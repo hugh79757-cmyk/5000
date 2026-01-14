@@ -1,0 +1,83 @@
+{{- define "main" }}
+
+<article class="post-single">
+  <header class="post-header">
+    {{ partial "breadcrumbs.html" . }}
+    <h1 class="post-title">
+      {{ .Title }}
+      {{- if .Draft }}<sup><span class="entry-isdraft">&nbsp;&nbsp;[draft]</span></sup>{{- end }}
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+      {{ .Description }}
+    </div>
+    {{- end }}
+    {{- if not .Params.hideMeta }}
+    <div class="post-meta">
+      {{- partial "post_meta.html" . -}}
+      {{- partial "translation_list.html" . -}}
+      {{- partial "edit_post.html" . -}}
+      {{- partial "post_canonical.html" . -}}
+    </div>
+    {{- end }}
+  </header>
+
+  {{- $isHidden := .Params.cover.hidden | default site.Params.cover.hiddenInSingle | default site.Params.cover.hidden }}
+  {{- partial "cover.html" (dict "cxt" . "IsHome" false "isHidden" $isHidden) }}
+
+  {{- if (.Param "ShowToc") }}
+  {{- partial "toc.html" . }}
+  {{- end }}
+
+  <!-- 광고 1: 본문 상단 -->
+  <div class="ad-container" style="margin: 20px 0; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8772455780561463"
+         data-ad-slot="6055637766"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <div class="post-content">
+    {{- if not (.Param "disableAnchoredHeadings") }}
+    {{- partial "anchored_headings.html" .Content | safeHTML }}
+    {{- else }}
+    {{ .Content }}
+    {{- end }}
+  </div>
+
+  <!-- 광고 2: 본문 하단 -->
+  <div class="ad-container" style="margin: 20px 0; text-align: center;">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-8772455780561463"
+         data-ad-slot="6055637766"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <footer class="post-footer">
+    {{- if .Params.tags }}
+    <ul class="post-tags">
+      {{- range ($.GetTerms "tags") }}
+      <li><a href="{{ .Permalink }}">{{ .LinkTitle }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+    {{- if (.Param "ShowShareButtons") }}
+    {{- partial "share_icons.html" . -}}
+    {{- end }}
+    {{- if (.Param "ShowPostNavLinks") }}
+    {{- partial "post_nav_links.html" . }}
+    {{- end }}
+  </footer>
+
+  {{- if (.Param "comments") }}
+  {{- partial "comments.html" . }}
+  {{- end }}
+</article>
+
+{{- end }}{{/* end main */}}
