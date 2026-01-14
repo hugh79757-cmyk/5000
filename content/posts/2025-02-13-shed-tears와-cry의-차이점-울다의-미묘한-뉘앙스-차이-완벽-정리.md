@@ -5,6 +5,7 @@ draft: false
 categories: ["일상다반사"]
 tags: []
 aliases:
+  - /entry/shed-tears와-cry의-차이점-울다의-미묘한-뉘앙스-차이-완벽-정리/
   - /entry/shed-tears와-cry의-차이점-울다의-미묘한-뉘앙스-차이-완벽-정리/
   - /673/
 ---
