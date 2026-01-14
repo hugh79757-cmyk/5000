@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>생활정보 on rotcha</title>
+    <link>http://localhost:1321/categories/%EC%83%9D%ED%99%9C%EC%A0%95%EB%B3%B4/</link>
+    <description>Recent content in 생활정보 on rotcha</description>
+    <generator>Hugo -- 0.154.2</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Wed, 14 Jan 2026 15:47:25 +0900</lastBuildDate>
+    <atom:link href="http://localhost:1321/categories/%EC%83%9D%ED%99%9C%EC%A0%95%EB%B3%B4/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>젝시오 드라이버 AS 센터 접수 신청 및 고객센터 전화번호 완벽 가이드</title>
+      <link>http://localhost:1321/posts/jeksio-deuraibeo-as-senteo/</link>
+      <pubDate>Wed, 14 Jan 2026 15:47:25 +0900</pubDate>
+      <guid>http://localhost:1321/posts/jeksio-deuraibeo-as-senteo/</guid>
+      <description>젹시오 드라이버 AS 접수 방법, 젝시고객센터 전화번호, 센터 위치, 무상/유상 조건을 상세히 안내합니다. 골프 클럽 수리가 필요할 때 참고하세요.</description>
+    </item>
+    <item>
+      <title>2026년 민방위 집합교육 유예신청 방법 및 일정 조회, 이수증 발급방법 총정리</title>
+      <link>http://localhost:1321/posts/2026nyeon-minbangwi-jiphapgyoyuk-sincheong/</link>
+      <pubDate>Wed, 14 Jan 2026 14:54:45 +0900</pubDate>
+      <guid>http://localhost:1321/posts/2026nyeon-minbangwi-jiphapgyoyuk-sincheong/</guid>
+      <description>민방위 집합교육 대상자 확인부터 교육 일정 조회, 신청 방법, 준비물, 이수증 발급까지 한눈에 정리했습니다. 불참 시 과태료 정보도 함께 안내합니다.</description>
+    </item>
+  </channel>
+</rss>

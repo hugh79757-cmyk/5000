@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Ai on rotcha</title>
-    <link>http://localhost:1318/tags/ai/</link>
+    <link>http://localhost:1321/tags/ai/</link>
     <description>Recent content in Ai on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
     <lastBuildDate>Sun, 20 Oct 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1318/tags/ai/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1321/tags/ai/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Pika.art: AI 기반의 시네마틱 콘텐츠 제작 도구</title>
-      <link>http://localhost:1318/posts/2024-10-20-pikaart-ai-%EA%B8%B0%EB%B0%98%EC%9D%98-%EC%8B%9C%EB%84%A4%EB%A7%88%ED%8B%B1-%EC%BD%98%ED%85%90%EC%B8%A0-%EC%A0%9C%EC%9E%91-%EB%8F%84%EA%B5%AC/</link>
+      <link>http://localhost:1321/posts/2024-10-20-pikaart-ai-%EA%B8%B0%EB%B0%98%EC%9D%98-%EC%8B%9C%EB%84%A4%EB%A7%88%ED%8B%B1-%EC%BD%98%ED%85%90%EC%B8%A0-%EC%A0%9C%EC%9E%91-%EB%8F%84%EA%B5%AC/</link>
       <pubDate>Sun, 20 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/posts/2024-10-20-pikaart-ai-%EA%B8%B0%EB%B0%98%EC%9D%98-%EC%8B%9C%EB%84%A4%EB%A7%88%ED%8B%B1-%EC%BD%98%ED%85%90%EC%B8%A0-%EC%A0%9C%EC%9E%91-%EB%8F%84%EA%B5%AC/</guid>
+      <guid>http://localhost:1321/posts/2024-10-20-pikaart-ai-%EA%B8%B0%EB%B0%98%EC%9D%98-%EC%8B%9C%EB%84%A4%EB%A7%88%ED%8B%B1-%EC%BD%98%ED%85%90%EC%B8%A0-%EC%A0%9C%EC%9E%91-%EB%8F%84%EA%B5%AC/</guid>
       <description>&lt;p&gt;Pika.art는 인공지능(AI) 기술을 활용하여 텍스트나 이미지를 시네마틱 영상으로 변환해주는 혁신적인 플랫폼입니다. 복잡한 그래픽 디자인이나 코딩 지식 없이도 누구나 쉽고 빠르게 고품질의 동영상을 제작할 수 있는 이 도구는 특히 콘텐츠 제작자나 마케팅 전문가들에게 유용한 도구로 자리 잡고 있습니다. 이번 글에서는 Pika.art의 주요 기능과 장점, 사용 방법, 그리고 활용 사례를 살펴보겠습니다.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://pika.art/try&#34;&gt;피카아트 바로가기&lt;/a&gt;&lt;/p&gt;
 &lt;h3 id=&#34;pikaart의-주요-기능&#34;&gt;Pika.art의 주요 기능&lt;/h3&gt;

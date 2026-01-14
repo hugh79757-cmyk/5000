@@ -2,52 +2,108 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Categories on rotcha</title>
-    <link>http://localhost:1318/categories/</link>
+    <link>http://localhost:1321/categories/</link>
     <description>Recent content in Categories on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
-    <lastBuildDate>Tue, 16 Sep 2025 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1318/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 14 Jan 2026 15:48:25 +0900</lastBuildDate>
+    <atom:link href="http://localhost:1321/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AS가이드</title>
+      <link>http://localhost:1321/categories/as%EA%B0%80%EC%9D%B4%EB%93%9C/</link>
+      <pubDate>Wed, 14 Jan 2026 15:48:25 +0900</pubDate>
+      <guid>http://localhost:1321/categories/as%EA%B0%80%EC%9D%B4%EB%93%9C/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>가전제품</title>
+      <link>http://localhost:1321/categories/%EA%B0%80%EC%A0%84%EC%A0%9C%ED%92%88/</link>
+      <pubDate>Wed, 14 Jan 2026 15:48:25 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%EA%B0%80%EC%A0%84%EC%A0%9C%ED%92%88/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>고객센터</title>
+      <link>http://localhost:1321/categories/%EA%B3%A0%EA%B0%9D%EC%84%BC%ED%84%B0/</link>
+      <pubDate>Wed, 14 Jan 2026 15:48:25 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%EA%B3%A0%EA%B0%9D%EC%84%BC%ED%84%B0/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>호텔·리조트</title>
+      <link>http://localhost:1321/categories/%ED%98%B8%ED%85%94%EB%A6%AC%EC%A1%B0%ED%8A%B8/</link>
+      <pubDate>Wed, 14 Jan 2026 15:48:25 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%ED%98%B8%ED%85%94%EB%A6%AC%EC%A1%B0%ED%8A%B8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>골프</title>
+      <link>http://localhost:1321/categories/%EA%B3%A8%ED%94%84/</link>
+      <pubDate>Wed, 14 Jan 2026 15:47:25 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%EA%B3%A8%ED%94%84/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>생활정보</title>
+      <link>http://localhost:1321/categories/%EC%83%9D%ED%99%9C%EC%A0%95%EB%B3%B4/</link>
+      <pubDate>Wed, 14 Jan 2026 15:47:25 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%EC%83%9D%ED%99%9C%EC%A0%95%EB%B3%B4/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>보조금</title>
+      <link>http://localhost:1321/categories/%EB%B3%B4%EC%A1%B0%EA%B8%88/</link>
+      <pubDate>Wed, 14 Jan 2026 14:55:45 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%EB%B3%B4%EC%A1%B0%EA%B8%88/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>행정</title>
+      <link>http://localhost:1321/categories/%ED%96%89%EC%A0%95/</link>
+      <pubDate>Wed, 14 Jan 2026 14:55:45 +0900</pubDate>
+      <guid>http://localhost:1321/categories/%ED%96%89%EC%A0%95/</guid>
+      <description></description>
+    </item>
     <item>
       <title>지식 아카이브</title>
-      <link>http://localhost:1318/categories/%EC%A7%80%EC%8B%9D-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/</link>
+      <link>http://localhost:1321/categories/%EC%A7%80%EC%8B%9D-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/</link>
       <pubDate>Tue, 16 Sep 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/categories/%EC%A7%80%EC%8B%9D-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/</guid>
+      <guid>http://localhost:1321/categories/%EC%A7%80%EC%8B%9D-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/</guid>
       <description></description>
     </item>
     <item>
       <title>일상다반사</title>
-      <link>http://localhost:1318/categories/%EC%9D%BC%EC%83%81%EB%8B%A4%EB%B0%98%EC%82%AC/</link>
+      <link>http://localhost:1321/categories/%EC%9D%BC%EC%83%81%EB%8B%A4%EB%B0%98%EC%82%AC/</link>
       <pubDate>Mon, 30 Jun 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/categories/%EC%9D%BC%EC%83%81%EB%8B%A4%EB%B0%98%EC%82%AC/</guid>
+      <guid>http://localhost:1321/categories/%EC%9D%BC%EC%83%81%EB%8B%A4%EB%B0%98%EC%82%AC/</guid>
       <description></description>
     </item>
     <item>
       <title>미용 제품 리뷰</title>
-      <link>http://localhost:1318/categories/%EB%AF%B8%EC%9A%A9-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
+      <link>http://localhost:1321/categories/%EB%AF%B8%EC%9A%A9-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
       <pubDate>Sun, 19 Jan 2025 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/categories/%EB%AF%B8%EC%9A%A9-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
+      <guid>http://localhost:1321/categories/%EB%AF%B8%EC%9A%A9-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
       <description></description>
     </item>
     <item>
       <title>책 읽는기쁨</title>
-      <link>http://localhost:1318/categories/%EC%B1%85-%EC%9D%BD%EB%8A%94%EA%B8%B0%EC%81%A8/</link>
+      <link>http://localhost:1321/categories/%EC%B1%85-%EC%9D%BD%EB%8A%94%EA%B8%B0%EC%81%A8/</link>
       <pubDate>Sat, 12 Oct 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/categories/%EC%B1%85-%EC%9D%BD%EB%8A%94%EA%B8%B0%EC%81%A8/</guid>
+      <guid>http://localhost:1321/categories/%EC%B1%85-%EC%9D%BD%EB%8A%94%EA%B8%B0%EC%81%A8/</guid>
       <description></description>
     </item>
     <item>
       <title>다이어트 제품 리뷰</title>
-      <link>http://localhost:1318/categories/%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
+      <link>http://localhost:1321/categories/%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
       <pubDate>Sun, 01 Sep 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/categories/%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
+      <guid>http://localhost:1321/categories/%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
       <description></description>
     </item>
     <item>
       <title>건강 기능식품 리뷰</title>
-      <link>http://localhost:1318/categories/%EA%B1%B4%EA%B0%95-%EA%B8%B0%EB%8A%A5%EC%8B%9D%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
+      <link>http://localhost:1321/categories/%EA%B1%B4%EA%B0%95-%EA%B8%B0%EB%8A%A5%EC%8B%9D%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
       <pubDate>Mon, 05 Aug 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/categories/%EA%B1%B4%EA%B0%95-%EA%B8%B0%EB%8A%A5%EC%8B%9D%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
+      <guid>http://localhost:1321/categories/%EA%B1%B4%EA%B0%95-%EA%B8%B0%EB%8A%A5%EC%8B%9D%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
       <description></description>
     </item>
   </channel>

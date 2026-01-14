@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>노션 한글 on rotcha</title>
-    <link>http://localhost:1318/tags/%EB%85%B8%EC%85%98-%ED%95%9C%EA%B8%80/</link>
+    <link>http://localhost:1321/tags/%EB%85%B8%EC%85%98-%ED%95%9C%EA%B8%80/</link>
     <description>Recent content in 노션 한글 on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
     <lastBuildDate>Sat, 05 Sep 2020 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1318/tags/%EB%85%B8%EC%85%98-%ED%95%9C%EA%B8%80/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1321/tags/%EB%85%B8%EC%85%98-%ED%95%9C%EA%B8%80/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>망각곡선과 노션(Notion), 노션이 한글화 됐다</title>
-      <link>http://localhost:1318/posts/2020-09-05-%EB%A7%9D%EA%B0%81%EA%B3%A1%EC%84%A0%EA%B3%BC-%EB%85%B8%EC%85%98notion-%EB%85%B8%EC%85%98%EC%9D%B4-%ED%95%9C%EA%B8%80%ED%99%94-%EB%90%90%EB%8B%A4/</link>
+      <link>http://localhost:1321/posts/2020-09-05-%EB%A7%9D%EA%B0%81%EA%B3%A1%EC%84%A0%EA%B3%BC-%EB%85%B8%EC%85%98notion-%EB%85%B8%EC%85%98%EC%9D%B4-%ED%95%9C%EA%B8%80%ED%99%94-%EB%90%90%EB%8B%A4/</link>
       <pubDate>Sat, 05 Sep 2020 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/posts/2020-09-05-%EB%A7%9D%EA%B0%81%EA%B3%A1%EC%84%A0%EA%B3%BC-%EB%85%B8%EC%85%98notion-%EB%85%B8%EC%85%98%EC%9D%B4-%ED%95%9C%EA%B8%80%ED%99%94-%EB%90%90%EB%8B%A4/</guid>
+      <guid>http://localhost:1321/posts/2020-09-05-%EB%A7%9D%EA%B0%81%EA%B3%A1%EC%84%A0%EA%B3%BC-%EB%85%B8%EC%85%98notion-%EB%85%B8%EC%85%98%EC%9D%B4-%ED%95%9C%EA%B8%80%ED%99%94-%EB%90%90%EB%8B%A4/</guid>
       <description>&lt;h4 id=&#34;헤르만-에빙하우스의-망각곡선&#34;&gt;헤르만 에빙하우스의 망각곡선&lt;/h4&gt;
 &lt;p&gt;에빙하우스의 망각곡선은 완만한 우하향 곡선이다.&lt;/p&gt;
 &lt;p&gt;어떠한 주제를 학습한 직후에 급속하게 망각되다가 점차 곡선이 완만해지면서 장기기억으로 이동하게 된다.&lt;/p&gt;

@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>구글 지역 바꾸기 on rotcha</title>
-    <link>http://localhost:1318/tags/%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD-%EB%B0%94%EA%BE%B8%EA%B8%B0/</link>
+    <link>http://localhost:1321/tags/%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD-%EB%B0%94%EA%BE%B8%EA%B8%B0/</link>
     <description>Recent content in 구글 지역 바꾸기 on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
     <lastBuildDate>Tue, 02 Jul 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1318/tags/%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD-%EB%B0%94%EA%BE%B8%EA%B8%B0/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1321/tags/%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD-%EB%B0%94%EA%BE%B8%EA%B8%B0/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>구글 재팬 바로가기 구글 지역설정을 통해 일본 기반 검색 가능 PC버전</title>
-      <link>http://localhost:1318/posts/2024-07-02-%EA%B5%AC%EA%B8%80-%EC%9E%AC%ED%8C%AC-%EB%B0%94%EB%A1%9C%EA%B0%80%EA%B8%B0-%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD%EC%84%A4%EC%A0%95%EC%9D%84-%ED%86%B5%ED%95%B4-%EC%9D%BC%EB%B3%B8-%EA%B8%B0%EB%B0%98-%EA%B2%80%EC%83%89-%EA%B0%80%EB%8A%A5-pc%EB%B2%84%EC%A0%84/</link>
+      <link>http://localhost:1321/posts/2024-07-02-%EA%B5%AC%EA%B8%80-%EC%9E%AC%ED%8C%AC-%EB%B0%94%EB%A1%9C%EA%B0%80%EA%B8%B0-%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD%EC%84%A4%EC%A0%95%EC%9D%84-%ED%86%B5%ED%95%B4-%EC%9D%BC%EB%B3%B8-%EA%B8%B0%EB%B0%98-%EA%B2%80%EC%83%89-%EA%B0%80%EB%8A%A5-pc%EB%B2%84%EC%A0%84/</link>
       <pubDate>Tue, 02 Jul 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/posts/2024-07-02-%EA%B5%AC%EA%B8%80-%EC%9E%AC%ED%8C%AC-%EB%B0%94%EB%A1%9C%EA%B0%80%EA%B8%B0-%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD%EC%84%A4%EC%A0%95%EC%9D%84-%ED%86%B5%ED%95%B4-%EC%9D%BC%EB%B3%B8-%EA%B8%B0%EB%B0%98-%EA%B2%80%EC%83%89-%EA%B0%80%EB%8A%A5-pc%EB%B2%84%EC%A0%84/</guid>
+      <guid>http://localhost:1321/posts/2024-07-02-%EA%B5%AC%EA%B8%80-%EC%9E%AC%ED%8C%AC-%EB%B0%94%EB%A1%9C%EA%B0%80%EA%B8%B0-%EA%B5%AC%EA%B8%80-%EC%A7%80%EC%97%AD%EC%84%A4%EC%A0%95%EC%9D%84-%ED%86%B5%ED%95%B4-%EC%9D%BC%EB%B3%B8-%EA%B8%B0%EB%B0%98-%EA%B2%80%EC%83%89-%EA%B0%80%EB%8A%A5-pc%EB%B2%84%EC%A0%84/</guid>
       <description>&lt;p&gt;단순하게 google.co.jp란 도메인을 통해 일본 기반의 검색결과를 얻을 수는 없습니다. 크롬을 사용한다면 사용지역 설정을 변경함으로서 일본에서는 어떤 검색결과가 나타나는지 알 수 있어요. 이번 포스팅에서는 크롬 pc버전 설정을 통해 구글 재팬 바로가기 효과를 낼 수 있는 방법에 대해 알아봅니다.&lt;/p&gt;
 &lt;h2 id=&#34;구글-재팬-바로가기-설정&#34;&gt;구글 재팬 바로가기 설정&lt;/h2&gt;
 &lt;h3 id=&#34;설정방법&#34;&gt;설정방법&lt;/h3&gt;

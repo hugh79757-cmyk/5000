@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>금융결제원 on rotcha</title>
-    <link>http://localhost:1318/tags/%EA%B8%88%EC%9C%B5%EA%B2%B0%EC%A0%9C%EC%9B%90/</link>
+    <link>http://localhost:1321/tags/%EA%B8%88%EC%9C%B5%EA%B2%B0%EC%A0%9C%EC%9B%90/</link>
     <description>Recent content in 금융결제원 on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
     <lastBuildDate>Tue, 27 Feb 2024 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1318/tags/%EA%B8%88%EC%9C%B5%EA%B2%B0%EC%A0%9C%EC%9B%90/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1321/tags/%EA%B8%88%EC%9C%B5%EA%B2%B0%EC%A0%9C%EC%9B%90/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>금융인증서란 무엇인가요? 종류와 특징에 대해서 자세히 알아보기</title>
-      <link>http://localhost:1318/posts/2024-02-27-%EA%B8%88%EC%9C%B5%EC%9D%B8%EC%A6%9D%EC%84%9C%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%EC%9A%94-%EC%A2%85%EB%A5%98%EC%99%80-%ED%8A%B9%EC%A7%95%EC%97%90-%EB%8C%80%ED%95%B4%EC%84%9C-%EC%9E%90%EC%84%B8%ED%9E%88-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0/</link>
+      <link>http://localhost:1321/posts/2024-02-27-%EA%B8%88%EC%9C%B5%EC%9D%B8%EC%A6%9D%EC%84%9C%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%EC%9A%94-%EC%A2%85%EB%A5%98%EC%99%80-%ED%8A%B9%EC%A7%95%EC%97%90-%EB%8C%80%ED%95%B4%EC%84%9C-%EC%9E%90%EC%84%B8%ED%9E%88-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0/</link>
       <pubDate>Tue, 27 Feb 2024 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/posts/2024-02-27-%EA%B8%88%EC%9C%B5%EC%9D%B8%EC%A6%9D%EC%84%9C%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%EC%9A%94-%EC%A2%85%EB%A5%98%EC%99%80-%ED%8A%B9%EC%A7%95%EC%97%90-%EB%8C%80%ED%95%B4%EC%84%9C-%EC%9E%90%EC%84%B8%ED%9E%88-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0/</guid>
+      <guid>http://localhost:1321/posts/2024-02-27-%EA%B8%88%EC%9C%B5%EC%9D%B8%EC%A6%9D%EC%84%9C%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%B8%EA%B0%80%EC%9A%94-%EC%A2%85%EB%A5%98%EC%99%80-%ED%8A%B9%EC%A7%95%EC%97%90-%EB%8C%80%ED%95%B4%EC%84%9C-%EC%9E%90%EC%84%B8%ED%9E%88-%EC%95%8C%EC%95%84%EB%B3%B4%EA%B8%B0/</guid>
       <description>&lt;p&gt;공동인증서(예전엔 공인인증서라고 불렀어요)의 불편함을 해소하기 위해 금융 결제원에서 개발한 것이 금융 인증서입니다. 공동인증서에 비해 편리한 점들이 많아요. 금융결제원 클라우드 서버에 저장되기 때문에 분실할 우려가 없고 공동인증서와는 다르게 보안 프로그램을 따로 설치할 필요가 없습니다. 이번 포스팅에서는 금융인증서에 대해서 자세하게 알아보겠습니다.&lt;/p&gt;
 &lt;p&gt;&lt;a href=&#34;https://rotcha.kr/entry/%EB%A7%A5%EB%B6%81-%EB%86%8D%ED%98%91%EB%B1%85%ED%82%B9-%EB%B3%B4%EC%95%88%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8-%EC%84%A4%EC%B9%98-%EC%98%A4%EB%A5%98-%ED%95%B4%EA%B2%B0%ED%95%98%EA%B8%B0&#34;&gt;맥북 농협뱅킹 보안프로그램 설치 오류 해결하기&lt;/a&gt;&lt;/p&gt;
 &lt;h2 id=&#34;금융인정서란&#34;&gt;금융인정서란?&lt;/h2&gt;

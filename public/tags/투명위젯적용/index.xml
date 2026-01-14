@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>투명위젯적용 on rotcha</title>
-    <link>http://localhost:1318/tags/%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF%EC%A0%81%EC%9A%A9/</link>
+    <link>http://localhost:1321/tags/%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF%EC%A0%81%EC%9A%A9/</link>
     <description>Recent content in 투명위젯적용 on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
     <lastBuildDate>Sat, 07 Aug 2021 00:00:00 +0000</lastBuildDate>
-    <atom:link href="http://localhost:1318/tags/%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF%EC%A0%81%EC%9A%A9/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://localhost:1321/tags/%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF%EC%A0%81%EC%9A%A9/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>네이버 블로그 홈페이지형 만들 때 투명위젯 문제와 해결</title>
-      <link>http://localhost:1318/posts/2021-08-07-%EB%84%A4%EC%9D%B4%EB%B2%84-%EB%B8%94%EB%A1%9C%EA%B7%B8-%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%ED%98%95-%EB%A7%8C%EB%93%A4-%EB%95%8C-%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF-%EB%AC%B8%EC%A0%9C%EC%99%80-%ED%95%B4%EA%B2%B0/</link>
+      <link>http://localhost:1321/posts/2021-08-07-%EB%84%A4%EC%9D%B4%EB%B2%84-%EB%B8%94%EB%A1%9C%EA%B7%B8-%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%ED%98%95-%EB%A7%8C%EB%93%A4-%EB%95%8C-%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF-%EB%AC%B8%EC%A0%9C%EC%99%80-%ED%95%B4%EA%B2%B0/</link>
       <pubDate>Sat, 07 Aug 2021 00:00:00 +0000</pubDate>
-      <guid>http://localhost:1318/posts/2021-08-07-%EB%84%A4%EC%9D%B4%EB%B2%84-%EB%B8%94%EB%A1%9C%EA%B7%B8-%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%ED%98%95-%EB%A7%8C%EB%93%A4-%EB%95%8C-%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF-%EB%AC%B8%EC%A0%9C%EC%99%80-%ED%95%B4%EA%B2%B0/</guid>
+      <guid>http://localhost:1321/posts/2021-08-07-%EB%84%A4%EC%9D%B4%EB%B2%84-%EB%B8%94%EB%A1%9C%EA%B7%B8-%ED%99%88%ED%8E%98%EC%9D%B4%EC%A7%80%ED%98%95-%EB%A7%8C%EB%93%A4-%EB%95%8C-%ED%88%AC%EB%AA%85%EC%9C%84%EC%A0%AF-%EB%AC%B8%EC%A0%9C%EC%99%80-%ED%95%B4%EA%B2%B0/</guid>
       <description>&lt;p&gt;네이버 블로그 홈페이지형 만드는 과정을 유튜브와 블로그의 글을 보고 하나하나 따라 해 봤어요. 하지만 막히는 부분이 있었습니다. 공간 위젯을 만들어서 네이버에서 설정된 타이틀이나 메뉴를 아래로 밀어내서 배경 스킨이 보이게 만들어야 하는데, 저는 아무리 해도 배경 스킨을 가린 형태가 되더군요. 결국스킨 변경이정답이었습니다.&lt;/p&gt;
 &lt;h2 id=&#34;네이버-블로그-홈페이지형을-만들-때-순서-개념-잡기&#34;&gt;네이버 블로그 홈페이지형을 만들 때 순서 개념 잡기&lt;/h2&gt;
 &lt;h3 id=&#34;스킨-배경과-레이아웃-설정하기&#34;&gt;스킨 배경과 레이아웃 설정하기&lt;/h3&gt;
