@@ -138,11 +138,11 @@ aliases:
 •“The babycriedfor hours.” (아기가 몇 시간 동안 울었다.)
 
 
-![image](./img/shed tears.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/shed tears.webp)
 
 
 
-![image](./img/shed tears.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/shed tears.webp)
 
 
 

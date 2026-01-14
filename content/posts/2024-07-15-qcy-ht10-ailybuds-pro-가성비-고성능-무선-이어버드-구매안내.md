@@ -56,11 +56,11 @@ QCY HT10 AilyBuds Pro+는 QCY에서 출시한 고성능 무선 이어버드로, 
 - IPX5 방수 등급: 비나 땀에도 강한 방수 성능을 제공하여 운동 중에도 안심하고 사용할 수 있습니다.
 
 
-![image](./img/qcy h10.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/qcy h10.webp)
 
 
 
-![image](./img/qcy h10.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/qcy h10.webp)
 
 
 
