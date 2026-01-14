@@ -23,18 +23,10 @@ aliases:
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.jpg)
-
-
-
 ## 카카오뱅크 스위프트 코드 -KAKOKR22XXX
 
 
 스위프트코드는 외화를 송금받을 때 입력해야 하는 은행 식별 코드입니다.참고로 우리은행의 스위프트 코드는 HVBKKRSE, 신한은행은 SHBKKRSE입니다.
-
-
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.png)
-
 
 
 ![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.png)

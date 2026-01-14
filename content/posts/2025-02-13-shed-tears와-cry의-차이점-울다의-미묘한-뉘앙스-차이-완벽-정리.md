@@ -143,10 +143,6 @@ aliases:
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/shed tears.webp)
-
-
-
 ## 마무리
 
 

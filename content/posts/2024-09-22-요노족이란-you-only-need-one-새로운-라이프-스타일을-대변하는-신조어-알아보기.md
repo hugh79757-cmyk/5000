@@ -41,10 +41,6 @@ rotcha.kr
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/yono 요노족.webp)
-
-
-
 ### 사회에 미치는 영향
 
 

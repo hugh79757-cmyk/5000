@@ -61,10 +61,6 @@ QCY HT10 AilyBuds Pro+는 QCY에서 출시한 고성능 무선 이어버드로, 
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/qcy h10.webp)
-
-
-
 ## 마무리
 
 

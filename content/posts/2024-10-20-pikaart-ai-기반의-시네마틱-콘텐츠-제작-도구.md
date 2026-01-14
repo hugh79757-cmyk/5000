@@ -27,10 +27,6 @@ Pika.art는 인공지능(AI) 기술을 활용하여 텍스트나 이미지를 �
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.webp)
-
-
-
 ![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img_1.webp)
 
 
