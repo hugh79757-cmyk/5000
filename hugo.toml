@@ -1,0 +1,35 @@
+baseURL = 'https://rotcha.kr/'
+languageCode = 'ko-kr'
+title = 'rotcha'
+theme = 'PaperMod'
+
+[params]
+defaultTheme = "auto"
+ShowReadingTime = true
+ShowShareButtons = true
+ShowPostNavLinks = true
+ShowBreadCrumbs = true
+ShowCodeCopyButtons = true
+ShowToc = true
+TocOpen = false
+
+[params.homeInfoParams]
+Title = "rotcha"
+Content = "Welcome"
+
+[[menu.main]]
+name = "글목록"
+url = "/archives/"
+weight = 1
+
+[[menu.main]]
+name = "검색"
+url = "/search/"
+weight = 2
+
+[outputs]
+home = ["HTML", "RSS", "JSON"]
+
+[minify]
+disableXML = true
+minifyOutput = true

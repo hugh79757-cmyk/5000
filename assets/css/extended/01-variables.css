@@ -1,0 +1,40 @@
+/* ========================================
+   rotcha.kr - 클린 미니멀 테마
+   ======================================== */
+
+:root {
+  --gap: 24px;
+  --content-gap: 20px;
+  --nav-width: 1024px;
+  --main-width: 720px;
+  --header-height: 60px;
+  --footer-height: 60px;
+  --radius: 12px;
+  
+  /* 라이트 모드 */
+  --theme: #ffffff;
+  --entry: #f9fafb;
+  --primary: #111827;
+  --secondary: #4b5563;
+  --tertiary: #f3f4f6;
+  --content: #1f2937;
+  --code-block-bg: #1f2937;
+  --code-bg: #f3f4f6;
+  --border: #e5e7eb;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+}
+
+.dark, :root[data-theme="dark"] {
+  --theme: #0f172a;
+  --entry: #1e293b;
+  --primary: #f1f5f9;
+  --secondary: #94a3b8;
+  --tertiary: #334155;
+  --content: #e2e8f0;
+  --code-block-bg: #1e293b;
+  --code-bg: #334155;
+  --border: #334155;
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+}

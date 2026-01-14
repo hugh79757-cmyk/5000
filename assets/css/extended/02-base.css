@@ -1,0 +1,60 @@
+/* 기본 스타일 */
+html, body {
+  background: var(--theme);
+  color: var(--primary);
+}
+
+.post-content, .entry-content {
+  color: var(--content);
+  line-height: 1.8;
+}
+
+/* 링크 */
+.post-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.post-content a:hover {
+  color: var(--accent-hover);
+}
+
+/* 카드 */
+.post-entry {
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-entry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* 네비게이션 */
+.nav {
+  background: var(--theme);
+  border-bottom: 1px solid var(--border);
+}
+
+/* TOC */
+.toc {
+  background: var(--entry);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+/* 광고 슬롯 */
+.ad-slot {
+  margin: 24px 0;
+  min-height: 100px;
+}
+
+/* 푸터 */
+.footer {
+  color: var(--secondary);
+  border-top: 1px solid var(--border);
+}
