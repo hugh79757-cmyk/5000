@@ -42,23 +42,23 @@ aliases:
 
 
 
-![image](./img/batch_스크린샷 2024-09-28 오후 4.04.26.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/batch_스크린샷 2024-09-28 오후 4.04.26.webp)
 
 
 
-![image](./img/batch_스크린샷 2024-09-28 오후 4.04.26.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/batch_스크린샷 2024-09-28 오후 4.04.26.webp)
 
 
 
-![image](./img/batch_스크린샷 2024-09-28 오후 4.04.35.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/batch_스크린샷 2024-09-28 오후 4.04.35.webp)
 
 
 
-![image](./img/batch_스크린샷 2024-09-28 오후 4.05.13.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/batch_스크린샷 2024-09-28 오후 4.05.13.webp)
 
 
 
-![image](./img/batch_스크린샷 2024-09-28 오후 4.05.26.webp)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/batch_스크린샷 2024-09-28 오후 4.05.26.webp)
 
 
 

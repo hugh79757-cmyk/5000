@@ -18,11 +18,11 @@ aliases:
 해외 송금을 받을 경우 수수료가 가장 적은 은행 중 하나가 카카오뱅크입니다. 하지만 단점은 송금받은 동시에 당일 환율이 적용되서 달러가 원화로 환전되어 입금된다는 점입니다.달러로 입금을 받고 보관을 하다가 환율이 높을 때 환전을 할 수 있으면 좋을 텐데요. 그러기 위해선 외화통장이 있어야 합니다. 카카오뱅크는 외화통장을 허용하지 않기 때문에 원화로 환전되어 수취를 하게 됩니다.
 
 
-![image](./img/img.jpg)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.jpg)
 
 
 
-![image](./img/img.jpg)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.jpg)
 
 
 
@@ -32,11 +32,11 @@ aliases:
 스위프트코드는 외화를 송금받을 때 입력해야 하는 은행 식별 코드입니다.참고로 우리은행의 스위프트 코드는 HVBKKRSE, 신한은행은 SHBKKRSE입니다.
 
 
-![image](./img/img.png)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.png)
 
 
 
-![image](./img/img.png)
+![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/img.png)
 
 
 
