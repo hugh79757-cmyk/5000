@@ -5,6 +5,7 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["Ai", "제작", "에이 아이", "인스타그램", "피카아트"]
 aliases:
+  - /entry/pikaart-ai-기반의-시네마틱-콘텐츠-제작-도구/
   - /entry/Pika.art:-AI-기반의-시네마틱-콘텐츠-제작-도구/
   - /589/
 ---

@@ -5,6 +5,7 @@ draft: false
 categories: [""]
 tags: []
 aliases:
+  - /entry/privacy-policy/
   - /entry/Privacy-Policy/
   - /172/
 ---
