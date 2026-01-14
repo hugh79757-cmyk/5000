@@ -61,10 +61,6 @@ aliases:
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/쿠에타핀정.webp)
-
-
-
 ## ? 총평
 
 

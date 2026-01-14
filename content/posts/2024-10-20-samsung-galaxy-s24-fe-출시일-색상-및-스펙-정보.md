@@ -31,10 +31,6 @@ aliases:
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/S24FE 앰버엘로우.webp)
-
-
-
 ### 색상 옵션
 
 
