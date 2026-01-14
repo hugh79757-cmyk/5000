@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>GPT4 on rotcha</title>
+    <link>http://localhost:1318/tags/gpt4/</link>
+    <description>Recent content in GPT4 on rotcha</description>
+    <generator>Hugo -- 0.154.2</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Mon, 08 May 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1318/tags/gpt4/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>뤼튼(Wrtn)과 챗GPT, 당신도 느낄 뤼튼이 더 좋을 수밖에 없는 이유</title>
+      <link>http://localhost:1318/posts/2023-05-08-%EB%A4%BC%ED%8A%BCwrtn%EA%B3%BC-%EC%B1%97gpt-%EB%8B%B9%EC%8B%A0%EB%8F%84-%EB%8A%90%EB%82%84-%EB%A4%BC%ED%8A%BC%EC%9D%B4-%EB%8D%94-%EC%A2%8B%EC%9D%84-%EC%88%98%EB%B0%96%EC%97%90-%EC%97%86%EB%8A%94-%EC%9D%B4%EC%9C%A0/</link>
+      <pubDate>Mon, 08 May 2023 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/posts/2023-05-08-%EB%A4%BC%ED%8A%BCwrtn%EA%B3%BC-%EC%B1%97gpt-%EB%8B%B9%EC%8B%A0%EB%8F%84-%EB%8A%90%EB%82%84-%EB%A4%BC%ED%8A%BC%EC%9D%B4-%EB%8D%94-%EC%A2%8B%EC%9D%84-%EC%88%98%EB%B0%96%EC%97%90-%EC%97%86%EB%8A%94-%EC%9D%B4%EC%9C%A0/</guid>
+      <description>&lt;p&gt;얼마 전 뤼튼 테크놀로지에서 자신의 제품 뤼튼을 무료로 공개한다는 기사를 접했습니다. 뤼튼을 사용해 보고 챗GPT보다 혹은 그림 그려주는 AI인 미드저니 보다 좋다는 생각을 했어요.오늘은 왜 뤼튼이 더 좋은 지 그 이유 몇 가지를 이야기해 보도록 하겠습니다.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://wrtn.ai&#34;&gt;❗️뤼튼(Wrtn) 바로가기❗️&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;gpt4-모델을-탑재한-챗봇-뤼튼wrtn&#34;&gt;GPT4 모델을 탑재한 챗봇, 뤼튼(Wrtn)&lt;/h2&gt;
+&lt;p&gt;일반에게 무료로 공개된 오픈 AI의 챗GPT는 GPT3.5를 기반으로 하고 있어요. GPT4를 사용하는 챗GPT는 유료입니다.오픈 AI와 뤼튼 테크롤러진의 GPT 3.5다 4다 하는 GPT의 버전이 동일한 모듈을 이야기하는 것인지 아니면 회사마다 기준이 다른지는 모르겠지만 결과물들을 보면 비슷합니다.둘 다 거짓말(?)을 생성하는데 능숙한 인공지능이라면 어떤 것을 쓰는 것이 좋을까요?&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

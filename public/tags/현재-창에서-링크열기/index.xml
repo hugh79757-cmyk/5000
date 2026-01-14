@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>현재 창에서 링크열기 on rotcha</title>
+    <link>http://localhost:1318/tags/%ED%98%84%EC%9E%AC-%EC%B0%BD%EC%97%90%EC%84%9C-%EB%A7%81%ED%81%AC%EC%97%B4%EA%B8%B0/</link>
+    <description>Recent content in 현재 창에서 링크열기 on rotcha</description>
+    <generator>Hugo -- 0.154.2</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Sun, 17 Sep 2023 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1318/tags/%ED%98%84%EC%9E%AC-%EC%B0%BD%EC%97%90%EC%84%9C-%EB%A7%81%ED%81%AC%EC%97%B4%EA%B8%B0/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>워드프레스 링크 현재창으로 열기가 안되나요? 체크해 볼 3가지</title>
+      <link>http://localhost:1318/posts/2023-09-17-%EC%9B%8C%EB%93%9C%ED%94%84%EB%A0%88%EC%8A%A4-%EB%A7%81%ED%81%AC-%ED%98%84%EC%9E%AC%EC%B0%BD%EC%9C%BC%EB%A1%9C-%EC%97%B4%EA%B8%B0%EA%B0%80-%EC%95%88%EB%90%98%EB%82%98%EC%9A%94-%EC%B2%B4%ED%81%AC%ED%95%B4-%EB%B3%BC-3%EA%B0%80%EC%A7%80/</link>
+      <pubDate>Sun, 17 Sep 2023 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/posts/2023-09-17-%EC%9B%8C%EB%93%9C%ED%94%84%EB%A0%88%EC%8A%A4-%EB%A7%81%ED%81%AC-%ED%98%84%EC%9E%AC%EC%B0%BD%EC%9C%BC%EB%A1%9C-%EC%97%B4%EA%B8%B0%EA%B0%80-%EC%95%88%EB%90%98%EB%82%98%EC%9A%94-%EC%B2%B4%ED%81%AC%ED%95%B4-%EB%B3%BC-3%EA%B0%80%EC%A7%80/</guid>
+      <description>&lt;p&gt;티스토리 블로그나 워드프레스에서 외부링크나 내부링크를 현재창에서 열게 하는 이유는 전면 광고를 활성화시키기 위해서입니다. 이번 포스팅에서는 애드센스 전면광고를 띄우기 위해 의도적으로 링크의 옵션을 현재창으로 열기로 설정. 하지만 글 링크를 클릭했을 때 현재창으로 열기가 안되고 새창으로 혹은 새창으로 열기가 되는 경우에 대해서 알아보도록 하겠습니다.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://rankmath.com/&#34;&gt;❗️랭크매스 바로가기❗️&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id=&#34;현재-창으로-열기가-안될-때&#34;&gt;현재 창으로 열기가 안될 때&lt;/h2&gt;
+&lt;p&gt;![image](./img/현재창에서 열기 썸네일.jpg)&lt;/p&gt;
+&lt;p&gt;![image](./img/현재창에서 열기 썸네일.jpg)&lt;/p&gt;
+&lt;p&gt;보통 워드프레스 블록 에디터를 사용할 경우 링크의 속성을 설정할 때 advanced 옵션에서 새 탭에서 열지 현재 창으로 열지 설정을 해 줄 수 있습니다. 블록 에디터(구텐베르크 편집기)는 현재 창 열기가 기본 옵션입니다.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

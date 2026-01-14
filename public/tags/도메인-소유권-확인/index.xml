@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>도메인 소유권 확인 on rotcha</title>
+    <link>http://localhost:1318/tags/%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%86%8C%EC%9C%A0%EA%B6%8C-%ED%99%95%EC%9D%B8/</link>
+    <description>Recent content in 도메인 소유권 확인 on rotcha</description>
+    <generator>Hugo -- 0.154.2</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Sat, 04 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1318/tags/%EB%8F%84%EB%A9%94%EC%9D%B8-%EC%86%8C%EC%9C%A0%EA%B6%8C-%ED%99%95%EC%9D%B8/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>호스팅케이알 : 티스토리 이차도메인 구글 서치 콘솔 소유권 확인법 설정</title>
+      <link>http://localhost:1318/posts/2020-07-04-%ED%98%B8%EC%8A%A4%ED%8C%85%EC%BC%80%EC%9D%B4%EC%95%8C-%ED%8B%B0%EC%8A%A4%ED%86%A0%EB%A6%AC-%EC%9D%B4%EC%B0%A8%EB%8F%84%EB%A9%94%EC%9D%B8-%EA%B5%AC%EA%B8%80-%EC%84%9C%EC%B9%98-%EC%BD%98%EC%86%94-%EC%86%8C%EC%9C%A0%EA%B6%8C-%ED%99%95%EC%9D%B8%EB%B2%95-%EC%84%A4%EC%A0%95/</link>
+      <pubDate>Sat, 04 Jul 2020 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/posts/2020-07-04-%ED%98%B8%EC%8A%A4%ED%8C%85%EC%BC%80%EC%9D%B4%EC%95%8C-%ED%8B%B0%EC%8A%A4%ED%86%A0%EB%A6%AC-%EC%9D%B4%EC%B0%A8%EB%8F%84%EB%A9%94%EC%9D%B8-%EA%B5%AC%EA%B8%80-%EC%84%9C%EC%B9%98-%EC%BD%98%EC%86%94-%EC%86%8C%EC%9C%A0%EA%B6%8C-%ED%99%95%EC%9D%B8%EB%B2%95-%EC%84%A4%EC%A0%95/</guid>
+      <description>&lt;h3 id=&#34;txt-레코드를본인-도메인-본인도메인의-dns-설정에-복사하세요&#34;&gt;&amp;ldquo;TXT 레코드를본인 도메인 본인도메인의 DNS 설정에 복사하세요&amp;rdquo;&lt;/h3&gt;
+&lt;p&gt;위의 문구를 본 적 있으신가요?&lt;/p&gt;
+&lt;p&gt;호스팅 케이알(Hosting.kr)에서 도메인을 구입하셨다면 잘 오셨습니다. 어떻게 TXT 레코드를 DNS 설정에 복사하는지 자세히 알려드리겠습니다.&lt;/p&gt;
+&lt;p&gt;따라와 보세요.&lt;/p&gt;
+&lt;h3 id=&#34;구글-서치-콘솔google-search-console에서-소유권-확인방법&#34;&gt;구글 서치 콘솔(Google Search Console)에서 소유권 확인방법&lt;/h3&gt;
+&lt;p&gt;저는 티스토리 블로그에 2차 도메인을 씌워서 사용 중입니다. 구글 서치 콘솔에 본인의 사이트를 등록하기 위해서는 소유권 확인이 필요합니다. 소유권 등록을 위해서는 크게 두 가지 방법이 있습니다.&lt;/p&gt;
+&lt;h4 id=&#34;1-dns-레코드를-통한-도메인-소유권-확인-&#34;&gt;1. DNS 레코드를 통한 도메인 소유권 확인 :&lt;/h4&gt;
+&lt;p&gt;&amp;lsquo;TXT 레코드를본인 도메인의 DNS 설정에 복사하세요&amp;rsquo;가 이경우에 해당합니다.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

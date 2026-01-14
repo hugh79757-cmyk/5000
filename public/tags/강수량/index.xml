@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>강수량 on rotcha</title>
+    <link>http://localhost:1318/tags/%EA%B0%95%EC%88%98%EB%9F%89/</link>
+    <description>Recent content in 강수량 on rotcha</description>
+    <generator>Hugo -- 0.154.2</generator>
+    <language>ko-kr</language>
+    <lastBuildDate>Sat, 20 Jul 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1318/tags/%EA%B0%95%EC%88%98%EB%9F%89/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>기상청 날씨누리 동네예보 정확한 지역별 날씨 실시간 정보</title>
+      <link>http://localhost:1318/posts/2024-07-20-%EA%B8%B0%EC%83%81%EC%B2%AD-%EB%82%A0%EC%94%A8%EB%88%84%EB%A6%AC-%EB%8F%99%EB%84%A4%EC%98%88%EB%B3%B4-%EC%A0%95%ED%99%95%ED%95%9C-%EC%A7%80%EC%97%AD%EB%B3%84-%EB%82%A0%EC%94%A8-%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%A0%95%EB%B3%B4/</link>
+      <pubDate>Sat, 20 Jul 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/posts/2024-07-20-%EA%B8%B0%EC%83%81%EC%B2%AD-%EB%82%A0%EC%94%A8%EB%88%84%EB%A6%AC-%EB%8F%99%EB%84%A4%EC%98%88%EB%B3%B4-%EC%A0%95%ED%99%95%ED%95%9C-%EC%A7%80%EC%97%AD%EB%B3%84-%EB%82%A0%EC%94%A8-%EC%8B%A4%EC%8B%9C%EA%B0%84-%EC%A0%95%EB%B3%B4/</guid>
+      <description>&lt;p&gt;기상청 동네예보는 기상청에서 읍·면·동 단위까지 기상 예측 정보를 발표하는 체계입니다. 기상청 홈페이지 날씨누리 혹은 모바일 앱을 통해 서비스가 제공되며, 국민 모두가 쉽게 날씨 정보를 실시간으로 파악할 수 있습니다. 이를 통해 생활 밀접 지역의 세부적인 날씨 예보를 확인하고 일상 생활에 큰 도움을 줄 수 있습니다.&lt;/p&gt;
+&lt;h2 id=&#34;날씨누리-동네예보란&#34;&gt;날씨누리 동네예보란?&lt;/h2&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.weather.go.kr/weather/forecast/timeseries2_metsky.jsp&#34;&gt;❗️날씨누리 동네예보 바로가기❗️&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;주요-기능&#34;&gt;주요 기능&lt;/h3&gt;
+&lt;h4 id=&#34;시간별-예보&#34;&gt;시간별 예보&lt;/h4&gt;
+&lt;p&gt;기상청 날씨누리 동네예보는 특정 지역의 날씨를 시간대별로 확인할 수 있습니다. 예를 들어, 서울특별시 동작구 신대방제2동의 경우, 현재 기온, 풍향, 풍속, 습도, 강수량 등의 정보를 시간대별로 제공합니다.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

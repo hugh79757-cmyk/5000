@@ -6,6 +6,49 @@
     <description>Recent content in Categories on rotcha</description>
     <generator>Hugo -- 0.154.2</generator>
     <language>ko-kr</language>
+    <lastBuildDate>Tue, 16 Sep 2025 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:1318/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>지식 아카이브</title>
+      <link>http://localhost:1318/categories/%EC%A7%80%EC%8B%9D-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/</link>
+      <pubDate>Tue, 16 Sep 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/categories/%EC%A7%80%EC%8B%9D-%EC%95%84%EC%B9%B4%EC%9D%B4%EB%B8%8C/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>일상다반사</title>
+      <link>http://localhost:1318/categories/%EC%9D%BC%EC%83%81%EB%8B%A4%EB%B0%98%EC%82%AC/</link>
+      <pubDate>Mon, 30 Jun 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/categories/%EC%9D%BC%EC%83%81%EB%8B%A4%EB%B0%98%EC%82%AC/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>미용 제품 리뷰</title>
+      <link>http://localhost:1318/categories/%EB%AF%B8%EC%9A%A9-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
+      <pubDate>Sun, 19 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/categories/%EB%AF%B8%EC%9A%A9-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>책 읽는기쁨</title>
+      <link>http://localhost:1318/categories/%EC%B1%85-%EC%9D%BD%EB%8A%94%EA%B8%B0%EC%81%A8/</link>
+      <pubDate>Sat, 12 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/categories/%EC%B1%85-%EC%9D%BD%EB%8A%94%EA%B8%B0%EC%81%A8/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>다이어트 제품 리뷰</title>
+      <link>http://localhost:1318/categories/%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
+      <pubDate>Sun, 01 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/categories/%EB%8B%A4%EC%9D%B4%EC%96%B4%ED%8A%B8-%EC%A0%9C%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title>건강 기능식품 리뷰</title>
+      <link>http://localhost:1318/categories/%EA%B1%B4%EA%B0%95-%EA%B8%B0%EB%8A%A5%EC%8B%9D%ED%92%88-%EB%A6%AC%EB%B7%B0/</link>
+      <pubDate>Mon, 05 Aug 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1318/categories/%EA%B1%B4%EA%B0%95-%EA%B8%B0%EB%8A%A5%EC%8B%9D%ED%92%88-%EB%A6%AC%EB%B7%B0/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
