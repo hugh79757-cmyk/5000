@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: ["이어버드", "가성비", "qcy", "와이어리스 이어버드", "qcy h10"]
 aliases:
   - /entry/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내/
+  - /440/
 ---
 
 

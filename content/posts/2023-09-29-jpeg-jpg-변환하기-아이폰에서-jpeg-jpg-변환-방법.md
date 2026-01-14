@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: ["jpeg jpg 변환", "아이폰 jpeg jpg 변환", "jpeg 역사", "jpeg 정의"]
 aliases:
   - /entry/jpeg-jpg-변환하기-아이폰에서-jpeg-jpg-변환-방법/
+  - /192/
 ---
 
 
