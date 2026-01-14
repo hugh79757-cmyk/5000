@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: ["넥슨", "Utd", "shield", "예매하기", "10월 20일"]
 aliases:
   - /entry/10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상/
+  - /571/
 ---
 
 

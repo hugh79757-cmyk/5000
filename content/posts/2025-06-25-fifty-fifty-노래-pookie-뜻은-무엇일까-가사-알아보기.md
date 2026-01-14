@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: []
 aliases:
   - /entry/Fifty-Fifty-노래-Pookie-뜻은-무엇일까-가사-알아보기/
+  - /766/
 ---
 
 

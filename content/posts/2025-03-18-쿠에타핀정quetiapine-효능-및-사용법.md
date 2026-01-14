@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: []
 aliases:
   - /entry/쿠에타핀정(Quetiapine)-효능-및-사용법/
+  - /709/
 ---
 
 

@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: ["skrrt", "skrr", "스컬뜻", "스컬이란"]
 aliases:
   - /entry/스컬뜻-힙합에서-Skrr-Skrrt의-의미와-사용-예시/
+  - /376/
 ---
 
 

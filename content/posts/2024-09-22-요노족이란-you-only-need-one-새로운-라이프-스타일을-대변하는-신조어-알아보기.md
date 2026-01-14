@@ -6,6 +6,7 @@ categories: ["지식 아카이브"]
 tags: ["신조어", "you only need one", "요노족", "yono", "요노"]
 aliases:
   - /entry/요노족이란-you-only-need-one-새로운-라이프-스타일을-대변하는-신조어-알아보기/
+  - /565/
 ---
 
 
