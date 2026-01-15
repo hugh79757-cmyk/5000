@@ -4,7 +4,7 @@ description: SBS 예능 '비서진'에서 이서진이 가요계의 전설 남�
   교감과 남진의 60년 가요사를 담은 특별한 방송 정보를 담았습니다.
 tags: [비서진, 이서진, 남진, SBS예능, 데뷔60주년, 콘서트, 꽃할배, 수발]
 categories: [예능, 방송정보]
-date: 2026-01-15 13:37:57+09:00
+date: 2026-01-15 13:38:00+09:00
 slug: kkothalbae-subal-jeonmun-iseojin
 cover:
   image: "thumbnail.webp"
