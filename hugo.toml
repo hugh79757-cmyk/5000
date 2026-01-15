@@ -33,3 +33,9 @@ home = ["HTML", "RSS", "JSON"]
 [minify]
 disableXML = true
 minifyOutput = true
+
+[params]
+description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
+
+[params.meta]
+description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
