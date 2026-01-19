@@ -1,44 +1,115 @@
 {{- /* 사이트 인증 메타 태그 */ -}}
-<meta name="norton-safeweb-site-verification" content="S8JEVE4V7CPQRQDK9PJIPF60HVLBPGGOO25AY1UDSSSM7-VV3MF7HJQRP8A3JCT8W3X6HBSLMT7IREP-M54AXT95D815IQXELK1A1AH-49Z5SKAHGHWDQ9764NQMLFMW" />
+<meta name="norton-safeweb-site-verification"
+  content="S8JEVE4V7CPQRQDK9PJIPF60HVLBPGGOO25AY1UDSSSM7-VV3MF7HJQRP8A3JCT8W3X6HBSLMT7IREP-M54AXT95D815IQXELK1A1AH-49Z5SKAHGHWDQ9764NQMLFMW" />
 <meta name="360-site-verification" content="c6f22a5b3041bf10b4df23ce29ac94cf" />
 <meta name="yandex-verification" content="a093ecbeea7a8440" />
-<meta name="p:domain_verify" content="a2f1f9d5f2c18d423c1d99f6c2d0247b"/>
+<meta name="p:domain_verify" content="a2f1f9d5f2c18d423c1d99f6c2d0247b" />
 <meta name="facebook-domain-verification" content="ie7idityr9eh8m81xq63vw1mt1ze30" />
 <meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520" />
 
-{{- /* Google Ads */ -}}
-<script async src="https://www.googletagmanager.com/gtag/js?id=GT-5TC34W4"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'GT-5TC34W4');
-</script>
+<!-- DNS Prefetch & Preconnect -->
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+<link rel="dns-prefetch" href="https://www.clarity.ms">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 
-{{- /* Google Analytics */ -}}
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-L3D3EGH8YN');
-</script>
+<!-- 폰트 Preload (LCP 개선) -->
+<link rel="preload"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2"
+  as="font" type="font/woff2" crossorigin>
 
-{{- /* Microsoft Clarity */ -}}
-<script type="text/javascript">
-    (function(c,l,a,r,i,t,y){
-        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "deigc1awql");
-</script>
+<!-- LCP 이미지 Preload (홈페이지인 경우) -->
+{{ if .IsHome }}
+{{ $pages := where .Site.RegularPages "Type" "posts" }}
+{{ $featured := first 1 $pages }}
+{{ range $featured }}
+{{ $image := .Resources.GetMatch "thumbnail.*" }}
+{{ if $image }}
+<link rel="preload" href="{{ $image.RelPermalink }}" as="image" fetchpriority="high">
+{{ else if .Params.cover.image }}
+<link rel="preload" href="{{ .Params.cover.image }}" as="image" fetchpriority="high">
+{{ end }}
+{{ end }}
+{{ end }}
 
-{{- /* AdSense */ -}}
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
-
-{{- /* 프리텐다드 폰트 */ -}}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-
+<!-- 프리텐다드 폰트 (더 가벼운 로딩) -->
 <style>
-body { font-family: "Pretendard", -apple-system, sans-serif; }
+  @font-face {
+    font-family: 'Pretendard';
+    font-weight: 400;
+    font-display: swap;
+    src: local('Pretendard Regular'),
+      url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2') format('woff2');
+  }
+
+  @font-face {
+    font-family: 'Pretendard';
+    font-weight: 700;
+    font-display: swap;
+    src: local('Pretendard Bold'),
+      url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Bold.woff2') format('woff2');
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+  }
 </style>
+
+<!-- Google Analytics + AdSense + Clarity (idle 시 로딩) -->
+<script>
+  (function () {
+    // Google Analytics (G-L3D3EGH8YN, GT-5TC34W4)
+    function loadAnalytics() {
+      // GA4
+      var script1 = document.createElement('script');
+      script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
+      script1.async = true;
+      document.head.appendChild(script1);
+
+      // Ads Gtag
+      var script2 = document.createElement('script');
+      script2.src = 'https://www.googletagmanager.com/gtag/js?id=GT-5TC34W4';
+      script2.async = true;
+      document.head.appendChild(script2);
+
+      script1.onload = function () {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-L3D3EGH8YN');
+        gtag('config', 'GT-5TC34W4');
+      };
+    }
+
+    // Microsoft Clarity
+    function loadClarity() {
+      (function (c, l, a, r, i, t, y) {
+        c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+        t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+        y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+      })(window, document, "clarity", "script", "deigc1awql");
+    }
+
+    // Google AdSense
+    function loadAdsense() {
+      var script = document.createElement('script');
+      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463';
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      document.head.appendChild(script);
+    }
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadAnalytics);
+      requestIdleCallback(loadClarity);
+      requestIdleCallback(function () { setTimeout(loadAdsense, 3000); });
+    } else {
+      window.addEventListener('load', function () {
+        setTimeout(loadAnalytics, 100);
+        setTimeout(loadClarity, 200);
+        setTimeout(loadAdsense, 3000);
+      });
+    }
+  })();
+</script>
