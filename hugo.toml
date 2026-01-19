@@ -14,6 +14,12 @@ ShowToc = true
 TocOpen = false
 description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
 
+[params.cover]
+  responsiveImages = true
+
+[params.assets]
+  favicon = "/favicon.ico"
+
 [params.homeInfoParams]
 Title = "rotcha"
 Content = "Welcome"
