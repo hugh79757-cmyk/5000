@@ -43,3 +43,6 @@ home = ["HTML", "RSS", "JSON"]
 [minify]
 disableXML = true
 minifyOutput = true
+
+[permalinks]
+posts = "/posts/:slug/"
