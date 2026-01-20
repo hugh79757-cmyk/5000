@@ -8,6 +8,7 @@ aliases:
   - /entry/samsung-galaxy-s24-fe-출시일-색상-및-스펙-정보/
   - /entry/Samsung-Galaxy-S24-FE-출시일-색상-및-스펙-정보/
   - /586/
+slug: "samsung-galaxy-s24-fe-출시일-색상-및-스펙-정보"
 ---
 
 

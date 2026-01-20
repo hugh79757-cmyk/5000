@@ -7,6 +7,7 @@ tags: ["겸손함", "이그노벨", "더닝 크루거", "더닝 크루거 효과
 aliases:
   - /entry/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신/
   - /151/
+slug: "더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신"
 ---
 
 

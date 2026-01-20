@@ -8,6 +8,7 @@ aliases:
   - /entry/칸국제광고제-역대-모든-수상작-보기-lovetheworkmore/
   - /entry/칸국제광고제-역대-모든-수상작-보기-lovetheworkmore/
   - /381/
+slug: "칸국제광고제-역대-모든-수상작-보기-lovetheworkmore"
 ---
 
 

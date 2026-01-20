@@ -8,6 +8,7 @@ aliases:
   - /entry/fifty-fifty-노래-pookie-뜻은-무엇일까-가사-알아보기/
   - /entry/Fifty-Fifty-노래-Pookie-뜻은-무엇일까-가사-알아보기/
   - /766/
+slug: "fifty-fifty-노래-pookie-뜻은-무엇일까-가사-알아보기"
 ---
 
 
