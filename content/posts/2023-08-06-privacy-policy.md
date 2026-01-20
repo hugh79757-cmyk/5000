@@ -8,6 +8,7 @@ aliases:
   - /entry/privacy-policy/
   - /entry/Privacy-Policy/
   - /172/
+slug: "privacy-policy"
 ---
 
 
