@@ -1,25 +1,19 @@
-/* ===== 자동광고 호환 + 사이드레일 광고 공간 확보 ===== */
+/* ===== 모바일 좌우 흔들림 방지 ===== */
 
-/* html, body - 사이드레일 광고를 위해 overflow 허용 */
-html {
-    overflow-x: visible;
+html, body {
+    overflow-x: hidden;
 }
 
-body {
-    overflow-x: visible;
-    min-width: 100%;
-}
-
-/* 메인 콘텐츠 영역 - 사이드레일 공간 확보 */
+/* 메인 콘텐츠 영역 */
 .main {
-    max-width: calc(var(--main-width) + var(--gap) * 2);
-    margin: 0 auto;
-    /* 사이드레일 광고 공간을 위한 패딩 제거 - 광고가 양옆에 붙을 수 있도록 */
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 /* 헤더/네비게이션 */
 .header,
 .nav {
+    overflow-x: hidden;
     max-width: 100%;
 }
 
@@ -36,37 +30,24 @@ body {
     height: auto;
 }
 
-/* 광고 슬롯 - 자동광고 완전 허용 */
+/* 수동 광고 슬롯 */
 .ad-slot,
-ins.adsbygoogle,
-.google-auto-placed,
-.adsbygoogle-noablate {
-    overflow: visible !important;
+ins.adsbygoogle {
+    max-width: 100%;
+    overflow: hidden;
     box-sizing: border-box;
-}
-
-/* 사이드레일 광고 허용 */
-div[id^="google_ads_iframe"],
-div[id^="aswift_"],
-.google-auto-placed {
-    position: fixed !important;
-    z-index: 9999 !important;
-}
-
-/* 앵커 광고 (상단/하단 고정) 허용 */
-ins.adsbygoogle[data-anchor-status],
-ins.adsbygoogle[data-ad-format="auto"] {
-    overflow: visible !important;
 }
 
 /* 포스트 엔트리 카드 */
 .post-entry {
     max-width: 100%;
+    overflow: hidden;
     box-sizing: border-box;
 }
 
 /* 푸터 */
 .footer {
+    overflow-x: hidden;
     max-width: 100%;
 }
 
@@ -143,11 +124,4 @@ body.list .main {
 .page-footer {
     margin-bottom: 0;
     padding-bottom: 0;
-}
-
-/* ===== 모바일에서는 사이드레일 숨김 (768px 이하) ===== */
-@media screen and (max-width: 768px) {
-    html, body {
-        overflow-x: hidden;
-    }
 }

@@ -1,10 +1,11 @@
-/* ===== CLS 방지 + 광고 공간 확보 (rotcha.kr) ===== */
+/* ===== CLS 방지 (rotcha.kr) ===== */
 
-/* 광고 영역 - 자동광고 공간 확보 */
+/* 수동 광고 영역 */
 .ad-slot {
     display: block;
     text-align: center;
     margin: 20px 0;
+    min-height: 100px;
 }
 
 .ad-top {
@@ -15,29 +16,9 @@
     min-height: 250px;
 }
 
-/* 자동광고 컨테이너 완전 허용 */
+/* 수동 광고 기본 스타일 */
 ins.adsbygoogle {
     display: block;
-    overflow: visible !important;
-}
-
-.google-auto-placed,
-.adsbygoogle-noablate,
-ins.adsbygoogle {
-    overflow: visible !important;
-    max-width: none !important;
-}
-
-/* 앵커 광고 (상단/하단 고정) 허용 */
-div[id^="google_ads_iframe"],
-div[id^="aswift_"] {
-    z-index: 9999 !important;
-}
-
-/* 사이드레일 광고 - body 양옆에 고정 */
-ins.adsbygoogle[data-ad-format="auto"],
-ins.adsbygoogle[data-ad-format="autorelaxed"] {
-    overflow: visible !important;
 }
 
 /* 이미지 영역 확보 */
@@ -60,11 +41,4 @@ ins.adsbygoogle[data-ad-format="autorelaxed"] {
     max-width: 100%;
     display: block;
     margin: 0 auto;
-}
-
-/* 본문 내 광고 (인아티클) */
-.post-content ins.adsbygoogle {
-    display: block;
-    margin: 20px 0;
-    min-height: 250px;
 }
