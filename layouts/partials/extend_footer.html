@@ -1,11 +1,13 @@
-{{- /* 광고 초기화 - 페이지당 1번만 실행 */ -}}
+{{- /* 광고 초기화 - 자동광고와 수동광고 모두 지원 */ -}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var ads = document.querySelectorAll('ins.adsbygoogle');
-    ads.forEach(function() {
-        try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        } catch(e) {}
+window.addEventListener('load', function() {
+    var manualAds = document.querySelectorAll('ins.adsbygoogle[data-ad-slot]');
+    manualAds.forEach(function(ad) {
+        if (!ad.getAttribute('data-adsbygoogle-status')) {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch(e) {}
+        }
     });
 });
 </script>

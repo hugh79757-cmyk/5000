@@ -3,9 +3,6 @@ languageCode = 'ko-kr'
 title = 'rotcha'
 theme = 'PaperMod'
 
-enableRobotsTXT = true
-canonifyURLs = true
-
 [params]
 defaultTheme = "auto"
 ShowReadingTime = true
@@ -16,18 +13,19 @@ ShowCodeCopyButtons = true
 ShowToc = true
 TocOpen = false
 description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
-env = "production"
-author = "rotcha"
 
 [params.cover]
-responsiveImages = true
+  responsiveImages = true
 
 [params.assets]
-favicon = "/favicon.ico"
+  favicon = "/favicon.ico"
 
 [params.homeInfoParams]
 Title = "rotcha"
 Content = "Welcome"
+
+[params.meta]
+description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
 
 [[menu.main]]
 name = "글목록"
@@ -53,14 +51,11 @@ minifyOutput = true
 posts = "/posts/:slug/"
 
 [markup]
-[markup.goldmark]
-[markup.goldmark.renderer]
-unsafe = true
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
 
 [sitemap]
-changefreq = "daily"
-priority = 0.5
-filename = "sitemap.xml"
-
-[services.rss]
-limit = 50
+  changefreq = "weekly"
+  priority = 0.5
+  filename = "sitemap.xml"
