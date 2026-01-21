@@ -1,8 +1,8 @@
 /* ===== 모바일 좌우 흔들림 방지 (자동광고 호환) ===== */
 
-/* html, body는 광고를 위해 overflow 허용 - clip 사용 */
-html, body {
-    overflow-x: clip;
+/* body에만 overflow 적용 (html 제외 - 앵커광고 허용) */
+body {
+    overflow-x: hidden;
 }
 
 /* 메인 콘텐츠 영역만 제한 */
@@ -31,13 +31,12 @@ html, body {
     height: auto;
 }
 
-/* 광고 슬롯 - 자동광고 완전 허용 */
+/* 광고 슬롯 - 자동광고 허용 */
 .ad-slot,
 ins.adsbygoogle,
-.google-auto-placed,
-.adsbygoogle-noablate {
-    max-width: 100vw !important;
-    overflow: visible !important;
+.google-auto-placed {
+    max-width: 100%;
+    overflow: visible;
     box-sizing: border-box;
 }
 

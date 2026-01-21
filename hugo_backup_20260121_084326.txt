@@ -1,5 +1,5 @@
 # Hugo 블로그 백업
-# 생성: 2026-01-21T08:15:33.399032
+# 생성: 2026-01-21T08:43:26.066940
 # 경로: /Users/twinssn/Desktop/rotcha-hugo
 # 모드: 전체
 # 제외: content/, public/, resources/, static/
@@ -14,7 +14,9 @@
 - analyze_traffic_save.py (1,132 bytes)
 - assets/css/extended/01-variables.css (858 bytes)
 - assets/css/extended/02-base.css (1,023 bytes)
-- assets/css/extended/04-cls-fix.css (809 bytes)
+- assets/css/extended/04-cls-fix.css (685 bytes)
+- assets/css/extended/05-mobile-fix.css (2,007 bytes)
+- assets/css/extended/06-ux-improve.css (1,994 bytes)
 - audit_site.py (2,905 bytes)
 - convert_tistory.py (7,402 bytes)
 - convert_tistory_v2.py (7,895 bytes)
@@ -25,10 +27,11 @@
 - generate_entry_redirects.py (1,100 bytes)
 - generate_redirects.py (3,399 bytes)
 - hugo-backup.py (8,876 bytes)
-- hugo.toml (878 bytes)
-- layouts/_default/single.html (2,460 bytes)
-- layouts/partials/adsense-in-article.html (326 bytes)
-- layouts/partials/extend_head.html (4,405 bytes)
+- hugo.toml (1,100 bytes)
+- layouts/_default/single.html (2,271 bytes)
+- layouts/partials/adsense-in-article.html (217 bytes)
+- layouts/partials/extend_footer.html (339 bytes)
+- layouts/partials/extend_head.html (3,061 bytes)
 - themes/PaperMod/.github/ISSUE_TEMPLATE/bug.yaml (4,042 bytes)
 - themes/PaperMod/.github/ISSUE_TEMPLATE/config.yml (234 bytes)
 - themes/PaperMod/.github/ISSUE_TEMPLATE/enhancement.yaml (1,586 bytes)
@@ -147,7 +150,7 @@
 
 ## 제외된 폴더
 - content/ (853개 파일)
-- public/ (14322개 파일)
+- public/ (14330개 파일)
 - resources/ (39개 파일)
 - static/ (2946개 파일)
 - rankingoneto-1-1/ (1979개 파일)
@@ -506,12 +509,11 @@ FILE: assets/css/extended/04-cls-fix.css
 
 /* ===== CLS 방지 (rotcha.kr) ===== */
 
-/* 광고 영역 확보 */
-.ad-slot,
-.google-auto-placed,
-ins.adsbygoogle {
-    display: block !important;
+/* 광고 영역 - 자동광고 공간 확보 */
+.ad-slot {
+    display: block;
     text-align: center;
+    margin: 20px 0;
 }
 
 .ad-top {
@@ -523,23 +525,21 @@ ins.adsbygoogle {
 }
 
 /* 인페이지 자동 광고 */
-ins.adsbygoogle[data-ad-format="auto"] {
-    min-height: 280px;
+ins.adsbygoogle {
+    display: block;
 }
 
-/* 이미지 영역 확보 (Aspect Ratio) */
+/* 이미지 영역 확보 */
 .entry-cover {
     position: relative;
     width: 100%;
     overflow: hidden;
-    background-color: var(--code-bg); /* 로딩 전 배경색 */
-    aspect-ratio: 16 / 9;
+    background-color: var(--code-bg);
 }
 
 .entry-cover img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
     display: block;
 }
 
@@ -549,6 +549,259 @@ ins.adsbygoogle[data-ad-format="auto"] {
     max-width: 100%;
     display: block;
     margin: 0 auto;
+}
+
+
+============================================================
+FILE: assets/css/extended/05-mobile-fix.css
+============================================================
+
+/* ===== 모바일 좌우 흔들림 방지 (자동광고 호환) ===== */
+
+/* body에만 overflow 적용 (html 제외 - 앵커광고 허용) */
+body {
+    overflow-x: hidden;
+}
+
+/* 메인 콘텐츠 영역만 제한 */
+.main {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* 헤더/네비게이션 */
+.header,
+.nav {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* 테이블, 코드블록 등 넓은 요소 처리 */
+.post-content pre,
+.post-content table,
+.post-content iframe {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 광고 슬롯 - 자동광고 허용 */
+.ad-slot,
+ins.adsbygoogle,
+.google-auto-placed {
+    max-width: 100%;
+    overflow: visible;
+    box-sizing: border-box;
+}
+
+/* 포스트 엔트리 카드 */
+.post-entry {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 푸터 */
+.footer {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* ===== 포스트 하단 빈 공간 제거 ===== */
+.post-single {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.post-footer {
+    margin-bottom: 0;
+    padding-bottom: 20px;
+}
+
+.post-content {
+    margin-bottom: 20px;
+}
+
+.main {
+    padding-bottom: 20px;
+    min-height: auto;
+}
+
+.footer {
+    margin-top: 0;
+    padding-top: 20px;
+}
+
+.paginav {
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+.share-buttons {
+    margin-bottom: 20px;
+}
+
+.post-tags {
+    margin-bottom: 20px;
+}
+
+/* ===== 홈페이지 하단 빈 공간 제거 ===== */
+.main {
+    min-height: unset;
+}
+
+body.list {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body.list .main {
+    flex: 1;
+    min-height: unset;
+}
+
+/* 푸터가 콘텐츠 바로 아래에 위치 */
+.footer {
+    margin-top: auto;
+}
+
+/* 페이지네이션 하단 여백 조정 */
+.pagination {
+    margin-bottom: 0;
+}
+
+/* 리스트 페이지 여백 */
+.post-entry:last-child {
+    margin-bottom: 0;
+}
+
+/* page-footer 여백 */
+.page-footer {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+
+============================================================
+FILE: assets/css/extended/06-ux-improve.css
+============================================================
+
+/* ===== 사용자 경험 개선 ===== */
+
+/* 부드러운 스크롤 */
+html {
+    scroll-behavior: smooth;
+}
+
+/* 링크 호버 효과 */
+.post-content a {
+    transition: color 0.2s ease;
+}
+
+/* 이미지 로딩 플레이스홀더 */
+.post-content img {
+    background-color: var(--code-bg);
+    transition: opacity 0.3s ease;
+}
+
+/* 버튼/카드 호버 효과 개선 */
+.post-entry {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-entry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* 코드 블록 가독성 */
+.post-content pre {
+    border-radius: 8px;
+    padding: 16px;
+}
+
+/* 목차(TOC) 개선 */
+.toc {
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.toc a {
+    transition: color 0.2s ease;
+}
+
+/* 태그 호버 */
+.post-tags a {
+    transition: background-color 0.2s ease;
+}
+
+/* 상단 이동 버튼 개선 */
+.top-link {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* 본문 가독성 */
+.post-content {
+    line-height: 1.8;
+    word-break: keep-all;
+}
+
+.post-content p {
+    margin-bottom: 1.5em;
+}
+
+.post-content h2 {
+    margin-top: 2em;
+    margin-bottom: 1em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid var(--border);
+}
+
+.post-content h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+/* 인용문 스타일 */
+.post-content blockquote {
+    border-left: 4px solid var(--primary);
+    padding-left: 16px;
+    margin: 1.5em 0;
+    color: var(--secondary);
+    font-style: italic;
+}
+
+/* 리스트 가독성 */
+.post-content ul,
+.post-content ol {
+    margin-bottom: 1.5em;
+}
+
+.post-content li {
+    margin-bottom: 0.5em;
+}
+
+/* 선택 영역 스타일 */
+::selection {
+    background-color: var(--primary);
+    color: var(--theme);
+}
+
+/* 포커스 스타일 (접근성) */
+a:focus,
+button:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* 다크모드 전환 애니메이션 */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 
@@ -1756,6 +2009,9 @@ weight = 2
 
 [outputs]
 home = ["HTML", "RSS", "JSON"]
+section = ["HTML", "RSS"]
+taxonomy = ["HTML"]
+term = ["HTML"]
 
 [minify]
 disableXML = true
@@ -1763,6 +2019,16 @@ minifyOutput = true
 
 [permalinks]
 posts = "/posts/:slug/"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+
+[sitemap]
+  changefreq = "weekly"
+  priority = 0.5
+  filename = "sitemap.xml"
 
 
 ============================================================
@@ -1794,7 +2060,7 @@ FILE: layouts/_default/single.html
   {{- partial "cover.html" (dict "cxt" . "IsHome" false "isHidden" $isHidden) }}
 
   <!-- 광고 1: 타이틀 하단 -->
-  <div class="ad-slot ad-top" style="margin: 20px 0; min-height: 100px;">
+  <div class="ad-slot ad-top">
     {{ partial "adsense-in-article.html" . }}
   </div>
 
@@ -1804,15 +2070,14 @@ FILE: layouts/_default/single.html
 
   <div class="post-content">
     {{- if not (.Param "disableAnchoredHeadings") }}
-    {{- /* 콘텐츠를 첫 번째 </p> 태그 기준으로 분할하여 광고 삽입 */}}
     {{- $content := partial "anchored_headings.html" .Content | safeHTML }}
     {{- $parts := split $content "</p>" }}
     {{- if gt (len $parts) 1 }}
     {{- /* 첫 번째 문단 출력 */}}
     {{ index $parts 0 | safeHTML }}</p>
 
-    <!-- 광고 2: 첫 문단 뒤 (인아티클) -->
-    <div class="ad-slot ad-after-first-p" style="margin: 25px 0; min-height: 250px;">
+    <!-- 광고 2: 첫 문단 하단 -->
+    <div class="ad-slot ad-after-first-p">
       {{ partial "adsense-in-article.html" . }}
     </div>
 
@@ -1855,16 +2120,35 @@ FILE: layouts/_default/single.html
 
 {{- end }}{{/* end main */}}
 
+
 ============================================================
 FILE: layouts/partials/adsense-in-article.html
 ============================================================
 
-<ins class="adsbygoogle ad-in-article" style="display:block; text-align:center; min-height:250px; margin: 20px 0;"
-    data-ad-client="ca-pub-8772455780561463" data-ad-slot="4098670212" data-ad-format="auto"
+<ins class="adsbygoogle"
+    style="display:block; text-align:center;"
+    data-ad-client="ca-pub-8772455780561463"
+    data-ad-slot="4098670212"
+    data-ad-format="auto"
     data-full-width-responsive="true"></ins>
+
+
+============================================================
+FILE: layouts/partials/extend_footer.html
+============================================================
+
+{{- /* 광고 초기화 - 페이지당 1번만 실행 */ -}}
 <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
+document.addEventListener('DOMContentLoaded', function() {
+    var ads = document.querySelectorAll('ins.adsbygoogle');
+    ads.forEach(function() {
+        try {
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        } catch(e) {}
+    });
+});
 </script>
+
 
 ============================================================
 FILE: layouts/partials/extend_head.html
@@ -1879,33 +2163,20 @@ FILE: layouts/partials/extend_head.html
 <meta name="facebook-domain-verification" content="ie7idityr9eh8m81xq63vw1mt1ze30" />
 <meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520" />
 
-<!-- DNS Prefetch & Preconnect -->
-<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-<link rel="dns-prefetch" href="https://www.googletagmanager.com">
-<link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
-<link rel="dns-prefetch" href="https://www.clarity.ms">
+<!-- Preconnect (성능 향상) -->
+<link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
+<link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+<link rel="dns-prefetch" href="https://www.google-analytics.com">
 
 <!-- 폰트 Preload (LCP 개선) -->
-<link rel="preload"
-  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2"
-  as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
 
-<!-- LCP 이미지 Preload (홈페이지인 경우) -->
-{{ if .IsHome }}
-{{ $pages := where .Site.RegularPages "Type" "posts" }}
-{{ $featured := first 1 $pages }}
-{{ range $featured }}
-{{ $image := .Resources.GetMatch "thumbnail.*" }}
-{{ if $image }}
-<link rel="preload" href="{{ $image.RelPermalink }}" as="image" fetchpriority="high">
-{{ else if .Params.cover.image }}
-<link rel="preload" href="{{ .Params.cover.image }}" as="image" fetchpriority="high">
-{{ end }}
-{{ end }}
-{{ end }}
+<!-- Google AdSense (즉시 로딩) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
 
-<!-- 프리텐다드 폰트 (더 가벼운 로딩) -->
+<!-- 폰트 스타일 (Critical CSS) -->
 <style>
   @font-face {
     font-family: 'Pretendard';
@@ -1914,7 +2185,6 @@ FILE: layouts/partials/extend_head.html
     src: local('Pretendard Regular'),
       url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2') format('woff2');
   }
-
   @font-face {
     font-family: 'Pretendard';
     font-weight: 700;
@@ -1922,69 +2192,40 @@ FILE: layouts/partials/extend_head.html
     src: local('Pretendard Bold'),
       url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Bold.woff2') format('woff2');
   }
-
   body {
-    font-family: 'Pretendard', -apple-system, sans-serif;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   }
 </style>
 
-<!-- Google Analytics + AdSense + Clarity (idle 시 로딩) -->
+<!-- Google Analytics + Clarity (지연 로딩) -->
 <script>
-  (function () {
-    // Google Analytics (G-L3D3EGH8YN, GT-5TC34W4)
-    function loadAnalytics() {
-      // GA4
-      var script1 = document.createElement('script');
-      script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
-      script1.async = true;
-      document.head.appendChild(script1);
-
-      // Ads Gtag
-      var script2 = document.createElement('script');
-      script2.src = 'https://www.googletagmanager.com/gtag/js?id=GT-5TC34W4';
-      script2.async = true;
-      document.head.appendChild(script2);
-
-      script1.onload = function () {
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-L3D3EGH8YN');
-        gtag('config', 'GT-5TC34W4');
-      };
-    }
-
-    // Microsoft Clarity
-    function loadClarity() {
-      (function (c, l, a, r, i, t, y) {
-        c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
-        t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
-        y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
-      })(window, document, "clarity", "script", "deigc1awql");
-    }
-
-    // Google AdSense
-    function loadAdsense() {
-      var script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
-
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(loadAnalytics);
-      requestIdleCallback(loadClarity);
-      requestIdleCallback(function () { setTimeout(loadAdsense, 3000); });
-    } else {
-      window.addEventListener('load', function () {
-        setTimeout(loadAnalytics, 100);
-        setTimeout(loadClarity, 200);
-        setTimeout(loadAdsense, 3000);
-      });
-    }
-  })();
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    // GA4
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
+    s.async = true;
+    document.head.appendChild(s);
+    s.onload = function() {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-L3D3EGH8YN');
+      gtag('config', 'GT-5TC34W4');
+    };
+  }, 1500);
+  
+  setTimeout(function() {
+    // Clarity
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "deigc1awql");
+  }, 2500);
+});
 </script>
+
 
 ============================================================
 FILE: themes/PaperMod/.github/ISSUE_TEMPLATE/bug.yaml
@@ -7665,7 +7906,7 @@ print(f"\n✅ {updated}개 마크다운 파일 수정 완료!")
 
 ============================================================
 # 백업 완료
-# 포함: 137개
+# 포함: 140개
 # 스킵: 1개
 # 스킵 목록: themes/PaperMod/layouts/partials/svg.html
 ============================================================

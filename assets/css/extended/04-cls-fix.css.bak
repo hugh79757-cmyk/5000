@@ -15,22 +15,9 @@
     min-height: 250px;
 }
 
-/* 자동광고 컨테이너 완전 허용 */
+/* 인페이지 자동 광고 */
 ins.adsbygoogle {
     display: block;
-}
-
-.google-auto-placed,
-.adsbygoogle-noablate,
-ins.adsbygoogle {
-    overflow: visible !important;
-    max-width: none !important;
-}
-
-/* 앵커 광고 (상단/하단 고정) 허용 */
-div[id^="google_ads_iframe"],
-div[id^="aswift_"] {
-    z-index: 9999 !important;
 }
 
 /* 이미지 영역 확보 */
