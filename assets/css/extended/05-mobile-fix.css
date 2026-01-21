@@ -1,16 +1,17 @@
-/* ===== 모바일 좌우 흔들림 방지 ===== */
-html, body {
+/* ===== 모바일 좌우 흔들림 방지 (자동광고 호환) ===== */
+
+/* body에만 overflow 적용 (html 제외 - 앵커광고 허용) */
+body {
     overflow-x: hidden;
-    width: 100%;
-    max-width: 100vw;
 }
 
+/* 메인 콘텐츠 영역만 제한 */
 .main {
     overflow-x: hidden;
     max-width: 100%;
 }
 
-/* 헤더/네비게이션 overflow 방지 */
+/* 헤더/네비게이션 */
 .header,
 .nav {
     overflow-x: hidden;
@@ -30,12 +31,12 @@ html, body {
     height: auto;
 }
 
-/* 광고 슬롯 overflow 방지 */
+/* 광고 슬롯 - 자동광고 허용 */
 .ad-slot,
 ins.adsbygoogle,
 .google-auto-placed {
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
 }
 
@@ -50,12 +51,6 @@ ins.adsbygoogle,
 .footer {
     overflow-x: hidden;
     max-width: 100%;
-}
-
-/* 페이지네이션 */
-.pagination {
-    max-width: 100%;
-    overflow-x: hidden;
 }
 
 /* ===== 포스트 하단 빈 공간 제거 ===== */
@@ -73,30 +68,25 @@ ins.adsbygoogle,
     margin-bottom: 20px;
 }
 
-/* 메인 영역 하단 여백 조정 */
 .main {
     padding-bottom: 20px;
     min-height: auto;
 }
 
-/* 푸터 상단 여백 */
 .footer {
     margin-top: 0;
     padding-top: 20px;
 }
 
-/* 페이지네이션 여백 */
 .paginav {
     margin-top: 20px;
     margin-bottom: 0;
 }
 
-/* 공유 버튼 여백 */
 .share-buttons {
     margin-bottom: 20px;
 }
 
-/* 태그 여백 */
 .post-tags {
     margin-bottom: 20px;
 }
