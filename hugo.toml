@@ -18,7 +18,6 @@ TocOpen = false
 description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
 env = "production"
 author = "rotcha"
-images = ["/og-image.png"]
 keywords = ["생활정보", "영업시간", "꿀팁", "일상"]
 
 [params.cover]
