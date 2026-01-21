@@ -57,3 +57,46 @@ ins.adsbygoogle,
     max-width: 100%;
     overflow-x: hidden;
 }
+
+/* ===== 포스트 하단 빈 공간 제거 ===== */
+.post-single {
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.post-footer {
+    margin-bottom: 0;
+    padding-bottom: 20px;
+}
+
+.post-content {
+    margin-bottom: 20px;
+}
+
+/* 메인 영역 하단 여백 조정 */
+.main {
+    padding-bottom: 20px;
+    min-height: auto;
+}
+
+/* 푸터 상단 여백 */
+.footer {
+    margin-top: 0;
+    padding-top: 20px;
+}
+
+/* 페이지네이션 여백 */
+.paginav {
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+/* 공유 버튼 여백 */
+.share-buttons {
+    margin-bottom: 20px;
+}
+
+/* 태그 여백 */
+.post-tags {
+    margin-bottom: 20px;
+}
