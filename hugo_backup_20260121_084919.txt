@@ -1,5 +1,5 @@
 # Hugo 블로그 백업
-# 생성: 2026-01-21T08:43:26.066940
+# 생성: 2026-01-21T08:49:19.458634
 # 경로: /Users/twinssn/Desktop/rotcha-hugo
 # 모드: 전체
 # 제외: content/, public/, resources/, static/
@@ -14,8 +14,8 @@
 - analyze_traffic_save.py (1,132 bytes)
 - assets/css/extended/01-variables.css (858 bytes)
 - assets/css/extended/02-base.css (1,023 bytes)
-- assets/css/extended/04-cls-fix.css (685 bytes)
-- assets/css/extended/05-mobile-fix.css (2,007 bytes)
+- assets/css/extended/04-cls-fix.css (963 bytes)
+- assets/css/extended/05-mobile-fix.css (2,062 bytes)
 - assets/css/extended/06-ux-improve.css (1,994 bytes)
 - audit_site.py (2,905 bytes)
 - convert_tistory.py (7,402 bytes)
@@ -27,10 +27,10 @@
 - generate_entry_redirects.py (1,100 bytes)
 - generate_redirects.py (3,399 bytes)
 - hugo-backup.py (8,876 bytes)
-- hugo.toml (1,100 bytes)
+- hugo.toml (1,075 bytes)
 - layouts/_default/single.html (2,271 bytes)
 - layouts/partials/adsense-in-article.html (217 bytes)
-- layouts/partials/extend_footer.html (339 bytes)
+- layouts/partials/extend_footer.html (449 bytes)
 - layouts/partials/extend_head.html (3,061 bytes)
 - themes/PaperMod/.github/ISSUE_TEMPLATE/bug.yaml (4,042 bytes)
 - themes/PaperMod/.github/ISSUE_TEMPLATE/config.yml (234 bytes)
@@ -150,7 +150,7 @@
 
 ## 제외된 폴더
 - content/ (853개 파일)
-- public/ (14330개 파일)
+- public/ (14331개 파일)
 - resources/ (39개 파일)
 - static/ (2946개 파일)
 - rankingoneto-1-1/ (1979개 파일)
@@ -524,9 +524,22 @@ FILE: assets/css/extended/04-cls-fix.css
     min-height: 250px;
 }
 
-/* 인페이지 자동 광고 */
+/* 자동광고 컨테이너 완전 허용 */
 ins.adsbygoogle {
     display: block;
+}
+
+.google-auto-placed,
+.adsbygoogle-noablate,
+ins.adsbygoogle {
+    overflow: visible !important;
+    max-width: none !important;
+}
+
+/* 앵커 광고 (상단/하단 고정) 허용 */
+div[id^="google_ads_iframe"],
+div[id^="aswift_"] {
+    z-index: 9999 !important;
 }
 
 /* 이미지 영역 확보 */
@@ -558,9 +571,9 @@ FILE: assets/css/extended/05-mobile-fix.css
 
 /* ===== 모바일 좌우 흔들림 방지 (자동광고 호환) ===== */
 
-/* body에만 overflow 적용 (html 제외 - 앵커광고 허용) */
-body {
-    overflow-x: hidden;
+/* html, body는 광고를 위해 overflow 허용 - clip 사용 */
+html, body {
+    overflow-x: clip;
 }
 
 /* 메인 콘텐츠 영역만 제한 */
@@ -589,12 +602,13 @@ body {
     height: auto;
 }
 
-/* 광고 슬롯 - 자동광고 허용 */
+/* 광고 슬롯 - 자동광고 완전 허용 */
 .ad-slot,
 ins.adsbygoogle,
-.google-auto-placed {
-    max-width: 100%;
-    overflow: visible;
+.google-auto-placed,
+.adsbygoogle-noablate {
+    max-width: 100vw !important;
+    overflow: visible !important;
     box-sizing: border-box;
 }
 
@@ -1973,6 +1987,9 @@ languageCode = 'ko-kr'
 title = 'rotcha'
 theme = 'PaperMod'
 
+enableRobotsTXT = true
+canonifyURLs = true
+
 [params]
 defaultTheme = "auto"
 ShowReadingTime = true
@@ -1983,19 +2000,18 @@ ShowCodeCopyButtons = true
 ShowToc = true
 TocOpen = false
 description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
+env = "production"
+author =***MASKED***
 
 [params.cover]
-  responsiveImages = true
+responsiveImages = true
 
 [params.assets]
-  favicon = "/favicon.ico"
+favicon = "/favicon.ico"
 
 [params.homeInfoParams]
 Title = "rotcha"
 Content = "Welcome"
-
-[params.meta]
-description = "일상 정보, 영업시간, 생활 꿀팁을 알려드리는 rotcha 블로그"
 
 [[menu.main]]
 name = "글목록"
@@ -2021,14 +2037,17 @@ minifyOutput = true
 posts = "/posts/:slug/"
 
 [markup]
-  [markup.goldmark]
-    [markup.goldmark.renderer]
-      unsafe = true
+[markup.goldmark]
+[markup.goldmark.renderer]
+unsafe = true
 
 [sitemap]
-  changefreq = "weekly"
-  priority = 0.5
-  filename = "sitemap.xml"
+changefreq = "daily"
+priority = 0.5
+filename = "sitemap.xml"
+
+[services.rss]
+limit = 50
 
 
 ============================================================
@@ -2137,14 +2156,16 @@ FILE: layouts/partials/adsense-in-article.html
 FILE: layouts/partials/extend_footer.html
 ============================================================
 
-{{- /* 광고 초기화 - 페이지당 1번만 실행 */ -}}
+{{- /* 광고 초기화 - 자동광고와 수동광고 모두 지원 */ -}}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var ads = document.querySelectorAll('ins.adsbygoogle');
-    ads.forEach(function() {
-        try {
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        } catch(e) {}
+window.addEventListener('load', function() {
+    var manualAds = document.querySelectorAll('ins.adsbygoogle[data-ad-slot]');
+    manualAds.forEach(function(ad) {
+        if (!ad.getAttribute('data-adsbygoogle-status')) {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch(e) {}
+        }
     });
 });
 </script>

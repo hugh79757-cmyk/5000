@@ -1,4 +1,5 @@
 {{- /* 사이트 인증 메타 태그 */ -}}
+<meta name="google-adsense-account" content="ca-pub-8772455780561463">
 <meta name="norton-safeweb-site-verification"
   content="S8JEVE4V7CPQRQDK9PJIPF60HVLBPGGOO25AY1UDSSSM7-VV3MF7HJQRP8A3JCT8W3X6HBSLMT7IREP-M54AXT95D815IQXELK1A1AH-49Z5SKAHGHWDQ9764NQMLFMW" />
 <meta name="360-site-verification" content="c6f22a5b3041bf10b4df23ce29ac94cf" />
@@ -7,20 +8,21 @@
 <meta name="facebook-domain-verification" content="ie7idityr9eh8m81xq63vw1mt1ze30" />
 <meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520" />
 
-<!-- Preconnect (성능 향상) -->
+<!-- Preconnect -->
 <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin>
 <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
 <link rel="dns-prefetch" href="https://www.google-analytics.com">
 
-<!-- 폰트 Preload (LCP 개선) -->
+<!-- 폰트 Preload -->
 <link rel="preload" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
 
-<!-- Google AdSense (즉시 로딩) -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463"
+     crossorigin="anonymous"></script>
 
-<!-- 폰트 스타일 (Critical CSS) -->
+<!-- 폰트 스타일 -->
 <style>
   @font-face {
     font-family: 'Pretendard';
@@ -45,7 +47,6 @@
 <script>
 window.addEventListener('load', function() {
   setTimeout(function() {
-    // GA4
     var s = document.createElement('script');
     s.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
     s.async = true;
@@ -57,15 +58,14 @@ window.addEventListener('load', function() {
       gtag('config', 'G-L3D3EGH8YN');
       gtag('config', 'GT-5TC34W4');
     };
-  }, 1500);
+  }, 2500);
   
   setTimeout(function() {
-    // Clarity
     (function(c,l,a,r,i,t,y){
       c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
       t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
       y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
     })(window, document, "clarity", "script", "deigc1awql");
-  }, 2500);
+  }, 3500);
 });
 </script>
