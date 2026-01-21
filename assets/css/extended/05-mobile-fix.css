@@ -1,0 +1,59 @@
+/* ===== 모바일 좌우 흔들림 방지 ===== */
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+}
+
+.main {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* 헤더/네비게이션 overflow 방지 */
+.header,
+.nav {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* 테이블, 코드블록 등 넓은 요소 처리 */
+.post-content pre,
+.post-content table,
+.post-content iframe {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.post-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* 광고 슬롯 overflow 방지 */
+.ad-slot,
+ins.adsbygoogle,
+.google-auto-placed {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 포스트 엔트리 카드 */
+.post-entry {
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 푸터 */
+.footer {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* 페이지네이션 */
+.pagination {
+    max-width: 100%;
+    overflow-x: hidden;
+}
