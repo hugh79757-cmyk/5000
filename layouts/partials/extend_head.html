@@ -11,9 +11,10 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
-<link rel="dns-prefetch" href="https://www.clarity.ms">
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
+
+<!-- Google AdSense (즉시 로딩 - 자동광고/앵커광고 필수) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
 
 <!-- 프리텐다드 폰트 -->
 <style>
@@ -38,48 +39,31 @@
   }
 </style>
 
-<!-- Google AdSense (우선 로딩) -->
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
-
 <!-- Google Analytics + Clarity (지연 로딩) -->
 <script>
-  (function () {
-    function loadAnalytics() {
-      var script1 = document.createElement('script');
-      script1.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
-      script1.async = true;
-      document.head.appendChild(script1);
-
-      var script2 = document.createElement('script');
-      script2.src = 'https://www.googletagmanager.com/gtag/js?id=GT-5TC34W4';
-      script2.async = true;
-      document.head.appendChild(script2);
-
-      script1.onload = function () {
+  window.addEventListener('load', function() {
+    // Google Analytics
+    setTimeout(function() {
+      var s1 = document.createElement('script');
+      s1.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
+      s1.async = true;
+      document.head.appendChild(s1);
+      s1.onload = function() {
         window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
+        function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', 'G-L3D3EGH8YN');
         gtag('config', 'GT-5TC34W4');
       };
-    }
+    }, 1000);
 
-    function loadClarity() {
-      (function (c, l, a, r, i, t, y) {
-        c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
-        t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
-        y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    // Microsoft Clarity
+    setTimeout(function() {
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
       })(window, document, "clarity", "script", "deigc1awql");
-    }
-
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(loadAnalytics);
-      requestIdleCallback(loadClarity);
-    } else {
-      window.addEventListener('load', function () {
-        setTimeout(loadAnalytics, 100);
-        setTimeout(loadClarity, 200);
-      });
-    }
-  })();
+    }, 2000);
+  });
 </script>
