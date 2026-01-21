@@ -1,11 +1,10 @@
 /* ===== CLS 방지 (rotcha.kr) ===== */
 
-/* 광고 영역 확보 */
-.ad-slot,
-.google-auto-placed,
-ins.adsbygoogle {
-    display: block !important;
+/* 광고 영역 - 자동광고 공간 확보 */
+.ad-slot {
+    display: block;
     text-align: center;
+    margin: 20px 0;
 }
 
 .ad-top {
@@ -17,23 +16,21 @@ ins.adsbygoogle {
 }
 
 /* 인페이지 자동 광고 */
-ins.adsbygoogle[data-ad-format="auto"] {
-    min-height: 280px;
+ins.adsbygoogle {
+    display: block;
 }
 
-/* 이미지 영역 확보 (Aspect Ratio) */
+/* 이미지 영역 확보 */
 .entry-cover {
     position: relative;
     width: 100%;
     overflow: hidden;
-    background-color: var(--code-bg); /* 로딩 전 배경색 */
-    aspect-ratio: 16 / 9;
+    background-color: var(--code-bg);
 }
 
 .entry-cover img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
     display: block;
 }
 
