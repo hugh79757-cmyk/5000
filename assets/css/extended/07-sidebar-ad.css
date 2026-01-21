@@ -1,0 +1,46 @@
+/* ===== 사이드레일 광고 공간 확보 ===== */
+
+/* 데스크톱에서 사이드 공간 확보 (1200px 이상) */
+@media screen and (min-width: 1200px) {
+    body {
+        /* 사이드레일 광고가 들어갈 공간 확보 */
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    /* 본문 영역은 중앙 유지 */
+    .main {
+        max-width: var(--main-width);
+        margin: 0 auto;
+    }
+    
+    /* 헤더도 중앙 유지 */
+    .header {
+        max-width: 100%;
+    }
+    
+    .nav {
+        max-width: var(--nav-width);
+        margin: 0 auto;
+    }
+}
+
+/* 대형 화면 (1400px 이상) - 사이드레일 최적 */
+@media screen and (min-width: 1400px) {
+    /* 사이드레일이 충분히 들어갈 공간 */
+    body {
+        min-width: 100vw;
+    }
+}
+
+/* 구글 자동광고 사이드레일 스타일 허용 */
+.google-auto-placed[data-ad-format="auto"] {
+    position: fixed !important;
+}
+
+/* 왼쪽/오른쪽 사이드레일 */
+ins.adsbygoogle[data-ad-format="auto"][style*="left"],
+ins.adsbygoogle[data-ad-format="auto"][style*="right"] {
+    overflow: visible !important;
+    z-index: 9998 !important;
+}
