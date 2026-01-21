@@ -1,8 +1,7 @@
-{{- /* 광고 초기화 - 자동광고와 수동광고 모두 지원 */ -}}
+{{- /* 수동 광고 초기화 */ -}}
 <script>
 window.addEventListener('load', function() {
-    var manualAds = document.querySelectorAll('ins.adsbygoogle[data-ad-slot]');
-    manualAds.forEach(function(ad) {
+    document.querySelectorAll('ins.adsbygoogle[data-ad-slot]').forEach(function(ad) {
         if (!ad.getAttribute('data-adsbygoogle-status')) {
             try {
                 (adsbygoogle = window.adsbygoogle || []).push({});
