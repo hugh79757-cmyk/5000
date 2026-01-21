@@ -1,6 +1,25 @@
-<ins class="adsbygoogle ad-in-article" style="display:block; text-align:center; min-height:250px; margin: 20px 0;"
-    data-ad-client="ca-pub-8772455780561463" data-ad-slot="4098670212" data-ad-format="auto"
+<ins class="adsbygoogle ad-in-article" 
+    style="display:block; text-align:center; min-height:250px; margin: 20px 0;"
+    data-ad-client="ca-pub-8772455780561463" 
+    data-ad-slot="4098670212" 
+    data-ad-format="auto"
     data-full-width-responsive="true"></ins>
 <script>
-    (adsbygoogle = window.adsbygoogle || []).push({});
+    (function() {
+        function pushAd() {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch(e) {
+                console.log('Ad push error:', e);
+            }
+        }
+        
+        // adsbygoogle가 로드될 때까지 대기
+        if (typeof adsbygoogle !== 'undefined') {
+            pushAd();
+        } else {
+            // 3.5초 후 재시도 (메인 스크립트 3초 후 로드되므로)
+            setTimeout(pushAd, 3500);
+        }
+    })();
 </script>
