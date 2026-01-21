@@ -4,8 +4,12 @@ description: 한화생명 고객센터 1588-6363 ARS 메뉴 구성을 상세히 
   번호를 확인하고 빠르게 상담받으세요.
 tags: [한화생명, 한화생명 ARS, 1588-6363, 한화생명 메뉴, 보이는 ARS, 한화생명 보험금 청구]
 categories: [금융, 보험]
-date: 2026-01-21 17:36:00+09:00
+date: 2026-01-21 21:29:27+09:00
 slug: hanhwasaengmyeong-gogaeksenteo-1588-6363
+cover:
+  image: "thumbnail.webp"
+  alt: ""
+  hidden: false
 ---
 한화생명 고객센터에 전화했을 때 ARS 안내 음성을 듣고 어떤 번호를 눌러야 할지 헷갈리신 적 있으신가요? 오늘은 **한화생명 고객센터 1588-6363** 의 ARS 메뉴 구성을 상세히 안내해 드리겠습니다.
 
