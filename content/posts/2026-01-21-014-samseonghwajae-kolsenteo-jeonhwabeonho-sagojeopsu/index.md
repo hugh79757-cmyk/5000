@@ -3,7 +3,7 @@ title: 삼성화재 콜센터 전화번호 사고접수 보험금청구 대출�
 description: 삼성화재 사고접수, 보험금청구, 대출상담 등 업무별 콜센터 전화번호를 총정리했습니다. 목적에 맞는 연락처로 빠르게 상담받으세요.
 tags: [삼성화재 콜센터, 삼성화재 사고접수, 보험금청구 전화번호, 삼성화재 대출, 1588-5114, 삼성화재 연락처, 보험 콜센터]
 categories: [금융, 보험]
-date: '2026-01-21T15:31:33+09:00'
+date: 2026-01-21 21:30:27+09:00
 slug: samseonghwajae-kolsenteo-jeonhwabeonho-sagojeopsu
 cover:
   image: "thumbnail.webp"

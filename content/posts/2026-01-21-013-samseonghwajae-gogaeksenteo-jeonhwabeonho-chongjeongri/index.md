@@ -3,7 +3,7 @@ title: 삼성화재 고객센터 전화번호 총정리 상담시간부터 업�
 description: 삼성화재 대표번호 1588-5114를 비롯해 대출, 사고접수, 보험금청구 등 업무별 고객센터 연락처와 상담시간을 한눈에 정리했습니다.
 tags: [삼성화재, 삼성화재 고객센터, 삼성화재 전화번호, 1588-5114, 보험 고객센터, 삼성화재 상담시간, 보험사 연락처]
 categories: [금융, 보험]
-date: '2026-01-21T15:30:17+09:00'
+date: 2026-01-21 21:30:27+09:00
 slug: samseonghwajae-gogaeksenteo-jeonhwabeonho-chongjeongri
 cover:
   image: "thumbnail.webp"
