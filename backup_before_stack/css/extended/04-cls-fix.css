@@ -1,0 +1,19 @@
+/* ===== 광고 CLS 방지 (최소한) ===== */
+
+.ad-slot {
+    display: block;
+    text-align: center;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.ad-after-first-p {
+    min-height: 250px;
+}
+
+ins.adsbygoogle {
+    display: block !important;
+    text-align: center !important;
+}
