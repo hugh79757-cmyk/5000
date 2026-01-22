@@ -1,4 +1,4 @@
-/* ===== 광고 CLS 방지 ===== */
+/* ===== 광고 CLS 방지 (최소한) ===== */
 
 .ad-slot {
     display: block;
@@ -16,24 +16,4 @@
 ins.adsbygoogle {
     display: block !important;
     text-align: center !important;
-}
-
-/* ===== 푸터 하단 여백 제거 ===== */
-html, body {
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-}
-
-.main {
-    flex: 1;
-}
-
-.footer {
-    margin-top: auto;
 }
