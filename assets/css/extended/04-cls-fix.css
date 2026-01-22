@@ -1,6 +1,5 @@
-/* ===== CLS 방지 및 광고 중앙 정렬 (rotcha.kr) ===== */
+/* ===== 광고 CLS 방지 (최소한) ===== */
 
-/* 수동 광고 영역 */
 .ad-slot {
     display: block;
     text-align: center;
@@ -10,40 +9,11 @@
     overflow: hidden;
 }
 
-.ad-top {
-    min-height: 100px;
-}
-
 .ad-after-first-p {
     min-height: 250px;
 }
 
-/* AdSense ins 태그 */
 ins.adsbygoogle {
     display: block !important;
     text-align: center !important;
-    min-height: 250px;
-    margin: 20px 0;
-}
-
-/* 이미지 영역 확보 */
-.entry-cover {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
-    background-color: var(--code-bg);
-}
-
-.entry-cover img {
-    width: 100%;
-    height: auto;
-    display: block;
-}
-
-/* 포스트 본문 이미지 */
-.post-content img {
-    height: auto;
-    max-width: 100%;
-    display: block;
-    margin: 0 auto;
 }
