@@ -35,7 +35,7 @@
   }
 </style>
 
-{{- /* Google Analytics + AdSense (idle 시 로딩) */ -}}
+{{- /* Google Analytics */ -}}
 <script>
   (function () {
     function loadAnalytics() {
@@ -50,23 +50,29 @@
         gtag('config', 'G-L3D3EGH8YN');
       };
     }
-    function loadAdsense() {
-      var script = document.createElement('script');
-      script.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463';
-      script.async = true;
-      script.crossOrigin = 'anonymous';
-      document.head.appendChild(script);
-    }
     if ('requestIdleCallback' in window) {
       requestIdleCallback(loadAnalytics);
-      requestIdleCallback(function () { setTimeout(loadAdsense, 2000); });
     } else {
       window.addEventListener('load', function () {
         setTimeout(loadAnalytics, 100);
-        setTimeout(loadAdsense, 2000);
       });
     }
   })();
+</script>
+
+{{- /* AdSense - 즉시 로드 + 자동 초기화 */ -}}
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
+<script>
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      var ads = document.querySelectorAll('ins.adsbygoogle');
+      ads.forEach(function(ad) {
+        if (!ad.getAttribute('data-adsbygoogle-status')) {
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        }
+      });
+    }, 500);
+  });
 </script>
 
 {{- /* Microsoft Clarity (지연 로딩) */ -}}
