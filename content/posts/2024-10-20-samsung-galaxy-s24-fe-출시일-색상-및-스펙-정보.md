@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["구매정보", "색상", "출시일", "특이점", "자급제폰"]
 aliases:
+  - "/samsung-galaxy-s24-fe-출시일-색상-및-스펙-정보/"
+  - "/entry/samsung-galaxy-s24-fe-출시일-색상-및-스펙-정보"
+  - "/entry/SamsungGalaxyS24FE출시일색상및스펙정보"
+  - "/entry/Samsung-Galaxy-S24-FE-출시일-색상-및-스펙-정보"
   - /entry/samsung-galaxy-s24-fe-출시일-색상-및-스펙-정보/
   - /entry/Samsung-Galaxy-S24-FE-출시일-색상-및-스펙-정보/
   - /586/

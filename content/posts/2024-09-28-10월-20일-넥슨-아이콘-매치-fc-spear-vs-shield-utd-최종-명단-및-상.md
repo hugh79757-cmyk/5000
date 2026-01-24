@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["넥슨", "Utd", "shield", "예매하기", "10월 20일"]
 aliases:
+  - "/10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상/"
+  - "/entry/10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상"
+  - "/entry/10월20일넥슨아이콘매치FCSPEARVSSHIELDUTD최종명단및상세정보및예매안내"
+  - "/entry/10월-20일-넥슨-아이콘-매치-FC-SPEAR-VS-SHIELD-UTD-최종-명단-및-상세-정보-및-예매-안내"
   - /entry/10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상/
   - /571/
 slug: "10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상"
