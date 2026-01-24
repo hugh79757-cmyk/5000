@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: []
 aliases:
+  - "/fifty-fifty-노래-pookie-뜻은-무엇일까-가사-알아보기/"
+  - "/entry/fifty-fifty-노래-pookie-뜻은-무엇일까-가사-알아보기"
+  - "/entry/FiftyFifty노래Pookie뜻은무엇일까가사알아보기"
+  - "/entry/Fifty-Fifty-노래-Pookie-뜻은-무엇일까-가사-알아보기"
   - /entry/fifty-fifty-노래-pookie-뜻은-무엇일까-가사-알아보기/
   - /entry/Fifty-Fifty-노래-Pookie-뜻은-무엇일까-가사-알아보기/
   - /766/

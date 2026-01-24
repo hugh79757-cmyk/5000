@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["skrrt", "skrr", "스컬뜻", "스컬이란"]
 aliases:
+  - "/스컬뜻-힙합에서-skrr-skrrt의-의미와-사용-예시/"
+  - "/entry/스컬뜻-힙합에서-skrr-skrrt의-의미와-사용-예시"
+  - "/entry/스컬뜻힙합에서SkrrSkrrt의의미와사용예시"
+  - "/entry/스컬뜻-힙합에서-Skrr-Skrrt의-의미와-사용-예시"
   - /entry/스컬뜻-힙합에서-skrr-skrrt의-의미와-사용-예시/
   - /entry/스컬뜻-힙합에서-Skrr-Skrrt의-의미와-사용-예시/
   - /376/

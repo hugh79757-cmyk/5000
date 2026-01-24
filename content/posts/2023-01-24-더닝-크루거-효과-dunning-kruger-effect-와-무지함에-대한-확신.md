@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["겸손함", "이그노벨", "더닝 크루거", "더닝 크루거 효과", "가면 증후군"]
 aliases:
+  - "/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신/"
+  - "/entry/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신"
+  - "/entry/더닝크루거효과(Dunning-KrugerEffect)와무지함에대한확신"
+  - "/entry/더닝-크루거-효과-(Dunning---Kruger-Effect)-와-무지함에-대한-확신"
   - /entry/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신/
   - /151/
 slug: "더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신"

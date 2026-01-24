@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["신조어", "you only need one", "요노족", "yono", "요노"]
 aliases:
+  - "/요노족이란-you-only-need-one-새로운-라이프-스타일을-대변하는-신조어-알아보기/"
+  - "/entry/요노족이란-you-only-need-one-새로운-라이프-스타일을-대변하는-신조어-알아보기"
+  - "/entry/요노족이란YouOnlyNeedOne새로운라이프스타일을대변하는신조어알아보기"
+  - "/entry/요노족이란-You-Only-Need-One-새로운-라이프-스타일을-대변하는-신조어-알아보기"
   - /entry/요노족이란-you-only-need-one-새로운-라이프-스타일을-대변하는-신조어-알아보기/
   - /565/
 slug: "요노족이란-you-only-need-one-새로운-라이프-스타일을-대변하는-신조어-알아보기"

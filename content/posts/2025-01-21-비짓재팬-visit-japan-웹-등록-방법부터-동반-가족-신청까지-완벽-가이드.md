@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: []
 aliases:
+  - "/비짓재팬-visit-japan-웹-등록-방법부터-동반-가족-신청까지-완벽-가이드/"
+  - "/entry/비짓재팬-visit-japan-웹-등록-방법부터-동반-가족-신청까지-완벽-가이드"
+  - "/entry/비짓재팬VisitJapan웹등록방법부터동반가족신청까지완벽가이드"
+  - "/entry/비짓재팬-Visit-Japan-웹-등록-방법부터-동반-가족-신청까지-완벽-가이드"
   - /entry/비짓재팬-visit-japan-웹-등록-방법부터-동반-가족-신청까지-완벽-가이드/
   - /662/
 slug: "비짓재팬-visit-japan-웹-등록-방법부터-동반-가족-신청까지-완벽-가이드"

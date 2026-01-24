@@ -5,6 +5,9 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["수상작", "감상하기", "칸국제광고제", "lovetheworkmore", "lovetheworkmore.com"]
 aliases:
+  - "/칸국제광고제-역대-모든-수상작-보기-lovetheworkmore/"
+  - "/entry/칸국제광고제역대모든수상작보기lovetheworkmore"
+  - "/entry/칸국제광고제-역대-모든-수상작-보기-lovetheworkmore"
   - /entry/칸국제광고제-역대-모든-수상작-보기-lovetheworkmore/
   - /entry/칸국제광고제-역대-모든-수상작-보기-lovetheworkmore/
   - /381/

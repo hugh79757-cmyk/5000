@@ -5,6 +5,10 @@ draft: false
 categories: ["지식 아카이브"]
 tags: ["이어버드", "가성비", "qcy", "와이어리스 이어버드", "qcy h10"]
 aliases:
+  - "/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내/"
+  - "/entry/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내"
+  - "/entry/QCYHT10AilyBudsPro+-가성비고성능무선이어버드구매안내"
+  - "/entry/QCY-HT10-AilyBuds-Pro+---가성비-고성능-무선-이어버드-구매안내"
   - /entry/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내/
   - /440/
 slug: "qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내"
