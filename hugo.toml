@@ -3,6 +3,8 @@ languageCode = 'ko-kr'
 title = 'rotcha'
 theme = 'PaperMod'
 
+googleAnalytics = 'GT-5TC34W4'
+
 enableRobotsTXT = true
 canonifyURLs = true
 
@@ -63,6 +65,10 @@ unsafe = true
 changefreq = "daily"
 priority = 0.5
 filename = "sitemap.xml"
+
+[services]
+[services.googleAnalytics]
+ID = 'GT-5TC34W4'
 
 [services.rss]
 limit = 50
