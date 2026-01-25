@@ -4,8 +4,12 @@ description: 퇴직자와 중도퇴사자를 위한 연말정산 방법을 총�
   알기 쉽게 안내합니다.
 tags: [퇴직자연말정산, 중도퇴사자연말정산, 종합소득세신고, 연말정산방법, 세금환급, 홈택스, 2026연말정산]
 categories: [경제, 세금]
-date: 2026-01-25 16:19:42+09:00
+date: 2026-01-25 17:28:21+09:00
 slug: 2026-toejikja-yeonmaljeongsan-wanbyeok
+cover:
+  image: "thumbnail.webp"
+  alt: ""
+  hidden: false
 ---
 [2026 시니어 복지혜택 모두 보기](https://65.informationhot.kr)
 
