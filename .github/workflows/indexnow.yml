@@ -1,0 +1,16 @@
+name: IndexNow Submit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  indexnow:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Cloudflare Pages
+        run: sleep 60
+
+      - name: Submit to IndexNow
+        run: curl "https://indexnow-submit.hugh79757.workers.dev/?site=rotcha.kr"
