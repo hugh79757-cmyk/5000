@@ -1,9 +1,17 @@
 <!-- 함께 읽으면 좋은 글 -->
 {{ if .IsPage }}
-{{ $related := .Site.RegularPages.Related . | first 5 }}
+{{ $currentPage := . }}
+{{ $posts := where site.RegularPages "Section" "posts" | shuffle | first 10 }}
+{{ $filtered := slice }}
+{{ range $posts }}
+  {{ if ne .Permalink $currentPage.Permalink }}
+    {{ $filtered = $filtered | append . }}
+  {{ end }}
+{{ end }}
+{{ $related := $filtered | first 5 }}
 {{ with $related }}
 <div class="related-posts" style="max-width: 800px; margin: 2rem auto; padding: 1.5rem; background: var(--code-bg); border-radius: 8px;">
-  <h3 style="margin-bottom: 1rem;">📚 함께 읽으면 좋은 글</h3>
+  <h3 style="margin-bottom: 1rem;">함께 읽으면 좋은 글</h3>
   <ul style="list-style: none; padding: 0; margin: 0;">
     {{ range . }}
     <li style="margin-bottom: 0.8rem;">
