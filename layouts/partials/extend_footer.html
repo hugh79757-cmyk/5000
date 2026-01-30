@@ -10,15 +10,33 @@
 {{ end }}
 {{ $related := $filtered | first 5 }}
 {{ with $related }}
-<div class="related-posts" style="max-width: 800px; margin: 2rem auto; padding: 1.5rem; background: var(--code-bg); border-radius: 8px;">
-  <h3 style="margin-bottom: 1rem;">함께 읽으면 좋은 글</h3>
-  <ul style="list-style: none; padding: 0; margin: 0;">
+<div class="related-posts" style="max-width:800px;margin:2rem auto;padding:1.5rem;background:var(--code-bg);border-radius:8px">
+  <h3 style="margin-bottom:1rem">함께 읽으면 좋은 글</h3>
+  <ul style="list-style:none;padding:0;margin:0">
     {{ range . }}
-    <li style="margin-bottom: 0.8rem;">
-      <a href="{{ .Permalink }}" style="color: var(--primary);">{{ .Title }}</a>
+    <li style="margin-bottom:0.8rem">
+      <a href="{{ .Permalink }}" style="color:var(--primary)">{{ .Title }}</a>
     </li>
     {{ end }}
   </ul>
 </div>
 {{ end }}
 {{ end }}
+
+<!-- 스크롤 이벤트 최적화 (throttle) -->
+<script>
+(function(){
+  var throttle=function(fn,wait){var t=0;return function(){var now=Date.now();if(now-t>=wait){t=now;fn.apply(this,arguments);}}};
+  var topBtn=document.getElementById("top-link");
+  if(topBtn){
+    var onScroll=throttle(function(){
+      if(document.body.scrollTop>800||document.documentElement.scrollTop>800){
+        topBtn.style.visibility="visible";topBtn.style.opacity="1";
+      }else{
+        topBtn.style.visibility="hidden";topBtn.style.opacity="0";
+      }
+    },100);
+    window.addEventListener("scroll",onScroll,{passive:true});
+  }
+})();
+</script>
