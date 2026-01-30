@@ -3,13 +3,26 @@
 <meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520">
 <meta name="yandex-verification" content="a093ecbeea7a8440" />
 
-{{- /* Google Fonts - 비차단 로딩 */ -}}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap"></noscript>
+{{- /* Pretendard 폰트 - 직접 로딩 (빠름) */ -}}
+<link rel="preload" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 400;
+  font-display: swap;
+  src: local('Pretendard Regular'),
+    url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Pretendard';
+  font-weight: 700;
+  font-display: swap;
+  src: local('Pretendard Bold'),
+    url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Bold.woff2') format('woff2');
+}
+</style>
 
-{{- /* AdSense 레이지로드 (인터랙션 또는 3초 후) */ -}}
+{{- /* AdSense 레이지로드 */ -}}
 <script>
 (function() {
   var loaded = false;
@@ -31,8 +44,8 @@
 
 {{- /* Google Analytics - 지연 로딩 */ -}}
 <script>
-(function() {
-  function loadGA() {
+window.addEventListener('load', function() {
+  setTimeout(function() {
     var s = document.createElement('script');
     s.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
     s.async = true;
@@ -43,13 +56,8 @@
       gtag('js', new Date());
       gtag('config', 'G-L3D3EGH8YN');
     };
-  }
-  if (document.readyState === 'complete') {
-    setTimeout(loadGA, 100);
-  } else {
-    window.addEventListener('load', function() { setTimeout(loadGA, 100); });
-  }
-})();
+  }, 100);
+});
 </script>
 
 {{- /* Microsoft Clarity - 지연 로딩 */ -}}
