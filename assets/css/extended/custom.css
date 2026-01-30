@@ -32,3 +32,29 @@ ins.adsbygoogle {
 .placeholder-thumb {
     aspect-ratio: 1/1;
 }
+
+/* ===== v1.5.2 fix: 광고 슬롯 삐져나옴 방지 ===== */
+.ad-slot {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+ins.adsbygoogle {
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* 본문 영역 내 광고 제한 */
+.post-content .ad-slot,
+.post-content ins.adsbygoogle {
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 광고 미로드 시 빈 슬롯 숨김 (선택) */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+    display: none !important;
+}
