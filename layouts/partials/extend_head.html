@@ -3,10 +3,11 @@
 <meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520">
 <meta name="yandex-verification" content="a093ecbeea7a8440" />
 
-{{- /* Google Fonts - Noto Sans KR */ -}}
+{{- /* Google Fonts - 비차단 로딩 */ -}}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap"></noscript>
 
 {{- /* AdSense 레이지로드 (인터랙션 또는 3초 후) */ -}}
 <script>
@@ -28,20 +29,38 @@
 })();
 </script>
 
-{{- /* Google Analytics */ -}}
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN"></script>
+{{- /* Google Analytics - 지연 로딩 */ -}}
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-L3D3EGH8YN');
+(function() {
+  function loadGA() {
+    var s = document.createElement('script');
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
+    s.async = true;
+    document.head.appendChild(s);
+    s.onload = function() {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-L3D3EGH8YN');
+    };
+  }
+  if (document.readyState === 'complete') {
+    setTimeout(loadGA, 100);
+  } else {
+    window.addEventListener('load', function() { setTimeout(loadGA, 100); });
+  }
+})();
 </script>
 
-{{- /* Microsoft Clarity */ -}}
+{{- /* Microsoft Clarity - 지연 로딩 */ -}}
 <script>
-  (function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-  })(window, document, "clarity", "script", "deigc1awql");
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "deigc1awql");
+  }, 2000);
+});
 </script>
