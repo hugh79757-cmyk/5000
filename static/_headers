@@ -1,9 +1,20 @@
+# Cloudflare Pages 헤더 설정
+
+# 모든 페이지 기본 헤더
 /*
-  X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
 
-# 이미지 캐시 최적화
+# HTML 페이지 - 짧은 캐시
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# CSS/JS - 장기 캐시 (fingerprint 사용)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 이미지 - 장기 캐시
 /*.jpg
   Cache-Control: public, max-age=31536000, immutable
 /*.jpeg
@@ -14,7 +25,19 @@
   Cache-Control: public, max-age=31536000, immutable
 /*.gif
   Cache-Control: public, max-age=31536000, immutable
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
 
-# 폰트 캐시
+# 폰트 - 장기 캐시
 /*.woff2
   Cache-Control: public, max-age=31536000, immutable
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+# RSS/JSON - 짧은 캐시
+/*.xml
+  Cache-Control: public, max-age=3600, must-revalidate
+/*.json
+  Cache-Control: public, max-age=3600, must-revalidate
