@@ -1,4 +1,4 @@
-/* ===== v1.7 레이아웃 안정화 ===== */
+/* ===== v1.65 레이아웃 안정화 ===== */
 
 /* 플로팅 요소 비활성화 */
 .footer, footer {
@@ -15,21 +15,13 @@
     contain: layout;
 }
 
-/* 이미지 레이아웃 시프트 방지 */
-.post-content img {
-    height: auto;
-    max-width: 100%;
-}
-
-/* 커버 이미지 aspect-ratio 설정 */
-.entry-cover img {
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    width: 100%;
-    height: auto;
-}
-
 /* 포스트 엔트리 높이 안정화 */
 .post-entry {
     contain: layout style;
+}
+
+/* 커버 이미지 컨테이너 */
+.entry-cover {
+    overflow: hidden;
+    border-radius: var(--radius);
 }

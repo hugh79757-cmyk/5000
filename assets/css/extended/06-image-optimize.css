@@ -1,51 +1,76 @@
-/* ===== v1.61 이미지 LCP 최적화 ===== */
+/* ===== v1.65 이미지 정사각형 (1:1) ===== */
 
-/* 모든 이미지 기본 최적화 */
+/* 모든 커버/썸네일 이미지 - 정사각형 */
+.entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    background-color: var(--code-bg);
+}
+
+/* 홈 첫 번째 포스트 */
+.first-entry .entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+/* 포스트 리스트 썸네일 */
+.post-entry .entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+/* 싱글 페이지 커버 이미지 */
+.post-single .entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    max-height: 500px;
+}
+
+/* 포스트 본문 내 이미지 - 정사각형 */
+.post-content img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    margin: 1rem auto;
+    display: block;
+    border-radius: var(--radius);
+    background-color: var(--code-bg);
+}
+
+/* content-visibility 최적화 */
 img {
     content-visibility: auto;
 }
 
-/* LCP 후보 이미지 - 즉시 렌더링 */
-.entry-cover img,
-.first-entry .entry-cover img {
+.entry-cover img {
     content-visibility: visible;
-    contain-intrinsic-size: 720px 405px;
+    contain-intrinsic-size: 300px 300px;
 }
 
-/* 포스트 본문 이미지 - 지연 로딩 최적화 */
 .post-content img {
     content-visibility: auto;
-    contain-intrinsic-size: 100% 300px;
+    contain-intrinsic-size: 300px 300px;
 }
 
-/* 썸네일 aspect-ratio 고정 (16:9) */
-.entry-cover img {
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    width: 100%;
-    height: auto;
-    background-color: var(--code-bg);
-}
-
-/* 홈 첫 번째 포스트 LCP 이미지 */
-.first-entry .entry-cover img {
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-}
-
-/* R2 외부 이미지 최적화 */
+/* 외부 이미지 (R2) */
 img[src*="r2.dev"] {
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
 }
 
-/* 모바일 이미지 사이즈 조정 */
+/* 모바일 대응 */
 @media (max-width: 768px) {
-    .entry-cover img {
-        contain-intrinsic-size: 100vw 56.25vw;
+    .entry-cover img,
+    .post-content img {
+        contain-intrinsic-size: 250px 250px;
     }
     
     .post-content img {
-        contain-intrinsic-size: 100% 200px;
+        max-width: 100%;
     }
 }
