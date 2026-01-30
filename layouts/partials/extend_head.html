@@ -3,8 +3,30 @@
 <meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520">
 <meta name="yandex-verification" content="a093ecbeea7a8440" />
 
-{{- /* AdSense 자동광고 */ -}}
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
+{{- /* Google Fonts - Noto Sans KR */ -}}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+
+{{- /* AdSense 레이지로드 (인터랙션 또는 3초 후) */ -}}
+<script>
+(function() {
+  var loaded = false;
+  function loadAdsense() {
+    if (loaded) return;
+    loaded = true;
+    var s = document.createElement('script');
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463';
+    s.async = true;
+    s.crossOrigin = 'anonymous';
+    document.head.appendChild(s);
+  }
+  ['scroll', 'click', 'touchstart', 'mousemove'].forEach(function(e) {
+    window.addEventListener(e, loadAdsense, {once: true, passive: true});
+  });
+  setTimeout(loadAdsense, 3000);
+})();
+</script>
 
 {{- /* Google Analytics */ -}}
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN"></script>
