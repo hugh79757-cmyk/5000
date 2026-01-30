@@ -1,32 +1,35 @@
-/* ===== v1.6 CLS 최적화 ===== */
+/* ===== v1.7 레이아웃 안정화 ===== */
 
 /* 플로팅 요소 비활성화 */
 .footer, footer {
     position: relative !important;
 }
 
-/* 광고 슬롯 기본 스타일 */
-.ad-slot {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
+/* 메인 컨텐츠 레이아웃 고정 */
+.main {
+    contain: layout style;
 }
 
-ins.adsbygoogle {
-    max-width: 100% !important;
-    overflow: hidden !important;
+/* 포스트 콘텐츠 레이아웃 안정화 */
+.post-content {
+    contain: layout;
 }
 
-/* 광고 미로드 시 공간 차지 안함 */
-ins.adsbygoogle:empty,
-ins.adsbygoogle[data-ad-status="unfilled"] {
-    display: none !important;
-    min-height: 0 !important;
-    height: 0 !important;
+/* 이미지 레이아웃 시프트 방지 */
+.post-content img {
+    height: auto;
+    max-width: 100%;
 }
 
-/* 광고 로드 후에만 높이 확보 */
-ins.adsbygoogle[data-ad-status="filled"] {
-    min-height: auto !important;
+/* 커버 이미지 aspect-ratio 설정 */
+.entry-cover img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+}
+
+/* 포스트 엔트리 높이 안정화 */
+.post-entry {
+    contain: layout style;
 }
