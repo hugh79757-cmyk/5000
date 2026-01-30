@@ -1,5 +1,6 @@
-/* ===== 광고 CLS 방지 (최소한) ===== */
+/* ===== v1.7 광고 CLS 완전 방지 ===== */
 
+/* 광고 슬롯 기본 - 고정 높이로 레이아웃 시프트 방지 */
 .ad-slot {
     display: block;
     text-align: center;
@@ -7,13 +8,62 @@
     width: 100%;
     max-width: 100%;
     overflow: hidden;
+    box-sizing: border-box;
 }
 
+/* 첫 문단 하단 광고 - 모바일/데스크톱 분리 */
 .ad-after-first-p {
     min-height: 250px;
+    background: transparent;
 }
 
+@media (max-width: 768px) {
+    .ad-after-first-p {
+        min-height: 200px;
+    }
+}
+
+/* AdSense ins 태그 기본 스타일 */
 ins.adsbygoogle {
     display: block !important;
     text-align: center !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* 광고 로드 전 - 최소 높이 유지 */
+ins.adsbygoogle:not([data-ad-status]) {
+    min-height: 250px;
+}
+
+@media (max-width: 768px) {
+    ins.adsbygoogle:not([data-ad-status]) {
+        min-height: 200px;
+    }
+}
+
+/* 광고 미로드/unfilled - 공간 축소 (부드럽게) */
+ins.adsbygoogle:empty,
+ins.adsbygoogle[data-ad-status="unfilled"] {
+    min-height: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transition: height 0.3s ease, min-height 0.3s ease;
+}
+
+/* 광고 로드 완료 - 자연스러운 높이 */
+ins.adsbygoogle[data-ad-status="filled"] {
+    min-height: auto !important;
+}
+
+/* data-ad-format="auto" 제거 대신 fluid 방지 */
+ins.adsbygoogle[data-ad-format="fluid"] {
+    min-height: 280px !important;
+}
+
+@media (max-width: 768px) {
+    ins.adsbygoogle[data-ad-format="fluid"] {
+        min-height: 200px !important;
+    }
 }
