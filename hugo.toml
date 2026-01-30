@@ -8,6 +8,18 @@ googleAnalytics = 'GT-5TC34W4'
 enableRobotsTXT = true
 canonifyURLs = true
 
+[build]
+[build.buildStats]
+enable = true
+
+[[build.cachebusters]]
+source = "assets/.*\\.(js|ts|jsx|tsx)"
+target = "(js|scripts|javascript)"
+
+[[build.cachebusters]]
+source = "assets/.*\\.(css|sass|scss)"
+target = "(css|styles|scss|sass)"
+
 [params]
 defaultTheme = "auto"
 ShowReadingTime = true
@@ -28,6 +40,7 @@ responsiveImages = true
 
 [params.assets]
 favicon = "/favicon.ico"
+disableFingerprinting = false
 
 [params.homeInfoParams]
 Title = "rotcha"
