@@ -1,0 +1,51 @@
+/* ===== v1.61 이미지 LCP 최적화 ===== */
+
+/* 모든 이미지 기본 최적화 */
+img {
+    content-visibility: auto;
+}
+
+/* LCP 후보 이미지 - 즉시 렌더링 */
+.entry-cover img,
+.first-entry .entry-cover img {
+    content-visibility: visible;
+    contain-intrinsic-size: 720px 405px;
+}
+
+/* 포스트 본문 이미지 - 지연 로딩 최적화 */
+.post-content img {
+    content-visibility: auto;
+    contain-intrinsic-size: 100% 300px;
+}
+
+/* 썸네일 aspect-ratio 고정 (16:9) */
+.entry-cover img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    background-color: var(--code-bg);
+}
+
+/* 홈 첫 번째 포스트 LCP 이미지 */
+.first-entry .entry-cover img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+/* R2 외부 이미지 최적화 */
+img[src*="r2.dev"] {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+}
+
+/* 모바일 이미지 사이즈 조정 */
+@media (max-width: 768px) {
+    .entry-cover img {
+        contain-intrinsic-size: 100vw 56.25vw;
+    }
+    
+    .post-content img {
+        contain-intrinsic-size: 100% 200px;
+    }
+}
