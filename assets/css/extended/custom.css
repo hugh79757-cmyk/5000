@@ -1,21 +1,24 @@
-/* ===== v1.65 레이아웃 안정화 ===== */
+/* ===== v1.66 레이아웃 + 광고 중앙 정렬 ===== */
 
 /* 플로팅 요소 비활성화 */
 .footer, footer {
     position: relative !important;
 }
 
-/* 메인 컨텐츠 레이아웃 고정 */
+/* 메인 컨텐츠 */
 .main {
     contain: layout style;
 }
 
-/* 포스트 콘텐츠 레이아웃 안정화 */
+/* 포스트 콘텐츠 */
 .post-content {
     contain: layout;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
-/* 포스트 엔트리 높이 안정화 */
+/* 포스트 엔트리 */
 .post-entry {
     contain: layout style;
 }
@@ -24,4 +27,17 @@
 .entry-cover {
     overflow: hidden;
     border-radius: var(--radius);
+}
+
+/* 모바일 본문 영역 */
+@media (max-width: 768px) {
+    .post-content {
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* 본문 내 모든 요소 중앙 정렬 */
+    .post-content > * {
+        max-width: 100%;
+    }
 }
