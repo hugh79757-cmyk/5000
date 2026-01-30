@@ -1,0 +1,6 @@
+/* ===== v1.5.2 모바일 성능 개선 ===== */
+@media (max-width: 768px) {
+  body::before {
+    display: none !important;
+  }
+}
