@@ -1,9 +1,11 @@
-/* 플로팅 광고/요소 비활성화 */
+/* ===== v1.6 CLS 최적화 ===== */
+
+/* 플로팅 요소 비활성화 */
 .footer, footer {
     position: relative !important;
 }
 
-/* 광고 삐져나옴 방지 */
+/* 광고 슬롯 기본 스타일 */
 .ad-slot {
     width: 100% !important;
     max-width: 100% !important;
@@ -16,21 +18,15 @@ ins.adsbygoogle {
     overflow: hidden !important;
 }
 
-/* 본문 영역 내 광고 제한 */
-.post-content .ad-slot,
-.post-content ins.adsbygoogle {
-    max-width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-/* 광고 미로드 시 빈 슬롯 숨김 */
+/* 광고 미로드 시 공간 차지 안함 */
+ins.adsbygoogle:empty,
 ins.adsbygoogle[data-ad-status="unfilled"] {
     display: none !important;
     min-height: 0 !important;
+    height: 0 !important;
 }
 
-/* min-height 제거 (CLS 개선) */
-ins.adsbygoogle:not([data-ad-status="filled"]) {
-    min-height: 0 !important;
+/* 광고 로드 후에만 높이 확보 */
+ins.adsbygoogle[data-ad-status="filled"] {
+    min-height: auto !important;
 }
