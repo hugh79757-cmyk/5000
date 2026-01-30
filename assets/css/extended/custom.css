@@ -3,37 +3,7 @@
     position: relative !important;
 }
 
-/* 혹시 광고 관련 플로팅 있으면 숨기기 */
-ins.adsbygoogle[style*="fixed"],
-ins.adsbygoogle[style*="sticky"],
-div[style*="position: fixed"],
-div[style*="position:fixed"] {
-    display: none !important;
-}
-
-/* ===== v1.5.1 광고 슬롯 높이 확보 ===== */
-.ad-slot.ad-top {
-    min-height: 100px;
-}
-
-.ad-slot.ad-after-first-p {
-    min-height: 250px;
-}
-
-ins.adsbygoogle {
-    min-height: 100px;
-}
-
-/* ===== v1.5.2 추가 스타일 ===== */
-.hero-title {
-    font-size: 2.5rem;
-}
-
-.placeholder-thumb {
-    aspect-ratio: 1/1;
-}
-
-/* ===== v1.5.2 fix: 광고 슬롯 삐져나옴 방지 ===== */
+/* 광고 삐져나옴 방지 */
 .ad-slot {
     width: 100% !important;
     max-width: 100% !important;
@@ -54,7 +24,13 @@ ins.adsbygoogle {
     margin-right: auto !important;
 }
 
-/* 광고 미로드 시 빈 슬롯 숨김 (선택) */
+/* 광고 미로드 시 빈 슬롯 숨김 */
 ins.adsbygoogle[data-ad-status="unfilled"] {
     display: none !important;
+    min-height: 0 !important;
+}
+
+/* min-height 제거 (CLS 개선) */
+ins.adsbygoogle:not([data-ad-status="filled"]) {
+    min-height: 0 !important;
 }
