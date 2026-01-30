@@ -7,6 +7,7 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+<link rel="dns-prefetch" href="https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
 <link rel="preconnect" href="https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev" crossorigin>
@@ -36,28 +37,28 @@ body {
 @media (max-width: 768px) { .ad-slot { min-height: 200px; } }
 </style>
 
-<!-- LCP 이미지 Preload -->
-{{ if .IsHome }}
-{{ $pages := where .Site.RegularPages "Type" "posts" }}
-{{ $featured := first 1 $pages }}
-{{ range $featured }}
-  {{ with .Resources.GetMatch "thumbnail*" }}
-    <link rel="preload" href="{{ .RelPermalink }}" as="image" fetchpriority="high">
-  {{ else }}
-    {{ with .Params.cover.image }}
-      <link rel="preload" href="{{ . | absURL }}" as="image" fetchpriority="high">
-    {{ end }}
-  {{ end }}
-{{ end }}
-{{ else if .IsPage }}
-  {{ with .Resources.GetMatch "thumbnail*" }}
-    <link rel="preload" href="{{ .RelPermalink }}" as="image" fetchpriority="high">
-  {{ else }}
-    {{ with .Params.cover.image }}
-      <link rel="preload" href="{{ . | absURL }}" as="image" fetchpriority="high">
-    {{ end }}
-  {{ end }}
-{{ end }}
+<!-- LCP 이미지 Preload (홈/싱글 페이지) -->
+{{- if .IsHome }}
+  {{- $pages := where .Site.RegularPages "Type" "posts" }}
+  {{- $featured := first 1 $pages }}
+  {{- range $featured }}
+    {{- with .Resources.GetMatch "thumbnail*" }}
+<link rel="preload" href="{{ .RelPermalink }}" as="image" type="image/{{ .MediaType.SubType }}" fetchpriority="high">
+    {{- else }}
+      {{- with .Params.cover.image }}
+<link rel="preload" href="{{ . | absURL }}" as="image" fetchpriority="high">
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- else if .IsPage }}
+  {{- with .Resources.GetMatch "thumbnail*" }}
+<link rel="preload" href="{{ .RelPermalink }}" as="image" type="image/{{ .MediaType.SubType }}" fetchpriority="high">
+  {{- else }}
+    {{- with .Params.cover.image }}
+<link rel="preload" href="{{ . | absURL }}" as="image" fetchpriority="high">
+    {{- end }}
+  {{- end }}
+{{- end }}
 
 <!-- Google Analytics (7초 후 로딩) -->
 <script>
