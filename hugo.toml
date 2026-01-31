@@ -108,18 +108,18 @@ ID = 'GT-5TC34W4'
 [services.rss]
 limit = 50
 
-[related]
-includeNewer = true
-threshold = 50
-toLower = true
+# [related] - 비활성화
+# includeNewer = true
+# threshold = 50
+# toLower = true
 
-[[related.indices]]
-name = "tags"
-weight = 100
+# [[related.indices]]
+# name = "tags"
+# weight = 100
 
-[[related.indices]]
-name = "categories"
-weight = 80
+# [[related.indices]]
+# name = "categories"
+# weight = 80
 
 [caches]
 [caches.images]
