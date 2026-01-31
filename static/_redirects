@@ -1,0 +1,21 @@
+# 티스토리 entry URL → 홈
+/entry/* / 301
+
+# 티스토리 모바일 URL
+/m/entry/* / 301
+/m/* / 301
+
+# 티스토리 태그 → 현재 태그 페이지
+/tag/* /tags/ 301
+
+# 티스토리 카테고리
+/category/* /categories/ 301
+
+# 기타
+/file/* / 301
+
+# 이전 휴고 URL (날짜 포함 형식)
+/posts/2021-* /posts/ 301
+/posts/2022-* /posts/ 301
+/posts/2024-* /posts/ 301
+/posts/2025-* /posts/ 301
