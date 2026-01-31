@@ -41,3 +41,12 @@
         max-width: 100%;
     }
 }
+
+/* 썸네일 정사각형으로 변경 */
+.entry-cover img,
+.post-single .entry-cover img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  max-height: none;
+}
