@@ -8,10 +8,7 @@ aliases:
   - "/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신/"
   - "/entry/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신"
   - "/entry/더닝크루거효과(Dunning-KrugerEffect)와무지함에대한확신"
-  - "/entry/더닝-크루거-효과-(Dunning
-  - "/posts/2023-01-24-더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신"
-  - "/posts/2023-01-24-더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신/"
----Kruger-Effect)-와-무지함에-대한-확신"
+  - "/entry/더닝-크루거-효과-(Dunning---Kruger-Effect)-와-무지함에-대한-확신"
   - /entry/더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신/
   - /151/
 slug: "더닝-크루거-효과-dunning-kruger-effect-와-무지함에-대한-확신"

@@ -8,10 +8,7 @@ aliases:
   - "/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내/"
   - "/entry/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내"
   - "/entry/QCYHT10AilyBudsPro+-가성비고성능무선이어버드구매안내"
-  - "/entry/QCY-HT10-AilyBuds-Pro+
-  - "/posts/2024-07-15-qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내"
-  - "/posts/2024-07-15-qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내/"
----가성비-고성능-무선-이어버드-구매안내"
+  - "/entry/QCY-HT10-AilyBuds-Pro+---가성비-고성능-무선-이어버드-구매안내"
   - /entry/qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내/
   - /440/
 slug: "qcy-ht10-ailybuds-pro-가성비-고성능-무선-이어버드-구매안내"
