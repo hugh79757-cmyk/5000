@@ -12,6 +12,8 @@ aliases:
   - /entry/쿠에타핀정quetiapine-효능-및-사용법/
   - /entry/쿠에타핀정(Quetiapine)-효능-및-사용법/
   - /709/
+  - "/posts/2025-03-18-쿠에타핀정quetiapine-효능-및-사용법"
+  - "/posts/2025-03-18-쿠에타핀정quetiapine-효능-및-사용법/"
 slug: "쿠에타핀정quetiapine-효능-및-사용법"
 ---
 
