@@ -11,6 +11,8 @@ aliases:
   - "/entry/10월-20일-넥슨-아이콘-매치-FC-SPEAR-VS-SHIELD-UTD-최종-명단-및-상세-정보-및-예매-안내"
   - /entry/10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상/
   - /571/
+  - "/posts/2024-09-28-10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상"
+  - "/posts/2024-09-28-10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상/"
 slug: "10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-및-상"
 ---
 
