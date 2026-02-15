@@ -72,7 +72,8 @@ cover:
 
 ---
 
-**전체 자격증 시험일정 한눈에 보기**
-
-[📅 613개 국가자격증 일정 확인 → cert.aikorea24.kr](https://cert.aikorea24.kr)
+<div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
+  <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
+  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+</div>
 
