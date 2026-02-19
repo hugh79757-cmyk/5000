@@ -9,6 +9,8 @@ cover:
   image: "thumbnail.webp"
   alt: "2026년 컨테이너크레인운전기능사 따는 법 – 일정부터 합격 전략까지 한 번에"
   hidden: false
+aliases:
+  - "/posts/2026년-컨테이너크레인운전기능사-따는-법-–-일정부터-합격-전략까지-한-번에/"
 ---
 
 [큐넷 바로가기](https://www.q-net.or.kr)

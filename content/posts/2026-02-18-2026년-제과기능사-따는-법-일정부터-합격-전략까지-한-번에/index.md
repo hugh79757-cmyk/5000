@@ -9,6 +9,8 @@ cover:
   image: "thumbnail.webp"
   alt: "2026년 제과기능사 따는 법 – 일정부터 합격 전략까지 한 번에"
   hidden: false
+aliases:
+  - "/posts/2026년-제과기능사-따는-법-–-일정부터-합격-전략까지-한-번에/"
 ---
 
 

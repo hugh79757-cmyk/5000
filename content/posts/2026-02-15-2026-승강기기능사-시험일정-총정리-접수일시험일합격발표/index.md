@@ -9,6 +9,8 @@ cover:
   image: "thumbnail.webp"
   alt: "2026 승강기기능사 시험일정 총정리 (접수일·시험일·합격발표)"
   hidden: false
+aliases:
+  - "/posts/2026-승강기기능사-시험일정-총정리-(접수일·시험일·합격발표)/"
 ---
 
 [큐넷 바로가기](https://www.q-net.or.kr)

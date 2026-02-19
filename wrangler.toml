@@ -1,5 +1,0 @@
-name = "rotcha-hugo"
-compatibility_date = "2024-01-01"
-
-[build]
-command = "npm install && HUGO_ENVIRONMENT=production hugo --gc --minify"
