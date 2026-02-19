@@ -68,6 +68,12 @@ name = "검색"
 url = "/search/"
 weight = 2
 
+[[menu.main]]
+identifier = "cert-exam"
+name = "자격증시험"
+url = "/categories/자격증시험/"
+weight = 3
+
 [outputs]
 home = ["HTML", "RSS", "JSON"]
 section = ["HTML", "RSS"]
