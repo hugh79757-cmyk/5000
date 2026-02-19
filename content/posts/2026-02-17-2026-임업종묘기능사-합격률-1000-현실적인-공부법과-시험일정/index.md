@@ -9,6 +9,8 @@ cover:
   image: "thumbnail.webp"
   alt: "2026 임업종묘기능사 합격률 100.0%… 현실적인 공부법과 시험일정"
   hidden: false
+aliases:
+  - "/posts/2026-임업종묘기능사-합격률-100.0%…-현실적인-공부법과-시험일정/"
 ---
 
 
