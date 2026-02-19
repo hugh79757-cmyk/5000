@@ -51,7 +51,7 @@ hiddenInList = false
 hiddenInSingle = false
 
 [params.assets]
-favicon = "/favicon.ico"
+favicon = "/favicon.png"
 disableFingerprinting = false
 
 [params.homeInfoParams]
