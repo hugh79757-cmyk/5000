@@ -102,6 +102,6 @@ cover:
 
 > 기출문제를 풀어보는 것이 합격의 지름길입니다.
 
-👉 **[CBT 모의고사 바로가기](https://cert.aikorea24.kr/exam/cbt)**
+👉 **[기출문제 다운로드](https://cert.aikorea24.kr/exam)**
 
 {% raw %}기출문제를 반복해서 풀면 출제 경향을 파악하고, 실전 감각을 키울 수 있습니다.{% /raw %}

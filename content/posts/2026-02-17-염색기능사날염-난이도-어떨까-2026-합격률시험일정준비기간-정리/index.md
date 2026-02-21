@@ -85,5 +85,5 @@ cover:
 
 > 염색기능사(날염) 기출문제를 풀어보는 것이 합격의 지름길입니다.
 
-👉 **[염색기능사(날염) CBT 모의고사 바로가기](https://cert.aikorea24.kr/exam/cbt)**
+👉 **[염색기능사(날염) 기출문제 다운로드](https://cert.aikorea24.kr/exam)**
 

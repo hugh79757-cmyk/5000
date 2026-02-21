@@ -21,7 +21,7 @@ aliases:
 
 제과기능사 기출문제를 풀어보는 것이 합격의 지름길입니다.
 
-👉 [제과기능사 CBT 모의고사 바로가기](https://cert.aikorea24.kr/exam/cbt)
+👉 [제과기능사 기출문제 다운로드](https://cert.aikorea24.kr/exam)
 
 
 [큐넷 바로가기](https://www.q-net.or.kr)
@@ -97,5 +97,5 @@ aliases:
 
 제과기능사 기출문제를 풀어보는 것이 합격의 지름길입니다.
 
-👉 [제과기능사 CBT 모의고사 바로가기](https://cert.aikorea24.kr/exam/cbt)
+👉 [제과기능사 기출문제 다운로드](https://cert.aikorea24.kr/exam)
 
