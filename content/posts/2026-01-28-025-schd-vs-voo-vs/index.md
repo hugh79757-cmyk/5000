@@ -97,4 +97,3 @@ SCHD, VOO, VYM은 각각 **배당 성장, 시장 추종, 고배당** 이라는 �
 
 각 ETF의 실시간 정보는 [인베스팅닷컴](https://kr.investing.com)에서 확인하실 수 있습니다.
 
-#SCHD #VOO #VYM #미국ETF #ETF비교 #배당ETF #S&P500 #장기투자

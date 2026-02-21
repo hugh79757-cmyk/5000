@@ -57,4 +57,3 @@ cover:
 
 더 자세한 상품 정보는 [삼성생명 연금보험 페이지](https://www.samsunglife.com/individual/products/insurance/main/MDP-PRINP030000M)에서 확인하실 수 있습니다.
 
-#삼성생명 #연금보험 #연금수령액 #연금계산 #노후준비 #연금저축 #개인연금 #연금LAB
