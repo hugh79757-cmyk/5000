@@ -41,4 +41,3 @@ Trading Economics는 2026년 연말 금 가격을 약 5,100달러 수준으로 �
 
 오늘의 금 시세는 [네이버 금융](https://finance.naver.com/marketindex/goldDetail.nhn)이나 [KB국민은행 골드가격](https://obank.kbstar.com/quics?page=C023489)에서 실시간으로 확인할 수 있습니다.
 
-#금시세 #금현물 #금값 #금투자 #골드 #금ETF #안전자산
