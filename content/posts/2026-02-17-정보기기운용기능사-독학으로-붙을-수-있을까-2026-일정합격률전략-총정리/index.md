@@ -22,7 +22,7 @@ cover:
 👉 **[정보기기운용기능사 기출문제 다운로드](https://cert.aikorea24.kr/exam)**
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/6892)
 
 정보기기운용기능사 자격증은 정보통신 분야에서 필수적인 자격으로, 독학으로도 충분히 합격할 수 있는 난이도를 가지고 있습니다. 이번 포스트에서는 2026년도 시험 일정과 준비 전략을 총정리해드리겠습니다.
 
@@ -85,7 +85,7 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/6892" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

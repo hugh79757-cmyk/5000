@@ -13,7 +13,7 @@ cover:
   hidden: false
 ---
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7302)
 
 염색기능사(날염) 자격증은 섬유 및 의복 분야에서 중요한 역할을 하는 기술 자격증입니다. 이 글에서는 2026년 염색기능사(날염) 시험의 난이도, 합격률, 시험 일정 및 준비 방법에 대해 자세히 알아보겠습니다.
 
@@ -70,7 +70,7 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7302" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

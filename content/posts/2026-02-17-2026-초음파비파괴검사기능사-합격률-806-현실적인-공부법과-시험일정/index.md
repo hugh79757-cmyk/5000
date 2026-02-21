@@ -13,7 +13,7 @@ cover:
   hidden: false
 ---
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7472)
 
 2026년 초음파비파괴검사기능사 시험이 다가오고 있습니다. 이 자격증은 국가기술자격으로, 안전 관리 분야에서 중요한 역할을 합니다. 현재 이 자격증의 실기 합격률은 80.6%로, 최근 3년 평균 71.0%에 비해 상당히 높은 수치를 기록하고 있습니다. 이러한 통계는 시험에 대한 난이도가 수월하다는 것을 반증합니다.
 
@@ -62,7 +62,7 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7472" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

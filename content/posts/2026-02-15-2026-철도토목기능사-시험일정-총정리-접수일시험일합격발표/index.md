@@ -23,7 +23,7 @@ cover:
 
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7010)
 
 철도토목기능사는 국가기술자격 중 하나로, 건설 분야의 토목 직무에 해당합니다. 이 자격증은 철도 관련 토목 구조물의 시공 및 관리에 필요한 전문 지식을 인증합니다. 2026년도 제6회 철도토목기능사 시험 일정에 대해 상세히 알아보겠습니다.
 
@@ -54,7 +54,7 @@ cover:
 
 철도토목기능사는 건설 분야에서 중요한 역할을 하는 자격증으로, 전문성을 갖춘 인력을 양성합니다. 여러분의 합격을 기원하며, 위의 일정과 팁을 참고하여 철저히 준비하시기 바랍니다. 
 
-더 자세한 정보는 [시험 일정 확인하기](https://cert.aikorea24.kr)에서 확인하실 수 있습니다.
+더 자세한 정보는 [시험 일정 확인하기](https://cert.aikorea24.kr/cert/7010)에서 확인하실 수 있습니다.
 ---
 
 **다른 자격증 시험일정 보기**
@@ -67,6 +67,6 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7010" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 

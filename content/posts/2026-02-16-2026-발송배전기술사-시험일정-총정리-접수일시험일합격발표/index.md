@@ -13,7 +13,7 @@ cover:
   hidden: false
 ---
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/0230)
 
 발송배전기술사는 전기 및 전자 분야의 기술사 자격증으로, 전력 시스템의 설계, 운영 및 관리 등 다양한 기술적 문제에 대한 전문성을 요구합니다. 2026년도 제138회 발송배전기술사 시험에 대한 자세한 일정과 준비 팁을 아래에서 확인해보세요.
 
@@ -63,7 +63,7 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/0230" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

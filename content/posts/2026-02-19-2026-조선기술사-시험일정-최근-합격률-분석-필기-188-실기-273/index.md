@@ -22,7 +22,7 @@ cover:
 👉 [조선기술사 기출문제 다운로드](https://cert.aikorea24.kr/exam/tech)
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/0320)
 
 조선기술사는 국가기술자격 중 하나로, 조선업에 종사하는 전문가로서의 자격을 인증받기 위해 필요한 시험입니다. 본 글에서는 2026년도 조선기술사 시험의 일정, 최근 합격률 분석, 출제경향 및 준비 방법 등을 자세히 살펴보겠습니다.
 
@@ -83,7 +83,7 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/0320" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

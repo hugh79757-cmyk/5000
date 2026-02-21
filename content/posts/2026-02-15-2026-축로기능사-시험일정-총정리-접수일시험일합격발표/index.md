@@ -54,7 +54,7 @@ aliases:
 
 ## 4. 접수 방법
 
-시험 접수는 [시험 일정 확인하기](https://cert.aikorea24.kr) 링크를 통해 가능합니다. 해당 사이트에서 정확한 안내를 확인하시고, 필기 및 실기 시험 접수를 잊지 마세요!
+시험 접수는 [시험 일정 확인하기](https://cert.aikorea24.kr/cert/6381) 링크를 통해 가능합니다. 해당 사이트에서 정확한 안내를 확인하시고, 필기 및 실기 시험 접수를 잊지 마세요!
 
 ## 마무리
 
@@ -75,6 +75,6 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/6381" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 

@@ -13,7 +13,7 @@ aliases:
   - "/posts/2026-제품응용모델링기능사-시험일정-총정리-(접수일·시험일·합격발표)/"
 ---
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/6793)
 
 긴급하게 알려드립니다! 2026년도 제품응용모델링기능사 시험이 다가오고 있습니다. 특히 실기 시험 접수 마감이 D-4일 남았습니다. 아래의 일정을 확인하시고, 필요한 준비를 빠르게 진행하시기 바랍니다.
 
@@ -35,14 +35,14 @@ aliases:
 
 3. **기출문제 분석**: 이전 기출문제를 통해 자주 출제되는 유형을 파악하고, 그에 따른 대비를 하는 것이 중요합니다. 기출문제를 분석하고, 그에 맞춘 연습을 통해 자신감을 높이세요.
 
-실기시험은 여러분의 실력을 직접 보여줄 수 있는 기회입니다. 따라서, 충분한 준비와 연습을 통해 좋은 결과를 얻을 수 있도록 하세요. 접수 마감일이 가까워지고 있으니, 필요한 서류와 준비물을 미리 점검하시고, [시험 일정 확인하기](https://cert.aikorea24.kr)에서 빠르게 접수하시기 바랍니다. 
+실기시험은 여러분의 실력을 직접 보여줄 수 있는 기회입니다. 따라서, 충분한 준비와 연습을 통해 좋은 결과를 얻을 수 있도록 하세요. 접수 마감일이 가까워지고 있으니, 필요한 서류와 준비물을 미리 점검하시고, [시험 일정 확인하기](https://cert.aikorea24.kr/cert/6793)에서 빠르게 접수하시기 바랍니다. 
 
 여러분의 성공적인 시험을 기원합니다!
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/6793" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 ---

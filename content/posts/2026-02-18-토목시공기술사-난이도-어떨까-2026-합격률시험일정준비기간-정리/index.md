@@ -24,7 +24,7 @@ aliases:
 👉 [토목시공기술사 기출문제 다운로드](https://cert.aikorea24.kr/exam/tech)
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/0480)
 
 토목시공기술사는 건설 분야에서 중요한 국가기술자격 중 하나로, 토목공학 관련 분야에서 실력을 인증받고자 하는 이들에게 필요한 자격증입니다. 이번 글에서는 2026년도 토목시공기술사의 난이도, 합격률, 시험 일정, 준비 기간 등에 대해 자세히 알아보겠습니다.
 
@@ -81,7 +81,7 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/0480" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**
