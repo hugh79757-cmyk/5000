@@ -23,7 +23,7 @@ aliases:
 
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/6288)
 
 항공기정비기능사 자격증은 국내 항공기 정비 분야에서 필수적인 자격으로, 기계 계열의 기술자격 중 하나입니다. 이 자격증을 취득하면 항공기 정비 및 수리에 관련된 전문적인 기술을 인정받을 수 있습니다. 2026년도 제6회 항공기정비기능사 시험의 일정과 준비 팁을 아래에 정리해 보았습니다.
 
@@ -67,6 +67,6 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/6288" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 

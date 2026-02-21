@@ -23,7 +23,7 @@ aliases:
 
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7835)
 
 2026년 컨테이너크레인운전기능사 시험은 기능사 자격증 중 건설 분야에 속합니다. 이 자격증은 컨테이너 크레인을 안전하게 운전하는 능력을 인증하는 국가기술자격입니다. 이 글에서는 시험 일정과 필기 및 실기 시험 준비 방법을 자세히 살펴보겠습니다.
 
@@ -99,7 +99,7 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7835" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

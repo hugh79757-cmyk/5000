@@ -24,7 +24,7 @@ aliases:
 👉 [제과기능사 기출문제 다운로드](https://cert.aikorea24.kr/exam)
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7892)
 
 2026년 제과기능사 자격증을 취득하고자 하시는 분들을 위해 시험 일정과 합격 전략을 정리했습니다. 제과기능사는 기능사 계열로, 식품 가공 분야에 속하는 국가기술자격입니다. 예상 난이도는 보통인 편이며, 추천 준비 기간은 1~2개월입니다. 아래에서 자세한 정보를 확인해 보세요.
 
@@ -82,7 +82,7 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7892" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

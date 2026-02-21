@@ -23,7 +23,7 @@ cover:
 
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/6801)
 
 2026년 임베디드기능사를 준비하는 여러분, 실기 시험 일정이 다가오고 있습니다! 임베디드기능사는 전기·전자 분야의 국가기술자격으로, 최근 기술 발전에 따라 많은 관심을 받고 있습니다. 이번 블로그에서는 시험 일정부터 합격 전략까지 본격적으로 안내해 드리겠습니다.
 
@@ -96,7 +96,7 @@ cover:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/6801" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

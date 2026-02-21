@@ -13,7 +13,7 @@ aliases:
   - "/posts/2026-환경기능사-시험일정-총정리-(접수일·시험일·합격발표)/"
 ---
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7918)
 
 환경기능사는 환경 및 에너지 분야에서 중요한 역할을 하는 국가기술자격증입니다. 이 자격증을 취득하면 환경 관련 업무에 종사할 수 있는 기회를 얻게 됩니다. 2026년도 환경기능사 시험에 대한 구체적인 일정과 준비 방법을 아래에서 확인해보세요.
 
@@ -38,12 +38,12 @@ aliases:
 
 환경기능사는 환경 분야에서 경력을 쌓고자 하는 이들에게 필수적인 자격증입니다. 위의 일정과 팁을 참고하여 체계적으로 준비하면 좋은 결과를 얻을 수 있을 것입니다. 
 
-자격증 시험에 대한 더 많은 정보는 [cert.aikorea24.kr](https://cert.aikorea24.kr)에서 확인할 수 있습니다. 
+자격증 시험에 대한 더 많은 정보는 [cert.aikorea24.kr](https://cert.aikorea24.kr/cert/7918)에서 확인할 수 있습니다. 
 
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7918" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 

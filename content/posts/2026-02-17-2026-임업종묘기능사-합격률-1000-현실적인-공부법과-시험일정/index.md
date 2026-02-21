@@ -24,7 +24,7 @@ aliases:
 👉 [임업종묘기능사 기출문제 다운로드](https://cert.aikorea24.kr/exam)
 
 
-[시험 일정 확인하기](https://cert.aikorea24.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr/cert/7630)
 
 2026 임업종묘기능사 시험은 농림어업 분야에서 중요한 역할을 하는 자격증입니다. 특히, 실기 시험에서 100.0%의 합격률을 기록하며, 필기 시험에서도 50.0%의 합격률을 보였습니다. 이번 포스트에서는 임업종묘기능사 시험의 상세정보와 효과적인 공부법을 안내하겠습니다.
 
@@ -84,7 +84,7 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7630" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
 **다른 자격증 시험일정 보기**

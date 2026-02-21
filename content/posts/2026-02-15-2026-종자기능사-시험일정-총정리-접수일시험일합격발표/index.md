@@ -23,7 +23,7 @@ aliases:
 
 
 
-## [시험 일정 확인하기](https://cert.aikorea24.kr)
+## [시험 일정 확인하기](https://cert.aikorea24.kr/cert/7620)
 
 안녕하세요! 자격증 시험 정보 전문 블로거입니다. 오늘은 2026년도 종자기능사 시험일정에 대해 총정리해 보겠습니다. 특히, 필기 및 실기 준비를 위해 중요한 날짜와 함께 시험 준비 팁도 제공하니, 놓치지 마세요!
 
@@ -64,6 +64,6 @@ aliases:
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
   <p style="color:#82b1ff; font-size:14px; margin:0 0 8px 0;">D-day 자동 알림! 접수 마감 놓치지 마세요</p>
-  <a href="https://cert.aikorea24.kr" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
+  <a href="https://cert.aikorea24.kr/cert/7620" target="_blank" style="display:inline-block; background:#82b1ff; color:#1a1a2e; padding:14px 36px; border-radius:50px; text-decoration:none; font-size:16px; font-weight:700;">자격증 - 에이아이코리아24</a>
 </div>
 
