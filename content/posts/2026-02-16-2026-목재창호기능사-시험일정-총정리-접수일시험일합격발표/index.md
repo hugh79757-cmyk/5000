@@ -13,7 +13,7 @@ cover:
   hidden: false
 ---
 
-[큐넷 바로가기](https://www.q-net.or.kr)
+[시험 일정 확인하기](https://cert.aikorea24.kr)
 
 ## 목재창호기능사 시험 일정
 
