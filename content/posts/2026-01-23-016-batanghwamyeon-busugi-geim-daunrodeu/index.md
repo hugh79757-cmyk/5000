@@ -91,4 +91,3 @@ Casual Desktop Game을 사용한다면 **Steam 워크샵** 을 적극 활용하�
 
 클래식한 감성을 원한다면 오리지널이나 토이 버전을, 더 다양한 기능과 안정성을 원한다면 Steam의 Casual Desktop Game을 추천드립니다. 지금 바로 다운로드하여 추억 속 그 시원한 쾌감을 다시 느껴보시기 바랍니다.
 
-#바탕화면부수기 #DesktopDestroyer #스트레스해소게임 #추억의게임 #무료게임다운로드 #CasualDesktopGame #PC게임

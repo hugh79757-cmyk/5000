@@ -131,4 +131,3 @@ STEM OPT를 진행 중이고 H-1B에 선발되지 않은 경우, STEM OPT 기간
 
 H-1B 관련 최신 정보는 [USCIS 공식 웹사이트](https://www.uscis.gov/working-in-the-united-states/temporary-workers/h-1b-specialty-occupations)에서 확인하시기 바랍니다. 개별 사안에 대해서는 반드시 이민 전문 변호사와 상담하시길 권장합니다.
 
-#H1B비자 #미국취업비자 #H1B추첨폐지 #고임금우선선발 #미국이민 #USCIS #FY2027 #미국유학생 #OPT #STEMOPT
