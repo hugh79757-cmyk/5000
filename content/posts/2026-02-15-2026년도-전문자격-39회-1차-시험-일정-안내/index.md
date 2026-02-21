@@ -64,8 +64,6 @@ cover:
 
 ---
 
-#해시태그
-#전문자격 #자격증 #시험일정 #cert.aikorea24.kr #시험준비 #자격증정보
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

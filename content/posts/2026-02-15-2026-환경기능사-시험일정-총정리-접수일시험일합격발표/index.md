@@ -40,7 +40,6 @@ aliases:
 
 자격증 시험에 대한 더 많은 정보는 [cert.aikorea24.kr](https://cert.aikorea24.kr)에서 확인할 수 있습니다. 
 
-#환경기능사 #자격증 #시험일정 #국가기술자격
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
