@@ -92,6 +92,9 @@ posts = "/posts/:slug/"
 [markup.goldmark.renderer]
 unsafe = true
 
+[markup.goldmark.extensions]
+strikethrough = false
+
 [markup.goldmark.parser]
 autoHeadingID = true
 autoHeadingIDType = "github"
