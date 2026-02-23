@@ -89,6 +89,7 @@ cover:
 - **모의 시험**: 실전과 유사한 환경에서 모의 시험 실시
 
 측량기능사는 상대적으로 수월한 난이도를 지니고 있으며, 짧은 준비 기간으로도 충분히 합격할 수 있는 자격증입니다. 위의 정보를 참고하여 체계적으로 준비하시기 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

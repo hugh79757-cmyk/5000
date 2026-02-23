@@ -81,6 +81,7 @@ cover:
    - 모든 과목을 통합한 실기 연습을 통해 시험 준비를 마무리합니다.
 
 정보기기운용기능사 자격증은 정보통신 분야에서의 기본적인 역량을 증명하는 중요한 자격입니다. 독학으로도 충분히 취득할 수 있으며, 위의 전략과 로드맵을 참고해 준비해보세요. 성공적인 합격을 기원합니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

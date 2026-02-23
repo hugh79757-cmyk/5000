@@ -79,6 +79,7 @@ cover:
 | 6개월            | 면접 준비                    | 모의 면접 및 피드백 받기      |
 
 조선기술사 시험은 높은 난이도로 알려져 있으며, 체계적인 준비와 충분한 실무 경험이 합격의 열쇠입니다. 철저한 준비로 좋은 결과를 얻기 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

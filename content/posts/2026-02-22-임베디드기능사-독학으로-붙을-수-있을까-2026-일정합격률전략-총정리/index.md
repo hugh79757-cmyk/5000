@@ -81,6 +81,7 @@ cover:
 | 4주차 | 모의시험 및 복습 | 실기 문제 풀이 및 실습 |
 
 임베디드기능사 자격증은 전기·전자 분야에서의 경력을 쌓는 데 중요한 발판이 될 수 있습니다. 체계적인 준비와 전략을 통해 합격을 목표로 하세요.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

@@ -71,6 +71,7 @@ cover:
 - 기능사/기능장: [실기 공개문제 다운로드](https://cert.aikorea24.kr/exam/open)
 
 이 글을 통해 아스팔트피니셔운전기능사 시험에 대한 정보를 충분히 얻으셨기를 바랍니다. 성공적인 시험 준비를 기원합니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

@@ -78,6 +78,7 @@ aliases:
 | 4주차 | 약점 보완 및 최종 점검          | 실기 연습 강화                  |
 
 이번 2026년 제과기능사 시험에 도전하시는 모든 분들께 행운을 빕니다. 철저한 준비와 실력 향상을 통해 합격의 기쁨을 누리시길 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

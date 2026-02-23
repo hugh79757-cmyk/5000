@@ -92,6 +92,7 @@ cover:
 임베디드기능사를 준비하는 모든 수험생 여러분, 체계적인 준비와 실습을 통해 좋은 결과를 기대합니다. 실기 시험이 다가오고 있으니, 최선을 다해 준비하시길 바랍니다. 
 
 행운을 빕니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

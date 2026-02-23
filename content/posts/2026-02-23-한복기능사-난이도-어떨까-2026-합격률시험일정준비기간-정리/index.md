@@ -84,6 +84,7 @@ cover:
 - **7~8주차**: 최종 점검 및 약점 보완
 
 한복기능사 자격증은 한국의 전통문화를 이해하고 계승하는 데 중요한 역할을 합니다. 체계적인 준비를 통해 한복기능사 시험에 도전해 보세요.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:28px; text-align:center; margin:20px 0;">

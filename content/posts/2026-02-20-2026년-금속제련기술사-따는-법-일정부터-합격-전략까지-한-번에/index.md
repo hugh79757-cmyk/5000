@@ -92,6 +92,7 @@ cover:
 이와 같은 체계적인 준비가 금속제련기술사 자격증 취득에 큰 도움이 될 것입니다. 준비 기간 동안 꾸준히 학습하고, 필요한 경우 전문가의 도움을 받는 것도 좋은 전략입니다. 
 
 성공적인 자격증 취득을 기원합니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

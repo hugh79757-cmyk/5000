@@ -77,6 +77,7 @@ aliases:
 3. **스터디 그룹 구성**: 함께 공부할 수 있는 스터디 그룹을 구성하여 서로의 지식을 공유하고 동기 부여를 받을 수 있습니다.
 
 토목시공기술사 자격증은 건설 분야에서 경력을 쌓고자 하는 이들에게 중요한 자격증입니다. 충분한 준비와 계획으로 도전하시기 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
