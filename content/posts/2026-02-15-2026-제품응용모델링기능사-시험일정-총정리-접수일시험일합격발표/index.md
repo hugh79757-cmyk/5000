@@ -38,6 +38,7 @@ aliases:
 실기시험은 여러분의 실력을 직접 보여줄 수 있는 기회입니다. 따라서, 충분한 준비와 연습을 통해 좋은 결과를 얻을 수 있도록 하세요. 접수 마감일이 가까워지고 있으니, 필요한 서류와 준비물을 미리 점검하시고, [시험 일정 확인하기](https://cert.aikorea24.kr/cert/6793)에서 빠르게 접수하시기 바랍니다. 
 
 여러분의 성공적인 시험을 기원합니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

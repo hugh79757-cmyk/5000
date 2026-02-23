@@ -43,6 +43,7 @@ cover:
 항공기체기술사 시험은 높은 수준의 전문성을 요구합니다. 체계적인 학습과 준비를 통해 좋은 결과를 얻으시길 바랍니다. 
 
 자격증 취득을 위한 여정에 행운이 함께하길 기원합니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

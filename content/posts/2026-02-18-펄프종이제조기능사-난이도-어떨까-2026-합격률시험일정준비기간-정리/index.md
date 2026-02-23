@@ -85,6 +85,7 @@ aliases:
 | 8주  | 최종 점검 및 시험 준비         | 실기 최종 점검                  |
 
 위의 로드맵을 참고하여 체계적으로 준비하면 충분한 합격 가능성을 높일 수 있습니다. 펄프종이제조기능사 자격증 취득을 위한 준비를 철저히 하시길 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

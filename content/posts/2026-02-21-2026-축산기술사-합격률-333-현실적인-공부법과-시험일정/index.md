@@ -78,6 +78,7 @@ cover:
 | 6개월     | 축산경영     | 경영 관련 서적 읽기 및 모의 시험 |
 
 이러한 계획을 통해 준비하면 축산기술사 시험에 대한 자신감을 구축할 수 있을 것입니다. 성공적인 준비를 기원합니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

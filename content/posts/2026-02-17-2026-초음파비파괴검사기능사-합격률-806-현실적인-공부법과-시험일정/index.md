@@ -58,6 +58,7 @@ cover:
 위의 로드맵을 기반으로 학습을 진행하면, 초음파비파괴검사기능사 자격증 취득에 한 발 더 다가갈 수 있습니다. 
 
 시험 준비에 박차를 가하고, 좋은 결과를 얻으시길 바랍니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

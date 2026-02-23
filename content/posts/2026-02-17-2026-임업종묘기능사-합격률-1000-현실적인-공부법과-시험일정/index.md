@@ -80,6 +80,7 @@ aliases:
 3. **안전 사항 숙지**: 실기 시험 중 안전에 대한 규칙을 준수하는 것도 평가 항목 중 하나입니다.
 
 임업종묘기능사 자격증은 안정적인 직업을 위한 기초가 될 수 있습니다. 철저하게 준비하여 좋은 결과를 얻으시기 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

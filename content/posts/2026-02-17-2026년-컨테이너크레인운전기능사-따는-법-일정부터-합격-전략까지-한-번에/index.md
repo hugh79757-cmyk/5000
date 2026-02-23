@@ -95,6 +95,7 @@ aliases:
    - 최종 점검 (2일)
 
 컨테이너크레인운전기능사는 기술과 안전이 모두 중요한 자격증입니다. 충분한 준비와 실습을 통해 합격의 기회를 높이세요. 좋은 결과가 있기를 바랍니다!
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

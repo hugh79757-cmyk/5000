@@ -83,6 +83,7 @@ cover:
 - **7~8주차**: 필기 및 실기 종합 복습 (모의 시험 및 실습 강화)
 
 2026년 주조기능사 시험 준비가 잘 되길 바라며, 계획적으로 공부하여 원하는 결과를 얻으시길 응원합니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

@@ -88,6 +88,7 @@ cover:
 | 4주차 | 전체 복습 및 모의 시험 | 실기 최종 점검       |
 
 양식조리기능사는 음식 서비스 분야에서의 전문성을 입증할 수 있는 자격증입니다. 체계적인 준비와 실습을 통해 합격에 도전해 보시기 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

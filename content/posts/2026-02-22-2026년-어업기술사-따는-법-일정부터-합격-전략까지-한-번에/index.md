@@ -90,6 +90,7 @@ cover:
 | 6개월          | 전 과목 복습 및 모의시험      | 전체적인 정리 및 시험 준비      |
 
 어업기술사 자격증은 농림어업 분야에서 전문성을 인정받을 수 있는 좋은 기회입니다. 체계적인 준비와 꾸준한 학습으로 좋은 결과를 얻으시길 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

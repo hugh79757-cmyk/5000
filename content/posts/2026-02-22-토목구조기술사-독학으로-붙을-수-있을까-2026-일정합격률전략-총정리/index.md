@@ -75,6 +75,7 @@ cover:
 | 6개월        | 종합 복습 및 모의고사 | 전 과목 종합 복습 및 시험 준비    |
 
 토목구조기술사는 도전적인 자격증이지만, 체계적인 준비와 전략을 통해 충분히 합격할 수 있습니다. 이를 위해 위의 일정과 전략을 참고하여 준비해 보시길 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">

@@ -87,6 +87,7 @@ cover:
 3. **안전 규정 숙지**: 작업 시 안전 수칙을 준수하는 것이 매우 중요하므로, 관련 내용을 반드시 학습하세요.
 
 열처리기능사 시험의 준비를 통해 전문성을 높이고, 안정적인 진로를 마련해 보시기 바랍니다.
+
 ---
 
 <div style="background:#1a1a2e; border-radius:12px; padding:24px; text-align:center; margin:20px 0;">
