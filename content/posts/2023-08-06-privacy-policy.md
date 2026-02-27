@@ -12,8 +12,6 @@ aliases:
   - /entry/privacy-policy/
   - /entry/Privacy-Policy/
   - /172/
-  - "/posts/2023-08-06-privacy-policy"
-  - "/posts/2023-08-06-privacy-policy/"
 slug: "privacy-policy"
 ---
 

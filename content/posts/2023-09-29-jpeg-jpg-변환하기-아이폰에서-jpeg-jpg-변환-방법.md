@@ -11,8 +11,6 @@ aliases:
   - /entry/jpeg-jpg-변환하기-아이폰에서-jpeg-jpg-변환-방법/
   - /entry/jpeg-jpg-변환하기-아이폰에서-jpeg-jpg-변환-방법/
   - /192/
-  - "/posts/2023-09-29-jpeg-jpg-변환하기-아이폰에서-jpeg-jpg-변환-방법"
-  - "/posts/2023-09-29-jpeg-jpg-변환하기-아이폰에서-jpeg-jpg-변환-방법/"
 slug: "jpeg-jpg-변환하기-아이폰에서-jpeg-jpg-변환-방법"
 ---
 
