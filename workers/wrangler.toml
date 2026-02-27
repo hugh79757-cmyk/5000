@@ -4,5 +4,6 @@ compatibility_date = "2024-01-01"
 
 routes = [
   { pattern = "rotcha.kr/entry/*", zone_name = "rotcha.kr" },
-  { pattern = "rotcha.kr/m/entry/*", zone_name = "rotcha.kr" }
+  { pattern = "rotcha.kr/m/entry/*", zone_name = "rotcha.kr" },
+  { pattern = "rotcha.kr/posts/*", zone_name = "rotcha.kr" }
 ]
