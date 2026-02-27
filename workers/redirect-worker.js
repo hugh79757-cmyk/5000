@@ -1,9 +1,5 @@
-// 단순 lowercase로 해결: 33개
-// 매핑 테이블 필요: 40개
-// 총 고유 매핑: 40개
-
 // ===== Cloudflare Worker: rotcha-redirect =====
-// /entry/* 및 /m/entry/* 요청을 /posts/slug/로 301 리다이렉트
+// /entry/*, /m/entry/*, /posts/YYYY-MM-DD-* 요청을 올바른 /posts/slug/로 301 리다이렉트
 
 const SLUG_MAP = {
   "'내일-봬요'-vs-'뵈요'-헷갈리는-높임-표현-바로잡기": "헷갈리기-쉬운-맞춤법-top-10-총정리",
@@ -63,21 +59,26 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    const match = path.match(/^\/(m\/)?entry\/(.+?)(?:\/comments)?\/?$/);
-    if (!match) {
-      return fetch(request);
+    // 1. /entry/slug 또는 /m/entry/slug 패턴
+    const entryMatch = path.match(/^\/(m\/)?entry\/(.+?)(?:\/comments)?\/?$/);
+    if (entryMatch) {
+      let entrySlug = entryMatch[2];
+      try { entrySlug = decodeURIComponent(entrySlug); } catch (e) {}
+      const loweredSlug = entrySlug.replace(/[A-Z]/g, c => c.toLowerCase());
+      const finalSlug = SLUG_MAP[loweredSlug] || loweredSlug;
+      return Response.redirect(`${url.origin}/posts/${encodeURI(finalSlug)}/`, 301);
     }
 
-    let entrySlug = match[2];
+    // 2. /posts/YYYY-MM-DD-slug 패턴 (날짜 접두사 제거 + trailing hyphen 제거)
+    const postsDateMatch = path.match(/^\/posts\/(\d{4}-\d{2}-\d{2})-(.+?)\/?$/);
+    if (postsDateMatch) {
+      let slug = postsDateMatch[2];
+      try { slug = decodeURIComponent(slug); } catch (e) {}
+      slug = slug.replace(/-$/, '');
+      return Response.redirect(`${url.origin}/posts/${encodeURI(slug)}/`, 301);
+    }
 
-    try {
-      entrySlug = decodeURIComponent(entrySlug);
-    } catch (e) {}
-
-    const loweredSlug = entrySlug.replace(/[A-Z]/g, c => c.toLowerCase());
-    const finalSlug = SLUG_MAP[loweredSlug] || loweredSlug;
-    const targetUrl = `${url.origin}/posts/${encodeURI(finalSlug)}/`;
-
-    return Response.redirect(targetUrl, 301);
+    // 매칭 안 되면 origin으로 패스스루
+    return fetch(request);
   }
 };
