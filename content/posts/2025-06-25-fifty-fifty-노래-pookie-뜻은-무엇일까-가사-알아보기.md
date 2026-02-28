@@ -31,7 +31,7 @@ rotcha.kr
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/766_img_070ef3fe.webp)
+![image](https://legacy-img.rotcha.kr/766_img_070ef3fe.webp)
 
 
 
@@ -53,7 +53,7 @@ Fifty Fifty의 “Pookie”에서는 바로 이 애칭의 의미를 적극적으
 한편 일부 해외 커뮤니티에서는 ‘Pookie’라는 단어가가볍거나 장난스럽게 누군가를 부를 때쓰이기도 한다는 의견도 있습니다. 최근에는 밈(Meme)이나 농담, 친구 간 놀림처럼 쓰이는 경우도 있다는 거죠. 다만 이는 어디까지나 일부 커뮤니티에서의 비격식적 쓰임일 뿐, 전체적으로 봤을 때 여전히사랑스러운 애칭으로 통용되는 표현입니다.
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/766_img_150da6c0.webp)
+![image](https://legacy-img.rotcha.kr/766_img_150da6c0.webp)
 
 
 
@@ -74,7 +74,7 @@ Fifty Fifty의 “Pookie”에서는 ‘Pookie’가정서적 친밀감과 애�
 노래 제목 하나만으로도 이렇게 다양한 해석이 가능하다는 점, 참 흥미롭죠? “Pookie”는 단어 자체의 귀여운 느낌과 함께,Fifty Fifty만의 독특한 감성과 메시지가 어우러져 더 특별하게 다가옵니다. 가사 한 줄 한 줄을 들여다보며, 그 안에 담긴 감정을 느껴보는 시간을 가져보시길 추천드립니다.
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/766_img_5c42b0f0.webp)
+![image](https://legacy-img.rotcha.kr/766_img_5c42b0f0.webp)
 
 
 Pookie /Fifty Fifty
@@ -218,7 +218,7 @@ Pa-pa-pa-ra-pa-pa (Yeah)
 Pa-pa-pa-ra-pa-pa
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/766_img_2f3de228.webp)
+![image](https://legacy-img.rotcha.kr/766_img_2f3de228.webp)
 
 
 뼈엔 엠비피(MBP) 골밀도와 뼈 건강을 동시에 챙기는 유단백추출물 건강기능식품 효능 효과 복용

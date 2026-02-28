@@ -63,7 +63,7 @@ slug: "쿠에타핀정quetiapine-효능-및-사용법"
 ❓쿠에타핀정의 일반적인 용량은?➡ 조현병 및 양극성 장애 치료 시1일 300~800mg, 불면증 보조 치료 시12.5~50mg로 사용될 수 있습니다.
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/709_쿠에타핀정.webp)
+![image](https://legacy-img.rotcha.kr/709_쿠에타핀정.webp)
 
 
 
