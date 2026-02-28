@@ -7,7 +7,7 @@ categories: [금융, 보험]
 date: 2026-01-21 17:36:00+09:00
 slug: hanhwasaengmyeong-gogaeksenteo-jeonhwabeonho-mit
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-010-hanhwasaengmyeong-gogaeksenteo-jeonhwabeonho-mit/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -15,7 +15,7 @@ cover:
 
 보험계약 조회부터 보험금 청구, 대출 상담까지 필요한 업무에 맞는 연락처를 확인하시고 빠르게 상담받으시기 바랍니다.
 
-![L4PACvhD.webp](assets/b9f961b76aea4781f53b46a7f17277aec351713d.webp)
+![L4PACvhD.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-010-hanhwasaengmyeong-gogaeksenteo-jeonhwabeonho-mit/b9f961b76aea4781f53b46a7f17277aec351713d.webp)
 
 
 
@@ -49,7 +49,7 @@ cover:
 
 ## 상담 전 준비사항
 
-![NME9WcMA.webp](assets/ea241e409becc700916a397d4207aeca5cf7bb05.webp)
+![NME9WcMA.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-010-hanhwasaengmyeong-gogaeksenteo-jeonhwabeonho-mit/ea241e409becc700916a397d4207aeca5cf7bb05.webp)
 
 고객센터에 전화하기 전에 몇 가지를 미리 준비해두시면 상담 시간을 단축할 수 있습니다. 본인 확인을 위해 주민등록번호와 보험거래 비밀번호가 필요합니다. 계약 관련 문의라면 보험증권번호를 미리 확인해두시면 좋습니다.
 

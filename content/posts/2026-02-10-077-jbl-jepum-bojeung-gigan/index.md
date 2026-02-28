@@ -6,7 +6,7 @@ categories: [IT/가전, AS안내]
 date: 2026-02-11 11:21:28+09:00
 slug: jbl-jepum-bojeung-gigan
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-077-jbl-jepum-bojeung-gigan/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ JBL 제품의 **품질 보증 기간** 은 구매일로부터 **12개월** 입�
 
 ## AS 신청 방법
 
-![qBw890y2.webp](assets/701d22a507192e7ec853f913e710b00f7e1d8b57.webp)
+![qBw890y2.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-077-jbl-jepum-bojeung-gigan/701d22a507192e7ec853f913e710b00f7e1d8b57.webp)
 
 JBL AS는 **하만오디오 전문 서비스센터** 를 통해 진행됩니다. 신청 방법은 세 가지입니다. 첫째, **고객센터(02-553-3494)** 에 전화하여 접수하는 방법입니다. 둘째, **JBL 공식 홈페이지** 를 통해 온라인으로 접수하는 방법입니다. 셋째, 서비스센터에 **직접 방문** 하여 접수하는 방법입니다.
 

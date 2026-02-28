@@ -6,7 +6,7 @@ categories: [생활정보, 통신]
 date: 2026-02-02 17:53:26+09:00
 slug: kt-wiyakgeum-hwangeup-66man
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-02-021-kt-wiyakgeum-hwangeup-66man/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -30,7 +30,7 @@ KT 위약금 환급을 받으려면 다음 조건을 **모두 충족** 해야 �
 
 ## 환급 신청 방법
 
-![287rKqvZ.webp](assets/57f55dfd3996888ebb380da37933c7a2069b60b7.webp)
+![287rKqvZ.webp](https://img.rotcha.kr/images/rotcha/2026-02-02-021-kt-wiyakgeum-hwangeup-66man/57f55dfd3996888ebb380da37933c7a2069b60b7.webp)
 
 환급 신청은 **2026년 1월 14일부터 1월 31일까지** 가능합니다. 이 기간이 지나면 온라인 신청이 어려워질 수 있으니 서둘러 신청하시기 바랍니다.
 

@@ -6,7 +6,7 @@ categories: [가전, AS정보]
 date: 2026-02-11 11:22:28+09:00
 slug: daeu-naengjanggo-gogaeksenteo-iyongbeopbuteo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-001-daeu-naengjanggo-gogaeksenteo-iyongbeopbuteo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -39,7 +39,7 @@ cover:
 
 ## 출장 수리 절차와 비용
 
-![WY2TdXos.webp](assets/71877bdce2a7cee6f9e8821b262cdcd768000a3f.webp)
+![WY2TdXos.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-001-daeu-naengjanggo-gogaeksenteo-iyongbeopbuteo/71877bdce2a7cee6f9e8821b262cdcd768000a3f.webp)
 
 출장 AS 접수가 완료되면 담당 기사가 방문 일정을 조율하기 위해 연락을 드립니다. 방문 당일 기사가 제품 상태를 점검하고 고장 원인을 파악한 후 수리를 진행합니다.
 

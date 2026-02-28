@@ -7,7 +7,7 @@ categories: [건강, 의료정보]
 date: 2026-01-30 10:05:45+09:00
 slug: gadasil9ga-gagyeok-byeongwonbyeol-bigyo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-30-007-gadasil9ga-gagyeok-byeongwonbyeol-bigyo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

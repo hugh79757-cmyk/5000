@@ -6,7 +6,7 @@ categories: [여행]
 date: 2026-02-11 23:29:14+09:00
 slug: don-an-deurigo-seol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-047-don-an-deurigo-seol/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ cover:
 
 국립현대미술관 서울관, 과천관, 덕수궁관과 국립중앙박물관도 설 연휴 기간 동안 무료로 개방됩니다. 특별 전시는 별도 요금이 부과될 수 있으나, 상설 전시는 무료로 관람할 수 있습니다.
 
-![fefAPIMG.webp](assets/d452017052227dade92acdee132e9f442c975454.webp)
+![fefAPIMG.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-047-don-an-deurigo-seol/d452017052227dade92acdee132e9f442c975454.webp)
 
 국립민속박물관, 국립고궁박물관 등 다른 국립 박물관들도 함께 무료 개방되니, 가족과 함께 문화 나들이를 계획해 보세요.
 

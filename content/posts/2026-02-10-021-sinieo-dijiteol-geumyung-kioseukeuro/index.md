@@ -6,7 +6,7 @@ categories: [디지털, 의료]
 date: '2026-02-10T13:44:48+09:00'
 slug: sinieo-dijiteol-geumyung-kioseukeuro
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-021-sinieo-dijiteol-geumyung-kioseukeuro/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ cover:
 
 ## 키오스크 기본 조작법
 
-![JUAuyTrL.webp](assets/6f7ca98d6e29066dbce071fa516f17ad68efcd82.webp)
+![JUAuyTrL.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-021-sinieo-dijiteol-geumyung-kioseukeuro/6f7ca98d6e29066dbce071fa516f17ad68efcd82.webp)
 
 키오스크 조작은 스마트폰과 비슷합니다. 화면을 손가락으로 터치하면 됩니다. 누르고 싶은 버튼을 손가락으로 가볍게 톡 치면 됩니다. 너무 세게 누르실 필요 없고, 스마트폰 화면 터치하듯이 가볍게 터치하시면 됩니다.
 

@@ -7,7 +7,7 @@ categories: [가전, AS정보]
 date: 2026-02-11 11:17:20+09:00
 slug: samseong-doeorak-gojangnatneunde-samseongjeonjaseobiseuro
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-069-samseong-doeorak-gojangnatneunde-samseongjeonjaseobiseuro/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -60,7 +60,7 @@ cover:
 
 ## 수리 비용과 무상 보증 기간 안내
 
-![R6k1cYht.webp](assets/1fff7f06a62eff5e2c67b9e8232e9075f326de76.webp)
+![R6k1cYht.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-069-samseong-doeorak-gojangnatneunde-samseongjeonjaseobiseuro/1fff7f06a62eff5e2c67b9e8232e9075f326de76.webp)
 
 도어락 수리 비용은 고장 유형, 부품 종류, 출장 여부에 따라 달라집니다. 무상 보증 기간 내라면 비용 부담 없이 수리받을 수 있지만, 보증 기간이 지났거나 사용자 과실로 인한 고장은 유상으로 진행됩니다.
 

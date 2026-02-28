@@ -6,7 +6,7 @@ categories: [심리테스트, 자기계발]
 date: 2026-01-29 11:37:13+09:00
 slug: muryo-mbti-geomsa-teseuteu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-017-muryo-mbti-geomsa-teseuteu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

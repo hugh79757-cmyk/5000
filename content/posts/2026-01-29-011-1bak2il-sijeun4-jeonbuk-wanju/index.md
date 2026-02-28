@@ -7,7 +7,7 @@ categories: [여행, 숙박]
 date: 2026-01-29 10:58:00+09:00
 slug: 1bak2il-sijeun4-jeonbuk-wanju
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-011-1bak2il-sijeun4-jeonbuk-wanju/thumbnail.webp"
   alt: ""
   hidden: false
 ---

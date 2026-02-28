@@ -7,7 +7,7 @@ categories: [세금, 재테크]
 date: 2026-02-10 20:31:59+09:00
 slug: 10manwon-naego-13manwon-dolryeobatneun
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-024-10manwon-naego-13manwon-dolryeobatneun/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -43,7 +43,7 @@ cover:
 
 ## 연말정산 반영 방법
 
-![iNHRDLUQ.webp](assets/d4d80b63889b47b80aee993c30647f22f0c6adeb.webp)
+![iNHRDLUQ.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-024-10manwon-naego-13manwon-dolryeobatneun/d4d80b63889b47b80aee993c30647f22f0c6adeb.webp)
 
 고향사랑기부제로 기부하면 연말정산에 자동 반영됩니다. 국세청 간소화 서비스에서 **기부금 내역** 이 자동으로 조회되므로 별도의 서류 제출이 필요 없습니다.
 

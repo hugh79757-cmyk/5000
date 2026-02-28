@@ -6,7 +6,7 @@ categories: [IT, 스마트폰]
 date: 2026-02-01 01:46:46+09:00
 slug: gaelreoksi-s26-eonje-naonayo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-31-003-gaelreoksi-s26-eonje-naonayo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

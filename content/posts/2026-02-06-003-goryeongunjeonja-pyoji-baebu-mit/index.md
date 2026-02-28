@@ -6,7 +6,7 @@ categories: [생활정보, 자동차보험]
 date: 2026-02-06 16:59:57+09:00
 slug: goryeongunjeonja-pyoji-baebu-mit
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-003-goryeongunjeonja-pyoji-baebu-mit/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -30,7 +30,7 @@ cover:
 
 고령운전자 표지는 여러 기관에서 무료로 배부하고 있습니다. 서울시 자치경찰위원회와 서울경찰청은 2025년 5월부터 어르신 운전중 표지 4,600매를 제작하여 배부하고 있습니다. 한국도로교통공단에서도 전국 운전면허시험장과 교통안전교육장에서 표지를 무료로 배부하고 있습니다.
 
-![rU7hm8o6.jpg](assets/652b741f135253526c7b6784541926b4d736fb7f.jpg)
+![rU7hm8o6.jpg](https://img.rotcha.kr/images/rotcha/2026-02-06-003-goryeongunjeonja-pyoji-baebu-mit/652b741f135253526c7b6784541926b4d736fb7f.jpg)
 
 일부 지자체에서는 동 행정복지센터에서도 표지를 받을 수 있습니다. 대전 유성구의 경우 70세 이상 차량 소유 운전자가 운전면허증을 지참하고 주소지 동 행정복지센터를 방문하면 무료로 표지를 받을 수 있습니다. 거주 지역의 구청이나 주민센터에 문의하시면 배부 여부를 확인할 수 있습니다.
 

@@ -7,7 +7,7 @@ categories: [교육, 정책]
 date: 2026-02-03 14:00:19+09:00
 slug: 2026nyeon-chwieop-hu-sanghwan
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-03-023-2026nyeon-chwieop-hu-sanghwan/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -23,7 +23,7 @@ cover:
 
 취업 후 상환 학자금대출은 재학 중에는 상환 의무 없이 졸업 후 일정 소득이 발생하면 그때부터 갚기 시작하는 제도입니다. 2026년 기준 **상환기준소득은 연 2,525만원** (총급여 기준)으로, 이 소득을 초과하는 경우에만 의무상환이 시작됩니다.
 
-![PBiAWAZn.webp](assets/55bed293d0e1379541d0b9d11b28766105214abc.webp)
+![PBiAWAZn.webp](https://img.rotcha.kr/images/rotcha/2026-02-03-023-2026nyeon-chwieop-hu-sanghwan/55bed293d0e1379541d0b9d11b28766105214abc.webp)
 
 소득이 상환기준소득 이하인 기간에는 상환이 유예되므로 취업 준비 기간이나 저소득 기간에도 부담 없이 학업에 집중할 수 있습니다. 물론 소득 발생 전이라도 원하면 언제든지 자발적으로 상환할 수 있으며, 중도상환 수수료는 없습니다.
 

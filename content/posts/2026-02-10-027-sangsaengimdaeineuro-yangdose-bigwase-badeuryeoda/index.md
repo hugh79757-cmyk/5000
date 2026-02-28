@@ -7,7 +7,7 @@ categories: [부동산, 세금]
 date: 2026-02-10 16:23:25+09:00
 slug: sangsaengimdaeineuro-yangdose-bigwase-badeuryeoda
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-027-sangsaengimdaeineuro-yangdose-bigwase-badeuryeoda/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 ## 실수 2. 임대료 인상률 5% 초과
 
-![jF14LMCU.webp](assets/8a7fcda8a8510dd98060da5e87cb69b2af4b154c.webp)
+![jF14LMCU.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-027-sangsaengimdaeineuro-yangdose-bigwase-badeuryeoda/8a7fcda8a8510dd98060da5e87cb69b2af4b154c.webp)
 
 상생임대인의 핵심 요건은 **임대보증금 또는 임대료 인상률 5% 이내** 입니다. 직전 계약 대비 5%를 초과하면 상생임대인으로 인정받지 못합니다.
 

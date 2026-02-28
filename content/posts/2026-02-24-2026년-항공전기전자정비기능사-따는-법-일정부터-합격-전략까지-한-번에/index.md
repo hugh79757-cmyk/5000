@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['항공전기·전자정비기능사', '기능사', '기계', '2026']
 slug: "2026년-항공전기전자정비기능사-따는-법-일정부터-합격-전략까지-한-번에"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-24-2026년-항공전기전자정비기능사-따는-법-일정부터-합격-전략까지-한-번에/thumbnail.webp"
   alt: "2026년 항공전기·전자정비기능사 따는 법 – 일정부터 합격 전략까지 한 번에"
   hidden: false
 ---

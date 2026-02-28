@@ -6,7 +6,7 @@ categories: [보험, 생활정보]
 date: 2026-02-25 17:59:29+09:00
 slug: 디비손해보험-고객센터-전화번호-1588
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-25-025-디비손해보험-고객센터-전화번호-1588/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -32,7 +32,7 @@ DB손해보험은 업무 특성에 따라 전용 전화번호를 운영하고 �
 
 보험금 청구 상담은 **1566-1040** 입니다. 장기보험, 상해보험, 질병보험 등의 보험금 청구 절차를 안내받을 수 있습니다.
 
-![GEwmLnyb.webp](assets/c02a6cb2420bd8471672a011bf873186c099362d.webp)
+![GEwmLnyb.webp](https://img.rotcha.kr/images/rotcha/2026-02-25-025-디비손해보험-고객센터-전화번호-1588/c02a6cb2420bd8471672a011bf873186c099362d.webp)
 
 보험계약대출 및 신용대출 문의는 **1544-0100** 입니다. 대출 가능 금액 조회, 대출 신청, 상환 문의 등을 처리합니다.
 

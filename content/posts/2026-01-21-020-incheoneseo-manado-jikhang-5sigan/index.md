@@ -7,7 +7,7 @@ categories: [여행, 항공권]
 date: 2026-01-21 21:22:03+09:00
 slug: incheoneseo-manado-jikhang-5sigan
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-020-incheoneseo-manado-jikhang-5sigan/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -15,7 +15,7 @@ cover:
 
 문제는 일반 항공권 검색 사이트에서 이 노선이 잘 뜨지 않는다는 점입니다. 스카이스캐너나 네이버 항공권에서 검색해도 직항편이 나오지 않아 당황하는 분들이 많습니다. 오늘은 팬아시아에어를 통해 마나도 직항편을 예약하는 방법을 처음부터 끝까지 정리해 드리겠습니다.
 
-![ABckusKj.webp](assets/8060d9d72b4f4707c129e37f0c665758f6c7952b.webp)
+![ABckusKj.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-020-incheoneseo-manado-jikhang-5sigan/8060d9d72b4f4707c129e37f0c665758f6c7952b.webp)
 
 ## 팬아시아에어는 어떤 회사인가
 
@@ -39,7 +39,7 @@ cover:
 
 마나도 왕복 항공권 가격은 시즌과 예약 시점에 따라 달라집니다. 팬아시아에어 홈페이지 기준으로 왕복 **50만 원대 중반에서 60만 원대** 사이에서 형성되어 있습니다. 성수기나 연휴 기간에는 가격이 더 올라갈 수 있습니다.
 
-![znsm7ntR.webp](assets/4b55a541847d695698638cb8de46916b4c52160c.webp)
+![znsm7ntR.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-020-incheoneseo-manado-jikhang-5sigan/4b55a541847d695698638cb8de46916b4c52160c.webp)
 
 이 가격에는 유류할증료와 제세공과금이 포함되어 있습니다. 이스타항공은 저비용항공사이기 때문에 위탁수하물과 기내식은 별도입니다. 위탁수하물 15킬로그램까지는 무료이고, 추가 수하물은 별도 요금이 발생합니다. 기내식을 원하면 사전에 예약하거나 기내에서 구매할 수 있습니다.
 

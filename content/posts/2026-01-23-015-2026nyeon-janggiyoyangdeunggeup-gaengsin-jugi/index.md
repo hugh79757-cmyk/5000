@@ -7,7 +7,7 @@ categories: [복지, 노인돌봄]
 date: 2026-01-25 17:36:40+09:00
 slug: 2026nyeon-janggiyoyangdeunggeup-gaengsin-jugi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-23-015-2026nyeon-janggiyoyangdeunggeup-gaengsin-jugi/thumbnail.webp"
   alt: ""
   hidden: false
 ---

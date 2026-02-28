@@ -7,7 +7,7 @@ categories: [금융, 보험]
 date: 2026-01-21 21:29:27+09:00
 slug: hanhwasaengmyeong-gogaeksenteo-1588-6363
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-011-hanhwasaengmyeong-gogaeksenteo-1588-6363/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -17,7 +17,7 @@ cover:
 
 ## 한화생명 ARS 이용 방법
 
-![cTURqBJF.webp](assets/0d2b76c8806cbd83f839361ce5546db8338878aa.webp)
+![cTURqBJF.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-011-hanhwasaengmyeong-gogaeksenteo-1588-6363/0d2b76c8806cbd83f839361ce5546db8338878aa.webp)
 
 한화생명 대표번호 **1588-6363** 에 전화하면 음성 안내가 시작됩니다. 이때 **1번** 을 누르면 보이는 ARS로 연결되고, **2번** 을 누르면 음성 ARS로 연결됩니다.
 
@@ -73,7 +73,7 @@ cover:
 
 ## 보이는 ARS 업무시간
 
-![ZpkHMoyQ.webp](assets/f45eaf34c0b6f9e6e8c00b3b08bb03e9073dbd4b.webp)
+![ZpkHMoyQ.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-011-hanhwasaengmyeong-gogaeksenteo-1588-6363/f45eaf34c0b6f9e6e8c00b3b08bb03e9073dbd4b.webp)
 
 보이는 ARS의 조회 업무는 **365일 24시간** 이용 가능합니다. 보험계약대출 신청이나 보험료 납입 같은 처리 업무는 평일 오전 7시부터 오후 11시 30분까지 가능합니다.
 

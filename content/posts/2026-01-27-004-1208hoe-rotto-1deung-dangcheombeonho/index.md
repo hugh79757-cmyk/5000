@@ -7,7 +7,7 @@ categories: [생활정보, 복권]
 date: 2026-01-27 13:25:24+09:00
 slug: 1208hoe-rotto-1deung-dangcheombeonho
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-27-004-1208hoe-rotto-1deung-dangcheombeonho/thumbnail.webp"
   alt: ""
   hidden: false
 ---

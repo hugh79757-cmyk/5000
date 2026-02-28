@@ -6,7 +6,7 @@ categories: [생활정보, AS안내]
 date: 2026-02-10 23:50:55+09:00
 slug: boruneo-gagu-as-sincheong
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-062-boruneo-gagu-as-sincheong/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -39,7 +39,7 @@ cover:
 
 ---
 
-![psvNtW3x.webp](assets/46e070662ba0388bca4de404c79b54688bad32e1.webp)
+![psvNtW3x.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-062-boruneo-gagu-as-sincheong/46e070662ba0388bca4de404c79b54688bad32e1.webp)
 
 ## 이전 설치 서비스 안내
 

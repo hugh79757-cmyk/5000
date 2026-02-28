@@ -6,7 +6,7 @@ categories: [여행, 캠핑]
 date: 2026-02-26 13:32:23+09:00
 slug: 캠핑카-없어도-괜찮은-쏘카
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-018-캠핑카-없어도-괜찮은-쏘카/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 ## 예약 방법과 이용 가격
 
-![s2XRgnzb.webp](assets/a9a505c316cd6812850cbd2fa48256405d60495b.webp)
+![s2XRgnzb.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-018-캠핑카-없어도-괜찮은-쏘카/a9a505c316cd6812850cbd2fa48256405d60495b.webp)
 
 스타리아 캠퍼4는 쏘카 앱을 통해 예약할 수 있습니다. 앱 메인 화면의 **여기로 부르기** 메뉴에서 차량 픽업 장소와 반납 장소를 설정하고, 이용 시간(최소 24시간)을 선택한 뒤 쏘카 추천 카테고리에서 캠핑카 태그가 달린 차량을 선택하면 됩니다. 대여 장소와 반납 장소를 다르게 설정할 수도 있어 편도 여행에도 활용 가능합니다.
 

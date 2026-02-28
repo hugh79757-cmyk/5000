@@ -7,7 +7,7 @@ categories: [취업정보, 공기업]
 date: 2026-02-01 01:46:46+09:00
 slug: hangukgonghanggongsa-chaeyong-2026-sinip
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-31-007-hangukgonghanggongsa-chaeyong-2026-sinip/thumbnail.webp"
   alt: ""
   hidden: false
 ---

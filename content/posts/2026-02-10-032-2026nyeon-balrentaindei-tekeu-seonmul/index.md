@@ -6,7 +6,7 @@ categories: [테크, 라이프스타일]
 date: 2026-02-10 16:23:25+09:00
 slug: 2026nyeon-balrentaindei-tekeu-seonmul
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-032-2026nyeon-balrentaindei-tekeu-seonmul/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -45,7 +45,7 @@ cover:
 
 건강 기능도 매우 강력합니다. 심박수 모니터링, 심전도(ECG) 측정, 혈중 산소 농도 측정, 수면 추적, 여성 건강 기능 등을 제공합니다. 넘어짐 감지와 긴급 구조 요청 기능은 위급 상황에서 생명을 구할 수 있는 기능으로 많은 실제 사례가 보고되고 있습니다.
 
-![gnBvTszU.webp](assets/c9d41e0a166c49157a576537d502fd1d54d30db5.webp)
+![gnBvTszU.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-032-2026nyeon-balrentaindei-tekeu-seonmul/c9d41e0a166c49157a576537d502fd1d54d30db5.webp)
 
 운동 추적 기능이 탁월합니다. 러닝, 사이클링, 수영, 요가, 근력 운동 등 수십 가지 운동을 자동으로 인식하고 추적합니다. GPS가 내장되어 있어 스마트폰 없이도 야외 운동 경로를 기록할 수 있습니다. 피트니스를 좋아하는 연인에게 선물하기 좋습니다.
 

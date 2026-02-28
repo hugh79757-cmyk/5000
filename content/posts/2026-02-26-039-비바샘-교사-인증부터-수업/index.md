@@ -7,7 +7,7 @@ categories: [교육, 교사지원]
 date: 2026-02-26 17:00:21+09:00
 slug: 비바샘-교사-인증부터-수업
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-039-비바샘-교사-인증부터-수업/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -35,7 +35,7 @@ cover:
 
 ## 핵심 기능 활용법
 
-![DLt9bGdC.webp](assets/30291c83050f2c6a93874ba6c52354207d10d4b5.webp)
+![DLt9bGdC.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-039-비바샘-교사-인증부터-수업/30291c83050f2c6a93874ba6c52354207d10d4b5.webp)
 
 비바샘의 가장 많이 활용되는 기능은 **교과서 통합자료 존** 입니다. 비상교과서를 채택한 선생님이라면, 교과서 DVD 전체 내용을 온라인에서 바로 다운로드할 수 있으며, 연간 계획서, 수정 보완 자료 등 교과서와 직결되는 핵심 자료들이 체계적으로 정리되어 있습니다.
 

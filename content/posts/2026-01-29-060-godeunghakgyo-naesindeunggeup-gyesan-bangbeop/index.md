@@ -7,7 +7,7 @@ categories: [교육, 입시]
 date: 2026-01-29 22:50:39+09:00
 slug: godeunghakgyo-naesindeunggeup-gyesan-bangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-060-godeunghakgyo-naesindeunggeup-gyesan-bangbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---

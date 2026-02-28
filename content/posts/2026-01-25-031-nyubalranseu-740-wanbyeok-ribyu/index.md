@@ -7,7 +7,7 @@ categories: [패션, 신발리뷰]
 date: 2026-01-25 19:55:30+09:00
 slug: nyubalranseu-740-wanbyeok-ribyu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-031-nyubalranseu-740-wanbyeok-ribyu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

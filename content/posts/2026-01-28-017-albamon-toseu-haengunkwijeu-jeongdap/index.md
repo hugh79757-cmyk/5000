@@ -7,7 +7,7 @@ categories: [생활정보, 앱테크]
 date: 2026-01-28 16:44:50+09:00
 slug: albamon-toseu-haengunkwijeu-jeongdap
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-017-albamon-toseu-haengunkwijeu-jeongdap/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -7,7 +7,7 @@ categories: [게임, 게임순위]
 date: 2026-02-01 02:30:57+09:00
 slug: pcgeim-raengking-2026nyeon-1wol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-007-pcgeim-raengking-2026nyeon-1wol/thumbnail.webp"
   alt: ""
   hidden: false
 ---

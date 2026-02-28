@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['조선기술사', '기술사', '기계', '2026']
 slug: "2026-조선기술사-시험일정-최근-합격률-분석-필기-188-실기-273"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-19-2026-조선기술사-시험일정-최근-합격률-분석-필기-188-실기-273/thumbnail.webp"
   alt: "2026 조선기술사 시험일정 + 최근 합격률 분석 (필기 18.8% / 실기 27.3%)"
   hidden: false
 ---

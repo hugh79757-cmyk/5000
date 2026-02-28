@@ -7,7 +7,7 @@ categories: [IT활용팁, 생활경제]
 date: 2026-02-05 18:08:10+09:00
 slug: jiyeoksarangsangpumgwon-samseongpei-deungrok-bangbeopgwa
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-066-jiyeoksarangsangpumgwon-samseongpei-deungrok-bangbeopgwa/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 일부 지역화폐는 삼성페이 연동을 지원하지 않을 수 있으니, 등록 전에 해당 지자체 홈페이지나 지역화폐 앱 공지를 확인하시기 바랍니다.
 
-![uEibARoM.webp](assets/871675a9f314bd9ceafaf6e20be6ce7c76593b61.webp)
+![uEibARoM.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-066-jiyeoksarangsangpumgwon-samseongpei-deungrok-bangbeopgwa/871675a9f314bd9ceafaf6e20be6ce7c76593b61.webp)
 
 ## 착한페이 앱 업데이트 오류 해결
 

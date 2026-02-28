@@ -7,7 +7,7 @@ categories: [투자, ETF]
 date: 2026-01-28 16:44:50+09:00
 slug: schd-vs-voo-vs
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-025-schd-vs-voo-vs/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -7,7 +7,7 @@ categories: [맛집, 이벤트]
 date: 2026-01-27 13:24:24+09:00
 slug: peuraengkeubeogeo-jingyeoguigeoin-kolrabo-gutjeu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-27-005-peuraengkeubeogeo-jingyeoguigeoin-kolrabo-gutjeu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

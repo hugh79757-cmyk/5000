@@ -6,7 +6,7 @@ categories: [영화]
 date: 2026-02-20 00:20:02+09:00
 slug: 왕과사는남자-정보-유해진-박지훈
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-19-004-왕과사는남자-정보-유해진-박지훈/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -20,7 +20,7 @@ cover:
 
 ## 기본 정보와 출연진
 
-![2026021994647.webp](assets/2ee966d27df62e2fccde22c9d9ace1987cc84b28.webp)
+![2026021994647.webp](https://img.rotcha.kr/images/rotcha/2026-02-19-004-왕과사는남자-정보-유해진-박지훈/2ee966d27df62e2fccde22c9d9ace1987cc84b28.webp)
 
 왕과 사는 남자는 장항준 감독이 연출하고 2026년 1월 개봉한 시대극 영화입니다. 러닝타임은 약 120분이며, 전체 관람가 등급으로 온 가족이 함께 볼 수 있습니다.
 
@@ -50,7 +50,7 @@ cover:
 
 ## 흥행 성적과 관객 반응
 
-![22255846786892004.webp](assets/1feb479297073e7aaabed4598d111d913a8e77a0.webp)
+![22255846786892004.webp](https://img.rotcha.kr/images/rotcha/2026-02-19-004-왕과사는남자-정보-유해진-박지훈/1feb479297073e7aaabed4598d111d913a8e77a0.webp)
 
 왕과 사는 남자는 개봉 첫 주말부터 박스오피스 1위를 차지했습니다. 5일 만에 100만, 12일 만에 200만, 14일 만에 300만을 돌파하며 손익분기점을 빠르게 넘겼습니다. 2주 차에 400만 관객을 달성하며 천만 영화를 향해 순항 중입니다.
 

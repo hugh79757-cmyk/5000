@@ -7,7 +7,7 @@ categories: [경제, 세금]
 date: 2026-01-25 17:28:21+09:00
 slug: 2026-toejikja-yeonmaljeongsan-wanbyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-005-2026-toejikja-yeonmaljeongsan-wanbyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---

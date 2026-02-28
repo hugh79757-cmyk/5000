@@ -7,7 +7,7 @@ category: [건강정보, 다이어트]
 date: 2026-01-29 11:37:13+09:00
 slug: maunjaro-gagyeokbigyo-choejeoga-cheobang
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-018-maunjaro-gagyeokbigyo-choejeoga-cheobang/thumbnail.webp"
   alt: ""
   hidden: false
 ---

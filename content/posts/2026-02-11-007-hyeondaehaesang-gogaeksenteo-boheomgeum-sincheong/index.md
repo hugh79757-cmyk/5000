@@ -6,7 +6,7 @@ categories: [보험, 고객센터]
 date: 2026-02-11 11:16:20+09:00
 slug: hyeondaehaesang-gogaeksenteo-boheomgeum-sincheong
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-007-hyeondaehaesang-gogaeksenteo-boheomgeum-sincheong/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ ARS 메뉴는 다음과 같습니다. **1번** 은 자동차보험 사고접수,
 
 ## 보험금 신청 방법
 
-![BfXSdYzl.webp](assets/0e61ef68c650c29edb04e7648dec156ca9877649.webp)
+![BfXSdYzl.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-007-hyeondaehaesang-gogaeksenteo-boheomgeum-sincheong/0e61ef68c650c29edb04e7648dec156ca9877649.webp)
 
 보험금 청구는 크게 세 가지 방법으로 가능합니다. 첫 번째는 **고객센터 전화** (1588-5656, 3번 메뉴)를 통한 접수입니다.
 

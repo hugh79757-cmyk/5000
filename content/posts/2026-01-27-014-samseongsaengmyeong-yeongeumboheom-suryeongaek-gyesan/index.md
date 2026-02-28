@@ -7,7 +7,7 @@ categories: [보험, 재테크]
 date: 2026-01-28 02:15:28+09:00
 slug: samseongsaengmyeong-yeongeumboheom-suryeongaek-gyesan
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-27-014-samseongsaengmyeong-yeongeumboheom-suryeongaek-gyesan/thumbnail.webp"
   alt: ""
   hidden: false
 ---

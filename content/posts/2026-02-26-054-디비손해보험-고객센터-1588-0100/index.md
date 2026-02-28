@@ -6,7 +6,7 @@ categories: [보험, 생활정보]
 date: 2026-02-26 18:32:51+09:00
 slug: 디비손해보험-고객센터-1588-0100
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-054-디비손해보험-고객센터-1588-0100/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ DB손해보험은 업무 유형에 따라 별도의 직통 번호를 운영하�
 
 ## ARS 메뉴 구성과 활용 팁
 
-![FN316vEG.jpeg](assets/f487e6a80a4990264e8ffb63f526c292b11010c0.jpeg)
+![FN316vEG.jpeg](https://img.rotcha.kr/images/rotcha/2026-02-26-054-디비손해보험-고객센터-1588-0100/f487e6a80a4990264e8ffb63f526c292b11010c0.jpeg)
 
 1588-0100으로 전화하면 자동응답(ARS) 시스템이 안내됩니다. 음성 안내에 따라 업무 유형을 선택하면 해당 부서 상담원에게 연결됩니다. 보험금 청구나 사고 접수는 ARS 초반 메뉴에 배치되어 있어 비교적 빠르게 접근할 수 있습니다.
 

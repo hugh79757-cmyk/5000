@@ -7,7 +7,7 @@ categories: [자격증, 취업]
 date: 2026-01-29 22:50:39+09:00
 slug: aidolbomi-jagyeokjeung-vs-boyukgyosa
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-068-aidolbomi-jagyeokjeung-vs-boyukgyosa/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['항공기정비기능사', '기능사', '기계', '2026']
 slug: "2026-항공기정비기능사-시험일정-총정리-접수일시험일합격발표"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-15-2026-항공기정비기능사-시험일정-총정리-접수일시험일합격발표/thumbnail.webp"
   alt: "2026 항공기정비기능사 시험일정 총정리 (접수일·시험일·합격발표)"
   hidden: false
 aliases:

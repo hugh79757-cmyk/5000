@@ -6,7 +6,7 @@ categories: [금융정보, 보험]
 date: 2026-01-21 17:35:00+09:00
 slug: gyobosaengmyeong-kolsenteo-sangdamwon-yeongyeol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-016-gyobosaengmyeong-kolsenteo-sangdamwon-yeongyeol/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ ARS 메뉴 구조를 미리 파악해 두시면 전화 연결 후 원하는 업�
 
 ## ARS 서비스 이용 시간
 
-![S7CB5HlA.webp](assets/6fc3564d4206a454d17eb3839cf22ca7528da7c7.webp)
+![S7CB5HlA.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-016-gyobosaengmyeong-kolsenteo-sangdamwon-yeongyeol/6fc3564d4206a454d17eb3839cf22ca7528da7c7.webp)
 
 교보생명 **ARS 서비스** 는 **매일 오전 8시부터 오후 11시 30분** 까지 운영됩니다. 상담원 연결이 불가능한 야간이나 주말에도 ARS를 통해 다양한 업무를 처리할 수 있어 편리합니다.
 

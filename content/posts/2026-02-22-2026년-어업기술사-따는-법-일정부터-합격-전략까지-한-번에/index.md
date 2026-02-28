@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['어업기술사', '기술사', '농림어업', '2026']
 slug: "2026년-어업기술사-따는-법-일정부터-합격-전략까지-한-번에"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-22-2026년-어업기술사-따는-법-일정부터-합격-전략까지-한-번에/thumbnail.webp"
   alt: "2026년 어업기술사 따는 법 – 일정부터 합격 전략까지 한 번에"
   hidden: false
 ---

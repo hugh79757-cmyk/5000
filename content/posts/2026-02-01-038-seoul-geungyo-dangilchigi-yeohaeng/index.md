@@ -7,7 +7,7 @@ categories: [국내여행, 경기도]
 date: 2026-02-01 14:00:19+09:00
 slug: seoul-geungyo-dangilchigi-yeohaeng
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-038-seoul-geungyo-dangilchigi-yeohaeng/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -25,7 +25,7 @@ cover:
 
 ## 입장료와 주차 정보
 
-![3Qwuix1Q.webp](assets/def22b28a699efff310a3c29c36e410631e4e0be.webp)
+![3Qwuix1Q.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-038-seoul-geungyo-dangilchigi-yeohaeng/def22b28a699efff310a3c29c36e410631e4e0be.webp)
 
 니지모리 스튜디오의 입장료는 평일과 주말에 따라 다르게 책정되어 있습니다. 평일에는 성인 기준 20,000원, 주말 및 공휴일에는 25,000원입니다. 만 15세 미만 방문객은 반드시 보호자를 동반해야 입장이 가능합니다.
 

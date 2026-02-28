@@ -18,7 +18,7 @@ categories:
 date: 2026-01-14T14:55:45+09:00
 slug: botaeme-jibangbojogeum-gwanrisiseutem-gogaeksenteo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-13-012-botaeme-jibangbojogeum-gwanrisiseutem-gogaeksenteo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -66,7 +66,7 @@ cover:
 
 ## 주요 기능 및 업무 흐름
 
-![2026011392557.webp](assets/2786e4b89f9c8c1b39e40dbe8d9212d0dc5b5ddf.webp)
+![2026011392557.webp](https://img.rotcha.kr/images/rotcha/2026-01-13-012-botaeme-jibangbojogeum-gwanrisiseutem-gogaeksenteo/2786e4b89f9c8c1b39e40dbe8d9212d0dc5b5ddf.webp)
 
 보탬e에서 민간보조사업자가 수행하는 주요 업무는 공모신청, 교부신청, 집행관리, 정산관리, 정보공시 등입니다.
 
@@ -104,7 +104,7 @@ cover:
 
 시스템 사용 중 오류가 발생하거나 사용 방법을 모르는 경우에는 고객센터(1660-1390)로 문의하거나 온라인 교육을 통해 해결하시기 바랍니다.
 
-![2026011392605.webp](assets/4bd70b37b672438331a11a121a958501addbab05.webp)
+![2026011392605.webp](https://img.rotcha.kr/images/rotcha/2026-01-13-012-botaeme-jibangbojogeum-gwanrisiseutem-gogaeksenteo/4bd70b37b672438331a11a121a958501addbab05.webp)
 
 ## 마무리
 

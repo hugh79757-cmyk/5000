@@ -6,7 +6,7 @@ categories: [쇼핑, 뷰티]
 date: 2026-02-10 16:22:25+09:00
 slug: olribeuyeong-oneuldeurim-pigeop-seobiseuro
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-033-olribeuyeong-oneuldeurim-pigeop-seobiseuro/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -23,7 +23,7 @@ cover:
 
 ## 오늘드림 서비스란
 
-![ZPV5CjTs.webp](assets/72013b28d2f9702514c56c96dc4789eef33070d3.webp)
+![ZPV5CjTs.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-033-olribeuyeong-oneuldeurim-pigeop-seobiseuro/72013b28d2f9702514c56c96dc4789eef33070d3.webp)
 
 올리브영 오늘드림은 온라인으로 주문하면 가까운 매장에서 3시간 이내에 배송해 주는 서비스입니다. 일반 택배처럼 물류센터에서 출발하는 것이 아니라, 주문자 근처의 올리브영 매장에서 직접 상품을 픽업하여 배달해 줍니다. 그래서 빠른 배송이 가능합니다.
 

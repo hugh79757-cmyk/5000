@@ -7,7 +7,7 @@ categories: [복지정보, 정부지원금]
 date: 2026-02-06 16:59:57+09:00
 slug: gichosaenghwalsugeupja-minsaengjiwongeum-ilbaninboda-25manwon
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-027-gichosaenghwalsugeupja-minsaengjiwongeum-ilbaninboda-25manwon/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -29,7 +29,7 @@ cover:
 
 **한부모가족** 도 1인당 30만원의 우대 지급 대상입니다. 한부모가족지원법에 따라 한부모가족 지원 대상자로 등록되어 있으면 해당됩니다. 이 세 가지 유형에 해당하지 않는 **일반 국민** 은 1인당 15만원(1차)을 받으며, 소득 상위 10%를 제외한 90%는 2차로 10만원을 추가로 받아 총 25만원을 받습니다.
 
-![GJAoCi2v.webp](assets/2054d8c965021ceb603c4d9eadd96a4e87f2c92e.webp)
+![GJAoCi2v.webp](https://img.rotcha.kr/images/rotcha/2026-02-06-027-gichosaenghwalsugeupja-minsaengjiwongeum-ilbaninboda-25manwon/2054d8c965021ceb603c4d9eadd96a4e87f2c92e.webp)
 
 ## 우대 지급 대상자 확인 방법
 

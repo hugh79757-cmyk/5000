@@ -6,7 +6,7 @@ categories: [투자, 해외주식]
 date: 2026-01-28 16:44:50+09:00
 slug: tqqq-juga-heureum-bunseok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-021-tqqq-juga-heureum-bunseok/thumbnail.webp"
   alt: ""
   hidden: false
 ---

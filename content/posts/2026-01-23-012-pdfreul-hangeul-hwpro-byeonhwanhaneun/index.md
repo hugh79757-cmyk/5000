@@ -7,7 +7,7 @@ categories: [프로그램, 오피스]
 date: 2026-01-23 17:53:41+09:00
 slug: pdfreul-hangeul-hwpro-byeonhwanhaneun
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-23-012-pdfreul-hangeul-hwpro-byeonhwanhaneun/thumbnail.webp"
   alt: ""
   hidden: false
 ---

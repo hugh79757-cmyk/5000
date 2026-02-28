@@ -7,7 +7,7 @@ categories: [여행, 다이빙]
 date: 2026-01-21 21:21:03+09:00
 slug: daibeo-cheonguk-manado-ganeun
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-021-daibeo-cheonguk-manado-ganeun/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -15,7 +15,7 @@ cover:
 
 문제는 접근성이었습니다. 마나도는 인도네시아 북술라웨시 주에 위치해 있어 자카르타나 발리를 경유해야 했습니다. 이동 시간만 10시간이 넘었습니다. 하지만 2025년 10월 이스타항공이 인천-마나도 직항편을 개설하면서 상황이 달라졌습니다. 이제 **5시간이면** 다이버의 천국에 도착합니다.
 
-![D6A6ECyO.webp](assets/6e5effcb71a71102e65d7fab4c11f5a98ce6eaeb.webp)
+![D6A6ECyO.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-021-daibeo-cheonguk-manado-ganeun/6e5effcb71a71102e65d7fab4c11f5a98ce6eaeb.webp)
 
 ## 부나켄 해양국립공원이 특별한 이유
 
@@ -37,7 +37,7 @@ cover:
 
 ## 다이버를 위한 마나도 여행 팁
 
-![VBTb8C73.webp](assets/c51242859bcd42edd6516d10d8ef59b620b6e99d.webp)
+![VBTb8C73.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-021-daibeo-cheonguk-manado-ganeun/c51242859bcd42edd6516d10d8ef59b620b6e99d.webp)
 
 마나도에서 다이빙을 계획하고 있다면 몇 가지 팁을 알아두면 좋습니다. 부나켄과 렘베 모두 다이빙 자격증이 필요합니다. 오픈워터 이상의 자격이 있어야 펀다이빙이 가능하고, 어드밴스드 자격이 있으면 더 깊은 포인트를 즐길 수 있습니다.
 

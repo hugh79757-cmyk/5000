@@ -7,7 +7,7 @@ categories: [패션, 브랜드리뷰]
 date: 2026-01-25 19:55:30+09:00
 slug: yunikeulro-nideulseu-kolrabo-wanbyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-032-yunikeulro-nideulseu-kolrabo-wanbyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---

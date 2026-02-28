@@ -7,7 +7,7 @@ categories: [보안, 개인정보]
 date: 2026-02-01 01:46:46+09:00
 slug: teolrin-nae-jeongbo-chatgi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-31-010-teolrin-nae-jeongbo-chatgi/thumbnail.webp"
   alt: ""
   hidden: false
 ---

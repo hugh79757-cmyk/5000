@@ -6,7 +6,7 @@ categories: [생활정보, AS안내]
 date: 2026-02-10 23:50:55+09:00
 slug: inuseu-bide-as-sincheong
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-060-inuseu-bide-as-sincheong/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -34,7 +34,7 @@ cover:
 
 이누스 비데 AS 신청은 세 가지 방법으로 진행할 수 있습니다. 첫 번째는 고객센터 전화 접수로, 1588-8613으로 전화하여 고장 증상을 설명하고 출장 서비스 일정을 예약하는 방법입니다. 두 번째는 온라인 AS 신청으로, 이누스 공식 홈페이지에서 AS 접수 양식을 작성하면 담당자가 확인 후 연락을 드립니다.
 
-![Dn7Kk3VO.webp](assets/9ce64fee65365d9d76f762a37f30af0cf6cbeabb.webp)
+![Dn7Kk3VO.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-060-inuseu-bide-as-sincheong/9ce64fee65365d9d76f762a37f30af0cf6cbeabb.webp)
 
 세 번째는 출장 서비스를 통한 현장 접수입니다. 기사가 방문하여 제품 상태를 직접 확인하고 수리를 진행합니다. 간단한 고장은 현장에서 바로 수리되며, 부품 교체가 필요한 경우 별도 일정을 잡아 재방문합니다.
 

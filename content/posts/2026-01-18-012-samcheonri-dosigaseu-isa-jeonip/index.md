@@ -6,7 +6,7 @@ categories: [생활정보, 이사가이드]
 date: 2026-01-18 13:09:01+09:00
 slug: samcheonri-dosigaseu-isa-jeonip
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-18-012-samcheonri-dosigaseu-isa-jeonip/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -14,7 +14,7 @@ cover:
 
 ## 삼천리 도시가스 전입 신청 방법
 
-![YbhCHyEu.webp](assets/4b230a3efbc8f392b9f59c5a62b748705abca8db.webp)
+![YbhCHyEu.webp](https://img.rotcha.kr/images/rotcha/2026-01-18-012-samcheonri-dosigaseu-isa-jeonip/4b230a3efbc8f392b9f59c5a62b748705abca8db.webp)
 
 
 
@@ -40,7 +40,7 @@ cover:
 
 ## 요금정산 방법과 주의사항
 
-![Jx6JaSF6.webp](assets/bee368c1d3adab0bbadc05c93abc41a92c3bd867.webp)
+![Jx6JaSF6.webp](https://img.rotcha.kr/images/rotcha/2026-01-18-012-samcheonri-dosigaseu-isa-jeonip/bee368c1d3adab0bbadc05c93abc41a92c3bd867.webp)
 
 **요금정산**은 전출 신청 시 기사가 방문하면서 진행됩니다. 계량기의 최종 지침을 읽고, 이전 방문 기사가 기록한 지침과의 차이를 계산하여 사용량을 결정합니다. 정산액이 많을 수도 있고 환급이 나올 수도 있으니, 미리 대략적인 금액을 계산해두면 도움이 됩니다. 삼천리 홈페이지에는 **"이사요금 단순계산"** 기능이 있어 고객번호를 입력하면 예상 정산액을 미리 확인할 수 있습니다.
 
@@ -52,7 +52,7 @@ cover:
 
 ## 자주 묻는 질문과 팁
 
-![lvpy3hzu.webp](assets/c72b7e13f647c361a878f38f37819bcbebc5e1fe.webp)
+![lvpy3hzu.webp](https://img.rotcha.kr/images/rotcha/2026-01-18-012-samcheonri-dosigaseu-isa-jeonip/c72b7e13f647c361a878f38f37819bcbebc5e1fe.webp)
 
 많은 이사객들이 묻는 질문 중 하나는 **"전입 연결비용은 얼마인가?"** 입니다. 일반적으로 약 **30,000~45,000원** 정도이며, 지역마다 또는 설치 케이스에 따라 다를 수 있습니다. 또 다른 질문은 **"예약 당일 집에 없으면 어떻게 하나?"** 입니다. 이 경우 기사 방문 불가 사항을 미리 홈페이지나 전화로 통보하고 예약을 변경해야 합니다. 예약 변경은 언제든지 가능하므로 일정이 바뀌면 빨리 수정하시기 바랍니다.
 

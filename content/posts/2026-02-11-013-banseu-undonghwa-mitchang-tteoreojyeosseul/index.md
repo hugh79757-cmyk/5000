@@ -6,7 +6,7 @@ categories: [패션]
 date: 2026-02-11 11:17:20+09:00
 slug: banseu-undonghwa-mitchang-tteoreojyeosseul
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-013-banseu-undonghwa-mitchang-tteoreojyeosseul/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 홈페이지 1대1 문의로 접수할 경우 수선이 필요한 부분을 상세히 적고 사진을 첨부하면 됩니다. 접수 후 안내에 따라 제품을 발송하면 검수를 거쳐 수선이 진행됩니다.
 
-![h1PUauCG.webp](assets/602ad04f00e4a37d0bebe6aa4213e7a51490d630.webp)
+![h1PUauCG.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-013-banseu-undonghwa-mitchang-tteoreojyeosseul/602ad04f00e4a37d0bebe6aa4213e7a51490d630.webp)
 
 ## 유상 수선 비용
 

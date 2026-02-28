@@ -7,7 +7,7 @@ categories: [생활경제, 재테크]
 date: 2026-02-05 18:09:10+09:00
 slug: gohyangsaranggibuje-seaekgongje-44-sanghyang
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-065-gohyangsaranggibuje-seaekgongje-44-sanghyang/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 앞서 계산한 실질 부담 56,000원에서 6만원 상당의 답례품을 받으면 오히려 **기부금보다 더 많은 혜택** 을 받는 구조가 됩니다. 이 때문에 "기부하면 손해"라는 인식과 달리, 세액공제와 답례품을 합치면 실질적으로 이득이 되는 제도입니다.
 
-![37qIS7LP.webp](assets/b5f828d27430170137563f12585f5f6cb0519b90.webp)
+![37qIS7LP.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-065-gohyangsaranggibuje-seaekgongje-44-sanghyang/b5f828d27430170137563f12585f5f6cb0519b90.webp)
 
 ## 기부 방법 안내
 

@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['미용사(피부)', '기능사', '이용.숙박.여행.오락.스포츠', '2026']
 slug: "2026-미용사피부-시험일정-최근-합격률-분석-필기-544-실기-451"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-24-2026-미용사피부-시험일정-최근-합격률-분석-필기-544-실기-451/thumbnail.webp"
   alt: "2026 미용사(피부) 시험일정 + 최근 합격률 분석 (필기 54.4% / 실기 45.1%)"
   hidden: false
 ---

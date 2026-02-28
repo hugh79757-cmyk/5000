@@ -7,7 +7,7 @@ categories: [패션, 명품]
 date: 2026-01-25 19:55:30+09:00
 slug: goyadeu-miniangju-gabang-wanbyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-034-goyadeu-miniangju-gabang-wanbyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---

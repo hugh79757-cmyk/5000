@@ -6,7 +6,7 @@ categories: [건강, 뷰티]
 date: 2026-01-21 21:16:47+09:00
 slug: boribapnamu-talmoje-gagyeok-hyoneung
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-019-boribapnamu-talmoje-gagyeok-hyoneung/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 ## 국립산림과학원이 입증한 탈모 예방 효능
 
-![uVvnbqal.jpeg](assets/307426b38249a5dbde06b5ba8ee2f9597609e81f.jpeg)
+![uVvnbqal.jpeg](https://img.rotcha.kr/images/rotcha/2026-01-21-019-boribapnamu-talmoje-gagyeok-hyoneung/307426b38249a5dbde06b5ba8ee2f9597609e81f.jpeg)
 
 산림청 국립산림과학원은 보리밥나무 추출물이 모발 성장과 발달의 핵심인 **모유두세포** 를 강화하는 효과가 있음을 연구를 통해 밝혀냈습니다. 모유두세포는 모낭 최하단에 위치하여 모발 생성과 성장의 시작점이 되는 핵심 세포입니다. 이 세포의 기능을 활성화하는 것이 탈모 예방의 근본적인 출발점이지만, 그동안 이를 명확히 촉진할 수 있다고 입증된 성분은 많지 않았습니다.
 
@@ -34,7 +34,7 @@ cover:
 
 
 
-![2026012153634.webp](assets/1cbdc6be9a05cc20fc1c99fb587b14f99b49d72e.webp)
+![2026012153634.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-019-boribapnamu-talmoje-gagyeok-hyoneung/1cbdc6be9a05cc20fc1c99fb587b14f99b49d72e.webp)
 
 ## 모발 건강 지표 전 항목 개선 효과
 
@@ -52,7 +52,7 @@ cover:
 
 ## 닥터방기원 보리밥나무 탈모샴푸 제품 소개
 
-![0rdFtcAo.jpeg](assets/597ae93fb1f50fa00fa316c7f050f88050e09097.jpeg)
+![0rdFtcAo.jpeg](https://img.rotcha.kr/images/rotcha/2026-01-21-019-boribapnamu-talmoje-gagyeok-hyoneung/597ae93fb1f50fa00fa316c7f050f88050e09097.jpeg)
 
 국립산림과학원의 연구 결과를 바탕으로 헤어 및 두피 전문 브랜드 **닥터방기원** 이 보리밥나무 추출물을 적용한 탈모 샴푸를 출시했습니다. 닥터방기원은 국립산림과학원과 기술이전 협약을 체결하고 특허 성분인 보리밥나무가지추출물을 제품에 적용했습니다.
 
@@ -84,7 +84,7 @@ cover:
 
 다만 탈모 샴푸의 특성상 단기간에 극적인 효과를 기대하기보다는 최소 4주에서 12주 이상 꾸준히 사용해야 변화를 체감할 수 있다는 점을 참고하시기 바랍니다.
 
-## 보리밥나무 탈모제 선택 시 고려사항![2026012153626.webp](assets/6c886bd18911a815cc9559d749492aaea416af16.webp)
+## 보리밥나무 탈모제 선택 시 고려사항![2026012153626.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-019-boribapnamu-talmoje-gagyeok-hyoneung/6c886bd18911a815cc9559d749492aaea416af16.webp)
 
 보리밥나무 추출물이 함유된 탈모 케어 제품을 선택할 때 몇 가지 고려할 점이 있습니다.
 

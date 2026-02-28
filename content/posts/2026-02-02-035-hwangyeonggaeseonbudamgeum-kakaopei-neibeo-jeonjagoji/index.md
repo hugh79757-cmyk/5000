@@ -7,7 +7,7 @@ categories: [생활정보, 납부방법]
 date: 2026-02-02 17:53:26+09:00
 slug: hwangyeonggaeseonbudamgeum-kakaopei-neibeo-jeonjagoji
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-02-035-hwangyeonggaeseonbudamgeum-kakaopei-neibeo-jeonjagoji/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 ## 네이버 앱 전자고지 신청 방법
 
-![qzXAQjQ2.webp](assets/3fe85d3274b413d13cf9f0d66d9273ee31d170fa.webp)
+![qzXAQjQ2.webp](https://img.rotcha.kr/images/rotcha/2026-02-02-035-hwangyeonggaeseonbudamgeum-kakaopei-neibeo-jeonjagoji/3fe85d3274b413d13cf9f0d66d9273ee31d170fa.webp)
 
 네이버 앱에서도 환경개선부담금 전자고지를 신청할 수 있습니다. 네이버 앱을 실행하고 **네이버페이** 메뉴로 이동합니다. 네이버페이 화면에서 **청구서** 또는 **내 청구서** 를 선택합니다.
 

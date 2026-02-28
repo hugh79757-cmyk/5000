@@ -16,7 +16,7 @@ categories:
 date: 2026-01-14T15:48:25+09:00
 slug: wijeuwel-keopimeosin-as-jeopsu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-14-002-wijeuwel-keopimeosin-as-jeopsu/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -74,7 +74,7 @@ cover:
 
 ## 품질보증 기준 및 수리 비용
 
-![2026011413848.webp](assets/f5ae29c364494413a8ab1c45c09e58ca5e38853e.webp)
+![2026011413848.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-002-wijeuwel-keopimeosin-as-jeopsu/f5ae29c364494413a8ab1c45c09e58ca5e38853e.webp)
 
 위즈웰 커피머신은 구입 날짜 기준으로 **1년의 품질보증기간**이 제공됩니다. 이 기간 내에 정상적인 사용 중에 발생한 고장은 별도의 비용 없이 무상으로 수리해 드립니다.
 
@@ -108,7 +108,7 @@ cover:
 
 고장이 발생했을 때는 **자가 수리를 시도하기보다는 빠르게 고객센터에 연락**하는 것이 현명합니다. 잘못된 분해나 수리 시도는 오히려 손상을 악화시킬 수 있으며, 무단 개조는 보증 대상에서 제외됩니다. 사소한 증상도 놓치지 않고 서비스센터에 문의하면 초기 단계에서 문제를 해결할 수 있어 더 큰 손상을 방지할 수 있습니다.
 
-![2026011413909.webp](assets/29a29821ea57d6a656fa4ff02cb046efc37df6cd.webp)
+![2026011413909.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-002-wijeuwel-keopimeosin-as-jeopsu/29a29821ea57d6a656fa4ff02cb046efc37df6cd.webp)
 
 ---
 

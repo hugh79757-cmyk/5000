@@ -6,7 +6,7 @@ categories: [비즈니스, 마케팅]
 date: 2026-02-26 18:31:51+09:00
 slug: 기프티쇼-비즈-사용법-기업
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-061-기프티쇼-비즈-사용법-기업/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -18,7 +18,7 @@ cover:
 
 ## 가입과 초기 설정
 
-![YTuRdEto.webp](assets/75a02683a026f4036a18c2561fafe1c35e7c79c6.webp)
+![YTuRdEto.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-061-기프티쇼-비즈-사용법-기업/75a02683a026f4036a18c2561fafe1c35e7c79c6.webp)
 
 기프티쇼 비즈는 **기업 전용** 서비스이므로 사업자등록증이 필요합니다. 가입은 기프티쇼 비즈 공식 홈페이지(biz.giftishow.com)에서 진행하며, 사업자 정보 입력, 담당자 정보 등록, 이용약관 동의 순서로 완료됩니다.
 

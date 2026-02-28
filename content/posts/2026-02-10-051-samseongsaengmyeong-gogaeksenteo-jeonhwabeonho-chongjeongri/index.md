@@ -7,7 +7,7 @@ categories: [금융, 보험]
 date: 2026-02-10 23:49:55+09:00
 slug: samseongsaengmyeong-gogaeksenteo-jeonhwabeonho-chongjeongri
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-051-samseongsaengmyeong-gogaeksenteo-jeonhwabeonho-chongjeongri/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -53,7 +53,7 @@ cover:
 
 ## 삼성생명 고객센터 빠르게 연결되는 팁
 
-![y3InVDsl.webp](assets/4c95001c29a84baee66353e76d8e01230a892104.webp)
+![y3InVDsl.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-051-samseongsaengmyeong-gogaeksenteo-jeonhwabeonho-chongjeongri/4c95001c29a84baee66353e76d8e01230a892104.webp)
 
 삼성생명 콜센터에 전화했을 때 상담원 연결까지 대기 시간이 길어지는 경우가 있습니다. 특히 월요일 오전이나 월말, 연초에는 문의가 집중되어 30분 이상 대기해야 하는 상황도 발생합니다. 이런 경우 몇 가지 방법을 활용하면 더 빠르게 상담을 받을 수 있습니다.
 
@@ -77,7 +77,7 @@ cover:
 
 ## 삼성생명 온라인 서비스 활용하기
 
-![y3InVDsl.webp](assets/4c95001c29a84baee66353e76d8e01230a892104.webp)
+![y3InVDsl.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-051-samseongsaengmyeong-gogaeksenteo-jeonhwabeonho-chongjeongri/4c95001c29a84baee66353e76d8e01230a892104.webp)
 
 전화 상담 외에도 삼성생명 홈페이지와 모바일 앱을 통해 다양한 업무를 직접 처리할 수 있습니다. 특히 단순 조회나 증명서 발급 같은 업무는 온라인으로 진행하는 것이 훨씬 빠르고 편리합니다.
 

@@ -6,7 +6,7 @@ categories: [보안서비스, 고객센터]
 date: 2026-02-11 11:22:28+09:00
 slug: adt-kaepseu-gogaeksenteo-iyongbeopgwa
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-004-adt-kaepseu-gogaeksenteo-iyongbeopgwa/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -45,7 +45,7 @@ CCTV 화면이 나오지 않거나, 센서가 작동하지 않거나, 경보음�
 
 홈페이지나 앱을 통해서도 일부 서비스 변경이 가능하지만, 해지와 같은 중요한 사항은 전화 상담을 통해 진행하는 것이 정확합니다.
 
-![ou1R9jIp.webp](assets/d92dc31a2bda39ce2fcc8c231aa51ea3747e1901.webp)
+![ou1R9jIp.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-004-adt-kaepseu-gogaeksenteo-iyongbeopgwa/d92dc31a2bda39ce2fcc8c231aa51ea3747e1901.webp)
 
 ## 캡스 앱 활용
 

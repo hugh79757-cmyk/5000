@@ -6,7 +6,7 @@ categories: [법률정보, 소비자권익]
 date: 2026-01-29 10:58:00+09:00
 slug: kupang-gaeinjeongbo-yuchul-jipdansosong
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-008-kupang-gaeinjeongbo-yuchul-jipdansosong/thumbnail.webp"
   alt: ""
   hidden: false
 ---

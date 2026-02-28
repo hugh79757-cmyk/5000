@@ -6,7 +6,7 @@ categories: [생활정보, 쇼핑]
 date: 2026-02-10 23:50:55+09:00
 slug: 11beonga-gogaeksenteo-jeonhwabeonho-seobiseubyeol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-067-11beonga-gogaeksenteo-jeonhwabeonho-seobiseubyeol/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 ## ARS 서비스 안내
 
-![PrRy2CkR.webp](assets/34ce98d31a70ff0588291738b21fc602a9d35433.webp)
+![PrRy2CkR.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-067-11beonga-gogaeksenteo-jeonhwabeonho-seobiseubyeol/34ce98d31a70ff0588291738b21fc602a9d35433.webp)
 
 11번가 고객센터 ARS는 카테고리별로 구분되어 빠른 상담 연결이 가능합니다. 전화 연결 후 ARS 안내에 따라 원하는 번호를 선택하면 됩니다. 주요 메뉴로는 주문 및 배송 조회, 취소 및 반품 접수, 교환 신청, 결제 문의, 회원 서비스 등이 있습니다.
 

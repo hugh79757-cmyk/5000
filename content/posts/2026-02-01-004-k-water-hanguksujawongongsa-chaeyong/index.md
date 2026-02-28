@@ -6,7 +6,7 @@ categories: [취업, 공기업]
 date: 2026-02-01 02:30:57+09:00
 slug: k-water-hanguksujawongongsa-chaeyong
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-004-k-water-hanguksujawongongsa-chaeyong/thumbnail.webp"
   alt: ""
   hidden: false
 ---

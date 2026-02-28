@@ -6,7 +6,7 @@ categories: [법률, 소비자]
 date: 2026-01-29 11:37:13+09:00
 slug: kupang-jipdansosong-chamyeo-annae
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-016-kupang-jipdansosong-chamyeo-annae/thumbnail.webp"
   alt: ""
   hidden: false
 ---

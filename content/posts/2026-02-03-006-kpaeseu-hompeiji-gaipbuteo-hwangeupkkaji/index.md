@@ -6,7 +6,7 @@ categories: [생활정보, 교통]
 date: 2026-02-03 14:01:19+09:00
 slug: kpaeseu-hompeiji-gaipbuteo-hwangeupkkaji
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-03-006-kpaeseu-hompeiji-gaipbuteo-hwangeupkkaji/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -28,7 +28,7 @@ K패스 가입은 **공식 홈페이지** 에서 진행합니다. 먼저 사이�
 
 가입 후에는 본인 명의의 **교통카드** 를 등록해야 합니다. 기존에 사용하던 티머니, 캐시비 등의 교통카드를 등록할 수 있으며, K패스 전용 카드를 신규 발급받을 수도 있습니다. 카드 등록까지 완료해야 환급 대상이 됩니다.
 
-![qdUuGueh.webp](assets/cbe5a42d4a4e1880c333882012579ca39ca5c505.webp)
+![qdUuGueh.webp](https://img.rotcha.kr/images/rotcha/2026-02-03-006-kpaeseu-hompeiji-gaipbuteo-hwangeupkkaji/cbe5a42d4a4e1880c333882012579ca39ca5c505.webp)
 
 ## 환급 조건 및 기준
 

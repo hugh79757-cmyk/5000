@@ -9,7 +9,7 @@ author: ''
 thumbnail: ''
 slug: pilripin-ipguk-iteuraebeuletravel-jakseongbangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-022-pilripin-ipguk-iteuraebeuletravel-jakseongbangbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---

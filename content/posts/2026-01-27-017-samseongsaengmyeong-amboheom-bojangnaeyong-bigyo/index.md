@@ -6,7 +6,7 @@ categories: [보험, 건강]
 date: 2026-01-28 02:13:27+09:00
 slug: samseongsaengmyeong-amboheom-bojangnaeyong-bigyo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-27-017-samseongsaengmyeong-amboheom-bojangnaeyong-bigyo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

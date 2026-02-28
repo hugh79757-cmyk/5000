@@ -5,7 +5,7 @@ categories: [생활정보]
 date: 2026-02-04 14:23:55+09:00
 slug: ijeulgyotongkadeu-balgeupbuteo-chungjeonkkaji-gyotongbi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-048-ijeulgyotongkadeu-balgeupbuteo-chungjeonkkaji-gyotongbi/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -19,7 +19,7 @@ cover:
 
 기존 티머니나 캐시비와 달리 **이즐교통카드** 는 모바일 앱을 통한 간편 충전과 실시간 잔액 확인이 가능하다. 또한 K패스와 연동하면 월 15회 이상 대중교통 이용 시 지출 금액의 일정 비율을 돌려받을 수 있다.
 
-![20260204112934.webp](assets/3f340849ceb74e34cd103d6bd4f17aa81e086717.webp)
+![20260204112934.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-048-ijeulgyotongkadeu-balgeupbuteo-chungjeonkkaji-gyotongbi/3f340849ceb74e34cd103d6bd4f17aa81e086717.webp)
 
 ### 발급 방법과 절차
 
@@ -37,7 +37,7 @@ cover:
 
 **이즐교통카드** 의 가장 큰 장점은 K패스와의 연동이다. K패스에 등록하면 월 15회 이상 대중교통 이용 시 일반인은 20%, 청년층은 30%, 저소득층은 53%까지 환급받을 수 있다. 환급금은 다음 달 카드 잔액으로 자동 충전되어 별도의 신청 절차가 필요 없다.
 
-![20260204112923.webp](assets/ae1f6a9b8e45fd6d6638761dcacc1092d15d5143.webp)
+![20260204112923.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-048-ijeulgyotongkadeu-balgeupbuteo-chungjeonkkaji-gyotongbi/ae1f6a9b8e45fd6d6638761dcacc1092d15d5143.webp)
 
 ## 결론
 

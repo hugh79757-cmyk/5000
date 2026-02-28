@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['항공기관기술사', '기술사', '기계', '2026']
 slug: "항공기관기술사-독학으로-붙을-수-있을까-2026-일정합격률전략-총정리"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-28-항공기관기술사-독학으로-붙을-수-있을까-2026-일정합격률전략-총정리/thumbnail.webp"
   alt: "항공기관기술사 독학으로 붙을 수 있을까? 2026 일정·합격률·전략 총정리"
   hidden: false
 ---

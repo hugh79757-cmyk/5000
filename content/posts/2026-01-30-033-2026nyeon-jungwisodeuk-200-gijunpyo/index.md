@@ -7,7 +7,7 @@ categories: [생활정보, 복지]
 date: 2026-01-31 00:05:47+09:00
 slug: 2026nyeon-jungwisodeuk-200-gijunpyo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-30-033-2026nyeon-jungwisodeuk-200-gijunpyo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

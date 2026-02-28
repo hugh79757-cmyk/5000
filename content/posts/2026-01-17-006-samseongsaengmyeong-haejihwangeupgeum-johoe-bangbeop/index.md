@@ -6,7 +6,7 @@ categories: [금융, 보험]
 date: 2026-01-17 13:39:59+09:00
 slug: samseongsaengmyeong-haejihwangeupgeum-johoe-bangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-17-006-samseongsaengmyeong-haejihwangeupgeum-johoe-bangbeop/thumbnail.webp"
   alt: "삼성생명 해지환급금 조회 방법 안내"
   hidden: false
 ---

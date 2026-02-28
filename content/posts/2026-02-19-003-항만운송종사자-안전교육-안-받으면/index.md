@@ -6,7 +6,7 @@ categories: [안전교육, 자격증]
 date: 2026-02-20 00:21:02+09:00
 slug: 항만운송종사자-안전교육-안-받으면
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-19-003-항만운송종사자-안전교육-안-받으면/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -36,7 +36,7 @@ cover:
 
 한국항만연수원에서 교육을 운영합니다. 온라인 교육은 항만안전교육포털을 통해 제공됩니다.
 
-![uIOQWZgY.webp](assets/a983b1bc8ffc77a446e807ba02c49f67b218a03b.webp)
+![uIOQWZgY.webp](https://img.rotcha.kr/images/rotcha/2026-02-19-003-항만운송종사자-안전교육-안-받으면/a983b1bc8ffc77a446e807ba02c49f67b218a03b.webp)
 
 ## 교육 대상자
 

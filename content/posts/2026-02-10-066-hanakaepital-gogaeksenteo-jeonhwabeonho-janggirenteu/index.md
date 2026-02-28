@@ -6,7 +6,7 @@ categories: [금융정보, 자동차]
 date: 2026-02-10 23:50:55+09:00
 slug: hanakaepital-gogaeksenteo-jeonhwabeonho-janggirenteu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-066-hanakaepital-gogaeksenteo-jeonhwabeonho-janggirenteu/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -33,7 +33,7 @@ cover:
 
 ## 장기렌트 사고 접수 방법
 
-![7mw4k0jG.webp](assets/af419c6f3a3bad8c447cd18db2f69b23a7f14193.webp)
+![7mw4k0jG.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-066-hanakaepital-gogaeksenteo-jeonhwabeonho-janggirenteu/af419c6f3a3bad8c447cd18db2f69b23a7f14193.webp)
 
 장기렌트 차량으로 사고가 발생한 경우 즉시 고객센터에 연락하여 사고 접수를 해야 합니다. 대표번호 1800-1110으로 전화하여 사고 접수를 선택하면 담당자가 안내해 드립니다. 사고 일시, 장소, 상대 차량 정보, 사고 경위 등을 설명하면 접수가 완료됩니다.
 

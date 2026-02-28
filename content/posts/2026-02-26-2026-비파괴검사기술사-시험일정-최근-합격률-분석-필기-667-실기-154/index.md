@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['비파괴검사기술사', '기술사', '안전관리', '2026']
 slug: "2026-비파괴검사기술사-시험일정-최근-합격률-분석-필기-667-실기-154"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-2026-비파괴검사기술사-시험일정-최근-합격률-분석-필기-667-실기-154/thumbnail.webp"
   alt: "2026 비파괴검사기술사 시험일정 + 최근 합격률 분석 (필기 66.7% / 실기 15.4%)"
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: [육아정책, 노동법]
 date: 2026-01-29 11:37:13+09:00
 slug: yugagi-10si-chulgeunje-sincheongbangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-020-yugagi-10si-chulgeunje-sincheongbangbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---

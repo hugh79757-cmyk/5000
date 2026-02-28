@@ -6,7 +6,7 @@ categories: [금융, 보험]
 date: 2026-01-17 13:39:59+09:00
 slug: samseongsaengmyeong-gogaeksenteo-jeonhwabeonho-1588
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-17-004-samseongsaengmyeong-gogaeksenteo-jeonhwabeonho-1588/thumbnail.webp"
   alt: ""
   hidden: false
 ---

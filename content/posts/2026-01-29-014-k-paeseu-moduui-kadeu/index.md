@@ -7,7 +7,7 @@ categories: [생활정보, 복지]
 date: 2026-01-29 10:58:00+09:00
 slug: k-paeseu-moduui-kadeu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-014-k-paeseu-moduui-kadeu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: [여행, 축제]
 date: 2026-01-29 03:10:50+09:00
 slug: hwacheon-sancheoneo-chukje-juchajang
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-003-hwacheon-sancheoneo-chukje-juchajang/thumbnail.webp"
   alt: ""
   hidden: false
 ---

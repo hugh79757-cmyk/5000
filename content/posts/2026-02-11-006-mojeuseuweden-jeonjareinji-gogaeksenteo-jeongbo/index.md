@@ -6,7 +6,7 @@ categories: [가전, AS정보]
 date: 2026-02-11 11:22:28+09:00
 slug: mojeuseuweden-jeonjareinji-gogaeksenteo-jeongbo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-006-mojeuseuweden-jeonjareinji-gogaeksenteo-jeongbo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 ## AS 신청 방법
 
-![KeNKks3O.webp](assets/830fbd8a5668617183b05c2b4de7b6a2c4a604a5.webp)
+![KeNKks3O.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-006-mojeuseuweden-jeonjareinji-gogaeksenteo-jeongbo/830fbd8a5668617183b05c2b4de7b6a2c4a604a5.webp)
 
 모즈스웨덴 전자레인지 AS는 **전화 상담 후 접수** 방식으로 진행됩니다. 먼저 고객센터에 연락하여 고장 증상을 설명합니다. 전원이 들어오지 않는지, 작동 중 멈추는지, 특정 버튼이 작동하지 않는지 등 구체적인 증상을 알려주세요.
 

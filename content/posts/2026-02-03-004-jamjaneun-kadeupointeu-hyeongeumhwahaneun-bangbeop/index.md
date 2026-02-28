@@ -6,7 +6,7 @@ categories: [금융, 생활정보]
 date: 2026-02-03 14:01:19+09:00
 slug: jamjaneun-kadeupointeu-hyeongeumhwahaneun-bangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-03-004-jamjaneun-kadeupointeu-hyeongeumhwahaneun-bangbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ cover:
 
 이 서비스의 가장 큰 장점은 **계좌입금 기능** 입니다. 조회된 포인트를 현금처럼 내 은행 계좌로 직접 입금받을 수 있습니다. 카드사별로 개별 앱에 접속할 필요 없이 한 곳에서 모든 작업을 처리할 수 있어 편리합니다.
 
-![JJLuc6MD.webp](assets/44b53d97c64a64d9f6d6d9294e4dc5505fcf4038.webp)
+![JJLuc6MD.webp](https://img.rotcha.kr/images/rotcha/2026-02-03-004-jamjaneun-kadeupointeu-hyeongeumhwahaneun-bangbeop/44b53d97c64a64d9f6d6d9294e4dc5505fcf4038.webp)
 
 ## 통합조회 이용 방법
 

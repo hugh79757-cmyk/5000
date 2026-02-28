@@ -6,7 +6,7 @@ categories: [생활정보, 정부지원]
 date: 2026-02-03 23:48:25+09:00
 slug: sangsaengpeibaek-nurijip-sincheongbuteo-jigeupkkaji
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-03-059-sangsaengpeibaek-nurijip-sincheongbuteo-jigeupkkaji/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -42,7 +42,7 @@ cover:
 
 ## 지급 시기 및 방법
 
-![rrY3QraJ.webp](assets/a313b0121275da5bf21b690b128b5be2a403cc3f.webp)
+![rrY3QraJ.webp](https://img.rotcha.kr/images/rotcha/2026-02-03-059-sangsaengpeibaek-nurijip-sincheongbuteo-jigeupkkaji/a313b0121275da5bf21b690b128b5be2a403cc3f.webp)
 
 환급금은 신청한 달의 소비 실적을 기준으로 **다음 달 중순 이후** 순차 지급됩니다. 예를 들어 9월 소비분은 10월 중순경에 지급됩니다. 정확한 지급일은 상생페이백 누리집에서 확인할 수 있습니다.
 

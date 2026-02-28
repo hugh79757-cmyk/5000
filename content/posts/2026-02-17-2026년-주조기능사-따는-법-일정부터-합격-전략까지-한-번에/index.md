@@ -8,7 +8,7 @@ slug: "2026년-주조기능사-따는-법-일정부터-합격-전략까지-한-�
 aliases:
   - "/posts/2026년-주조기능사-따는-법-–-일정부터-합격-전략까지-한-번에/"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-17-2026년-주조기능사-따는-법-일정부터-합격-전략까지-한-번에/thumbnail.webp"
   alt: "2026년 주조기능사 따는 법 – 일정부터 합격 전략까지 한 번에"
   hidden: false
 ---

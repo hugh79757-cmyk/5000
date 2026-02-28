@@ -6,7 +6,7 @@ categories: [가전, AS정보]
 date: 2026-02-11 11:22:28+09:00
 slug: deoham-tv-gogaeksenteo-as
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-003-deoham-tv-gogaeksenteo-as/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -23,7 +23,7 @@ TV는 고가의 가전제품인 만큼 고장이 발생하면 걱정이 앞섭�
 
 ## 고객센터 연락처
 
-![2026021181043.webp](assets/32504fc3faf9f0fc29549c552223fa2912bbe6e9.webp)
+![2026021181043.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-003-deoham-tv-gogaeksenteo-as/32504fc3faf9f0fc29549c552223fa2912bbe6e9.webp)
 
 더함 TV **고객센터 대표번호는 1833-7877** 입니다. 이 번호로 전화하여 내선번호를 선택하면 원하는 서비스를 받을 수 있습니다.
 
@@ -57,7 +57,7 @@ TV는 고가의 가전제품인 만큼 고장이 발생하면 걱정이 앞섭�
 
 정확한 수리 비용은 기사 방문 후 점검을 통해 안내받을 수 있습니다. 수리비가 과다할 경우 신제품 구입과 비교하여 결정하시기 바랍니다.
 
-![8VCvevms.webp](assets/c4ac93ae4b36230cb12008168b2cf43169c95f7e.webp)
+![8VCvevms.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-003-deoham-tv-gogaeksenteo-as/c4ac93ae4b36230cb12008168b2cf43169c95f7e.webp)
 
 ## 마무리
 

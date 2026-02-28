@@ -6,7 +6,7 @@ categories: [엔터테인먼트, 드라마]
 date: 2026-01-28 16:43:50+09:00
 slug: eondeokeobeo-misseuhong-churyeonjin-julgeori
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-011-eondeokeobeo-misseuhong-churyeonjin-julgeori/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -14,7 +14,7 @@ cover:
 
 박신혜와 고경표의 만남, 90년대 레트로 감성, 그리고 통쾌한 잠입 수사 스토리까지 다양한 재미 요소를 갖춘 이 드라마의 모든 것을 정리해드립니다.
 
-![2026012811318.webp](assets/a79c8242c385640777b2b98c6fe7ee050701f4a8.webp)
+![2026012811318.webp](https://img.rotcha.kr/images/rotcha/2026-01-28-011-eondeokeobeo-misseuhong-churyeonjin-julgeori/a79c8242c385640777b2b98c6fe7ee050701f4a8.webp)
 
 
 
@@ -30,7 +30,7 @@ OTT 플랫폼에서도 동시 공개되어 **넷플릭스** 와 **티빙** 에�
 
 
 
-![2026012811327.webp](assets/702b139180ecd339f0a52c802da3f736abd9d126.webp)
+![2026012811327.webp](https://img.rotcha.kr/images/rotcha/2026-01-28-011-eondeokeobeo-misseuhong-churyeonjin-julgeori/702b139180ecd339f0a52c802da3f736abd9d126.webp)
 
 1997년 세기말, 여의도 증권가에서 수상한 자금의 흐름이 포착됩니다. 35세 엘리트 증권감독관 **홍금보** 는 개미 투자자들의 돈을 빼돌려 사익을 챙기는 한민증권 사주 일가의 비리를 파헤치기 위해 특단의 결심을 합니다.
 
@@ -58,7 +58,7 @@ OTT 플랫폼에서도 동시 공개되어 **넷플릭스** 와 **티빙** 에�
 
 그 외에도 **있지 유나** 가 홍장미 역으로 특별 출연합니다. 홍금보의 동생이자 홍금보가 위장 신분으로 사용하는 홍장미의 실제 주인공입니다.
 
-![2026012811310.webp](assets/ef9f3ffe53cb39e011e6125ada8ced9e05d60c91.webp)
+![2026012811310.webp](https://img.rotcha.kr/images/rotcha/2026-01-28-011-eondeokeobeo-misseuhong-churyeonjin-julgeori/ef9f3ffe53cb39e011e6125ada8ced9e05d60c91.webp)
 
 
 

@@ -6,7 +6,7 @@ categories: [생활정보, 고객지원]
 date: 2026-01-18 13:16:10+09:00
 slug: samcheonridosigaseu-gogaeksenteo-jeonhwabeonho-1544
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-18-013-samcheonridosigaseu-gogaeksenteo-jeonhwabeonho-1544/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ ARS 화면에서 원하는 항목을 선택한 후, 더 자세한 상담이 필�
 
 ## 고객센터 운영시간 및 상담 안내
 
-![dvQIqeLo.webp](assets/2708a9d370eef8c8e733c90fdf6d23b76ddee947.webp)
+![dvQIqeLo.webp](https://img.rotcha.kr/images/rotcha/2026-01-18-013-samcheonridosigaseu-gogaeksenteo-jeonhwabeonho-1544/2708a9d370eef8c8e733c90fdf6d23b76ddee947.webp)
 
 삼천리도시가스 고객센터의 **상담원 연결 시간은 평일 오전 9시부터 오후 6시까지**입니다. 점심시간은 **오후 12시부터 오후 1시까지** 상담이 중단되니 참고하시기 바랍니다. 토요일, 일요일, 공휴일에는 상담원 연결 서비스가 제한되거나 불가능할 수 있으니, 급하지 않은 사항은 평일에 연락하는 것을 추천합니다. 다만 **긴급 상황, 특히 가스 누출 신고는 24시간 365일 접수**되고 있으므로 언제든지 전화할 수 있습니다.
 
@@ -40,7 +40,7 @@ ARS는 24시간 운영되고 있어서, 평일 상담 시간이 아니더라도 
 
 **카카오톡 채널**을 통해서도 상담과 신청이 가능합니다. 삼천리 공식 카카오톡 채널을 친구 추가한 후, 채팅 형식으로 간단히 요청하면 상담원이 응답합니다. 이 방법은 전화 대기 시간이 길 때 매우 효과적이며, 채팅 기록이 남기 때문에 나중에 확인하기도 편합니다. **모바일 앱**도 있어서 스마트폰에서 더욱 간편하게 모든 서비스를 이용할 수 있습니다.
 
-![iVN8ny6j.webp](assets/469c283cb952334a606fa731be36a917bf242b0c.webp)
+![iVN8ny6j.webp](https://img.rotcha.kr/images/rotcha/2026-01-18-013-samcheonridosigaseu-gogaeksenteo-jeonhwabeonho-1544/469c283cb952334a606fa731be36a917bf242b0c.webp)
 
 ## 긴급 상황 대응 및 가스 누출 신고
 
@@ -66,7 +66,7 @@ ARS는 24시간 운영되고 있어서, 평일 상담 시간이 아니더라도 
 
 ## 자주 묻는 질문 정리
 
-![1gQpzawb.webp](assets/e36a1bc2a67639abd9c16cd4b1a26c778e71c152.webp)
+![1gQpzawb.webp](https://img.rotcha.kr/images/rotcha/2026-01-18-013-samcheonridosigaseu-gogaeksenteo-jeonhwabeonho-1544/e36a1bc2a67639abd9c16cd4b1a26c778e71c152.webp)
 
 **"요금이 갑자기 많이 나왔어요"** - 이런 경우 계절 변화(겨울 난방), 가전제품 추가 사용, 누수 등이 원인일 수 있습니다. 고객센터에 연락하여 상담받으시면, 원인 파악과 함께 절감 방법을 안내받을 수 있습니다. **"자동이체를 신청했는데 아직 해지가 안 됐어요"** - 자동이체 해지는 신청 후 1~2주 정도 소요되므로, 그 기간에는 중복으로 요금이 나올 수 있습니다. 상담원에게 상황을 알리면 조치해드립니다. **"이사하는데 먼저 뭐부터 해야 해요?"** - 이전 집은 전출 신청을, 새 집은 전입 신청을 각각 2~3일 전에 미리 해두시면 됩니다.
 

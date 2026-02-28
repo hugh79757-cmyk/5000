@@ -5,7 +5,7 @@ _origin: 2026-01-23-021-2026nyeon-noin-pyeongsaenggyoyukbaucheo-sodeuk
 date: 2026-01-25 14:56:23+09:00
 slug: 2026nyeon-noin-pyeongsaenggyoyukbaucheo-jedo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-001-2026nyeon-noin-pyeongsaenggyoyukbaucheo-jedo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

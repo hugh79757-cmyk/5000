@@ -6,7 +6,7 @@ categories: [맛집, 여수여행]
 date: 2026-02-01 01:46:46+09:00
 slug: yeosu-ekseupoyeok-geuncheo-40nyeon
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-31-009-yeosu-ekseupoyeok-geuncheo-40nyeon/thumbnail.webp"
   alt: ""
   hidden: false
 ---

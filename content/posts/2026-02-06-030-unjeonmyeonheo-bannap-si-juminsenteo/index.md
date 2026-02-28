@@ -7,7 +7,7 @@ categories: [생활정보, 행정서류]
 date: 2026-02-06 16:59:57+09:00
 slug: unjeonmyeonheo-bannap-si-juminsenteo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-030-unjeonmyeonheo-bannap-si-juminsenteo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -43,7 +43,7 @@ cover:
 
 ## 대리 신청 시 필요한 서류
 
-![m0GitAjR.webp](assets/ba6fa8c7715677fab817edb027a8c6caf0976163.webp)
+![m0GitAjR.webp](https://img.rotcha.kr/images/rotcha/2026-02-06-030-unjeonmyeonheo-bannap-si-juminsenteo/ba6fa8c7715677fab817edb027a8c6caf0976163.webp)
 
 대리인이 운전면허 반납을 대신 신청할 경우 다음의 서류를 모두 준비해야 합니다. 서류가 하나라도 빠지면 처리가 불가능하므로 방문 전 꼼꼼히 확인하시기 바랍니다.
 

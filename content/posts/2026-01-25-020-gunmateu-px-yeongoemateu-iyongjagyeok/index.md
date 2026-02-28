@@ -7,7 +7,7 @@ categories: [생활정보, 군인복지]
 date: 2026-01-25 17:22:11+09:00
 slug: gunmateu-px-yeongoemateu-iyongjagyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-020-gunmateu-px-yeongoemateu-iyongjagyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---

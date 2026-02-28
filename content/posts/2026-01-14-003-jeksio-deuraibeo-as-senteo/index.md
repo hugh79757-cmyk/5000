@@ -17,7 +17,7 @@ categories:
 date: 2026-01-14T15:47:25+09:00
 slug: jeksio-deuraibeo-as-senteo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-14-003-jeksio-deuraibeo-as-senteo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -37,7 +37,7 @@ cover:
 
 **효율적인 상담 시간대 안내**
 
-![2026011414447.webp](assets/95bf51a1510dec1dee9c21c6dd5979d2cab2e3ed.webp)
+![2026011414447.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-003-jeksio-deuraibeo-as-senteo/95bf51a1510dec1dee9c21c6dd5979d2cab2e3ed.webp)
 
 점심시간인 오후 12시부터 1시 사이에는 상담원 연결이 지연될 수 있으므로 이 시간을 피해 전화를 거는 것이 좋습니다. 만약 대기 시간이 길다면 **오전 9시 30분부터 11시 30분 사이** 또는 **오후 2시부터 5시 사이**에 전화하는 것을 권장합니다. 이 시간대에 전화하면 상담원 대기 시간이 짧아 보다 신속한 상담을 받을 수 있습니다.
 
@@ -81,7 +81,7 @@ AS 접수는 3가지 방법으로 진행할 수 있습니다. 각 방법의 특�
 
 ## 젹시오 드라이버 무상 AS 조건
 
-![2026011414501.webp](assets/7bc76d5a7c73be5e5cfc0f50d4813e9325b50fba.webp)
+![2026011414501.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-003-jeksio-deuraibeo-as-senteo/7bc76d5a7c73be5e5cfc0f50d4813e9325b50fba.webp)
 
 AS를 받기 전에 가장 먼저 확인해야 할 것이 **무상 보증 기간**입니다. 보증 기간 내라면 수리 비용 없이 무상 수리를 받을 수 있습니다.
 
@@ -153,7 +153,7 @@ AS를 받기 위한 가장 중요한 조건은 **정품 확인**입니다.
 
 ## 젹시오 AS 신청 전 최종 체크리스트
 
-![2026011414507.webp](assets/cc1a77d3e62cf586fd48767973e800c2629ece95.webp)
+![2026011414507.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-003-jeksio-deuraibeo-as-senteo/cc1a77d3e62cf586fd48767973e800c2629ece95.webp)
 
 AS를 신청하기 전에 다음 사항들을 확인하면 불필요한 지연을 방지할 수 있습니다.
 

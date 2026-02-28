@@ -7,7 +7,7 @@ categories: [IT활용팁, 라이프]
 date: 2026-02-05 18:09:10+09:00
 slug: jeminai-saju-peurompeuteu-jedaero
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-061-jeminai-saju-peurompeuteu-jedaero/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 ## 정확도 200% 올리는 프롬프트 예시
 
-![8CgSi7CY.webp](assets/63f032c6c3fdb4ebd91972975053ca86a34a910b.webp)
+![8CgSi7CY.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-061-jeminai-saju-peurompeuteu-jedaero/63f032c6c3fdb4ebd91972975053ca86a34a910b.webp)
 
 아래는 실제로 사용할 수 있는 프롬프트 템플릿입니다. 복사해서 본인의 정보만 바꿔 입력하시면 됩니다.
 

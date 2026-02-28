@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['기계가공조립기능사', '기능사', '기계', '2026']
 slug: "2026-기계가공조립기능사-시험일정-최근-합격률-분석-필기-449-실기-705"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-23-2026-기계가공조립기능사-시험일정-최근-합격률-분석-필기-449-실기-705/thumbnail.webp"
   alt: "2026 기계가공조립기능사 시험일정 + 최근 합격률 분석 (필기 44.9% / 실기 70.5%)"
   hidden: false
 ---

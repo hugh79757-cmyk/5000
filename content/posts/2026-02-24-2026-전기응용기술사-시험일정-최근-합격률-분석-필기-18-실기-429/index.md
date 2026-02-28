@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['전기응용기술사', '기술사', '전기.전자', '2026']
 slug: "2026-전기응용기술사-시험일정-최근-합격률-분석-필기-18-실기-429"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-24-2026-전기응용기술사-시험일정-최근-합격률-분석-필기-18-실기-429/thumbnail.webp"
   alt: "2026 전기응용기술사 시험일정 + 최근 합격률 분석 (필기 1.8% / 실기 42.9%)"
   hidden: false
 ---

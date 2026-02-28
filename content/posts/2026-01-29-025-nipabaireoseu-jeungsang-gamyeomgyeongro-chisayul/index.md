@@ -9,7 +9,7 @@ author: ''
 thumbnail: ''
 slug: nipabaireoseu-jeungsang-gamyeomgyeongro-chisayul
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-025-nipabaireoseu-jeungsang-gamyeomgyeongro-chisayul/thumbnail.webp"
   alt: ""
   hidden: false
 ---

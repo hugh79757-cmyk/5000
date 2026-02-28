@@ -6,7 +6,7 @@ categories: [엔터테인먼트, 예능]
 date: 2026-01-28 16:44:50+09:00
 slug: punghyanggo2-sijeun1gwa-dalrajin-jeom
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-019-punghyanggo2-sijeun1gwa-dalrajin-jeom/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -36,7 +36,7 @@ cover:
 
 ## 여행지가 아시아에서 유럽으로
 
-![2026012813032.webp](assets/7189935d27e743b6310a8a930f1a38c91d7cb168.webp)
+![2026012813032.webp](https://img.rotcha.kr/images/rotcha/2026-01-28-019-punghyanggo2-sijeun1gwa-dalrajin-jeom/7189935d27e743b6310a8a930f1a38c91d7cb168.webp)
 
 시즌1은 **베트남** 이 무대였습니다. 하노이에서 시작해 고산도시 사파까지 이동하며 4개 에피소드가 공개되었습니다. 열대 기후의 베트남과 달리 사파는 고도가 높아 서늘하고 겨울에는 눈이 내리기도 하는 곳으로, 이색적인 풍경이 시청자들의 눈을 사로잡았습니다.
 
@@ -80,7 +80,7 @@ cover:
 
 ## 앞으로의 에피소드 예측
 
-![2026012813054.webp](assets/0bd14bec2de3edf97b9ea0f400b3c5b0c90e6596.webp)
+![2026012813054.webp](https://img.rotcha.kr/images/rotcha/2026-01-28-019-punghyanggo2-sijeun1gwa-dalrajin-jeom/0bd14bec2de3edf97b9ea0f400b3c5b0c90e6596.webp)
 
 시즌2의 예고편과 공개된 에피소드를 바탕으로 앞으로의 전개를 예측해봅니다.
 

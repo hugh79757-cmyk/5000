@@ -6,7 +6,7 @@ categories: [금융, 보험]
 date: 2026-01-21 21:30:27+09:00
 slug: samseonghwajae-gogaeksenteo-jeonhwabeonho-chongjeongri
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-013-samseonghwajae-gogaeksenteo-jeonhwabeonho-chongjeongri/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -16,7 +16,7 @@ cover:
 
 ## 삼성화재 대표 고객센터 연락처
 
-![zgJ145gh.webp](assets/ac04e9aea3f02580ce3221e0a2b4466e6444b64a.webp)
+![zgJ145gh.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-013-samseonghwajae-gogaeksenteo-jeonhwabeonho-chongjeongri/ac04e9aea3f02580ce3221e0a2b4466e6444b64a.webp)
 
 삼성화재의 대표 고객센터 번호는 **1588-5114** 입니다. 이 번호는 삼성화재의 모든 보험 관련 업무를 통합적으로 안내받을 수 있는 대표 창구로, 어떤 문의든 이 번호로 전화하면 해당 업무 담당 부서로 연결받을 수 있습니다.
 
@@ -44,7 +44,7 @@ cover:
 
 ## 업무별 상담 가능 시간 정리
 
-![fkwnoLEK.webp](assets/5395cdd6f0a20abebc1f7a03b51884d820301768.webp)
+![fkwnoLEK.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-013-samseonghwajae-gogaeksenteo-jeonhwabeonho-chongjeongri/5395cdd6f0a20abebc1f7a03b51884d820301768.webp)
 
 삼성화재 고객센터의 상담 가능 시간은 업무 유형에 따라 다르게 운영됩니다. 전화하기 전에 상담 가능 시간을 확인하시면 헛걸음을 피할 수 있습니다.
 

@@ -7,7 +7,7 @@ categories: [이민, 미국비자]
 date: 2026-01-25 16:19:42+09:00
 slug: 2026nyeon-h1b-bija-wanjeonhi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-007-2026nyeon-h1b-bija-wanjeonhi/thumbnail.webp"
   alt: ""
   hidden: false
 ---
