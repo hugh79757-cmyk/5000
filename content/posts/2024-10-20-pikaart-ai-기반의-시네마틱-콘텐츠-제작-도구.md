@@ -29,19 +29,19 @@ Pika.art는 인공지능(AI) 기술을 활용하여 텍스트나 이미지를 �
 - 사용자 친화적인 인터페이스복잡한 동영상 편집 프로그램과 달리, Pika.art는 매우 직관적이고 간편한 사용자 인터페이스를 제공합니다. 사용자는 몇 번의 클릭만으로도 원하는 동영상을 손쉽게 제작할 수 있으며, 초보자도 어렵지 않게 사용할 수 있는 것이 큰 장점입니다. 모든 기능이 간단한 메뉴로 정리되어 있어 별도의 교육 없이도 쉽게 이해하고 활용할 수 있습니다.
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/589_img.webp)
+![image](https://legacy-img.rotcha.kr/589_img.webp)
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/589_img_1.webp)
+![image](https://legacy-img.rotcha.kr/589_img_1.webp)
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/589_img_2.webp)
+![image](https://legacy-img.rotcha.kr/589_img_2.webp)
 
 
 
-![image](https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev/589_img_3.webp)
+![image](https://legacy-img.rotcha.kr/589_img_3.webp)
 
 
 
