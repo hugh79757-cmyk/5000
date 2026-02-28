@@ -48,19 +48,19 @@ slug: "10월-20일-넥슨-아이콘-매치-fc-spear-vs-shield-utd-최종-명단-
 
 
 
-![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7 2024-09-28 오후 4.04.26.webp)
+![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-09-28%20오후%204.04.26.webp)
 
 
 
-![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7 2024-09-28 오후 4.04.35.webp)
+![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-09-28%20오후%204.04.35.webp)
 
 
 
-![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7 2024-09-28 오후 4.05.13.webp)
+![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-09-28%20오후%204.05.13.webp)
 
 
 
-![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7 2024-09-28 오후 4.05.26.webp)
+![image](https://legacy-img.rotcha.kr/batch_%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202024-09-28%20오후%204.05.26.webp)
 
 
 
