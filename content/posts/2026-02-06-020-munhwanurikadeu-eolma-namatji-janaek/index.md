@@ -7,7 +7,7 @@ categories: [복지정보, 생활꿀팁]
 date: 2026-02-06 16:59:57+09:00
 slug: munhwanurikadeu-eolma-namatji-janaek
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-020-munhwanurikadeu-eolma-namatji-janaek/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -29,7 +29,7 @@ cover:
 
 두 번째는 **NH농협카드 고객센터 1644-4000** 입니다. 전화 연결 후 7번(기프트카드 및 문화누리카드), 5번(문화누리카드), 1번(잔액조회)을 순서대로 선택하면 됩니다. 카드 유효기간과 함께 현재 잔액을 확인할 수 있습니다. 24시간 이용 가능하므로 언제든 편한 시간에 전화하시면 됩니다.
 
-![Qvzfk4Z7.jpg](assets/2df8b280a89f5b1ad2e606203e3286afd6851e25.jpg)
+![Qvzfk4Z7.jpg](https://img.rotcha.kr/images/rotcha/2026-02-06-020-munhwanurikadeu-eolma-namatji-janaek/2df8b280a89f5b1ad2e606203e3286afd6851e25.jpg)
 
 ## 잔액 조회 방법 3번 농협카드 앱 연동
 

@@ -6,7 +6,7 @@ categories: [복지, 정부지원]
 date: 2026-01-28 16:44:50+09:00
 slug: nongsikpum-baucheo-wol-10manwon
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-013-nongsikpum-baucheo-wol-10manwon/thumbnail.webp"
   alt: ""
   hidden: false
 ---

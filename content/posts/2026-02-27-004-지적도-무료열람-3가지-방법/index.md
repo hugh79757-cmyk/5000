@@ -6,7 +6,7 @@ categories: [부동산, 생활정보]
 date: 2026-02-28 11:14:49+09:00
 slug: 지적도-무료열람-3가지-방법
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-27-004-지적도-무료열람-3가지-방법/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -28,7 +28,7 @@ cover:
 
 ## 방법 2. 토지이음에서 열람하기
 
-![UJYRSMPE.webp](assets/8e4485d43ea933a84be025168704c24befa0e70d.webp)
+![UJYRSMPE.webp](https://img.rotcha.kr/images/rotcha/2026-02-27-004-지적도-무료열람-3가지-방법/8e4485d43ea933a84be025168704c24befa0e70d.webp)
 
 **토지이음** 은 국토교통부가 운영하는 토지이용계획 열람 서비스로, 지적도뿐 아니라 용도지역, 지구, 구역 등 토지의 규제 정보까지 함께 확인할 수 있는 것이 장점입니다.
 

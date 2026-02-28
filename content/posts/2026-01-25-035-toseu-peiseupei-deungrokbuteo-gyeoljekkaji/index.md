@@ -6,7 +6,7 @@ categories: [생활정보]
 date: 2026-01-25 19:54:30+09:00
 slug: toseu-peiseupei-deungrokbuteo-gyeoljekkaji
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-035-toseu-peiseupei-deungrokbuteo-gyeoljekkaji/thumbnail.webp"
   alt: ""
   hidden: false
 ---

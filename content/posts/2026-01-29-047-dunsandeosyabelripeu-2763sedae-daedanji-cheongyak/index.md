@@ -7,7 +7,7 @@ categories: [부동산, 청약정보]
 date: 2026-01-29 18:45:17+09:00
 slug: dunsandeosyabelripeu-2763sedae-daedanji-cheongyak
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-047-dunsandeosyabelripeu-2763sedae-daedanji-cheongyak/thumbnail.webp"
   alt: ""
   hidden: false
 ---

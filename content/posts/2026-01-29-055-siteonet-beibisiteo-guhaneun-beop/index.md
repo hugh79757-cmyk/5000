@@ -7,7 +7,7 @@ categories: [육아, 생활정보]
 date: 2026-01-29 22:49:39+09:00
 slug: siteonet-beibisiteo-guhaneun-beop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-055-siteonet-beibisiteo-guhaneun-beop/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: [생활정보, 통신]
 date: 2026-02-02 17:53:26+09:00
 slug: skt-kt-lg-tongsin
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-02-026-skt-kt-lg-tongsin/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -26,7 +26,7 @@ cover:
 
 ## 미환급금 조회 방법 단계별 안내
 
-![H6tXK2JY.webp](assets/72a41df6678c767f3818a4270f1349b7193be208.webp)
+![H6tXK2JY.webp](https://img.rotcha.kr/images/rotcha/2026-02-02-026-skt-kt-lg-tongsin/72a41df6678c767f3818a4270f1349b7193be208.webp)
 
 스마트초이스에서 미환급금을 조회하는 방법은 다음과 같습니다.
 

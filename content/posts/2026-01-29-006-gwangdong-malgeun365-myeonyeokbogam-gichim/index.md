@@ -6,7 +6,7 @@ categories: [건강, 영양제]
 date: 2026-01-29 10:57:00+09:00
 slug: gwangdong-malgeun365-myeonyeokbogam-gichim
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-006-gwangdong-malgeun365-myeonyeokbogam-gichim/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ cover:
 
 ## 주요 성분과 기능성
 
-![2026012983537.webp](assets/21e7dedae325af20593c72893ee2ea53ccf66a4f.webp)
+![2026012983537.webp](https://img.rotcha.kr/images/rotcha/2026-01-29-006-gwangdong-malgeun365-myeonyeokbogam-gichim/21e7dedae325af20593c72893ee2ea53ccf66a4f.webp)
 
 광동 맑은365 면역보감의 핵심 성분은 호주산 프로폴리스추출물과 아연입니다. 프로폴리스는 벌이 나무의 수지를 모아 만든 천연 물질로, 강력한 항균과 항산화 작용을 합니다. 이 제품에는 플라보노이드가 일일 섭취량 최대치인 17mg 함유되어 있으며, 아연은 5.85mg이 들어 있습니다.
 

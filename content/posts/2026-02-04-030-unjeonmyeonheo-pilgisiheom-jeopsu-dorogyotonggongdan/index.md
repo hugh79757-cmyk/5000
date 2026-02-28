@@ -7,7 +7,7 @@ categories: [생활정보, 자동차]
 date: 2026-02-04 14:24:55+09:00
 slug: unjeonmyeonheo-pilgisiheom-jeopsu-dorogyotonggongdan
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-030-unjeonmyeonheo-pilgisiheom-jeopsu-dorogyotonggongdan/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -25,7 +25,7 @@ cover:
 
 ## 현장 접수 방법
 
-![Wn0BBVCo.webp](assets/69e02c0abaf7fc03220169d3e4b58bb928f3b380.webp)
+![Wn0BBVCo.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-030-unjeonmyeonheo-pilgisiheom-jeopsu-dorogyotonggongdan/69e02c0abaf7fc03220169d3e4b58bb928f3b380.webp)
 
 온라인 예약 없이 운전면허시험장에 직접 방문하여 당일 접수도 가능합니다. 오전 시험은 09:00~11:10, 오후 시험은 13:00~17:00에 접수할 수 있습니다. 다만 현장 접수는 인원 제한이 있을 수 있으므로 여유 있게 방문하는 것이 좋습니다.
 

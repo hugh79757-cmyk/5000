@@ -6,7 +6,7 @@ categories: [여행, 가족나들이]
 date: 2026-01-29 10:58:00+09:00
 slug: siheung-geobukseom-nunsseolmaejang-2026
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-012-siheung-geobukseom-nunsseolmaejang-2026/thumbnail.webp"
   alt: ""
   hidden: false
 ---

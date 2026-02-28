@@ -6,7 +6,7 @@ categories: [자동차, 보험]
 date: 2026-02-10 16:23:25+09:00
 slug: chakhanunjeon-mailriji-10jeom-ssaatneunde
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-009-chakhanunjeon-mailriji-10jeom-ssaatneunde/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 ## 보험료 할인과 연계하는 방법
 
-![ycqX8PnD.webp](assets/968e4058a62a3bda3b01047b907185d86a656388.webp)
+![ycqX8PnD.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-009-chakhanunjeon-mailriji-10jeom-ssaatneunde/968e4058a62a3bda3b01047b907185d86a656388.webp)
 
 착한운전 마일리지와 별개로, 보험사의 '마일리지 자동차보험' 특약을 활용할 수 있습니다.
 

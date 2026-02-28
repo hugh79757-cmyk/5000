@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['펄프종이제조기능사', '기능사', '농림어업', '2026']
 slug: "펄프종이제조기능사-난이도-어떨까-2026-합격률시험일정준비기간-정리"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-18-펄프종이제조기능사-난이도-어떨까-2026-합격률시험일정준비기간-정리/thumbnail.webp"
   alt: "펄프종이제조기능사 난이도 어떨까? 2026 합격률·시험일정·준비기간 정리"
   hidden: false
 aliases:

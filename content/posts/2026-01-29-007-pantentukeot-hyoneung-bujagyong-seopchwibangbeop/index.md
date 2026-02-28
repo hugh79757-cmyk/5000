@@ -7,7 +7,7 @@ categories: [건강, 다이어트]
 date: 2026-01-29 10:58:00+09:00
 slug: pantentukeot-hyoneung-bujagyong-seopchwibangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-007-pantentukeot-hyoneung-bujagyong-seopchwibangbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -19,7 +19,7 @@ cover:
 
 ## 판텐투컷 제품 정보
 
-![2026012983850.webp](assets/2ce56e4453e83cf1753f97bf0a2775275a164774.webp)
+![2026012983850.webp](https://img.rotcha.kr/images/rotcha/2026-01-29-007-pantentukeot-hyoneung-bujagyong-seopchwibangbeop/2ce56e4453e83cf1753f97bf0a2775275a164774.webp)
 
 판텐투컷의 정확한 제품 정보는 다음과 같습니다.
 

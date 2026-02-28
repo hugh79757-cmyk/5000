@@ -6,7 +6,7 @@ categories: [금융, 세금]
 date: 2026-01-28 02:12:27+09:00
 slug: haejihwangeupgeum-segeum-jonghapsodeukse-singo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-008-haejihwangeupgeum-segeum-jonghapsodeukse-singo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

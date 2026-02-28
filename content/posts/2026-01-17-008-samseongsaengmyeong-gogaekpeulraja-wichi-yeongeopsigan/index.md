@@ -7,7 +7,7 @@ categories: [금융, 보험]
 date: 2026-01-17 13:38:59+09:00
 slug: samseongsaengmyeong-gogaekpeulraja-wichi-yeongeopsigan
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-17-008-samseongsaengmyeong-gogaekpeulraja-wichi-yeongeopsigan/thumbnail.webp"
   alt: ""
   hidden: false
 ---

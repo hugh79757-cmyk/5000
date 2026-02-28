@@ -8,7 +8,7 @@ author: ''
 thumbnail: ''
 slug: 33-tteneun-iyu-peuriraenseo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-063-33-tteneun-iyu-peuriraenseo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

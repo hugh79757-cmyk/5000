@@ -6,7 +6,7 @@ categories: [보험, 생활정보]
 date: 2026-02-26 18:32:51+09:00
 slug: 에이스아메리칸화재-고객센터-1566-5800
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-060-에이스아메리칸화재-고객센터-1566-5800/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -28,7 +28,7 @@ cover:
 
 ## 보험 조회 방법
 
-![i44S05fc.webp](assets/1f68ac184028db018f9d8af38db343b97313e6db.webp)
+![i44S05fc.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-060-에이스아메리칸화재-고객센터-1566-5800/1f68ac184028db018f9d8af38db343b97313e6db.webp)
 
 가입한 보험의 내용을 조회하는 방법은 두 가지입니다. 첫째, 위의 고객센터 번호로 전화하여 본인 인증 후 상담원을 통해 확인할 수 있습니다. 둘째, 라이나손해보험 다이렉트 홈페이지(acedirect.co.kr)에 로그인하면 온라인으로 계약 내용, 보장 범위, 납입 이력 등을 조회할 수 있습니다.
 

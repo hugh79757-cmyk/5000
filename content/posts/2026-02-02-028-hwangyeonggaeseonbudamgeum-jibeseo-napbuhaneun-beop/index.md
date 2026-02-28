@@ -6,7 +6,7 @@ categories: [생활정보, 납부방법]
 date: 2026-02-02 17:53:26+09:00
 slug: hwangyeonggaeseonbudamgeum-jibeseo-napbuhaneun-beop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-02-028-hwangyeonggaeseonbudamgeum-jibeseo-napbuhaneun-beop/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 납부 절차는 다음과 같습니다. 위택스 접속 후 **납부하기** 메뉴를 선택합니다. **전자납부번호 조회납부** 를 클릭한 뒤 **지방세외수입** 을 선택합니다. 고지서에 기재된 전자납부번호 19자리를 입력하거나, 로그인 상태라면 자동 조회된 내역에서 납부할 항목을 선택합니다. 마지막으로 결제 수단을 선택하고 납부를 완료합니다.
 
-![Li68qrGF.webp](assets/4986ae998cfd4b629c03cd4c0f077689fa3b3766.webp)
+![Li68qrGF.webp](https://img.rotcha.kr/images/rotcha/2026-02-02-028-hwangyeonggaeseonbudamgeum-jibeseo-napbuhaneun-beop/4986ae998cfd4b629c03cd4c0f077689fa3b3766.webp)
 
 ## 비회원 납부 방법
 

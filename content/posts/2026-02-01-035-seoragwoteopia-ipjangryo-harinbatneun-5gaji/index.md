@@ -6,7 +6,7 @@ categories: [여행, 국내여행]
 date: 2026-02-01 14:00:19+09:00
 slug: seoragwoteopia-ipjangryo-harinbatneun-5gaji
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-035-seoragwoteopia-ipjangryo-harinbatneun-5gaji/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -38,7 +38,7 @@ cover:
 
 ## 설악워터피아 이용 시 알아두면 좋은 꿀팁
 
-![pHOkLhyi.webp](assets/752b53d19e5ee538dd0a949c96d83dcbeb23fef6.webp)
+![pHOkLhyi.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-035-seoragwoteopia-ipjangryo-harinbatneun-5gaji/752b53d19e5ee538dd0a949c96d83dcbeb23fef6.webp)
 
 수영복과 수영모는 반드시 착용해야 하며 캡모자도 가능합니다. 수영복 위에는 물이 빠지지 않는 얇은 의류에 한해 착용이 허용되므로 추운 겨울철에는 래시가드를 준비하면 좋습니다.
 

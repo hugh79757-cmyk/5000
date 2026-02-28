@@ -6,7 +6,7 @@ categories: [복지, 생활정보]
 date: 2026-01-23 17:52:41+09:00
 slug: gukminmeokgeorianjeonmang-jiwon-naeyonggwa-sayongcheo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-23-017-gukminmeokgeorianjeonmang-jiwon-naeyonggwa-sayongcheo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

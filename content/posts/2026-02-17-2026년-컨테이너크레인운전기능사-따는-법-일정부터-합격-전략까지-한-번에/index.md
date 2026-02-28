@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['컨테이너크레인운전기능사', '기능사', '건설', '2026']
 slug: "2026년-컨테이너크레인운전기능사-따는-법-일정부터-합격-전략까지-한-번에"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-17-2026년-컨테이너크레인운전기능사-따는-법-일정부터-합격-전략까지-한-번에/thumbnail.webp"
   alt: "2026년 컨테이너크레인운전기능사 따는 법 – 일정부터 합격 전략까지 한 번에"
   hidden: false
 aliases:

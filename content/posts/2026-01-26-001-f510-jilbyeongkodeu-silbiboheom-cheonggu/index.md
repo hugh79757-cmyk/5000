@@ -7,7 +7,7 @@ categories: [보험, 건강정보]
 date: 2026-01-26 12:09:46+09:00
 slug: f510-jilbyeongkodeu-silbiboheom-cheonggu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-26-001-f510-jilbyeongkodeu-silbiboheom-cheonggu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

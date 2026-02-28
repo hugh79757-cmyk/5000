@@ -7,7 +7,7 @@ categories: [엔터테인먼트, 드라마]
 date: 2026-01-25 16:19:42+09:00
 slug: i-sarang-tongyeok-doenayo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-009-i-sarang-tongyeok-doenayo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -19,7 +19,7 @@ cover:
 
 ## 후쿠시 소타 기본 프로필
 
-![2026012521408.webp](assets/7b26185fdf4a49a3da5e0fb836d91de418228ce7.webp)
+![2026012521408.webp](https://img.rotcha.kr/images/rotcha/2026-01-25-009-i-sarang-tongyeok-doenayo/7b26185fdf4a49a3da5e0fb836d91de418228ce7.webp)
 
 후쿠시 소타는 1993년 5월 30일 일본 도쿄에서 태어났습니다. 2026년 현재 만 32세로, 일본 연예계에서 한창 전성기를 누리고 있는 중견 배우입니다. 키 183cm의 훤칠한 체격과 부드러운 인상이 특징이며, 혈액형은 O형입니다. 소속사는 일본의 대형 연예 기획사인 켄온으로, 카메나시 카즈야, 야마시타 토모히사 등 유명 배우들이 소속된 곳입니다.
 
@@ -27,7 +27,7 @@ cover:
 
 ## 데뷔와 가면라이더 포제로 얻은 인지도
 
-![2026012521428.webp](assets/02d1ac242ab68110ad39186006b82f313c7b3b58.webp)
+![2026012521428.webp](https://img.rotcha.kr/images/rotcha/2026-01-25-009-i-sarang-tongyeok-doenayo/02d1ac242ab68110ad39186006b82f313c7b3b58.webp)
 
 후쿠시 소타의 이름을 일본 전역에 알린 작품은 단연 **가면라이더 포제** 입니다. 2011년부터 2012년까지 방영된 이 특촬물에서 그는 주인공 키사라기 겐타로 역을 맡아 1년간 시청자들과 만났습니다. 가면라이더 시리즈는 일본에서 오랜 역사를 가진 인기 프랜차이즈로, 이 시리즈의 주인공을 맡는다는 것은 신인 배우에게 엄청난 기회입니다.
 
@@ -51,7 +51,7 @@ cover:
 
 ## 이 사랑 통역 되나요에서의 쿠로사와 히로
 
-![2026012521417.webp](assets/05cec6be39ac98d23bb3b61d082cf27545713e6f.webp)
+![2026012521417.webp](https://img.rotcha.kr/images/rotcha/2026-01-25-009-i-sarang-tongyeok-doenayo/05cec6be39ac98d23bb3b61d082cf27545713e6f.webp)
 
 2026년 1월 넷플릭스를 통해 공개된 **이 사랑 통역 되나요** 에서 후쿠시 소타는 일본 배우 쿠로사와 히로 역을 맡았습니다. 이 작품은 다중언어 통역사 주호진이 글로벌 톱스타 차무희의 통역을 맡으면서 벌어지는 로맨틱 코미디입니다. 김선호가 통역사 주호진을, 고윤정이 톱스타 차무희를 연기합니다.
 

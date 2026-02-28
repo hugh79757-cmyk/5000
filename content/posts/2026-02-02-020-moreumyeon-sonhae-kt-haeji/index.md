@@ -6,7 +6,7 @@ categories: [생활정보, 통신]
 date: 2026-02-02 17:53:26+09:00
 slug: moreumyeon-sonhae-kt-haeji
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-02-020-moreumyeon-sonhae-kt-haeji/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -36,7 +36,7 @@ KT 공식 홈페이지에서 미환급금을 조회하는 방법은 다음과 �
 
 환급 신청 후에는 보통 **2주에서 4주 이내** 에 등록한 계좌로 입금됩니다. 입금이 완료되면 KT에서 문자로 안내해 드립니다.
 
-![zpbHbpvY.webp](assets/aa684d2b58ca9e55706393e76cb276c54b5edbaf.webp)
+![zpbHbpvY.webp](https://img.rotcha.kr/images/rotcha/2026-02-02-020-moreumyeon-sonhae-kt-haeji/aa684d2b58ca9e55706393e76cb276c54b5edbaf.webp)
 
 ## 마이케이티 앱에서 확인하는 방법
 

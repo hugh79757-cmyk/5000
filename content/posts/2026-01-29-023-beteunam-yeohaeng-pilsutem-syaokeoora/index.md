@@ -6,7 +6,7 @@ categories: [여행, 간식]
 date: '2026-01-29T15:21:46+09:00'
 slug: beteunam-yeohaeng-pilsutem-syaokeoora
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-023-beteunam-yeohaeng-pilsutem-syaokeoora/thumbnail.webp"
   alt: ""
   hidden: false
 ---

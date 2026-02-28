@@ -7,7 +7,7 @@ categories: [예능, 방송정보]
 date: 2026-01-15 13:38:00+09:00
 slug: kkothalbae-subal-jeonmun-iseojin
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-15-003-kkothalbae-subal-jeonmun-iseojin/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -25,7 +25,7 @@ cover:
 
 ## '꽃할배 수발 전문' 이서진의 매력
 
-![20260115113515.webp](assets/55ef7875b9c7b590f6db1083f4c33a1ebc1ab336.webp)
+![20260115113515.webp](https://img.rotcha.kr/images/rotcha/2026-01-15-003-kkothalbae-subal-jeonmun-iseojin/55ef7875b9c7b590f6db1083f4c33a1ebc1ab336.webp)
 
 **이서진**은 '꽃할배'라는 애정 어린 별명으로 불리며 예능에서 자신의 독특한 매력을 드러내고 있습니다. 평소 남에게 무심해 보이던 그가 선배나 출연자를 위해서라면 손을 직접 마사지해주고, 옷매무새를 정돈해주며 정성스러운 수발을 펼친다고 알려져 있습니다.
 
@@ -63,7 +63,7 @@ cover:
 
 ## 예고편 속 감동의 순간들
 
-![20260115113430.webp](assets/5fd08df6cc6efc17f75f8bf07a16ce0b4615324b.webp)
+![20260115113430.webp](https://img.rotcha.kr/images/rotcha/2026-01-15-003-kkothalbae-subal-jeonmun-iseojin/5fd08df6cc6efc17f75f8bf07a16ce0b4615324b.webp)
 
 공개된 예고편에서 눈에 띄는 순간들은 다음과 같습니다:
 

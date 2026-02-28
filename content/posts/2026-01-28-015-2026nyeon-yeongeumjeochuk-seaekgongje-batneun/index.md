@@ -7,7 +7,7 @@ categories: [재테크, 세금]
 date: 2026-01-28 16:44:50+09:00
 slug: 2026nyeon-yeongeumjeochuk-seaekgongje-batneun
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-015-2026nyeon-yeongeumjeochuk-seaekgongje-batneun/thumbnail.webp"
   alt: ""
   hidden: false
 ---

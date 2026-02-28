@@ -6,7 +6,7 @@ categories: [금융, 대출]
 date: 2026-02-04 14:24:55+09:00
 slug: 1eok-daechul-si-wol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-001-1eok-daechul-si-wol/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 ## 상환 방식별 차이점
 
-![qfpgDPR6.jpg](assets/08de452b8bfd11c4e2acb41e09e000610e32d440.jpg)
+![qfpgDPR6.jpg](https://img.rotcha.kr/images/rotcha/2026-02-04-001-1eok-daechul-si-wol/08de452b8bfd11c4e2acb41e09e000610e32d440.jpg)
 
 주택담보대출의 상환 방식은 크게 세 가지입니다. **원리금균등상환** 은 매달 같은 금액을 납부하는 방식으로, 초반에는 이자 비중이 높고 점점 원금 비중이 높아집니다. 자금 계획을 세우기 쉬워 가장 많이 선택하는 방식입니다.
 

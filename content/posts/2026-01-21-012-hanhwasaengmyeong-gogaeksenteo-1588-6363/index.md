@@ -19,7 +19,7 @@ slug: hanhwasaengmyeong-gogaeksenteo-1588-6363
 
 ## 음성 ARS 메뉴 구성
 
-![Amodernprofessionalgraphicdesignshowcasinga1768984052121.webp](assets/3a81cdb7354c0c142eaab4eb007173f4bdedd9ed.webp)
+![Amodernprofessionalgraphicdesignshowcasinga1768984052121.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-012-hanhwasaengmyeong-gogaeksenteo-1588-6363/3a81cdb7354c0c142eaab4eb007173f4bdedd9ed.webp)
 
 음성 ARS에서 이용할 수 있는 메뉴를 번호별로 정리하면 다음과 같습니다.
 

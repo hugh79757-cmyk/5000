@@ -7,7 +7,7 @@ categories: [푸드, 제품리뷰]
 date: 2026-01-26 12:08:46+09:00
 slug: awohom-ondeogo-dosirak-soljik
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-26-003-awohom-ondeogo-dosirak-soljik/thumbnail.webp"
   alt: ""
   hidden: false
 ---

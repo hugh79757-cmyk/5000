@@ -6,7 +6,7 @@ categories: [여행]
 date: 2026-02-11 23:30:14+09:00
 slug: seol-yeonhyu-gosokdoro-tonghaengryo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-049-seol-yeonhyu-gosokdoro-tonghaengryo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 ## KTX 역귀성 50% 할인
 
-![luezxxjJ.webp](assets/e526e4a76e738338aadc346ea4cd637939f5c898.webp)
+![luezxxjJ.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-049-seol-yeonhyu-gosokdoro-tonghaengryo/e526e4a76e738338aadc346ea4cd637939f5c898.webp)
 
 서울 등 수도권에서 지방으로 내려가는 하행 열차는 좌석 경쟁이 치열하지만, 지방에서 수도권으로 올라오는 역귀성 열차는 비교적 여유롭습니다. 정부는 역귀성 수요를 분산하기 위해 역귀성 KTX 열차에 50% 할인을 적용합니다.
 

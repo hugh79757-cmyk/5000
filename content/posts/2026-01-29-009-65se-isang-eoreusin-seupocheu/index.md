@@ -7,7 +7,7 @@ categories: [복지, 생활정보]
 date: 2026-01-29 10:58:00+09:00
 slug: 65se-isang-eoreusin-seupocheu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-009-65se-isang-eoreusin-seupocheu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

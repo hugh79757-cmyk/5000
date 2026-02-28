@@ -5,7 +5,7 @@ _origin: 2026-01-23-019-2026nyeon-3wol-tonghapdolbom-sihaengeuro
 date: 2026-01-25 16:19:42+09:00
 slug: 2026nyeon-sihaeng-dolbomtonghapjiwonbeobui-juyo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-002-2026nyeon-sihaeng-dolbomtonghapjiwonbeobui-juyo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -35,7 +35,7 @@ cover:
 
 ## ## 지역 서비스 확충 및 예산 배정
 
-![1EwKPf09.webp](assets/3c8a0b608efe2dd2b51e95b46ca93d33e9ed6607.webp)
+![1EwKPf09.webp](https://img.rotcha.kr/images/rotcha/2026-01-25-002-2026nyeon-sihaeng-dolbomtonghapjiwonbeobui-juyo/3c8a0b608efe2dd2b51e95b46ca93d33e9ed6607.webp)
 
 2026년 통합돌봄 예산의 620억 원은 지역 서비스 확충을 위해 사용되며, 서비스 격차를 줄이고 부족한 지역에 집중적으로 투입됩니다. 또한, 전문 인력의 양성도 계획되어 다양한 직종의 협력 체계를 구축할 예정입니다.
 

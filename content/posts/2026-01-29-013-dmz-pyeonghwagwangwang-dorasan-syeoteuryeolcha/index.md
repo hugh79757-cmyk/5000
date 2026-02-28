@@ -6,7 +6,7 @@ categories: [여행, 국내여행]
 date: 2026-01-29 10:58:00+09:00
 slug: dmz-pyeonghwagwangwang-dorasan-syeoteuryeolcha
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-013-dmz-pyeonghwagwangwang-dorasan-syeoteuryeolcha/thumbnail.webp"
   alt: ""
   hidden: false
 ---

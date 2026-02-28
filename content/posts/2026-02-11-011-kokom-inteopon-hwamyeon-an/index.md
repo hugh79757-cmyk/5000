@@ -6,7 +6,7 @@ categories: [가전]
 date: 2026-02-11 11:17:20+09:00
 slug: kokom-inteopon-hwamyeon-an
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-011-kokom-inteopon-hwamyeon-an/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -20,7 +20,7 @@ cover:
 
 ## 코콤 고객센터 연락처 및 운영 시간
 
-![LVIWyALG.webp](assets/f16e7303107283d3b4bb16f113f57209b1bdacc3.webp)
+![LVIWyALG.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-011-kokom-inteopon-hwamyeon-an/f16e7303107283d3b4bb16f113f57209b1bdacc3.webp)
 
 자가점검 후에도 증상이 계속된다면 AS를 신청해야 합니다. 코콤 통합 고객센터 전화번호는 1577-0051이며, 평일 오전 9시부터 오후 6시까지 운영됩니다. 점심시간인 12시부터 13시 사이에는 상담이 어려울 수 있습니다.
 

@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['천장크레인운전기능사', '기능사', '건설', '2026']
 slug: "천장크레인운전기능사-독학으로-붙을-수-있을까-2026-일정합격률전략-총정리"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-23-천장크레인운전기능사-독학으로-붙을-수-있을까-2026-일정합격률전략-총정리/thumbnail.webp"
   alt: "천장크레인운전기능사 독학으로 붙을 수 있을까? 2026 일정·합격률·전략 총정리"
   hidden: false
 ---

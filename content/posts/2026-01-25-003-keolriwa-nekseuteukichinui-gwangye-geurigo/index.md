@@ -7,7 +7,7 @@ categories: [경제, 기업분석]
 date: 2026-01-25 16:19:42+09:00
 slug: keolriwa-nekseuteukichinui-gwangye-geurigo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-003-keolriwa-nekseuteukichinui-gwangye-geurigo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

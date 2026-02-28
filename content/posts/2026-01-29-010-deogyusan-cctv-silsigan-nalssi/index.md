@@ -6,7 +6,7 @@ date: 2026-01-29 10:58:00+09:00
 tags: [덕유산, 덕유산 CCTV, 덕유산 실시간, 덕유산 날씨, 무주 덕유산, 상고대, 덕유산 곤돌라, 설천봉]
 slug: deogyusan-cctv-silsigan-nalssi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-010-deogyusan-cctv-silsigan-nalssi/thumbnail.webp"
   alt: ""
   hidden: false
 ---

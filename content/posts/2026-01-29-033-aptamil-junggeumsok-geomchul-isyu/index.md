@@ -6,7 +6,7 @@ categories: [육아, 식품안전]
 date: 2026-01-29 18:45:17+09:00
 slug: aptamil-junggeumsok-geomchul-isyu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-033-aptamil-junggeumsok-geomchul-isyu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

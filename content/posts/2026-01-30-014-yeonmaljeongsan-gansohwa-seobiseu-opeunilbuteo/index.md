@@ -7,7 +7,7 @@ categories: [세금, 연말정산]
 date: 2026-01-31 00:06:47+09:00
 slug: yeonmaljeongsan-gansohwa-seobiseu-opeunilbuteo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-30-014-yeonmaljeongsan-gansohwa-seobiseu-opeunilbuteo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

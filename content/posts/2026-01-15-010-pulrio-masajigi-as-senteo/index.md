@@ -7,7 +7,7 @@ categories: [생활정보, 전자제품]
 date: 2026-01-15 22:46:01+09:00
 slug: pulrio-masajigi-as-senteo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-15-010-pulrio-masajigi-as-senteo/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -25,7 +25,7 @@ cover:
 
 ## 풀리오 AS 접수 방법
 
-![2026011583522.webp](assets/da9fc99aa636955a476c54487632bad462cca188.webp)
+![2026011583522.webp](https://img.rotcha.kr/images/rotcha/2026-01-15-010-pulrio-masajigi-as-senteo/da9fc99aa636955a476c54487632bad462cca188.webp)
 
 풀리오 AS 접수는 **전화 접수**와 **카카오톡 접수** 두 가지 방법으로 진행할 수 있습니다. 전화로 접수할 경우 1551-0879로 전화를 걸어 문제 증상을 설명하고, 구매 정보(구매처, 주문 번호, 구매 날짜)를 제공하면 AS 접수가 완료됩니다. 이후 풀리오에서 지정한 택배사가 방문하여 제품을 수거합니다.
 
@@ -33,7 +33,7 @@ cover:
 
 **중요한 점**은 교환 및 반품 진행을 위한 택배 접수는 풀리오에서 직접 진행한다는 것입니다. 임의로 택배를 발송하면 분실 우려가 있고 처리가 불가할 수 있으므로, 반드시 고객센터를 통해 정식으로 접수한 후 안내에 따라 진행해야 합니다.
 
-![2026011583450.webp](assets/a2558d0bbf3043084eb2975ca8fa435fbf27c83d.webp)
+![2026011583450.webp](https://img.rotcha.kr/images/rotcha/2026-01-15-010-pulrio-masajigi-as-senteo/a2558d0bbf3043084eb2975ca8fa435fbf27c83d.webp)
 
 ## 풀리오 마사지기 품질 보증 기간 안내
 
@@ -49,7 +49,7 @@ cover:
 
 반면 **사용자 과실로 인한 손상**은 유상 처리 대상입니다. 제품을 떨어뜨렸거나 침수되었거나, 고의적으로 분해를 시도했거나, 충격으로 인해 파손된 경우가 이에 해당합니다. 또한 지나친 힘으로 조작하거나 극한의 온도 환경에서 사용하거나 제조사 미승인 부품을 사용한 경우도 정상 사용 범위를 벗어난 것으로 판단되어 유상 처리될 수 있습니다. 부품만 별도로 구매하는 것은 불가능하며, 자체적으로 제품을 분해하거나 재조립하는 경우 서비스 제한이 있을 수 있으니 주의해야 합니다.
 
-![2026011583433.webp](assets/0db9a0e41ca92de59877d8dd4dec129055747e2e.webp)
+![2026011583433.webp](https://img.rotcha.kr/images/rotcha/2026-01-15-010-pulrio-masajigi-as-senteo/0db9a0e41ca92de59877d8dd4dec129055747e2e.webp)
 
 ## 풀리오 AS 소요 기간
 

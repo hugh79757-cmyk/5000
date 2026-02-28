@@ -7,7 +7,7 @@ categories: [취업정보, IT채용]
 date: 2026-02-01 01:45:46+09:00
 slug: hyeondaeotoebeo-itjikgun-chaeyong-peuroseseu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-31-015-hyeondaeotoebeo-itjikgun-chaeyong-peuroseseu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: [자동차, 수입차]
 date: 2026-02-01 12:52:28+09:00
 slug: 2025-bolbo-xc90-gagyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-028-2025-bolbo-xc90-gagyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -20,7 +20,7 @@ XC90의 가장 큰 특징은 **7인승 구성**입니다. 프리미엄 대형 SU
 
 ## 2025년형 트림별 가격
 
-![4nfggX87.webp](assets/3deb20d39251259c8ebfe3c03e92889ab58fcb83.webp)
+![4nfggX87.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-028-2025-bolbo-xc90-gagyeok/3deb20d39251259c8ebfe3c03e92889ab58fcb83.webp)
 
 2025년형 볼보 XC90은 **마일드 하이브리드(B6)**와 **플러그인 하이브리드(T8)** 두 가지 파워트레인으로 구성됩니다.
 
@@ -40,7 +40,7 @@ AWD(상시 사륜구동)가 기본 적용되어 눈길이나 빗길에서도 안
 
 ## T8 플러그인 하이브리드 상세 스펙
 
-![Z75CVFVk.webp](assets/469e27e28f8946e35b2e67db13bd4232ec4adf7d.webp)
+![Z75CVFVk.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-028-2025-bolbo-xc90-gagyeok/469e27e28f8946e35b2e67db13bd4232ec4adf7d.webp)
 
 T8 모델은 **2.0리터 터보 엔진과 전기 모터**의 조합으로 시스템 총 출력 455마력을 발휘합니다. 0-100km/h 가속 시간은 약 5.4초로, 대형 SUV로서는 상당히 빠른 편입니다.
 
@@ -66,7 +66,7 @@ T8 모델은 **2.0리터 터보 엔진과 전기 모터**의 조합으로 시스
 
 ## 구매 추천 트림
 
-![DfQCRGY9.webp](assets/3a8a7fd822f65e6153b083ae65ce90e479773d1c.webp)
+![DfQCRGY9.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-028-2025-bolbo-xc90-gagyeok/3a8a7fd822f65e6153b083ae65ce90e479773d1c.webp)
 
 가성비를 중시한다면 **B6 Plus Bright** 트림을 추천합니다. 8,820만원에 볼보의 핵심 가치인 안전과 품질을 모두 경험할 수 있습니다. 부족한 옵션은 애프터마켓에서 보완할 수 있습니다.
 

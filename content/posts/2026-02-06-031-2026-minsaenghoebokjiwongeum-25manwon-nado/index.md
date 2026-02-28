@@ -7,7 +7,7 @@ categories: [생활정보, 정부지원금]
 date: 2026-02-06 16:58:57+09:00
 slug: 2026-minsaenghoebokjiwongeum-25manwon-nado
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-031-2026-minsaenghoebokjiwongeum-25manwon-nado/thumbnail.webp"
   alt: ""
   hidden: false
 ---

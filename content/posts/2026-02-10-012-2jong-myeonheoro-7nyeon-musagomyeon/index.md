@@ -6,7 +6,7 @@ categories: [자동차, 면허]
 date: 2026-02-10 16:23:25+09:00
 slug: 2jong-myeonheoro-7nyeon-musagomyeon
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-012-2jong-myeonheoro-7nyeon-musagomyeon/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -29,7 +29,7 @@ cover:
 
 ## 2025년부터 달라진 점
 
-![rBFjak9t.webp](assets/25b3c1382b2231b5d1437c547a8ec3172a3e1810.webp)
+![rBFjak9t.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-012-2jong-myeonheoro-7nyeon-musagomyeon/25b3c1382b2231b5d1437c547a8ec3172a3e1810.webp)
 
 2025년부터 1종 자동조건부 면허 갱신 조건이 강화되었습니다.
 

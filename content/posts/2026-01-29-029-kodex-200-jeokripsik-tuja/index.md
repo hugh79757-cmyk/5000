@@ -6,7 +6,7 @@ categories: [투자, ETF]
 date: 2026-01-29 18:45:17+09:00
 slug: kodex-200-jeokripsik-tuja
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-029-kodex-200-jeokripsik-tuja/thumbnail.webp"
   alt: ""
   hidden: false
 ---

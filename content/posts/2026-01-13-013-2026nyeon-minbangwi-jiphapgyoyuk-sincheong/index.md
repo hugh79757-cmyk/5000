@@ -18,7 +18,7 @@ slug: "2026nyeon-minbangwi-jiphapgyoyuk-sincheong"
 
 ## 민방위 교육 대상자와 연차별 교육 방식
 
-![2026011393337.webp](assets/47e4dba2259560ae1ef614942103a6dc54831049.webp)
+![2026011393337.webp](https://img.rotcha.kr/images/rotcha/2026-01-13-013-2026nyeon-minbangwi-jiphapgyoyuk-sincheong/47e4dba2259560ae1ef614942103a6dc54831049.webp)
 
 민방위 대원은 만 20세 이상 만 40세 이하의 대한민국 국민 중 현역·예비역 복무를 마친 사람이 해당됩니다. 군 전역 후 8년간 예비군 훈련을 마치면 그 다음 해부터 민방위 대원으로 편성되어 교육을 받게 됩니다.
 
@@ -46,7 +46,7 @@ slug: "2026nyeon-minbangwi-jiphapgyoyuk-sincheong"
 
 ## 민방위 교육 이수증 발급 방법
 
-![2026011393509.webp](assets/796479ee50a94767257051d6b6ca20b971b3c88f.webp)
+![2026011393509.webp](https://img.rotcha.kr/images/rotcha/2026-01-13-013-2026nyeon-minbangwi-jiphapgyoyuk-sincheong/796479ee50a94767257051d6b6ca20b971b3c88f.webp)
 
 교육을 이수한 후에는 이수증을 발급받아 회사나 기관에 제출해야 하는 경우가 있습니다. 민방위 교육 이수증은 **민방위 전자출결센터(ktongji.or.kr)** 또는 각 지역별 민방위 교육 사이트에서 발급받을 수 있습니다.
 
@@ -64,7 +64,7 @@ slug: "2026nyeon-minbangwi-jiphapgyoyuk-sincheong"
 
 민방위 교육 일정은 보통 3월부터 시작하여 11월까지 진행되며, 보충 교육을 포함하면 12월까지 운영됩니다. 연말에 급하게 교육을 받으려 하면 일정이 마감되거나 선택의 폭이 좁아질 수 있으므로, 가능하면 상반기 중에 미리 이수해두는 것을 권장합니다.
 
-![2026011393550.webp](assets/7eb089d1d545bd4d60133462f1149858ea9a45ff.webp)
+![2026011393550.webp](https://img.rotcha.kr/images/rotcha/2026-01-13-013-2026nyeon-minbangwi-jiphapgyoyuk-sincheong/7eb089d1d545bd4d60133462f1149858ea9a45ff.webp)
 
 ## 마무리
 

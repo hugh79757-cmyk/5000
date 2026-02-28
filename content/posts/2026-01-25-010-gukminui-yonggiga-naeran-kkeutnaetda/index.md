@@ -7,7 +7,7 @@ categories: [시사, 법률]
 date: 2026-01-25 16:18:42+09:00
 slug: gukminui-yonggiga-naeran-kkeutnaetda
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-010-gukminui-yonggiga-naeran-kkeutnaetda/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -19,7 +19,7 @@ cover:
 
 
 
-![2026012521710.webp](assets/fdcc1275ff338e7d55a7c9c683a804ed4168e4b4.webp)
+![2026012521710.webp](https://img.rotcha.kr/images/rotcha/2026-01-25-010-gukminui-yonggiga-naeran-kkeutnaetda/fdcc1275ff338e7d55a7c9c683a804ed4168e4b4.webp)
 
 
 

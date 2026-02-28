@@ -7,7 +7,7 @@ categories: [세금, 경영]
 date: 2026-02-10 20:30:59+09:00
 slug: gasugeum-10eok-neomeumyeon-semujosa
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-029-gasugeum-10eok-neomeumyeon-semujosa/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 ## 세무조사에서 가수금이 문제되는 이유
 
-![2sU96TLC.webp](assets/9e574065e0b6900b8043fc704a15c40bfcf28460.webp)
+![2sU96TLC.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-029-gasugeum-10eok-neomeumyeon-semujosa/9e574065e0b6900b8043fc704a15c40bfcf28460.webp)
 
 세무서는 가수금을 **매출 누락** 의 증거로 봅니다. 실제로는 매출이 발생했는데 신고하지 않고 가수금으로 처리한 것 아니냐는 의심입니다. 이 경우 부가가치세, 법인세 추징과 가산세가 부과됩니다.
 

@@ -6,7 +6,7 @@ categories: [맛집, 엔터테인먼트]
 date: 2026-02-03 23:49:25+09:00
 slug: cheonhajeppang-churyeonja-ppangjip-wichiwa
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-03-058-cheonhajeppang-churyeonja-ppangjip-wichiwa/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -56,7 +56,7 @@ K-푸드에 이어 **K-베이커리** 열풍이 불고 있습니다. MBN에서 �
 
 [레브두 네이버 지도](https://naver.me/5yx6BQLJ)
 
-![xYta7mWq.webp](assets/4f5ca7f7d7cb6c1ea47106e8f573f36144165b7b.webp)
+![xYta7mWq.webp](https://img.rotcha.kr/images/rotcha/2026-02-03-058-cheonhajeppang-churyeonja-ppangjip-wichiwa/4f5ca7f7d7cb6c1ea47106e8f573f36144165b7b.webp)
 
 ## 경기도 양주 빵집
 

@@ -6,7 +6,7 @@ categories: [생활]
 date: 2026-02-11 23:30:14+09:00
 slug: seol-myeongjeol-jangbogi-jeone
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-048-seol-myeongjeol-jangbogi-jeone/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -26,7 +26,7 @@ cover:
 
 ## 온누리상품권 사용처
 
-![6qLaMT0a.webp](assets/ac040d11289d0f400fe26b327ea23bd2b6e23d00.webp)
+![6qLaMT0a.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-048-seol-myeongjeol-jangbogi-jeone/ac040d11289d0f400fe26b327ea23bd2b6e23d00.webp)
 
 온누리상품권은 전국 전통시장과 상점가 가맹점에서 사용할 수 있습니다. 시장 입구나 매장에 온누리상품권 가맹점 스티커가 부착되어 있으니 확인 후 사용하시면 됩니다.
 

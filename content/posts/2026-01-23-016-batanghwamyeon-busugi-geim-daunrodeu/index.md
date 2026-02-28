@@ -7,7 +7,7 @@ categories: [게임, 유틸리티]
 date: 2026-01-23 17:53:41+09:00
 slug: batanghwamyeon-busugi-geim-daunrodeu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-23-016-batanghwamyeon-busugi-geim-daunrodeu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

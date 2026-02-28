@@ -7,7 +7,7 @@ categories: [금융, 생활꿀팁]
 date: 2026-01-23 17:53:41+09:00
 slug: netpeulrikseu-kupang-neibeo-30
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-23-014-netpeulrikseu-kupang-neibeo-30/thumbnail.webp"
   alt: ""
   hidden: false
 ---

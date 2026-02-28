@@ -6,7 +6,7 @@ categories: [생활정보, 앱리뷰]
 date: 2026-02-26 17:01:21+09:00
 slug: 빠른길찾기-어떤-앱이-가장
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-042-빠른길찾기-어떤-앱이-가장/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -28,7 +28,7 @@ cover:
 
 카카오택시, 카카오T 등 카카오 모빌리티 생태계와의 연동이 자연스럽다는 점도 장점입니다. 맛집, 카페 등 주변 추천 정보가 풍부하여 목적지 주변 탐색에 유리하며, 카카오톡으로 경로를 바로 공유할 수 있는 편의성도 갖추고 있습니다.
 
-![4ZHcuShL.webp](assets/b04962a01d958a377084bea311391d5ccb6212b3.webp)
+![4ZHcuShL.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-042-빠른길찾기-어떤-앱이-가장/b04962a01d958a377084bea311391d5ccb6212b3.webp)
 
 ## 네이버지도의 빠른길찾기 특징
 

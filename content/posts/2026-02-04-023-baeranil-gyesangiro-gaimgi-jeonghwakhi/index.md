@@ -7,7 +7,7 @@ categories: [건강, 여성건강]
 date: 2026-02-04 14:24:55+09:00
 slug: baeranil-gyesangiro-gaimgi-jeonghwakhi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-023-baeranil-gyesangiro-gaimgi-jeonghwakhi/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -23,7 +23,7 @@ cover:
 
 ## 온라인 배란일 계산기 활용법
 
-![Wr7Bs1m2.webp](assets/ec5c8a46c139aaf2de953915e5bd6efc0627b769.webp)
+![Wr7Bs1m2.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-023-baeranil-gyesangiro-gaimgi-jeonghwakhi/ec5c8a46c139aaf2de953915e5bd6efc0627b769.webp)
 
 현재 다양한 온라인 배란일 계산기가 제공되고 있습니다. [Clearblue 배란일 계산기](https://kr.clearblue.com/how-to-get-pregnant/ovulation-calculator)나 [원포 배란일 계산기](https://wondfo.co.kr/page/pregnancy/calculation.html) 등을 활용하면 마지막 생리 시작일과 평균 생리 주기만 입력하여 배란 예정일과 가임기를 자동으로 확인할 수 있습니다.
 

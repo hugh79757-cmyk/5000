@@ -7,7 +7,7 @@ categories: [생활정보, 금융정보]
 date: 2026-02-06 17:34:03+09:00
 slug: kpaeseu-moduuikadeu-sincheongbangbeopgwa-wol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-045-kpaeseu-moduuikadeu-sincheongbangbeopgwa-wol/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 ## 대상별 월 상한 금액
 
-![A0EvYa7z.webp](assets/e23c452d728ce352e93df9ad0e8b01236f11baed.webp)
+![A0EvYa7z.webp](https://img.rotcha.kr/images/rotcha/2026-02-06-045-kpaeseu-moduuikadeu-sincheongbangbeopgwa-wol/e23c452d728ce352e93df9ad0e8b01236f11baed.webp)
 
 가입자의 조건에 따라 월 상한 금액이 다르게 적용됩니다. 일반형 기준 일반 국민은 62,000원, 청년과 어르신, 2자녀 부모는 55,000원, 3자녀 이상 부모와 저소득층은 45,000원입니다.
 

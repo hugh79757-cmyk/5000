@@ -6,7 +6,7 @@ categories: [부동산, 재테크]
 date: 2026-02-26 13:38:50+09:00
 slug: 부동산홈-실거래가-조회부터-시세
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-011-부동산홈-실거래가-조회부터-시세/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -38,7 +38,7 @@ GIS(지리정보시스템) 서비스를 이용하면 지도 위에서 직관적�
 
 정부 기관의 데이터 외에, **KB부동산(KB Land)** 과 **네이버 부동산** 도 병행하여 활용하면 보다 풍부한 정보를 얻을 수 있습니다.
 
-![EQcwv8em.webp](assets/60b10e3556eac2f78b964054697adeaeec548106.webp)
+![EQcwv8em.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-011-부동산홈-실거래가-조회부터-시세/60b10e3556eac2f78b964054697adeaeec548106.webp)
 
 KB부동산은 KB국민은행이 운영하는 서비스로, 아파트 시세, AI 예측 시세, 실거래가, 분양 정보, 세금 계산기 등을 종합적으로 제공합니다. 특히 KB 시세는 은행 대출 심사의 기준이 되므로, 대출 가능 금액을 가늠하는 데 필수적인 정보입니다.
 

@@ -6,7 +6,7 @@ categories: [가전, AS정보]
 date: 2026-02-11 11:22:28+09:00
 slug: tepal-cheongsogi-gogaeksenteo-mit
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-11-002-tepal-cheongsogi-gogaeksenteo-mit/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 ## 전국 서비스센터 위치
 
-![D9s7B8xu.webp](assets/43e9b8499192d5b5af143ac7819276e169588be6.webp)
+![D9s7B8xu.webp](https://img.rotcha.kr/images/rotcha/2026-02-11-002-tepal-cheongsogi-gogaeksenteo-mit/43e9b8499192d5b5af143ac7819276e169588be6.webp)
 
 테팔 청소기 AS는 전국 위니아에이드 서비스센터에서 진행됩니다. 서울 지역의 경우 **강남서비스센터** (서울특별시 강남구 봉은사로 119 성옥빌딩 3층), **마포서비스센터** (서울 마포구 월드컵로 96 영훈빌딩 3층), **관악서비스센터** 등이 있습니다.
 

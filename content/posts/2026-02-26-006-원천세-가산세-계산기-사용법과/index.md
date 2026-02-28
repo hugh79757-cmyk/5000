@@ -6,7 +6,7 @@ categories: [세금, 실무가이드]
 date: 2026-02-26 13:31:23+09:00
 slug: 원천세-가산세-계산기-사용법과
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-006-원천세-가산세-계산기-사용법과/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -32,7 +32,7 @@ cover:
 
 계산 결과를 확인한 후 그대로 납부까지 진행할 수 있으므로, 별도의 수기 계산 없이 정확한 금액을 납부할 수 있습니다.
 
-![HyBrsz5p.webp](assets/6fc41382fb07d027011b97840a1437a9b1220474.webp)
+![HyBrsz5p.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-006-원천세-가산세-계산기-사용법과/6fc41382fb07d027011b97840a1437a9b1220474.webp)
 
 ## 기한후신고와 가산세 감면 혜택
 

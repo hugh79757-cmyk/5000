@@ -6,7 +6,7 @@ categories: [금융, 보험]
 date: 2026-01-21 21:30:27+09:00
 slug: samseonghwajae-kolsenteo-jeonhwabeonho-sagojeopsu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-014-samseonghwajae-kolsenteo-jeonhwabeonho-sagojeopsu/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -14,7 +14,7 @@ cover:
 
 이 글에서는 삼성화재의 사고접수, 보험금청구, 대출상담 등 주요 업무별 전화번호를 한곳에 모았습니다. 필요한 업무에 해당하는 연락처를 확인하시고 효율적으로 이용하시기 바랍니다.
 
-![AE4wEdZq1.webp](assets/38b328a0cca832aa9234b16470a1d150c3d4e974.webp)
+![AE4wEdZq1.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-014-samseonghwajae-kolsenteo-jeonhwabeonho-sagojeopsu/38b328a0cca832aa9234b16470a1d150c3d4e974.webp)
 
 
 
@@ -54,7 +54,7 @@ cover:
 
 ## 퇴직연금 및 연금 상담 연락처
 
-![Mi9eArGT.webp](assets/35b6148b5e696ee446306eaee5dabbba308f9822.webp)
+![Mi9eArGT.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-014-samseonghwajae-kolsenteo-jeonhwabeonho-sagojeopsu/35b6148b5e696ee446306eaee5dabbba308f9822.webp)
 
 
 

@@ -6,7 +6,7 @@ categories: [금융정보, 보험]
 date: 2026-01-21 17:36:00+09:00
 slug: gyobosaengmyeong-gogaeksenteo-boheomgeum-cheonggu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-21-015-gyobosaengmyeong-gogaeksenteo-boheomgeum-cheonggu/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -22,7 +22,7 @@ cover:
 
 **방문 청구** 는 전국 교보생명 고객플라자 또는 지점을 직접 방문하여 접수하는 방법입니다. 신분증과 보험가입증서를 지참하여 방문하시면 됩니다. 담당 컨설턴트(FP)가 있으신 경우 컨설턴트에게 연락하여 대리 접수를 요청하실 수도 있습니다.
 
-![6gl17CKS.webp](assets/24c3b34cc9a2717c9b292c8410cb8632071fffef.webp)
+![6gl17CKS.webp](https://img.rotcha.kr/images/rotcha/2026-01-21-015-gyobosaengmyeong-gogaeksenteo-boheomgeum-cheonggu/24c3b34cc9a2717c9b292c8410cb8632071fffef.webp)
 
 ## 보험금 청구 필요 서류
 

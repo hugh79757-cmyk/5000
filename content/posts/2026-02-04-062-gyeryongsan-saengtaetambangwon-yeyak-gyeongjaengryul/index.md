@@ -7,7 +7,7 @@ categories: [여행, 국내여행]
 date: 2026-02-05 18:09:10+09:00
 slug: gyeryongsan-saengtaetambangwon-yeyak-gyeongjaengryul
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-062-gyeryongsan-saengtaetambangwon-yeyak-gyeongjaengryul/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -33,7 +33,7 @@ cover:
 
 ## 입퇴실 시간 및 이용 안내
 
-![v9mICBf6.webp](assets/0ec943fa2233913d226361dba2d17601f967f263.webp)
+![v9mICBf6.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-062-gyeryongsan-saengtaetambangwon-yeyak-gyeongjaengryul/0ec943fa2233913d226361dba2d17601f967f263.webp)
 
 입실 시간은 **오후 3시** , 퇴실 시간은 **오전 11시** 입니다. 체크인 전에 관리사무소에서 간단한 안내를 받고 객실 열쇠를 수령합니다. 시설 내에서는 정숙 시간을 지켜야 하며, 반려동물 동반은 제한될 수 있으니 사전에 확인하시기 바랍니다.
 

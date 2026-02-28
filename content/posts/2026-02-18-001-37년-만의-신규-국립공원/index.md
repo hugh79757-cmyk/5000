@@ -6,7 +6,7 @@ categories: [여행, 등산]
 date: 2026-02-18 23:10:33+09:00
 slug: 37년-만의-신규-국립공원
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-18-001-37년-만의-신규-국립공원/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -24,7 +24,7 @@ cover:
 
 ## 두 번째 이유 멸종위기종 14종이 서식하는 생태 보고
 
-![5Pp3myb4.webp](assets/76114f8974c98b4a2c340e84d99245ac67673a43.webp)
+![5Pp3myb4.webp](https://img.rotcha.kr/images/rotcha/2026-02-18-001-37년-만의-신규-국립공원/76114f8974c98b4a2c340e84d99245ac67673a43.webp)
 
 금정산이 국립공원으로 지정된 가장 큰 이유 중 하나는 뛰어난 **생태적 가치** 입니다. 이곳에서는 멸종위기 야생생물 14종을 포함한 총 1,782종의 생물이 서식하고 있습니다. 특히 2025년과 2026년에 걸쳐 금정산 일대에서 멸종위기 야생동물 **담비** 의 모습이 여러 차례 포착되어 지역 생태계 보전 성과를 보여주는 상징적인 사례로 주목받았습니다.
 

@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['축산기술사', '기술사', '농림어업', '2026']
 slug: "2026-축산기술사-합격률-333-현실적인-공부법과-시험일정"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-21-2026-축산기술사-합격률-333-현실적인-공부법과-시험일정/thumbnail.webp"
   alt: "2026 축산기술사 합격률 33.3%… 현실적인 공부법과 시험일정"
   hidden: false
 ---

@@ -7,7 +7,7 @@ categories: [재테크, 세금]
 date: 2026-01-25 16:19:42+09:00
 slug: 2026-yeongeumjeochuk-seaekgongjero-148manwon
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-004-2026-yeongeumjeochuk-seaekgongjero-148manwon/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: [생활정보, AS안내]
 date: 2026-02-10 23:50:55+09:00
 slug: ribateu-gagu-as-sincheong
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-061-ribateu-gagu-as-sincheong/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -37,7 +37,7 @@ cover:
 
 AS 접수 시에는 제품명, 구매 일자, 구매처, 고장 증상 등의 정보가 필요합니다. 구매 영수증이나 주문 내역이 있으면 보증 기간 확인이 더 빠르게 진행됩니다. 접수 완료 후 기사 방문 일정을 안내받아 수리를 진행합니다.
 
-![uZAIq55b.webp](assets/0892c92d96204ebfcf432b07cd218af47291a0b2.webp)
+![uZAIq55b.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-061-ribateu-gagu-as-sincheong/0892c92d96204ebfcf432b07cd218af47291a0b2.webp)
 
 ---
 

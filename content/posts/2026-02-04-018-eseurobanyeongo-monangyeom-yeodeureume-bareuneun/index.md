@@ -7,7 +7,7 @@ categories: [건강, 피부관리]
 date: 2026-02-04 14:24:55+09:00
 slug: eseurobanyeongo-monangyeom-yeodeureume-bareuneun
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-018-eseurobanyeongo-monangyeom-yeodeureume-bareuneun/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 사용 기간은 **최대 10일** 을 넘기지 않는 것이 원칙입니다. 10일간 사용해도 증상이 호전되지 않는다면 사용을 중단하고 피부과 전문의와 상담해야 합니다. 장기간 사용하면 세균이 내성을 갖게 되어 연고의 효과가 떨어질 수 있습니다. 일부 피부과 전문의는 5~7일 사용 후 며칠 쉬었다가 다시 사용하는 방법을 권장하기도 합니다.
 
-![NVmba2Wd.webp](assets/9e31340d0b0a9afbef726f3d0d0197b46e9a6713.webp)
+![NVmba2Wd.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-018-eseurobanyeongo-monangyeom-yeodeureume-bareuneun/9e31340d0b0a9afbef726f3d0d0197b46e9a6713.webp)
 
 ## 에스로반연고 부작용과 주의사항
 

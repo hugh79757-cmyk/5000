@@ -6,7 +6,7 @@ categories: [보험, 생활정보]
 date: 2026-02-11 11:17:20+09:00
 slug: gyobosaengmyeong-gogaeksenteo-yeongyeori-an
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-10-078-gyobosaengmyeong-gogaeksenteo-yeongyeori-an/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -28,7 +28,7 @@ cover:
 
 비교적 연결이 빠른 시간대는 **화요일~목요일 오전 10:00~11:30** 또는 **오후 14:30~16:00** 입니다. 급하지 않은 문의라면 이 시간대에 전화하는 것이 좋습니다.
 
-![ROLgOKCA.webp](assets/55c0b78a1d5e770ef1d3ed622721daedd8fb5c66.webp)
+![ROLgOKCA.webp](https://img.rotcha.kr/images/rotcha/2026-02-10-078-gyobosaengmyeong-gogaeksenteo-yeongyeori-an/55c0b78a1d5e770ef1d3ed622721daedd8fb5c66.webp)
 
 ## 대안 상담 방법
 

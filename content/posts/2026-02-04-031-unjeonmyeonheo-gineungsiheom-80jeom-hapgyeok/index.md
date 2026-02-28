@@ -7,7 +7,7 @@ categories: [생활정보, 자동차]
 date: 2026-02-04 14:24:55+09:00
 slug: unjeonmyeonheo-gineungsiheom-80jeom-hapgyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-031-unjeonmyeonheo-gineungsiheom-80jeom-hapgyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 실격 사유로는 안전벨트 미착용 상태로 주행, 장애물 충돌, 시험관 긴급정지 명령, 차량 이탈 등이 있습니다. 특히 직각주차 시 기둥을 접촉하거나, 경사로에서 밀림이 발생하면 실격 처리되므로 주의가 필요합니다.
 
-![dyKcKCI7.webp](assets/022ef43eb8e72ddc1ac430418ecf368205050c23.webp)
+![dyKcKCI7.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-031-unjeonmyeonheo-gineungsiheom-80jeom-hapgyeok/022ef43eb8e72ddc1ac430418ecf368205050c23.webp)
 
 ## 직각주차 코스 공략법
 

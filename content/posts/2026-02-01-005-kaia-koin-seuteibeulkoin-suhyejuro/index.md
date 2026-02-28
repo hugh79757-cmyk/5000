@@ -7,7 +7,7 @@ categories: [암호화폐, 투자분석]
 date: 2026-02-01 02:30:57+09:00
 slug: kaia-koin-seuteibeulkoin-suhyejuro
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-005-kaia-koin-seuteibeulkoin-suhyejuro/thumbnail.webp"
   alt: ""
   hidden: false
 ---

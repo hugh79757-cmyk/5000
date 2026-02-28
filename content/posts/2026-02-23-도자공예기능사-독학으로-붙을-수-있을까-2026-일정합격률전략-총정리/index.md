@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['도자공예기능사', '기능사', '인쇄.목재.가구.공예', '2026']
 slug: "도자공예기능사-독학으로-붙을-수-있을까-2026-일정합격률전략-총정리"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-23-도자공예기능사-독학으로-붙을-수-있을까-2026-일정합격률전략-총정리/thumbnail.webp"
   alt: "도자공예기능사 독학으로 붙을 수 있을까? 2026 일정·합격률·전략 총정리"
   hidden: false
 ---

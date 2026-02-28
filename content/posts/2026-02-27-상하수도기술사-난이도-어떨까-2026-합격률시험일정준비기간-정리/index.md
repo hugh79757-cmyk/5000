@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['상하수도기술사', '기술사', '건설', '2026']
 slug: "상하수도기술사-난이도-어떨까-2026-합격률시험일정준비기간-정리"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-27-상하수도기술사-난이도-어떨까-2026-합격률시험일정준비기간-정리/thumbnail.webp"
   alt: "상하수도기술사 난이도 어떨까? 2026 합격률·시험일정·준비기간 정리"
   hidden: false
 ---

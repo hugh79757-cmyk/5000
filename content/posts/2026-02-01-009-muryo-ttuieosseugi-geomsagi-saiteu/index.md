@@ -7,7 +7,7 @@ categories: [IT, 유용한사이트]
 date: 2026-02-01 02:29:57+09:00
 slug: muryo-ttuieosseugi-geomsagi-saiteu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-009-muryo-ttuieosseugi-geomsagi-saiteu/thumbnail.webp"
   alt: ""
   hidden: false
 ---

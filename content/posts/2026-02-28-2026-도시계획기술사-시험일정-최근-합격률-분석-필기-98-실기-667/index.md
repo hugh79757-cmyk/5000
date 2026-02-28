@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['도시계획기술사', '기술사', '건설', '2026']
 slug: "2026-도시계획기술사-시험일정-최근-합격률-분석-필기-98-실기-667"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-28-2026-도시계획기술사-시험일정-최근-합격률-분석-필기-98-실기-667/thumbnail.webp"
   alt: "2026 도시계획기술사 시험일정 + 최근 합격률 분석 (필기 9.8% / 실기 66.7%)"
   hidden: false
 ---

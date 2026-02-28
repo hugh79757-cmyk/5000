@@ -6,7 +6,7 @@ categories: [생활정보, 교통]
 date: 2026-02-28 11:15:49+09:00
 slug: 인천-콜택시-전화번호-앱
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-27-003-인천-콜택시-전화번호-앱/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -26,7 +26,7 @@ cover:
 
 모범택시나 대형택시가 필요하다면 별도 업체에 문의하는 것이 좋습니다. 인천공항 콜택시 통합콜센터 번호는 **1555-2040** 으로, 인천공항에서 전국 어디로든 예약이 가능합니다. 만약 전화번호가 기억나지 않는다면 **지역번호 + 114** 를 눌러 콜택시 안내를 받을 수도 있습니다.
 
-![8hAjnKQu.webp](assets/df98832502a8ca7e301eb6aa78d92bf4c78f181d.webp)
+![8hAjnKQu.webp](https://img.rotcha.kr/images/rotcha/2026-02-27-003-인천-콜택시-전화번호-앱/df98832502a8ca7e301eb6aa78d92bf4c78f181d.webp)
 
 ## 앱으로 예약하는 방법
 

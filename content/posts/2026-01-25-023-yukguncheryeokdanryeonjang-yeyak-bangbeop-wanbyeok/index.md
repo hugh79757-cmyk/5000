@@ -7,7 +7,7 @@ categories: [생활정보, 골프]
 date: 2026-01-25 17:21:11+09:00
 slug: yukguncheryeokdanryeonjang-yeyak-bangbeop-wanbyeok
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-023-yukguncheryeokdanryeonjang-yeyak-bangbeop-wanbyeok/thumbnail.webp"
   alt: ""
   hidden: false
 ---

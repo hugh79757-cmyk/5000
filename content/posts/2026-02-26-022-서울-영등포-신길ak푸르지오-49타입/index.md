@@ -7,7 +7,7 @@ categories: [부동산, 분양정보]
 date: 2026-02-26 13:32:23+09:00
 slug: 서울-영등포-신길ak푸르지오-49타입
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-26-022-서울-영등포-신길ak푸르지오-49타입/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -31,7 +31,7 @@ cover:
 
 ## 분양가와 실거래가 현황
 
-![B4FtdNmZ.webp](assets/e0a8a168d955bd684c33aba4f60df8ddefcb819a.webp)
+![B4FtdNmZ.webp](https://img.rotcha.kr/images/rotcha/2026-02-26-022-서울-영등포-신길ak푸르지오-49타입/e0a8a168d955bd684c33aba4f60df8ddefcb819a.webp)
 
 신길AK푸르지오 49타입의 분양가는 평당 약 3,500만원대로 책정되어 있습니다. 이는 인근 신길뉴타운 기입주 단지들의 59타입 실거래가와 비교해도 상당히 저렴한 수준입니다.
 

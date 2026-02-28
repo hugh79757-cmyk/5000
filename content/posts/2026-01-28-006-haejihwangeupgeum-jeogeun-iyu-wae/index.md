@@ -6,7 +6,7 @@ categories: [금융, 보험]
 date: 2026-01-28 02:14:28+09:00
 slug: haejihwangeupgeum-jeogeun-iyu-wae
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-28-006-haejihwangeupgeum-jeogeun-iyu-wae/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -16,7 +16,7 @@ categories:
 date: 2026-01-14T15:48:25+09:00
 slug: paradaiseusiti-gogaeksenteo-jeonhwabeonhosangdamwon-munuibangbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-14-001-paradaiseusiti-gogaeksenteo-jeonhwabeonhosangdamwon-munuibangbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -29,7 +29,7 @@ cover:
 
 ## 파라다이스시티 대표 전화번호 및 운영시간
 
-![2026011411725.webp](assets/19d3b4a50e0e4ca8961fe4387870829a8d81fe30.webp)
+![2026011411725.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-001-paradaiseusiti-gogaeksenteo-jeonhwabeonhosangdamwon-munuibangbeop/19d3b4a50e0e4ca8961fe4387870829a8d81fe30.webp)
 
 파라다이스시티의 모든 문의를 총괄하는 **공식 대표 전화번호는 1833-8855**입니다. 이 번호를 통해 객실 예약, 예약 확인, 취소, 각종 시설 안내 등 리조트 전반에 걸친 문의를 처리할 수 있습니다.
 
@@ -65,7 +65,7 @@ cover:
 
 이렇게 시설별로 전문화된 번호를 사용하면 **대기 시간을 크게 줄이고 정확한 정보**를 빠르게 받을 수 있습니다.
 
-![2026011411649.webp](assets/9d5a299299b4f2f20e51e4d3776486ce0e321cd3.webp)
+![2026011411649.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-001-paradaiseusiti-gogaeksenteo-jeonhwabeonhosangdamwon-munuibangbeop/9d5a299299b4f2f20e51e4d3776486ce0e321cd3.webp)
 
 ---
 
@@ -95,7 +95,7 @@ cover:
 
 카카오톡 채널의 가장 큰 장점은 **상담 내용이 채팅창에 기록으로 남는다**는 것입니다. 나중에 정보가 필요할 때 채팅 기록을 스크롤하여 이전 상담 내용을 다시 확인할 수 있어 매우 실용적입니다. 또한 카카오톡은 **휴대폰으로 언제 어디서나 접근 가능**하므로 업무 중이나 이동 중에도 편하게 문의할 수 있습니다. 사진이나 예약증 등 증빙 자료를 첨부해야 할 때도 카카오톡 채팅창에 바로 업로드할 수 있어 편리합니다.
 
-![2026011411641.webp](assets/5cd9bca933cad5d43fdb9167a98f82841e1dfcc4.webp)
+![2026011411641.webp](https://img.rotcha.kr/images/rotcha/2026-01-14-001-paradaiseusiti-gogaeksenteo-jeonhwabeonhosangdamwon-munuibangbeop/5cd9bca933cad5d43fdb9167a98f82841e1dfcc4.webp)
 
 ---
 

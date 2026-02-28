@@ -7,7 +7,7 @@ categories: [복지정보, 여행정보]
 date: 2026-02-06 16:59:57+09:00
 slug: ktx-neomu-bissadamyeon-munhwanurikadeu
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-06-022-ktx-neomu-bissadamyeon-munhwanurikadeu/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -29,7 +29,7 @@ KTX 요금이 부담되어 여행을 망설이고 계신가요? 문화누리카�
 
 나눔패스를 이용하려면 레츠코레일 홈페이지나 앱에서 열차를 조회한 후 **할인/패스 선택 화면에서 나눔패스 또는 공공할인을 선택** 합니다. 결제 단계에서 문화누리카드로 결제하면 됩니다. 단, 나눔패스는 좌석 수가 제한되어 있어 인기 시간대에는 조기 매진될 수 있으니 가능한 한 일찍 예매하시는 것이 좋습니다.
 
-![GaINPGvH.jpg](assets/747b8eebb0e00b11d58340e7e55273d6d1b5f3f7.jpg)
+![GaINPGvH.jpg](https://img.rotcha.kr/images/rotcha/2026-02-06-022-ktx-neomu-bissadamyeon-munhwanurikadeu/747b8eebb0e00b11d58340e7e55273d6d1b5f3f7.jpg)
 
 ## 문화누리레일패스 무제한 이용
 

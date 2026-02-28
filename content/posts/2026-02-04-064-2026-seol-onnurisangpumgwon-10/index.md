@@ -7,7 +7,7 @@ categories: [생활경제, 재테크]
 date: 2026-02-05 18:09:10+09:00
 slug: 2026-seol-onnurisangpumgwon-10
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-064-2026-seol-onnurisangpumgwon-10/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -47,7 +47,7 @@ cover:
 
 전통시장 외에 온누리상품권 가맹점에서도 사용 가능하지만, 소득공제 혜택은 전통시장 결제분에만 적용되니 주의하세요.
 
-![dHslljDu.webp](assets/b133279ede24a6526615397a99d664cd3f07a58b.webp)
+![dHslljDu.webp](https://img.rotcha.kr/images/rotcha/2026-02-04-064-2026-seol-onnurisangpumgwon-10/b133279ede24a6526615397a99d664cd3f07a58b.webp)
 
 ## 결론
 

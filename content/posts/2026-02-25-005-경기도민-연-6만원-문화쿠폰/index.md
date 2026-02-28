@@ -6,7 +6,7 @@ categories: [생활정보, 지역혜택]
 date: 2026-02-25 19:48:38+09:00
 slug: 경기도민-연-6만원-문화쿠폰
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-25-005-경기도민-연-6만원-문화쿠폰/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -36,7 +36,7 @@ cover:
 
 ## 60세 이상도 쉽게 사용 가능
 
-![cVftAq01.webp](assets/7b8aa0d281c57ec0398ce9f53ff3291bf80a8853.webp)
+![cVftAq01.webp](https://img.rotcha.kr/images/rotcha/2026-02-25-005-경기도민-연-6만원-문화쿠폰/7b8aa0d281c57ec0398ce9f53ff3291bf80a8853.webp)
 
 앱 사용이 어려울 것 같다고 걱정하시는 분들도 계실 겁니다. 하지만 컬처패스 앱은 사용법이 직관적으로 설계되어 있습니다. 실제로 60세 이상 고령 사용자 400만 명 이상이 큰 어려움 없이 사용하고 있다는 통계가 있습니다.
 

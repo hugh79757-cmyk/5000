@@ -6,7 +6,7 @@ categories: [건강, 구강케어]
 date: 2026-02-25 19:47:38+09:00
 slug: 포레비타-프레쉬가드-뿌리는-구강유산균
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-25-007-포레비타-프레쉬가드-뿌리는-구강유산균/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -32,7 +32,7 @@ cover:
 
 사용법은 간단합니다. 양치 후 마무리 단계에서 입안에 1에서 2회 분무하면 됩니다. 특히 잠들기 전에 사용하면 효과적이라고 합니다. 수면 중에는 침 분비가 줄어들어 세균이 번식하기 좋은 환경이 되는데, 이때 구강유산균이 도움이 될 수 있습니다.
 
-![9evrqsFr.webp](assets/87bd06de8bf2848080923907c3ac860b7b137695.webp)
+![9evrqsFr.webp](https://img.rotcha.kr/images/rotcha/2026-02-25-007-포레비타-프레쉬가드-뿌리는-구강유산균/87bd06de8bf2848080923907c3ac860b7b137695.webp)
 
 ## 사용 후기 분석
 

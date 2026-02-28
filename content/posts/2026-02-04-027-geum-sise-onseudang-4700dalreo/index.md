@@ -7,7 +7,7 @@ categories: [투자, 재테크]
 date: 2026-02-04 14:24:55+09:00
 slug: geum-sise-onseudang-4700dalreo
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-04-027-geum-sise-onseudang-4700dalreo/thumbnail.webp"
   alt: ""
   hidden: false
 ---

@@ -6,7 +6,7 @@ categories: ['자격증']
 tags: ['자격증시험', 'cert.aikorea24.kr', '국가전문자격', '2026']
 slug: "2026년도-전문자격-39회-1차-시험-일정-안내"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-15-2026년도-전문자격-39회-1차-시험-일정-안내/thumbnail.webp"
   alt: "2026년도 전문자격 39회 1차 시험 일정 안내"
   hidden: false
 ---

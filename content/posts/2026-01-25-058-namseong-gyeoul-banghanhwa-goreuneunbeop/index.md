@@ -7,7 +7,7 @@ tags: [방한화추천, 남성방한화, 겨울신발, 방한화고르는법, �
 categories: [패션, 신발가이드]
 slug: namseong-gyeoul-banghanhwa-goreuneunbeop
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-25-058-namseong-gyeoul-banghanhwa-goreuneunbeop/thumbnail.webp"
   alt: ""
   hidden: false
 ---

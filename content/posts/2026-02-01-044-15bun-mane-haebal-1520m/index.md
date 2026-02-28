@@ -6,7 +6,7 @@ categories: [국내여행, 등산]
 date: 2026-02-01 13:59:19+09:00
 slug: 15bun-mane-haebal-1520m
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-044-15bun-mane-haebal-1520m/thumbnail.webp"
   alt: ""
   hidden: false
 ---

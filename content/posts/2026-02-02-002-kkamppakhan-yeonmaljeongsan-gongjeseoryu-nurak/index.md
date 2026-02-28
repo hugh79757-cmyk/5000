@@ -7,7 +7,7 @@ categories: [세금, 연말정산]
 date: 2026-02-02 17:52:26+09:00
 slug: kkamppakhan-yeonmaljeongsan-gongjeseoryu-nurak
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-02-002-kkamppakhan-yeonmaljeongsan-gongjeseoryu-nurak/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -27,7 +27,7 @@ cover:
 
 ## 방법 1 : 5월 종합소득세 신고
 
-![AtVWPwuS.webp](assets/8f5d81d29b7328f5c1c934134afb70f4dbd4c817.webp)
+![AtVWPwuS.webp](https://img.rotcha.kr/images/rotcha/2026-02-02-002-kkamppakhan-yeonmaljeongsan-gongjeseoryu-nurak/8f5d81d29b7328f5c1c934134afb70f4dbd4c817.webp)
 
 연말정산 때 공제서류를 누락한 경우, 가장 일반적인 대처방법은 **5월 종합소득세 확정신고** 입니다.
 

@@ -6,7 +6,7 @@ categories: [자동차, 수입차]
 date: 2026-02-01 12:52:28+09:00
 slug: seujeuki-jimni-hanguk-chulsi
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-024-seujeuki-jimni-hanguk-chulsi/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -14,7 +14,7 @@ cover:
 
 ## 스즈키 짐니의 매력
 
-![RUjMNADz.webp](assets/82e9e5ffac43de3c259a1b5fb33a2952cd090a8c.webp)
+![RUjMNADz.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-024-seujeuki-jimni-hanguk-chulsi/82e9e5ffac43de3c259a1b5fb33a2952cd090a8c.webp)
 
 스즈키 짐니는 전 세계적으로 열광적인 팬층을 보유한 **소형 오프로더**입니다. 1970년 1세대 출시 이후 50년 넘게 이어온 역사를 가지고 있으며, 현재 4세대 모델이 판매 중입니다. 콤팩트한 차체에 본격 사륜구동 시스템을 갖춘 독특한 콘셉트가 특징입니다.
 
@@ -26,7 +26,7 @@ cover:
 
 짐니의 국내 정식 출시 가능성은 여러 차례 제기되었지만, 구체적인 계획은 발표되지 않았습니다. 배기가스 규제 인증, 안전 기준 충족, 판매 네트워크 구축 등의 과정이 필요하기 때문에 단기간 내 정식 출시는 어려울 것으로 보입니다.
 
-![q8LcxKQ7.webp](assets/7bbc81b32380c9599810622f6732715dfcb039a2.webp)
+![q8LcxKQ7.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-024-seujeuki-jimni-hanguk-chulsi/7bbc81b32380c9599810622f6732715dfcb039a2.webp)
 
 ## 해외 가격 및 국내 예상 가격
 
@@ -50,7 +50,7 @@ cover:
 
 ## 짐니 구매 시 주의사항
 
-![wEx6I9WK.webp](assets/fce5b73470429f39ea9281d9b5b2d23055db62a8.webp)
+![wEx6I9WK.webp](https://img.rotcha.kr/images/rotcha/2026-02-01-024-seujeuki-jimni-hanguk-chulsi/fce5b73470429f39ea9281d9b5b2d23055db62a8.webp)
 
 병행 수입 차량은 몇 가지 **제약 사항**이 있습니다.
 

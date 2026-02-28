@@ -8,7 +8,7 @@ slug: "염색기능사날염-난이도-어떨까-2026-합격률시험일정준�
 aliases:
   - "/posts/염색기능사(날염)-난이도-어떨까?-2026-합격률·시험일정·준비기간-정리/"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-17-염색기능사날염-난이도-어떨까-2026-합격률시험일정준비기간-정리/thumbnail.webp"
   alt: "염색기능사(날염) 난이도 어떨까? 2026 합격률·시험일정·준비기간 정리"
   hidden: false
 ---

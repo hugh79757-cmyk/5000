@@ -6,7 +6,7 @@ categories: ['자격증시험']
 tags: ['임업종묘기능사', '기능사', '농림어업', '2026']
 slug: "2026-임업종묘기능사-합격률-1000-현실적인-공부법과-시험일정"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-17-2026-임업종묘기능사-합격률-1000-현실적인-공부법과-시험일정/thumbnail.webp"
   alt: "2026 임업종묘기능사 합격률 100.0%… 현실적인 공부법과 시험일정"
   hidden: false
 aliases:

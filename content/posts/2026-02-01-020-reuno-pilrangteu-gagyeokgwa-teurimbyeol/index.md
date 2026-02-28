@@ -7,7 +7,7 @@ categories: [자동차, 신차정보]
 date: 2026-02-01 12:51:28+09:00
 slug: reuno-pilrangteu-gagyeokgwa-teurimbyeol
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-01-020-reuno-pilrangteu-gagyeokgwa-teurimbyeol/thumbnail.webp"
   alt: ""
   hidden: false
 ---
@@ -19,7 +19,7 @@ cover:
 
 전장 4,915mm의 당당한 차체를 가진 필랑트는 국내 시장에서 현대 팰리세이드, 기아 쏘렌토와 직접 경쟁하는 모델입니다. 특히 **4,331만원**이라는 시작 가격은 같은 세그먼트 경쟁 모델 대비 상당히 공격적인 가격 책정으로 평가받고 있습니다.
 
-![Rscj8Err.jpg](assets/dedfb26566bba4c23ea63004cf041f3a5c9d9eb6.jpg)
+![Rscj8Err.jpg](https://img.rotcha.kr/images/rotcha/2026-02-01-020-reuno-pilrangteu-gagyeokgwa-teurimbyeol/dedfb26566bba4c23ea63004cf041f3a5c9d9eb6.jpg)
 
 ## 트림별 가격 분석
 
@@ -39,7 +39,7 @@ cover:
 
 ## 주요 옵션 및 기능
 
-![3IJtQ9BO.jpg](assets/acdf424ee9264d7375607042809a4366de514ec5.jpg)
+![3IJtQ9BO.jpg](https://img.rotcha.kr/images/rotcha/2026-02-01-020-reuno-pilrangteu-gagyeokgwa-teurimbyeol/acdf424ee9264d7375607042809a4366de514ec5.jpg)
 
 필랑트의 안전 사양은 준대형 SUV 수준에 걸맞게 충실합니다. **레벨 2 자율주행 보조 시스템**이 기본 적용되며, 어댑티브 크루즈 컨트롤, 차로 유지 보조, 전방 충돌 방지 등이 포함됩니다.
 
@@ -55,7 +55,7 @@ cover:
 
 ## 구매 추천 트림
 
-![xg681uF2.jpg](assets/81b9d03a1256b200fdb3584785974dbab510fb87.jpg)
+![xg681uF2.jpg](https://img.rotcha.kr/images/rotcha/2026-02-01-020-reuno-pilrangteu-gagyeokgwa-teurimbyeol/81b9d03a1256b200fdb3584785974dbab510fb87.jpg)
 
 가장 추천하는 트림은 **아이코닉**입니다. 4,697만원이라는 가격에 파노라마 선루프, BOSE 사운드 시스템, 가죽 시트 등 일상 사용에서 만족도를 높여주는 옵션들이 모두 포함되어 있습니다.
 

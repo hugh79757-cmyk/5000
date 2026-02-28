@@ -8,7 +8,7 @@ slug: "2026-초음파비파괴검사기능사-합격률-806-현실적인-공부�
 aliases:
   - "/posts/2026-초음파비파괴검사기능사-합격률-80.6%…-현실적인-공부법과-시험일정/"
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-02-17-2026-초음파비파괴검사기능사-합격률-806-현실적인-공부법과-시험일정/thumbnail.webp"
   alt: "2026 초음파비파괴검사기능사 합격률 80.6%… 현실적인 공부법과 시험일정"
   hidden: false
 ---

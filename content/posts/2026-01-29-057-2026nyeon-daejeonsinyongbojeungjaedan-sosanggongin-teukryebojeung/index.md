@@ -6,7 +6,7 @@ categories: [금융지원, 소상공인]
 date: 2026-01-29 22:50:39+09:00
 slug: 2026nyeon-daejeonsinyongbojeungjaedan-sosanggongin-teukryebojeung
 cover:
-  image: "thumbnail.webp"
+  image: "https://img.rotcha.kr/images/rotcha/2026-01-29-057-2026nyeon-daejeonsinyongbojeungjaedan-sosanggongin-teukryebojeung/thumbnail.webp"
   alt: ""
   hidden: false
 ---
