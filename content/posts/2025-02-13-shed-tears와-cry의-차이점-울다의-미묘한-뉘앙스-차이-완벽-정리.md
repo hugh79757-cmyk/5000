@@ -144,7 +144,7 @@ slug: "shed-tears와-cry의-차이점-울다의-미묘한-뉘앙스-차이-완�
 •“The babycriedfor hours.” (아기가 몇 시간 동안 울었다.)
 
 
-![image](https://legacy-img.rotcha.kr/shed tears.webp)
+![image](https://legacy-img.rotcha.kr/shed%20tears.webp)
 
 
 
