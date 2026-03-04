@@ -30,6 +30,7 @@ disableDate = true
 disableLatLong = true
 
 [params]
+images = ["og-rotcha.jpeg"]
 defaultTheme = "auto"
 ShowReadingTime = true
 ShowShareButtons = true
