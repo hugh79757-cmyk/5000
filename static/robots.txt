@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /posts/
+Allow: /tags/
+Allow: /categories/
+Allow: /archives/
+Allow: /search/
+
+Disallow: /entry/
+Disallow: /m/
+Disallow: /tag/
+Disallow: /category/
+Disallow: /category
+Disallow: /file/
+Disallow: /guestbook
+
+Sitemap: https://rotcha.kr/sitemap.xml

@@ -1,0 +1,64 @@
+/* ===== v1.66 레이아웃 + 광고 중앙 정렬 ===== */
+
+/* 플로팅 요소 비활성화 */
+.footer, footer {
+    position: relative !important;
+}
+
+/* 메인 컨텐츠 */
+.main {
+    contain: layout style;
+}
+
+/* 포스트 콘텐츠 */
+.post-content {
+    contain: layout;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* 포스트 엔트리 */
+.post-entry {
+    contain: layout style;
+}
+
+/* 커버 이미지 컨테이너 */
+.entry-cover {
+    overflow: hidden;
+    border-radius: var(--radius);
+}
+
+/* 모바일 본문 영역 */
+@media (max-width: 768px) {
+    .post-content {
+        padding: 0;
+        margin: 0;
+    }
+    
+    /* 본문 내 모든 요소 중앙 정렬 */
+    .post-content > * {
+        max-width: 100%;
+    }
+}
+
+/* 썸네일 정사각형으로 변경 */
+.entry-cover img,
+.post-single .entry-cover img {
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  width: 100%;
+  max-height: none;
+}
+
+/* 썸네일 정사각형으로 변경 */
+.entry-cover {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.entry-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

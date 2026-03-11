@@ -1,0 +1,76 @@
+/* ===== v1.65 이미지 정사각형 (1:1) ===== */
+
+/* 모든 커버/썸네일 이미지 - 정사각형 */
+.entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    background-color: var(--code-bg);
+}
+
+/* 홈 첫 번째 포스트 */
+.first-entry .entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+/* 포스트 리스트 썸네일 */
+.post-entry .entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+/* 싱글 페이지 커버 이미지 */
+.post-single .entry-cover img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    max-height: 500px;
+}
+
+/* 포스트 본문 내 이미지 - 정사각형 */
+.post-content img {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    margin: 1rem auto;
+    display: block;
+    border-radius: var(--radius);
+    background-color: var(--code-bg);
+}
+
+/* content-visibility 최적화 */
+img {
+    content-visibility: auto;
+}
+
+.entry-cover img {
+    content-visibility: visible;
+    contain-intrinsic-size: 300px 300px;
+}
+
+.post-content img {
+    content-visibility: auto;
+    contain-intrinsic-size: 300px 300px;
+}
+
+/* 외부 이미지 (R2) */
+img[src*="r2.dev"] {
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+}
+
+/* 모바일 대응 */
+@media (max-width: 768px) {
+    .entry-cover img,
+    .post-content img {
+        contain-intrinsic-size: 250px 250px;
+    }
+    
+    .post-content img {
+        max-width: 100%;
+    }
+}

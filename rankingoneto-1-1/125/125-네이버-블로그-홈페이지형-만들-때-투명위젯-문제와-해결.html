@@ -1,0 +1,148 @@
+
+<meta charset="utf-8">
+<html lang="ko">
+<head>
+    <link rel="stylesheet" type="text/css" href="./../style.css" />
+    <title>네이버 블로그 홈페이지형 만들 때 투명위젯 문제와 해결</title>
+</head>
+<body id="tt-body-page" class="">
+<div id="wrap" class="wrap-right">
+    <div id="container">
+        <main class="main ">
+            <div class="area-main">
+                <div class="area-view">
+                    <div class="article-header">
+                        <div class="inner-article-header">
+                            <div class="box-meta">
+                                <h2 class="title-article">네이버 블로그 홈페이지형 만들 때 투명위젯 문제와 해결</h2>
+                                <div class="box-info">
+                                    <p class="category">지식 아카이브</p>
+                                    <p class="date">2021-08-07 00:05:33</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="article-view">
+                        <div class="contents_style">
+                            <p data-ke-size="size16">네이버 블로그 홈페이지형 만드는 과정을 유튜브와 블로그의 글을 보고 하나하나 따라 해 봤어요. 하지만 막히는 부분이 있었습니다. 공간 위젯을 만들어서 네이버에서 설정된 타이틀이나 메뉴를 아래로 밀어내서 배경 스킨이 보이게 만들어야 하는데, 저는 아무리 해도 배경 스킨을 가린 형태가 되더군요. 결국 <b>스킨 변경이</b> 정답이었습니다.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<!--애드센스 광고-->
+<script src="[https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js](https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js)"></script>
+<!-- 광고단위1 -->
+<p data-ke-size="size16">&nbsp;</p>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<h2 data-ke-size="size26">네이버 블로그 홈페이지형을 만들 때 순서 개념 잡기</h2>
+<h3 data-ke-size="size23">스킨 배경과 레이아웃 설정하기&nbsp;</h3>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li>2000*700(혹은 600)의 사이즈로 스킨 배경을 만들어 줍니다.&nbsp;</li>
+<li>'관리-꾸미기 설정-세부 디자인 설정-디자인 직접 등록'을 통해 스킨 배경을 등록합니다.</li>
+<li>'관리-꾸미기 설정-레이아웃.위젯 설정'에서 아래 사진과 같은 레이아웃을 선택합니다.</li>
+</ol>
+<p><figure class="imageblock alignCenter" >
+    <span data-lightbox="lightbox">
+        <img src="./img/위젯설정.png"  />
+    </span>
+    <figcaption></figcaption>
+</figure></p>
+<h3 data-ke-size="size23">투명 위젯 설정하기&nbsp;</h3>
+<ol style="list-style-type: decimal;" data-ke-list-type="decimal">
+<li>'관리-꾸미기 설정-레이아웃.위젯 설정-위젯 직접 등록'을 통해서 투명 위젯을 5개 만들어줍니다.&nbsp;</li>
+<li>투명 위젯을 설정해서 '글영역'을 원하는 만큼 아래로 밀어내서 처음에 설정한 '스킨 배경'이 보이도록 해 주세요.&nbsp;</li>
+</ol>
+<h4 data-ke-size="size20">투명 위젯 만들기&nbsp;</h4>
+<p data-ke-size="size16">투명 위젯의 html 코드는 다음과 같습니다.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;1. 테이블을 이용한 방법</p>
+<p data-ke-size="size16"><b>&lt;table width="170"&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td width="170" height="600" /&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</b></p>
+<p data-ke-size="size16">위의 코드를 이용해서 투명위젯을 직접 등록합니다. 높이를 자신의 이미지에 맞게 height="600"에서 600의 숫자를 바꿔주시면 됩니다.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;2. 줄바꿈을 이용한 방법</p>
+<p data-ke-size="size16"><b>&lt;br&gt;</b></p>
+<p data-ke-size="size16"><b>&lt;br&gt;</b></p>
+<p data-ke-size="size16"><b>&lt;/br&gt;</b></p>
+<p data-ke-size="size16"><b>&lt;/br&gt;</b></p>
+<p data-ke-size="size16">이와 같은 코드를 연속으로 넣어줘서 투명 위젯의 길이를 조정합니다.&nbsp;</p>
+<p><figure class="imageblock alignCenter" >
+    <span data-lightbox="lightbox">
+        <img src="./img/위젯설정_1.png"  />
+    </span>
+    <figcaption>투명위젯 설정방법</figcaption>
+</figure></p>
+<p data-ke-size="size16">5개의 투명위젯 이름을 공간 1, 공간 2, 공간 3, 공간 4, 공간 5로 설정하고 그림처럼 '메뉴 형태'아래 배치해 줍니다. 이때 오른쪽 '레이아웃 설정'은 넓게를 선택해 주세요.</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16"><span style="color: #ee2323;">저는 여기서 문제가 발생했습니다.&nbsp;</span></p>
+<p data-ke-size="size16">&nbsp;</p>
+<p><figure class="imageblock alignCenter" >
+    <span data-lightbox="lightbox">
+        <img src="./img/네이버홈페이지배경.png"  />
+    </span>
+    <figcaption>투명위젯을 설정한 모습</figcaption>
+</figure></p>
+<p data-ke-size="size16">&nbsp;</p>
+<!--애드센스 광고-->
+<script src="[https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js](https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js)"></script>
+<!-- 광고단위1 -->
+<p data-ke-size="size16">&nbsp;</p>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+<h2 data-ke-size="size26">투명위젯이 적용이 안 되는 문제 해결</h2>
+<p data-ke-size="size16">위의 그림과 같이 '글영역'이 투명 위젯을 적용한 이유로 아래로 내려가지만 뒤의 배경 이미지는 그대로 가려진 경우가 생겼습니다.&nbsp;</p>
+<p data-ke-size="size16"><span style="color: #ee2323;"><b>이때 '스킨'을 변경해 주면 해결이 됩니다.</b></span> 스킨의 종류에 따라서 위와 같은 문제가 발생하기도 합니다.&nbsp;&nbsp;</p>
+<p data-ke-size="size16">해결을 위해 저는 '관리-꾸미기 설정-스킨 선택'에서 두 번째 스킨인 '와이드'를 선택하고 적용시켰습니다.&nbsp;</p>
+<p><figure class="imageblock alignCenter" >
+    <span data-lightbox="lightbox">
+        <img src="./img/네이버홈페이지형정상.png"  />
+    </span>
+    <figcaption>정상적으로 등록된 모습</figcaption>
+</figure></p>
+<p data-ke-size="size16">스킨을 변경시킨 후 위의 사진과 같이 정상적으로 글 영역이 아래로 내려간 것을 확인할 수 있었습니다.&nbsp;</p>
+<p data-ke-size="size16">스킨 배경 위로 버튼을 추가하신다면 투명 위젯의 테이블 높이를 조정해서 버튼 1, 버튼 2 ~ 버튼 5까지 만든 다음 공간 1~공간 5 아래 배치시켜줍니다. 공간 위젯의 테이블 높이는 height=300, 버튼 위젯의 테이블 높이도 300으로 설정해주면 됩니다.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">자세한 내용은 유튜브나 다른 분의 블로그를 참조하시기 바랍니다.&nbsp; &nbsp; &nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<h2 data-ke-size="size26">마무리&nbsp;</h2>
+<p data-ke-size="size16">네이버 블로그 홈페이지형을 만들 경우의 이점은 좀더 전문적인 블로그로 보일 수 있다는 점입니다. 획일화된 다른 분들의 블로그와 차별화된 나만의 고유한 블로그 레이아웃의 블로그를 원하신다면 시도하시기를 추천드립니다. '스킨 변경'을 모르는 상태로 여러 번 시행착오를 거치다 알게 돼서 포스팅합니다. 나만의 예쁜 네이버 블로그 홈페이지형을 만드시는데 참고하시기 바랍니다.&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<p data-ke-size="size16">&nbsp;</p>
+<figure id="og_1691477570488" contenteditable="false" data-ke-type="opengraph" data-ke-align="alignCenter" data-og-type="article" data-og-title="네이버 2차계정 만들기, 전화번호만 있으면 가능?" data-og-description="네이버에 가입하면 한 개의 전화번호로 3개의 네이버 계정을 만들 수 있습니다. 3개 이상 더 많은 블로그를 개설하고 싶으면 어떻게 할까요? 지인에게 부탁해서 인증번호 가는 것을 알려달라고 " data-og-host="rotcha.kr" data-og-source-url="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-2%EC%B0%A8%EA%B3%84%EC%A0%95-%EB%A7%8C%EB%93%A4%EA%B8%B0" data-og-url="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-2%EC%B0%A8%EA%B3%84%EC%A0%95-%EB%A7%8C%EB%93%A4%EA%B8%B0" data-og-image="https://scrap.kakaocdn.net/dn/ciojDP/hyTAwcqdnk/2YKIbNyN6Lr3uglgB3KiK0/img.png?width=800&amp;height=800&amp;face=0_0_800_800,https://scrap.kakaocdn.net/dn/MFq4j/hyTzgPPaN6/dm3H5WtDzy5VXNSlw1BEX1/img.png?width=800&amp;height=800&amp;face=0_0_800_800"><a href="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-2%EC%B0%A8%EA%B3%84%EC%A0%95-%EB%A7%8C%EB%93%A4%EA%B8%B0"  rel="noopener" data-source-url="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-2%EC%B0%A8%EA%B3%84%EC%A0%95-%EB%A7%8C%EB%93%A4%EA%B8%B0">
+<div class="og-image" style="background-image: url('https://scrap.kakaocdn.net/dn/ciojDP/hyTAwcqdnk/2YKIbNyN6Lr3uglgB3KiK0/img.png?width=800&amp;height=800&amp;face=0_0_800_800,https://scrap.kakaocdn.net/dn/MFq4j/hyTzgPPaN6/dm3H5WtDzy5VXNSlw1BEX1/img.png?width=800&amp;height=800&amp;face=0_0_800_800');">&nbsp;</div>
+<div class="og-text">
+<p class="og-title" data-ke-size="size16">네이버 2차계정 만들기, 전화번호만 있으면 가능?</p>
+<p class="og-desc" data-ke-size="size16">네이버에 가입하면 한 개의 전화번호로 3개의 네이버 계정을 만들 수 있습니다. 3개 이상 더 많은 블로그를 개설하고 싶으면 어떻게 할까요? 지인에게 부탁해서 인증번호 가는 것을 알려달라고</p>
+<p class="og-host" data-ke-size="size16">rotcha.kr</p>
+</div>
+</a></figure>
+<p data-ke-size="size16">&nbsp;</p>
+<figure id="og_1691477585643" contenteditable="false" data-ke-type="opengraph" data-ke-align="alignCenter" data-og-type="article" data-og-title="네이버는 수정을 싫어한다? 검색결과 누락시 검색 반영 요청하기" data-og-description="네이버 블로그에 작성한 나의 포스팅이 검색이 되지 않는다면? 검색 결과에 노출이 되지 않는 다면 정말 맥이 빠지는 일입니다. 적게는 30분 많게는 2~3시간 정성을 다해서 글을 작성했는데, 방문" data-og-host="rotcha.kr" data-og-source-url="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-%EA%B2%80%EC%83%89-%EB%B0%98%EC%98%81-%EC%9A%94%EC%B2%AD" data-og-url="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-%EA%B2%80%EC%83%89-%EB%B0%98%EC%98%81-%EC%9A%94%EC%B2%AD" data-og-image="https://scrap.kakaocdn.net/dn/jjt5h/hyTzeEr76b/yy08E0fKdV0318XRSQ1yk1/img.png?width=800&amp;height=800&amp;face=0_0_800_800,https://scrap.kakaocdn.net/dn/JKt2F/hyTy9woGAn/ZIr2veRlFdPQ6hsAfKlOJK/img.png?width=800&amp;height=800&amp;face=0_0_800_800"><a href="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-%EA%B2%80%EC%83%89-%EB%B0%98%EC%98%81-%EC%9A%94%EC%B2%AD"  rel="noopener" data-source-url="https://rotcha.kr/entry/%EB%84%A4%EC%9D%B4%EB%B2%84-%EA%B2%80%EC%83%89-%EB%B0%98%EC%98%81-%EC%9A%94%EC%B2%AD">
+<div class="og-image" style="background-image: url('https://scrap.kakaocdn.net/dn/jjt5h/hyTzeEr76b/yy08E0fKdV0318XRSQ1yk1/img.png?width=800&amp;height=800&amp;face=0_0_800_800,https://scrap.kakaocdn.net/dn/JKt2F/hyTy9woGAn/ZIr2veRlFdPQ6hsAfKlOJK/img.png?width=800&amp;height=800&amp;face=0_0_800_800');">&nbsp;</div>
+<div class="og-text">
+<p class="og-title" data-ke-size="size16">네이버는 수정을 싫어한다? 검색결과 누락시 검색 반영 요청하기</p>
+<p class="og-desc" data-ke-size="size16">네이버 블로그에 작성한 나의 포스팅이 검색이 되지 않는다면? 검색 결과에 노출이 되지 않는 다면 정말 맥이 빠지는 일입니다. 적게는 30분 많게는 2~3시간 정성을 다해서 글을 작성했는데, 방문</p>
+<p class="og-host" data-ke-size="size16">rotcha.kr</p>
+</div>
+</a></figure>
+<p data-ke-size="size16">&nbsp;</p>
+<figure id="og_1691477608900" contenteditable="false" data-ke-type="opengraph" data-ke-align="alignCenter" data-og-type="article" data-og-title="쿠팡 파트너스 20일 동안 수익과 생각 나는 것들" data-og-description="1. 트래픽(클릭수)이 늘어나면 구매율도 덩달아 올를 거라고 생각했는데 아무 상관이 없다. 클릭수를 높이 찍어도 구매율이 최저(2000원 정도) 일 때도 있고 어제(7월 7일) 같은 경우 하루 동안 15만" data-og-host="rotcha.kr" data-og-source-url="https://rotcha.kr/entry/%EC%BF%A0%ED%8C%A1-%ED%8C%8C%ED%8A%B8%EB%84%88%EC%8A%A4-20%EC%9D%BC-%EB%8F%99%EC%95%88-%EC%88%98%EC%9D%B5%EA%B3%BC-%EC%83%9D%EA%B0%81-%EB%82%98%EB%8A%94-%EA%B2%83%EB%93%A4" data-og-url="https://rotcha.kr/entry/%EC%BF%A0%ED%8C%A1-%ED%8C%8C%ED%8A%B8%EB%84%88%EC%8A%A4-20%EC%9D%BC-%EB%8F%99%EC%95%88-%EC%88%98%EC%9D%B5%EA%B3%BC-%EC%83%9D%EA%B0%81-%EB%82%98%EB%8A%94-%EA%B2%83%EB%93%A4" data-og-image="https://scrap.kakaocdn.net/dn/mmJxb/hyTzbHJUyB/Kbsk5lVMt1WUCvhk8WZeF1/img.png?width=673&amp;height=396&amp;face=0_0_673_396,https://scrap.kakaocdn.net/dn/PwMfP/hyTADWVet0/TxuKqhEWcupPq9UucKh8f0/img.png?width=673&amp;height=396&amp;face=0_0_673_396,https://scrap.kakaocdn.net/dn/bTAjCI/hyTAz1hdBE/erdVjika492lTOI3usxtY1/img.png?width=673&amp;height=396&amp;face=0_0_673_396"><a href="https://rotcha.kr/entry/%EC%BF%A0%ED%8C%A1-%ED%8C%8C%ED%8A%B8%EB%84%88%EC%8A%A4-20%EC%9D%BC-%EB%8F%99%EC%95%88-%EC%88%98%EC%9D%B5%EA%B3%BC-%EC%83%9D%EA%B0%81-%EB%82%98%EB%8A%94-%EA%B2%83%EB%93%A4" rel="noopener" data-source-url="https://rotcha.kr/entry/%EC%BF%A0%ED%8C%A1-%ED%8C%8C%ED%8A%B8%EB%84%88%EC%8A%A4-20%EC%9D%BC-%EB%8F%99%EC%95%88-%EC%88%98%EC%9D%B5%EA%B3%BC-%EC%83%9D%EA%B0%81-%EB%82%98%EB%8A%94-%EA%B2%83%EB%93%A4">
+<div class="og-image" style="background-image: url('https://scrap.kakaocdn.net/dn/mmJxb/hyTzbHJUyB/Kbsk5lVMt1WUCvhk8WZeF1/img.png?width=673&amp;height=396&amp;face=0_0_673_396,https://scrap.kakaocdn.net/dn/PwMfP/hyTADWVet0/TxuKqhEWcupPq9UucKh8f0/img.png?width=673&amp;height=396&amp;face=0_0_673_396,https://scrap.kakaocdn.net/dn/bTAjCI/hyTAz1hdBE/erdVjika492lTOI3usxtY1/img.png?width=673&amp;height=396&amp;face=0_0_673_396');">&nbsp;</div>
+<div class="og-text">
+<p class="og-title" data-ke-size="size16">쿠팡 파트너스 20일 동안 수익과 생각 나는 것들</p>
+<p class="og-desc" data-ke-size="size16">1. 트래픽(클릭수)이 늘어나면 구매율도 덩달아 올를 거라고 생각했는데 아무 상관이 없다. 클릭수를 높이 찍어도 구매율이 최저(2000원 정도) 일 때도 있고 어제(7월 7일) 같은 경우 하루 동안 15만</p>
+<p class="og-host" data-ke-size="size16">rotcha.kr</p>
+</div>
+</a></figure>
+<p data-ke-size="size16">&nbsp;</p>
+                        </div>
+                        <br/>
+                        <div class="tags">
+                            #네이버블로그홈페이지형 #네이버블로그투명위젯 #투명위젯적용 #투명위젯적용문제 #투명위젯문제 #네이버블로그홈페이지형문제 #투명위젯문제해결법 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+</body>
+</html>

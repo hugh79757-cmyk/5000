@@ -1,0 +1,143 @@
+/* ===== 커스텀 버튼 스타일 ===== */
+
+/* 기본 버튼 공통 */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  margin: 4px;
+}
+
+/* btn1: 기본 아웃라인 (현재 스타일과 유사) */
+.btn1 {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+.btn1:hover {
+  background: var(--primary);
+  color: var(--theme);
+}
+
+/* btn2: 파란색 채움 */
+.btn2 {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+.btn2:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* btn3: 그린 그라데이션 */
+.btn3 {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  color: #fff;
+}
+.btn3:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* btn4: 오렌지/레드 그라데이션 */
+.btn4 {
+  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
+  border: none;
+  color: #fff;
+}
+.btn4:hover {
+  background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);
+}
+
+/* btn5: 퍼플/핑크 그라데이션 */
+.btn5 {
+  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+  border: none;
+  color: #fff;
+}
+.btn5:hover {
+  background: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+/* btn6: 다크 글래스모피즘 (다크테마 특화) */
+.btn6 {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--primary);
+}
+.btn6:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* btn7: 네온 글로우 (사이버 느낌) */
+.btn7 {
+  background: transparent;
+  border: 2px solid #00f5d4;
+  color: #00f5d4;
+  text-shadow: 0 0 5px #00f5d4;
+}
+.btn7:hover {
+  background: #00f5d4;
+  color: #000;
+  box-shadow: 0 0 20px #00f5d4, 0 0 40px rgba(0, 245, 212, 0.3);
+  text-shadow: none;
+}
+
+/* 버튼 크기 변형 */
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-lg {
+  padding: 14px 28px;
+  font-size: 16px;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+/* 버튼 그룹 */
+.btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.btn-group-center {
+  justify-content: center;
+}
+
+/* 아이콘 버튼 */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-icon svg,
+.btn-icon img {
+  width: 16px;
+  height: 16px;
+}
