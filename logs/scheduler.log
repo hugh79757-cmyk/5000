@@ -36,3 +36,13 @@ travel-hugo: failed or quota reached
 2026-03-11 18:30:04,260 [INFO] === travel1-hugo 발행 시작: 2026-03-11 18:30:04 ===
 2026-03-11 18:30:34,209 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/세종-낙화축제와-2025-세종미술주간-5곳-일정-비교-및-현지인-추천-리스트/
 
+2026-03-11 21:00:22,274 [INFO] === travel2-hugo 발행 시작: 2026-03-11 21:00:22 ===
+2026-03-11 21:00:59,256 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/대구-문화유산-투어-3곳-가창-찐빵-골목과-관암사-소재사-추천-리스트/
+
+2026-03-11 22:00:05,958 [INFO] === travel3-hugo 발행 시작: 2026-03-11 22:00:05 ===
+2026-03-11 22:00:10,656 [ERROR] ed <block end>, but found %r" % token.id, token.start_mark)
+yaml.parser.ParserError: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/prompts.yaml", line 9, column 1
+expected <block end>, but found '['
+  in "/Users/twinssn/Projects/5000/config/prompts.yaml", line 11, column 3
+

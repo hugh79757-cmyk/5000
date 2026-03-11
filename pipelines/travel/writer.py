@@ -77,6 +77,55 @@ def _build_data_block(data):
 
 
 
+def _inject_naver_map(body_md, items):
+    import urllib.parse
+    if not items:
+        return body_md
+    map_links = []
+    for item in items:
+        title = item.get("title", "").strip()
+        if not title:
+            continue
+        mapx = str(item.get("mapX", item.get("mapx", ""))).strip()
+        mapy = str(item.get("mapY", item.get("mapy", ""))).strip()
+        addr = item.get("addr1", item.get("addr", ""))
+        if mapx and mapy:
+            url = "https://map.naver.com/v5/?c=" + mapx + "," + mapy + ",15,0,0,0,dh"
+        elif addr:
+            encoded = urllib.parse.quote(addr + " " + title)
+            url = "https://map.naver.com/v5/search/" + encoded
+        else:
+            encoded = urllib.parse.quote(title)
+            url = "https://map.naver.com/v5/search/" + encoded
+        map_links.append((title, url))
+    if not map_links:
+        return body_md
+    lines = body_md.split("\n")
+    result = []
+    used_idx = 0
+    for line in lines:
+        result.append(line)
+        if used_idx < len(map_links) and re.match(r"^##\s+", line):
+            matched = False
+            for j in range(used_idx, len(map_links)):
+                ml_title, ml_url = map_links[j]
+                name_parts = [p for p in ml_title.split() if len(p) >= 2]
+                if any(part in line for part in name_parts):
+                    used_idx = j + 1
+                    matched = True
+                    btn = "> **" + ml_title + "** | [네이버 지도에서 보기](" + ml_url + ")"
+                    result.append("")
+                    result.append(btn)
+                    break
+            if not matched and used_idx < len(map_links):
+                ml_title, ml_url = map_links[used_idx]
+                used_idx += 1
+                btn = "> **" + ml_title + "** | [네이버 지도에서 보기](" + ml_url + ")"
+                result.append("")
+                result.append(btn)
+    return "\n".join(result)
+
+
 def _inject_images(items, content):
     """API image URLs into body after each H2 in order"""
     existing = len(re.findall(r'!\[', content))
@@ -178,6 +227,7 @@ def generate_content(data, blog_id="travel-hugo"):
     content = _enrich_with_nearby(data, content)
     items = data.get("items", [])
     content = _inject_images(items, content)
+    content = _inject_naver_map(content, items)
 
     display_region = data.get("display_region", "")
     theme = data.get("theme", "")
