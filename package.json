@@ -1,0 +1,15 @@
+{
+  "name": "rotcha-hugo",
+  "version": "1.62.0",
+  "description": "Hugo blog with PurgeCSS optimization",
+  "scripts": {
+    "build": "hugo --gc --minify",
+    "dev": "hugo server -D"
+  },
+  "devDependencies": {
+    "postcss": "^8.4.35",
+    "postcss-cli": "^11.0.0",
+    "@fullhuman/postcss-purgecss": "^6.0.0",
+    "autoprefixer": "^10.4.17"
+  }
+}

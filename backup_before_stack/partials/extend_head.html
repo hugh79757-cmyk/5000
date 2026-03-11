@@ -1,0 +1,89 @@
+{{- /* 사이트 인증 메타 태그 */ -}}
+<meta name="google-adsense-account" content="ca-pub-8772455780561463">
+<meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520">
+<meta name="yandex-verification" content="a093ecbeea7a8440" />
+
+{{- /* DNS Prefetch & Preconnect */ -}}
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
+
+{{- /* 프리텐다드 폰트 */ -}}
+<link rel="preload"
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2"
+  as="font" type="font/woff2" crossorigin>
+
+<style>
+  @font-face {
+    font-family: 'Pretendard';
+    font-weight: 400;
+    font-display: swap;
+    src: local('Pretendard Regular'),
+      url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Regular.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'Pretendard';
+    font-weight: 700;
+    font-display: swap;
+    src: local('Pretendard Bold'),
+      url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/woff2/Pretendard-Bold.woff2') format('woff2');
+  }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+</style>
+
+{{- /* Google Analytics */ -}}
+<script>
+  (function () {
+    function loadAnalytics() {
+      var script = document.createElement('script');
+      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';
+      script.async = true;
+      document.head.appendChild(script);
+      script.onload = function () {
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-L3D3EGH8YN');
+      };
+    }
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadAnalytics);
+    } else {
+      window.addEventListener('load', function () {
+        setTimeout(loadAnalytics, 100);
+      });
+    }
+  })();
+</script>
+
+{{- /* AdSense - 즉시 로드 + 자동 초기화 */ -}}
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463" crossorigin="anonymous"></script>
+<script>
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      var ads = document.querySelectorAll('ins.adsbygoogle');
+      ads.forEach(function(ad) {
+        if (!ad.getAttribute('data-adsbygoogle-status')) {
+          (adsbygoogle = window.adsbygoogle || []).push({});
+        }
+      });
+    }, 500);
+  });
+</script>
+
+{{- /* Microsoft Clarity (지연 로딩) */ -}}
+<script>
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "deigc1awql");
+    }, 3000);
+  });
+</script>

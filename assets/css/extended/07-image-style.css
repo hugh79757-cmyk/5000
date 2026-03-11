@@ -1,0 +1,43 @@
+/* ===== v1.64 이미지 스타일 ===== */
+
+/* 포스트 본문 이미지 */
+.post-img {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.post-img img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    background-color: var(--code-bg);
+}
+
+.post-img figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--secondary);
+}
+
+/* 이미지 로딩 중 placeholder */
+.post-img img[loading="lazy"] {
+    background: linear-gradient(90deg, var(--code-bg) 25%, var(--border) 50%, var(--code-bg) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.post-img img[loading="lazy"][src] {
+    animation: none;
+    background: none;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* 외부 이미지 (R2) 최적화 */
+img[src*="r2.dev"] {
+    content-visibility: auto;
+    contain-intrinsic-size: 100% 300px;
+}

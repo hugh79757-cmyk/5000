@@ -1,0 +1,40 @@
+{{ $currentPage := . }}
+{{ $related := slice }}
+
+{{/* 1순위: 같은 태그 글 */}}
+{{ $currentTags := .Params.tags | default slice }}
+{{ if $currentTags }}
+  {{ range $tag := $currentTags }}
+    {{ range where (index site.Taxonomies.tags $tag).Pages ".Permalink" "!=" $currentPage.Permalink }}
+      {{ $related = $related | append . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* 2순위: 같은 카테고리 글 (태그 매칭이 부족할 때) */}}
+{{ if lt (len $related) 5 }}
+  {{ $currentCats := .Params.categories | default slice }}
+  {{ range $cat := $currentCats }}
+    {{ range where (index site.Taxonomies.categories $cat).Pages ".Permalink" "!=" $currentPage.Permalink }}
+      {{ $related = $related | append . }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{/* 중복 제거 + 최대 5개 */}}
+{{ $related = $related | uniq | first 5 }}
+
+{{ with $related }}
+<div class="related-posts" style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border);">
+  <h3 style="margin-bottom: 1rem; color: var(--primary);">함께 읽으면 좋은 글</h3>
+  <ul style="list-style: none; padding: 0; margin: 0;">
+    {{ range . }}
+    <li style="margin-bottom: 0.8rem;">
+      <a href="{{ .RelPermalink }}" style="color: var(--secondary); text-decoration: none;">
+        {{ .Title }}
+      </a>
+    </li>
+    {{ end }}
+  </ul>
+</div>
+{{ end }}

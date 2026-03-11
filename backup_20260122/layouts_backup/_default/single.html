@@ -1,0 +1,84 @@
+{{- define "main" }}
+
+<article class="post-single">
+  <header class="post-header">
+    {{- partial "breadcrumbs.html" . }}
+    <h1 class="post-title">
+      {{ .Title }}
+      {{- if .Draft }}<sup><span class="entry-isdraft">&nbsp;&nbsp;[draft]</span></sup>{{- end }}
+    </h1>
+    {{- if .Description }}
+    <div class="post-description">
+      {{ .Description }}
+    </div>
+    {{- end }}
+    {{- if not .Params.hideMeta }}
+    <div class="post-meta">
+      {{- partial "post_meta.html" . -}}
+    </div>
+    {{- end }}
+  </header>
+
+  {{- $isHidden := .Params.cover.hidden | default site.Params.cover.hiddenInSingle | default site.Params.cover.hidden }}
+  {{- partial "cover.html" (dict "cxt" . "IsHome" false "isHidden" $isHidden) }}
+
+  <!-- 광고 1: 타이틀 하단 -->
+  <div class="ad-slot ad-top">
+    {{ partial "adsense-in-article.html" . }}
+  </div>
+
+  {{- if (.Param "ShowToc") }}
+  {{- partial "toc.html" . }}
+  {{- end }}
+
+  <div class="post-content">
+    {{- if not (.Param "disableAnchoredHeadings") }}
+    {{- $content := partial "anchored_headings.html" .Content | safeHTML }}
+    {{- $parts := split $content "</p>" }}
+    {{- if gt (len $parts) 1 }}
+    {{- /* 첫 번째 문단 출력 */}}
+    {{ index $parts 0 | safeHTML }}</p>
+
+    <!-- 광고 2: 첫 문단 하단 -->
+    <div class="ad-slot ad-after-first-p">
+      {{ partial "adsense-in-article.html" . }}
+    </div>
+
+    {{- /* 나머지 콘텐츠 출력 */}}
+    {{- range $i, $part := $parts }}
+    {{- if gt $i 0 }}
+    {{- if ne $part "" }}
+    {{ $part | safeHTML }}</p>
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- else }}
+    {{ $content }}
+    {{- end }}
+    {{- else }}
+    {{ .Content }}
+    {{- end }}
+  </div>
+
+  <footer class="post-footer">
+    {{- if .Params.tags }}
+    <ul class="post-tags">
+      {{- range ($.GetTerms "tags") }}
+      <li><a href="{{ .Permalink }}">{{ .LinkTitle }}</a></li>
+      {{- end }}
+    </ul>
+    {{- end }}
+    {{- if (.Param "ShowShareButtons") }}
+    {{- partial "share_icons.html" . -}}
+    {{- end }}
+    {{- if (.Param "ShowPostNavLinks") }}
+    {{- partial "post_nav_links.html" . }}
+    {{- end }}
+  </footer>
+
+  {{- if (.Param "comments") }}
+  {{- partial "comments.html" . }}
+  {{- end }}
+</article>
+
+{{- end }}{{/* end main */}}

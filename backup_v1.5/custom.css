@@ -1,0 +1,12 @@
+/* 플로팅 광고/요소 비활성화 */
+.footer, footer {
+    position: relative !important;
+}
+
+/* 혹시 광고 관련 플로팅 있으면 숨기기 */
+ins.adsbygoogle[style*="fixed"],
+ins.adsbygoogle[style*="sticky"],
+div[style*="position: fixed"],
+div[style*="position:fixed"] {
+    display: none !important;
+}
