@@ -7,7 +7,6 @@
 # Global rules (all prompts reference this)
 # ============================================================
 _global_rules: &global_rules |
-  - "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 취소선 문법(~~)은 어떤 경우에도 본문, 제목, 부제목에 포함하지 않는다."
   [ABSOLUTE BAN — any of these in body = reject]
   - "바랍니다", "드립니다", "하시기 바랍니다"
   - "공식 홈페이지를 확인", "공식 홈페이지를 참고"
@@ -78,7 +77,6 @@ tour1_camping:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean blog post using the campsite/outdoor data below.
 
     [DATA]
@@ -124,7 +122,6 @@ tour1_leports:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean blog post using the leports/activity data below.
 
     [DATA]
@@ -168,7 +165,6 @@ travel1_festival:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean blog post using the festival/event data below.
 
     [DATA]
@@ -216,7 +212,6 @@ travel2_heritage:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean blog post using the cultural heritage data below.
 
     [DATA]
@@ -264,7 +259,6 @@ tour2_food:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean blog post using the restaurant/food data below.
 
     [DATA]
@@ -310,7 +304,6 @@ tour3_course:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean blog post using the attraction/course data below.
 
     [DATA]
@@ -353,7 +346,6 @@ travel_info:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean travel blog post using the data below.
 
     [DATA]
@@ -383,7 +375,6 @@ sports_preview:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean sports preview using the data below.
 
     [DATA]
@@ -405,7 +396,6 @@ ecommerce_review:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean product review using the data below.
 
     [DATA]
@@ -427,7 +417,6 @@ life_info:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean life-info post using the data below.
 
     [DATA]
@@ -449,7 +438,6 @@ tvshow_review:
     *global_rules*
 
   user: |
-    취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.
     Write a Korean review of a TV-featured location.
 
     [DATA]
