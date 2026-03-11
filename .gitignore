@@ -1,0 +1,7 @@
+.env
+config/api_keys.yaml
+data/content.db
+data/content.db-journal
+__pycache__/
+*.pyc
+.venv/

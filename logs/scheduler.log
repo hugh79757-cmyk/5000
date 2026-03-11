@@ -1,0 +1,36 @@
+2026-03-11 15:45:11,943 [INFO] 5000 scheduler started
+2026-03-11 15:45:11,943 [INFO] registered 18 jobs
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel1-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel2-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel3-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel4-hugo',), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=daily_report, args=(), kwargs={})
+2026-03-11 17:00:21,762 [INFO] === travel-hugo 발행 시작: 2026-03-11 17:00:21 ===
+2026-03-11 17:00:23,013 [INFO] ed, or not known)"))
+Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+travel-hugo: failed or quota reached
+
+2026-03-11 17:10:25,104 [INFO] === travel-hugo git push ===
+2026-03-11 17:10:25,315 [INFO] travel-hugo no changes
+2026-03-11 17:10:25,315 [INFO] === travel1-hugo git push ===
+2026-03-11 17:10:25,461 [INFO] travel1-hugo no changes
+2026-03-11 17:10:25,461 [INFO] === travel2-hugo git push ===
+2026-03-11 17:10:25,603 [INFO] travel2-hugo no changes
+2026-03-11 17:10:25,604 [INFO] === travel3-hugo git push ===
+2026-03-11 17:10:25,718 [INFO] travel3-hugo no changes
+2026-03-11 17:10:25,718 [INFO] === travel4-hugo git push ===
+2026-03-11 17:10:25,848 [INFO] travel4-hugo no changes
+2026-03-11 18:30:04,260 [INFO] === travel1-hugo 발행 시작: 2026-03-11 18:30:04 ===

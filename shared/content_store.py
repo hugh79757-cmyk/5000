@@ -1,0 +1,208 @@
+import re
+import sqlite3
+import os
+from datetime import datetime
+
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "content.db")
+
+
+def get_conn():
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL")
+    return conn
+
+
+def init_db():
+    conn = get_conn()
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS articles ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        "blog_id TEXT NOT NULL,"
+        "title TEXT NOT NULL,"
+        "slug TEXT,"
+        "body_md TEXT,"
+        "body_html TEXT,"
+        "thumbnail_url TEXT,"
+        "category TEXT,"
+        "tags TEXT,"
+        "data_source TEXT,"
+        "source_id TEXT,"
+        "prompt_id TEXT,"
+        "model TEXT,"
+        "published_url TEXT,"
+        "published_at TEXT,"
+        "platform TEXT,"
+        "status TEXT DEFAULT 'draft',"
+        "created_at TEXT DEFAULT (datetime('now'))"
+        ")"
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_articles_blog_id ON articles(blog_id)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_articles_source ON articles(data_source, source_id)")
+    conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_published_url ON articles(published_url)")
+    conn.commit()
+    conn.close()
+
+
+def insert_article(article):
+    conn = get_conn()
+    cur = conn.execute(
+        "INSERT OR IGNORE INTO articles"
+        " (blog_id, title, slug, body_md, body_html, thumbnail_url, category, tags,"
+        "  data_source, source_id, prompt_id, model, published_url, published_at,"
+        "  platform, status, created_at)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (
+            article.get("blog_id", ""),
+            article.get("title", ""),
+            article.get("slug", ""),
+            article.get("body_md", ""),
+            article.get("body_html", ""),
+            article.get("thumbnail_url", ""),
+            article.get("category", ""),
+            article.get("tags", ""),
+            article.get("data_source", ""),
+            article.get("source_id", ""),
+            article.get("prompt_id", ""),
+            article.get("model", ""),
+            article.get("published_url", ""),
+            article.get("published_at", ""),
+            article.get("platform", ""),
+            article.get("status", "published"),
+            article.get("created_at", datetime.utcnow().isoformat()),
+        ),
+    )
+    row_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return row_id
+
+
+def update_published(article_id, published_url):
+    conn = get_conn()
+    conn.execute(
+        "UPDATE articles SET published_url=?, status='published',"
+        " published_at=datetime('now') WHERE id=?",
+        (published_url, article_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_today_count(blog_id):
+    conn = get_conn()
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    row = conn.execute(
+        "SELECT COUNT(*) as cnt FROM articles WHERE blog_id=? AND date(created_at)=?",
+        (blog_id, today),
+    ).fetchone()
+    conn.close()
+    return row["cnt"] if row else 0
+
+
+def article_exists(published_url):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT 1 FROM articles WHERE published_url=?",
+        (published_url,),
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def get_all_articles(blog_id=None, limit=100, offset=0):
+    conn = get_conn()
+    if blog_id:
+        rows = conn.execute(
+            "SELECT * FROM articles WHERE blog_id=? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            (blog_id, limit, offset),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT * FROM articles ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            (limit, offset),
+        ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def register_images(article_id, blog_id, html):
+    conn = get_conn()
+    urls = re.findall(r'<img[^>]+src=["\'](https?://[^"\'>]+)["\'"]', html or "")
+    md_urls = re.findall(r'!\[[^\]]*\]\((https?://[^)]+)\)', html or "")
+    all_urls = list(set(urls + md_urls))
+    count = 0
+    for url in all_urls:
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO used_images (image_url, article_id, blog_id) VALUES (?,?,?)",
+                (url, article_id, blog_id),
+            )
+            count += 1
+        except Exception:
+            pass
+    conn.commit()
+    conn.close()
+    return count
+
+
+def is_image_used(image_url):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT 1 FROM used_images WHERE image_url=?",
+        (image_url,),
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def filter_unused_images(image_urls):
+    conn = get_conn()
+    unused = []
+    for url in image_urls:
+        row = conn.execute(
+            "SELECT 1 FROM used_images WHERE image_url=?",
+            (url,),
+        ).fetchone()
+        if not row:
+            unused.append(url)
+    conn.close()
+    return unused
+
+
+def get_used_image_count(blog_id=None):
+    conn = get_conn()
+    if blog_id:
+        row = conn.execute(
+            "SELECT COUNT(*) as cnt FROM used_images WHERE blog_id=?",
+            (blog_id,),
+        ).fetchone()
+    else:
+        row = conn.execute("SELECT COUNT(*) as cnt FROM used_images").fetchone()
+    conn.close()
+    return row["cnt"] if row else 0
+
+
+def source_exists(blog_id, data_source, source_id):
+    if not source_id:
+        return False
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT 1 FROM articles WHERE blog_id=? AND data_source=? AND source_id=?",
+        (blog_id, data_source, source_id),
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def title_similar_exists(blog_id, title):
+    conn = get_conn()
+    core = title[:15]
+    row = conn.execute(
+        "SELECT 1 FROM articles WHERE blog_id=? AND title LIKE ?",
+        (blog_id, "%" + core + "%"),
+    ).fetchone()
+    conn.close()
+    return row is not None
