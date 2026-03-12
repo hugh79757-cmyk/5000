@@ -1,0 +1,44 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/entry/*
+  X-Robots-Tag: noindex, nofollow
+/m/*
+  X-Robots-Tag: noindex, nofollow
+/tag/*
+  X-Robots-Tag: noindex, nofollow
+/category/*
+  X-Robots-Tag: noindex, nofollow
+
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+/*.gif
+  Cache-Control: public, max-age=31536000, immutable
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+/*.woff
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.xml
+  Cache-Control: public, max-age=3600, must-revalidate
+/*.json
+  Cache-Control: public, max-age=3600, must-revalidate

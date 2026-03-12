@@ -30,14 +30,21 @@ export async function onRequest(context) {
     needsRedirect = true;
   }
 
-  // 5. /tag/ -> /tags/
+  // 5. /tag/슬러그 -> /tags/슬러그/ (공백->하이픈 변환)
   if (targetPath.startsWith('/tag/')) {
-    targetPath = '/tags/';
+    let slug = decodeURIComponent(targetPath.replace(/^\/tag\//, '').replace(/\/$/, ''));
+    slug = slug.toLowerCase().replace(/\s+/g, '-');
+    targetPath = slug ? '/tags/' + encodeURIComponent(slug) + '/' : '/tags/';
     needsRedirect = true;
   }
 
-  // 6. /category -> /categories/
-  if (targetPath.startsWith('/category')) {
+  // 6. /category/슬러그 -> /categories/슬러그/ (공백->하이픈 변환)
+  if (targetPath.startsWith('/category/')) {
+    let slug = decodeURIComponent(targetPath.replace(/^\/category\//, '').replace(/\/$/, ''));
+    slug = slug.toLowerCase().replace(/\s+/g, '-');
+    targetPath = slug ? '/categories/' + encodeURIComponent(slug) + '/' : '/categories/';
+    needsRedirect = true;
+  } else if (targetPath === '/category' || targetPath === '/category/') {
     targetPath = '/categories/';
     needsRedirect = true;
   }

@@ -19,9 +19,11 @@
     {{- range $i, $e := .Params.tags }}{{ if $i }}, {{ end }}{{ $e }}{{ end }} {{- end -}}">
 {{- end }}
 <meta name="description" content="{{- with .Description }}{{ . }}{{- else }}{{- if or .IsPage .IsSection}}
-    {{- .Summary | default (printf "%s - %s" .Title  site.Title) }}{{- else }}{{- if or (eq .Kind "taxonomy") (eq .Kind "term") }}
-    {{- printf "%s 관련 글 모음 — %s" .Title site.Title }}{{- else }}
-    {{- with site.Params.description }}{{ . }}{{- end }}{{- end }}{{- end }}{{- end -}}">
+    {{- .Summary | default (printf "%s - %s" .Title  site.Title) }}{{- else }}{{- if eq .Kind "term" }}
+    {{- $first := index .Pages 0 }}{{- with $first }}{{- printf "%s - %s" $.Title (.Summary | plainify | truncate 80) }}{{- else }}{{- printf "%s 관련 글 모음 — %s" $.Title site.Title }}{{- end }}
+    {{- else }}{{- if eq .Kind "taxonomy" }}
+    {{- printf "%s — %s의 모든 %s 목록입니다." .Title site.Title .Data.Plural }}{{- else }}
+    {{- with site.Params.description }}{{ . }}{{- end }}{{- end }}{{- end }}{{- end }}{{- end -}}">
 <meta name="author" content="{{ (partial "author.html" . ) }}">
 <link rel="canonical" href="{{ if .Params.canonicalURL -}} {{ trim .Params.canonicalURL " " }} {{- else -}} {{ .Permalink }} {{- end }}">
 {{- if site.Params.analytics.google.SiteVerificationTag }}
