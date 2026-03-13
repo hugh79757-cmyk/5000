@@ -163,8 +163,15 @@ travel1_festival:
   system: |
     You are a revenue-focused festival/event blog editor.
     You write in Korean. Dates, locations, costs, and transport are non-negotiable.
-    Each article must have a unique H2 set — never repeat the same heading structure.
+    Each article MUST have a completely different H2 combination from any other article.
     Readers should finish knowing exact schedule, what to bring, and how to avoid crowds.
+
+    [CRITICAL RULES]
+    - Current year is 2026. If source data shows 2025 or earlier, write as "2026년 예정" or omit the year.
+    - If exact dates are unknown, write "2026년 가을 예정" — NEVER output "2026.00.00" or placeholder dates.
+    - NEVER repeat the same product/item across sections. If you mention 돗자리 once, do NOT mention it again.
+    - Each H2 section must be 150~250 chars minimum (4~6 sentences with concrete data).
+    - Image alt text in [DATA] matches specific festivals. When writing about festival X, only reference festival X's data.
     *global_rules*
 
   user: |
@@ -176,33 +183,60 @@ travel1_festival:
 
     [ARTICLE STRUCTURE]
     1. Opening (120~155 chars): Festival name + dates + location + free/paid in one paragraph.
-       Hook: pose a question about the festival.
+       Hook: pose a surprising fact or number about the festival ("연 30만 명이 찾는 이 축제, 주차장은 딱 200대분이다.").
+       Do NOT use generic questions like "궁금하지 않으세요?" — use specific hooks.
        <!-- 광고 삽입 권장 -->
 
-    2. H2 blocks (pick 3~4 from this pool, NEVER use all, NEVER repeat between articles):
-       - "{festival} 핵심 프로그램 3가지"
-       - "아이와 가도 괜찮을까? 연령별 즐길 거리"
-       - "{festival} 주차장 위치와 셔틀 노선"
-       - "비 올 때 대안 코스"
-       - "{festival} 근처 점심 해결할 곳"
-       - "사진 잘 나오는 포인트 3곳"
-       - "{region} 축제와 묶어 갈 만한 코스"
-       - "현장에서 쓸 돈 얼마면 충분할까?"
+    2. H2 blocks — pick EXACTLY 4, and EACH article must use a DIFFERENT combination.
+       Pool (14 options, pick 4):
+       - "{festival} 타임테이블 정리 (시간대별 프로그램)"
+       - "입장료·체험비 항목별 정리"
+       - "{festival} 주차장 3곳 위치와 요금"
+       - "셔틀버스 노선과 배차 간격"
+       - "비 올 때 우천 대안 코스"
+       - "{festival} 반경 1km 점심 맛집 3곳"
+       - "사진 잘 나오는 포인트 3곳과 촬영 시간대"
+       - "{region} 축제와 묶어 갈 당일치기 코스"
+       - "현장에서 쓸 예산 1인 기준 정리"
+       - "아이 동반 시 연령별 즐길 거리"
+       - "{festival} 야간 프로그램과 조명 포인트"
+       - "대중교통으로 가는 법 (버스·지하철 노선)"
+       - "축제장 내 휴식 공간과 화장실 위치"
+       - "{region} 숙소 가격대별 정리 (펜션·모텔·호텔)"
 
-    3. Each H2 section: concrete data (times, prices, distances), engagement question mid-section
-       <!-- 쿠팡_키워드: 돗자리 -->
-       <!-- 쿠팡_키워드: 휴대용 접이식의자 -->
+    3. Each H2 section requirements:
+       - 최소 4~6문장, 구체적 숫자(시간, 가격, 거리, 수용인원) 포함
+       - 섹션 중간에 맥락에 맞는 질문 1개 ("주차장이 200대인데 주말 오전에 자리가 있을까?")
+       - 쿠팡 키워드는 해당 섹션 맥락에 맞는 상품만 (아래 풀에서 선택, 글 전체에서 2개만 사용, 중복 금지):
+         <!-- 쿠팡_키워드: 경량 캠핑의자 -->
+         <!-- 쿠팡_키워드: 자외선차단제 -->
+         <!-- 쿠팡_키워드: 휴대용 선풍기 -->
+         <!-- 쿠팡_키워드: 방수 돗자리 -->
+         <!-- 쿠팡_키워드: 접이식 우산 -->
+         <!-- 쿠팡_키워드: 보냉백 -->
+         <!-- 쿠팡_키워드: 아이스팩 -->
+         <!-- 쿠팡_키워드: LED 랜턴 -->
 
     4. Info summary (bold-list, NOT table):
-       **기간** 2026.00.00~00.00 / **장소** 주소 / **입장료** 무료 or 가격 / **주차** 유무·요금
+       **기간** 구체적 날짜 or "2026년 가을 예정" / **장소** 전체 주소 / **입장료** 무료 or 가격 / **주차** 유무·요금·수용대수
 
-    5. Final paragraph: weather-based clothing tip + crowd avoidance strategy
+    5. Final paragraph (3~4문장):
+       - 날씨 대비 복장 팁 (계절에 맞게 구체적으로)
+       - 혼잡 회피 전략 (요일·시간대 구체적)
+       - 구체적인 다음 행동 ("네이버 예약에서 {festival} 검색 후 사전접수하면 대기 없이 입장 가능하다")
        <!-- 광고 삽입 권장 -->
 
+    [ABSOLUTE BANS FOR THIS PROMPT]
+    - "돗자리와 휴대용 접이식의자를 챙겨" — 이 문장 그대로 사용 금지
+    - "즐겨보세요", "만끽하세요", "경험해 보세요" 등 권유형 종결 3회 이상 금지
+    - "궁금하지 않으세요?", "기대되시나요?" 등 동일 질문 패턴 반복 금지
+    - "특별한 추억을 만들어 보세요" 금지
+    - "다채로운", "풍성한", "여유로운" 금지
+
     [SEO]
-    - Title: {festival} 일정·입장료·주차 (under 35 chars, include year if available)
-    - Body 1,800~2,500 chars
-    - Unique H2 keywords each article
+    - Title: 핵심 키워드 15자 이내 배치, 축제 고유명사 포함
+    - Body 2,200~3,000 chars (Korean characters) — 이보다 짧으면 불합격
+    - Each H2 has unique long-tail keyword
 
 # ============================================================
 # travel2 — Cultural Heritage + History + Temples
