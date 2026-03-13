@@ -46,3 +46,124 @@ yaml.parser.ParserError: while parsing a block mapping
 expected <block end>, but found '['
   in "/Users/twinssn/Projects/5000/config/prompts.yaml", line 11, column 3
 
+2026-03-11 22:15:12,208 [INFO] === travel4-hugo 발행 시작: 2026-03-11 22:15:12 ===
+2026-03-11 22:15:45,453 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/부산-여행코스-5곳-온천욕부터-곰장어까지-현지인-추천-핵심-체크리스트/
+
+2026-03-11 22:30:17,162 [INFO] === travel-hugo git push ===
+2026-03-11 22:30:17,317 [INFO] travel-hugo no changes
+2026-03-11 22:30:17,317 [INFO] === travel1-hugo git push ===
+2026-03-11 22:30:17,436 [INFO] travel1-hugo no changes
+2026-03-11 22:30:17,437 [INFO] === travel2-hugo git push ===
+2026-03-11 22:30:17,566 [INFO] travel2-hugo no changes
+2026-03-11 22:30:17,566 [INFO] === travel3-hugo git push ===
+2026-03-11 22:30:17,716 [INFO] travel3-hugo no changes
+2026-03-11 22:30:17,717 [INFO] === travel4-hugo git push ===
+2026-03-11 22:30:17,871 [INFO] travel4-hugo no changes
+2026-03-11 23:50:26,399 [INFO] === 일일 리포트 생성 ===
+2026-03-11 23:50:26,667 [ERROR] 리포트 실패: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-03-12 08:00:09,607 [INFO] === travel-hugo 발행 시작: 2026-03-12 08:00:09 ===
+2026-03-12 08:01:01,784 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/경기도-글램핑-4곳-가격-비교-산우물-북-캠핑장-추천-순위와-체크리스트/
+
+2026-03-12 08:10:02,711 [INFO] === travel-hugo git push ===
+2026-03-12 08:10:02,883 [INFO] travel-hugo no changes
+2026-03-12 09:30:12,093 [INFO] === travel1-hugo 발행 시작: 2026-03-12 09:30:12 ===
+2026-03-12 09:30:48,021 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/충남-의좋은-형제-축제와-서천-마량진항-해넘이-명소-5곳-현지인-추천-가볼-만한-곳/
+
+2026-03-12 09:40:19,034 [INFO] === travel1-hugo git push ===
+2026-03-12 09:40:19,184 [INFO] travel1-hugo no changes
+2026-03-12 12:00:09,214 [INFO] === travel2-hugo 발행 시작: 2026-03-12 12:00:09 ===
+2026-03-12 12:00:56,180 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/제주-보물-탐방-5곳-가파도-위미항-괴오름-현지인-추천-명소-지도/
+
+2026-03-12 12:10:27,366 [INFO] === travel2-hugo git push ===
+2026-03-12 12:10:27,642 [INFO] travel2-hugo no changes
+2026-03-12 13:30:15,525 [INFO] === travel3-hugo 발행 시작: 2026-03-12 13:30:15 ===
+2026-03-12 13:30:51,129 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/경남-해물-맛집-5곳-가격-비교-우도전복죽부터-부산식당까지-현지인-추천/
+
+2026-03-12 13:40:23,708 [INFO] === travel3-hugo git push ===
+2026-03-12 13:40:23,889 [INFO] travel3-hugo no changes
+2026-03-12 15:30:15,245 [INFO] === travel4-hugo 발행 시작: 2026-03-12 15:30:15 ===
+2026-03-12 15:30:53,277 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/경북-울릉도와-독도-2곳-여행코스-7시간-가격-비교와-추천-명소/
+
+2026-03-12 15:40:24,456 [INFO] === travel4-hugo git push ===
+2026-03-12 15:40:24,650 [INFO] travel4-hugo no changes
+2026-03-12 17:00:04,479 [INFO] === travel-hugo 발행 시작: 2026-03-12 17:00:04 ===
+2026-03-12 17:00:31,936 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/경상도-웰니스-여행-3곳-낙천탕-등억온천단지-김해-롯데워터파크-가격대별-추천-리스트/
+
+2026-03-12 17:10:02,847 [INFO] === travel-hugo git push ===
+2026-03-12 17:10:03,019 [INFO] travel-hugo no changes
+2026-03-12 17:10:03,020 [INFO] === travel1-hugo git push ===
+2026-03-12 17:10:03,146 [INFO] travel1-hugo no changes
+2026-03-12 17:10:03,146 [INFO] === travel2-hugo git push ===
+2026-03-12 17:10:03,280 [INFO] travel2-hugo no changes
+2026-03-12 17:10:03,280 [INFO] === travel3-hugo git push ===
+2026-03-12 17:10:03,401 [INFO] travel3-hugo no changes
+2026-03-12 17:10:03,401 [INFO] === travel4-hugo git push ===
+2026-03-12 17:10:03,517 [INFO] travel4-hugo no changes
+2026-03-12 18:30:18,044 [INFO] === travel1-hugo 발행 시작: 2026-03-12 18:30:18 ===
+2026-03-12 18:31:00,745 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/경남-축제-5선-무료-입장-대장경기록문화축제와-진주남강유등축제-현지인-추천/
+
+2026-03-12 21:00:23,546 [INFO] === travel2-hugo 발행 시작: 2026-03-12 21:00:23 ===
+2026-03-12 21:00:55,263 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/광주-문화유산-투어-3곳-국립-518-민주묘지-신룡동오층석탑-푸른길분수공원-상세-운영시간-공개/
+
+2026-03-12 22:00:01,879 [INFO] === travel3-hugo 발행 시작: 2026-03-12 22:00:01 ===
+2026-03-12 22:01:18,997 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/울산-카페-3곳-경복궁-몽구도원-이너리트-현지인-추천-메뉴와-가격-공개/
+
+2026-03-12 22:15:20,220 [INFO] === travel4-hugo 발행 시작: 2026-03-12 22:15:20 ===
+2026-03-12 22:16:17,218 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/울산-여행코스-5곳-추천-현지인-강추-울주-문화유산-포함-비교-체크리스트/
+
+2026-03-12 22:30:18,722 [INFO] === travel-hugo git push ===
+2026-03-12 22:30:18,901 [INFO] travel-hugo no changes
+2026-03-12 22:30:18,901 [INFO] === travel1-hugo git push ===
+2026-03-12 22:30:19,030 [INFO] travel1-hugo no changes
+2026-03-12 22:30:19,030 [INFO] === travel2-hugo git push ===
+2026-03-12 22:30:19,152 [INFO] travel2-hugo no changes
+2026-03-12 22:30:19,152 [INFO] === travel3-hugo git push ===
+2026-03-12 22:30:19,273 [INFO] travel3-hugo no changes
+2026-03-12 22:30:19,273 [INFO] === travel4-hugo git push ===
+2026-03-12 22:30:19,393 [INFO] travel4-hugo no changes
+2026-03-12 23:50:00,778 [INFO] === 일일 리포트 생성 ===
+2026-03-12 23:50:00,784 [ERROR] 리포트 실패: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-03-13 08:00:13,652 [INFO] === travel-hugo 발행 시작: 2026-03-13 08:00:13 ===
+2026-03-13 08:00:55,369 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/제주-국보-탐방-3곳-황우지해안열두굴-송악산-진지동굴-천지연-걸매생태공원-추천-가이드/
+
+2026-03-13 08:10:26,301 [INFO] === travel-hugo git push ===
+2026-03-13 08:10:26,400 [INFO] travel-hugo no changes
+2026-03-13 09:30:05,270 [INFO] === travel1-hugo 발행 시작: 2026-03-13 09:30:05 ===
+2026-03-13 09:30:39,754 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/충북-제천과-단양의-5대-축제-명소-가을철-즐기기-완벽-가이드/
+
+2026-03-13 09:40:10,783 [INFO] === travel1-hugo git push ===
+2026-03-13 09:40:10,942 [INFO] travel1-hugo no changes
+2026-03-13 12:00:27,915 [INFO] === travel2-hugo 발행 시작: 2026-03-13 12:00:27 ===
+2026-03-13 12:00:58,082 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/경기-사적-탐방-3곳-추천-사나사-수원통닭거리-안성향교-현지인-추천-리스트/
+
+2026-03-13 12:10:29,137 [INFO] === travel2-hugo git push ===
+2026-03-13 12:10:29,339 [INFO] travel2-hugo no changes
+2026-03-13 13:30:10,024 [INFO] === travel3-hugo 발행 시작: 2026-03-13 13:30:10 ===
+2026-03-13 13:30:51,271 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/부산-고기-맛집-3곳-산성청송가든몽작다원-가격-비교와-현지인-추천/
+
+2026-03-13 13:40:22,908 [INFO] === travel3-hugo git push ===
+2026-03-13 13:40:23,119 [INFO] travel3-hugo no changes
+2026-03-13 15:30:08,470 [INFO] === travel4-hugo 발행 시작: 2026-03-13 15:30:08 ===
+2026-03-13 15:30:58,497 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/강원-동해안-일주-5곳-추천-코스와-현지인-추천-맛집-총예산-3만원/
+
+2026-03-13 15:40:29,558 [INFO] === travel4-hugo git push ===
+2026-03-13 15:40:29,709 [INFO] travel4-hugo no changes
+2026-03-13 17:00:08,687 [INFO] === travel-hugo 발행 시작: 2026-03-13 17:00:08 ===
+2026-03-13 17:00:49,792 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/충청북도-반려견-동반-캠핑장-4곳-가격-비교와-추천-순위-확인/
+
+2026-03-13 17:10:20,713 [INFO] === travel-hugo git push ===
+2026-03-13 17:10:20,819 [INFO] travel-hugo no changes
+2026-03-13 17:10:20,819 [INFO] === travel1-hugo git push ===
+2026-03-13 17:10:20,938 [INFO] travel1-hugo no changes
+2026-03-13 17:10:20,939 [INFO] === travel2-hugo git push ===
+2026-03-13 17:10:21,063 [INFO] travel2-hugo no changes
+2026-03-13 17:10:21,063 [INFO] === travel3-hugo git push ===
+2026-03-13 17:10:21,179 [INFO] travel3-hugo no changes
+2026-03-13 17:10:21,180 [INFO] === travel4-hugo git push ===
+2026-03-13 17:10:21,286 [INFO] travel4-hugo no changes
+2026-03-13 18:30:01,447 [INFO] === travel1-hugo 발행 시작: 2026-03-13 18:30:01 ===
+2026-03-13 18:30:54,541 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/경북-축제-추천-3곳-청도반시축제와-백두대간-봉자페스티벌-상세정보/
+
+2026-03-13 21:00:13,537 [INFO] === travel2-hugo 발행 시작: 2026-03-13 21:00:13 ===
+2026-03-13 21:00:53,520 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/제주-테마파크-입장료-5곳-비교-신화테마파크-추천-리스트/
+

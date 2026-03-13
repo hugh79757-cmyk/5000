@@ -83,46 +83,27 @@ def _inject_naver_map(body_md, items):
         return body_md
     map_links = []
     for item in items:
-        title = item.get("title", "").strip()
+        title = item.get("title", item.get("facltNm", "")).strip()
         if not title:
             continue
-        mapx = str(item.get("mapX", item.get("mapx", ""))).strip()
-        mapy = str(item.get("mapY", item.get("mapy", ""))).strip()
-        addr = item.get("addr1", item.get("addr", ""))
-        if mapx and mapy:
-            url = "https://map.naver.com/v5/?c=" + mapx + "," + mapy + ",15,0,0,0,dh"
-        elif addr:
-            encoded = urllib.parse.quote(addr + " " + title)
-            url = "https://map.naver.com/v5/search/" + encoded
-        else:
-            encoded = urllib.parse.quote(title)
-            url = "https://map.naver.com/v5/search/" + encoded
+        encoded = urllib.parse.quote(title)
+        url = "https://map.naver.com/v5/search/" + encoded
         map_links.append((title, url))
     if not map_links:
         return body_md
     lines = body_md.split("\n")
     result = []
-    used_idx = 0
     for line in lines:
         result.append(line)
-        if used_idx < len(map_links) and re.match(r"^##\s+", line):
-            matched = False
-            for j in range(used_idx, len(map_links)):
-                ml_title, ml_url = map_links[j]
-                name_parts = [p for p in ml_title.split() if len(p) >= 2]
-                if any(part in line for part in name_parts):
-                    used_idx = j + 1
-                    matched = True
-                    btn = "> **" + ml_title + "** | [네이버 지도에서 보기](" + ml_url + ")"
-                    result.append("")
-                    result.append(btn)
-                    break
-            if not matched and used_idx < len(map_links):
-                ml_title, ml_url = map_links[used_idx]
-                used_idx += 1
-                btn = "> **" + ml_title + "** | [네이버 지도에서 보기](" + ml_url + ")"
+        if not re.match(r"^##\s+", line):
+            continue
+        for ml_title, ml_url in map_links:
+            name_parts = [p for p in ml_title.split() if len(p) >= 2]
+            if any(part in line for part in name_parts):
+                btn = "> [" + ml_title + " 네이버 지도에서 보기](" + ml_url + ")"
                 result.append("")
                 result.append(btn)
+                break
     return "\n".join(result)
 
 
@@ -163,6 +144,7 @@ def _inject_images(items, content):
     return "\n".join(result)
 
 def _enrich_with_nearby(data, html):
+    import urllib.parse
     from core.content_processor import enrich_items_with_blog_info, get_nearby_info
 
     items = data.get("items", [])
@@ -181,19 +163,25 @@ def _enrich_with_nearby(data, html):
         nearby_html += "\n\n## 반경 10km 내 가볼만한 곳\n\n"
         for a in attractions[:3]:
             name = a.get("title", "")
-            addr = a.get("addr1", "")
-            nearby_html += f"**{name}**\n\n{addr}\n\n"
+            if not name:
+                continue
+            encoded = urllib.parse.quote(name)
+            url = "https://map.naver.com/v5/search/" + encoded
+            nearby_html += "[" + name + " 지도에서 보기](" + url + ")\n\n"
 
     restaurants = nearby_data.get("restaurants", [])
     if restaurants:
         nearby_html += "\n\n## 반경 10km 내 맛집\n\n"
         for r in restaurants[:3]:
             name = r.get("title", "")
-            addr = r.get("addr1", "")
+            if not name:
+                continue
+            encoded = urllib.parse.quote(name)
+            url = "https://map.naver.com/v5/search/" + encoded
             tel = r.get("tel", "")
-            nearby_html += f"**{name}**\n\n{addr}\n\n"
+            nearby_html += "[" + name + " 지도에서 보기](" + url + ")\n\n"
             if tel:
-                nearby_html += f"전화: {tel}\n\n"
+                nearby_html += "전화: " + tel + "\n\n"
 
     return html + nearby_html
 
@@ -358,25 +346,33 @@ def generate_content(data, blog_id="travel-hugo"):
     )
 
     place_names = ', '.join([i.get('title', i.get('facltNm', ''))[:12] for i in items[:3]])
-    title_prompt = f"""아래 정보를 바탕으로 클릭하고 싶은 블로그 제목 1개만 생성하세요.
+    title_prompt = f"""블로그 제목 1개만 출력하세요. 따옴표 없이 제목 텍스트만 출력.
 
-참고 템플릿: {fallback_title}
 지역: {display_region}
 테마: {theme}
-세부조건: {angle}
 장소수: {len(items)}
-장소명: {place_names}
+대표 장소: {place_names}
 
-규칙:
-- 35~50자 (짧으면 감점)
-- 입니다, 합니다, 드립니다 금지
-- 지역명 반드시 포함
-- 숫자 반드시 포함 (가격, 개수, 시간 등)
-- 장소명이나 메뉴명 등 구체적 고유명사 1개 이상 포함
-- 클릭 유도 요소 1개 이상 포함 (가격 공개, 비교 결과, 순위, 체크리스트, 현지인 추천 등)
-- 템플릿을 뼈대로 삼되 구체적 정보를 자유롭게 덧붙여 확장할 것
-- 제목에 콜론(:) 하이픈(-) 파이프(|) 플러스(+) 특수기호 사용 금지
-- 예시: "경기 가평 글램핑 3곳 1박 가격 비교 스윗피크닉 포함 총정리"
+필수 규칙:
+- 25~40자 (이 범위 밖이면 불합격)
+- 지역명 + 숫자 + 고유명사(축제명/장소명/메뉴명) 반드시 포함
+- 구체적 정보 1개 포함 (가격, 시간, 거리, 입장료 등)
+- 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
+- 특수기호 금지 (콜론, 하이픈, 파이프, 플러스, 느낌표)
+
+금지 표현:
+- "완벽 가이드", "총정리", "꼭 가봐야 할", "추천", "베스트"
+- "현지인 추천", "상세정보", "즐기기"
+
+좋은 제목 예시:
+- "강릉 커피축제 입장 무료 3곳 주차 500대 가능"
+- "부산 불꽃축제 2026 관람 명당 4곳 셔틀 노선 포함"
+- "전주 비빔밥축제 체험비 5천원 아이 동반 프로그램 3가지"
+- "대구 치맥페스티벌 무료존 위치와 야간 공연 시간표"
+
+나쁜 제목 예시 (이렇게 쓰지 마):
+- "경북 축제 추천 3곳 청도반시축제와 백두대간 봉자페스티벌 상세정보" (너무 김, 추천/상세정보 사용)
+- "충북 제천과 단양의 5대 축제 명소 가을철 즐기기 완벽 가이드" (완벽 가이드, 즐기기 사용)
 """
 
     title_result = ai_generate(
