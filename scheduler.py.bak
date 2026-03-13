@@ -110,11 +110,12 @@ schedule.every().day.at("15:30").do(run_publish, "travel4-hugo")
 schedule.every().day.at("19:30").do(run_publish, "travel4-hugo")
 schedule.every().day.at("22:30").do(run_publish, "travel4-hugo")
 
-# git push: 하루 2회 일괄 (빌드 절약: 최대 10회/일 = 300회/월)
-# 오후 1시: 오전 발행분 (07:00~12:00) 일괄 push
-schedule.every().day.at("13:10").do(git_push_all)
-# 밤 11시: 오후+저녁 발행분 (13:00~22:30) 일괄 push
-schedule.every().day.at("23:00").do(git_push_all)
+# git push: after each wave + end of day
+schedule.every().day.at("09:10").do(git_push_all)
+schedule.every().day.at("12:40").do(git_push_all)
+schedule.every().day.at("16:00").do(git_push_all)
+schedule.every().day.at("20:00").do(git_push_all)
+schedule.every().day.at("22:45").do(git_push_all)
 
 schedule.every().day.at("23:50").do(daily_report)
 
