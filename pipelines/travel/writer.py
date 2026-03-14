@@ -186,6 +186,73 @@ def _enrich_with_nearby(data, html):
     return html + nearby_html
 
 
+
+def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
+    """생성된 콘텐츠의 H2 수, 글자수, 금지표현을 검증하고 미달 시 재생성"""
+    BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며"]
+    
+    for attempt in range(max_retries + 1):
+        # 검증
+        h2_count = len(re.findall(r'^## ', content, re.MULTILINE))
+        char_count = len(content)
+        banned_found = [b for b in BANNED if b in content]
+        
+        issues = []
+        if h2_count > 6:
+            issues.append(f"H2 {h2_count}개→4개 필요")
+        if char_count < 1800:
+            issues.append(f"글자수 {char_count}→2200 필요")
+        if banned_found:
+            issues.append(f"금지표현: {banned_found}")
+        
+        if not issues:
+            logger.info("콘텐츠 검증 통과 (H2:%d, 글자수:%d)", h2_count, char_count)
+            return content
+        
+        if attempt < max_retries:
+            logger.warning("콘텐츠 검증 실패 (시도 %d/%d): %s → 재생성", 
+                          attempt + 1, max_retries + 1, ", ".join(issues))
+            
+            fix_instruction = f"""이전 글에 문제가 있어 다시 작성합니다.
+수정사항:
+- H2(##)는 정확히 4개만 사용하세요. 현재 {h2_count}개입니다.
+- 글자수는 2,200자 이상이어야 합니다. 현재 {char_count}자입니다.
+- 금지 표현({', '.join(BANNED)})을 절대 사용하지 마세요.
+- 나머지 규칙은 동일합니다.
+
+""" + user_prompt
+            
+            retry_result = ai_generate(system_prompt, fix_instruction, tier="default")
+            if retry_result and retry_result.get("content"):
+                content = retry_result["content"]
+            else:
+                logger.error("재생성 실패, 원본 유지")
+                return content
+        else:
+            logger.warning("최종 검증: H2:%d, 글자수:%d, 금지:%s (수정 가능 항목 자동 보정)", 
+                          h2_count, char_count, banned_found)
+            
+            # H2 초과 시 자동 보정: 5번째 이후 H2를 H3로 변환
+            if h2_count > 4:
+                lines = content.split("\n")
+                h2_seen = 0
+                for i, line in enumerate(lines):
+                    if line.startswith("## "):
+                        h2_seen += 1
+                        if h2_seen > 4:
+                            lines[i] = "###" + line[2:]
+                content = "\n".join(lines)
+                logger.info("H2 자동 보정: %d개 → 4개 (초과분 H3 변환)", h2_count)
+            
+            # 금지표현 자동 제거
+            for b in banned_found:
+                content = content.replace(b, "")
+            
+            return content
+    
+    return content
+
+
 def generate_content(data, blog_id="travel-hugo"):
     source_type = data.get("source_type", "camping")
     prompt_id = _select_prompt_id(blog_id, source_type)
@@ -211,6 +278,9 @@ def generate_content(data, blog_id="travel-hugo"):
 
     content = result["content"]
     model_used = result.get("model", "")
+
+    # 후처리: H2 수, 글자수, 금지표현 검증 및 재생성
+    content = _validate_and_retry(content, system_prompt, user_prompt)
 
     content = _enrich_with_nearby(data, content)
     items = data.get("items", [])
