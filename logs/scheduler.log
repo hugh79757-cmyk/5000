@@ -239,3 +239,25 @@ expected <block end>, but found '['
 2026-03-14 10:30:20,961 [INFO] === travel1-hugo 발행 시작: 2026-03-14 10:30:20 ===
 2026-03-14 10:31:07,778 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/경남-하동별맛축제-입장료-무료-5곳-맛집-탐방/
 
+2026-03-14 11:00:11,071 [INFO] === travel2-hugo 발행 시작: 2026-03-14 11:00:11 ===
+2026-03-14 11:01:07,793 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/강원-송지호둘레길-입장료-무료-자연-탐방-5곳-소개/
+
+2026-03-14 11:30:11,780 [INFO] === travel3-hugo 발행 시작: 2026-03-14 11:30:11 ===
+2026-03-14 11:30:52,334 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/전남-해물-맛집-5곳-숙자네-1인분-2만원/
+
+2026-03-14 12:00:26,264 [INFO] === travel4-hugo 발행 시작: 2026-03-14 12:00:26 ===
+2026-03-14 12:01:03,486 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/충북-금강-따라-도는-물의-5곳-입장료-3천원/
+
+2026-03-14 12:40:11,696 [INFO] === travel-hugo git push ===
+2026-03-14 12:40:11,916 [INFO] travel-hugo no changes
+2026-03-14 12:40:11,916 [INFO] === travel1-hugo git push ===
+2026-03-14 12:40:12,004 [INFO] travel1-hugo no changes
+2026-03-14 12:40:12,004 [INFO] === travel2-hugo git push ===
+2026-03-14 12:40:12,111 [INFO] travel2-hugo no changes
+2026-03-14 12:40:12,111 [INFO] === travel3-hugo git push ===
+2026-03-14 12:40:12,225 [INFO] travel3-hugo no changes
+2026-03-14 12:40:12,225 [INFO] === travel4-hugo git push ===
+2026-03-14 12:40:12,307 [INFO] travel4-hugo no changes
+2026-03-14 13:00:14,743 [INFO] === travel-hugo 발행 시작: 2026-03-14 13:00:14 ===
+2026-03-14 13:01:00,777 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/서울-한옥-스테이-5곳-평균-1박-요금-10만원/
+
