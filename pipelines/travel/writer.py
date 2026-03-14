@@ -244,6 +244,16 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
                 content = "\n".join(lines)
                 logger.info("H2 자동 보정: %d개 → 4개 (초과분 H3 변환)", h2_count)
             
+            # H1→H2 자동 변환
+            h1_lines = re.findall(r'^# [^#]', content, re.MULTILINE)
+            if h1_lines:
+                lines = content.split("\n")
+                for i, line in enumerate(lines):
+                    if re.match(r'^# [^#]', line):
+                        lines[i] = "#" + line  # # → ##
+                content = "\n".join(lines)
+                logger.info("H1 자동 보정: %d개 → H2 변환", len(h1_lines))
+
             # 금지표현 자동 제거
             for b in banned_found:
                 content = content.replace(b, "")
