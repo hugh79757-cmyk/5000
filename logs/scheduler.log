@@ -281,3 +281,66 @@ travel2-hugo: failed or quota reached
 2026-03-15 16:00:22,883 [INFO] travel4-hugo no changes
 2026-03-15 16:00:22,883 [INFO] === hotissue-hugo git push ===
 2026-03-15 16:00:24,406 [INFO] hotissue-hugo pushed
+2026-03-15 17:00:01,191 [INFO] === travel-hugo 발행 시작: 2026-03-15 17:00:01 ===
+2026-03-15 17:00:34,940 [INFO] travel-hugo: failed or quota reached
+
+2026-03-15 17:00:34,940 [INFO] === hotissue-hugo 발행 시작: 2026-03-15 17:00:34 ===
+2026-03-15 17:01:08,057 [INFO] /file.carisyou.com/upload/2026/03/12/FILE_202603120300...
+  [이미지] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/339e673d.webp
+  R2 URL: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/339e673d.webp
+
+5. 파일 생성...
+  2026-03-15-006-신차가-3046만원-코나-하이브리드-3년-뒤-1889만원-잔존가치-분석/
+  커버 이미지 설정 완료
+
+발행하려면:
+  cd /Users/twinssn/Projects/hotissue-hugo && git add . && git commit -m 'post: 신차가 3,046만원 코나 하이브리드, 3년 뒤 1,889만원? 잔존가치 분석' && git push
+
+완료!
+
+
+2026-03-15 18:00:14,576 [INFO] === travel1-hugo 발행 시작: 2026-03-15 18:00:14 ===
+2026-03-15 18:01:03,642 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/울산에서-열리는-2024-울산에이팜-행사와-축제-소개/
+
+2026-03-15 18:30:09,406 [INFO] === travel2-hugo 발행 시작: 2026-03-15 18:30:09 ===
+2026-03-15 18:30:56,730 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/경남에서-즐길-수-있는-테마파크-5곳-소개/
+
+2026-03-15 19:00:02,663 [INFO] === travel3-hugo 발행 시작: 2026-03-15 19:00:02 ===
+2026-03-15 19:00:44,585 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/경기에서-즐기는-냉면-맛집-5곳-소개/
+
+2026-03-15 19:30:20,737 [INFO] === travel4-hugo 발행 시작: 2026-03-15 19:30:20 ===
+2026-03-15 19:30:53,345 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/세종에서-즐기는-반달가슴곰-체험-여행코스-소개/
+
+2026-03-15 20:00:27,030 [INFO] === travel-hugo git push ===
+2026-03-15 20:00:27,473 [INFO] travel-hugo no changes
+2026-03-15 20:00:27,473 [INFO] === travel1-hugo git push ===
+2026-03-15 20:00:27,635 [INFO] travel1-hugo no changes
+2026-03-15 20:00:27,635 [INFO] === travel2-hugo git push ===
+2026-03-15 20:00:31,093 [INFO] travel2-hugo pushed
+2026-03-15 20:00:31,094 [INFO] === travel3-hugo git push ===
+2026-03-15 20:00:31,234 [INFO] travel3-hugo no changes
+2026-03-15 20:00:31,234 [INFO] === travel4-hugo git push ===
+2026-03-15 20:00:31,356 [INFO] travel4-hugo no changes
+2026-03-15 20:00:31,357 [INFO] === hotissue-hugo git push ===
+2026-03-15 20:00:32,926 [INFO] hotissue-hugo pushed
+2026-03-15 21:00:09,681 [INFO] === travel-hugo 발행 시작: 2026-03-15 21:00:09 ===
+2026-03-15 21:01:00,159 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/전남에서-만나는-화순-수만리들국화마을-탐방-가이드/
+
+2026-03-15 21:01:00,160 [INFO] === hotissue-hugo 발행 시작: 2026-03-15 21:01:00 ===
+2026-03-15 21:01:43,697 [INFO] 본: http://file.carisyou.com/upload/2023/08/18/FILE_202308181250...
+  [이미지] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/c2383300.webp
+  R2 URL: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/c2383300.webp
+
+5. 파일 생성...
+  2026-03-15-007-쏘렌토-vs-쏘렌토-하이브리드-3년-보유비용-17만원-차이의-진실/
+  커버 이미지 설정 완료
+
+발행하려면:
+  cd /Users/twinssn/Projects/hotissue-hugo && git add . && git commit -m 'post: 쏘렌토 vs 쏘렌토 하이브리드, 3년 보유비용 17만원 차이의 진실' && git push
+
+완료!
+
+
+2026-03-15 21:30:16,575 [INFO] === travel1-hugo 발행 시작: 2026-03-15 21:30:16 ===
+2026-03-15 21:31:04,819 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/전남-여수밤바다-불꽃축제와-함께하는-행사-가이드/
+
