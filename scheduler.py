@@ -60,7 +60,7 @@ def git_push(site_name):
 
 
 def git_push_all():
-    for site in ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"]:
+    for site in ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo", "hotissue-hugo"]:
         git_push(site)
 
 
@@ -116,6 +116,13 @@ schedule.every().day.at("12:40").do(git_push_all)
 schedule.every().day.at("16:00").do(git_push_all)
 schedule.every().day.at("20:00").do(git_push_all)
 schedule.every().day.at("22:45").do(git_push_all)
+
+
+schedule.every().day.at("07:00").do(run_publish, "hotissue-hugo")
+schedule.every().day.at("10:00").do(run_publish, "hotissue-hugo")
+schedule.every().day.at("13:00").do(run_publish, "hotissue-hugo")
+schedule.every().day.at("17:00").do(run_publish, "hotissue-hugo")
+schedule.every().day.at("21:00").do(run_publish, "hotissue-hugo")
 
 schedule.every().day.at("23:50").do(daily_report)
 

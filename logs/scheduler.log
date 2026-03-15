@@ -1,263 +1,283 @@
-2026-03-11 15:45:11,943 [INFO] 5000 scheduler started
-2026-03-11 15:45:11,943 [INFO] registered 18 jobs
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-11 15:45:11,943 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel1-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel2-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel3-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push, args=('travel4-hugo',), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-11 15:45:11,944 [INFO]   Job(interval=1, unit=days, do=daily_report, args=(), kwargs={})
-2026-03-11 17:00:21,762 [INFO] === travel-hugo 발행 시작: 2026-03-11 17:00:21 ===
-2026-03-11 17:00:23,013 [INFO] ed, or not known)"))
+2026-03-14 18:16:18,230 [INFO] 5000 scheduler started
+2026-03-14 18:16:18,230 [INFO] registered 36 jobs
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-14 18:16:18,230 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-14 18:16:18,231 [INFO]   Job(interval=1, unit=days, do=daily_report, args=(), kwargs={})
+2026-03-14 18:30:18,461 [INFO] === travel2-hugo 발행 시작: 2026-03-14 18:30:18 ===
+2026-03-14 18:30:19,851 [INFO] d, or not known)"))
 Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
-travel-hugo: failed or quota reached
+travel2-hugo: failed or quota reached
 
-2026-03-11 17:10:25,104 [INFO] === travel-hugo git push ===
-2026-03-11 17:10:25,315 [INFO] travel-hugo no changes
-2026-03-11 17:10:25,315 [INFO] === travel1-hugo git push ===
-2026-03-11 17:10:25,461 [INFO] travel1-hugo no changes
-2026-03-11 17:10:25,461 [INFO] === travel2-hugo git push ===
-2026-03-11 17:10:25,603 [INFO] travel2-hugo no changes
-2026-03-11 17:10:25,604 [INFO] === travel3-hugo git push ===
-2026-03-11 17:10:25,718 [INFO] travel3-hugo no changes
-2026-03-11 17:10:25,718 [INFO] === travel4-hugo git push ===
-2026-03-11 17:10:25,848 [INFO] travel4-hugo no changes
-2026-03-11 18:30:04,260 [INFO] === travel1-hugo 발행 시작: 2026-03-11 18:30:04 ===
-2026-03-11 18:30:34,209 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/세종-낙화축제와-2025-세종미술주간-5곳-일정-비교-및-현지인-추천-리스트/
+2026-03-14 19:00:20,334 [INFO] === travel3-hugo 발행 시작: 2026-03-14 19:00:20 ===
+2026-03-14 19:00:59,107 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/경북에서-맛보는-양지다방과-솔밭식당-맛집-소개/
 
-2026-03-11 21:00:22,274 [INFO] === travel2-hugo 발행 시작: 2026-03-11 21:00:22 ===
-2026-03-11 21:00:59,256 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/대구-문화유산-투어-3곳-가창-찐빵-골목과-관암사-소재사-추천-리스트/
+2026-03-14 19:30:29,453 [INFO] === travel4-hugo 발행 시작: 2026-03-14 19:30:29 ===
+2026-03-14 19:31:06,405 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/서울-여의도-샛강을-따라-걷는-여행코스-소개/
 
-2026-03-11 22:00:05,958 [INFO] === travel3-hugo 발행 시작: 2026-03-11 22:00:05 ===
-2026-03-11 22:00:10,656 [ERROR] ed <block end>, but found %r" % token.id, token.start_mark)
-yaml.parser.ParserError: while parsing a block mapping
-  in "/Users/twinssn/Projects/5000/config/prompts.yaml", line 9, column 1
-expected <block end>, but found '['
-  in "/Users/twinssn/Projects/5000/config/prompts.yaml", line 11, column 3
+2026-03-14 20:00:07,136 [INFO] === travel-hugo git push ===
+2026-03-14 20:00:07,821 [INFO] travel-hugo no changes
+2026-03-14 20:00:07,822 [INFO] === travel1-hugo git push ===
+2026-03-14 20:00:08,680 [INFO] travel1-hugo no changes
+2026-03-14 20:00:08,680 [INFO] === travel2-hugo git push ===
+2026-03-14 20:00:09,109 [INFO] travel2-hugo no changes
+2026-03-14 20:00:09,109 [INFO] === travel3-hugo git push ===
+2026-03-14 20:00:09,492 [INFO] travel3-hugo no changes
+2026-03-14 20:00:09,493 [INFO] === travel4-hugo git push ===
+2026-03-14 20:00:09,955 [INFO] travel4-hugo no changes
+2026-03-14 20:00:09,955 [INFO] === hotissue-hugo git push ===
+2026-03-14 20:00:13,729 [INFO] hotissue-hugo pushed
+2026-03-14 21:00:14,481 [INFO] === travel-hugo 발행 시작: 2026-03-14 21:00:14 ===
+2026-03-14 21:01:11,221 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/대구에서-즐기는-웰니스-여행-명소-5곳-소개/
 
-2026-03-11 22:15:12,208 [INFO] === travel4-hugo 발행 시작: 2026-03-11 22:15:12 ===
-2026-03-11 22:15:45,453 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/부산-여행코스-5곳-온천욕부터-곰장어까지-현지인-추천-핵심-체크리스트/
+2026-03-14 21:01:11,222 [INFO] === hotissue-hugo 발행 시작: 2026-03-14 21:01:11 ===
+2026-03-14 21:01:48,100 [INFO] 년 뒤 2,364만원? 잔존가치 분석
+  슬러그: 신차가-5030만원-아이오닉-5-3년-뒤-2364만원-잔존가치-분석
 
-2026-03-11 22:30:17,162 [INFO] === travel-hugo git push ===
-2026-03-11 22:30:17,317 [INFO] travel-hugo no changes
-2026-03-11 22:30:17,317 [INFO] === travel1-hugo git push ===
-2026-03-11 22:30:17,436 [INFO] travel1-hugo no changes
-2026-03-11 22:30:17,437 [INFO] === travel2-hugo git push ===
-2026-03-11 22:30:17,566 [INFO] travel2-hugo no changes
-2026-03-11 22:30:17,566 [INFO] === travel3-hugo git push ===
-2026-03-11 22:30:17,716 [INFO] travel3-hugo no changes
-2026-03-11 22:30:17,717 [INFO] === travel4-hugo git push ===
-2026-03-11 22:30:17,871 [INFO] travel4-hugo no changes
-2026-03-11 23:50:26,399 [INFO] === 일일 리포트 생성 ===
-2026-03-11 23:50:26,667 [ERROR] 리포트 실패: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
-2026-03-12 08:00:09,607 [INFO] === travel-hugo 발행 시작: 2026-03-12 08:00:09 ===
-2026-03-12 08:01:01,784 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/경기도-글램핑-4곳-가격-비교-산우물-북-캠핑장-추천-순위와-체크리스트/
+4. 이미지 처리...
+  [이미지] 원본: http://file.carisyou.com/upload/2025/05/13/FILE_202505130241...
+  [이미지] R2 업로드 실패 - 원본 URL 사용
+  R2 URL: http://file.carisyou.com/upload/2025/05/13/FILE_202505130241048364.jpg
 
-2026-03-12 08:10:02,711 [INFO] === travel-hugo git push ===
-2026-03-12 08:10:02,883 [INFO] travel-hugo no changes
-2026-03-12 09:30:12,093 [INFO] === travel1-hugo 발행 시작: 2026-03-12 09:30:12 ===
-2026-03-12 09:30:48,021 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/충남-의좋은-형제-축제와-서천-마량진항-해넘이-명소-5곳-현지인-추천-가볼-만한-곳/
+5. 파일 생성...
+  2026-03-14-003-신차가-5030만원-아이오닉-5-3년-뒤-2364만원-잔존가치-분석/
+  커버 이미지 설정 완료
 
-2026-03-12 09:40:19,034 [INFO] === travel1-hugo git push ===
-2026-03-12 09:40:19,184 [INFO] travel1-hugo no changes
-2026-03-12 12:00:09,214 [INFO] === travel2-hugo 발행 시작: 2026-03-12 12:00:09 ===
-2026-03-12 12:00:56,180 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/제주-보물-탐방-5곳-가파도-위미항-괴오름-현지인-추천-명소-지도/
+발행하려면:
+  cd /Users/twinssn/Projects/hotissue-hugo && git add . && git commit -m 'post: 신차가 5,030만원 아이오닉 5, 3년 뒤 2,364만원? 잔존가치 분석' && git push
 
-2026-03-12 12:10:27,366 [INFO] === travel2-hugo git push ===
-2026-03-12 12:10:27,642 [INFO] travel2-hugo no changes
-2026-03-12 13:30:15,525 [INFO] === travel3-hugo 발행 시작: 2026-03-12 13:30:15 ===
-2026-03-12 13:30:51,129 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/경남-해물-맛집-5곳-가격-비교-우도전복죽부터-부산식당까지-현지인-추천/
+완료!
 
-2026-03-12 13:40:23,708 [INFO] === travel3-hugo git push ===
-2026-03-12 13:40:23,889 [INFO] travel3-hugo no changes
-2026-03-12 15:30:15,245 [INFO] === travel4-hugo 발행 시작: 2026-03-12 15:30:15 ===
-2026-03-12 15:30:53,277 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/경북-울릉도와-독도-2곳-여행코스-7시간-가격-비교와-추천-명소/
 
-2026-03-12 15:40:24,456 [INFO] === travel4-hugo git push ===
-2026-03-12 15:40:24,650 [INFO] travel4-hugo no changes
-2026-03-12 17:00:04,479 [INFO] === travel-hugo 발행 시작: 2026-03-12 17:00:04 ===
-2026-03-12 17:00:31,936 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/경상도-웰니스-여행-3곳-낙천탕-등억온천단지-김해-롯데워터파크-가격대별-추천-리스트/
+2026-03-14 21:30:18,580 [INFO] === travel1-hugo 발행 시작: 2026-03-14 21:30:18 ===
+2026-03-14 21:31:11,047 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/대구-서리지-가족-체험-페스티벌-일정과-주변-명소-소개/
 
-2026-03-12 17:10:02,847 [INFO] === travel-hugo git push ===
-2026-03-12 17:10:03,019 [INFO] travel-hugo no changes
-2026-03-12 17:10:03,020 [INFO] === travel1-hugo git push ===
-2026-03-12 17:10:03,146 [INFO] travel1-hugo no changes
-2026-03-12 17:10:03,146 [INFO] === travel2-hugo git push ===
-2026-03-12 17:10:03,280 [INFO] travel2-hugo no changes
-2026-03-12 17:10:03,280 [INFO] === travel3-hugo git push ===
-2026-03-12 17:10:03,401 [INFO] travel3-hugo no changes
-2026-03-12 17:10:03,401 [INFO] === travel4-hugo git push ===
-2026-03-12 17:10:03,517 [INFO] travel4-hugo no changes
-2026-03-12 18:30:18,044 [INFO] === travel1-hugo 발행 시작: 2026-03-12 18:30:18 ===
-2026-03-12 18:31:00,745 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/경남-축제-5선-무료-입장-대장경기록문화축제와-진주남강유등축제-현지인-추천/
+2026-03-14 22:00:11,496 [INFO] === travel2-hugo 발행 시작: 2026-03-14 22:00:11 ===
+2026-03-14 22:01:42,698 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/경남-문화유산-투어-입곡-저수지-드라이브길-소개/
 
-2026-03-12 21:00:23,546 [INFO] === travel2-hugo 발행 시작: 2026-03-12 21:00:23 ===
-2026-03-12 21:00:55,263 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/광주-문화유산-투어-3곳-국립-518-민주묘지-신룡동오층석탑-푸른길분수공원-상세-운영시간-공개/
+2026-03-14 22:15:12,948 [INFO] === travel3-hugo 발행 시작: 2026-03-14 22:15:12 ===
+2026-03-14 22:15:57,198 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/세종에서-즐기는-떡볶이-맛집-5곳-소개/
 
-2026-03-12 22:00:01,879 [INFO] === travel3-hugo 발행 시작: 2026-03-12 22:00:01 ===
-2026-03-12 22:01:18,997 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/울산-카페-3곳-경복궁-몽구도원-이너리트-현지인-추천-메뉴와-가격-공개/
+2026-03-14 22:30:27,471 [INFO] === travel4-hugo 발행 시작: 2026-03-14 22:30:27 ===
+2026-03-14 22:31:05,662 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/광주에서-만나는-근현대-유적지-5곳-소개/
 
-2026-03-12 22:15:20,220 [INFO] === travel4-hugo 발행 시작: 2026-03-12 22:15:20 ===
-2026-03-12 22:16:17,218 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/울산-여행코스-5곳-추천-현지인-강추-울주-문화유산-포함-비교-체크리스트/
+2026-03-14 22:45:05,930 [INFO] === travel-hugo git push ===
+2026-03-14 22:45:06,107 [INFO] travel-hugo no changes
+2026-03-14 22:45:06,107 [INFO] === travel1-hugo git push ===
+2026-03-14 22:45:06,223 [INFO] travel1-hugo no changes
+2026-03-14 22:45:06,224 [INFO] === travel2-hugo git push ===
+2026-03-14 22:45:06,354 [INFO] travel2-hugo no changes
+2026-03-14 22:45:06,354 [INFO] === travel3-hugo git push ===
+2026-03-14 22:45:06,475 [INFO] travel3-hugo no changes
+2026-03-14 22:45:06,475 [INFO] === travel4-hugo git push ===
+2026-03-14 22:45:06,588 [INFO] travel4-hugo no changes
+2026-03-14 22:45:06,588 [INFO] === hotissue-hugo git push ===
+2026-03-14 22:45:08,105 [INFO] hotissue-hugo pushed
+2026-03-14 23:50:09,012 [INFO] === 일일 리포트 생성 ===
+2026-03-14 23:50:09,134 [ERROR] 리포트 실패: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-03-15 07:00:17,465 [INFO] === travel-hugo 발행 시작: 2026-03-15 07:00:17 ===
+2026-03-15 07:01:18,992 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/광주여성영화제와-함께하는-봄-축제-5곳-소개/
 
-2026-03-12 22:30:18,722 [INFO] === travel-hugo git push ===
-2026-03-12 22:30:18,901 [INFO] travel-hugo no changes
-2026-03-12 22:30:18,901 [INFO] === travel1-hugo git push ===
-2026-03-12 22:30:19,030 [INFO] travel1-hugo no changes
-2026-03-12 22:30:19,030 [INFO] === travel2-hugo git push ===
-2026-03-12 22:30:19,152 [INFO] travel2-hugo no changes
-2026-03-12 22:30:19,152 [INFO] === travel3-hugo git push ===
-2026-03-12 22:30:19,273 [INFO] travel3-hugo no changes
-2026-03-12 22:30:19,273 [INFO] === travel4-hugo git push ===
-2026-03-12 22:30:19,393 [INFO] travel4-hugo no changes
-2026-03-12 23:50:00,778 [INFO] === 일일 리포트 생성 ===
-2026-03-12 23:50:00,784 [ERROR] 리포트 실패: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
-2026-03-13 08:00:13,652 [INFO] === travel-hugo 발행 시작: 2026-03-13 08:00:13 ===
-2026-03-13 08:00:55,369 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/제주-국보-탐방-3곳-황우지해안열두굴-송악산-진지동굴-천지연-걸매생태공원-추천-가이드/
+2026-03-15 07:01:18,993 [INFO] === hotissue-hugo 발행 시작: 2026-03-15 07:01:18 ===
+2026-03-15 07:06:19,010 [ERROR] hotissue-hugo 타임아웃 (300s)
+2026-03-15 07:30:19,442 [INFO] === travel1-hugo 발행 시작: 2026-03-15 07:30:19 ===
+2026-03-15 07:31:01,175 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/대전-세계인-어울림-축제와-함께하는-행사-5곳-소개/
 
-2026-03-13 08:10:26,301 [INFO] === travel-hugo git push ===
-2026-03-13 08:10:26,400 [INFO] travel-hugo no changes
-2026-03-13 09:30:05,270 [INFO] === travel1-hugo 발행 시작: 2026-03-13 09:30:05 ===
-2026-03-13 09:30:39,754 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/충북-제천과-단양의-5대-축제-명소-가을철-즐기기-완벽-가이드/
+2026-03-15 08:00:01,706 [INFO] === travel2-hugo 발행 시작: 2026-03-15 08:00:01 ===
+2026-03-15 08:00:03,443 [INFO] d, or not known)"))
+Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+travel2-hugo: failed or quota reached
 
-2026-03-13 09:40:10,783 [INFO] === travel1-hugo git push ===
-2026-03-13 09:40:10,942 [INFO] travel1-hugo no changes
-2026-03-13 12:00:27,915 [INFO] === travel2-hugo 발행 시작: 2026-03-13 12:00:27 ===
-2026-03-13 12:00:58,082 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/경기-사적-탐방-3곳-추천-사나사-수원통닭거리-안성향교-현지인-추천-리스트/
+2026-03-15 08:30:04,247 [INFO] === travel3-hugo 발행 시작: 2026-03-15 08:30:04 ===
+2026-03-15 08:30:37,438 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/부산에서-즐기는-칼국수-맛집-5곳-소개/
 
-2026-03-13 12:10:29,137 [INFO] === travel2-hugo git push ===
-2026-03-13 12:10:29,339 [INFO] travel2-hugo no changes
-2026-03-13 13:30:10,024 [INFO] === travel3-hugo 발행 시작: 2026-03-13 13:30:10 ===
-2026-03-13 13:30:51,271 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/부산-고기-맛집-3곳-산성청송가든몽작다원-가격-비교와-현지인-추천/
+2026-03-15 09:00:07,699 [INFO] === travel4-hugo 발행 시작: 2026-03-15 09:00:07 ===
+2026-03-15 09:00:50,518 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/충남-아우내-장터와-서해바다-체험-여행코스-소개/
 
-2026-03-13 13:40:22,908 [INFO] === travel3-hugo git push ===
-2026-03-13 13:40:23,119 [INFO] travel3-hugo no changes
-2026-03-13 15:30:08,470 [INFO] === travel4-hugo 발행 시작: 2026-03-13 15:30:08 ===
-2026-03-13 15:30:58,497 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/강원-동해안-일주-5곳-추천-코스와-현지인-추천-맛집-총예산-3만원/
+2026-03-15 09:10:20,604 [INFO] === travel-hugo git push ===
+2026-03-15 09:10:20,738 [INFO] travel-hugo no changes
+2026-03-15 09:10:20,738 [INFO] === travel1-hugo git push ===
+2026-03-15 09:10:20,857 [INFO] travel1-hugo no changes
+2026-03-15 09:10:20,857 [INFO] === travel2-hugo git push ===
+2026-03-15 09:10:20,989 [INFO] travel2-hugo no changes
+2026-03-15 09:10:20,989 [INFO] === travel3-hugo git push ===
+2026-03-15 09:10:21,099 [INFO] travel3-hugo no changes
+2026-03-15 09:10:21,099 [INFO] === travel4-hugo git push ===
+2026-03-15 09:10:21,222 [INFO] travel4-hugo no changes
+2026-03-15 09:10:21,222 [INFO] === hotissue-hugo git push ===
+2026-03-15 09:10:22,764 [INFO] hotissue-hugo pushed
+2026-03-15 10:00:23,204 [INFO] === travel-hugo 발행 시작: 2026-03-15 10:00:23 ===
+2026-03-15 10:01:05,077 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/충청남도-글램핑-명소-3곳과-즐길-거리-소개/
 
-2026-03-13 15:40:29,558 [INFO] === travel4-hugo git push ===
-2026-03-13 15:40:29,709 [INFO] travel4-hugo no changes
-2026-03-13 17:00:08,687 [INFO] === travel-hugo 발행 시작: 2026-03-13 17:00:08 ===
-2026-03-13 17:00:49,792 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/충청북도-반려견-동반-캠핑장-4곳-가격-비교와-추천-순위-확인/
+2026-03-15 10:01:05,078 [INFO] === hotissue-hugo 발행 시작: 2026-03-15 10:01:05 ===
+2026-03-15 10:01:30,010 [INFO] ile.carisyou.com/upload/2023/03/14/FILE_202303141048...
+  [이미지] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/df1f6574.webp
+  R2 URL: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/df1f6574.webp
 
-2026-03-13 17:10:20,713 [INFO] === travel-hugo git push ===
-2026-03-13 17:10:20,819 [INFO] travel-hugo no changes
-2026-03-13 17:10:20,819 [INFO] === travel1-hugo git push ===
-2026-03-13 17:10:20,938 [INFO] travel1-hugo no changes
-2026-03-13 17:10:20,939 [INFO] === travel2-hugo git push ===
-2026-03-13 17:10:21,063 [INFO] travel2-hugo no changes
-2026-03-13 17:10:21,063 [INFO] === travel3-hugo git push ===
-2026-03-13 17:10:21,179 [INFO] travel3-hugo no changes
-2026-03-13 17:10:21,180 [INFO] === travel4-hugo git push ===
-2026-03-13 17:10:21,286 [INFO] travel4-hugo no changes
-2026-03-13 18:30:01,447 [INFO] === travel1-hugo 발행 시작: 2026-03-13 18:30:01 ===
-2026-03-13 18:30:54,541 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/경북-축제-추천-3곳-청도반시축제와-백두대간-봉자페스티벌-상세정보/
+5. 파일 생성...
+  2026-03-15-003-신차가-2549만원-아반떼-하이브리드-3년-뒤-1580만원-잔존가치-분석/
+  커버 이미지 설정 완료
 
-2026-03-13 21:00:13,537 [INFO] === travel2-hugo 발행 시작: 2026-03-13 21:00:13 ===
-2026-03-13 21:00:53,520 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/제주-테마파크-입장료-5곳-비교-신화테마파크-추천-리스트/
+발행하려면:
+  cd /Users/twinssn/Projects/hotissue-hugo && git add . && git commit -m 'post: 신차가 2,549만원 아반떼 하이브리드, 3년 뒤 1,580만원? 잔존가치 분석' && git push
 
-2026-03-14 09:47:09,323 [INFO] 5000 scheduler started
-2026-03-14 09:47:09,323 [INFO] registered 31 jobs
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:09,323 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:09,324 [INFO]   Job(interval=1, unit=days, do=daily_report, args=(), kwargs={})
-2026-03-14 09:47:33,960 [INFO] 5000 scheduler started
-2026-03-14 09:47:33,960 [INFO] registered 31 jobs
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:33,960 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
-2026-03-14 09:47:33,961 [INFO]   Job(interval=1, unit=days, do=daily_report, args=(), kwargs={})
-2026-03-14 10:00:05,534 [INFO] === travel-hugo 발행 시작: 2026-03-14 10:00:05 ===
-2026-03-14 10:00:47,449 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/장성-국립장성치유의숲-입장료-5천원-5곳-웰니스-여행/
+완료!
 
-2026-03-14 10:30:20,961 [INFO] === travel1-hugo 발행 시작: 2026-03-14 10:30:20 ===
-2026-03-14 10:31:07,778 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/경남-하동별맛축제-입장료-무료-5곳-맛집-탐방/
 
-2026-03-14 11:00:11,071 [INFO] === travel2-hugo 발행 시작: 2026-03-14 11:00:11 ===
-2026-03-14 11:01:07,793 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/강원-송지호둘레길-입장료-무료-자연-탐방-5곳-소개/
+2026-03-15 10:30:00,232 [INFO] === travel1-hugo 발행 시작: 2026-03-15 10:30:00 ===
+2026-03-15 10:30:40,150 [INFO] travel1-hugo: failed or quota reached
 
-2026-03-14 11:30:11,780 [INFO] === travel3-hugo 발행 시작: 2026-03-14 11:30:11 ===
-2026-03-14 11:30:52,334 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/전남-해물-맛집-5곳-숙자네-1인분-2만원/
+2026-03-15 11:00:10,400 [INFO] === travel2-hugo 발행 시작: 2026-03-15 11:00:10 ===
+2026-03-15 11:02:05,464 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/충남에서-만나는-국보-탐방-명소-5곳-소개/
 
-2026-03-14 12:00:26,264 [INFO] === travel4-hugo 발행 시작: 2026-03-14 12:00:26 ===
-2026-03-14 12:01:03,486 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/충북-금강-따라-도는-물의-5곳-입장료-3천원/
+2026-03-15 11:30:06,298 [INFO] === travel3-hugo 발행 시작: 2026-03-15 11:30:06 ===
+2026-03-15 11:30:45,888 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/광주-맛집-하해가부터-백년한우까지-추천/
 
-2026-03-14 12:40:11,696 [INFO] === travel-hugo git push ===
-2026-03-14 12:40:11,916 [INFO] travel-hugo no changes
-2026-03-14 12:40:11,916 [INFO] === travel1-hugo git push ===
-2026-03-14 12:40:12,004 [INFO] travel1-hugo no changes
-2026-03-14 12:40:12,004 [INFO] === travel2-hugo git push ===
-2026-03-14 12:40:12,111 [INFO] travel2-hugo no changes
-2026-03-14 12:40:12,111 [INFO] === travel3-hugo git push ===
-2026-03-14 12:40:12,225 [INFO] travel3-hugo no changes
-2026-03-14 12:40:12,225 [INFO] === travel4-hugo git push ===
-2026-03-14 12:40:12,307 [INFO] travel4-hugo no changes
-2026-03-14 13:00:14,743 [INFO] === travel-hugo 발행 시작: 2026-03-14 13:00:14 ===
-2026-03-14 13:01:00,777 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/서울-한옥-스테이-5곳-평균-1박-요금-10만원/
+2026-03-15 12:00:16,283 [INFO] === travel4-hugo 발행 시작: 2026-03-15 12:00:16 ===
+2026-03-15 12:01:14,187 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/강원-인제에서-고성과-동해안일주해안도로-여행코스-소개/
 
+2026-03-15 12:40:14,907 [INFO] === travel-hugo git push ===
+2026-03-15 12:40:15,038 [INFO] travel-hugo no changes
+2026-03-15 12:40:15,038 [INFO] === travel1-hugo git push ===
+2026-03-15 12:40:15,152 [INFO] travel1-hugo no changes
+2026-03-15 12:40:15,152 [INFO] === travel2-hugo git push ===
+2026-03-15 12:40:15,269 [INFO] travel2-hugo no changes
+2026-03-15 12:40:15,269 [INFO] === travel3-hugo git push ===
+2026-03-15 12:40:15,394 [INFO] travel3-hugo no changes
+2026-03-15 12:40:15,395 [INFO] === travel4-hugo git push ===
+2026-03-15 12:40:15,512 [INFO] travel4-hugo no changes
+2026-03-15 12:40:15,512 [INFO] === hotissue-hugo git push ===
+2026-03-15 12:40:15,711 [INFO] hotissue-hugo pushed
+2026-03-15 13:00:15,946 [INFO] === travel-hugo 발행 시작: 2026-03-15 13:00:15 ===
+2026-03-15 13:00:44,195 [INFO] travel-hugo: success - https://tour1.rotcha.kr/posts/전라남도에서-반려견과-함께하는-캠핑장-소개/
+
+2026-03-15 13:00:44,196 [INFO] === hotissue-hugo 발행 시작: 2026-03-15 13:00:44 ===
+2026-03-15 13:01:04,208 [INFO] /file.carisyou.com/upload/2025/07/28/FILE_202507280117...
+  [이미지] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/a5e7980a.webp
+  R2 URL: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/car-images/2026/03/15/a5e7980a.webp
+
+5. 파일 생성...
+  2026-03-15-004-2026-아이오닉-6-롱-레인지-이-라이트-2wd-3년-보유비용-완전-분석/
+  커버 이미지 설정 완료
+
+발행하려면:
+  cd /Users/twinssn/Projects/hotissue-hugo && git add . && git commit -m 'post: 2026 아이오닉 6 롱 레인지 이-라이트 2WD 3년 보유비용 완전 분석' && git push
+
+완료!
+
+
+2026-03-15 14:00:04,963 [INFO] === travel1-hugo 발행 시작: 2026-03-15 14:00:04 ===
+2026-03-15 14:00:51,288 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/인천에서-만나는-강화-별밤-야행과-축제들-소개/
+
+2026-03-15 14:30:21,645 [INFO] === travel2-hugo 발행 시작: 2026-03-15 14:30:21 ===
+2026-03-15 14:31:07,302 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/제주에서-만나는-보물-탐방-명소-5곳-소개/
+
+2026-03-15 15:00:07,699 [INFO] === travel3-hugo 발행 시작: 2026-03-15 15:00:07 ===
+2026-03-15 15:00:49,041 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/강원에서-즐기는-떡볶이-맛집-5곳-소개/
+
+2026-03-15 15:30:19,585 [INFO] === travel4-hugo 발행 시작: 2026-03-15 15:30:19 ===
+2026-03-15 15:31:08,499 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/울산에서-즐기는-단풍과-바다-여행코스-5곳-소개/
+
+이오닉-6-유지비감가-총정리/
+  커버 이미지 설정 완료
+
+발행하려면:
+  cd /Users/twinssn/Projects/hotissue-hugo && git add . && git commit -m 'post: 신차가 5,064만원 아이오닉 6, 유지비·감가 총정리' && git push
+
+완료!
+
+
+2026-03-15 14:00:25,520 [INFO] === travel1-hugo 발행 시작: 2026-03-15 14:00:25 ===
+2026-03-15 14:01:07,837 [INFO] travel1-hugo: success - https://travel1.rotcha.kr/posts/제주에서-즐기는-원도심-야간여행과-축제-소개/
+
+2026-03-15 14:30:11,653 [INFO] === travel2-hugo 발행 시작: 2026-03-15 14:30:11 ===
+2026-03-15 14:31:17,038 [INFO] travel2-hugo: success - https://travel2.rotcha.kr/posts/전남에서-만나는-역사-탐방지-5곳-소개/
+
+2026-03-15 15:00:20,812 [INFO] === travel3-hugo 발행 시작: 2026-03-15 15:00:20 ===
+2026-03-15 15:01:09,275 [INFO] travel3-hugo: success - https://tour2.rotcha.kr/posts/제주에서-맛보는-국밥-맛집-5곳-소개/
+
+2026-03-15 15:30:12,730 [INFO] === travel4-hugo 발행 시작: 2026-03-15 15:30:12 ===
+2026-03-15 15:30:52,432 [INFO] travel4-hugo: success - https://tour3.rotcha.kr/posts/제주에서-한라산-품-안의-여행코스-5곳-소개/
+
+2026-03-15 15:53:51,745 [INFO] 5000 scheduler started
+2026-03-15 15:53:51,977 [INFO] registered 36 jobs
+2026-03-15 15:53:51,977 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-15 15:53:51,977 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-15 15:53:51,977 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-15 15:53:51,977 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel1-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel2-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel3-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('travel4-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=git_push_all, args=(), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=run_publish, args=('hotissue-hugo',), kwargs={})
+2026-03-15 15:53:51,980 [INFO]   Job(interval=1, unit=days, do=daily_report, args=(), kwargs={})
+2026-03-15 16:00:22,490 [INFO] === travel-hugo git push ===
+2026-03-15 16:00:22,612 [INFO] travel-hugo no changes
+2026-03-15 16:00:22,612 [INFO] === travel1-hugo git push ===
+2026-03-15 16:00:22,688 [INFO] travel1-hugo no changes
+2026-03-15 16:00:22,688 [INFO] === travel2-hugo git push ===
+2026-03-15 16:00:22,754 [INFO] travel2-hugo no changes
+2026-03-15 16:00:22,754 [INFO] === travel3-hugo git push ===
+2026-03-15 16:00:22,819 [INFO] travel3-hugo no changes
+2026-03-15 16:00:22,819 [INFO] === travel4-hugo git push ===
+2026-03-15 16:00:22,883 [INFO] travel4-hugo no changes
+2026-03-15 16:00:22,883 [INFO] === hotissue-hugo git push ===
+2026-03-15 16:00:24,406 [INFO] hotissue-hugo pushed

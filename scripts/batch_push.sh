@@ -10,6 +10,7 @@ REPOS=(
   "/Users/twinssn/Projects/travel2-hugo"
   "/Users/twinssn/Projects/travel3-hugo"
   "/Users/twinssn/Projects/travel4-hugo"
+  "/Users/twinssn/Projects/hotissue-hugo"
 )
 
 TIMESTAMP=$(date +"%Y-%m-%d %H:%M")

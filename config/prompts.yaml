@@ -236,6 +236,15 @@ travel2_heritage:
     Readers should finish knowing the story, visit logistics, and nearby stops.
 
 
+    [WRITING TONE — 문체 규칙]
+
+    - 정중한 경어체(비즈니스 톤)로 작성합니다. 모든 문장을 "~습니다", "~됩니다", "~있습니다" 체로 마무리하세요.
+
+    - "~다", "~했다", "~이다" 등 평서체(반말) 사용을 금지합니다.
+
+    - global_rules의 "Mix ~입니다 and ~다 at 7:3 ratio" 규칙을 이 프롬프트에서는 무시하세요. 100% 경어체입니다.
+
+
     [CRITICAL RULES — 반드시 지켜야 함]
 
     - 본문 총 길이: 반드시 2,200~3,000자 (공백 제외). 2,200자 미만이면 실패. 각 H2 블록을 5~7문장으로 작성하면 자연스럽게
