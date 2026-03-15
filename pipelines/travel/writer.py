@@ -328,12 +328,12 @@ def generate_content(data, blog_id="travel-hugo"):
             "2026 {region} 가을 축제 {count}곳 완벽 가이드",
         ],
         "travel2-hugo": [
-            "2026 {region} {theme} {count}곳 입장료와 운영시간 총정리",
-            "{region} 문화유산 {count}곳으로 떠나는 역사 탐방 코스",
-            "{region} 사적지 {count}곳, 해설 프로그램과 함께 즐기기",
-            "{region} 역사 여행 {count}곳 주차와 교통 정보 정리",
-            "{region}에서 만나는 국보와 보물 {count}곳 탐방 가이드",
-            "{region} 문화재 {count}곳, 사진 찍기 좋은 포인트까지",
+            "{region} {theme} 탐방, 입장료와 운영시간 총정리",
+            "{region} 문화유산 탐방 코스, 주변 유적까지 정리",
+            "{region} 사적지 탐방, 해설 프로그램과 주차 안내",
+            "{region} 역사 여행 코스, 교통과 주차 정보 정리",
+            "{region}에서 만나는 {theme} 탐방 가이드",
+            "{region} 문화재 탐방, 사진 찍기 좋은 포인트까지",
         ],
         "travel3-hugo": [
             "{region} {theme} 현지인이 추천하는 맛집 {count}곳",

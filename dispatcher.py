@@ -44,6 +44,28 @@ def main():
         print(f"all-hugo: {len(results)} published")
         return
 
+
+    if cmd == "hotissue-hugo":
+        import subprocess
+        cap_python = "/Users/twinssn/Projects/hotissue-hugo/automation/.venv/bin/python3"
+        cap_dir = "/Users/twinssn/Projects/hotissue-hugo"
+        try:
+            result = subprocess.run(
+                [cap_python, "automation/publish.py"],
+                capture_output=True, text=True,
+                cwd=cap_dir,
+                timeout=300
+            )
+            if result.stdout:
+                print(result.stdout[-500:])
+            if result.returncode != 0 and result.stderr:
+                print("CAP error:", result.stderr[-300:])
+        except subprocess.TimeoutExpired:
+            print("CAP timeout (300s)")
+        except Exception as e:
+            print(f"CAP failed: {e}")
+        return
+
     if cmd in HUGO_BLOGS or cmd == "travel-blogger":
         from pipelines.travel.pipeline import _run_single
         result = _run_single(cmd)
