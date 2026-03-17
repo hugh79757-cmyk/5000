@@ -246,7 +246,7 @@ def run_travel(blog_cfg):
         _tg_error(blog_id, "content_generation", "AI 본문 생성 실패")
         return None
 
-    from shared.content_store import title_similar_exists, register_images
+    from shared.content_store import title_similar_exists, register_images, register_places
     if title_similar_exists(blog_id, result["title"]):
         logger.warning(blog_id + " similar title: " + result["title"][:30])
         return None
@@ -273,6 +273,13 @@ def run_travel(blog_cfg):
             register_images(article_id, blog_id, body_html)
         if article_id and body_md:
             register_images(article_id, blog_id, body_md)
+        # 장소 발행 이력 등록
+        place_names = [it.get("title", it.get("facltNm", "")).strip()
+                       for it in data.get("items", [])
+                       if it.get("title") or it.get("facltNm")]
+        if article_id and place_names:
+            register_places(article_id, blog_id, place_names)
+            logger.info("장소 %d건 등록: %s", len(place_names), ", ".join(n[:10] for n in place_names))
 
     logger.info(blog_id + " result: " + str(pub_result.get("success", False)))
     return pub_result
