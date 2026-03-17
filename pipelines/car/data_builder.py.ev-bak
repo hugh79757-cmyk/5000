@@ -4,39 +4,6 @@ import random
 import re
 from pathlib import Path
 
-# 모델명 매핑 (carisyou → public_fuel_data)
-MODEL_NAME_MAP = {
-    "모델 Y": "Model Y",
-    "모델 3": "Model 3",
-    "그랑 콜레오스": "콜레오스",
-    "그랑 콜레오스 하이브리드": "콜레오스",
-    "필랑트": "ARKANA",
-    "일렉트리파이드 G80": "G80 전동화",
-    "무쏘 스포츠": "무쏘 2.3",
-    "1시리즈": "118",
-    "2시리즈 액티브 투어러": "218",
-    "2시리즈 그란 쿠페": "220",
-    "2시리즈": "220",
-    "3시리즈": "320",
-    "5시리즈": "520",
-    "7시리즈": "740",
-    "8시리즈": "840",
-    "C클래스": "C200",
-    "프리우스": "Prius",
-    "캠리": "Camry",
-    "오딧세이": "ODYSSEY",
-    "RSQ8": "Q8",
-    "마이바흐 S클래스": "Maybach S",
-    "마이바흐 GLS": "Maybach GLS",
-    "마이바흐 EQS SUV": "Maybach EQS",
-    "마이바흐 SL": "Maybach SL",
-    "RS3": "RS 3",
-    "무쏘": "무쏘 2.3",
-    "G클래스": "G 580",
-}
-
-
-
 BRAND_URLS = {
     "현대": "https://www.hyundai.com/kr/ko/e/vehicles",
     "기아": "https://www.kia.com/kr/vehicles",
@@ -76,11 +43,7 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
     model_clean = model
     for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보", " LPi", " LPG", " 2.5", " 2.2", " 1.6"]:
         model_clean = model_clean.replace(suffix, "")
-    # 모델명 매핑 적용
-    if model_clean in MODEL_NAME_MAP:
-        search_key = MODEL_NAME_MAP[model_clean]
-    else:
-        search_key = model_clean.split()[0] if model_clean.split() else model_clean
+    search_key = model_clean.split()[0] if model_clean.split() else model_clean
     brand_names = BRAND_MAP_API.get(brand, [brand])
     placeholders = ",".join(["?" for _ in brand_names])
     query = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
@@ -98,32 +61,6 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
                 except:
                     pass
     return None
-
-
-
-def lookup_ev_specs(conn, brand, model):
-    """public_fuel_data에서 EV 추가 스펙 조회 (주행거리, 배터리 등)"""
-    c = conn.cursor()
-    model_clean = model
-    for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보"]:
-        model_clean = model_clean.replace(suffix, "")
-    search_key = model_clean.split()[0] if model_clean.split() else model_clean
-    
-    rows = c.execute("""
-        SELECT display_eff, range_per_charge, engine_displacement, fuel_nm, model_nm
-        FROM public_fuel_data 
-        WHERE source='CAREFF' AND fuel_nm='전기' AND model_nm LIKE ?
-        ORDER BY CAST(year AS INTEGER) DESC LIMIT 1
-    """, ["%" + search_key + "%"]).fetchall()
-    
-    if rows:
-        r = rows[0]
-        return {
-            "ev_range_km": int(r["range_per_charge"]) if r["range_per_charge"] and r["range_per_charge"] != "NULL" else None,
-            "ev_efficiency": float(r["display_eff"]) if r["display_eff"] and r["display_eff"] != "NULL" else None,
-            "ev_model_match": r["model_nm"],
-        }
-    return {}
 
 def build_engine_desc(car):
     ft = str(car["fuel_type"] or "")
@@ -378,12 +315,4 @@ def build_input(conn, topic, db_path):
         "cta_links": {"kb_chacha": "https://www.kbchachacha.com", "carisyou": "https://www.carisyou.com"},
         "thumbnail_url": "",
     })
-    # EV 추가 데이터 보강 (배터리 주행거리 등)
-    if car["fuel_type"] == "전기":
-        ev_specs = lookup_ev_specs(conn, car["brand"], car["model"])
-        if ev_specs:
-            data["ev_range_km"] = ev_specs.get("ev_range_km")
-            data["ev_efficiency"] = ev_specs.get("ev_efficiency")
-            data["ev_model_match"] = ev_specs.get("ev_model_match")
-
     return data
