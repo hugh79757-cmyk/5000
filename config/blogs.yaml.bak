@@ -1,0 +1,223 @@
+blogs:
+- id: travel-blogger
+  name: 여행로드 (Blogger)
+  platform: blogger
+  blog_id: '835513737064071192'
+  url: https://travel.rotcha.kr
+  domain: travel.rotcha.kr
+  daily_quota: 15
+  categories:
+  - travel
+  - camping
+  - heritage
+  - wellness
+  status: active
+- id: ud-blogger
+  name: 정보핫 UD (Blogger)
+  platform: blogger
+  blog_id: ''
+  url: https://ud.informationhot.kr
+  domain: ud.informationhot.kr
+  daily_quota: 15
+  categories:
+  - life
+  - tech
+  status: active
+- id: techpawz2-blogger
+  name: 테크포즈 2 (Blogger)
+  platform: blogger
+  blog_id: ''
+  url: https://2.techpawz.com
+  domain: 2.techpawz.com
+  daily_quota: 15
+  categories:
+  - tech
+  - ecommerce
+  status: active
+- id: simprotection-blogger
+  name: 심프로텍션 (Blogger)
+  platform: blogger
+  blog_id: ''
+  url: https://simprotection.blogspot.com
+  domain: simprotection.blogspot.com
+  daily_quota: 15
+  categories:
+  - life
+  - insurance
+  status: active
+- id: quiz-blogger
+  name: 퀴즈방 (Blogger)
+  platform: blogger
+  blog_id: ''
+  url: ''
+  domain: ''
+  daily_quota: 15
+  categories:
+  - quiz
+  - entertainment
+  status: active
+- id: stock-hugo
+  name: 캔들트렌드 (Hugo)
+  platform: hugo
+  repo: stock-blog
+  url: https://stock.informationhot.kr
+  domain: stock.informationhot.kr
+  theme: PaperMod
+  daily_quota: 50
+  categories:
+  - stock
+  - finance
+  status: active
+- id: hotissue-hugo
+  name: 핫이슈 (Hugo)
+  platform: hugo
+  repo: hotissue-hugo
+  url: https://hotissue.rotcha.kr
+  domain: hotissue.rotcha.kr
+  theme: PaperMod
+  daily_quota: 50
+  categories:
+  - auto
+  - hotissue
+  status: active
+- id: informationhot-hugo
+  name: 벤치마크 (Hugo)
+  platform: hugo
+  repo: informationhot-hugo
+  url: https://informationhot.kr
+  domain: informationhot.kr
+  theme: Congo
+  daily_quota: 50
+  categories:
+  - benchmark
+  - tech
+  status: active
+- id: rotcha-hugo
+  name: 고객센터 (Hugo)
+  platform: hugo
+  repo: rotcha-hugo
+  url: https://rotcha.kr
+  domain: rotcha.kr
+  theme: PaperMod
+  daily_quota: 50
+  categories:
+  - service
+  - life
+  status: active
+- id: techpawz-wp
+  name: 테크포즈 (WordPress)
+  platform: wordpress
+  url: https://techpawz.com
+  domain: techpawz.com
+  daily_quota: 30
+  categories:
+  - tech
+  - review
+  status: active
+- id: issue-wp
+  name: 이슈 테크포즈 (WordPress)
+  platform: wordpress
+  url: https://issue.techpawz.com
+  domain: issue.techpawz.com
+  daily_quota: 30
+  categories:
+  - issue
+  - news
+  status: active
+- id: biz-wp
+  name: 비즈 테크포즈 (WordPress)
+  platform: wordpress
+  url: https://biz.techpawz.com
+  domain: biz.techpawz.com
+  daily_quota: 30
+  categories:
+  - business
+  - ecommerce
+  status: active
+- id: kuta-wp
+  name: 쿠타 (WordPress)
+  platform: wordpress
+  url: https://kuta.informationhot.kr
+  domain: kuta.informationhot.kr
+  daily_quota: 30
+  categories:
+  - life
+  - local
+  status: active
+- id: aikorea24-astro
+  name: AI코리아24 (Astro)
+  platform: astro
+  url: https://aikorea24.kr
+  domain: aikorea24.kr
+  daily_quota: 20
+  categories:
+  - ai
+  - tech
+  status: active
+- id: travel-hugo
+  name: 여행로드 Hugo (Blowfish)
+  platform: hugo
+  repo: travel-hugo
+  url: https://tour1.rotcha.kr
+  domain: tour1.rotcha.kr
+  theme: Blowfish
+  daily_quota: 50
+  categories:
+  - camping
+  - outdoor
+  - leports
+  - wellness
+  status: active
+- id: travel1-hugo
+  name: 여행로드 Travel1 (Blowfish)
+  platform: hugo
+  repo: travel1-hugo
+  url: https://travel1.rotcha.kr
+  domain: travel1.rotcha.kr
+  theme: Blowfish
+  daily_quota: 50
+  categories:
+  - festival
+  - event
+  - season
+  status: active
+- id: travel2-hugo
+  name: 여행로드 Travel2 (Blowfish)
+  platform: hugo
+  repo: travel2-hugo
+  url: https://travel2.rotcha.kr
+  domain: travel2.rotcha.kr
+  theme: Blowfish
+  daily_quota: 50
+  categories:
+  - heritage
+  - culture
+  - temple
+  status: active
+- id: travel3-hugo
+  name: 여행로드 Tour2 (Blowfish)
+  platform: hugo
+  repo: travel3-hugo
+  url: https://tour2.rotcha.kr
+  domain: tour2.rotcha.kr
+  theme: Blowfish
+  daily_quota: 50
+  categories:
+  - food
+  - restaurant
+  - cafe
+  - localfood
+  status: active
+- id: travel4-hugo
+  name: 여행로드 Tour3 (Blowfish)
+  platform: hugo
+  repo: travel4-hugo
+  url: https://tour3.rotcha.kr
+  domain: tour3.rotcha.kr
+  theme: Blowfish
+  daily_quota: 50
+  categories:
+  - course
+  - travel
+  - planner
+  status: active

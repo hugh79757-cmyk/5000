@@ -60,7 +60,7 @@ def git_push(site_name):
 
 
 def git_push_all():
-    for site in ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"]:
+    for site in ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo", "CAP/hotissue-hugo", "CAP/tco-hugo", "CAP/deal-hugo", "CAP/compare-hugo", "CAP/guide-hugo", "CAP/ev-hugo"]:
         git_push(site)
 
 
@@ -110,12 +110,44 @@ schedule.every().day.at("15:30").do(run_publish, "travel4-hugo")
 schedule.every().day.at("19:30").do(run_publish, "travel4-hugo")
 schedule.every().day.at("22:30").do(run_publish, "travel4-hugo")
 
-# git push: after each wave + end of day
-schedule.every().day.at("09:10").do(git_push_all)
-schedule.every().day.at("12:40").do(git_push_all)
-schedule.every().day.at("16:00").do(git_push_all)
-schedule.every().day.at("20:00").do(git_push_all)
+# git push: 발행 웨이브 종료 후 일괄 push (5회/일)
 schedule.every().day.at("22:45").do(git_push_all)
+
+
+schedule.every().day.at("07:01").do(run_publish, "cap-hotissue")
+schedule.every().day.at("07:03").do(run_publish, "cap-tco")
+schedule.every().day.at("07:05").do(run_publish, "cap-deal")
+schedule.every().day.at("07:07").do(run_publish, "cap-compare")
+schedule.every().day.at("07:09").do(run_publish, "cap-guide")
+schedule.every().day.at("07:11").do(run_publish, "cap-ev")
+
+schedule.every().day.at("10:01").do(run_publish, "cap-hotissue")
+schedule.every().day.at("10:03").do(run_publish, "cap-tco")
+schedule.every().day.at("10:05").do(run_publish, "cap-deal")
+schedule.every().day.at("10:07").do(run_publish, "cap-compare")
+schedule.every().day.at("10:09").do(run_publish, "cap-guide")
+schedule.every().day.at("10:11").do(run_publish, "cap-ev")
+
+schedule.every().day.at("13:01").do(run_publish, "cap-hotissue")
+schedule.every().day.at("13:03").do(run_publish, "cap-tco")
+schedule.every().day.at("13:05").do(run_publish, "cap-deal")
+schedule.every().day.at("13:07").do(run_publish, "cap-compare")
+schedule.every().day.at("13:09").do(run_publish, "cap-guide")
+schedule.every().day.at("13:11").do(run_publish, "cap-ev")
+
+schedule.every().day.at("17:01").do(run_publish, "cap-hotissue")
+schedule.every().day.at("17:03").do(run_publish, "cap-tco")
+schedule.every().day.at("17:05").do(run_publish, "cap-deal")
+schedule.every().day.at("17:07").do(run_publish, "cap-compare")
+schedule.every().day.at("17:09").do(run_publish, "cap-guide")
+schedule.every().day.at("17:11").do(run_publish, "cap-ev")
+
+schedule.every().day.at("21:01").do(run_publish, "cap-hotissue")
+schedule.every().day.at("21:03").do(run_publish, "cap-tco")
+schedule.every().day.at("21:05").do(run_publish, "cap-deal")
+schedule.every().day.at("21:07").do(run_publish, "cap-compare")
+schedule.every().day.at("21:09").do(run_publish, "cap-guide")
+schedule.every().day.at("21:11").do(run_publish, "cap-ev")
 
 schedule.every().day.at("23:50").do(daily_report)
 

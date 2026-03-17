@@ -107,17 +107,63 @@ def _inject_naver_map(body_md, items):
     return "\n".join(result)
 
 
+def _fallback_image_from_korservice(items, theme):
+    """이미지 없는 아이템에 한국관광공사 키워드 검색으로 대체 이미지 확보"""
+    import requests
+    api_key = os.environ.get("TOUR_API_KEY", "") or os.environ.get("TOURAPI_KEY", "") or os.environ.get("DATA_GO_KR_API_KEY", "")
+    if not api_key:
+        return items
+    for item in items:
+        img = item.get("firstImageUrl") or item.get("firstimage") or item.get("image") or ""
+        if img and img.startswith("http"):
+            continue
+        keyword = item.get("title", "")[:20]
+        if not keyword:
+            continue
+        try:
+            resp = requests.get(
+                "http://apis.data.go.kr/B551011/KorService2/searchKeyword2",
+                params={
+                    "serviceKey": api_key,
+                    "keyword": keyword,
+                    "numOfRows": 5,
+                    "pageNo": 1,
+                    "MobileOS": "ETC",
+                    "MobileApp": "5000",
+                    "_type": "json",
+                },
+                timeout=10,
+            )
+            resp_items = resp.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(resp_items, dict):
+                resp_items = [resp_items]
+            for ri in resp_items:
+                fi = ri.get("firstimage", "")
+                if fi and fi.startswith("http"):
+                    item["firstimage"] = fi
+                    item["image"] = fi
+                    logger.info("폴백 이미지 확보: %s → %s", keyword[:15], fi[:60])
+                    break
+        except Exception as e:
+            logger.warning("폴백 이미지 실패 (%s): %s", keyword[:15], str(e))
+    return items
+
+
 def _inject_images(items, content):
     """API image URLs into body after each H2 in order"""
     existing = len(re.findall(r'!\[', content))
     if existing >= len(items):
         return content
 
+    from shared.content_store import is_image_used
     img_list = []
     for item in items:
         name = item.get("facltNm", item.get("title", ""))
         img = item.get("firstImageUrl") or item.get("firstimage") or item.get("image") or ""
         if name and img and img.startswith("http"):
+            if is_image_used(img):
+                logger.info("이미지 중복 스킵: %s (%s)", name[:20], img[-30:])
+                continue
             img_list.append((name, img))
 
     if not img_list:
@@ -280,6 +326,18 @@ def generate_content(data, blog_id="travel-hugo"):
     system_prompt = prompt_result["system"]
     user_prompt = prompt_result["user"]
 
+    # 장소명 강제 바인딩: API 실제 데이터 이름만 사용하도록 지시
+    place_items = data.get("items", [])
+    real_names = [it.get("title", it.get("facltNm", "")).strip() for it in place_items if it.get("title") or it.get("facltNm")]
+    if real_names:
+        name_constraint = (
+            "\n\n[필수 규칙] 아래 장소명을 정확히 그대로 사용하세요. "
+            "임의로 이름을 바꾸거나 새로 만들지 마세요:\n"
+            + "\n".join(f"- {n}" for n in real_names)
+            + "\n"
+        )
+        user_prompt = name_constraint + user_prompt
+
     result = ai_generate(system_prompt, user_prompt, tier="default")
 
     if not result or not result.get("content"):
@@ -383,14 +441,14 @@ def generate_content(data, blog_id="travel-hugo"):
 - 20~35자
 - 지역명 반드시 포함
 - 조사(에서, 의, 과, 와, 으로, 부터)를 넣어 자연스러운 문장으로 작성
-- 서술어(총정리, 비교, 추천, 정리, 가이드, 소개)로 마무리
+- 서술어(총정리, 비교, 추천 리스트, 정리, 한눈에 보기, 가격 정리, 코스 안내)로 마무리
 - 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
 - 특수기호 금지 (콜론, 느낌표, 하이픈)
 - 가격 정보는 제목에 넣지 않기 (본문에서 다룸)
 - 고유명사(축제명/장소명)는 1개만 포함
 
 금지 표현:
-- "완벽 가이드", "꼭 가봐야 할", "베스트", "상세정보", "즐기기"
+- "완벽 가이드", "꼭 가봐야 할", "베스트", "상세정보", "즐기기", "소개", "알아보기", "만나보기"
 
 좋은 제목 예시:
 - "2026 광주 비어페스트 일정과 인근 맛집 총정리"
@@ -415,6 +473,24 @@ def generate_content(data, blog_id="travel-hugo"):
         generated_title = title_result["content"].strip().strip('"').strip("'").strip()
         generated_title = re.sub(r'^(제목[:\s]*|Title[:\s]*)', '', generated_title).strip()
         if len(generated_title) > 5:
+            import random as _r
+            import re as _re
+            ban_endings = ['소개', '알아보기', '만나보기', '살펴보기', '확인하기', '코스 안내', '안내']
+            ban_phrases = ['에서 즐기는', '에서 만나는', '에서 즐길 수 있는']
+            for ban in ban_endings:
+                if generated_title.endswith(ban):
+                    replacements = ['추천', '한눈에 보기', '가격 비교', '코스 추천', '비교', '체크리스트', '방문 전 필독']
+                    generated_title = generated_title[:-len(ban)].rstrip() + ' ' + _r.choice(replacements)
+                    break
+            for bp in ban_phrases:
+                if bp in generated_title:
+                    generated_title = generated_title.replace(bp, ' ')
+                    generated_title = ' '.join(generated_title.split())
+            long_words = _re.findall(r'[가-힣]{8,}', generated_title)
+            if long_words:
+                generated_title = fallback_title
+            if len(generated_title) > 45 or len(generated_title) < 15:
+                generated_title = fallback_title
             title = generated_title
 
     labels = list(set(filter(None, [
