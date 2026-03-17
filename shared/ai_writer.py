@@ -54,3 +54,20 @@ def generate(system_prompt, user_prompt, tier="default"):
             return generate(system_prompt, user_prompt, tier="economy")
         else:
             raise
+
+
+def generate_car(prompt_text, data):
+    data_block_lines = []
+    for key, value in data.items():
+        if key in ("notes", "sources", "cta_links", "thumbnail_url", "site_id"):
+            continue
+        data_block_lines.append(str(key) + ": " + str(value))
+    data_block = "\n".join(data_block_lines)
+
+    system_prompt = "당신은 자동차 전문 블로그 에디터입니다. 한국어로 작성합니다."
+    user_prompt = prompt_text + "\n\n[DATA]\n" + data_block
+
+    result = generate(system_prompt, user_prompt, tier="default")
+    if result and result.get("content"):
+        return result["content"]
+    return None

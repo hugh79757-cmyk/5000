@@ -131,11 +131,34 @@ def _publish_blogger(blog_cfg, title, body_html, tags):
     return {"success": True, "url": resp.get("url", ""), "post_id": resp.get("id", "")}
 
 
+def _extract_first_image(body_md):
+    """Extract first image URL from markdown body."""
+    m = re.search(r'!\[.*?\]\((https?://[^)]+)\)', body_md)
+    return m.group(1) if m else ""
+
+
+def _extract_description(body_md):
+    """Extract first meaningful paragraph as description (max 150 chars)."""
+    for line in body_md.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--"):
+            continue
+        clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]+\)', r'\1', line)
+        if len(clean) > 30:
+            return clean[:150]
+    return ""
+
+
 def _publish_hugo(blog_cfg, title, body_md, slug, category, tags, thumbnail_url):
     repo_name = blog_cfg.get("repo", "")
     repo_path = os.path.join("/Users/twinssn/Projects", repo_name)
-    content_dir = os.path.join(repo_path, "content", "posts")
-    os.makedirs(content_dir, exist_ok=True)
+    post_dir = os.path.join(repo_path, "content", "posts", slug)
+    os.makedirs(post_dir, exist_ok=True)
+
+    if not thumbnail_url:
+        thumbnail_url = _extract_first_image(body_md)
 
     post = frontmatter.Post(body_md)
     post["title"] = title
@@ -147,9 +170,13 @@ def _publish_hugo(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
     if tags:
         post["tags"] = [t.strip() for t in tags.split(",") if t.strip()]
     if thumbnail_url:
-        post["image"] = thumbnail_url
+        post["featureimage"] = thumbnail_url
 
-    file_path = os.path.join(content_dir, slug + ".md")
+    desc = _extract_description(body_md)
+    if desc:
+        post["description"] = desc
+
+    file_path = os.path.join(post_dir, "index.md")
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(frontmatter.dumps(post))
 

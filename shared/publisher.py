@@ -1,34 +1,17 @@
 import os
 import re
 import yaml
-import markdown
-import requests
-import frontmatter
+import subprocess
 from datetime import datetime
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-from googleapiclient.discovery import build
-from dotenv import load_dotenv
+from pathlib import Path
 from shared.content_store import insert_article, update_published, get_today_count
 
-load_dotenv()
-
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
-SCOPES = ["https://www.googleapis.com/auth/blogger"]
 
 
 def load_blogs():
     with open(os.path.join(CONFIG_DIR, "blogs.yaml"), "r", encoding="utf-8") as f:
         return yaml.safe_load(f)["blogs"]
-
-
-def load_api_keys():
-    path = os.path.join(CONFIG_DIR, "api_keys.yaml")
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            return yaml.safe_load(f)
-    return {}
 
 
 def get_blog_config(blog_id):
@@ -39,31 +22,121 @@ def get_blog_config(blog_id):
     raise ValueError("Blog not found: " + blog_id)
 
 
-def get_blogger_service():
-    keys = load_api_keys()
-    blogger_cfg = keys.get("blogger", {})
-    token_path = blogger_cfg.get("token_path", "")
-    client_secret_path = blogger_cfg.get("client_secret_path", "")
-
-    creds = None
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(client_secret_path, SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open(token_path, "w") as f:
-            f.write(creds.to_json())
-
-    return build("blogger", "v3", credentials=creds)
-
-
 def slugify(text):
     text = re.sub(r"[^\w\s가-힣-]", "", text)
     text = re.sub(r"[\s]+", "-", text.strip())
     return text.lower()[:80]
+
+
+def _extract_first_image(body_md):
+    m = re.search(r'!\[.*?\]\((https?://[^)]+)\)', body_md)
+    return m.group(1) if m else ""
+
+
+def _extract_description(body_md):
+    for line in body_md.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--") or line.startswith("|"):
+            continue
+        clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]+\)', r'\1', line)
+        if len(clean) > 30:
+            return clean[:150]
+    return ""
+
+
+def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description):
+    date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    fm = "---\n"
+    fm += 'title: "' + title.replace('"', '\\"') + '"\n'
+    fm += "date: '" + date_str + "'\n"
+    fm += "slug: '" + slug + "'\n"
+    fm += "draft: false\n"
+    if description:
+        fm += 'description: "' + description.replace('"', '\\"') + '"\n'
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        fm += "tags: " + str(tag_list) + "\n"
+    if category:
+        fm += "categories: ['" + category + "']\n"
+    if thumbnail_url:
+        fm += "cover:\n"
+        fm += '  image: "' + thumbnail_url + '"\n'
+        fm += '  alt: "' + title.replace('"', '\\"') + '"\n'
+        fm += "  hidden: false\n"
+    fm += "---\n\n"
+    return fm, date_str
+
+
+def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description):
+    date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    fm = "---\n"
+    fm += 'title: "' + title.replace('"', '\\"') + '"\n'
+    fm += "slug: '" + slug + "'\n"
+    fm += "date: '" + date_str + "'\n"
+    fm += "draft: false\n"
+    if description:
+        fm += 'description: "' + description.replace('"', '\\"') + '"\n'
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        fm += "tags: " + str(tag_list) + "\n"
+    if category:
+        fm += "categories: ['" + category + "']\n"
+    if thumbnail_url:
+        fm += 'featureimage: "' + thumbnail_url + '"\n'
+    fm += "---\n\n"
+    return fm, date_str
+
+
+def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url):
+    theme = blog_cfg.get("theme", "PaperMod")
+    site_path = blog_cfg.get("site_path", "")
+    if not site_path:
+        site_path = os.path.join("/Users/twinssn/Projects", blog_cfg.get("repo", ""))
+    description = _extract_description(body_md)
+
+    if not thumbnail_url:
+        thumbnail_url = _extract_first_image(body_md)
+    if thumbnail_url and thumbnail_url.startswith("http://tong.visitkorea.or.kr"):
+        thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
+
+    if theme == "Blowfish":
+        fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description)
+        post_dir = os.path.join(site_path, "content", "posts", slug)
+        os.makedirs(post_dir, exist_ok=True)
+        file_path = os.path.join(post_dir, "index.md")
+    else:
+        fm, date_str = _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description)
+        date_prefix = datetime.now().strftime("%Y-%m-%d")
+        post_dir = os.path.join(site_path, "content", "posts")
+        os.makedirs(post_dir, exist_ok=True)
+        file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
+
+    content = fm + body_md
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    expected_url = "https://" + blog_cfg.get("domain", "") + "/posts/" + slug + "/"
+    return {"success": True, "url": expected_url, "file_path": file_path}
+
+
+def deploy_site(site_path, cf_project):
+    site = Path(site_path)
+    result = subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=str(site), capture_output=True, text=True)
+    if result.returncode != 0:
+        raise Exception("Hugo build failed: " + result.stderr[:500])
+    result = subprocess.run(
+        ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+         "--project-name=" + cf_project, "--branch=main", "--commit-dirty=true"],
+        cwd=str(site), capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        raise Exception("Wrangler deploy failed: " + result.stderr[:500])
+    public_dir = site / "public"
+    if public_dir.exists():
+        subprocess.run(["rm", "-rf", str(public_dir)])
+    return True
 
 
 def publish(blog_id, title, body_md, body_html=None,
@@ -74,11 +147,8 @@ def publish(blog_id, title, body_md, body_html=None,
     blog_cfg = get_blog_config(blog_id)
 
     today_count = get_today_count(blog_id)
-    if today_count >= blog_cfg.get("daily_quota", 15):
+    if today_count >= blog_cfg.get("daily_quota", 50):
         return {"success": False, "reason": "daily_quota_exceeded", "count": today_count}
-
-    if not body_html:
-        body_html = markdown.markdown(body_md, extensions=["tables", "fenced_code"])
 
     slug = slugify(title)
 
@@ -87,7 +157,7 @@ def publish(blog_id, title, body_md, body_html=None,
         "title": title,
         "slug": slug,
         "body_md": body_md,
-        "body_html": body_html,
+        "body_html": body_html or "",
         "thumbnail_url": thumbnail_url,
         "category": category,
         "tags": tags,
@@ -102,111 +172,21 @@ def publish(blog_id, title, body_md, body_html=None,
     }
     article_id = insert_article(article)
 
-    platform = blog_cfg["platform"]
-
-    if platform == "blogger":
-        result = _publish_blogger(blog_cfg, title, body_html, tags)
-    elif platform == "hugo":
-        result = _publish_hugo(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
-    elif platform == "wordpress":
-        result = _publish_wordpress(blog_cfg, title, body_html, category, tags)
-    else:
-        result = {"success": False, "reason": "unsupported_platform: " + platform}
+    result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
 
     if result.get("success"):
         update_published(article_id, result.get("url", ""))
+        cf_project = blog_cfg.get("cf_project", "")
+        site_path = blog_cfg.get("site_path", "")
+        if cf_project and site_path:
+            try:
+                deploy_site(site_path, cf_project)
+                result["deployed"] = True
+            except Exception as e:
+                result["deployed"] = False
+                result["deploy_error"] = str(e)
+                from shared.telegram_notifier import send_error as _tg_err
+                _tg_err(blog_id, "deploy", "Hugo빌드/Wrangler배포 실패: " + str(e)[:200])
 
     result["article_id"] = article_id
     return result
-
-
-def _publish_blogger(blog_cfg, title, body_html, tags):
-    service = get_blogger_service()
-    labels = [t.strip() for t in tags.split(",") if t.strip()]
-    post_body = {"kind": "blogger#post", "title": title, "content": body_html}
-    if labels:
-        post_body["labels"] = labels
-
-    resp = service.posts().insert(blogId=blog_cfg["blog_id"], body=post_body, isDraft=False).execute()
-    return {"success": True, "url": resp.get("url", ""), "post_id": resp.get("id", "")}
-
-
-def _extract_first_image(body_md):
-    """Extract first image URL from markdown body."""
-    m = re.search(r'!\[.*?\]\((https?://[^)]+)\)', body_md)
-    return m.group(1) if m else ""
-
-
-def _extract_description(body_md):
-    """Extract first meaningful paragraph as description (max 150 chars)."""
-    for line in body_md.split("\n"):
-        line = line.strip()
-        if not line:
-            continue
-        if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--"):
-            continue
-        clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]+\)', r'\1', line)
-        if len(clean) > 30:
-            return clean[:150]
-    return ""
-
-
-def _publish_hugo(blog_cfg, title, body_md, slug, category, tags, thumbnail_url):
-    repo_name = blog_cfg.get("repo", "")
-    repo_path = os.path.join("/Users/twinssn/Projects", repo_name)
-    post_dir = os.path.join(repo_path, "content", "posts", slug)
-    os.makedirs(post_dir, exist_ok=True)
-
-    if not thumbnail_url:
-        thumbnail_url = _extract_first_image(body_md)
-
-    post = frontmatter.Post(body_md)
-    post["title"] = title
-    post["slug"] = slug
-    post["date"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S+09:00")
-    post["draft"] = False
-    if category:
-        post["categories"] = [category]
-    if tags:
-        post["tags"] = [t.strip() for t in tags.split(",") if t.strip()]
-    if thumbnail_url:
-        post["featureimage"] = thumbnail_url
-
-    desc = _extract_description(body_md)
-    if desc:
-        post["description"] = desc
-
-    file_path = os.path.join(post_dir, "index.md")
-    with open(file_path, "w", encoding="utf-8") as f:
-        f.write(frontmatter.dumps(post))
-
-    expected_url = "https://" + blog_cfg.get("domain", "") + "/posts/" + slug + "/"
-    return {"success": True, "url": expected_url, "file_path": file_path}
-
-
-def _publish_wordpress(blog_cfg, title, body_html, category, tags):
-    keys = load_api_keys()
-    wp_configs = keys.get("wordpress", {})
-    wp_key = blog_cfg["id"].replace("-wp", "").replace("-", "_")
-    wp_cfg = None
-    for k, v in wp_configs.items():
-        if k == wp_key or v.get("url", "") == blog_cfg.get("url", ""):
-            wp_cfg = v
-            break
-
-    if not wp_cfg:
-        return {"success": False, "reason": "wp_config_not_found"}
-
-    api_url = wp_cfg["url"] + "/wp-json/wp/v2/posts"
-    data = {
-        "title": title,
-        "content": body_html,
-        "status": "publish",
-    }
-    resp = requests.post(api_url, json=data,
-                         auth=(wp_cfg["username"], wp_cfg["app_password"]))
-
-    if resp.status_code in (200, 201):
-        result = resp.json()
-        return {"success": True, "url": result.get("link", ""), "post_id": str(result.get("id", ""))}
-    return {"success": False, "reason": resp.text}

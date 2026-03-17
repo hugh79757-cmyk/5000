@@ -1,73 +1,81 @@
 #!/bin/bash
-# ============================================
-# 여행 블로그 5개 일괄 push
-# 사용법: bash /tmp/batch_push.sh
-# ============================================
+cd /Users/twinssn/Projects/5000
+.venv/bin/python3 -c "
+import yaml, subprocess, os
+from datetime import datetime
 
-REPOS=(
-  "/Users/twinssn/Projects/travel-hugo"
-  "/Users/twinssn/Projects/travel1-hugo"
-  "/Users/twinssn/Projects/travel2-hugo"
-  "/Users/twinssn/Projects/travel3-hugo"
-  "/Users/twinssn/Projects/travel4-hugo"
-  "/Users/twinssn/Projects/hotissue-hugo"
-)
+with open('config/blogs.yaml') as f:
+    config = yaml.safe_load(f)
 
-TIMESTAMP=$(date +"%Y-%m-%d %H:%M")
-SUCCESS=0
-SKIP=0
-FAIL=0
+blogs = config.get('blogs', [])
+deploy_cfg = config.get('deploy', {})
+branch = deploy_cfg.get('branch', 'main')
+commit_dirty = deploy_cfg.get('commit_dirty', True)
 
-echo "===== 배치 Push 시작: $TIMESTAMP ====="
-echo ""
+TIMESTAMP = datetime.now().strftime('%Y-%m-%d %H:%M')
+SUCCESS = 0
+SKIP = 0
+FAIL = 0
 
-for REPO in "${REPOS[@]}"; do
-  NAME=$(basename "$REPO")
-  echo "--- $NAME ---"
+print('===== Wrangler 배치 배포 시작: ' + TIMESTAMP + ' =====')
+print('')
 
-  if [ ! -d "$REPO/.git" ]; then
-    echo "  [SKIP] Git repo 아님"
-    SKIP=$((SKIP + 1))
-    echo ""
-    continue
-  fi
+for blog in blogs:
+    if blog.get('status') != 'active':
+        continue
+    site_path = blog.get('site_path', '')
+    cf_project = blog.get('cf_project', '')
+    name = blog['id']
 
-  cd "$REPO" || continue
+    if not site_path or not os.path.isdir(site_path):
+        print('--- ' + name + ' ---')
+        print('  [SKIP] 디렉토리 없음: ' + site_path)
+        SKIP += 1
+        continue
 
-  CHANGES=$(git status --porcelain)
-  if [ -z "$CHANGES" ]; then
-    echo "  [SKIP] 변경사항 없음"
-    SKIP=$((SKIP + 1))
-    echo ""
-    continue
-  fi
+    os.chdir(site_path)
+    result = subprocess.run(['git', 'status', '--porcelain'], capture_output=True, text=True)
+    changes = result.stdout.strip()
 
-  FILE_COUNT=$(echo "$CHANGES" | wc -l | tr -d ' ')
-  echo "  변경 파일: ${FILE_COUNT}개"
+    if not changes:
+        print('--- ' + name + ' [SKIP] 변경없음 ---')
+        SKIP += 1
+        continue
 
-  git add -A
-  git commit -m "publish: ${TIMESTAMP} 일괄 발행 (${FILE_COUNT}건)" --quiet
+    file_count = len(changes.split(chr(10)))
+    print('--- ' + name + ' (' + str(file_count) + '건) ---')
 
-  if git push origin main --quiet 2>/dev/null; then
-    echo "  [OK] push 완료"
-    SUCCESS=$((SUCCESS + 1))
-  else
-    echo "  [RETRY] pull 후 재시도..."
-    git pull --rebase origin main --quiet 2>/dev/null
-    if git push origin main --quiet 2>/dev/null; then
-      echo "  [OK] push 완료 (재시도)"
-      SUCCESS=$((SUCCESS + 1))
-    else
-      echo "  [FAIL] push 실패"
-      FAIL=$((FAIL + 1))
-    fi
-  fi
-  echo ""
-done
+    subprocess.run(['git', 'add', '-A'], capture_output=True)
+    subprocess.run(['git', 'commit', '-m', 'publish: ' + TIMESTAMP + ' (' + str(file_count) + '건)', '--quiet'], capture_output=True)
 
-echo "===== 결과 ====="
-echo "  성공: ${SUCCESS}개"
-echo "  스킵: ${SKIP}개 (변경없음)"
-echo "  실패: ${FAIL}개"
-echo "  빌드 소모: ${SUCCESS}회"
-echo "  월간 예상 (매일 1회): $((SUCCESS * 30))회 / 500회"
+    print('  Hugo 빌드...')
+    r = subprocess.run(['hugo', '--gc', '--minify', '--quiet'], capture_output=True, text=True)
+    if r.returncode != 0:
+        print('  [FAIL] 빌드 실패: ' + r.stderr[:200])
+        FAIL += 1
+        continue
+
+    print('  Wrangler 배포...')
+    dirty_flag = '--commit-dirty=true' if commit_dirty else ''
+    cmd = ['wrangler', 'pages', 'deploy', './public', '--project-name=' + cf_project, '--branch=' + branch]
+    if commit_dirty:
+        cmd.append('--commit-dirty=true')
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        print('  [FAIL] 배포 실패: ' + r.stderr[:200])
+        FAIL += 1
+    else:
+        output_lines = r.stdout.strip().split(chr(10))
+        print('  ' + output_lines[-1] if output_lines else '  OK')
+        print('  [OK]')
+        SUCCESS += 1
+
+    subprocess.run(['rm', '-rf', './public'], capture_output=True)
+    print('')
+
+print('===== 결과 =====')
+print('  성공: ' + str(SUCCESS))
+print('  스킵: ' + str(SKIP))
+print('  실패: ' + str(FAIL))
+print('  CF 빌드 소모: 0 (Direct Upload)')
+"

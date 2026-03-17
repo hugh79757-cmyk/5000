@@ -11,13 +11,6 @@ load_dotenv("/Users/twinssn/Projects/tour-auto-publisher/.env")
 
 logger = logging.getLogger(__name__)
 
-def _fix_image_https(url):
-    """http://tong.visitkorea.or.kr → https 변환"""
-    if url and url.startswith("http://tong.visitkorea.or.kr"):
-        return url.replace("http://", "https://", 1)
-    return url
-
-
 
 def _safe_region(addr_str):
     if not addr_str or not addr_str.strip():
@@ -285,27 +278,11 @@ def fetch_course():
 
 
 def fetch_wellness():
-    """웰니스관광정보 API (WellnessTursmService) - http, langDivCd=KOR 필수"""
-    import requests
-    api_key = os.environ.get("TOUR_API_KEY", "") or os.environ.get("DATA_GO_KR_API_KEY", "")
-    if not api_key:
-        logger.warning("wellness: API key not found")
-        return None
+    from core.wellness_api import WellnessAPI
+    api = WellnessAPI()
     try:
-        resp = requests.get(
-            "http://apis.data.go.kr/B551011/WellnessTursmService/areaBasedList",
-            params={
-                "serviceKey": api_key,
-                "numOfRows": 50,
-                "pageNo": 1,
-                "MobileOS": "ETC",
-                "MobileApp": "5000",
-                "_type": "json",
-                "langDivCd": "KOR",
-            },
-            timeout=15,
-        )
-        data = resp.json()
+        params = {"numOfRows": 50, "pageNo": 1}
+        data = api._request("areaBasedList", params)
         items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
         if isinstance(items_raw, dict):
             items_raw = [items_raw]
@@ -314,18 +291,14 @@ def fetch_wellness():
         selected = random.sample(items_raw, min(5, len(items_raw)))
         items = []
         for item in selected:
-            org_img = item.get("orgImage", "") or ""
-            thumb_img = item.get("thumbImage", "") or ""
-            img = org_img or thumb_img
             items.append({
                 "title": item.get("title", ""),
-                "addr": item.get("baseAddr", ""),
-                "addr1": item.get("baseAddr", ""),
-                "firstimage": _fix_image_https(img),
-                "image": _fix_image_https(img),
+                "addr": item.get("addr1", ""),
+                "addr1": item.get("addr1", ""),
+                "firstimage": item.get("firstimage", ""),
+                "image": item.get("firstimage", ""),
                 "overview": item.get("overview", ""),
                 "tel": item.get("tel", ""),
-                "contentId": item.get("contentId", ""),
                 "_raw": item,
             })
         region = _safe_region(items[0].get("addr", "")) if items else ""
@@ -342,7 +315,6 @@ def fetch_wellness():
     except Exception as e:
         logger.warning("wellness fetch failed: " + str(e))
         return None
-
 
 
 def fetch_heritage():
