@@ -148,18 +148,12 @@ def register_images(article_id, blog_id, html):
     return count
 
 
-def is_image_used(image_url, blog_id=None):
+def is_image_used(image_url):
     conn = get_conn()
-    if blog_id:
-        row = conn.execute(
-            "SELECT 1 FROM used_images WHERE image_url=? AND blog_id=?",
-            (image_url, blog_id),
-        ).fetchone()
-    else:
-        row = conn.execute(
-            "SELECT 1 FROM used_images WHERE image_url=?",
-            (image_url,),
-        ).fetchone()
+    row = conn.execute(
+        "SELECT 1 FROM used_images WHERE image_url=?",
+        (image_url,),
+    ).fetchone()
     conn.close()
     return row is not None
 

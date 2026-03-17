@@ -30,12 +30,7 @@ def slugify(text):
 
 def _extract_first_image(body_md):
     m = re.search(r'!\[.*?\]\((https?://[^)]+)\)', body_md)
-    if not m:
-        return ""
-    url = m.group(1)
-    if "tong.visitkorea.or.kr" in url and url.startswith("http://"):
-        url = url.replace("http://", "https://", 1)
-    return url
+    return m.group(1) if m else ""
 
 
 def _extract_description(body_md):
@@ -89,11 +84,7 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     if category:
         fm += "categories: ['" + category + "']\n"
     if thumbnail_url:
-        if "tong.visitkorea.or.kr" in thumbnail_url and thumbnail_url.startswith("http://"):
-            thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
         fm += 'featureimage: "' + thumbnail_url + '"\n'
-    else:
-        fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n\n"
     return fm, date_str
 

@@ -149,7 +149,7 @@ def _fallback_image_from_korservice(items, theme):
     return items
 
 
-def _inject_images(items, content, blog_id=None):
+def _inject_images(items, content):
     """API image URLs into body after each H2 in order"""
     existing = len(re.findall(r'!\[', content))
     if existing >= len(items):
@@ -161,7 +161,7 @@ def _inject_images(items, content, blog_id=None):
         name = item.get("facltNm", item.get("title", ""))
         img = item.get("firstImageUrl") or item.get("firstimage") or item.get("image") or ""
         if name and img and img.startswith("http"):
-            if is_image_used(img, blog_id=blog_id):
+            if is_image_used(img):
                 logger.info("이미지 중복 스킵: %s (%s)", name[:20], img[-30:])
                 continue
             img_list.append((name, img))
@@ -398,7 +398,7 @@ def generate_content(data, blog_id="travel-hugo"):
 
     content = _enrich_with_nearby(data, content)
     items = data.get("items", [])
-    content = _inject_images(items, content, blog_id=blog_id)
+    content = _inject_images(items, content)
     content = _inject_naver_map(content, items)
 
     display_region = data.get("display_region", "")
