@@ -8,31 +8,26 @@ from pathlib import Path
 MODEL_NAME_MAP = {
     "모델 Y": "Model Y",
     "모델 3": "Model 3",
+    "EV5": "EV5",
+    "EV4": "EV4",
     "그랑 콜레오스": "콜레오스",
-    "그랑 콜레오스 하이브리드": "콜레오스",
-    "필랑트": "ARKANA",
-    "일렉트리파이드 G80": "G80 전동화",
-    "무쏘 스포츠": "무쏘 2.3",
+    "필랑트": "르노 아르카나",
+    "일렉트리파이드 G80": "G80",
+    "무쏘": "무쏘",
+    "무쏘 스포츠": "무쏘",
     "1시리즈": "118",
+    "2시리즈": "220",
     "2시리즈 액티브 투어러": "218",
     "2시리즈 그란 쿠페": "220",
-    "2시리즈": "220",
     "3시리즈": "320",
     "5시리즈": "520",
     "7시리즈": "740",
     "8시리즈": "840",
     "C클래스": "C200",
-    "프리우스": "Prius",
-    "캠리": "Camry",
-    "오딧세이": "ODYSSEY",
-    "RSQ8": "Q8",
-    "마이바흐 S클래스": "Maybach S",
-    "마이바흐 GLS": "Maybach GLS",
-    "마이바흐 EQS SUV": "Maybach EQS",
-    "마이바흐 SL": "Maybach SL",
-    "RS3": "RS 3",
-    "무쏘": "무쏘 2.3",
-    "G클래스": "G 580",
+    "G클래스": "G580",
+    "캠리": "캠리",
+    "프리우스": "프리우스",
+    "오딧세이": "오딧세이",
 }
 
 
@@ -378,12 +373,4 @@ def build_input(conn, topic, db_path):
         "cta_links": {"kb_chacha": "https://www.kbchachacha.com", "carisyou": "https://www.carisyou.com"},
         "thumbnail_url": "",
     })
-    # EV 추가 데이터 보강 (배터리 주행거리 등)
-    if car["fuel_type"] == "전기":
-        ev_specs = lookup_ev_specs(conn, car["brand"], car["model"])
-        if ev_specs:
-            data["ev_range_km"] = ev_specs.get("ev_range_km")
-            data["ev_efficiency"] = ev_specs.get("ev_efficiency")
-            data["ev_model_match"] = ev_specs.get("ev_model_match")
-
     return data

@@ -51,3 +51,10 @@ openai.APIConnectionError: Connection error.
 2026-03-17 14:52:19,107 [INFO] Next run: 2026-03-17 15:00:00
 2026-03-17 15:00:19,929 [INFO] Publishing: travel3-hugo
 2026-03-17 15:30:25,213 [INFO] Publishing: travel4-hugo
+2026-03-17 17:00:12,267 [INFO] Publishing: travel-hugo
+2026-03-17 17:03:05,275 [INFO] Publishing: hotissue-hugo
+2026-03-17 17:04:21,869 [INFO] Publishing: tco-hugo
+2026-03-17 17:05:35,136 [INFO] Publishing: deal-hugo
+2026-03-17 17:07:12,518 [INFO] Publishing: compare-hugo
+2026-03-17 17:09:29,043 [INFO] Publishing: guide-hugo
+2026-03-17 17:11:14,593 [INFO] Publishing: ev-hugo
