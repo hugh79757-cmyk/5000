@@ -309,6 +309,40 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
     return content
 
 
+
+def _validate_place_names(content, real_names, max_retries=1):
+    """AI 생성 본문에 실제 API 장소명이 포함되어 있는지 검증"""
+    if not real_names:
+        return content, True
+
+    for attempt in range(max_retries + 1):
+        found = []
+        missing = []
+        for name in real_names:
+            # 정확한 이름 또는 핵심 부분(앞 6자)이 본문에 있는지
+            if name in content or (len(name) > 5 and name[:6] in content):
+                found.append(name)
+            else:
+                missing.append(name)
+
+        ratio = len(found) / len(real_names) if real_names else 0
+        logger.info("장소명 검증: %d/%d 일치 (%.0f%%)", len(found), len(real_names), ratio * 100)
+
+        if ratio >= 0.6:
+            if missing:
+                logger.warning("누락 장소: %s", ", ".join(m[:15] for m in missing))
+            return content, True
+
+        logger.warning("장소명 불일치 (시도 %d/%d): 일치=%s, 누락=%s",
+                       attempt + 1, max_retries + 1,
+                       [n[:15] for n in found], [n[:15] for n in missing])
+
+        if attempt < max_retries:
+            return content, False
+
+    return content, False
+
+
 def generate_content(data, blog_id="travel-hugo"):
     source_type = data.get("source_type", "camping")
     prompt_id = _select_prompt_id(blog_id, source_type)
@@ -349,6 +383,18 @@ def generate_content(data, blog_id="travel-hugo"):
 
     # 후처리: H2 수, 글자수, 금지표현 검증 및 재생성
     content = _validate_and_retry(content, system_prompt, user_prompt)
+
+    # 장소명 검증: API 데이터의 실제 장소명이 본문에 포함되어 있는지 확인
+    place_items = data.get("items", [])
+    real_names = [it.get("title", it.get("facltNm", "")).strip() for it in place_items if it.get("title") or it.get("facltNm")]
+    content, names_ok = _validate_place_names(content, real_names)
+    if not names_ok:
+        logger.warning("장소명 불일치 → 재생성 시도")
+        retry = ai_generate(system_prompt, user_prompt, tier="default")
+        if retry and retry.get("content"):
+            content = retry["content"]
+            content = _validate_and_retry(content, system_prompt, user_prompt)
+            content, _ = _validate_place_names(content, real_names)
 
     content = _enrich_with_nearby(data, content)
     items = data.get("items", [])

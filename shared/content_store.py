@@ -206,3 +206,64 @@ def title_similar_exists(blog_id, title):
     ).fetchone()
     conn.close()
     return row is not None
+
+def init_used_places():
+    conn = get_conn()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS used_places (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            place_name TEXT NOT NULL,
+            content_id TEXT DEFAULT '',
+            blog_id TEXT NOT NULL,
+            article_id INTEGER,
+            published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(place_name, blog_id)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+def is_place_used(place_name, blog_id):
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT 1 FROM used_places WHERE place_name=? AND blog_id=?",
+        (place_name, blog_id),
+    ).fetchone()
+    conn.close()
+    return row is not None
+
+
+def register_places(article_id, blog_id, place_names, content_ids=None):
+    conn = get_conn()
+    init_used_places()
+    count = 0
+    for i, name in enumerate(place_names):
+        cid = content_ids[i] if content_ids and i < len(content_ids) else ""
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO used_places (place_name, content_id, blog_id, article_id) VALUES (?,?,?,?)",
+                (name, cid, blog_id, article_id),
+            )
+            count += 1
+        except Exception:
+            pass
+    conn.commit()
+    conn.close()
+    return count
+
+
+def filter_unused_places(place_names, blog_id):
+    conn = get_conn()
+    init_used_places()
+    unused = []
+    for name in place_names:
+        row = conn.execute(
+            "SELECT 1 FROM used_places WHERE place_name=? AND blog_id=?",
+            (name, blog_id),
+        ).fetchone()
+        if not row:
+            unused.append(name)
+    conn.close()
+    return unused
+
