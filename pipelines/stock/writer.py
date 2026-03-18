@@ -129,7 +129,7 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
 9. 2026년 3월 기준 최신 정보로 작성
 10. 절대 "함께 읽어보기", "관련 글", "추천 글" 같은 내부링크 섹션을 만들지 마세요
 11. 다른 블로그 글 URL을 절대 생성하지 마세요
-12. 제공된 데이터에 없는 수치(PER, PBR, 배당률, 주가 등)를 절대 지어내지 마세요
+12. [중요] 제공된 데이터에 없는 수치(금리, PER, PBR, 배당률, 주가, 수익률 등)를 절대 지어내지 마세요. 구체적 숫자가 필요한 곳에는 "○○증권 홈페이지에서 최신 금리를 확인하세요" 식으로 안내하세요
 13. 데이터가 제공되지 않은 경우, 구체적 수치 대신 분석 방법론과 투자 전략 중심으로 작성하세요
 
 [출력 형식]
@@ -179,6 +179,11 @@ def _parse_response(content):
             body_lines.append(line)
 
     body = "\n".join(body_lines).strip()
+
+    # "함께 읽어보기" 등 내부링크 섹션 자동 제거
+    body = re.sub(r"\n##\s*(함께|관련|추천).*?(?=\n## |\Z)", "", body, flags=re.DOTALL)
+    body = re.sub(r"\n-\s*\[.*?\]\(/(posts|articles)/.*?\)\s*", "", body)
+    body = body.strip()
 
     if not title and body:
         for line in body_lines:
