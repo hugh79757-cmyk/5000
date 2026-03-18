@@ -130,16 +130,7 @@ def run(blog_cfg):
 
 
 def _pick_strategy(conn, blog_id):
-    c = conn.cursor()
-    today = datetime.now().strftime("%Y-%m-%d")
-    today_disc = c.execute(
-        "SELECT COUNT(*) FROM publish_history WHERE site_id=? AND date(published_at)=? AND post_type='disclosure'",
-        (blog_id, today)
-    ).fetchone()[0]
-
-    if today_disc < 2:
-        return "disclosure"
-    return random.choice(EVERGREEN_TYPES)
+    return "disclosure"
 
 
 def _filter_unpublished(conn, blog_id, disclosures):
