@@ -209,6 +209,12 @@ def publish(blog_id, title, body_md, body_html=None,
             data_source="", source_id="", prompt_id="",
             model=""):
 
+    # 후처리: AI가 생성한 가짜 내부링크 제거
+    import re
+    if body_md:
+        body_md = re.sub(r"\n+##\s*(함께|관련|추천)\s*(읽어보기|읽을거리|글|포스트).*", "", body_md, flags=re.DOTALL)
+        body_md = body_md.rstrip()
+
     blog_cfg = get_blog_config(blog_id)
 
     today_count = get_today_count(blog_id)
