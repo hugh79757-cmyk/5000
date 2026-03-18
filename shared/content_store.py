@@ -95,7 +95,7 @@ def get_today_count(blog_id):
     conn = get_conn()
     today = datetime.utcnow().strftime("%Y-%m-%d")
     row = conn.execute(
-        "SELECT COUNT(*) as cnt FROM articles WHERE blog_id=? AND date(created_at)=?",
+        "SELECT COUNT(*) as cnt FROM articles WHERE blog_id=? AND date(created_at)=? AND status='published'",
         (blog_id, today),
     ).fetchone()
     conn.close()

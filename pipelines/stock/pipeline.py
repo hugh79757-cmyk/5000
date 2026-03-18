@@ -176,8 +176,9 @@ def _make_thumbnail(title, category, stock_code, corp_name):
             output_path=tmp_path,
         )
 
-        slug = title[:50].replace(" ", "-").lower()
-        r2_key = f"stock-thumbnails/{datetime.now().strftime('%Y%m%d')}-{slug}.webp"
+        import hashlib
+        title_hash = hashlib.md5(title.encode()).hexdigest()[:10]
+        r2_key = f"stock-thumbnails/{datetime.now().strftime('%Y%m%d')}-{title_hash}.webp"
         url = upload_file(tmp_path, r2_key, content_type="image/webp")
 
         os.remove(tmp_path)
