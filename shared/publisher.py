@@ -5,6 +5,8 @@ import yaml
 import subprocess
 from datetime import datetime
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv(override=True)
 from shared.content_store import insert_article, update_published, get_today_count
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
@@ -208,7 +210,36 @@ def publish(blog_id, title, body_md, body_html=None,
     }
     article_id = insert_article(article)
 
-    result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
+    platform = blog_cfg.get("platform", "hugo")
+
+    if platform == "blogger":
+        import os
+        from dotenv import load_dotenv as _ldenv
+        _ldenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
+        from shared.blogger_publisher import publish_to_blogger
+        blog_id_env = blog_cfg.get("blog_id_env", "")
+        blogger_blog_id = os.getenv(blog_id_env, "")
+        if not blogger_blog_id:
+            return {"success": False, "error": "blogger blog_id not configured"}
+        labels = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+        html_content = body_html or body_md
+        result = publish_to_blogger(blogger_blog_id, title, html_content, labels)
+
+    elif platform == "wordpress":
+        import os
+        from dotenv import load_dotenv as _ldenv2
+        _ldenv2(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
+        from shared.wp_publisher import publish_to_wordpress
+        wp_url = os.getenv(blog_cfg.get("wp_url_env", ""), "")
+        wp_user = os.getenv(blog_cfg.get("wp_user_env", ""), "")
+        wp_pass = os.getenv(blog_cfg.get("wp_pass_env", ""), "")
+        if not wp_url:
+            return {"success": False, "error": "wordpress url not configured"}
+        html_content = body_html or body_md
+        result = publish_to_wordpress(wp_url, wp_user, wp_pass, title, html_content)
+
+    else:
+        result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
 
     if result.get("success"):
         update_published(article_id, result.get("url", ""))

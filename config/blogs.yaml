@@ -196,6 +196,51 @@ blogs:
       times: ["09:00","12:00","15:30","19:30","22:30"]
     status: active
 
+  # === TV-show 연동 사이트 ===
+  - id: tvshow-blogger
+    name: "tv-show 맛집블로그"
+    platform: blogger
+    blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
+    domain: tv-show.informationhot.kr
+    pipeline: travel
+    fetch_sources:
+      - {type: food, weight: 0.7}
+      - {type: course, weight: 0.3}
+    daily_quota: 5
+    schedule:
+      times: ["09:00","11:00","14:00","16:00","19:00"]
+    status: active
+
+  - id: ud-blogger
+    name: "ud 레시피블로그"
+    platform: blogger
+    blog_id_env: BLOGGER_RECIPE_BLOG_ID
+    domain: ud.informationhot.kr
+    pipeline: travel
+    fetch_sources:
+      - {type: food, weight: 0.7}
+      - {type: course, weight: 0.3}
+    daily_quota: 5
+    schedule:
+      times: ["09:30","11:30","14:30","16:30","19:30"]
+    status: active
+
+  - id: kuta-wordpress
+    name: "kuta 워드프레스"
+    platform: wordpress
+    wp_url_env: WP_KUTA_URL
+    wp_user_env: WP_KUTA_USER
+    wp_pass_env: WP_KUTA_PASS
+    domain: kuta.informationhot.kr
+    pipeline: travel
+    fetch_sources:
+      - {type: food, weight: 0.7}
+      - {type: course, weight: 0.3}
+    daily_quota: 5
+    schedule:
+      times: ["10:00","12:00","15:00","17:00","20:00"]
+    status: active
+
 deploy:
   method: wrangler
   branch: main
@@ -206,3 +251,4 @@ batch_deploy:
 
 git_backup:
   schedule: "sunday 03:00"
+
