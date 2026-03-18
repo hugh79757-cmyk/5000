@@ -285,6 +285,11 @@ def run_travel(blog_cfg):
     return pub_result
 
 
+
+def run_stock(blog_cfg):
+    from pipelines.stock.pipeline import run
+    return run(blog_cfg)
+
 def dispatch(blog_id):
     cfg = get_blog_config(blog_id)
     if not cfg:
@@ -300,6 +305,8 @@ def dispatch(blog_id):
         return run_car(cfg)
     elif pipeline == "travel":
         return run_travel(cfg)
+    elif pipeline == "stock":
+        return run_stock(cfg)
     else:
         logger.error("Unknown pipeline: " + pipeline)
         return None
