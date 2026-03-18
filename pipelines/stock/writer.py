@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 
 
-def generate_disclosure_article(disclosure, company_info=None, financials=None):
+def generate_disclosure_article(disclosure, company_info=None, financials=None, financials_prev=None, dividend=None):
     corp_name = disclosure.get("corp_name", "")
     report_nm = disclosure.get("report_nm", "")
     rcept_dt = disclosure.get("rcept_dt", "")
@@ -25,7 +25,14 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None):
     if financials:
         key_items = [f for f in financials if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
         for f in key_items[:3]:
-            context_parts.append(f"{f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
+            context_parts.append(f"[당기] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
+    if financials_prev:
+        key_prev = [f for f in financials_prev if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+        for f in key_prev[:3]:
+            context_parts.append(f"[전기] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
+    if dividend and isinstance(dividend, dict):
+        for item in dividend.get("list", [])[:3]:
+            context_parts.append(f"배당: {item.get('se_nm', '')} {item.get('thstrm', '')}원")
 
     context = "\n".join(context_parts)
 
