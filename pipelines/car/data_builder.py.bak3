@@ -378,14 +378,12 @@ def build_input(conn, topic, db_path):
         "cta_links": {"kb_chacha": "https://www.kbchachacha.com", "carisyou": "https://www.carisyou.com"},
         "thumbnail_url": "",
     })
-    # EV 추가 데이터 보강 (배터리 용량, 주행거리 등)
+    # EV 추가 데이터 보강 (배터리 주행거리 등)
     if car["fuel_type"] == "전기":
         ev_specs = lookup_ev_specs(conn, car["brand"], car["model"])
         if ev_specs:
             data["ev_range_km"] = ev_specs.get("ev_range_km")
             data["ev_efficiency"] = ev_specs.get("ev_efficiency")
             data["ev_model_match"] = ev_specs.get("ev_model_match")
-        if car["battery_capacity_kwh"]:
-            data["battery_capacity_kwh"] = car["battery_capacity_kwh"]
 
     return data

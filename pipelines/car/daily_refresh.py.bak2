@@ -276,7 +276,7 @@ def refresh_images(conn):
     return total_new
 
 
-def replenish_topics(conn, min_pending=30):
+def replenish_topics(conn, min_pending=10):
     """사이트별 post_type 토픽이 min_pending 미만이면 자동 보충"""
     c = conn.cursor()
 
@@ -314,7 +314,7 @@ def replenish_topics(conn, min_pending=30):
     solos = [car["car_id"] for car in popular]
 
     # EV 전용 필터
-    ev_cars = [car["car_id"] for car in popular if car["fuel_type"] in ("전기", "가솔린/하이브리드")]
+    ev_cars = [car["car_id"] for car in popular if car["fuel_type"] == "전기"]
 
     total_created = 0
 
@@ -454,36 +454,11 @@ def run_refresh():
 
     logger.info("=== CAP 데이터 갱신 시작 ===")
 
-    trims_updated = 0
-    images_added = 0
-    new_cars = []
-    price_changes = 0
-    topics_created = 0
-
-    try:
-        trims_updated = refresh_trims(conn)
-    except Exception as e:
-        logger.error(f"refresh_trims 실패: {e}")
-
-    try:
-        images_added = refresh_images(conn)
-    except Exception as e:
-        logger.error(f"refresh_images 실패: {e}")
-
-    try:
-        new_cars = scan_new_cars(conn)
-    except Exception as e:
-        logger.error(f"scan_new_cars 실패: {e}")
-
-    try:
-        price_changes = detect_price_changes(conn)
-    except Exception as e:
-        logger.error(f"detect_price_changes 실패: {e}")
-
-    try:
-        topics_created = replenish_topics(conn)
-    except Exception as e:
-        logger.error(f"replenish_topics 실패: {e}")
+    trims_updated = refresh_trims(conn)
+    images_added = refresh_images(conn)
+    new_cars = scan_new_cars(conn)
+    price_changes = detect_price_changes(conn)
+    topics_created = replenish_topics(conn)
 
     if new_cars:
         logger.info(f"신규 차량 {len(new_cars)}대 발견 (수동 등록 필요)")
