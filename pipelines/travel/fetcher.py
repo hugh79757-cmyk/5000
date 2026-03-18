@@ -271,7 +271,9 @@ def fetch_course():
         if not items_raw:
             logger.warning("course: no data for " + region_name)
             return None
-        selected = random.sample(items_raw, min(5, len(items_raw)))
+        with_img = [i for i in items_raw if i.get('firstimage')]
+        pool = with_img if len(with_img) >= 3 else items_raw
+        selected = random.sample(pool, min(5, len(pool)))
         adapted = _adapt_korservice_items(selected)
         return {
             "items": adapted,
@@ -315,7 +317,9 @@ def fetch_wellness():
             items_raw = [items_raw]
         if not items_raw:
             return None
-        selected = random.sample(items_raw, min(5, len(items_raw)))
+        with_img = [i for i in items_raw if i.get('orgImage') or i.get('thumbImage')]
+        pool = with_img if len(with_img) >= 3 else items_raw
+        selected = random.sample(pool, min(5, len(pool)))
         items = []
         for item in selected:
             org_img = item.get("orgImage", "") or ""
