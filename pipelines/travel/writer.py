@@ -168,6 +168,22 @@ def _inject_images(items, content, blog_id=None):
             img_list.append((name, img))
 
     if not img_list:
+        # 다이닝코드에서 사진 검색 시도
+        try:
+            from shared.diningcode_enricher import enrich_from_diningcode
+            for item in items:
+                name = item.get("facltNm", item.get("title", ""))
+                addr = item.get("addr", item.get("addr1", ""))
+                if name:
+                    dc = enrich_from_diningcode(name, addr)
+                    if dc.get("photo_urls"):
+                        img_list.append((name, dc["photo_urls"][0]))
+                        if len(img_list) >= 3:
+                            break
+        except Exception as e:
+            logger.warning("다이닝코드 이미지 fallback 실패: %s", e)
+
+    if not img_list:
         return content
 
     lines = content.split("\n")
