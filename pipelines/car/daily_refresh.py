@@ -228,6 +228,33 @@ def scan_new_cars(conn):
     return found
 
 
+def fill_trim_efficiency(conn):
+    """trims 테이블의 fuel_efficiency가 NULL인 항목을 public_fuel_data에서 보충"""
+    import sys
+    if "/Users/twinssn/Projects/5000" not in sys.path:
+        sys.path.insert(0, "/Users/twinssn/Projects/5000")
+    from pipelines.car.data_builder import lookup_fuel_efficiency
+
+    c = conn.cursor()
+    rows = c.execute("""
+        SELECT t.rowid AS rid, t.car_id, t.trim_name, c.brand, c.model, c.displacement
+        FROM trims t JOIN cars c ON t.car_id = c.car_id
+        WHERE (t.fuel_efficiency IS NULL OR t.fuel_efficiency = 0)
+    """).fetchall()
+
+    filled = 0
+    for r in rows:
+        eff = lookup_fuel_efficiency(conn, r["brand"], r["model"], r["displacement"])
+        if eff and eff > 0:
+            c.execute("UPDATE trims SET fuel_efficiency=? WHERE rowid=?", (eff, r["rid"]))
+            filled += 1
+
+    conn.commit()
+    if filled > 0:
+        logger.info(f"  [연비보충] {filled}/{len(rows)}건 매칭 완료")
+    return filled
+
+
 def refresh_images(conn):
     """이미지 부족 차량 보충 (차단 목록 제외)"""
     c = conn.cursor()
@@ -464,6 +491,11 @@ def run_refresh():
         trims_updated = refresh_trims(conn)
     except Exception as e:
         logger.error(f"refresh_trims 실패: {e}")
+
+    try:
+        fill_trim_efficiency(conn)
+    except Exception as e:
+        logger.error(f"fill_trim_efficiency 실패: {e}")
 
     try:
         images_added = refresh_images(conn)
