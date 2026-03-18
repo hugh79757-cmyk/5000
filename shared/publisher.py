@@ -256,6 +256,10 @@ def publish(blog_id, title, body_md, body_html=None,
             return {"success": False, "error": "blogger blog_id not configured"}
         labels = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
         html_content = body_html or body_md
+        # markdown -> HTML 변환 (Blogger는 HTML 필요)
+        if not body_html and body_md:
+            import markdown
+            html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
         result = publish_to_blogger(blogger_blog_id, title, html_content, labels)
 
     elif platform == "wordpress":

@@ -23,6 +23,7 @@ BLOG_PROMPT_MAP = {
     "travel2-hugo": {"heritage": "travel2_heritage", "korservice": "travel2_heritage"},
     "travel3-hugo": {"korservice": "tour2_food", "food": "tour2_food"},
     "travel4-hugo": {"korservice": "tour3_course", "course": "tour3_course"},
+    "tvshow-blogger": {"korservice": "tour2_food", "food": "tour2_food", "course": "tour3_course"},
 }
 
 
