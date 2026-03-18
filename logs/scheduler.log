@@ -113,3 +113,15 @@ openai.APIConnectionError: Connection error.
 2026-03-18 10:44:42,736 [INFO] Publishing: travel2-hugo
 2026-03-18 11:00:19,435 [INFO] Publishing: travel2-hugo
 2026-03-18 11:30:16,312 [INFO] Publishing: travel3-hugo
+2026-03-18 12:00:12,339 [INFO] Publishing: travel4-hugo
+2026-03-18 13:00:19,568 [INFO] Publishing: travel-hugo
+2026-03-18 13:02:19,321 [INFO] Publishing: hotissue-hugo
+2026-03-18 13:03:22,861 [INFO] CATCHUP: tco-hugo expected=3 actual=2 missed=1
+2026-03-18 13:03:22,861 [INFO] Publishing: tco-hugo
+2026-03-18 13:04:39,431 [INFO] Publishing: tco-hugo
+2026-03-18 13:05:51,591 [INFO] Publishing: deal-hugo
+2026-03-18 13:06:38,113 [INFO]   [후처리] 경고: 본문에 연비 4.7 없음
+2026-03-18 13:07:08,134 [INFO] Publishing: compare-hugo
+2026-03-18 13:09:16,864 [INFO] Publishing: guide-hugo
+2026-03-18 13:11:26,672 [INFO] Publishing: ev-hugo
+2026-03-18 13:12:11,847 [INFO]   [후처리] 경고: 본문에 연비 12.9 없음
