@@ -195,7 +195,7 @@ def fetch_food():
                 "MobileOS": "ETC",
                 "MobileApp": "TAP",
                 "_type": "json",
-                "numOfRows": 20,
+                "numOfRows": 50,
                 "pageNo": 1,
                 "contentTypeId": 39,
                 "areaCode": area_code,
@@ -214,7 +214,9 @@ def fetch_food():
         if not items_raw:
             logger.warning("food: no data for " + region_name)
             return None
-        selected = random.sample(items_raw, min(5, len(items_raw)))
+        with_img = [i for i in items_raw if i.get('firstimage')]
+        pool = with_img if len(with_img) >= 3 else items_raw
+        selected = random.sample(pool, min(5, len(pool)))
         adapted = _adapt_korservice_items(selected)
         return {
             "items": adapted,
