@@ -241,6 +241,20 @@ blogs:
       times: ["10:00","12:00","15:00","17:00","20:00"]
     status: active
 
+  - id: stock-hugo
+    name: "캔들트렌드 주식분석"
+    pipeline: stock
+    platform: hugo
+    theme: congo
+    repo: stock-blog
+    site_path: /Users/twinssn/Projects/stock-blog
+    cf_project: stock-informationhot
+    domain: stock.informationhot.kr
+    daily_quota: 5
+    schedule:
+      times: ["08:30","11:30","14:30","17:30","20:30"]
+    status: active
+
 deploy:
   method: wrangler
   branch: main

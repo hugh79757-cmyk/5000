@@ -1,0 +1,178 @@
+import os
+import json
+import logging
+import requests
+
+logger = logging.getLogger(__name__)
+
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+
+
+def generate_disclosure_article(disclosure, company_info=None, financials=None):
+    corp_name = disclosure.get("corp_name", "")
+    report_nm = disclosure.get("report_nm", "")
+    rcept_dt = disclosure.get("rcept_dt", "")
+
+    context_parts = [
+        f"기업명: {corp_name}",
+        f"공시명: {report_nm}",
+        f"접수일: {rcept_dt}",
+    ]
+    if company_info:
+        context_parts.append(f"CEO: {company_info.get('ceo_nm', '')}")
+        context_parts.append(f"업종: {company_info.get('induty_code', '')}")
+        context_parts.append(f"종목코드: {company_info.get('stock_code', '')}")
+    if financials:
+        key_items = [f for f in financials if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+        for f in key_items[:3]:
+            context_parts.append(f"{f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
+
+    context = "\n".join(context_parts)
+
+    prompt = f"""당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
+아래 공시 정보를 바탕으로, 주식 투자에 관심있는 일반인이 읽고 싶어할 블로그 글을 작성하세요.
+
+[공시 정보]
+{context}
+
+[제목 작성 규칙]
+- 반드시 클릭을 유도하는 흥미로운 제목
+- "기업명 + 핵심 이벤트 + 궁금증 유발" 패턴 사용
+- 예시: "삼성전자 실적 발표, 영업이익 40% 급감 바닥은 어디일까", "카카오 자사주 매입 발표 지금 사도 될까"
+- 숫자(%, 원, 배)를 반드시 포함
+- 50자 이내
+
+[본문 작성 규칙]
+1. 첫 문단에서 독자의 관심을 사로잡는 후킹 문장으로 시작 (질문형 또는 충격적 사실)
+2. 본문 3000자 이상
+3. H2 헤딩 4~6개, 자연스러운 소제목 (예: "이 회사가 하는 일", "실적은 어땠나", "지금 투자해도 될까")
+4. 금액은 읽기 쉽게 표현 (12,432,454,206원 → 약 124억 원)
+5. 전문 용어는 괄호로 쉬운 설명 추가
+6. 구체적인 투자 판단 근거 제시 (PER, PBR, 동종업계 비교)
+7. 리스크 요인도 균형있게 서술
+8. 마지막에 "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
+9. 마크다운 형식, H1(#) 사용 금지
+
+[출력 형식]
+TITLE: (제목)
+CATEGORY: (카테고리 1개: 공시분석/실적분석/배당분석/IPO분석/ETF분석/시장분석 중 택1)
+TAGS: (쉼표로 구분, 5개 이내)
+BODY:
+(본문 마크다운)"""
+
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    resp = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={
+            "model": OPENAI_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 4000,
+            "temperature": 0.7,
+        },
+        timeout=60,
+    )
+    resp.raise_for_status()
+    content = resp.json()["choices"][0]["message"]["content"]
+    return _parse_response(content)
+
+
+def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
+    prompts = {
+        "dividend_ranking": """한국 주식시장 고배당주 순위를 분석하는 블로그 글을 작성하세요.
+배당수익률 상위 종목, 배당 성장성, 안정성을 분석하고 투자 전략을 제시하세요.""",
+        "etf_comparison": """국내 인기 ETF를 비교 분석하는 블로그 글을 작성하세요.
+KODEX, TIGER, SOL 등 운용사별 대표 ETF의 수익률, 보수, 구성종목을 비교하세요.""",
+        "sector_analysis": """한국 주식시장 업종별 PER/PBR 비교 분석 글을 작성하세요.
+저평가/고평가 업종을 구분하고, 업종별 투자 매력도를 분석하세요.""",
+        "ipo_schedule": """최근 공모주(IPO) 청약 일정과 기업 분석 글을 작성하세요.
+청약일, 공모가, 기업 개요, 성장성을 정리하세요.""",
+        "cma_savings": """CMA 및 예금 금리 비교 분석 글을 작성하세요.
+증권사별 CMA 금리, 은행 예금 금리를 비교하고 최적 전략을 제시하세요.""",
+    }
+
+    base_prompt = prompts.get(topic_type, prompts["dividend_ranking"])
+
+    if corp_data:
+        base_prompt += f"\n\n참고 기업 데이터: {json.dumps(corp_data, ensure_ascii=False)[:1000]}"
+
+    prompt = f"""당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
+
+{base_prompt}
+
+[제목 작성 규칙]
+- 클릭을 유도하는 흥미로운 제목, 숫자 반드시 포함
+- 예시: "2026년 고배당주 TOP 10 연 8% 수익 가능한 종목은", "KODEX vs TIGER ETF 수수료 0.01% 차이가 만드는 수익률 격차"
+- 50자 이내
+
+[본문 작성 규칙]
+1. 첫 문단에서 독자의 관심을 사로잡는 후킹 문장
+2. 본문 3000자 이상
+3. H2 헤딩 4~6개, 대화체 소제목
+4. 금액은 읽기 쉽게 (억 원, 만 원 단위)
+5. 비교 표가 있으면 마크다운 테이블 사용
+6. 구체적 종목명과 수치 포함
+7. "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
+8. 마크다운 형식, H1(#) 사용 금지
+9. 2026년 3월 기준 최신 정보로 작성
+
+[출력 형식]
+TITLE: (제목)
+CATEGORY: (카테고리 1개: 공시분석/실적분석/배당분석/IPO분석/ETF분석/시장분석 중 택1)
+TAGS: (쉼표로 구분, 5개 이내)
+BODY:
+(본문 마크다운)"""
+
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    resp = requests.post(
+        "https://api.openai.com/v1/chat/completions",
+        headers={"Authorization": f"Bearer {api_key}"},
+        json={
+            "model": OPENAI_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 4000,
+            "temperature": 0.7,
+        },
+        timeout=60,
+    )
+    resp.raise_for_status()
+    content = resp.json()["choices"][0]["message"]["content"]
+    return _parse_response(content)
+
+
+def _parse_response(content):
+    title = ""
+    category = ""
+    tags = ""
+    body = ""
+
+    lines = content.strip().split("\n")
+    body_start = False
+    body_lines = []
+
+    for line in lines:
+        if line.startswith("TITLE:"):
+            title = line.replace("TITLE:", "").strip().strip('"')
+        elif line.startswith("CATEGORY:"):
+            category = line.replace("CATEGORY:", "").strip()
+        elif line.startswith("TAGS:"):
+            tags = line.replace("TAGS:", "").strip()
+        elif line.startswith("BODY:"):
+            body_start = True
+        elif body_start:
+            body_lines.append(line)
+
+    body = "\n".join(body_lines).strip()
+
+    if not title and body:
+        for line in body_lines:
+            if line.startswith("# "):
+                title = line.replace("# ", "").strip()
+                break
+
+    return {
+        "title": title,
+        "category": category,
+        "tags": tags,
+        "body_md": body,
+    }

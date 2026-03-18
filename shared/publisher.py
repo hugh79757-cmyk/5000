@@ -54,6 +54,28 @@ def _extract_description(body_md):
     return ""
 
 
+
+def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description):
+    date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    fm = "---\n"
+    fm += 'title: "' + title.replace('"', '\\"') + '"\n'
+    fm += "date: " + date_str + "\n"
+    fm += "draft: false\n"
+    if description:
+        fm += 'description: "' + description[:200].replace('"', '\\"') + '"\n'
+    fm += 'slug: "' + slug + '"\n'
+    if category:
+        fm += 'categories: ["' + category + '"]\n'
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        fm += "tags: [" + ", ".join('"' + t + '"' for t in tag_list) + "]\n"
+    if thumbnail_url:
+        fm += 'image: "' + thumbnail_url + '"\n'
+    else:
+        fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-stock-thumbnail.webp"\n'
+    fm += "---\n"
+    return fm, date_str
+
 def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
@@ -132,6 +154,11 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     if theme == "Blowfish":
         fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description)
+        post_dir = os.path.join(site_path, "content", "posts", slug)
+        os.makedirs(post_dir, exist_ok=True)
+        file_path = os.path.join(post_dir, "index.md")
+    elif theme == "congo":
+        fm, date_str = _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description)
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
