@@ -112,3 +112,4 @@ openai.APIConnectionError: Connection error.
 2026-03-18 10:44:42,736 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1
 2026-03-18 10:44:42,736 [INFO] Publishing: travel2-hugo
 2026-03-18 11:00:19,435 [INFO] Publishing: travel2-hugo
+2026-03-18 11:30:16,312 [INFO] Publishing: travel3-hugo
