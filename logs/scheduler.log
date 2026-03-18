@@ -125,3 +125,4 @@ openai.APIConnectionError: Connection error.
 2026-03-18 13:09:16,864 [INFO] Publishing: guide-hugo
 2026-03-18 13:11:26,672 [INFO] Publishing: ev-hugo
 2026-03-18 13:12:11,847 [INFO]   [후처리] 경고: 본문에 연비 12.9 없음
+2026-03-18 14:00:17,619 [INFO] Publishing: travel1-hugo
