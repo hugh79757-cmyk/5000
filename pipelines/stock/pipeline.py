@@ -26,6 +26,8 @@ def run(blog_cfg):
     from shared.publisher import publish
     from pipelines.stock.fetcher import fetch_recent_disclosure, fetch_company_info, fetch_financial_summary, get_listed_corps
     from pipelines.stock.writer import generate_disclosure_article, generate_evergreen_article
+    from pipelines.stock.thumbnail import generate_stock_thumbnail
+    from shared.r2_uploader import upload_file
 
     init_db()
     today_count = get_today_count(blog_id)
@@ -48,8 +50,19 @@ def run(blog_cfg):
             corp_code = disc.get("corp_code", "")
             company = fetch_company_info(corp_code) if corp_code else None
             financials = fetch_financial_summary(corp_code) if corp_code else []
-            article = generate_disclosure_article(disc, company, financials)
+            # 전년도 재무도 가져와서 YoY 비교 가능하게
+            financials_prev = fetch_financial_summary(corp_code, year="2023") if corp_code else []
+            # 배당 정보도 추가
+            try:
+                from pipelines.stock.fetcher import fetch_dividend_info
+                dividend = fetch_dividend_info(corp_code) if corp_code else None
+            except:
+                dividend = None
+            article = generate_disclosure_article(disc, company, financials, financials_prev, dividend)
             if article.get("title") and article.get("body_md"):
+                # 썸네일 생성 + R2 업로드
+                stock_code = company.get("stock_code", "") if company else ""
+                thumb_url = _make_thumbnail(article["title"], article.get("category", "공시분석"), stock_code, corp_name)
                 result = publish(
                     blog_id=blog_id,
                     title=article["title"],
@@ -59,15 +72,43 @@ def run(blog_cfg):
                     data_source="dart_disclosure",
                     source_id=disc.get("rcept_no", ""),
                     model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+                    thumbnail_url=thumb_url,
                 )
                 if result and result.get("success"):
                     _record_publish(conn, blog_id, disc)
     else:
         topic_type = strategy
         corps = get_listed_corps(limit=50)
-        sample = random.sample(corps, min(5, len(corps)))
-        article = generate_evergreen_article(topic_type, corp_data=sample)
+        sample = random.sample(corps, min(10, len(corps)))
+
+        # 각 기업의 실제 재무 데이터 수집
+        enriched = []
+        for corp in sample:
+            corp_code = corp.get("corp_code", "")
+            if not corp_code:
+                continue
+            try:
+                info = fetch_company_info(corp_code)
+                fins = fetch_financial_summary(corp_code)
+                key_fins = [f for f in (fins or []) if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+                corp_enriched = {
+                    "corp_name": corp.get("corp_name", ""),
+                    "stock_code": corp.get("stock_code", ""),
+                    "sector": corp.get("sector", ""),
+                    "ceo": info.get("ceo_nm", "") if info else "",
+                    "financials": {f.get("account_nm"): f.get("thstrm_amount", "") for f in key_fins},
+                }
+                enriched.append(corp_enriched)
+                if len(enriched) >= 5:
+                    break
+            except Exception as e:
+                logger.warning(f"기업 데이터 수집 실패 {corp_code}: {e}")
+                continue
+
+        article = generate_evergreen_article(topic_type, corp_data=enriched if enriched else sample)
         if article.get("title") and article.get("body_md"):
+            # 썸네일 생성 + R2 업로드
+            thumb_url = _make_thumbnail(article["title"], article.get("category", "시장분석"), "", "")
             result = publish(
                 blog_id=blog_id,
                 title=article["title"],
@@ -77,6 +118,7 @@ def run(blog_cfg):
                 data_source=f"evergreen_{topic_type}",
                 source_id="",
                 model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+                thumbnail_url=thumb_url,
             )
 
     conn.close()
@@ -115,3 +157,31 @@ def _record_publish(conn, blog_id, disclosure):
         (disclosure.get("corp_code", ""), disclosure.get("stock_code", ""), "disclosure", disclosure.get("report_nm", ""), blog_id)
     )
     conn.commit()
+
+def _make_thumbnail(title, category, stock_code, corp_name):
+    """Pillow 썸네일 생성 후 R2 업로드, URL 반환"""
+    import tempfile
+    try:
+        from pipelines.stock.thumbnail import generate_stock_thumbnail
+        from shared.r2_uploader import upload_file
+
+        with tempfile.NamedTemporaryFile(suffix=".webp", delete=False) as tmp:
+            tmp_path = tmp.name
+
+        generate_stock_thumbnail(
+            title=title,
+            category=category,
+            stock_code=stock_code,
+            corp_name=corp_name,
+            output_path=tmp_path,
+        )
+
+        slug = title[:50].replace(" ", "-").lower()
+        r2_key = f"stock-thumbnails/{datetime.now().strftime('%Y%m%d')}-{slug}.webp"
+        url = upload_file(tmp_path, r2_key, content_type="image/webp")
+
+        os.remove(tmp_path)
+        return url
+    except Exception as e:
+        logger.warning(f"썸네일 생성 실패: {e}")
+        return None

@@ -72,7 +72,7 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
     if thumbnail_url:
         fm += 'image: "' + thumbnail_url + '"\n'
     else:
-        fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-stock-thumbnail.webp"\n'
+        fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n"
     return fm, date_str
 
