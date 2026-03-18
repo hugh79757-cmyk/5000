@@ -23,11 +23,11 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
         context_parts.append(f"업종: {company_info.get('induty_code', '')}")
         context_parts.append(f"종목코드: {company_info.get('stock_code', '')}")
     if financials:
-        key_items = [f for f in financials if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+        key_items = [f for f in financials if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
         for f in key_items[:3]:
             context_parts.append(f"[당기] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
     if financials_prev:
-        key_prev = [f for f in financials_prev if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+        key_prev = [f for f in financials_prev if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
         for f in key_prev[:3]:
             context_parts.append(f"[전기] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
     if dividend and isinstance(dividend, dict):
