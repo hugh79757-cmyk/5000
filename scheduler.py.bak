@@ -1,162 +1,128 @@
-import schedule
-import time
-import subprocess
-import logging
 import os
 import sys
+import yaml
+import time
+import logging
+import schedule
+import subprocess
 from datetime import datetime
 
-sys.path.insert(0, "/Users/twinssn/Projects/5000")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.StreamHandler()]
-)
+from dotenv import load_dotenv
+load_dotenv("/Users/twinssn/Projects/5000/.env")
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+CONFIG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config")
 PROJECT_DIR = "/Users/twinssn/Projects/5000"
-PYTHON = "/Users/twinssn/Projects/5000/.venv/bin/python3"
+PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
+
+
+def load_config():
+    with open(os.path.join(CONFIG_DIR, "blogs.yaml"), "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
 def run_publish(blog_id):
-    logger.info(f"=== {blog_id} 발행 시작: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===")
+    logger.info("Publishing: " + blog_id)
     try:
         result = subprocess.run(
             [PYTHON, "dispatcher.py", blog_id],
-            capture_output=True, text=True,
             cwd=PROJECT_DIR,
-            timeout=300
+            capture_output=True,
+            text=True,
+            timeout=600
         )
         if result.stdout:
-            logger.info(result.stdout[-500:])
+            for line in result.stdout.strip().split("\n")[-3:]:
+                logger.info("  " + line)
         if result.returncode != 0 and result.stderr:
-            logger.error(result.stderr[-300:])
+            logger.error("  ERR: " + result.stderr[-200:])
     except subprocess.TimeoutExpired:
-        logger.error(f"{blog_id} 타임아웃 (300s)")
+        logger.error(blog_id + " timeout (600s)")
     except Exception as e:
-        logger.error(f"{blog_id} 발행 실패: {e}")
+        logger.error(blog_id + " failed: " + str(e))
 
 
-def git_push(site_name):
-    site_dir = f"/Users/twinssn/Projects/{site_name}"
-    if not os.path.isdir(site_dir):
-        logger.warning(f"{site_dir} 없음, push 스킵")
-        return
-    logger.info(f"=== {site_name} git push ===")
+def batch_deploy():
+    logger.info("Batch deploy started")
     try:
-        subprocess.run(["git", "add", "-A"], cwd=site_dir, capture_output=True, timeout=30)
         result = subprocess.run(
-            ["git", "commit", "-m", f"auto: {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
-            cwd=site_dir, capture_output=True, text=True, timeout=30
+            ["bash", os.path.join(PROJECT_DIR, "scripts", "batch_push.sh")],
+            capture_output=True,
+            text=True,
+            timeout=1800
         )
-        if "nothing to commit" not in result.stdout:
-            subprocess.run(["git", "push", "origin", "main"], cwd=site_dir, capture_output=True, timeout=60)
-            logger.info(f"{site_name} pushed")
-        else:
-            logger.info(f"{site_name} no changes")
+        if result.stdout:
+            for line in result.stdout.strip().split("\n")[-5:]:
+                logger.info("  " + line)
     except Exception as e:
-        logger.error(f"{site_name} push 실패: {e}")
-
-
-def git_push_all():
-    for site in ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo", "CAP/hotissue-hugo", "CAP/tco-hugo", "CAP/deal-hugo", "CAP/compare-hugo", "CAP/guide-hugo", "CAP/ev-hugo"]:
-        git_push(site)
+        logger.error("Batch deploy failed: " + str(e))
 
 
 def daily_report():
-    logger.info("=== 일일 리포트 생성 ===")
+    logger.info("Daily report")
     try:
-        from shared.content_store import init_db
-        from shared.monitor import send_daily_report
-        init_db()
-        send_daily_report()
+        result = subprocess.run(
+            [PYTHON, "dispatcher.py", "report"],
+            cwd=PROJECT_DIR,
+            capture_output=True,
+            text=True,
+            timeout=120
+        )
+        if result.stdout:
+            logger.info("  " + result.stdout.strip()[-200:])
     except Exception as e:
-        logger.error(f"리포트 실패: {e}")
+        logger.error("Report failed: " + str(e))
 
 
-# travel-hugo: 07:00 10:00 13:00 17:00 21:00
-schedule.every().day.at("07:00").do(run_publish, "travel-hugo")
-schedule.every().day.at("10:00").do(run_publish, "travel-hugo")
-schedule.every().day.at("13:00").do(run_publish, "travel-hugo")
-schedule.every().day.at("17:00").do(run_publish, "travel-hugo")
-schedule.every().day.at("21:00").do(run_publish, "travel-hugo")
-
-# travel1-hugo: 07:30 10:30 14:00 18:00 21:30
-schedule.every().day.at("07:30").do(run_publish, "travel1-hugo")
-schedule.every().day.at("10:30").do(run_publish, "travel1-hugo")
-schedule.every().day.at("14:00").do(run_publish, "travel1-hugo")
-schedule.every().day.at("18:00").do(run_publish, "travel1-hugo")
-schedule.every().day.at("21:30").do(run_publish, "travel1-hugo")
-
-# travel2-hugo: 08:00 11:00 14:30 18:30 22:00
-schedule.every().day.at("08:00").do(run_publish, "travel2-hugo")
-schedule.every().day.at("11:00").do(run_publish, "travel2-hugo")
-schedule.every().day.at("14:30").do(run_publish, "travel2-hugo")
-schedule.every().day.at("18:30").do(run_publish, "travel2-hugo")
-schedule.every().day.at("22:00").do(run_publish, "travel2-hugo")
-
-# travel3-hugo: 08:30 11:30 15:00 19:00 22:15
-schedule.every().day.at("08:30").do(run_publish, "travel3-hugo")
-schedule.every().day.at("11:30").do(run_publish, "travel3-hugo")
-schedule.every().day.at("15:00").do(run_publish, "travel3-hugo")
-schedule.every().day.at("19:00").do(run_publish, "travel3-hugo")
-schedule.every().day.at("22:15").do(run_publish, "travel3-hugo")
-
-# travel4-hugo: 09:00 12:00 15:30 19:30 22:30
-schedule.every().day.at("09:00").do(run_publish, "travel4-hugo")
-schedule.every().day.at("12:00").do(run_publish, "travel4-hugo")
-schedule.every().day.at("15:30").do(run_publish, "travel4-hugo")
-schedule.every().day.at("19:30").do(run_publish, "travel4-hugo")
-schedule.every().day.at("22:30").do(run_publish, "travel4-hugo")
-
-# git push: 발행 웨이브 종료 후 일괄 push (5회/일)
-schedule.every().day.at("22:45").do(git_push_all)
+def _run_car_refresh():
+    import subprocess
+    subprocess.run([sys.executable, "pipelines/car/daily_refresh.py"], cwd=os.path.dirname(os.path.abspath(__file__)))
+    logger.info("CAR daily_refresh completed")
 
 
-schedule.every().day.at("07:01").do(run_publish, "cap-hotissue")
-schedule.every().day.at("07:03").do(run_publish, "cap-tco")
-schedule.every().day.at("07:05").do(run_publish, "cap-deal")
-schedule.every().day.at("07:07").do(run_publish, "cap-compare")
-schedule.every().day.at("07:09").do(run_publish, "cap-guide")
-schedule.every().day.at("07:11").do(run_publish, "cap-ev")
-
-schedule.every().day.at("10:01").do(run_publish, "cap-hotissue")
-schedule.every().day.at("10:03").do(run_publish, "cap-tco")
-schedule.every().day.at("10:05").do(run_publish, "cap-deal")
-schedule.every().day.at("10:07").do(run_publish, "cap-compare")
-schedule.every().day.at("10:09").do(run_publish, "cap-guide")
-schedule.every().day.at("10:11").do(run_publish, "cap-ev")
-
-schedule.every().day.at("13:01").do(run_publish, "cap-hotissue")
-schedule.every().day.at("13:03").do(run_publish, "cap-tco")
-schedule.every().day.at("13:05").do(run_publish, "cap-deal")
-schedule.every().day.at("13:07").do(run_publish, "cap-compare")
-schedule.every().day.at("13:09").do(run_publish, "cap-guide")
-schedule.every().day.at("13:11").do(run_publish, "cap-ev")
-
-schedule.every().day.at("17:01").do(run_publish, "cap-hotissue")
-schedule.every().day.at("17:03").do(run_publish, "cap-tco")
-schedule.every().day.at("17:05").do(run_publish, "cap-deal")
-schedule.every().day.at("17:07").do(run_publish, "cap-compare")
-schedule.every().day.at("17:09").do(run_publish, "cap-guide")
-schedule.every().day.at("17:11").do(run_publish, "cap-ev")
-
-schedule.every().day.at("21:01").do(run_publish, "cap-hotissue")
-schedule.every().day.at("21:03").do(run_publish, "cap-tco")
-schedule.every().day.at("21:05").do(run_publish, "cap-deal")
-schedule.every().day.at("21:07").do(run_publish, "cap-compare")
-schedule.every().day.at("21:09").do(run_publish, "cap-guide")
-schedule.every().day.at("21:11").do(run_publish, "cap-ev")
-
-schedule.every().day.at("23:50").do(daily_report)
+def _send_morning_report():
+    import subprocess
+    subprocess.run([sys.executable, "-m", "shared.daily_report"], cwd=os.path.dirname(os.path.abspath(__file__)))
 
 
-logger.info("5000 scheduler started")
-logger.info(f"registered {len(schedule.get_jobs())} jobs")
-for job in schedule.get_jobs():
-    logger.info(f"  {job}")
+def register_schedules():
+    config = load_config()
+    blogs = config.get("blogs", [])
+    job_count = 0
 
-while True:
-    schedule.run_pending()
-    time.sleep(30)
+    for blog in blogs:
+        if blog.get("status") != "active":
+            continue
+        blog_id = blog["id"]
+        times = blog.get("schedule", {}).get("times", [])
+        for t in times:
+            schedule.every().day.at(t).do(run_publish, blog_id)
+            job_count += 1
+
+    batch_time = config.get("batch_deploy", {}).get("schedule", "22:45")
+    schedule.every().day.at(batch_time).do(batch_deploy)
+    job_count += 1
+
+    schedule.every().day.at("23:50").do(daily_report)
+    job_count += 1
+
+    return job_count
+
+
+def main():
+    logger.info("=== 5000 Scheduler Starting ===")
+    job_count = register_schedules()
+    logger.info("Registered " + str(job_count) + " jobs")
+    logger.info("Next run: " + str(schedule.next_run()))
+
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+
+
+if __name__ == "__main__":
+    main()

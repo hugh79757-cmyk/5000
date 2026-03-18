@@ -6,6 +6,7 @@ import logging
 import schedule
 import subprocess
 from datetime import datetime
+import sqlite3
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -40,10 +41,72 @@ def run_publish(blog_id):
                 logger.info("  " + line)
         if result.returncode != 0 and result.stderr:
             logger.error("  ERR: " + result.stderr[-200:])
+            return False
+        return True
     except subprocess.TimeoutExpired:
         logger.error(blog_id + " timeout (600s)")
+        return False
     except Exception as e:
         logger.error(blog_id + " failed: " + str(e))
+        return False
+
+
+
+def catchup_missed():
+    """놓친 스케줄 보충 발행 — 5분마다 체크"""
+    config = load_config()
+    blogs = config.get("blogs", [])
+    now = datetime.now()
+    current_hour = now.hour
+
+    for blog in blogs:
+        if blog.get("status") != "active":
+            continue
+        blog_id = blog["id"]
+        pipeline = blog.get("pipeline", "")
+
+        # 오늘 발행해야 할 횟수: 현재 시각 이전 스케줄 수
+        times = blog.get("schedule", {}).get("times", [])
+        expected = 0
+        for t in times:
+            h, m = map(int, t.split(":"))
+            if h < current_hour or (h == current_hour and m <= now.minute):
+                expected += 1
+
+        if expected == 0:
+            continue
+
+        # 오늘 실제 발행 수
+        if pipeline == "car":
+            db_path = os.path.join(PROJECT_DIR, "data", "car.db")
+            try:
+                conn = sqlite3.connect(db_path)
+                car_site = blog_id.replace("-hugo", "")
+                row = conn.execute(
+                    "SELECT COUNT(*) FROM publish_log WHERE site=? AND date(published_at)=date('now')",
+                    (car_site,)
+                ).fetchone()
+                actual = row[0] if row else 0
+                conn.close()
+            except Exception:
+                actual = 0
+        else:
+            try:
+                sys.path.insert(0, PROJECT_DIR)
+                from shared.content_store import get_today_count
+                actual = get_today_count(blog_id)
+            except Exception:
+                actual = 0
+
+        missed = expected - actual
+        if missed > 0:
+            logger.info("CATCHUP: " + blog_id + " expected=" + str(expected) + " actual=" + str(actual) + " missed=" + str(missed))
+            for i in range(missed):
+                success = run_publish(blog_id)
+                if not success:
+                    logger.warning("CATCHUP: " + blog_id + " retry " + str(i+1) + " failed, skip remaining")
+                    break
+                time.sleep(5)
 
 
 def batch_deploy():
@@ -105,6 +168,8 @@ def register_schedules():
 
     batch_time = config.get("batch_deploy", {}).get("schedule", "22:45")
     schedule.every().day.at(batch_time).do(batch_deploy)
+    schedule.every().day.at("06:30").do(_run_car_refresh)
+    logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
 
     schedule.every().day.at("23:50").do(daily_report)
@@ -119,8 +184,16 @@ def main():
     logger.info("Registered " + str(job_count) + " jobs")
     logger.info("Next run: " + str(schedule.next_run()))
 
+    last_catchup = 0
     while True:
         schedule.run_pending()
+        now_ts = time.time()
+        if now_ts - last_catchup >= 300:  # 5분마다
+            try:
+                catchup_missed()
+            except Exception as e:
+                logger.error("Catchup error: " + str(e))
+            last_catchup = now_ts
         time.sleep(30)
 
 

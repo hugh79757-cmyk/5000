@@ -276,134 +276,6 @@ def refresh_images(conn):
     return total_new
 
 
-def replenish_topics(conn, min_pending=30):
-    """사이트별 post_type 토픽이 min_pending 미만이면 자동 보충"""
-    c = conn.cursor()
-
-    SITE_POST_TYPE = {
-        "hotissue": "resale_compare",
-        "tco": "tco_analysis",
-        "deal": "promo_deal",
-        "compare": "ranking_compare",
-        "guide": "beginner_guide",
-        "ev": "ev_analysis",
-    }
-
-    # 인기차 목록
-    popular = c.execute(
-        "SELECT car_id, brand, model, segment, fuel_type FROM cars WHERE is_popular=1"
-    ).fetchall()
-
-    # 세그먼트별 그룹핑
-    seg_map = {}
-    for car in popular:
-        seg = car["segment"]
-        if seg not in seg_map:
-            seg_map[seg] = []
-        seg_map[seg].append(car)
-
-    # 경쟁차 조합 생성: 같은 세그먼트 내 다른 차량
-    pairs = []
-    for seg, cars in seg_map.items():
-        for i, a in enumerate(cars):
-            for b in cars[i+1:]:
-                pairs.append((a["car_id"], b["car_id"]))
-                pairs.append((b["car_id"], a["car_id"]))
-
-    # 단독 토픽 (경쟁차 없음): tco, deal, guide, ev
-    solos = [car["car_id"] for car in popular]
-
-    # EV 전용 필터
-    ev_cars = [car["car_id"] for car in popular if car["fuel_type"] in ("전기", "가솔린/하이브리드")]
-
-    total_created = 0
-
-    for site_id, post_type in SITE_POST_TYPE.items():
-        # 현재 pending 수
-        row = c.execute(
-            "SELECT COUNT(*) FROM topics WHERE site_id=? AND post_type=? AND status='pending'",
-            (site_id, post_type)
-        ).fetchone()
-        current = row[0]
-
-        if current >= min_pending:
-            continue
-
-        need = min_pending - current
-        created = 0
-
-        if post_type == "resale_compare" or post_type == "ranking_compare":
-            # 비교 글: 경쟁차 조합 필요
-            for car_a, car_b in pairs:
-                if created >= need:
-                    break
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
-                    (car_a, car_b, post_type, site_id)
-                ).fetchone()
-                if not exists:
-                    pri = 7
-                    c.execute(
-                        "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,?,?,datetime('now'),?)",
-                        (car_a, car_b, post_type, pri, "pending", site_id)
-                    )
-                    created += 1
-
-        elif post_type == "ev_analysis":
-            # EV 전용
-            for car_id in ev_cars:
-                if created >= need:
-                    break
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
-                    (car_id, post_type, site_id)
-                ).fetchone()
-                if not exists:
-                    c.execute(
-                        "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,7,'pending',datetime('now'),?)",
-                        (car_id, post_type, site_id)
-                    )
-                    created += 1
-            # EV 비교 조합도 추가
-            for i, a in enumerate(ev_cars):
-                for b in ev_cars[i+1:]:
-                    if created >= need:
-                        break
-                    exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
-                        (a, b, post_type, site_id)
-                    ).fetchone()
-                    if not exists:
-                        c.execute(
-                            "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,7,'pending',datetime('now'),?)",
-                            (a, b, post_type, site_id)
-                        )
-                        created += 1
-
-        else:
-            # tco_analysis, promo_deal, beginner_guide: 단독 토픽
-            for car_id in solos:
-                if created >= need:
-                    break
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
-                    (car_id, post_type, site_id)
-                ).fetchone()
-                if not exists:
-                    c.execute(
-                        "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,7,'pending',datetime('now'),?)",
-                        (car_id, post_type, site_id)
-                    )
-                    created += 1
-
-        if created > 0:
-            logger.info(f"  [토픽보충] {site_id}/{post_type}: {created}건 추가 (기존 {current} → {current+created})")
-        total_created += created
-
-    conn.commit()
-    return total_created
-
-
 def detect_price_changes(conn):
     """트림 가격 변동 감지 → 이벤트 토픽 자동 생성"""
     c = conn.cursor()
@@ -454,36 +326,10 @@ def run_refresh():
 
     logger.info("=== CAP 데이터 갱신 시작 ===")
 
-    trims_updated = 0
-    images_added = 0
-    new_cars = []
-    price_changes = 0
-    topics_created = 0
-
-    try:
-        trims_updated = refresh_trims(conn)
-    except Exception as e:
-        logger.error(f"refresh_trims 실패: {e}")
-
-    try:
-        images_added = refresh_images(conn)
-    except Exception as e:
-        logger.error(f"refresh_images 실패: {e}")
-
-    try:
-        new_cars = scan_new_cars(conn)
-    except Exception as e:
-        logger.error(f"scan_new_cars 실패: {e}")
-
-    try:
-        price_changes = detect_price_changes(conn)
-    except Exception as e:
-        logger.error(f"detect_price_changes 실패: {e}")
-
-    try:
-        topics_created = replenish_topics(conn)
-    except Exception as e:
-        logger.error(f"replenish_topics 실패: {e}")
+    trims_updated = refresh_trims(conn)
+    images_added = refresh_images(conn)
+    new_cars = scan_new_cars(conn)
+    price_changes = detect_price_changes(conn)
 
     if new_cars:
         logger.info(f"신규 차량 {len(new_cars)}대 발견 (수동 등록 필요)")
@@ -499,7 +345,7 @@ def run_refresh():
     total_trims = conn.execute('SELECT COUNT(*) FROM trims').fetchone()[0]
     pending = conn.execute("SELECT COUNT(*) FROM topics WHERE status=\'pending\'").fetchone()[0]
 
-    logger.info(f"=== 갱신 완료: 차량 {total_cars}대, 트림 {total_trims}개, 이미지 {total_imgs}장, 대기토픽 {pending}개, 신규토픽 {topics_created}개 ===")
+    logger.info(f"=== 갱신 완료: 차량 {total_cars}대, 트림 {total_trims}개, 이미지 {total_imgs}장, 대기토픽 {pending}개 ===")
     conn.close()
 
 
