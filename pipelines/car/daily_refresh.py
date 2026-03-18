@@ -321,6 +321,11 @@ def replenish_topics(conn, min_pending=30):
         "SELECT car_id, brand, model, segment, fuel_type FROM cars WHERE is_popular=1"
     ).fetchall()
 
+    # 비인기차 목록 (롱테일 트래픽용)
+    unpopular = c.execute(
+        "SELECT car_id, brand, model, segment, fuel_type FROM cars WHERE is_popular=0 AND segment!='상용차' ORDER BY RANDOM()"
+    ).fetchall()
+
     # 세그먼트별 그룹핑
     seg_map = {}
     for car in popular:
@@ -336,6 +341,21 @@ def replenish_topics(conn, min_pending=30):
             for b in cars[i+1:]:
                 pairs.append((a["car_id"], b["car_id"]))
                 pairs.append((b["car_id"], a["car_id"]))
+
+    # 비인기차 세그먼트별 비교 조합
+    unpop_seg_map = {}
+    for car in unpopular:
+        seg = car["segment"]
+        if seg not in unpop_seg_map:
+            unpop_seg_map[seg] = []
+        unpop_seg_map[seg].append(car)
+
+    unpop_pairs = []
+    for seg, ucars in unpop_seg_map.items():
+        for i, a in enumerate(ucars):
+            for b in ucars[i+1:]:
+                unpop_pairs.append((a["car_id"], b["car_id"]))
+                unpop_pairs.append((b["car_id"], a["car_id"]))
 
     # 단독 토픽 (경쟁차 없음): tco, deal, guide, ev
     solos = [car["car_id"] for car in popular]
@@ -356,7 +376,19 @@ def replenish_topics(conn, min_pending=30):
         if current >= min_pending:
             continue
 
-        need = min_pending - current
+        # 인기차/비인기차 비율: 전체의 2/3는 인기차, 1/3은 비인기차
+        pop_pending = c.execute(
+            "SELECT COUNT(*) FROM topics t JOIN cars c ON t.car_id=c.car_id WHERE t.site_id=? AND t.post_type=? AND t.status='pending' AND c.is_popular=1",
+            (site_id, post_type)
+        ).fetchone()[0]
+        unpop_pending = current - pop_pending
+        min_popular = min_pending * 2 // 3      # 20
+        min_unpopular = min_pending - min_popular  # 10
+        need_popular = max(0, min_popular - pop_pending)
+        need_unpopular = max(0, min_unpopular - unpop_pending)
+        need = need_popular + need_unpopular
+        if need == 0:
+            continue
         created = 0
 
         if post_type == "resale_compare" or post_type == "ranking_compare":
@@ -375,6 +407,24 @@ def replenish_topics(conn, min_pending=30):
                         (car_a, car_b, post_type, pri, "pending", site_id)
                     )
                     created += 1
+
+            # 인기차 소진 시 비인기차 비교 조합 추가
+            if created < need:
+                unpop_created = 0
+                for car_a, car_b in unpop_pairs:
+                    if unpop_created >= need_unpopular or created >= need:
+                        break
+                    exists = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
+                        (car_a, car_b, post_type, site_id)
+                    ).fetchone()
+                    if not exists:
+                        c.execute(
+                            "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,5,'pending',datetime('now'),?)",
+                            (car_a, car_b, post_type, site_id)
+                        )
+                        created += 1
+                        unpop_created += 1
 
         elif post_type == "ev_analysis":
             # EV 전용
@@ -407,10 +457,28 @@ def replenish_topics(conn, min_pending=30):
                         )
                         created += 1
 
+            # 인기 EV 소진 시 비인기 전기차/하이브리드 추가
+            if created < need:
+                unpop_ev = [car["car_id"] for car in unpopular if car["fuel_type"] in ("전기", "가솔린/하이브리드")]
+                for car_id in unpop_ev:
+                    if created >= need:
+                        break
+                    exists = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
+                        (car_id, post_type, site_id)
+                    ).fetchone()
+                    if not exists:
+                        c.execute(
+                            "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,9,'pending',datetime('now'),?)",
+                            (car_id, post_type, site_id)
+                        )
+                        created += 1
+
         else:
             # tco_analysis, promo_deal, beginner_guide: 단독 토픽
+            # 인기차 (priority 7)
             for car_id in solos:
-                if created >= need:
+                if created >= need_popular:
                     break
                 exists = c.execute(
                     "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
@@ -422,6 +490,38 @@ def replenish_topics(conn, min_pending=30):
                         (car_id, post_type, site_id)
                     )
                     created += 1
+            # 비인기차 (priority 5)
+            unpop_created = 0
+            for car in unpopular:
+                if unpop_created >= need_unpopular:
+                    break
+                exists = c.execute(
+                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
+                    (car["car_id"], post_type, site_id)
+                ).fetchone()
+                if not exists:
+                    c.execute(
+                        "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,5,'pending',datetime('now'),?)",
+                        (car["car_id"], post_type, site_id)
+                    )
+                    created += 1
+                    unpop_created += 1
+
+            # 인기차 소진 시 비인기차 추가
+            if created < need:
+                for car in unpopular:
+                    if created >= need:
+                        break
+                    exists = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data')",
+                        (car["car_id"], post_type, site_id)
+                    ).fetchone()
+                    if not exists:
+                        c.execute(
+                            "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,9,'pending',datetime('now'),?)",
+                            (car["car_id"], post_type, site_id)
+                        )
+                        created += 1
 
         if created > 0:
             logger.info(f"  [토픽보충] {site_id}/{post_type}: {created}건 추가 (기존 {current} → {current+created})")

@@ -1,0 +1,174 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<title>이미지 검수 - 10/13</title>
+<style>
+body { font-family:-apple-system,sans-serif; background:#1a1a1a; color:#eee; padding:20px 20px 80px; }
+h1 { color:#fff; } h2 { color:#8cf; margin-top:30px; border-bottom:1px solid #444; padding-bottom:6px; }
+.nav { margin:10px 0 20px; font-size:14px; } .nav a { margin:0 4px; text-decoration:none; }
+.img-grid { display:flex; flex-wrap:wrap; gap:10px; }
+.img-card { border:2px solid #333; border-radius:8px; overflow:hidden; width:220px; }
+.img-card img { width:220px; height:150px; object-fit:cover; display:block; }
+.img-card.selected { border-color:#f44; }
+.img-info { padding:6px; font-size:12px; color:#aaa; }
+.toolbar { position:fixed; bottom:0; left:0; right:0; background:#222; padding:10px 20px; border-top:2px solid #f44; display:flex; gap:10px; align-items:center; z-index:100; }
+.toolbar button { padding:8px 14px; border:none; border-radius:6px; cursor:pointer; font-size:13px; font-weight:bold; }
+.count-badge { background:#f44; color:#fff; padding:4px 10px; border-radius:12px; font-size:13px; }
+</style></head><body>
+<h1>이미지 검수 (10/13)</h1>
+<div class="nav"><a href="page1.html" style="color:#8cf">[1]</a> <a href="page2.html" style="color:#8cf">[2]</a> <a href="page3.html" style="color:#8cf">[3]</a> <a href="page4.html" style="color:#8cf">[4]</a> <a href="page5.html" style="color:#8cf">[5]</a> <a href="page6.html" style="color:#8cf">[6]</a> <a href="page7.html" style="color:#8cf">[7]</a> <a href="page8.html" style="color:#8cf">[8]</a> <a href="page9.html" style="color:#8cf">[9]</a> <a href="page10.html" style="font-weight:bold;color:#f44">[10]</a> <a href="page11.html" style="color:#8cf">[11]</a> <a href="page12.html" style="color:#8cf">[12]</a> <a href="page13.html" style="color:#8cf">[13]</a></div>
+<p style="color:#888;font-size:13px;">이 페이지: 10개 차량, 70장</p>
+<h2>제네시스 GV60 마그마 (7장)</h2><div class="img-grid"><div class="img-card" id="card-1181">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131119258750.png" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1181" onchange="toggleCard(this)"> ID: 1181</label></div></div><div class="img-card" id="card-1182">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131059546150.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1182" onchange="toggleCard(this)"> ID: 1182</label></div></div><div class="img-card" id="card-1183">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131059548971.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1183" onchange="toggleCard(this)"> ID: 1183</label></div></div><div class="img-card" id="card-1184">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131059553812.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1184" onchange="toggleCard(this)"> ID: 1184</label></div></div><div class="img-card" id="card-1185">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131059556233.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1185" onchange="toggleCard(this)"> ID: 1185</label></div></div><div class="img-card" id="card-1186">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131059558604.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1186" onchange="toggleCard(this)"> ID: 1186</label></div></div><div class="img-card" id="card-1187">
+<img src="http://file.carisyou.com/upload/2026/01/13/FILE_202601131059578920.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1187" onchange="toggleCard(this)"> ID: 1187</label></div></div></div><h2>제네시스 GV70 (7장)</h2><div class="img-grid"><div class="img-card" id="card-607">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081041472230.png" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="607" onchange="toggleCard(this)"> ID: 607</label></div></div><div class="img-card" id="card-608">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081100249560.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="608" onchange="toggleCard(this)"> ID: 608</label></div></div><div class="img-card" id="card-609">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081100260651.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="609" onchange="toggleCard(this)"> ID: 609</label></div></div><div class="img-card" id="card-610">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081100267822.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="610" onchange="toggleCard(this)"> ID: 610</label></div></div><div class="img-card" id="card-611">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081100280534.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="611" onchange="toggleCard(this)"> ID: 611</label></div></div><div class="img-card" id="card-612">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081100283765.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="612" onchange="toggleCard(this)"> ID: 612</label></div></div><div class="img-card" id="card-613">
+<img src="http://file.carisyou.com/upload/2024/05/08/FILE_202405081100292588.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="613" onchange="toggleCard(this)"> ID: 613</label></div></div></div><h2>제네시스 GV80 (6장)</h2><div class="img-grid"><div class="img-card" id="card-402">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307133030.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="402" onchange="toggleCard(this)"> ID: 402</label></div></div><div class="img-card" id="card-403">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307135961.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="403" onchange="toggleCard(this)"> ID: 403</label></div></div><div class="img-card" id="card-404">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307139212.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="404" onchange="toggleCard(this)"> ID: 404</label></div></div><div class="img-card" id="card-405">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307141523.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="405" onchange="toggleCard(this)"> ID: 405</label></div></div><div class="img-card" id="card-406">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307144194.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="406" onchange="toggleCard(this)"> ID: 406</label></div></div><div class="img-card" id="card-407">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307255830.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="407" onchange="toggleCard(this)"> ID: 407</label></div></div></div><h2>제네시스 GV80 쿠페 (6장)</h2><div class="img-grid"><div class="img-card" id="card-3757">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307133030.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3757" onchange="toggleCard(this)"> ID: 3757</label></div></div><div class="img-card" id="card-3758">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307135961.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3758" onchange="toggleCard(this)"> ID: 3758</label></div></div><div class="img-card" id="card-3759">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307139212.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3759" onchange="toggleCard(this)"> ID: 3759</label></div></div><div class="img-card" id="card-3760">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307141523.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3760" onchange="toggleCard(this)"> ID: 3760</label></div></div><div class="img-card" id="card-3761">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307144194.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3761" onchange="toggleCard(this)"> ID: 3761</label></div></div><div class="img-card" id="card-3762">
+<img src="http://file.carisyou.com/upload/2023/10/12/FILE_202310120307255830.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3762" onchange="toggleCard(this)"> ID: 3762</label></div></div></div><h2>제네시스 일렉트리파이드 G80 (6장)</h2><div class="img-grid"><div class="img-card" id="card-1922">
+<img src="http://file.carisyou.com/upload/2026/03/04/FILE_202603040148411653.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1922" onchange="toggleCard(this)"> ID: 1922</label></div></div><div class="img-card" id="card-1923">
+<img src="http://file.carisyou.com/upload/2026/03/04/FILE_202603040148409312.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1923" onchange="toggleCard(this)"> ID: 1923</label></div></div><div class="img-card" id="card-1924">
+<img src="http://file.carisyou.com/upload/2026/03/04/FILE_202603040148406831.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1924" onchange="toggleCard(this)"> ID: 1924</label></div></div><div class="img-card" id="card-1925">
+<img src="http://file.carisyou.com/upload/2026/03/04/FILE_202603040148413994.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1925" onchange="toggleCard(this)"> ID: 1925</label></div></div><div class="img-card" id="card-1926">
+<img src="http://file.carisyou.com/upload/2026/03/04/FILE_202603040148403450.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1926" onchange="toggleCard(this)"> ID: 1926</label></div></div><div class="img-card" id="card-1927">
+<img src="http://file.carisyou.com/upload/2024/09/05/FILE_202409051047185020.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1927" onchange="toggleCard(this)"> ID: 1927</label></div></div></div><h2>테슬라 모델 3 (12장)</h2><div class="img-grid"><div class="img-card" id="card-763">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908525276.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="763" onchange="toggleCard(this)"> ID: 763</label></div></div><div class="img-card" id="card-764">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908494130.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="764" onchange="toggleCard(this)"> ID: 764</label></div></div><div class="img-card" id="card-765">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908535048.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="765" onchange="toggleCard(this)"> ID: 765</label></div></div><div class="img-card" id="card-766">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908530147.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="766" onchange="toggleCard(this)"> ID: 766</label></div></div><div class="img-card" id="card-767">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908500301.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="767" onchange="toggleCard(this)"> ID: 767</label></div></div><div class="img-card" id="card-768">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908505302.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="768" onchange="toggleCard(this)"> ID: 768</label></div></div><div class="img-card" id="card-3791">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908525276.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3791" onchange="toggleCard(this)"> ID: 3791</label></div></div><div class="img-card" id="card-3792">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908494130.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3792" onchange="toggleCard(this)"> ID: 3792</label></div></div><div class="img-card" id="card-3793">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908535048.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3793" onchange="toggleCard(this)"> ID: 3793</label></div></div><div class="img-card" id="card-3794">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908530147.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3794" onchange="toggleCard(this)"> ID: 3794</label></div></div><div class="img-card" id="card-3795">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908500301.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3795" onchange="toggleCard(this)"> ID: 3795</label></div></div><div class="img-card" id="card-3796">
+<img src="http://file.carisyou.com/upload/2024/04/15/FILE_202404150908505302.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="3796" onchange="toggleCard(this)"> ID: 3796</label></div></div></div><h2>테슬라 모델 Y (8장)</h2><div class="img-grid"><div class="img-card" id="card-257">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280337185710.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="257" onchange="toggleCard(this)"> ID: 257</label></div></div><div class="img-card" id="card-258">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280337218686.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="258" onchange="toggleCard(this)"> ID: 258</label></div></div><div class="img-card" id="card-259">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280337213555.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="259" onchange="toggleCard(this)"> ID: 259</label></div></div><div class="img-card" id="card-260">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280337208604.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="260" onchange="toggleCard(this)"> ID: 260</label></div></div><div class="img-card" id="card-261">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280337192321.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="261" onchange="toggleCard(this)"> ID: 261</label></div></div><div class="img-card" id="card-262">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280337197402.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="262" onchange="toggleCard(this)"> ID: 262</label></div></div><div class="img-card" id="card-265">
+<img src="http://file.carisyou.com/upload/2025/01/07/FILE_202501070128246050.png" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="265" onchange="toggleCard(this)"> ID: 265</label></div></div><div class="img-card" id="card-1142">
+<img src="http://file.carisyou.com/upload/2025/03/28/FILE_202503280326303300.png" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="1142" onchange="toggleCard(this)"> ID: 1142</label></div></div></div><h2>토요타 GR86 (6장)</h2><div class="img-grid"><div class="img-card" id="card-903">
+<img src="http://file.carisyou.com/upload/2022/05/17/FILE_202205170119455820.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="903" onchange="toggleCard(this)"> ID: 903</label></div></div><div class="img-card" id="card-904">
+<img src="http://file.carisyou.com/upload/2022/05/17/FILE_202205170119459461.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="904" onchange="toggleCard(this)"> ID: 904</label></div></div><div class="img-card" id="card-905">
+<img src="http://file.carisyou.com/upload/2022/05/17/FILE_202205170119461832.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="905" onchange="toggleCard(this)"> ID: 905</label></div></div><div class="img-card" id="card-906">
+<img src="http://file.carisyou.com/upload/2022/05/17/FILE_202205170119464253.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="906" onchange="toggleCard(this)"> ID: 906</label></div></div><div class="img-card" id="card-907">
+<img src="http://file.carisyou.com/upload/2022/05/17/FILE_202205170119466474.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="907" onchange="toggleCard(this)"> ID: 907</label></div></div><div class="img-card" id="card-908">
+<img src="http://file.carisyou.com/upload/2022/05/17/FILE_202205170119469065.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="908" onchange="toggleCard(this)"> ID: 908</label></div></div></div><h2>토요타 캠리 (6장)</h2><div class="img-grid"><div class="img-card" id="card-987">
+<img src="http://file.carisyou.com/upload/2024/11/11/FILE_202411111125575560.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="987" onchange="toggleCard(this)"> ID: 987</label></div></div><div class="img-card" id="card-988">
+<img src="http://file.carisyou.com/upload/2024/11/11/FILE_202411111125581411.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="988" onchange="toggleCard(this)"> ID: 988</label></div></div><div class="img-card" id="card-989">
+<img src="http://file.carisyou.com/upload/2024/11/11/FILE_202411111126002595.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="989" onchange="toggleCard(this)"> ID: 989</label></div></div><div class="img-card" id="card-990">
+<img src="http://file.carisyou.com/upload/2024/11/11/FILE_202411111126023849.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="990" onchange="toggleCard(this)"> ID: 990</label></div></div><div class="img-card" id="card-991">
+<img src="http://file.carisyou.com/upload/2024/11/11/FILE_202411111126007866.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="991" onchange="toggleCard(this)"> ID: 991</label></div></div><div class="img-card" id="card-992">
+<img src="http://file.carisyou.com/upload/2024/11/11/FILE_202411111125597084.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="992" onchange="toggleCard(this)"> ID: 992</label></div></div></div><h2>토요타 프리우스 (6장)</h2><div class="img-grid"><div class="img-card" id="card-367">
+<img src="http://file.carisyou.com/upload/2023/11/13/FILE_202311130920032374.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="367" onchange="toggleCard(this)"> ID: 367</label></div></div><div class="img-card" id="card-368">
+<img src="http://file.carisyou.com/upload/2023/11/13/FILE_202311130920022200.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="368" onchange="toggleCard(this)"> ID: 368</label></div></div><div class="img-card" id="card-369">
+<img src="http://file.carisyou.com/upload/2023/11/13/FILE_202311130920036126.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="369" onchange="toggleCard(this)"> ID: 369</label></div></div><div class="img-card" id="card-370">
+<img src="http://file.carisyou.com/upload/2023/11/13/FILE_202311130920025871.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="370" onchange="toggleCard(this)"> ID: 370</label></div></div><div class="img-card" id="card-371">
+<img src="http://file.carisyou.com/upload/2023/11/13/FILE_202311130920039948.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="371" onchange="toggleCard(this)"> ID: 371</label></div></div><div class="img-card" id="card-372">
+<img src="http://file.carisyou.com/upload/2023/11/13/FILE_202311130920041639.jpg" loading="lazy" onerror="this.parentElement.style.opacity='0.3'">
+<div class="img-info"><label><input type="checkbox" class="del-check" value="372" onchange="toggleCard(this)"> ID: 372</label></div></div></div>
+<div class="toolbar">
+<span class="count-badge" id="sel-count">0개 선택</span>
+<button style="background:#4a9eff;color:#fff" onclick="copyIds()">삭제 ID 복사</button>
+<button style="background:#555;color:#fff" onclick="deselectAll()">전체 해제</button>
+</div>
+<script>
+function toggleCard(cb) { document.getElementById('card-'+cb.value).classList.toggle('selected',cb.checked); updateCount(); }
+function updateCount() { document.getElementById('sel-count').textContent=document.querySelectorAll('.del-check:checked').length+'개 선택'; }
+function copyIds() {
+  var ids=Array.from(document.querySelectorAll('.del-check:checked')).map(function(c){return c.value});
+  if(!ids.length){alert('선택 없음');return;}
+  navigator.clipboard.writeText('삭제할 ID: '+ids.join(',')).then(function(){alert(ids.length+'개 ID 복사됨')});
+}
+function deselectAll() { document.querySelectorAll('.del-check').forEach(function(c){c.checked=false;toggleCard(c)}); }
+</script></body></html>
