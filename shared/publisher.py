@@ -1,4 +1,5 @@
 import os
+import sqlite3
 import re
 import yaml
 import subprocess
@@ -98,6 +99,23 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     return fm, date_str
 
 
+
+def _get_related_posts(blog_id, current_slug, max_count=3):
+    """같은 블로그의 최근 발행 글에서 관련 글 추출"""
+    try:
+        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "content.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT title, slug FROM articles WHERE blog_id=? AND slug!=? AND status='published' ORDER BY created_at DESC LIMIT ?",
+            (blog_id, current_slug, max_count)
+        ).fetchall()
+        conn.close()
+        return [{"title": r["title"], "slug": r["slug"]} for r in rows]
+    except Exception:
+        return []
+
+
 def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url):
     theme = blog_cfg.get("theme", "PaperMod")
     site_path = blog_cfg.get("site_path", "")
@@ -121,6 +139,15 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         post_dir = os.path.join(site_path, "content", "posts")
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
+
+    # 내부 링크 삽입
+    blog_id_for_links = blog_cfg.get("id", "")
+    related = _get_related_posts(blog_id_for_links, slug)
+    if related:
+        links_md = "\n\n## 함께 읽어보기\n\n"
+        for rp in related:
+            links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
+        body_md = body_md.rstrip() + links_md
 
     content = fm + body_md
     with open(file_path, "w", encoding="utf-8") as f:
