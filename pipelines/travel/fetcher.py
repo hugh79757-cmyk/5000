@@ -31,6 +31,7 @@ def _adapt_korservice_items(items_raw):
     adapted = []
     for item in items_raw:
         title_val = item.get("title", "")
+        import re as _re; title_val = _re.sub(r"202[0-4]", "2026", title_val)
         addr_val = item.get("addr1", item.get("baseAddr", ""))
         adapted.append({
             "facltNm": title_val,
@@ -218,14 +219,31 @@ def fetch_food():
         pool = with_img if len(with_img) >= 3 else items_raw
         selected = random.sample(pool, min(5, len(pool)))
         adapted = _adapt_korservice_items(selected)
+        # 시군구 추출: addr1에서 두 번째 토큰 (예: "경기도 수원시 팔달구..." → "수원시")
+        sigungu_name = region_name
+        try:
+            addrs = [item.get("addr1", "") for item in selected if item.get("addr1")]
+            if addrs:
+                from collections import Counter
+                sigungu_tokens = []
+                for addr in addrs:
+                    parts = addr.split()
+                    if len(parts) >= 2:
+                        sigungu_tokens.append(parts[1])
+                if sigungu_tokens:
+                    most_common = Counter(sigungu_tokens).most_common(1)[0][0]
+                    sigungu_name = most_common.replace("시", "").replace("군", "").replace("구", "")
+        except Exception:
+            pass
+        display = sigungu_name if sigungu_name != region_name else region_name
         return {
             "items": adapted,
-            "display_region": region_name,
-            "sigungu": region_name,
+            "display_region": display,
+            "sigungu": sigungu_name,
             "do_name": region_name,
             "theme": keyword,
             "category": "맛집",
-            "angle": region_name + " " + keyword,
+            "angle": display + " " + keyword,
             "source_type": "korservice",
         }
     except Exception as e:

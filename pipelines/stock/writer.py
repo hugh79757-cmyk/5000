@@ -20,7 +20,7 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
     ]
     if company_info:
         context_parts.append(f"CEO: {company_info.get('ceo_nm', '')}")
-        context_parts.append(f"업종: {company_info.get('induty_code', '')}")
+        context_parts.append(f"업종: {company_info.get('induty_nm', company_info.get('induty_code', ''))}")
         context_parts.append(f"종목코드: {company_info.get('stock_code', '')}")
     if financials:
         key_items = [f for f in financials if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
@@ -82,7 +82,7 @@ BODY:
         json={
             "model": OPENAI_MODEL,
             "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 4000,
+            "max_tokens": 8000,
             "temperature": 0.7,
         },
         timeout=60,
@@ -152,7 +152,7 @@ BODY:
         json={
             "model": OPENAI_MODEL,
             "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 4000,
+            "max_tokens": 8000,
             "temperature": 0.7,
         },
         timeout=60,
