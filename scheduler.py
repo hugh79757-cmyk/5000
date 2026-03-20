@@ -4,6 +4,7 @@ import yaml
 import time
 import logging
 import schedule
+from shared.telegram_notifier import send_error as _tg_error
 import subprocess
 from datetime import datetime
 import sqlite3
@@ -41,15 +42,46 @@ def run_publish(blog_id):
                 logger.info("  " + line)
         if result.returncode != 0 and result.stderr:
             logger.error("  ERR: " + result.stderr[-200:])
+            _tg_error(blog_id, "scheduler", result.stderr[-300:])
             return False
         return True
     except subprocess.TimeoutExpired:
         logger.error(blog_id + " timeout (600s)")
+        _tg_error(blog_id, "scheduler", "timeout 600s")
         return False
     except Exception as e:
         logger.error(blog_id + " failed: " + str(e))
+        _tg_error(blog_id, "scheduler", str(e)[:300])
         return False
 
+
+import threading
+from collections import defaultdict
+
+_publish_queue = []
+_queue_lock = threading.Lock()
+PUBLISH_DELAY = 15  # 블로그 간 딜레이(초)
+
+def queue_publish(blog_id):
+    """동시간대 블로그를 큐에 넣고 순차 실행"""
+    with _queue_lock:
+        _publish_queue.append(blog_id)
+        if len(_publish_queue) == 1:
+            threading.Thread(target=_drain_queue, daemon=True).start()
+
+def _drain_queue():
+    """큐에 쌓인 블로그를 순차적으로 실행"""
+    while True:
+        with _queue_lock:
+            if not _publish_queue:
+                return
+            blog_id = _publish_queue.pop(0)
+        logger.info(f"Queue executing: {blog_id} (remaining: {len(_publish_queue)})")
+        run_publish(blog_id)
+        with _queue_lock:
+            if not _publish_queue:
+                return
+        time.sleep(PUBLISH_DELAY)
 
 
 def catchup_missed():
@@ -141,6 +173,22 @@ def daily_report():
         logger.error("Report failed: " + str(e))
 
 
+def _run_gap_keyword_sync():
+    """news-keyword-pro golden CSV → gap.db 동기화"""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", "/Users/twinssn/Projects/5000/scripts/sync_golden_to_gap.py"],
+            capture_output=True, text=True, timeout=120,
+            cwd="/Users/twinssn/Projects/5000"
+        )
+        logger.info(f"GAP keyword sync: {result.stdout.strip().split(chr(10))[-1]}")
+        if result.returncode != 0:
+            logger.warning(f"GAP keyword sync stderr: {result.stderr[:200]}")
+    except Exception as e:
+        logger.error(f"GAP keyword sync failed: {e}")
+
+
 def _run_car_refresh():
     import subprocess
     subprocess.run([sys.executable, "pipelines/car/daily_refresh.py"], cwd=os.path.dirname(os.path.abspath(__file__)))
@@ -163,11 +211,15 @@ def register_schedules():
         blog_id = blog["id"]
         times = blog.get("schedule", {}).get("times", [])
         for t in times:
-            schedule.every().day.at(t).do(run_publish, blog_id)
+            schedule.every().day.at(t).do(queue_publish, blog_id)
             job_count += 1
 
     batch_time = config.get("batch_deploy", {}).get("schedule", "22:45")
     schedule.every().day.at(batch_time).do(batch_deploy)
+    schedule.every().day.at("05:00").do(_run_gap_keyword_sync)
+    logger.info("GAP keyword sync scheduled at 05:00")
+    job_count += 1
+
     schedule.every().day.at("06:30").do(_run_car_refresh)
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1

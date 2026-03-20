@@ -20,16 +20,16 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
     ]
     if company_info:
         context_parts.append(f"CEO: {company_info.get('ceo_nm', '')}")
-        context_parts.append(f"업종: {company_info.get('induty_nm', company_info.get('induty_code', ''))}")
+        context_parts.append(f"업종: {company_info.get('induty_code', '')}")
         context_parts.append(f"종목코드: {company_info.get('stock_code', '')}")
     if financials:
         key_items = [f for f in financials if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
         for f in key_items[:3]:
-            context_parts.append(f"[당기 {f.get('bsns_year', '')}] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원 (전기: {f.get('frmtrm_amount', '')}원)")
+            context_parts.append(f"[당기] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
     if financials_prev:
         key_prev = [f for f in financials_prev if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
         for f in key_prev[:3]:
-            context_parts.append(f"[전전기 {f.get('bsns_year', '')}] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원 (전기: {f.get('frmtrm_amount', '')}원)")
+            context_parts.append(f"[전기] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원")
     if dividend and isinstance(dividend, dict):
         for item in dividend.get("list", [])[:3]:
             context_parts.append(f"배당: {item.get('se_nm', '')} {item.get('thstrm', '')}원")

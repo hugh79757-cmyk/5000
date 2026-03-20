@@ -6,37 +6,6 @@ from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
-# 한국표준산업분류 주요 업종코드 매핑
-INDUTY_MAP = {
-    "10": "식료품", "11": "음료", "13": "섬유", "14": "의복",
-    "20": "화학물질", "21": "의약품", "22": "고무·플라스틱", "23": "비금속광물",
-    "24": "1차금속", "25": "금속가공", "26": "전자부품·컴퓨터", "27": "의료·정밀기기",
-    "28": "전기장비", "29": "기계장비", "30": "자동차", "31": "운송장비",
-    "32": "가구", "33": "기타제조", "35": "전기·가스", "41": "건설",
-    "45": "자동차판매", "46": "도매", "47": "소매", "49": "육상운송",
-    "50": "수상운송", "51": "항공운송", "52": "창고·운송서비스",
-    "55": "숙박", "56": "음식점", "58": "출판", "59": "영상·오디오",
-    "60": "방송", "61": "통신", "62": "컴퓨터프로그래밍", "63": "정보서비스",
-    "64": "금융", "65": "보험", "66": "금융·보험서비스",
-    "68": "부동산", "70": "연구개발", "71": "전문서비스", "72": "건축·엔지니어링",
-    "73": "광고", "74": "기타전문서비스", "75": "사업시설관리",
-    "84": "공공행정", "85": "교육", "86": "보건", "87": "사회복지",
-}
-
-def get_induty_name(code):
-    """업종코드(5자리) → 업종명 변환"""
-    if not code:
-        return ""
-    code = str(code).strip()
-    # 5자리 정확 매칭 → 4자리 → 3자리 → 2자리 순서
-    for length in [5, 4, 3, 2]:
-        prefix = code[:length]
-        if prefix in INDUTY_MAP:
-            return INDUTY_MAP[prefix]
-    return ""
-
-
-
 DART_BASE = "https://opendart.fss.or.kr/api"
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
 
@@ -88,15 +57,11 @@ def fetch_company_info(corp_code):
     }, timeout=10)
     data = r.json()
     if data.get("status") == "000":
-        if "induty_nm" not in data and data.get("induty_code"):
-            data["induty_nm"] = get_induty_name(data["induty_code"])
         return data
     return None
 
 
-def fetch_financial_summary(corp_code, year=None, report_code="11011"):
-    if year is None:
-        year = str(datetime.now().year - 1)
+def fetch_financial_summary(corp_code, year="2024", report_code="11011"):
     key = _get_key()
     r = requests.get(f"{DART_BASE}/fnlttSinglAcntAll.json", params={
         "crtfc_key": key,
@@ -118,9 +83,7 @@ def fetch_ipo_securities(days=30):
     return ipo
 
 
-def fetch_dividend_info(corp_code, year=None):
-    if year is None:
-        year = str(datetime.now().year - 1)
+def fetch_dividend_info(corp_code, year="2024"):
     key = _get_key()
     r = requests.get(f"{DART_BASE}/alotMatter.json", params={
         "crtfc_key": key,

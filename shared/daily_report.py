@@ -12,7 +12,7 @@ from shared.telegram_notifier import send_daily_report
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
 
-TAP_DB = "/Users/twinssn/Projects/tour-auto-publisher/tap.db"
+TAP_DB = "/Users/twinssn/Projects/TAP/tap.db"
 LAP_LOG = "/Users/twinssn/Projects/LAP/data/publish_log.json"
 
 

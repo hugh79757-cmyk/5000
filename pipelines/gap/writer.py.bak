@@ -1,0 +1,126 @@
+import os
+import re
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _clean_html(text):
+    return re.sub(r"</?b>", "", text or "")
+
+
+def _build_reference_block(data):
+    lines = []
+    lines.append(f"## 키워드: {data['keyword']}")
+    lines.append(f"수집일시: {data['fetched_at']}")
+    lines.append(f"총 소스: {data['total_sources']}건\n")
+
+    if data.get("news"):
+        lines.append("### 뉴스")
+        for i, item in enumerate(data["news"][:5], 1):
+            title = _clean_html(item.get("title", ""))
+            desc = _clean_html(item.get("description", ""))
+            lines.append(f"{i}. {title}")
+            if desc:
+                lines.append(f"   {desc[:200]}")
+        lines.append("")
+
+    if data.get("web"):
+        lines.append("### 웹문서")
+        for i, item in enumerate(data["web"][:5], 1):
+            title = _clean_html(item.get("title", ""))
+            desc = _clean_html(item.get("description", ""))
+            lines.append(f"{i}. {title}")
+            if desc:
+                lines.append(f"   {desc[:200]}")
+        lines.append("")
+
+    if data.get("blog"):
+        lines.append("### 블로그")
+        for i, item in enumerate(data["blog"][:3], 1):
+            title = _clean_html(item.get("title", ""))
+            desc = _clean_html(item.get("description", ""))
+            lines.append(f"{i}. {title}")
+            if desc:
+                lines.append(f"   {desc[:200]}")
+
+    return "\n".join(lines)
+
+
+def generate_gap_article(keyword, fetched_data, model=None):
+    from shared.ai_writer import call_openai
+
+    if model is None:
+        model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+
+    reference = _build_reference_block(fetched_data)
+
+    system_prompt = """당신은 생활정보 전문 블로거입니다.
+아래 참고자료를 바탕으로 독자에게 유용한 블로그 글을 작성하세요.
+
+규칙:
+1. 제목은 SEO에 최적화된 한국어로 작성 (40자 이내)
+2. 본문은 마크다운 형식, 2000~3000자
+3. H2(##) 소제목 3~5개로 구조화
+4. 최신 정보와 실용적 팁 포함
+5. 자연스러운 한국어, 구어체 섞어 친근하게
+6. 마지막에 핵심 요약 포함
+7. 참고자료의 내용을 그대로 복사하지 말고 재구성
+
+출력 형식:
+---
+title: "제목"
+category: "카테고리"
+tags: "태그1, 태그2, 태그3"
+description: "120자 이내 설명"
+---
+
+본문 마크다운"""
+
+    user_prompt = f"키워드: {keyword}\n\n참고자료:\n{reference}"
+    response = call_openai(system_prompt, user_prompt, model=model)
+
+    if not response:
+        logger.error(f"AI 글 생성 실패: {keyword}")
+        return None
+
+    return _parse_article(response, keyword)
+
+
+def _parse_article(response, keyword):
+    fm_match = re.search(r"---\s*\n(.+?)\n---", response, re.DOTALL)
+    if not fm_match:
+        logger.warning(f"frontmatter 파싱 실패: {keyword}")
+        return None
+
+    fm_text = fm_match.group(1)
+    body_md = response[fm_match.end():].strip()
+
+    title = ""
+    category = "생활정보"
+    tags = ""
+    description = ""
+
+    for line in fm_text.split("\n"):
+        line = line.strip()
+        if line.startswith("title:"):
+            title = line.split(":", 1)[1].strip().strip('"').strip("'")
+        elif line.startswith("category:"):
+            category = line.split(":", 1)[1].strip().strip('"').strip("'")
+        elif line.startswith("tags:"):
+            tags = line.split(":", 1)[1].strip().strip('"').strip("'")
+        elif line.startswith("description:"):
+            description = line.split(":", 1)[1].strip().strip('"').strip("'")
+
+    if not title or not body_md:
+        logger.warning(f"제목 또는 본문 없음: {keyword}")
+        return None
+
+    return {
+        "title": title,
+        "body_md": body_md,
+        "category": category,
+        "tags": tags,
+        "description": description,
+        "keyword": keyword,
+    }

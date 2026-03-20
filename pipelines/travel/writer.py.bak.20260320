@@ -17,52 +17,6 @@ from shared.prompt_builder import build as build_prompt
 
 logger = logging.getLogger(__name__)
 
-
-
-# ── Heritage 카드 링크 ─────────────────────────────────────
-HERITAGE_CARDS = {
-    "서울": {
-        "title": "서울 궁궐 가이드 — 경복궁·창덕궁·덕수궁 4개 언어 해설",
-        "url": "https://heritage.aikorea24.kr/",
-        "image": "https://www.heritage.go.kr/gung/gogung1/images/ic-c1.jpg",
-        "desc": "경복궁부터 종묘까지, 600년 역사의 궁궐을 4개 언어 해설·사진·지도로 탐험하세요."
-    },
-    "경기": {
-        "title": "서울 궁궐·종묘 완벽 가이드 — 수도권에서 가까운 세계유산",
-        "url": "https://heritage.aikorea24.kr/",
-        "image": "https://www.heritage.go.kr/gung/gogung2/images/img_changdeok_story_bg_00_00.jpg",
-        "desc": "경기도에서 30분 거리, UNESCO 세계유산 창덕궁과 종묘를 만나보세요."
-    },
-    "default": {
-        "title": "한국 궁궐·종묘 가이드 — K-Heritage Guide",
-        "url": "https://heritage.aikorea24.kr/",
-        "image": "https://www.heritage.go.kr/gung/gogung4/images/mode_general_00_01.jpg",
-        "desc": "경복궁, 창덕궁, 창경궁, 덕수궁, 종묘 — 4개 언어 해설과 사진으로 만나는 한국의 궁궐"
-    }
-}
-
-def _build_heritage_card(region: str) -> str:
-    """지역에 맞는 heritage 카드 HTML을 생성한다."""
-    card = HERITAGE_CARDS.get(region, HERITAGE_CARDS["default"])
-    html = (
-        '\n<div style="margin:1.5em 0;padding:0;border:1px solid #e0d5c1;border-radius:12px;'
-        'overflow:hidden;max-width:600px;background:#fffdf7;">'
-        '<a href="' + card["url"] + '" target="_blank" rel="noopener" '
-        'style="display:flex;text-decoration:none;color:inherit;">'
-        '<img src="' + card["image"] + '" alt="K-Heritage Guide" '
-        'style="width:120px;height:120px;object-fit:cover;flex-shrink:0;" loading="lazy"/>'
-        '<div style="padding:12px 16px;flex:1;min-width:0;">'
-        '<span style="display:inline-block;font-size:11px;color:#B8860B;'
-        'font-weight:700;letter-spacing:0.5px;margin-bottom:4px;">K-HERITAGE GUIDE</span>'
-        '<p style="margin:0 0 6px;font-size:15px;font-weight:700;line-height:1.35;'
-        'color:#2c2416;">' + card["title"] + '</p>'
-        '<p style="margin:0;font-size:13px;color:#6b5e4f;line-height:1.4;">'
-        + card["desc"] + '</p>'
-        '</div></a></div>\n'
-    )
-    return html
-
-
 BLOG_PROMPT_MAP = {
     "travel-hugo": {"camping": "tour1_camping", "korservice": "tour1_leports", "wellness": "tour1_leports", "heritage": "tour1_leports"},
     "travel1-hugo": {"korservice": "travel1_festival", "festival": "travel1_festival"},
@@ -119,16 +73,6 @@ def _build_data_block(data):
             lines.append(f"이미지: {item['firstImageUrl']}")
 
         lines.append("")
-
-    # nearby 맛집 데이터 추가
-    nearby_restaurants = data.get("nearby_restaurants", [])
-    if nearby_restaurants:
-        lines.append("")
-        lines.append("[주변 실제 맛집 데이터 - 이 데이터만 맛집으로 사용하세요]")
-        for nr in nearby_restaurants[:5]:
-            name = nr.get("title", "")
-            tel = nr.get("tel", "")
-            lines.append(f"- {name}" + (f" (전화: {tel})" if tel else ""))
 
     return "\n".join(lines)
 
@@ -270,7 +214,7 @@ def _enrich_with_nearby(data, html):
                 continue
             encoded = urllib.parse.quote(name)
             url = "https://map.naver.com/v5/search/" + encoded
-            nearby_html += '<a class="nearby-link" href="' + url + '" target="_blank">' + name + ' 지도에서 보기</a>\n\n'
+            nearby_html += "[" + name + " 지도에서 보기](" + url + ")\n\n"
 
     restaurants = nearby_data.get("restaurants", [])
     if restaurants:
@@ -282,59 +226,12 @@ def _enrich_with_nearby(data, html):
             encoded = urllib.parse.quote(name)
             url = "https://map.naver.com/v5/search/" + encoded
             tel = r.get("tel", "")
-            nearby_html += '<a class="nearby-link" href="' + url + '" target="_blank">' + name + ' 지도에서 보기</a>\n\n'
+            nearby_html += "[" + name + " 지도에서 보기](" + url + ")\n\n"
             if tel:
                 nearby_html += "전화: " + tel + "\n\n"
 
     return html + nearby_html
 
-
-
-
-def _post_process(content):
-    """후처리: 미완성 문장, HTML 주석, 과잉 질문 정리"""
-    # 노출되면 안 되는 HTML 주석 제거
-    content = re.sub(r'<!--\s*(여행용 카메라|편한 워킹화|보조배터리)\s*-->', '', content)
-    # 미완성 문장 수정
-    content = re.sub(r'계획하시기\s*\.', '계획하는 것을 추천한다.', content)
-    content = re.sub(r'확인하여\s*\.', '확인하는 것이 좋다.', content)
-    content = re.sub(r'확인해 보시기\s*\.', '확인해 보는 것이 좋다.', content)
-    # "궁금하지 않으세요/않으신가요" 2회 초과 시 제거
-    q_matches = re.findall(r'[^\n]*궁금하[^\n]*\n?', content)
-    if len(q_matches) > 2:
-        count = 0
-        lines = content.split('\n')
-        new_lines = []
-        for line in lines:
-            if '궁금하' in line:
-                count += 1
-                if count > 2:
-                    continue
-            new_lines.append(line)
-        content = '\n'.join(new_lines)
-    # 연속 빈줄 정리
-    content = re.sub(r'\n{4,}', '\n\n\n', content)
-    # CTA 제휴 박스 삽입 (함께 읽어보기 앞에)
-    if "함께 읽어보기" in content:
-        cta_html = """
-<div class="cta-box">
-  <p style="margin:0;font-size:1.1rem;">여행 숙소를 찾고 계신가요?</p>
-  <a href="https://www.trip.com/?Allianceid=3993748&SID=travel_blog" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
-</div>
-"""
-        content = content.replace("## 함께 읽어보기", cta_html + "\n## 함께 읽어보기")
-    elif content.rstrip().endswith("---"):
-        pass
-    else:
-        cta_html = """
-<div class="cta-box">
-  <p style="margin:0;font-size:1.1rem;">여행 숙소를 찾고 계신가요?</p>
-  <a href="https://www.trip.com/?Allianceid=3993748&SID=travel_blog" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
-</div>
-"""
-        content = content.rstrip() + "\n\n" + cta_html
-
-    return content
 
 
 def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
@@ -500,21 +397,7 @@ def generate_content(data, blog_id="travel-hugo"):
             content = _validate_and_retry(content, system_prompt, user_prompt)
             content, _ = _validate_place_names(content, real_names)
 
-    content = _post_process(content)
     content = _enrich_with_nearby(data, content)
-    # Heritage 카드 삽입 (본문 첫 H2 바로 앞)
-    try:
-        _region = data.get("region", "") if isinstance(data, dict) else ""
-        _h_card = _build_heritage_card(_region)
-        _h2_match = re.search(r"(\n##\s)", content)
-        if _h2_match:
-            _pos = _h2_match.start()
-            content = content[:_pos] + _h_card + content[_pos:]
-        else:
-            content = _h_card + content
-    except Exception as e:
-        print(f"[heritage-card] 삽입 실패: {e}")
-
     items = data.get("items", [])
     content = _inject_images(items, content, blog_id=blog_id)
     content = _inject_naver_map(content, items)

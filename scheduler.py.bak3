@@ -4,6 +4,7 @@ import yaml
 import time
 import logging
 import schedule
+from shared.telegram_notifier import send_error as _tg_error
 import subprocess
 from datetime import datetime
 import sqlite3
@@ -41,13 +42,16 @@ def run_publish(blog_id):
                 logger.info("  " + line)
         if result.returncode != 0 and result.stderr:
             logger.error("  ERR: " + result.stderr[-200:])
+            _tg_error(blog_id, "scheduler", result.stderr[-300:])
             return False
         return True
     except subprocess.TimeoutExpired:
         logger.error(blog_id + " timeout (600s)")
+        _tg_error(blog_id, "scheduler", "timeout 600s")
         return False
     except Exception as e:
         logger.error(blog_id + " failed: " + str(e))
+        _tg_error(blog_id, "scheduler", str(e)[:300])
         return False
 
 

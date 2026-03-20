@@ -51,7 +51,7 @@ def run(blog_cfg):
             company = fetch_company_info(corp_code) if corp_code else None
             financials = fetch_financial_summary(corp_code) if corp_code else []
             # 전년도 재무도 가져와서 YoY 비교 가능하게
-            financials_prev = fetch_financial_summary(corp_code, year=str(datetime.now().year - 2)) if corp_code else []
+            financials_prev = fetch_financial_summary(corp_code, year="2023") if corp_code else []
             # 배당 정보도 추가
             try:
                 from pipelines.stock.fetcher import fetch_dividend_info
