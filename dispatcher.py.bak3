@@ -9,10 +9,10 @@ from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, "/Users/twinssn/Projects/TAP")
+sys.path.insert(0, "/Users/twinssn/Projects/tour-auto-publisher")
 
 from dotenv import load_dotenv
-load_dotenv("/Users/twinssn/Projects/TAP/.env")
+load_dotenv("/Users/twinssn/Projects/tour-auto-publisher/.env")
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -184,7 +184,7 @@ def run_travel(blog_cfg):
     blog_id = blog_cfg["id"]
     logger.info("Travel pipeline: " + blog_id)
 
-    os.chdir("/Users/twinssn/Projects/TAP")
+    os.chdir("/Users/twinssn/Projects/tour-auto-publisher")
 
     from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
@@ -301,48 +301,8 @@ def dispatch(blog_id):
     elif pipeline == "travel":
         return run_travel(cfg)
     elif pipeline == "stock":
-        blog_id = cfg.get("id", "")
-        # STAP 블로그별 전문 파이프라인 매핑 (확장 시 여기만 추가)
-        STAP_PIPELINE_MAP = {
-            "dividend-hugo": "dividend",
-            "etf-hugo": "etf",
-            "sector-hugo": "sector",
-            "ipo-hugo": "ipo",
-            "finance-hugo": "finance",
-        }
-        stap_name = STAP_PIPELINE_MAP.get(blog_id)
-        if stap_name:
-            import importlib
-            # STAP 경로를 최상위에 삽입 + 모듈 캐시 정리
-            stap_root = "/Users/twinssn/Projects/STAP"
-            if stap_root in sys.path:
-                sys.path.remove(stap_root)
-            sys.path.insert(0, stap_root)
-            # 기존 shared/pipelines 모듈 캐시 제거
-            for mod_name in list(sys.modules.keys()):
-                if mod_name.startswith("shared.") or mod_name.startswith("pipelines."):
-                    del sys.modules[mod_name]
-            if "shared" in sys.modules:
-                del sys.modules["shared"]
-            if "pipelines" in sys.modules:
-                del sys.modules["pipelines"]
-            mod = importlib.import_module(f"pipelines.{stap_name}.pipeline")
-            importlib.reload(mod)
-            result = mod.run(cfg)
-            # 복원: STAP 경로 제거, 5000 모듈 캐시도 정리
-            if stap_root in sys.path:
-                sys.path.remove(stap_root)
-            for mod_name in list(sys.modules.keys()):
-                if mod_name.startswith("shared.") or mod_name.startswith("pipelines."):
-                    del sys.modules[mod_name]
-            if "shared" in sys.modules:
-                del sys.modules["shared"]
-            if "pipelines" in sys.modules:
-                del sys.modules["pipelines"]
-            return result
-        else:
-            from pipelines.stock.pipeline import run as run_stock
-            return run_stock(cfg)
+        from pipelines.stock.pipeline import run as run_stock
+        return run_stock(cfg)
     elif pipeline == "gap":
         from pipelines.gap.pipeline import run as run_gap
         return run_gap(cfg)

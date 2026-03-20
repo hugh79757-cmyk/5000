@@ -294,3 +294,73 @@ batch_deploy:
 git_backup:
   schedule: "sunday 03:00"
 
+
+  - id: dividend-hugo
+    name: "배당주 투자 가이드"
+    pipeline: stock
+    platform: hugo
+    theme: blowfish
+    repo: dividend-hugo
+    site_path: /Users/twinssn/Projects/CAP/dividend-hugo
+    cf_project: dividend-hugo
+    domain: dividend.techpawz.com
+    daily_quota: 5
+    schedule:
+      times: ["09:00","12:00","15:00","18:00","21:00"]
+    status: active
+
+  - id: etf-hugo
+    name: "ETF 투자 분석"
+    pipeline: stock
+    platform: hugo
+    theme: blowfish
+    repo: etf-hugo
+    site_path: /Users/twinssn/Projects/CAP/etf-hugo
+    cf_project: etf-hugo
+    domain: etf.techpawz.com
+    daily_quota: 5
+    schedule:
+      times: ["09:10","12:10","15:10","18:10","21:10"]
+    status: active
+
+  - id: sector-hugo
+    name: "섹터 분석 리포트"
+    pipeline: stock
+    platform: hugo
+    theme: blowfish
+    repo: sector-hugo
+    site_path: /Users/twinssn/Projects/CAP/sector-hugo
+    cf_project: sector-hugo
+    domain: sector.techpawz.com
+    daily_quota: 5
+    schedule:
+      times: ["09:20","12:20","15:20","18:20","21:20"]
+    status: active
+
+  - id: ipo-hugo
+    name: "IPO·공모주 분석"
+    pipeline: stock
+    platform: hugo
+    theme: blowfish
+    repo: ipo-hugo
+    site_path: /Users/twinssn/Projects/CAP/ipo-hugo
+    cf_project: ipo-hugo
+    domain: ipo.techpawz.com
+    daily_quota: 5
+    schedule:
+      times: ["09:30","12:30","15:30","18:30","21:30"]
+    status: active
+
+  - id: finance-hugo
+    name: "금리·예적금 비교"
+    pipeline: stock
+    platform: hugo
+    theme: blowfish
+    repo: finance-hugo
+    site_path: /Users/twinssn/Projects/CAP/finance-hugo
+    cf_project: finance-hugo
+    domain: finance.techpawz.com
+    daily_quota: 5
+    schedule:
+      times: ["09:40","12:40","15:40","18:40","21:40"]
+    status: active

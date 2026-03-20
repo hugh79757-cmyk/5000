@@ -152,12 +152,12 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     if thumbnail_url and thumbnail_url.startswith("http://tong.visitkorea.or.kr"):
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
 
-    if theme == "Blowfish":
+    if theme.lower() == "blowfish":
         fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description)
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
-    elif theme == "congo":
+    elif theme.lower() == "congo":
         fm, date_str = _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description)
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
@@ -207,7 +207,7 @@ def deploy_site(site_path, cf_project):
 def publish(blog_id, title, body_md, body_html=None,
             category="", tags="", thumbnail_url="",
             data_source="", source_id="", prompt_id="",
-            model=""):
+            model="", wp_category=None):
 
     # 후처리: AI가 생성한 가짜 내부링크 제거
     import re
@@ -273,7 +273,11 @@ def publish(blog_id, title, body_md, body_html=None,
         if not wp_url:
             return {"success": False, "error": "wordpress url not configured"}
         html_content = body_html or body_md
-        result = publish_to_wordpress(wp_url, wp_user, wp_pass, title, html_content)
+        # markdown -> HTML 변환 (WordPress도 HTML 필요)
+        if not body_html and body_md:
+            import markdown
+            html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
+        result = publish_to_wordpress(wp_url, wp_user, wp_pass, title, html_content, categories=[wp_category] if wp_category else None, featured_image_url=thumbnail_url)
 
     else:
         result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)

@@ -32,8 +32,29 @@ def send(message, parse_mode="HTML"):
 
 
 def send_error(blog_id, stage, error_msg):
+    # blogs.yaml에서 도메인, 레포 정보 가져오기
+    domain = ""
+    repo = ""
+    try:
+        import yaml
+        from pathlib import Path
+        cfg_path = Path(__file__).parent.parent / "config" / "blogs.yaml"
+        with open(cfg_path, "r", encoding="utf-8") as yf:
+            cfg = yaml.safe_load(yf)
+        for blog in cfg.get("blogs", []):
+            if blog.get("id") == blog_id:
+                domain = blog.get("domain", "")
+                repo = blog.get("repo", "")
+                break
+    except:
+        pass
+
     text = "🚨 <b>발행 오류</b>\n"
     text += "<b>블로그:</b> " + blog_id + "\n"
+    if domain:
+        text += "<b>도메인:</b> " + domain + "\n"
+    if repo:
+        text += "<b>레포:</b> " + repo + "\n"
     text += "<b>단계:</b> " + stage + "\n"
     text += "<b>오류:</b> " + str(error_msg)[:500]
     return send(text)

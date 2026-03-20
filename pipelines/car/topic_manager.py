@@ -58,36 +58,10 @@ def select_topic(conn, site_id='hotissue', days_window=7, skip_ids=None, post_ty
     '''.format(placeholder, " AND t.post_type = ?" if post_type else ""), [site_id] + (list(skip_set) if skip_set else []) + ([post_type] if post_type else [])).fetchone()
     return oldest
 
-def generate_title(data):
-    """본문 H2 첫 번째를 제목으로 사용하되, fallback 템플릿도 준비"""
-    model_short = data["model"].replace("현대 ", "").replace("기아 ", "")
-    comp_short = data.get("competitor", "").replace("현대 ", "").replace("기아 ", "")
-    price = data.get("base_price", 0)
-    trim = data.get("trim", "")
-    resale = data.get("resale_rate_percent", 0)
-    resale_3yr = data.get("resale_3yr", 0)
-    dep_3yr = data.get("three_year_depreciation", 0)
-    total_3yr = data.get("three_year_total_cost", 0)
-    wa = josa_wa(comp_short)
-    eul = josa_eul(model_short)
-
-    if comp_short:
-        templates = [
-            f"{model_short} {trim} {price:,}만원, 지금 사도 될까",
-            f"{model_short}{wa} {comp_short} 3년 유지비 {dep_3yr:,}만원 차이 비교",
-            f"{model_short} vs {comp_short} 3년 보유하면 누가 더 손해일까",
-            f"{price:,}만원 {model_short}, {comp_short}보다 나은 선택일까",
-            f"{model_short} {comp_short} 감가 비교 3년 후 얼마나 떨어질까",
-        ]
-    else:
-        templates = [
-            f"{model_short} {trim} {price:,}만원, 지금 사도 될까",
-            f"{model_short} 3년 타면 실제 비용 {total_3yr:,}만원 나가는 이유",
-            f"{price:,}만원 {model_short} 3년 뒤 {resale_3yr:,}만원 감가 분석",
-            f"{model_short} {trim} 잔존가치 {resale}% 실구매자 비용 분석",
-            f"{model_short}{eul} 지금 사면 3년 후 얼마나 남을까",
-        ]
-    return random.choice(templates)
+def generate_title(data, site_id="hotissue"):
+    """title_engine의 사이트별 고CTR 템플릿 엔진으로 위임"""
+    from pipelines.car.title_engine import generate_title as _engine_title
+    return _engine_title(data, site_id=site_id)
 
 def make_slug(title):
     slug = re.sub(r'[^\w\s가-힣-]', '', title)

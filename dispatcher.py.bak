@@ -108,7 +108,7 @@ def run_car(blog_cfg):
     for attempt in range(1, MAX_RETRY + 1):
         logger.info("토픽 선택 (시도 " + str(attempt) + "/" + str(MAX_RETRY) + ")")
         car_site_id = blog_id.replace('-hugo', '')
-        topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids)
+        topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=blog_cfg.get('post_type'))
         if not topic:
             logger.info(blog_id + " no topics available")
             conn.close()
@@ -143,7 +143,7 @@ def run_car(blog_cfg):
         return None
 
     body = validate_body(body, data)
-    title = generate_title(data)
+    title = generate_title(data, site_id=car_site_id)
     slug = make_slug(title)
     logger.info("제목: " + title)
 
