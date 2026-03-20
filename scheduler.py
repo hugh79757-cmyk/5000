@@ -60,7 +60,7 @@ from collections import defaultdict
 
 _publish_queue = []
 _queue_lock = threading.Lock()
-PUBLISH_DELAY = 15  # 블로그 간 딜레이(초)
+PUBLISH_DELAY = 180  # 블로그 간 딜레이(초)
 
 def queue_publish(blog_id):
     """동시간대 블로그를 큐에 넣고 순차 실행"""
