@@ -1,19 +1,16 @@
 default:
   provider: openai
   model: gpt-4o-mini
-  max_tokens: 16384
-  temperature: 0.75
+  temperature: 0.85
 
 fallback:
   provider: upstage
   model: solar-pro3
-  max_tokens: 8192
   temperature: 0.7
 
 economy:
   provider: openai
   model: gpt-4o-mini
-  max_tokens: 4096
   temperature: 0.7
 
 providers:

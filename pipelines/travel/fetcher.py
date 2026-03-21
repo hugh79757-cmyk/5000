@@ -50,6 +50,15 @@ def _adapt_korservice_items(items_raw):
             "contenttypeid": str(item.get("contenttypeid", "")),
             "overview": item.get("overview", ""),
             "_raw": item,
+            "eventstartdate": item.get("eventstartdate", ""),
+            "eventenddate": item.get("eventenddate", ""),
+            "playtime": item.get("playtime", ""),
+            "eventplace": item.get("eventplace", ""),
+            "usetimefestival": item.get("usetimefestival", ""),
+            "sponsor1": item.get("sponsor1", ""),
+            "program": item.get("program", ""),
+            "subevent": item.get("subevent", ""),
+            "agelimit": item.get("agelimit", ""),
         })
     return adapted
 
@@ -180,9 +189,73 @@ def fetch_festival():
         if not items_raw:
             logger.warning("festival: no data for " + region_name)
             return None
+
+        # 계절 필터는 detailIntro 이후로 이동됨
+
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
         selected = random.sample(pool, min(5, len(pool)))
+        
+        # detailIntro API로 축제 상세정보 보강
+        for item in selected:
+            cid = item.get("contentid")
+            if not cid:
+                continue
+            try:
+                detail_resp = req.get(
+                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
+                    params={
+                        "serviceKey": key,
+                        "MobileOS": "ETC",
+                        "MobileApp": "TAP",
+                        "_type": "json",
+                        "contentId": cid,
+                        "contentTypeId": 15,
+                    },
+                    timeout=15,
+                )
+                d2 = detail_resp.json()
+                intro_items = d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+                if isinstance(intro_items, dict):
+                    intro_items = [intro_items]
+                if intro_items:
+                    detail = intro_items[0]
+                    item["eventstartdate"] = detail.get("eventstartdate", "")
+                    item["eventenddate"] = detail.get("eventenddate", "")
+                    item["playtime"] = detail.get("playtime", "")
+                    item["eventplace"] = detail.get("eventplace", "")
+                    item["usetimefestival"] = detail.get("usetimefestival", "")
+                    item["sponsor1"] = detail.get("sponsor1", "")
+                    item["program"] = detail.get("program", "")
+                    item["subevent"] = detail.get("subevent", "")
+                    item["agelimit"] = detail.get("agelimit", "")
+                    logger.info(f"festival detailIntro: {item.get('title','')} 보강 완료")
+            except Exception as e:
+                logger.warning(f"festival detailIntro 실패 (무시): {e}")
+        
+        # 계절 필터: detailIntro 이후 eventstartdate 기반 필터링
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        month_ago = (now - timedelta(days=30)).strftime("%Y%m%d")
+        month_later = (now + timedelta(days=60)).strftime("%Y%m%d")
+        seasonal = []
+        for item in selected:
+            estart = str(item.get("eventstartdate", ""))
+            eend = str(item.get("eventenddate", "")) or estart
+            if not estart:
+                continue  # 날짜 없는 축제는 제외
+            if eend >= month_ago and estart <= month_later:
+                seasonal.append(item)
+                logger.info(f"festival 계절 통과: {item.get('title','')} ({estart}~{eend})")
+            else:
+                logger.info(f"festival 계절 제외: {item.get('title','')} ({estart}~{eend})")
+        if seasonal:
+            selected = seasonal[:1]  # 계절 맞는 축제 중 1개만 선택
+            logger.info(f"festival: 계절 필터 후 {len(seasonal)}건 중 1건 선택")
+        else:
+            selected = selected[:1]  # 전부 불일치면 첫 번째 사용
+            logger.warning(f"festival: 계절 필터 후 0건, 원본 첫 항목 사용")
+
         adapted = _adapt_korservice_items(selected)
         return {
             "items": adapted,
@@ -341,6 +414,44 @@ def fetch_course():
                 pool = with_img if len(with_img) >= 3 else items_raw  # 필터 후 부족하면 원복
 
         selected = random.sample(pool, min(5, len(pool)))
+        
+        # detailIntro API로 축제 상세정보 보강
+        for item in selected:
+            cid = item.get("contentid")
+            if not cid:
+                continue
+            try:
+                detail_resp = req.get(
+                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
+                    params={
+                        "serviceKey": key,
+                        "MobileOS": "ETC",
+                        "MobileApp": "TAP",
+                        "_type": "json",
+                        "contentId": cid,
+                        "contentTypeId": 15,
+                    },
+                    timeout=15,
+                )
+                d2 = detail_resp.json()
+                intro_items = d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+                if isinstance(intro_items, dict):
+                    intro_items = [intro_items]
+                if intro_items:
+                    detail = intro_items[0]
+                    item["eventstartdate"] = detail.get("eventstartdate", "")
+                    item["eventenddate"] = detail.get("eventenddate", "")
+                    item["playtime"] = detail.get("playtime", "")
+                    item["eventplace"] = detail.get("eventplace", "")
+                    item["usetimefestival"] = detail.get("usetimefestival", "")
+                    item["sponsor1"] = detail.get("sponsor1", "")
+                    item["program"] = detail.get("program", "")
+                    item["subevent"] = detail.get("subevent", "")
+                    item["agelimit"] = detail.get("agelimit", "")
+                    logger.info(f"festival detailIntro: {item.get('title','')} 보강 완료")
+            except Exception as e:
+                logger.warning(f"festival detailIntro 실패 (무시): {e}")
+        
         adapted = _adapt_korservice_items(selected)
         return {
             "items": adapted,

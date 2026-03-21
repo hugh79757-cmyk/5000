@@ -2324,3 +2324,919 @@ expected <block end>, but found '-'
 2026-03-21 15:07:30,003 [INFO] Publishing: kuta-wordpress
 2026-03-21 15:07:40,032 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
 2026-03-21 15:07:40,032 [INFO] Publishing: travel3-hugo
+2026-03-21 15:08:57,880 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:08:57,881 [INFO] Publishing: travel4-hugo
+2026-03-21 15:09:55,475 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:09:55,476 [INFO] Publishing: tvshow-blogger
+2026-03-21 15:10:47,490 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:10:47,490 [INFO] Publishing: ud-blogger
+2026-03-21 15:11:43,901 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-21 15:11:43,904 [INFO] Publishing: dividend-hugo
+2026-03-21 15:11:51,864 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:11:51,866 [INFO] Publishing: kuta-wordpress
+2026-03-21 15:12:53,152 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:12:53,153 [INFO] Publishing: gap-kuta
+2026-03-21 15:13:22,968 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:13:22,969 [INFO] Publishing: stock-hugo
+2026-03-21 15:14:17,083 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:14:17,084 [INFO] Publishing: dividend-hugo
+2026-03-21 15:15:05,260 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:15:05,261 [INFO] Publishing: etf-hugo
+2026-03-21 15:16:05,107 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:16:05,108 [INFO] Publishing: sector-hugo
+2026-03-21 15:16:54,502 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:16:54,503 [INFO] Publishing: ipo-hugo
+2026-03-21 15:17:28,515 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:17:28,516 [INFO] Publishing: finance-hugo
+2026-03-21 15:17:34,020 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:17:34,020 [INFO] Publishing: senior-hugo
+2026-03-21 15:19:12,799 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-21 15:19:12,824 [INFO] Publishing: etf-hugo
+2026-03-21 15:19:12,888 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:19:12,888 [INFO] Publishing: travel-hugo
+2026-03-21 15:20:13,324 [ERROR]   ERR: bnail_url)
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182, in _write_hugo_post
+    if kwargs.get("data_source") == "car_db":
+       ^^^^^^
+NameError: name 'kwargs' is not defined
+
+2026-03-21 15:20:14,226 [WARNING] CATCHUP: travel-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:20:19,277 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:20:19,278 [INFO] Publishing: travel1-hugo
+2026-03-21 15:21:16,709 [ERROR]   ERR: bnail_url)
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182, in _write_hugo_post
+    if kwargs.get("data_source") == "car_db":
+       ^^^^^^
+NameError: name 'kwargs' is not defined
+
+2026-03-21 15:21:17,556 [WARNING] CATCHUP: travel1-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:21:22,629 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:21:22,629 [INFO] Publishing: travel2-hugo
+2026-03-21 15:23:59,561 [ERROR]   ERR: bnail_url)
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182, in _write_hugo_post
+    if kwargs.get("data_source") == "car_db":
+       ^^^^^^
+NameError: name 'kwargs' is not defined
+
+2026-03-21 15:24:00,620 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:24:05,736 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:24:05,737 [INFO] Publishing: travel3-hugo
+2026-03-21 15:24:43,770 [ERROR]   ERR: bnail_url)
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182, in _write_hugo_post
+    if kwargs.get("data_source") == "car_db":
+       ^^^^^^
+NameError: name 'kwargs' is not defined
+
+2026-03-21 15:24:44,619 [WARNING] CATCHUP: travel3-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:24:49,691 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:24:49,691 [INFO] Publishing: travel4-hugo
+2026-03-21 15:25:28,809 [ERROR]   ERR: bnail_url)
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182, in _write_hugo_post
+    if kwargs.get("data_source") == "car_db":
+       ^^^^^^
+NameError: name 'kwargs' is not defined
+
+2026-03-21 15:25:29,680 [WARNING] CATCHUP: travel4-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:25:34,747 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:25:34,747 [INFO] Publishing: tvshow-blogger
+2026-03-21 15:26:25,207 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:26:25,207 [INFO] Publishing: ud-blogger
+2026-03-21 15:27:28,830 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:27:28,830 [INFO] Publishing: kuta-wordpress
+2026-03-21 15:28:33,372 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:28:33,373 [INFO] Publishing: gap-kuta
+2026-03-21 15:29:01,991 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:29:01,992 [INFO] Publishing: stock-hugo
+2026-03-21 15:29:21,076 [ERROR]   ERR: bnail_url)
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182, in _write_hugo_post
+    if kwargs.get("data_source") == "car_db":
+       ^^^^^^
+NameError: name 'kwargs' is not defined
+
+2026-03-21 15:29:21,947 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:29:27,020 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:29:27,020 [INFO] Publishing: dividend-hugo
+2026-03-21 15:30:21,310 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:30:21,310 [INFO] Publishing: etf-hugo
+2026-03-21 15:30:47,054 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:30:47,054 [INFO] Publishing: sector-hugo
+2026-03-21 15:31:38,253 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:31:38,253 [INFO] Publishing: ipo-hugo
+2026-03-21 15:32:34,141 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:32:34,142 [INFO] Publishing: finance-hugo
+2026-03-21 15:32:39,419 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:32:39,419 [INFO] Publishing: senior-hugo
+2026-03-21 15:34:11,955 [INFO] Queue executing: sector-hugo (remaining: 3)
+2026-03-21 15:34:11,963 [INFO] Publishing: sector-hugo
+2026-03-21 15:34:12,041 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:12,041 [INFO] Publishing: travel-hugo
+2026-03-21 15:34:12,178 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:13,108 [WARNING] CATCHUP: travel-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:18,238 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:18,239 [INFO] Publishing: travel1-hugo
+2026-03-21 15:34:18,403 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:19,383 [WARNING] CATCHUP: travel1-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:24,470 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:24,470 [INFO] Publishing: travel2-hugo
+2026-03-21 15:34:24,640 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:25,512 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:30,619 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:30,620 [INFO] Publishing: travel3-hugo
+2026-03-21 15:34:30,803 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:31,652 [WARNING] CATCHUP: travel3-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:36,842 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:36,843 [INFO] Publishing: travel4-hugo
+2026-03-21 15:34:36,984 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:37,834 [WARNING] CATCHUP: travel4-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:42,908 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:42,909 [INFO] Publishing: tvshow-blogger
+2026-03-21 15:34:43,061 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:44,078 [WARNING] CATCHUP: tvshow-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:49,140 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:49,141 [INFO] Publishing: ud-blogger
+2026-03-21 15:34:49,290 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:50,186 [WARNING] CATCHUP: ud-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:34:55,287 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:34:55,288 [INFO] Publishing: kuta-wordpress
+2026-03-21 15:34:55,443 [ERROR]   ERR: e 227, in run_travel
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:34:56,312 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:35:01,420 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 15:35:01,420 [INFO] Publishing: gap-kuta
+2026-03-21 15:35:01,625 [ERROR]   ERR: py", line 81, in run
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:35:02,458 [WARNING] CATCHUP: gap-kuta 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:35:07,538 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:35:07,538 [INFO] Publishing: stock-hugo
+2026-03-21 15:35:07,691 [ERROR]   ERR: py", line 26, in run
+    from shared.publisher import publish
+  File "/Users/twinssn/Projects/5000/shared/publisher.py", line 182
+    logger.info("쿠팡 상품 링크 삽입 완료")
+IndentationError: unexpected indent
+
+2026-03-21 15:35:08,564 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 15:35:13,595 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:35:13,596 [INFO] Publishing: dividend-hugo
+2026-03-21 15:36:00,677 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:36:00,677 [INFO] Publishing: etf-hugo
+2026-03-21 15:36:48,249 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:36:48,250 [INFO] Publishing: sector-hugo
+2026-03-21 15:37:22,427 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:37:22,428 [INFO] Publishing: ipo-hugo
+2026-03-21 15:37:41,644 [INFO] Queue executing: travel4-hugo (remaining: 2)
+2026-03-21 15:37:41,646 [INFO] Publishing: travel4-hugo
+2026-03-21 15:38:07,604 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:38:07,606 [INFO] Publishing: finance-hugo
+2026-03-21 15:38:13,504 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:38:13,505 [INFO] Publishing: senior-hugo
+2026-03-21 15:40:13,736 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:40:13,736 [INFO] Publishing: travel-hugo
+2026-03-21 15:41:21,913 [INFO] Queue executing: gap-kuta (remaining: 2)
+2026-03-21 15:41:21,919 [INFO] Publishing: gap-kuta
+2026-03-21 15:41:44,862 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:41:44,863 [INFO] Publishing: travel1-hugo
+2026-03-21 15:43:13,555 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:43:13,555 [INFO] Publishing: travel2-hugo
+2026-03-21 15:44:33,938 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:44:33,938 [INFO] Publishing: travel3-hugo
+2026-03-21 15:44:51,330 [INFO] Queue executing: ipo-hugo (remaining: 1)
+2026-03-21 15:44:51,333 [INFO] Publishing: ipo-hugo
+2026-03-21 15:45:48,896 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:45:48,897 [INFO] Publishing: travel4-hugo
+2026-03-21 15:46:55,841 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:46:55,842 [INFO] Publishing: tvshow-blogger
+2026-03-21 15:48:19,684 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:48:19,685 [INFO] Publishing: ud-blogger
+2026-03-21 15:48:21,241 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-21 15:48:21,241 [INFO] Publishing: finance-hugo
+2026-03-21 15:49:19,020 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:49:19,021 [INFO] Publishing: kuta-wordpress
+2026-03-21 15:50:21,991 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 15:50:21,991 [INFO] Publishing: gap-kuta
+2026-03-21 15:50:52,834 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:50:52,834 [INFO] Publishing: stock-hugo
+2026-03-21 15:51:39,209 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:51:39,210 [INFO] Publishing: dividend-hugo
+2026-03-21 15:52:38,123 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:52:38,124 [INFO] Publishing: etf-hugo
+2026-03-21 15:53:23,812 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:53:23,813 [INFO] Publishing: sector-hugo
+2026-03-21 15:54:00,699 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:54:00,699 [INFO] Publishing: ipo-hugo
+2026-03-21 15:54:53,042 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:54:53,043 [INFO] Publishing: finance-hugo
+2026-03-21 15:54:58,275 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:54:58,276 [INFO] Publishing: senior-hugo
+2026-03-21 15:56:57,056 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:56:57,056 [INFO] Publishing: travel-hugo
+2026-03-21 15:58:31,258 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:58:31,260 [INFO] Publishing: travel1-hugo
+2026-03-21 15:59:46,744 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:59:46,744 [INFO] Publishing: travel2-hugo
+2026-03-21 16:02:24,085 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:02:24,086 [INFO] Publishing: travel3-hugo
+2026-03-21 16:03:49,239 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:03:49,240 [INFO] Publishing: travel4-hugo
+2026-03-21 16:05:19,611 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:05:19,612 [INFO] Publishing: tvshow-blogger
+2026-03-21 16:06:40,430 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:06:40,431 [INFO] Publishing: ud-blogger
+2026-03-21 16:07:44,867 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:07:44,868 [INFO] Publishing: kuta-wordpress
+2026-03-21 16:08:47,281 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:08:47,281 [INFO] Publishing: gap-kuta
+2026-03-21 16:09:14,234 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:09:14,235 [INFO] Publishing: stock-hugo
+2026-03-21 16:10:53,434 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:10:53,435 [INFO] Publishing: dividend-hugo
+2026-03-21 16:11:50,693 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:11:50,693 [INFO] Publishing: etf-hugo
+2026-03-21 16:13:00,304 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:13:00,305 [INFO] Publishing: sector-hugo
+2026-03-21 16:13:45,297 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:13:45,298 [INFO] Publishing: ipo-hugo
+2026-03-21 16:14:18,543 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:14:18,544 [INFO] Publishing: finance-hugo
+2026-03-21 16:14:23,936 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:14:23,936 [INFO] Publishing: senior-hugo
+2026-03-21 16:16:18,711 [INFO] Queue executing: tvshow-blogger (remaining: 0)
+2026-03-21 16:16:18,723 [INFO] Publishing: tvshow-blogger
+2026-03-21 16:16:19,426 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:16:19,427 [INFO] Publishing: travel-hugo
+2026-03-21 16:17:33,183 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:17:33,183 [INFO] Publishing: travel1-hugo
+2026-03-21 16:18:47,287 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:18:47,288 [INFO] Publishing: travel2-hugo
+2026-03-21 16:20:18,934 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:20:18,935 [INFO] Publishing: travel3-hugo
+2026-03-21 16:21:40,729 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:21:40,730 [INFO] Publishing: travel4-hugo
+2026-03-21 16:22:59,713 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:22:59,715 [INFO] Publishing: tvshow-blogger
+2026-03-21 16:24:02,928 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:24:02,929 [INFO] Publishing: ud-blogger
+2026-03-21 16:25:00,695 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:25:00,696 [INFO] Publishing: kuta-wordpress
+2026-03-21 16:25:59,188 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:25:59,189 [INFO] Publishing: gap-kuta
+2026-03-21 16:26:26,355 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:26:26,356 [INFO] Publishing: stock-hugo
+2026-03-21 16:27:07,209 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:27:07,209 [INFO] Publishing: dividend-hugo
+2026-03-21 16:27:56,900 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:27:56,901 [INFO] Publishing: etf-hugo
+2026-03-21 16:28:26,896 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:28:26,896 [INFO] Publishing: sector-hugo
+2026-03-21 16:28:57,164 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:28:57,165 [INFO] Publishing: ipo-hugo
+2026-03-21 16:29:28,725 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:29:28,726 [INFO] Publishing: finance-hugo
+2026-03-21 16:29:34,028 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:29:34,033 [INFO] Publishing: senior-hugo
+2026-03-21 16:31:23,899 [INFO] Queue executing: ud-blogger (remaining: 0)
+2026-03-21 16:31:23,902 [INFO] Publishing: ud-blogger
+2026-03-21 16:31:23,991 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:31:23,991 [INFO] Publishing: travel-hugo
+2026-03-21 16:32:51,606 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:32:51,607 [INFO] Publishing: travel1-hugo
+2026-03-21 16:34:23,710 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:34:23,712 [INFO] Publishing: travel2-hugo
+2026-03-21 16:35:52,515 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:35:52,517 [INFO] Publishing: travel3-hugo
+2026-03-21 16:37:11,370 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:37:11,379 [INFO] Publishing: travel4-hugo
+2026-03-21 16:38:27,136 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:38:27,137 [INFO] Publishing: tvshow-blogger
+2026-03-21 16:39:15,095 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:39:15,100 [INFO] Publishing: ud-blogger
+2026-03-21 16:40:05,684 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:40:05,685 [INFO] Publishing: kuta-wordpress
+2026-03-21 16:40:58,001 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:40:58,001 [INFO] Publishing: gap-kuta
+2026-03-21 16:41:24,381 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:41:24,383 [INFO] Publishing: stock-hugo
+2026-03-21 16:42:10,845 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:42:10,846 [INFO] Publishing: dividend-hugo
+2026-03-21 16:42:59,028 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:42:59,029 [INFO] Publishing: etf-hugo
+2026-03-21 16:43:30,740 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:43:30,740 [INFO] Publishing: sector-hugo
+2026-03-21 16:44:02,451 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:44:02,452 [INFO] Publishing: ipo-hugo
+2026-03-21 16:44:49,934 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:44:49,935 [INFO] Publishing: finance-hugo
+2026-03-21 16:44:55,130 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:44:55,130 [INFO] Publishing: senior-hugo
+2026-03-21 16:46:39,482 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:46:39,482 [INFO] Publishing: travel-hugo
+2026-03-21 16:47:49,753 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:47:49,754 [INFO] Publishing: travel1-hugo
+2026-03-21 16:49:03,029 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:49:03,030 [INFO] Publishing: travel2-hugo
+2026-03-21 16:50:24,538 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:50:24,540 [INFO] Publishing: travel3-hugo
+2026-03-21 16:51:34,555 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:51:34,556 [INFO] Publishing: travel4-hugo
+2026-03-21 16:52:53,784 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:52:53,784 [INFO] Publishing: tvshow-blogger
+2026-03-21 16:53:50,703 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:53:50,704 [INFO] Publishing: ud-blogger
+2026-03-21 16:54:47,317 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:54:47,319 [INFO] Publishing: kuta-wordpress
+2026-03-21 16:56:12,116 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 16:56:12,152 [INFO] Publishing: gap-kuta
+2026-03-21 16:56:37,337 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:56:37,356 [INFO] Publishing: stock-hugo
+2026-03-21 16:57:28,063 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:57:28,068 [INFO] Publishing: dividend-hugo
+2026-03-21 16:58:19,385 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:58:19,409 [INFO] Publishing: etf-hugo
+2026-03-21 16:59:06,916 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:59:06,917 [INFO] Publishing: sector-hugo
+2026-03-21 16:59:49,814 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 16:59:49,816 [INFO] Publishing: ipo-hugo
+2026-03-21 17:00:23,695 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:00:23,696 [INFO] Publishing: finance-hugo
+2026-03-21 17:00:28,915 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:00:28,915 [INFO] Publishing: senior-hugo
+2026-03-21 17:02:15,278 [INFO] Queue executing: travel-hugo (remaining: 2)
+2026-03-21 17:02:15,280 [INFO] Publishing: travel-hugo
+2026-03-21 17:02:15,366 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:02:15,366 [INFO] Publishing: travel-hugo
+2026-03-21 17:03:36,165 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:03:36,167 [INFO] Publishing: travel1-hugo
+2026-03-21 17:04:57,586 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:04:57,587 [INFO] Publishing: travel2-hugo
+2026-03-21 17:06:15,859 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:06:15,860 [INFO] Publishing: travel3-hugo
+2026-03-21 17:06:33,263 [INFO] Queue executing: kuta-wordpress (remaining: 1)
+2026-03-21 17:06:33,264 [INFO] Publishing: kuta-wordpress
+2026-03-21 17:07:33,493 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:07:33,495 [INFO] Publishing: travel4-hugo
+2026-03-21 17:08:57,365 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:08:57,367 [INFO] Publishing: tvshow-blogger
+2026-03-21 17:10:03,411 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:10:03,412 [INFO] Publishing: ud-blogger
+2026-03-21 17:10:22,531 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-21 17:10:22,533 [INFO] Publishing: hotissue-hugo
+2026-03-21 17:11:06,870 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:11:06,870 [INFO] Publishing: kuta-wordpress
+2026-03-21 17:11:23,836 [INFO]   [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: K9
+2026-03-21 17:11:59,293 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:11:59,294 [INFO] Publishing: gap-kuta
+2026-03-21 17:12:32,369 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:12:32,370 [INFO] Publishing: stock-hugo
+2026-03-21 17:13:30,175 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:13:30,175 [INFO] Publishing: dividend-hugo
+2026-03-21 17:14:24,998 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:14:24,999 [INFO] Publishing: etf-hugo
+2026-03-21 17:15:05,308 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:15:05,309 [INFO] Publishing: sector-hugo
+2026-03-21 17:15:36,542 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:15:36,543 [INFO] Publishing: ipo-hugo
+2026-03-21 17:16:25,111 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:16:25,111 [INFO] Publishing: finance-hugo
+2026-03-21 17:16:30,268 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:16:30,268 [INFO] Publishing: senior-hugo
+2026-03-21 17:18:05,637 [INFO] Queue executing: tco-hugo (remaining: 4)
+2026-03-21 17:18:05,638 [INFO] Publishing: tco-hugo
+2026-03-21 17:18:05,732 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:18:05,732 [INFO] Publishing: travel-hugo
+2026-03-21 17:18:05,884 [INFO]   [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: GLS
+2026-03-21 17:18:05,884 [INFO]     [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: LM
+2026-03-21 17:18:05,884 [INFO]     [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: X6 M
+2026-03-21 17:19:11,060 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:19:11,061 [INFO] Publishing: travel1-hugo
+2026-03-21 17:20:27,239 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:20:27,240 [INFO] Publishing: travel2-hugo
+2026-03-21 17:21:05,938 [INFO] Queue executing: deal-hugo (remaining: 3)
+2026-03-21 17:21:05,939 [INFO] Publishing: deal-hugo
+2026-03-21 17:21:36,330 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:21:36,331 [INFO] Publishing: travel3-hugo
+2026-03-21 17:21:36,517 [ERROR]   ERR: erate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 463
+    content = re.sub(r'
+                     ^
+SyntaxError: unterminated string literal (detected at line 463)
+
+2026-03-21 17:21:37,488 [WARNING] CATCHUP: travel3-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 17:21:42,570 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:21:42,571 [INFO] Publishing: travel4-hugo
+2026-03-21 17:21:42,710 [ERROR]   ERR: erate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 463
+    content = re.sub(r'
+                     ^
+SyntaxError: unterminated string literal (detected at line 463)
+
+2026-03-21 17:21:43,632 [WARNING] CATCHUP: travel4-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 17:21:48,743 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:21:48,744 [INFO] Publishing: tvshow-blogger
+2026-03-21 17:21:48,963 [ERROR]   ERR: erate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 463
+    content = re.sub(r'
+                     ^
+SyntaxError: unterminated string literal (detected at line 463)
+
+2026-03-21 17:21:49,883 [WARNING] CATCHUP: tvshow-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 17:21:54,909 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:21:54,909 [INFO] Publishing: ud-blogger
+2026-03-21 17:21:55,044 [ERROR]   ERR: erate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 463
+    content = re.sub(r'
+                     ^
+SyntaxError: unterminated string literal (detected at line 463)
+
+2026-03-21 17:21:55,950 [WARNING] CATCHUP: ud-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 17:22:01,028 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:22:01,028 [INFO] Publishing: kuta-wordpress
+2026-03-21 17:22:01,185 [ERROR]   ERR: erate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 463
+    content = re.sub(r'
+                     ^
+SyntaxError: unterminated string literal (detected at line 463)
+
+2026-03-21 17:22:02,046 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 17:22:07,072 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:22:07,072 [INFO] Publishing: gap-kuta
+2026-03-21 17:22:34,814 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:22:34,815 [INFO] Publishing: stock-hugo
+2026-03-21 17:23:17,992 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:23:17,993 [INFO] Publishing: dividend-hugo
+2026-03-21 17:24:05,366 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:24:05,368 [INFO] Publishing: etf-hugo
+2026-03-21 17:24:41,486 [INFO] Queue executing: compare-hugo (remaining: 2)
+2026-03-21 17:24:41,486 [INFO] Publishing: compare-hugo
+2026-03-21 17:24:41,507 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:24:41,507 [INFO] Publishing: sector-hugo
+2026-03-21 17:25:10,425 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:25:10,426 [INFO] Publishing: ipo-hugo
+2026-03-21 17:25:47,922 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:25:47,922 [INFO] Publishing: finance-hugo
+2026-03-21 17:25:53,156 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:25:53,157 [INFO] Publishing: senior-hugo
+2026-03-21 17:27:39,915 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:27:39,915 [INFO] Publishing: travel-hugo
+2026-03-21 17:28:21,198 [INFO] Queue executing: guide-hugo (remaining: 1)
+2026-03-21 17:28:21,199 [INFO] Publishing: guide-hugo
+2026-03-21 17:28:43,696 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:28:43,697 [INFO] Publishing: travel1-hugo
+2026-03-21 17:30:14,787 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:30:14,787 [INFO] Publishing: travel2-hugo
+2026-03-21 17:31:49,948 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:31:49,949 [INFO] Publishing: travel3-hugo
+2026-03-21 17:32:11,762 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-21 17:32:11,763 [INFO] Publishing: ev-hugo
+2026-03-21 17:33:15,435 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:33:15,435 [INFO] Publishing: travel4-hugo
+2026-03-21 17:34:37,629 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:34:37,630 [INFO] Publishing: tvshow-blogger
+2026-03-21 17:35:38,089 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:35:38,090 [INFO] Publishing: ud-blogger
+2026-03-21 17:36:31,971 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:36:31,972 [INFO] Publishing: kuta-wordpress
+2026-03-21 17:46:32,000 [ERROR] kuta-wordpress timeout (600s)
+2026-03-21 17:46:32,973 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 17:46:38,057 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:46:38,058 [INFO] Publishing: gap-kuta
+2026-03-21 17:47:07,004 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:47:07,004 [INFO] Publishing: stock-hugo
+2026-03-21 17:48:01,101 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:48:01,102 [INFO] Publishing: dividend-hugo
+2026-03-21 17:48:55,708 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:48:55,709 [INFO] Publishing: etf-hugo
+2026-03-21 17:49:33,470 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:49:33,473 [INFO] Publishing: sector-hugo
+2026-03-21 17:50:08,557 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:50:08,558 [INFO] Publishing: ipo-hugo
+2026-03-21 17:50:43,880 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:50:43,880 [INFO] Publishing: finance-hugo
+2026-03-21 17:50:49,392 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:50:49,393 [INFO] Publishing: senior-hugo
+2026-03-21 17:52:30,661 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-21 17:52:30,665 [INFO] Publishing: stock-hugo
+2026-03-21 17:52:30,709 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:52:30,709 [INFO] Publishing: travel-hugo
+2026-03-21 17:53:47,754 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:53:47,755 [INFO] Publishing: travel1-hugo
+2026-03-21 17:54:59,252 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:54:59,254 [INFO] Publishing: travel2-hugo
+2026-03-21 17:56:12,405 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:56:12,405 [INFO] Publishing: travel3-hugo
+2026-03-21 17:57:36,181 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 17:57:36,181 [INFO] Publishing: travel4-hugo
+2026-03-21 17:59:02,412 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 17:59:02,412 [INFO] Publishing: tvshow-blogger
+2026-03-21 18:00:07,364 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:00:07,365 [INFO] Publishing: ud-blogger
+2026-03-21 18:01:39,560 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:01:39,578 [INFO] Publishing: kuta-wordpress
+2026-03-21 18:02:53,402 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:02:53,403 [INFO] Publishing: gap-kuta
+2026-03-21 18:03:24,328 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:03:24,328 [INFO] Publishing: stock-hugo
+2026-03-21 18:03:31,696 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:03:31,697 [INFO] Publishing: dividend-hugo
+2026-03-21 18:04:18,688 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:04:18,690 [INFO] Publishing: etf-hugo
+2026-03-21 18:05:00,294 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:05:00,295 [INFO] Publishing: sector-hugo
+2026-03-21 18:05:31,613 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:05:31,614 [INFO] Publishing: ipo-hugo
+2026-03-21 18:06:25,844 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:06:25,845 [INFO] Publishing: finance-hugo
+2026-03-21 18:06:31,127 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:06:31,127 [INFO] Publishing: senior-hugo
+2026-03-21 18:08:01,712 [INFO] Queue executing: travel1-hugo (remaining: 2)
+2026-03-21 18:08:01,713 [INFO] Publishing: travel1-hugo
+2026-03-21 18:08:01,750 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:08:01,751 [INFO] Publishing: travel-hugo
+2026-03-21 18:09:21,043 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:09:21,044 [INFO] Publishing: travel1-hugo
+2026-03-21 18:10:21,879 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:10:21,879 [INFO] Publishing: travel2-hugo
+2026-03-21 18:10:25,286 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 18:10:26,328 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 18:10:31,408 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:10:31,408 [INFO] Publishing: travel3-hugo
+2026-03-21 18:11:49,810 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:11:49,810 [INFO] Publishing: travel4-hugo
+2026-03-21 18:11:58,161 [INFO] Queue executing: gap-kuta (remaining: 1)
+2026-03-21 18:11:58,162 [INFO] Publishing: gap-kuta
+2026-03-21 18:12:42,580 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:12:42,580 [INFO] Publishing: tvshow-blogger
+2026-03-21 18:13:51,532 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:13:51,532 [INFO] Publishing: ud-blogger
+2026-03-21 18:14:48,100 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:14:48,101 [INFO] Publishing: kuta-wordpress
+2026-03-21 18:15:22,370 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-21 18:15:22,372 [INFO] Publishing: dividend-hugo
+2026-03-21 18:15:49,627 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 18:15:49,628 [INFO] Publishing: gap-kuta
+2026-03-21 18:16:15,598 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:16:15,599 [INFO] Publishing: stock-hugo
+2026-03-21 18:16:22,776 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:16:22,778 [INFO] Publishing: dividend-hugo
+2026-03-21 18:17:15,358 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:17:15,360 [INFO] Publishing: etf-hugo
+2026-03-21 18:17:48,273 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:17:48,273 [INFO] Publishing: sector-hugo
+2026-03-21 18:18:36,010 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:18:36,011 [INFO] Publishing: ipo-hugo
+2026-03-21 18:19:05,634 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:19:05,635 [INFO] Publishing: finance-hugo
+2026-03-21 18:19:10,884 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:19:10,884 [INFO] Publishing: senior-hugo
+2026-03-21 18:20:02,152 [INFO] Queue executing: etf-hugo (remaining: 1)
+2026-03-21 18:20:02,153 [INFO] Publishing: etf-hugo
+2026-03-21 18:20:02,233 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:20:02,233 [INFO] Publishing: travel-hugo
+2026-03-21 18:21:33,890 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:21:33,892 [INFO] Publishing: travel1-hugo
+2026-03-21 18:22:36,179 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:22:36,180 [INFO] Publishing: travel2-hugo
+2026-03-21 18:22:38,905 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 18:22:39,843 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 18:22:44,948 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:22:44,948 [INFO] Publishing: travel3-hugo
+2026-03-21 18:23:42,227 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-21 18:23:42,229 [INFO] Publishing: sector-hugo
+2026-03-21 18:24:09,974 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:24:09,977 [INFO] Publishing: travel4-hugo
+2026-03-21 18:25:20,001 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:25:20,002 [INFO] Publishing: tvshow-blogger
+2026-03-21 18:26:25,865 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:26:25,865 [INFO] Publishing: ud-blogger
+2026-03-21 18:28:07,325 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:28:07,325 [INFO] Publishing: kuta-wordpress
+2026-03-21 18:28:59,003 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 18:28:59,004 [INFO] Publishing: gap-kuta
+2026-03-21 18:29:27,139 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:29:27,140 [INFO] Publishing: stock-hugo
+2026-03-21 18:29:34,436 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:29:34,436 [INFO] Publishing: dividend-hugo
+2026-03-21 18:30:36,331 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:30:36,331 [INFO] Publishing: etf-hugo
+2026-03-21 18:31:10,249 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:31:10,250 [INFO] Publishing: sector-hugo
+2026-03-21 18:31:49,897 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:31:49,898 [INFO] Publishing: ipo-hugo
+2026-03-21 18:32:22,932 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:32:22,933 [INFO] Publishing: finance-hugo
+2026-03-21 18:32:28,215 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:32:28,215 [INFO] Publishing: senior-hugo
+2026-03-21 18:34:18,627 [INFO] Queue executing: travel2-hugo (remaining: 1)
+2026-03-21 18:34:18,640 [INFO] Publishing: travel2-hugo
+2026-03-21 18:34:18,855 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:34:18,855 [INFO] Publishing: travel-hugo
+2026-03-21 18:34:31,501 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 18:35:55,390 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:35:55,391 [INFO] Publishing: travel1-hugo
+2026-03-21 18:37:04,597 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:37:04,599 [INFO] Publishing: travel2-hugo
+2026-03-21 18:37:09,311 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 18:37:10,299 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 18:37:15,379 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:37:15,379 [INFO] Publishing: travel3-hugo
+2026-03-21 18:37:32,572 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-21 18:37:32,573 [INFO] Publishing: ipo-hugo
+2026-03-21 18:38:33,140 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:38:33,141 [INFO] Publishing: travel4-hugo
+2026-03-21 18:39:35,054 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:39:35,054 [INFO] Publishing: tvshow-blogger
+2026-03-21 18:40:44,819 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:40:44,819 [INFO] Publishing: ud-blogger
+2026-03-21 18:41:45,243 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:41:45,243 [INFO] Publishing: kuta-wordpress
+2026-03-21 18:42:44,336 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 18:42:44,337 [INFO] Publishing: gap-kuta
+2026-03-21 18:43:10,142 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:43:10,142 [INFO] Publishing: stock-hugo
+2026-03-21 18:43:17,741 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:43:17,742 [INFO] Publishing: dividend-hugo
+2026-03-21 18:44:07,559 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:44:07,560 [INFO] Publishing: etf-hugo
+2026-03-21 18:44:43,287 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:44:43,287 [INFO] Publishing: sector-hugo
+2026-03-21 18:45:26,879 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:45:26,879 [INFO] Publishing: ipo-hugo
+2026-03-21 18:45:59,012 [INFO] CATCHUP: finance-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:45:59,013 [INFO] Publishing: finance-hugo
+2026-03-21 18:46:04,289 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:46:04,290 [INFO] Publishing: senior-hugo
+2026-03-21 18:47:42,896 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-21 18:47:42,918 [INFO] Publishing: finance-hugo
+2026-03-21 18:47:42,965 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:47:42,965 [INFO] Publishing: travel-hugo
+2026-03-21 18:48:55,529 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:48:55,530 [INFO] Publishing: travel1-hugo
+2026-03-21 18:49:50,249 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:49:50,250 [INFO] Publishing: travel2-hugo
+2026-03-21 18:50:17,132 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 18:50:18,167 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 18:50:23,186 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:50:23,186 [INFO] Publishing: travel3-hugo
+2026-03-21 18:51:43,927 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 18:51:43,928 [INFO] Publishing: travel4-hugo
+2026-03-21 18:52:49,622 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:52:49,623 [INFO] Publishing: tvshow-blogger
+2026-03-21 18:53:57,089 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:53:57,089 [INFO] Publishing: ud-blogger
+2026-03-21 18:54:54,304 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:54:54,305 [INFO] Publishing: kuta-wordpress
+2026-03-21 18:55:45,321 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 18:55:45,322 [INFO] Publishing: gap-kuta
+2026-03-21 18:56:09,494 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:56:09,494 [INFO] Publishing: stock-hugo
+2026-03-21 18:56:16,848 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:56:16,849 [INFO] Publishing: dividend-hugo
+2026-03-21 18:57:06,531 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:57:06,531 [INFO] Publishing: etf-hugo
+2026-03-21 18:57:41,019 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:57:41,019 [INFO] Publishing: sector-hugo
+2026-03-21 18:58:24,265 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:58:24,265 [INFO] Publishing: ipo-hugo
+2026-03-21 18:59:11,343 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:59:11,344 [INFO] Publishing: finance-hugo
+2026-03-21 18:59:16,621 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 18:59:16,621 [INFO] Publishing: senior-hugo
+2026-03-21 19:01:12,986 [INFO] Queue executing: travel3-hugo (remaining: 1)
+2026-03-21 19:01:12,986 [INFO] Publishing: travel3-hugo
+2026-03-21 19:01:13,033 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:01:13,033 [INFO] Publishing: travel-hugo
+2026-03-21 19:02:36,776 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:02:36,776 [INFO] Publishing: travel1-hugo
+2026-03-21 19:03:43,199 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:03:43,199 [INFO] Publishing: travel2-hugo
+2026-03-21 19:04:12,379 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 19:04:13,322 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 19:04:18,476 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:04:18,476 [INFO] Publishing: travel3-hugo
+2026-03-21 19:05:37,753 [INFO] Queue executing: tvshow-blogger (remaining: 0)
+2026-03-21 19:05:37,753 [INFO] Publishing: tvshow-blogger
+2026-03-21 19:05:41,193 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 19:05:41,194 [INFO] Publishing: travel4-hugo
+2026-03-21 19:06:52,229 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:06:52,229 [INFO] Publishing: tvshow-blogger
+2026-03-21 19:08:05,862 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:08:05,862 [INFO] Publishing: ud-blogger
+2026-03-21 19:09:07,524 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:09:07,525 [INFO] Publishing: kuta-wordpress
+2026-03-21 19:10:11,700 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:10:11,701 [INFO] Publishing: gap-kuta
+2026-03-21 19:10:41,252 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:10:41,252 [INFO] Publishing: stock-hugo
+2026-03-21 19:10:48,546 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:10:48,546 [INFO] Publishing: dividend-hugo
+2026-03-21 19:11:44,724 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:11:44,724 [INFO] Publishing: etf-hugo
+2026-03-21 19:12:10,095 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:12:10,095 [INFO] Publishing: sector-hugo
+2026-03-21 19:12:36,184 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:12:36,185 [INFO] Publishing: ipo-hugo
+2026-03-21 19:13:28,547 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:13:28,548 [INFO] Publishing: finance-hugo
+2026-03-21 19:13:33,844 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:13:33,845 [INFO] Publishing: senior-hugo
+2026-03-21 19:15:26,520 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:15:26,520 [INFO] Publishing: travel-hugo
+2026-03-21 19:16:48,995 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:16:48,996 [INFO] Publishing: travel1-hugo
+2026-03-21 19:17:51,968 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:17:51,968 [INFO] Publishing: travel2-hugo
+2026-03-21 19:17:54,650 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 19:17:55,599 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 19:18:00,680 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:18:00,680 [INFO] Publishing: travel3-hugo
+2026-03-21 19:19:24,104 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 19:19:24,104 [INFO] Publishing: travel4-hugo
+2026-03-21 19:20:32,389 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:20:32,389 [INFO] Publishing: tvshow-blogger
+2026-03-21 19:21:24,781 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:21:24,782 [INFO] Publishing: ud-blogger
+2026-03-21 19:22:40,777 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:22:40,778 [INFO] Publishing: kuta-wordpress
+2026-03-21 19:23:50,249 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:23:50,250 [INFO] Publishing: gap-kuta
+2026-03-21 19:24:14,973 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:24:14,974 [INFO] Publishing: stock-hugo
+2026-03-21 19:24:22,233 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:24:22,233 [INFO] Publishing: dividend-hugo
+2026-03-21 19:25:18,298 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:25:18,298 [INFO] Publishing: etf-hugo
+2026-03-21 19:26:00,348 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:26:00,349 [INFO] Publishing: sector-hugo
+2026-03-21 19:26:28,826 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:26:28,827 [INFO] Publishing: ipo-hugo
+2026-03-21 19:27:18,588 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:27:18,588 [INFO] Publishing: finance-hugo
+2026-03-21 19:27:23,943 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:27:23,943 [INFO] Publishing: senior-hugo
+2026-03-21 19:29:19,259 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:29:19,259 [INFO] Publishing: travel-hugo
+2026-03-21 19:30:27,270 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:30:27,271 [INFO] Publishing: travel1-hugo
+2026-03-21 19:31:41,078 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:31:41,079 [INFO] Publishing: travel2-hugo
+2026-03-21 19:32:00,858 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 19:32:01,756 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 19:32:06,837 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:32:06,837 [INFO] Publishing: travel3-hugo
+2026-03-21 19:33:35,405 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 19:33:35,405 [INFO] Publishing: travel4-hugo
+2026-03-21 19:34:40,301 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:34:40,301 [INFO] Publishing: tvshow-blogger
+2026-03-21 19:35:54,771 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:35:54,771 [INFO] Publishing: ud-blogger
+2026-03-21 19:36:54,752 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:36:54,753 [INFO] Publishing: kuta-wordpress
+2026-03-21 19:38:05,197 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:38:05,197 [INFO] Publishing: gap-kuta
+2026-03-21 19:38:29,969 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:38:29,970 [INFO] Publishing: stock-hugo
+2026-03-21 19:38:37,114 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:38:37,114 [INFO] Publishing: dividend-hugo
+2026-03-21 19:39:26,003 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:39:26,005 [INFO] Publishing: etf-hugo
+2026-03-21 19:40:24,473 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:40:24,474 [INFO] Publishing: sector-hugo
+2026-03-21 19:40:56,573 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:40:56,574 [INFO] Publishing: ipo-hugo
+2026-03-21 19:41:52,086 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:41:52,087 [INFO] Publishing: finance-hugo
+2026-03-21 19:41:57,397 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:41:57,398 [INFO] Publishing: senior-hugo
+2026-03-21 19:43:53,929 [INFO] Queue executing: travel4-hugo (remaining: 1)
+2026-03-21 19:43:53,952 [INFO] Publishing: travel4-hugo
+2026-03-21 19:43:54,012 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:43:54,013 [INFO] Publishing: travel-hugo
+2026-03-21 19:45:26,867 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:45:26,868 [INFO] Publishing: travel1-hugo
+2026-03-21 19:46:44,589 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:46:44,590 [INFO] Publishing: travel2-hugo
+2026-03-21 19:46:47,855 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 19:46:48,970 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 19:46:54,047 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:46:54,048 [INFO] Publishing: travel3-hugo
+2026-03-21 19:47:58,549 [INFO] Queue executing: ud-blogger (remaining: 0)
+2026-03-21 19:47:58,551 [INFO] Publishing: ud-blogger
+2026-03-21 19:48:41,039 [INFO] CATCHUP: travel4-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:48:41,040 [INFO] Publishing: travel4-hugo
+2026-03-21 19:49:52,962 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:49:52,963 [INFO] Publishing: tvshow-blogger
+2026-03-21 19:51:13,083 [INFO] CATCHUP: ud-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:51:13,084 [INFO] Publishing: ud-blogger
+2026-03-21 19:52:20,980 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:52:20,981 [INFO] Publishing: kuta-wordpress
+2026-03-21 19:53:26,229 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:53:26,230 [INFO] Publishing: gap-kuta
+2026-03-21 19:53:52,550 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:53:52,550 [INFO] Publishing: stock-hugo
+2026-03-21 19:53:59,845 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:53:59,846 [INFO] Publishing: dividend-hugo
+2026-03-21 19:54:55,133 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:54:55,134 [INFO] Publishing: etf-hugo
+2026-03-21 19:55:23,497 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:55:23,498 [INFO] Publishing: sector-hugo
+2026-03-21 19:55:56,614 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:55:56,615 [INFO] Publishing: ipo-hugo
+2026-03-21 19:56:38,412 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:56:38,412 [INFO] Publishing: finance-hugo
+2026-03-21 19:56:43,677 [INFO] CATCHUP: senior-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 19:56:43,678 [INFO] Publishing: senior-hugo
+2026-03-21 19:57:20,406 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:57:20,407 [INFO] Publishing: travel-hugo
+2026-03-21 19:58:39,566 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 19:58:39,567 [INFO] Publishing: travel1-hugo
+2026-03-21 20:00:00,930 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 20:00:00,931 [INFO] Publishing: travel2-hugo
+2026-03-21 20:00:11,398 [ERROR]   ERR: s=extra_vars)
+  File "/Users/twinssn/Projects/5000/shared/prompt_builder.py", line 15, in build
+    raise ValueError("Unknown prompt_id: " + prompt_id)
+ValueError: Unknown prompt_id: travel2_heritage
+
+2026-03-21 20:00:12,420 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 20:00:17,541 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 20:00:17,542 [INFO] Publishing: travel3-hugo
+2026-03-21 20:01:59,049 [INFO] CATCHUP: travel4-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-21 20:01:59,051 [INFO] Publishing: travel4-hugo
+2026-03-21 20:03:26,977 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 20:03:26,977 [INFO] Publishing: tvshow-blogger

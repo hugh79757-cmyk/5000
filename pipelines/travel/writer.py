@@ -115,6 +115,28 @@ def _build_data_block(data):
             lines.append(f"홈페이지: {item['homepage']}")
         if item.get("tel"):
             lines.append(f"전화: {item['tel']}")
+        if item.get("eventstartdate"):
+            lines.append(f"행사시작일: {item['eventstartdate']}")
+        if item.get("eventenddate"):
+            lines.append(f"행사종료일: {item['eventenddate']}")
+        if item.get("playtime"):
+            lines.append(f"운영시간: {item['playtime']}")
+        if item.get("eventplace"):
+            lines.append(f"행사장소: {item['eventplace']}")
+        if item.get("usetimefestival"):
+            lines.append(f"입장료: {item['usetimefestival']}")
+        if item.get("sponsor1"):
+            lines.append(f"주최: {item['sponsor1']}")
+        if item.get("program"):
+            lines.append(f"프로그램: {item['program']}")
+        if item.get("subevent"):
+            lines.append(f"부대행사: {item['subevent']}")
+        if item.get("agelimit"):
+            lines.append(f"이용제한: {item['agelimit']}")
+        if item.get("blog_snippets"):
+            lines.append("네이버 블로그 참고정보 (사실 확인 불가, 참고용):")
+            for sn in item["blog_snippets"][:6]:
+                lines.append(f"  - {sn}")
         if item.get("firstImageUrl"):
             lines.append(f"이미지: {item['firstImageUrl']}")
 
@@ -126,20 +148,6 @@ def _build_data_block(data):
             lines.append(f"시설: {', '.join(bi['facilities'][:5])}")
         if bi.get("targets"):
             lines.append(f"추천 대상: {', '.join(bi['targets'][:3])}")
-        # 다이닝코드 데이터 (메뉴, 영업시간, 주차, 평점)
-        dc = item.get("diningcode", {})
-        if dc.get("main_menus"):
-            lines.append(f"대표메뉴: {', '.join(dc['main_menus'][:5])}")
-        if dc.get("hours"):
-            lines.append(f"영업시간: {dc['hours']}")
-        if dc.get("closed_days"):
-            lines.append(f"휴무일: {dc['closed_days']}")
-        if dc.get("parking"):
-            lines.append(f"주차: {dc['parking']}")
-        if dc.get("rating"):
-            lines.append(f"평점: {dc['rating']}")
-        if dc.get("keywords"):
-            lines.append(f"특징: {', '.join(dc['keywords'][:5])}")
         # 다이닝코드 데이터 (메뉴, 영업시간, 주차, 평점)
         dc = item.get("diningcode", {})
         if dc.get("main_menus"):
@@ -393,7 +401,7 @@ def _post_process(content):
 
 def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
     """생성된 콘텐츠의 H2 수, 글자수, 금지표현을 검증하고 미달 시 재생성"""
-    BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며"]
+    BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요", "느껴보세요"]
     
     for attempt in range(max_retries + 1):
         # 검증
@@ -404,7 +412,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
         issues = []
         if h2_count > 6:
             issues.append(f"H2 {h2_count}개→4개 필요")
-        if char_count < 1800:
+        if char_count < 2000:
             issues.append(f"글자수 {char_count}→2200 필요")
         if banned_found:
             issues.append(f"금지표현: {banned_found}")
@@ -420,7 +428,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
             fix_instruction = f"""이전 글에 문제가 있어 다시 작성합니다.
 수정사항:
 - H2(##)는 정확히 4개만 사용하세요. 현재 {h2_count}개입니다.
-- 글자수는 2,200자 이상이어야 합니다. 현재 {char_count}자입니다.
+- 글자수는 반드시 2,200자 이상이어야 합니다. 현재 {char_count}자입니다. 각 H3 섹션을 8문장 이상, 각 H2를 5문장 이상으로 충분히 서술하세요.
 - 금지 표현({', '.join(BANNED)})을 절대 사용하지 마세요.
 - 나머지 규칙은 동일합니다.
 
@@ -458,9 +466,38 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
                 content = "\n".join(lines)
                 logger.info("H1 자동 보정: %d개 → H2 변환", len(h1_lines))
 
+            # 미완성 문장 후처리 ("하시기 .", "보시기 ." 등)
+            content = re.sub(r'하시기\s*\.', '하는 것이 좋습니다.', content)
+            content = re.sub(r'보시기\s*\.', '보는 것을 추천합니다.', content)
+            content = re.sub(r'드시기\s*\.', '드시는 것을 추천합니다.', content)
+            content = re.sub(r'참고하시기\s*\.', '참고하는 것이 좋습니다.', content)
+            content = re.sub(r'보내시기\s*\.', '보내는 것을 추천합니다.', content)
+            content = re.sub(r'즐기시기\s*\.', '즐기는 것을 추천합니다.', content)
+            
+            # 비한글 외래어 오류 제거 (러시아어 등)
+            content = re.sub(r'[а-яА-ЯёЁ]+', '', content)
+            
+            # 2025→2026 날짜 변환 (TourAPI 원본 데이터 잔재)
+            content = content.replace('2025년', '2026년')
+            content = content.replace('2024년', '2026년')
+            
             # 금지표현 자동 제거
             for b in banned_found:
                 content = content.replace(b, "")
+            
+            # "만원대", "약 N만원" 등 애매한 가격 표현 강제 제거
+            price_patterns = [
+                r'약\s*\d+[,.]?\d*\s*만\s*원대?',
+                r'\d+[,.]?\d*\s*만\s*원대',
+                r'가격대는?\s*약?\s*\d+[,.]?\d*\s*만\s*원',
+                r'1인당\s*약?\s*\d+[,.]?\d*\s*만\s*원',
+                r'인당\s*약?\s*\d+[,.]?\d*\s*만\s*원',
+                r'평균\s*약?\s*\d+[,.]?\d*\s*만\s*원',
+            ]
+            for pp in price_patterns:
+                content = re.sub(pp, '', content)
+            # 빈 문장 정리 (패턴 제거 후 남은 빈 줄)
+            content = re.sub(r'\n\s*\n\s*\n', '\n\n', content)
             
             return content
     
@@ -528,6 +565,29 @@ def generate_content(data, blog_id="travel-hugo"):
                         logger.info(f"다이닝코드: {name} → 메뉴 {len(dc.get('main_menus',[]))}개, 평점 {dc.get('rating','')}")
         except Exception as e:
             logger.warning(f"다이닝코드 enrichment 실패 (무시): {e}")
+
+    # 축제 파이프라인이면 네이버 블로그 검색으로 추가 정보 보강
+    if source_type in ("korservice",) and prompt_id == "travel1_festival":
+        try:
+            from core.naver_blog_api import load_naver_blog_api
+            blog_api = load_naver_blog_api()
+            for item in data.get("items", []):
+                name = item.get("title", item.get("facltNm", ""))
+                if not name:
+                    continue
+                queries = [f"{name} 프로그램", f"{name} 주차 교통", f"{name} 후기 팁"]
+                snippets = []
+                for q in queries:
+                    results = blog_api.search(q, display=3, sort="sim")
+                    for r in results:
+                        desc = r.get("description", "").replace("<b>", "").replace("</b>", "")
+                        if desc and len(desc) > 20:
+                            snippets.append(desc[:150])
+                if snippets:
+                    item["blog_snippets"] = snippets[:6]
+                    logger.info(f"축제 블로그 보강: {name} → {len(snippets)}개 스니펫")
+        except Exception as e:
+            logger.warning(f"축제 블로그 enrichment 실패 (무시): {e}")
 
     data_block = _build_data_block(data)
 
@@ -628,24 +688,24 @@ def generate_content(data, blog_id="travel-hugo"):
         "travel1-hugo": [
             "2026 {region} {theme} 일정과 입장료 총정리",
             "{region} {theme} 가볼만한 곳 {count}선 추천",
-            "이번 주말 {region} {theme}, 알고 가면 2배 즐긴다",
+            "{region} {theme} 일정과 체험 프로그램 정리",
             "{region} {theme} 일정부터 주차까지 한눈에 보기",
-            "2026 {region} 봄 축제 {count}곳 일정 총정리",
+            "2026 {region} 축제 {count}곳 일정 총정리",
             "{region} {theme}, 아이와 함께 가기 좋은 {count}곳",
-            "{region} {theme} 근처 맛집까지 한번에 정리",
+            "{region} {theme} 교통과 주차 정보 총정리",
             "주말 나들이로 딱! {region} {theme} {count}곳 추천",
             "{region} 무료 축제 {count}곳, 일정과 위치 총정리",
-            "2026 {region} 가을 축제 {count}곳 완벽 가이드",
+            "2026 {region} 축제 {count}곳 일정과 위치 정리",
             "{region} {theme} 주차장 위치와 요금 정리",
             "{region} {theme} 대중교통 가는 법과 셔틀 안내",
             "{region} {theme} 체험 프로그램 {count}가지 비교",
             "비 오는 날에도 즐길 수 있는 {region} {theme} 정리",
-            "{region} {theme} 푸드존 메뉴와 가격 미리보기",
+            "{region} {theme} 주요 프로그램과 체험 정리",
             "{region} {theme} 포토존 위치와 인생샷 팁 정리",
             "올해 처음 열리는 {region} {theme} 일정 총정리",
             "{region} {theme} 야간 프로그램과 조명 행사 안내",
             "{region} {theme}와 묶어 갈 당일치기 코스 추천",
-            "{region} {theme} 사전예약 방법과 할인 정보 정리",
+            "{region} {theme} 사전예약과 입장 안내 정리",
         ],
         "travel2-hugo": [
             "{region} {theme} 탐방, 입장료와 운영시간 총정리",
@@ -670,26 +730,26 @@ def generate_content(data, blog_id="travel-hugo"):
             "{region} 숨은 {theme} {count}곳, 현지인 추천 코스",
         ],
         "travel3-hugo": [
-            "{region} {theme} 현지인이 추천하는 맛집 {count}곳",
+            "{region} {theme} 현지인이 추천하는 식당 {count}곳",
             "{region}에 가면 꼭 먹어야 할 {theme} {count}선",
-            "{region} {theme} 가성비 맛집 {count}곳 메뉴와 가격 정리",
-            "현지인만 아는 {region} {theme} 맛집 {count}곳 총정리",
-            "{region} {theme} 웨이팅 없는 맛집 {count}곳 추천",
-            "{region} 로컬 맛집 {count}곳, 메뉴와 가격까지 정리",
-            "{region} {theme} 혼밥하기 좋은 맛집 {count}곳",
-            "여행 중 들르기 좋은 {region} {theme} 맛집 {count}곳",
-            "주말 {region} {theme} 맛집 {count}곳 총정리",
+            "{region} {theme} 가성비 식당 {count}곳 메뉴와 위치 정리",
+            "현지인만 아는 {region} {theme} {count}곳 총정리",
+            "{region} {theme} 웨이팅 없는 식당 {count}곳 추천",
+            "{region} 로컬 맛집 {count}곳 메뉴와 영업 정보 정리",
+            "{region} {theme} 혼밥하기 좋은 식당 {count}곳",
+            "여행 중 들르기 좋은 {region} {theme} {count}곳",
+            "주말 {region} {theme} {count}곳 총정리",
             "{region} {angle} 맛집 {count}곳, 영업시간과 휴무일 정리",
-            "{region} {theme} 1만원 이하 맛집 {count}곳 비교",
-            "{region} {theme} 주차 가능한 맛집 {count}곳 정리",
-            "아이와 가기 좋은 {region} {theme} 맛집 {count}곳",
-            "{region} {theme} 오래된 노포 맛집 {count}곳 탐방",
+            "{region} {theme} 가성비 식당 {count}곳 비교",
+            "{region} {theme} 주차 가능한 식당 {count}곳 정리",
+            "아이와 가기 좋은 {region} {theme} {count}곳",
+            "{region} {theme} 오래된 노포 {count}곳 탐방",
             "{region} {theme} 점심 특선 메뉴 비교 {count}곳",
-            "관광지 근처 {region} {theme} 맛집 {count}곳 동선 정리",
-            "{region} {theme} 예약 필수 맛집 {count}곳과 연락처",
-            "{region} 새벽이나 심야 영업 {theme} 맛집 {count}곳",
-            "{region} {theme} 테라스와 뷰 좋은 맛집 {count}곳 비교",
-            "포장이나 배달 가능한 {region} {theme} 맛집 {count}곳",
+            "관광지 근처 {region} {theme} {count}곳 동선 정리",
+            "{region} {theme} 예약 필수 식당 {count}곳과 연락처",
+            "{region} 새벽이나 심야 영업 {theme} {count}곳",
+            "{region} {theme} 테라스와 뷰 좋은 식당 {count}곳 비교",
+            "포장이나 배달 가능한 {region} {theme} {count}곳",
         ],
         "travel4-hugo": [
             "{region} 당일치기 여행 코스 {count}곳 동선 총정리",
@@ -701,7 +761,7 @@ def generate_content(data, blog_id="travel-hugo"):
             "{region} 드라이브 코스 {count}곳, 주차 정보 포함",
             "{region}에서 하루 만에 즐기는 {theme} {count}곳 플랜",
             "{region} 대중교통으로 가능한 여행 코스 {count}곳",
-            "{region} {theme} 맛집까지 포함한 풀코스 {count}곳",
+            "{region} {theme} 식당까지 포함한 풀코스 {count}곳",
             "커플 여행으로 좋은 {region} {theme} {count}곳 코스",
             "{region} {theme} 반나절 코스와 점심 맛집 추천",
             "뚜벅이를 위한 {region} {theme} {count}곳 코스 정리",
@@ -746,7 +806,7 @@ def generate_content(data, blog_id="travel-hugo"):
 - 20~35자
 - 지역명 반드시 포함
 - 조사(에서, 의, 과, 와, 으로, 부터)를 넣어 자연스러운 문장으로 작성
-- 서술어(총정리, 비교, 추천 리스트, 정리, 한눈에 보기, 가격 정리, 코스 안내)로 마무리
+- 서술어(총정리, 비교, 추천 리스트, 정리, 한눈에 보기, 코스 안내)로 마무리
 - 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
 - 특수기호 금지 (콜론, 느낌표, 하이픈)
 - 가격 정보는 제목에 넣지 않기 (본문에서 다룸)
@@ -777,6 +837,9 @@ def generate_content(data, blog_id="travel-hugo"):
     if title_result and title_result.get("content"):
         generated_title = title_result["content"].strip().strip('"').strip("'").strip()
         generated_title = re.sub(r'^(제목[:\s]*|Title[:\s]*)', '', generated_title).strip()
+        # "1곳" 어색한 제목 보정
+        if '1곳' in generated_title:
+            generated_title = generated_title.replace(' 1곳', '').replace('1곳 ', '')
         if len(generated_title) > 5:
             import random as _r
             import re as _re
@@ -784,7 +847,7 @@ def generate_content(data, blog_id="travel-hugo"):
             ban_phrases = ['에서 즐기는', '에서 만나는', '에서 즐길 수 있는']
             for ban in ban_endings:
                 if generated_title.endswith(ban):
-                    replacements = ['추천', '한눈에 보기', '가격 비교', '코스 추천', '비교', '체크리스트', '방문 전 필독']
+                    replacements = ['추천', '한눈에 보기', '메뉴 비교', '코스 추천', '비교', '체크리스트', '방문 전 필독']
                     generated_title = generated_title[:-len(ban)].rstrip() + ' ' + _r.choice(replacements)
                     break
             for bp in ban_phrases:
