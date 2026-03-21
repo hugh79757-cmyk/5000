@@ -201,6 +201,8 @@ def run_car(blog_cfg):
         source_id=str(topic['car_id']),
         prompt_id=topic["post_type"] if topic else blog_cfg.get("post_type", ""),
         model="gpt-4o-mini",
+        segment=data.get("segment", ""),
+        fuel_type=data.get("fuel_type", ""),
     )
 
     c = conn.cursor()

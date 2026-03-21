@@ -36,7 +36,7 @@ def generate(system_prompt, user_prompt, tier="default"):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            max_tokens=tier_config.get("max_tokens", 4096),
+            # max_tokens 제한 제거 — GPT가 필요한 만큼 생성
             temperature=tier_config.get("temperature", 0.7),
         )
         content = response.choices[0].message.content

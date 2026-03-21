@@ -50,7 +50,7 @@ def _extract_description(body_md):
         line = line.strip()
         if not line:
             continue
-        if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--") or line.startswith("|") or line.startswith("<"):
+        if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--") or line.startswith("|"):
             continue
         clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]*\)', r'\1', line)
         if len(clean) > 20:
