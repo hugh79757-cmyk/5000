@@ -87,18 +87,38 @@ def _drain_queue():
         time.sleep(PUBLISH_DELAY)
 
 
+# 일일 catchup 시도 카운터: {blog_id: count}
+_catchup_attempts = {}
+_catchup_date = None
+
+MAX_CATCHUP_PER_BLOG = 3  # 블로그당 하루 최대 보충 시도 횟수
+
+
 def catchup_missed():
-    """놓친 스케줄 보충 발행 — 5분마다 체크"""
+    """놓친 스케줄 보충 발행 — 5분마다 체크, 블로그당 일일 3회 상한"""
+    global _catchup_attempts, _catchup_date
+
     config = load_config()
     blogs = config.get("blogs", [])
     now = datetime.now()
     current_hour = now.hour
+    today_str = now.strftime("%Y-%m-%d")
+
+    # 날짜 바뀌면 카운터 초기화
+    if _catchup_date != today_str:
+        _catchup_attempts = {}
+        _catchup_date = today_str
 
     for blog in blogs:
         if blog.get("status") != "active":
             continue
         blog_id = blog["id"]
         pipeline = blog.get("pipeline", "")
+
+        # 일일 상한 체크
+        attempts = _catchup_attempts.get(blog_id, 0)
+        if attempts >= MAX_CATCHUP_PER_BLOG:
+            continue
 
         # 오늘 발행해야 할 횟수: 현재 시각 이전 스케줄 수
         times = blog.get("schedule", {}).get("times", [])
@@ -135,12 +155,12 @@ def catchup_missed():
 
         missed = expected - actual
         if missed > 0:
-            # 블로그당 최대 1건만 보충 (과다 catchup 방지)
-            logger.info("CATCHUP: " + blog_id + " expected=" + str(expected) + " actual=" + str(actual) + " missed=" + str(missed) + " -> 1건만 보충")
+            _catchup_attempts[blog_id] = attempts + 1
+            logger.info("CATCHUP: " + blog_id + " expected=" + str(expected) + " actual=" + str(actual) + " missed=" + str(missed) + " attempt=" + str(attempts + 1) + "/" + str(MAX_CATCHUP_PER_BLOG))
             try:
                 success = run_publish(blog_id)
                 if not success:
-                    logger.warning("CATCHUP: " + blog_id + " 보충 실패, 다음 정규 스케줄에서 재시도")
+                    logger.warning("CATCHUP: " + blog_id + " 보충 실패 (" + str(attempts + 1) + "/" + str(MAX_CATCHUP_PER_BLOG) + ")")
             except Exception as e:
                 logger.error("CATCHUP: " + blog_id + " 예외: " + str(e))
             time.sleep(5)
