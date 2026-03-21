@@ -197,6 +197,9 @@ blogs:
     weight: 0.6
   - type: korservice_heritage
     weight: 0.4
+  fetch_sources:
+  - type: heritage
+    weight: 1.0
   id: travel2-hugo
   name: 문화유산
   pipeline: travel
