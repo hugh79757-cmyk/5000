@@ -143,6 +143,25 @@ def run_car(blog_cfg):
         return None
 
     body = validate_body(body, data)
+
+    # 글자수 미달 시 프롬프트 힌트 추가하여 재생성
+    MIN_CHARS = 2200
+    if len(body) < MIN_CHARS:
+        logger.warning(f"글자수 {len(body)}자 미달({MIN_CHARS}자) — 힌트 추가 재생성")
+        length_hint = (
+            "\n\n[추가 지시]\n"
+            "이전 응답이 너무 짧았습니다. 반드시 2,500자 이상 작성하세요.\n"
+            "각 H2 섹션을 5문장 이상으로 쓰고, 모든 숫자에 해석 문장을 붙이세요.\n"
+            "표 아래에 핵심 요약 문장을 추가하세요. 절대 글을 일찍 끝내지 마세요."
+        )
+        body2 = generate_car(prompt_text + length_hint, data)
+        if body2:
+            body2 = validate_body(body2, data)
+            if len(body2) >= len(body):
+                body = body2
+                logger.info(f"재생성 완료: {len(body)}자")
+            else:
+                logger.warning(f"재생성도 미달: {len(body2)}자 — 긴 쪽 유지")
     title = generate_title(data, site_id=car_site_id)
     slug = make_slug(title)
     logger.info("제목: " + title)

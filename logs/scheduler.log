@@ -2209,3 +2209,51 @@ expected <block end>, but found '-'
 2026-03-21 14:09:50,790 [INFO] Publishing: travel1-hugo
 2026-03-21 14:09:50,863 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
 2026-03-21 14:09:50,863 [INFO] Publishing: travel-hugo
+2026-03-21 14:10:35,833 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:10:35,834 [INFO] Publishing: travel1-hugo
+2026-03-21 14:11:54,582 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:11:54,583 [INFO] Publishing: travel2-hugo
+2026-03-21 14:13:19,820 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:13:19,821 [INFO] Publishing: travel3-hugo
+2026-03-21 14:14:03,754 [INFO] Queue executing: tvshow-blogger (remaining: 0)
+2026-03-21 14:14:03,755 [INFO] Publishing: tvshow-blogger
+2026-03-21 14:14:40,768 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:14:40,769 [INFO] Publishing: travel4-hugo
+2026-03-21 14:15:46,510 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:15:46,511 [INFO] Publishing: tvshow-blogger
+2026-03-21 14:16:51,591 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:16:51,592 [INFO] Publishing: ud-blogger
+2026-03-21 14:17:38,137 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:17:38,138 [INFO] Publishing: kuta-wordpress
+2026-03-21 14:18:25,558 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:18:25,559 [INFO] Publishing: gap-kuta
+2026-03-21 14:18:54,114 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:18:54,114 [INFO] Publishing: stock-hugo
+2026-03-21 14:19:42,742 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:19:42,743 [INFO] Publishing: dividend-hugo
+2026-03-21 14:20:27,453 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:20:27,454 [INFO] Publishing: etf-hugo
+2026-03-21 14:21:09,428 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:21:09,429 [INFO] Publishing: sector-hugo
+2026-03-21 14:22:03,976 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:22:03,977 [INFO] Publishing: ipo-hugo
+2026-03-21 14:22:50,280 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:22:50,281 [INFO] Publishing: finance-hugo
+2026-03-21 14:22:55,536 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:22:55,536 [INFO] Publishing: senior-hugo
+2026-03-21 14:24:56,627 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:24:56,627 [INFO] Publishing: travel-hugo
+2026-03-21 14:26:38,418 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:26:38,419 [INFO] Publishing: travel1-hugo
+2026-03-21 14:28:33,669 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:28:33,670 [INFO] Publishing: travel2-hugo
+2026-03-21 14:30:19,697 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:30:19,698 [INFO] Publishing: travel3-hugo
+2026-03-21 14:31:54,676 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:31:54,677 [INFO] Publishing: travel4-hugo
+2026-03-21 14:33:02,835 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:33:02,836 [INFO] Publishing: tvshow-blogger
+2026-03-21 14:34:12,037 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:34:12,039 [INFO] Publishing: ud-blogger
+2026-03-21 14:35:08,417 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:35:08,417 [INFO] Publishing: kuta-wordpress

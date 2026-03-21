@@ -34,11 +34,11 @@ def select_topic(conn, site_id='hotissue', days_window=7, skip_ids=None, post_ty
     recent_keys = {r[0] for r in recent}
     if post_type:
         topics = c.execute('''
-            SELECT * FROM topics WHERE status = 'pending' AND site_id = ? AND post_type = ? ORDER BY priority DESC
+            SELECT * FROM topics WHERE status = 'pending' AND site_id = ? AND post_type = ? ORDER BY priority DESC, RANDOM()
         ''', (site_id, post_type)).fetchall()
     else:
         topics = c.execute('''
-            SELECT * FROM topics WHERE status = 'pending' AND site_id = ? ORDER BY priority DESC
+            SELECT * FROM topics WHERE status = 'pending' AND site_id = ? ORDER BY priority DESC, RANDOM()
         ''', (site_id,)).fetchall()
     skip_set = set(skip_ids) if skip_ids else set()
     for t in topics:
