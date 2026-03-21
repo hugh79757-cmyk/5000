@@ -3240,3 +3240,5 @@ ValueError: Unknown prompt_id: travel2_heritage
 2026-03-21 20:01:59,051 [INFO] Publishing: travel4-hugo
 2026-03-21 20:03:26,977 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
 2026-03-21 20:03:26,977 [INFO] Publishing: tvshow-blogger
+2026-03-21 20:09:07,972 [INFO] CATCHUP: ud-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-21 20:09:07,973 [INFO] Publishing: ud-blogger
