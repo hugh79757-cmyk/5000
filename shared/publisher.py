@@ -178,6 +178,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
 
+
     # 내부 링크 삽입
     blog_id_for_links = blog_cfg.get("id", "")
     related = _get_related_posts(blog_id_for_links, slug)
@@ -213,7 +214,7 @@ def deploy_site(site_path, cf_project):
     return True
 
 
-def publish(blog_id, title, body_md, body_html=None,
+def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
             category="", tags="", thumbnail_url="",
             data_source="", source_id="", prompt_id="",
             model="", wp_category=None):
@@ -288,7 +289,21 @@ def publish(blog_id, title, body_md, body_html=None,
             html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
         result = publish_to_wordpress(wp_url, wp_user, wp_pass, title, html_content, categories=[wp_category] if wp_category else None, featured_image_url=thumbnail_url)
 
+
     else:
+        # ── 쿠팡 파트너스 링크 삽입 (CAR만) ──
+        if data_source == "car_db":
+            try:
+                from shared.coupang_car import CoupangCar
+                coupang = CoupangCar()
+                if coupang.is_configured():
+                    coupang_md = coupang.get_car_product_links(segment=segment, fuel_type=fuel_type, count=2)
+                    if coupang_md:
+                        body_md = body_md.rstrip() + coupang_md
+                        logger.info("쿠팡 링크 삽입 완료")
+            except Exception as e:
+                logger.warning(f"쿠팡 링크 삽입 실패: {e}")
+
         result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
 
     if result.get("success"):
