@@ -1402,3 +1402,810 @@ expected <block end>, but found '-'
 2026-03-20 14:32:49,957 [INFO] Next run: 2026-03-20 15:00:00
 2026-03-20 14:32:49,968 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3
 2026-03-20 14:32:49,968 [INFO] Publishing: travel-hugo
+2026-03-21 10:33:38,291 [INFO] === 5000 Scheduler Starting ===
+2026-03-21 10:33:38,333 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-21 10:33:38,333 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-21 10:33:38,334 [INFO] Registered 108 jobs
+2026-03-21 10:33:38,334 [INFO] Next run: 2026-03-21 11:00:00
+2026-03-21 10:33:38,418 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 10:33:38,418 [INFO] Publishing: travel-hugo
+2026-03-21 10:35:10,938 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 10:35:10,938 [INFO] Publishing: travel1-hugo
+2026-03-21 10:36:34,694 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:36:34,696 [INFO] Publishing: travel2-hugo
+2026-03-21 10:37:55,444 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:37:55,445 [INFO] Publishing: travel3-hugo
+2026-03-21 10:39:03,246 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:39:03,246 [INFO] Publishing: travel4-hugo
+2026-03-21 10:40:26,482 [INFO] CATCHUP: tvshow-blogger expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:40:26,482 [INFO] Publishing: tvshow-blogger
+2026-03-21 10:41:20,903 [INFO] CATCHUP: ud-blogger expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:41:20,903 [INFO] Publishing: ud-blogger
+2026-03-21 10:42:16,248 [INFO] CATCHUP: kuta-wordpress expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:42:16,249 [INFO] Publishing: kuta-wordpress
+2026-03-21 10:43:10,566 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 10:43:10,567 [INFO] Publishing: gap-kuta
+2026-03-21 10:43:40,117 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:43:40,117 [INFO] Publishing: stock-hugo
+2026-03-21 10:44:28,360 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:44:28,360 [INFO] Publishing: dividend-hugo
+2026-03-21 10:45:20,508 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:45:20,508 [INFO] Publishing: etf-hugo
+2026-03-21 10:45:55,994 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:45:55,995 [INFO] Publishing: sector-hugo
+2026-03-21 10:46:26,643 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:46:26,644 [INFO] Publishing: ipo-hugo
+2026-03-21 10:47:21,772 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:47:21,773 [INFO] Publishing: finance-hugo
+2026-03-21 10:48:41,805 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 10:48:41,805 [INFO] Publishing: travel-hugo
+2026-03-21 10:50:04,043 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 10:50:04,045 [INFO] Publishing: travel1-hugo
+2026-03-21 10:51:26,836 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:51:26,838 [INFO] Publishing: travel2-hugo
+2026-03-21 10:52:36,514 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:52:36,515 [INFO] Publishing: travel3-hugo
+2026-03-21 10:53:54,899 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:53:54,900 [INFO] Publishing: travel4-hugo
+2026-03-21 10:55:06,990 [INFO] CATCHUP: tvshow-blogger expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:55:06,995 [INFO] Publishing: tvshow-blogger
+2026-03-21 10:55:56,758 [INFO] CATCHUP: ud-blogger expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:55:56,759 [INFO] Publishing: ud-blogger
+2026-03-21 10:56:57,918 [INFO] CATCHUP: kuta-wordpress expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:56:57,918 [INFO] Publishing: kuta-wordpress
+2026-03-21 10:57:50,598 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 10:57:50,598 [INFO] Publishing: gap-kuta
+2026-03-21 10:58:19,615 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:58:19,615 [INFO] Publishing: stock-hugo
+2026-03-21 10:59:07,465 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:59:07,465 [INFO] Publishing: dividend-hugo
+2026-03-21 10:59:59,602 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 10:59:59,603 [INFO] Publishing: etf-hugo
+2026-03-21 11:00:33,214 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:00:33,214 [INFO] Publishing: sector-hugo
+2026-03-21 11:01:12,449 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:01:12,450 [INFO] Publishing: ipo-hugo
+2026-03-21 11:01:50,122 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:01:50,123 [INFO] Publishing: finance-hugo
+2026-03-21 11:03:16,211 [INFO] Queue executing: travel2-hugo (remaining: 1)
+2026-03-21 11:03:16,212 [INFO] Publishing: travel2-hugo
+2026-03-21 11:03:16,286 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:03:16,286 [INFO] Publishing: travel-hugo
+2026-03-21 11:04:33,398 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:04:33,398 [INFO] Publishing: travel1-hugo
+2026-03-21 11:05:58,130 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:05:58,130 [INFO] Publishing: travel2-hugo
+2026-03-21 11:07:56,826 [INFO] Queue executing: tvshow-blogger (remaining: 0)
+2026-03-21 11:07:56,827 [INFO] Publishing: tvshow-blogger
+2026-03-21 11:15:58,167 [ERROR] travel2-hugo timeout (600s)
+2026-03-21 11:15:59,028 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:16:04,068 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:16:04,068 [INFO] Publishing: travel3-hugo
+2026-03-21 11:17:17,345 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:17:17,346 [INFO] Publishing: travel4-hugo
+2026-03-21 11:18:17,158 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:18:17,159 [INFO] Publishing: tvshow-blogger
+2026-03-21 11:19:30,878 [INFO] CATCHUP: ud-blogger expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:19:30,879 [INFO] Publishing: ud-blogger
+2026-03-21 11:20:25,826 [INFO] CATCHUP: kuta-wordpress expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:20:25,827 [INFO] Publishing: kuta-wordpress
+2026-03-21 11:21:26,905 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:21:26,905 [INFO] Publishing: gap-kuta
+2026-03-21 11:21:54,375 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:21:54,375 [INFO] Publishing: stock-hugo
+2026-03-21 11:22:31,862 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:22:31,862 [INFO] Publishing: dividend-hugo
+2026-03-21 11:23:26,003 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:23:26,004 [INFO] Publishing: etf-hugo
+2026-03-21 11:24:03,434 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:24:03,435 [INFO] Publishing: sector-hugo
+2026-03-21 11:24:34,585 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:24:34,585 [INFO] Publishing: ipo-hugo
+2026-03-21 11:25:09,018 [ERROR]   ERR: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        (published_url, article_id),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
+
+2026-03-21 11:25:09,859 [WARNING] CATCHUP: ipo-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:25:14,930 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:25:14,930 [INFO] Publishing: finance-hugo
+2026-03-21 11:26:36,375 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:26:36,375 [INFO] Publishing: travel-hugo
+2026-03-21 11:27:44,503 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:27:44,504 [INFO] Publishing: travel1-hugo
+2026-03-21 11:28:56,267 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:28:56,268 [INFO] Publishing: travel2-hugo
+2026-03-21 11:30:29,448 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:30:29,449 [INFO] Publishing: travel3-hugo
+2026-03-21 11:31:31,486 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:31:31,487 [INFO] Publishing: travel4-hugo
+2026-03-21 11:32:30,183 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:32:30,184 [INFO] Publishing: tvshow-blogger
+2026-03-21 11:33:35,559 [INFO] CATCHUP: ud-blogger expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:33:35,560 [INFO] Publishing: ud-blogger
+2026-03-21 11:33:35,758 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:33:36,405 [WARNING] Telegram send failed: 400
+2026-03-21 11:33:36,407 [WARNING] CATCHUP: ud-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:33:41,484 [INFO] CATCHUP: kuta-wordpress expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:33:41,485 [INFO] Publishing: kuta-wordpress
+2026-03-21 11:33:41,681 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:33:42,324 [WARNING] Telegram send failed: 400
+2026-03-21 11:33:42,326 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:33:47,368 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:33:47,368 [INFO] Publishing: gap-kuta
+2026-03-21 11:33:47,569 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:33:48,207 [WARNING] Telegram send failed: 400
+2026-03-21 11:33:48,208 [WARNING] CATCHUP: gap-kuta 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:33:53,290 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:33:53,290 [INFO] Publishing: stock-hugo
+2026-03-21 11:33:53,495 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:33:54,127 [WARNING] Telegram send failed: 400
+2026-03-21 11:33:54,129 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:33:59,206 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:33:59,206 [INFO] Publishing: dividend-hugo
+2026-03-21 11:33:59,417 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:34:00,073 [WARNING] Telegram send failed: 400
+2026-03-21 11:34:00,075 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:34:05,152 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:34:05,153 [INFO] Publishing: etf-hugo
+2026-03-21 11:34:05,354 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:34:06,022 [WARNING] Telegram send failed: 400
+2026-03-21 11:34:06,024 [WARNING] CATCHUP: etf-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:34:11,085 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:34:11,085 [INFO] Publishing: sector-hugo
+2026-03-21 11:34:11,278 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:34:11,914 [WARNING] Telegram send failed: 400
+2026-03-21 11:34:11,916 [WARNING] CATCHUP: sector-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:34:16,989 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:34:16,989 [INFO] Publishing: ipo-hugo
+2026-03-21 11:34:17,198 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:34:17,833 [WARNING] Telegram send failed: 400
+2026-03-21 11:34:17,835 [WARNING] CATCHUP: ipo-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:34:22,883 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:34:22,883 [INFO] Publishing: finance-hugo
+2026-03-21 11:34:23,110 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:34:23,758 [WARNING] Telegram send failed: 400
+2026-03-21 11:34:23,760 [WARNING] CATCHUP: finance-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 11:34:58,861 [INFO] Queue executing: travel3-hugo (remaining: 2)
+2026-03-21 11:34:58,861 [INFO] Publishing: travel3-hugo
+2026-03-21 11:34:58,892 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+2026-03-21 11:34:59,079 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:34:59,743 [WARNING] Telegram send failed: 400
+2026-03-21 11:37:59,773 [INFO] Queue executing: ud-blogger (remaining: 1)
+2026-03-21 11:37:59,774 [INFO] Publishing: ud-blogger
+2026-03-21 11:37:59,972 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:38:00,614 [WARNING] Telegram send failed: 400
+2026-03-21 11:39:59,419 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+2026-03-21 11:41:00,641 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-21 11:41:00,641 [INFO] Publishing: stock-hugo
+2026-03-21 11:41:00,843 [ERROR]   ERR: a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 464, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 466, column 3
+
+2026-03-21 11:41:01,503 [WARNING] Telegram send failed: 400
+2026-03-21 11:45:00,136 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 460, column 3
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 463, column 3
+2026-03-21 11:50:00,790 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:50:00,790 [INFO] Publishing: travel-hugo
+2026-03-21 11:51:06,326 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:51:06,326 [INFO] Publishing: travel1-hugo
+2026-03-21 11:52:02,319 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:52:02,320 [INFO] Publishing: travel2-hugo
+2026-03-21 11:54:14,402 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:54:14,402 [INFO] Publishing: travel3-hugo
+2026-03-21 11:55:19,159 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:55:19,159 [INFO] Publishing: travel4-hugo
+2026-03-21 11:56:30,769 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:56:30,769 [INFO] Publishing: tvshow-blogger
+2026-03-21 11:57:51,600 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:57:51,601 [INFO] Publishing: ud-blogger
+2026-03-21 11:58:41,159 [INFO] CATCHUP: kuta-wordpress expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 11:58:41,159 [INFO] Publishing: kuta-wordpress
+2026-03-21 11:59:33,903 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:59:33,903 [INFO] Publishing: gap-kuta
+2026-03-21 11:59:56,302 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 11:59:56,302 [INFO] Publishing: stock-hugo
+2026-03-21 12:00:46,429 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:00:46,430 [INFO] Publishing: dividend-hugo
+2026-03-21 12:01:42,025 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:01:42,026 [INFO] Publishing: etf-hugo
+2026-03-21 12:02:12,006 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:02:12,006 [INFO] Publishing: sector-hugo
+2026-03-21 12:02:57,428 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:02:57,429 [INFO] Publishing: ipo-hugo
+2026-03-21 12:03:32,180 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:03:32,181 [INFO] Publishing: finance-hugo
+2026-03-21 12:03:37,439 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:03:37,439 [INFO] Publishing: senior-hugo
+2026-03-21 12:04:46,611 [INFO] Queue executing: travel4-hugo (remaining: 2)
+2026-03-21 12:04:46,636 [INFO] Publishing: travel4-hugo
+2026-03-21 12:04:46,695 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:04:46,696 [INFO] Publishing: travel-hugo
+2026-03-21 12:05:41,011 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:05:41,012 [INFO] Publishing: travel1-hugo
+2026-03-21 12:07:34,040 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:07:34,040 [INFO] Publishing: travel2-hugo
+2026-03-21 12:08:41,150 [INFO] Queue executing: kuta-wordpress (remaining: 1)
+2026-03-21 12:08:41,151 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:08:43,789 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:08:43,789 [INFO] Publishing: travel3-hugo
+2026-03-21 12:10:20,190 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:10:20,191 [INFO] Publishing: travel4-hugo
+2026-03-21 12:11:23,031 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:11:23,032 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:12:13,213 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:12:13,213 [INFO] Publishing: ud-blogger
+2026-03-21 12:12:32,106 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-21 12:12:32,107 [INFO] Publishing: dividend-hugo
+2026-03-21 12:13:33,575 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:13:33,576 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:14:27,953 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:14:27,954 [INFO] Publishing: gap-kuta
+2026-03-21 12:14:55,286 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:14:55,287 [INFO] Publishing: stock-hugo
+2026-03-21 12:15:40,904 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:15:40,905 [INFO] Publishing: dividend-hugo
+2026-03-21 12:16:33,126 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:16:33,127 [INFO] Publishing: etf-hugo
+2026-03-21 12:17:17,935 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:17:17,936 [INFO] Publishing: sector-hugo
+2026-03-21 12:17:47,542 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:17:47,543 [INFO] Publishing: ipo-hugo
+2026-03-21 12:18:20,440 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:18:20,440 [INFO] Publishing: finance-hugo
+2026-03-21 12:18:25,703 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:18:25,703 [INFO] Publishing: senior-hugo
+2026-03-21 12:28:25,730 [ERROR] senior-hugo timeout (600s)
+2026-03-21 12:28:25,770 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:28:25,770 [WARNING] CATCHUP: senior-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:29:01,065 [INFO] Queue executing: etf-hugo (remaining: 1)
+2026-03-21 12:29:01,066 [INFO] Publishing: etf-hugo
+2026-03-21 12:29:01,147 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:01,147 [INFO] Publishing: travel-hugo
+2026-03-21 12:29:01,955 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:01,956 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:01,956 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:07,116 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:07,116 [INFO] Publishing: travel1-hugo
+2026-03-21 12:29:07,783 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:07,783 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:12,944 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:12,944 [INFO] Publishing: travel2-hugo
+2026-03-21 12:29:13,653 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:13,653 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:18,812 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:18,812 [INFO] Publishing: travel3-hugo
+2026-03-21 12:29:19,473 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:19,473 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:24,645 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:24,646 [INFO] Publishing: travel4-hugo
+2026-03-21 12:29:25,312 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:25,312 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:25,312 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:30,470 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:30,470 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:29:31,142 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:31,142 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:36,299 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:36,300 [INFO] Publishing: ud-blogger
+2026-03-21 12:29:36,965 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:36,965 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:36,965 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:42,123 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:42,123 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:29:42,794 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:42,795 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:47,952 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:47,952 [INFO] Publishing: gap-kuta
+2026-03-21 12:29:53,395 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:53,395 [INFO] Publishing: stock-hugo
+2026-03-21 12:29:53,777 [ERROR]   ERR: &sort_mth=desc (Caused by NameResolutionError("HTTPSConnection(host='opendart.fss.or.kr', port=443): Failed to resolve 'opendart.fss.or.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:29:53,799 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:53,799 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:29:58,956 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:29:58,956 [INFO] Publishing: dividend-hugo
+2026-03-21 12:29:59,245 [ERROR]   ERR: : /v1/chat/completions (Caused by NameResolutionError("HTTPSConnection(host='api.openai.com', port=443): Failed to resolve 'api.openai.com' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:29:59,267 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:29:59,267 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:30:04,423 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:30:04,424 [INFO] Publishing: etf-hugo
+2026-03-21 12:30:09,811 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:30:09,812 [INFO] Publishing: sector-hugo
+2026-03-21 12:30:15,248 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:30:15,249 [INFO] Publishing: ipo-hugo
+2026-03-21 12:30:20,630 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:30:20,630 [INFO] Publishing: finance-hugo
+2026-03-21 12:30:25,979 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:30:25,980 [INFO] Publishing: senior-hugo
+2026-03-21 12:32:01,500 [INFO] Queue executing: sector-hugo (remaining: 1)
+2026-03-21 12:32:01,500 [INFO] Publishing: sector-hugo
+2026-03-21 12:34:02,189 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:02,189 [INFO] Publishing: travel-hugo
+2026-03-21 12:34:02,875 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:02,875 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:02,875 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:08,032 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:08,033 [INFO] Publishing: travel1-hugo
+2026-03-21 12:34:08,696 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:08,696 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:13,854 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:13,854 [INFO] Publishing: travel2-hugo
+2026-03-21 12:34:14,556 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:14,556 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:19,650 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:19,651 [INFO] Publishing: travel3-hugo
+2026-03-21 12:34:20,320 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:20,320 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:25,478 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:25,478 [INFO] Publishing: travel4-hugo
+2026-03-21 12:34:26,141 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:26,141 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:31,298 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:31,298 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:34:31,970 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:31,971 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:37,128 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:37,128 [INFO] Publishing: ud-blogger
+2026-03-21 12:34:37,789 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:37,789 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:42,946 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:42,946 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:34:43,609 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:43,609 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:48,767 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:48,767 [INFO] Publishing: gap-kuta
+2026-03-21 12:34:54,186 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:54,186 [INFO] Publishing: stock-hugo
+2026-03-21 12:34:54,518 [ERROR]   ERR: &sort_mth=desc (Caused by NameResolutionError("HTTPSConnection(host='opendart.fss.or.kr', port=443): Failed to resolve 'opendart.fss.or.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:34:54,542 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:54,542 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:34:59,699 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:34:59,699 [INFO] Publishing: dividend-hugo
+2026-03-21 12:34:59,974 [ERROR]   ERR: : /v1/chat/completions (Caused by NameResolutionError("HTTPSConnection(host='api.openai.com', port=443): Failed to resolve 'api.openai.com' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:34:59,996 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:34:59,996 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:35:01,930 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-21 12:35:01,930 [INFO] Publishing: ipo-hugo
+2026-03-21 12:35:05,153 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:35:05,153 [INFO] Publishing: etf-hugo
+2026-03-21 12:35:10,540 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:35:10,541 [INFO] Publishing: sector-hugo
+2026-03-21 12:35:15,972 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:35:15,972 [INFO] Publishing: ipo-hugo
+2026-03-21 12:35:21,357 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:35:21,357 [INFO] Publishing: finance-hugo
+2026-03-21 12:35:26,709 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:35:26,709 [INFO] Publishing: senior-hugo
+2026-03-21 12:39:02,886 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:02,887 [INFO] Publishing: travel-hugo
+2026-03-21 12:39:03,580 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:03,580 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:03,580 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:08,738 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:08,738 [INFO] Publishing: travel1-hugo
+2026-03-21 12:39:09,402 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:09,402 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:14,559 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:14,560 [INFO] Publishing: travel2-hugo
+2026-03-21 12:39:15,273 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:15,273 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:20,431 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:20,431 [INFO] Publishing: travel3-hugo
+2026-03-21 12:39:21,103 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:21,103 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:21,103 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:26,261 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:26,261 [INFO] Publishing: travel4-hugo
+2026-03-21 12:39:26,932 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:26,932 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:26,932 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:32,089 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:32,089 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:39:32,760 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:32,760 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:37,918 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:37,918 [INFO] Publishing: ud-blogger
+2026-03-21 12:39:38,586 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:38,587 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:43,744 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:43,744 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:39:44,412 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:44,412 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:49,570 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:49,570 [INFO] Publishing: gap-kuta
+2026-03-21 12:39:54,992 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:39:54,992 [INFO] Publishing: stock-hugo
+2026-03-21 12:39:55,323 [ERROR]   ERR: &sort_mth=desc (Caused by NameResolutionError("HTTPSConnection(host='opendart.fss.or.kr', port=443): Failed to resolve 'opendart.fss.or.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:39:55,346 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:39:55,346 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:40:00,504 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:40:00,504 [INFO] Publishing: dividend-hugo
+2026-03-21 12:40:00,784 [ERROR]   ERR: : /v1/chat/completions (Caused by NameResolutionError("HTTPSConnection(host='api.openai.com', port=443): Failed to resolve 'api.openai.com' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:40:00,807 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:40:00,807 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:40:05,964 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:40:05,964 [INFO] Publishing: etf-hugo
+2026-03-21 12:40:11,348 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:40:11,348 [INFO] Publishing: sector-hugo
+2026-03-21 12:40:16,779 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:40:16,779 [INFO] Publishing: ipo-hugo
+2026-03-21 12:40:22,163 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 -> 1건만 보충
+2026-03-21 12:40:22,164 [INFO] Publishing: finance-hugo
+2026-03-21 12:40:27,515 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:40:27,516 [INFO] Publishing: senior-hugo
+2026-03-21 12:41:02,991 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-21 12:41:02,992 [INFO] Publishing: finance-hugo
+2026-03-21 12:44:03,794 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:03,795 [INFO] Publishing: travel-hugo
+2026-03-21 12:44:04,481 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:04,481 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:04,481 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:09,640 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:09,640 [INFO] Publishing: travel1-hugo
+2026-03-21 12:44:10,300 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:10,301 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:15,458 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:15,459 [INFO] Publishing: travel2-hugo
+2026-03-21 12:44:16,168 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:16,168 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:21,326 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:21,326 [INFO] Publishing: travel3-hugo
+2026-03-21 12:44:21,995 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:21,996 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:27,153 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:27,154 [INFO] Publishing: travel4-hugo
+2026-03-21 12:44:27,813 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:27,813 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:32,970 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:32,971 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:44:33,645 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:33,645 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:38,802 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:38,802 [INFO] Publishing: ud-blogger
+2026-03-21 12:44:39,468 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:39,468 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:39,468 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:44,623 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:44,623 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:44:45,292 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:45,292 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:50,449 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:50,450 [INFO] Publishing: gap-kuta
+2026-03-21 12:44:55,867 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:44:55,867 [INFO] Publishing: stock-hugo
+2026-03-21 12:44:56,198 [ERROR]   ERR: &sort_mth=desc (Caused by NameResolutionError("HTTPSConnection(host='opendart.fss.or.kr', port=443): Failed to resolve 'opendart.fss.or.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:44:56,221 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:44:56,221 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:45:01,379 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:45:01,379 [INFO] Publishing: dividend-hugo
+2026-03-21 12:45:01,657 [ERROR]   ERR: : /v1/chat/completions (Caused by NameResolutionError("HTTPSConnection(host='api.openai.com', port=443): Failed to resolve 'api.openai.com' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:45:01,679 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:45:01,679 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:45:06,836 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:45:06,836 [INFO] Publishing: etf-hugo
+2026-03-21 12:45:12,224 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:45:12,224 [INFO] Publishing: sector-hugo
+2026-03-21 12:45:17,656 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:45:17,657 [INFO] Publishing: ipo-hugo
+2026-03-21 12:45:23,035 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:45:23,036 [INFO] Publishing: finance-hugo
+2026-03-21 12:45:28,386 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:45:28,386 [INFO] Publishing: senior-hugo
+2026-03-21 12:49:04,703 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:04,703 [INFO] Publishing: travel-hugo
+2026-03-21 12:49:05,391 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:05,391 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:05,391 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:10,549 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:10,549 [INFO] Publishing: travel1-hugo
+2026-03-21 12:49:11,218 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:11,219 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:16,376 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:16,377 [INFO] Publishing: travel2-hugo
+2026-03-21 12:49:17,094 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:17,094 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:22,252 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:22,252 [INFO] Publishing: travel3-hugo
+2026-03-21 12:49:22,914 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:22,914 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:28,071 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:28,071 [INFO] Publishing: travel4-hugo
+2026-03-21 12:49:28,736 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:28,736 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:33,893 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:33,894 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:49:34,566 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:34,566 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:34,566 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:39,723 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:39,724 [INFO] Publishing: ud-blogger
+2026-03-21 12:49:40,384 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:40,384 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:45,541 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:45,542 [INFO] Publishing: kuta-wordpress
+2026-03-21 12:49:46,213 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:46,213 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:51,370 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:51,371 [INFO] Publishing: gap-kuta
+2026-03-21 12:49:56,788 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:49:56,788 [INFO] Publishing: stock-hugo
+2026-03-21 12:49:57,122 [ERROR]   ERR: &sort_mth=desc (Caused by NameResolutionError("HTTPSConnection(host='opendart.fss.or.kr', port=443): Failed to resolve 'opendart.fss.or.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:49:57,143 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:49:57,143 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:50:02,300 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:50:02,301 [INFO] Publishing: dividend-hugo
+2026-03-21 12:50:02,580 [ERROR]   ERR: : /v1/chat/completions (Caused by NameResolutionError("HTTPSConnection(host='api.openai.com', port=443): Failed to resolve 'api.openai.com' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-21 12:50:02,602 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAGGDeNxyGFhjI5Y5fEGyzeZcxiG5yv05PE/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:50:02,602 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-21 12:50:07,759 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:50:07,759 [INFO] Publishing: etf-hugo
+2026-03-21 12:50:13,147 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:50:13,148 [INFO] Publishing: sector-hugo
+2026-03-21 12:50:18,577 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:50:18,577 [INFO] Publishing: ipo-hugo
+2026-03-21 12:50:23,958 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:50:23,959 [INFO] Publishing: finance-hugo
+2026-03-21 12:50:29,312 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:50:29,312 [INFO] Publishing: senior-hugo
+2026-03-21 12:54:05,549 [INFO] CATCHUP: travel-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:54:05,549 [INFO] Publishing: travel-hugo
+2026-03-21 12:54:06,252 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:06,252 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:06,252 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:11,335 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:54:11,335 [INFO] Publishing: travel1-hugo
+2026-03-21 12:54:12,006 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:12,006 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:17,088 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:54:17,088 [INFO] Publishing: travel2-hugo
+2026-03-21 12:54:17,822 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:17,822 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:17,822 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Max retries exceeded with url: /B551011/GoCamping/basedList?serviceKey=d7f94cfdad3e653f0e75fb97905e57fc23182e7ec5a931af96eeafeb4cdb2c84&numOfRows=1000&MobileOS=ETC&MobileApp=TAP&_type=json (Caused by NameResolutionError("HTTPSConnection(host='apis.data.go.kr', port=443): Failed to resolve 'apis.data.go.kr' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-21 12:54:22,903 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:54:22,903 [INFO] Publishing: travel3-hugo
+2026-03-21 12:56:10,629 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:56:10,630 [INFO] Publishing: travel4-hugo
+2026-03-21 12:57:22,754 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:57:22,754 [INFO] Publishing: tvshow-blogger
+2026-03-21 12:58:15,469 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:58:15,469 [INFO] Publishing: ud-blogger
+2026-03-21 12:59:16,165 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 12:59:16,165 [INFO] Publishing: kuta-wordpress
+2026-03-21 13:00:13,827 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:00:13,828 [INFO] Publishing: gap-kuta
+2026-03-21 13:00:41,820 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:00:41,821 [INFO] Publishing: stock-hugo
+2026-03-21 13:01:33,097 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:01:33,098 [INFO] Publishing: dividend-hugo
+2026-03-21 13:02:21,400 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:02:21,400 [INFO] Publishing: etf-hugo
+2026-03-21 13:02:55,310 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:02:55,311 [INFO] Publishing: sector-hugo
+2026-03-21 13:03:37,995 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:03:37,995 [INFO] Publishing: ipo-hugo
+2026-03-21 13:04:17,083 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:04:17,083 [INFO] Publishing: finance-hugo
+2026-03-21 13:04:22,295 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:04:22,296 [INFO] Publishing: senior-hugo
+2026-03-21 13:06:29,032 [INFO] Queue executing: travel-hugo (remaining: 4)
+2026-03-21 13:06:29,056 [INFO] Publishing: travel-hugo
+2026-03-21 13:06:29,067 [INFO] CATCHUP: tco-hugo expected=3 actual=2 missed=1 -> 1건만 보충
+2026-03-21 13:06:29,067 [INFO] Publishing: tco-hugo
+2026-03-21 13:07:03,623 [INFO] CATCHUP: deal-hugo expected=3 actual=2 missed=1 -> 1건만 보충
+2026-03-21 13:07:03,624 [INFO] Publishing: deal-hugo
+2026-03-21 13:07:27,607 [INFO]   [후처리] 경고: 3년 총비용(2004만원)이 차값의 2배 초과
+2026-03-21 13:07:32,658 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:07:32,658 [INFO] Publishing: travel-hugo
+2026-03-21 13:09:01,597 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:09:01,598 [INFO] Publishing: travel1-hugo
+2026-03-21 13:10:20,918 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:10:20,918 [INFO] Publishing: travel2-hugo
+2026-03-21 13:10:34,913 [INFO] Queue executing: gap-kuta (remaining: 3)
+2026-03-21 13:10:34,913 [INFO] Publishing: gap-kuta
+2026-03-21 13:11:39,338 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:11:39,339 [INFO] Publishing: travel3-hugo
+2026-03-21 13:12:59,718 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:12:59,718 [INFO] Publishing: travel4-hugo
+2026-03-21 13:13:55,305 [INFO] Queue executing: hotissue-hugo (remaining: 2)
+2026-03-21 13:13:55,306 [INFO] Publishing: hotissue-hugo
+2026-03-21 13:14:13,189 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:14:13,189 [INFO] Publishing: tvshow-blogger
+2026-03-21 13:15:01,669 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:15:01,669 [INFO] Publishing: ud-blogger
+2026-03-21 13:15:56,470 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:15:56,471 [INFO] Publishing: kuta-wordpress
+2026-03-21 13:16:44,555 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:16:44,555 [INFO] Publishing: gap-kuta
+2026-03-21 13:17:09,117 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:17:09,117 [INFO] Publishing: stock-hugo
+2026-03-21 13:17:39,212 [INFO] Queue executing: tco-hugo (remaining: 1)
+2026-03-21 13:17:39,212 [INFO] Publishing: tco-hugo
+2026-03-21 13:17:43,537 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:17:43,538 [INFO] Publishing: dividend-hugo
+2026-03-21 13:18:23,726 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:18:23,726 [INFO] Publishing: etf-hugo
+2026-03-21 13:18:50,204 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:18:50,204 [INFO] Publishing: sector-hugo
+2026-03-21 13:19:22,419 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:19:22,420 [INFO] Publishing: ipo-hugo
+2026-03-21 13:20:01,893 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:20:01,893 [INFO] Publishing: finance-hugo
+2026-03-21 13:20:07,102 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:20:07,103 [INFO] Publishing: senior-hugo
+2026-03-21 13:21:12,812 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-21 13:21:12,812 [INFO] Publishing: deal-hugo
+2026-03-21 13:21:42,327 [INFO]   [후처리] 경고: 3년 총비용(1297만원)이 차값의 2배 초과
+2026-03-21 13:21:59,649 [INFO] Queue executing: compare-hugo (remaining: 2)
+2026-03-21 13:21:59,649 [INFO] Publishing: compare-hugo
+2026-03-21 13:21:59,687 [INFO] CATCHUP: compare-hugo expected=3 actual=2 missed=1 -> 1건만 보충
+2026-03-21 13:21:59,687 [INFO] Publishing: compare-hugo
+2026-03-21 13:22:33,800 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:22:33,801 [INFO] Publishing: travel-hugo
+2026-03-21 13:23:58,982 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:23:58,982 [INFO] Publishing: travel1-hugo
+2026-03-21 13:25:09,046 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:25:09,046 [INFO] Publishing: travel2-hugo
+2026-03-21 13:25:29,907 [INFO] Queue executing: guide-hugo (remaining: 1)
+2026-03-21 13:25:29,908 [INFO] Publishing: guide-hugo
+2026-03-21 13:26:05,391 [INFO]   [후처리] 경고: 본문에 연비 5.2 없음
+2026-03-21 13:26:36,994 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:26:36,995 [INFO] Publishing: travel3-hugo
+2026-03-21 13:27:33,063 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:27:33,064 [INFO] Publishing: travel4-hugo
+2026-03-21 13:28:52,126 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:28:52,126 [INFO] Publishing: tvshow-blogger
+2026-03-21 13:29:05,417 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-21 13:29:05,417 [INFO] Publishing: ev-hugo
+2026-03-21 13:29:43,193 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:29:43,194 [INFO] Publishing: ud-blogger
+2026-03-21 13:30:34,881 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:30:34,881 [INFO] Publishing: kuta-wordpress
+2026-03-21 13:31:42,756 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:31:42,756 [INFO] Publishing: gap-kuta
+2026-03-21 13:32:11,645 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:32:11,645 [INFO] Publishing: stock-hugo
+2026-03-21 13:32:56,089 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:32:56,089 [INFO] Publishing: dividend-hugo
+2026-03-21 13:33:41,702 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:33:41,703 [INFO] Publishing: etf-hugo
+2026-03-21 13:34:11,829 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:34:11,829 [INFO] Publishing: sector-hugo
+2026-03-21 13:34:54,326 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:34:54,328 [INFO] Publishing: ipo-hugo
+2026-03-21 13:35:24,617 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:35:24,618 [INFO] Publishing: finance-hugo
+2026-03-21 13:35:29,933 [INFO] CATCHUP: senior-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:35:29,934 [INFO] Publishing: senior-hugo
+2026-03-21 13:37:14,469 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:37:14,469 [INFO] Publishing: travel-hugo
+2026-03-21 13:38:45,090 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:38:45,091 [INFO] Publishing: travel1-hugo
+2026-03-21 13:39:52,272 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:39:52,273 [INFO] Publishing: travel2-hugo
+2026-03-21 13:41:30,207 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:41:30,208 [INFO] Publishing: travel3-hugo
+2026-03-21 13:42:46,412 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:42:46,413 [INFO] Publishing: travel4-hugo
+2026-03-21 13:44:12,605 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:44:12,605 [INFO] Publishing: tvshow-blogger
+2026-03-21 13:45:19,339 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:45:19,340 [INFO] Publishing: ud-blogger
+2026-03-21 13:46:10,687 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:46:10,688 [INFO] Publishing: kuta-wordpress
+2026-03-21 13:47:11,976 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:47:11,977 [INFO] Publishing: gap-kuta
+2026-03-21 13:47:35,174 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:47:35,174 [INFO] Publishing: stock-hugo
+2026-03-21 13:48:15,666 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:48:15,667 [INFO] Publishing: dividend-hugo
+2026-03-21 13:49:32,949 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:49:32,950 [INFO] Publishing: etf-hugo
+2026-03-21 13:50:19,859 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:50:19,860 [INFO] Publishing: sector-hugo
+2026-03-21 13:50:49,227 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:50:49,228 [INFO] Publishing: ipo-hugo
+2026-03-21 13:51:29,612 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:51:29,613 [INFO] Publishing: finance-hugo
+2026-03-21 13:51:34,797 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:51:34,797 [INFO] Publishing: senior-hugo
+2026-03-21 13:53:20,700 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 13:53:20,701 [INFO] Publishing: travel-hugo
+2026-03-21 13:54:25,869 [INFO] CATCHUP: travel1-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:54:25,871 [INFO] Publishing: travel1-hugo
+2026-03-21 13:56:18,339 [INFO] CATCHUP: travel2-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:56:18,340 [INFO] Publishing: travel2-hugo
+2026-03-21 13:57:27,665 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:57:27,666 [INFO] Publishing: travel3-hugo
+2026-03-21 13:58:26,435 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:58:26,436 [INFO] Publishing: travel4-hugo
+2026-03-21 13:59:43,952 [INFO] CATCHUP: tvshow-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 13:59:43,952 [INFO] Publishing: tvshow-blogger
+2026-03-21 14:01:07,089 [INFO] CATCHUP: ud-blogger expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:01:07,090 [INFO] Publishing: ud-blogger
+2026-03-21 14:02:09,702 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:02:09,703 [INFO] Publishing: kuta-wordpress
+2026-03-21 14:03:27,966 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:03:27,967 [INFO] Publishing: gap-kuta
+2026-03-21 14:03:59,836 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:03:59,836 [INFO] Publishing: stock-hugo
+2026-03-21 14:04:48,371 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:04:48,371 [INFO] Publishing: dividend-hugo
+2026-03-21 14:05:41,724 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:05:41,724 [INFO] Publishing: etf-hugo
+2026-03-21 14:06:25,072 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:06:25,073 [INFO] Publishing: sector-hugo
+2026-03-21 14:07:13,980 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:07:13,980 [INFO] Publishing: ipo-hugo
+2026-03-21 14:07:50,336 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:07:50,338 [INFO] Publishing: finance-hugo
+2026-03-21 14:07:57,175 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:07:57,177 [INFO] Publishing: senior-hugo
+2026-03-21 14:09:50,789 [INFO] Queue executing: travel1-hugo (remaining: 1)
+2026-03-21 14:09:50,790 [INFO] Publishing: travel1-hugo
+2026-03-21 14:09:50,863 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:09:50,863 [INFO] Publishing: travel-hugo

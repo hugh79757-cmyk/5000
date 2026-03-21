@@ -296,7 +296,10 @@ def dispatch(blog_id):
         return None
 
     pipeline = cfg.get("pipeline", "")
-    if pipeline == "car":
+    if pipeline == "senior":
+        from pipelines.senior.pipeline import run
+        return run(cfg)
+    elif pipeline == "car":
         return run_car(cfg)
     elif pipeline == "travel":
         return run_travel(cfg)

@@ -71,23 +71,66 @@ def make_slug(title):
     return slug
 
 def validate_body(body, data):
+    import logging
+    logger = logging.getLogger(__name__)
+
+    issues = []
     model_name = data.get("model", "")
+    comp_name = data.get("competitor", "")
+
+    # 1. 모델명 확인
     if model_name and model_name not in body:
-        print(f"  [후처리] 경고: 본문에 '{model_name}' 없음")
+        issues.append(f"본문에 '{model_name}' 없음")
+
+    # 2. 가격 확인
     price = data.get("base_price", 0)
     if price > 0:
         price_str = f"{price:,}"
         if price_str not in body:
-            print(f"  [후처리] 경고: 본문에 가격 '{price_str}만원' 없음")
+            issues.append(f"가격 '{price_str}만원' 없음")
+
+    # 3. 3년 총비용 이상 확인
     total_cost = data.get("three_year_total_cost", 0)
     if total_cost > 0 and total_cost > price * 2:
-        print(f"  [후처리] 경고: 3년 총비용({total_cost}만원)이 차값의 2배 초과")
+        issues.append(f"3년 총비용({total_cost}만원)이 차값의 2배 초과")
+
+    # 4. 연비 확인
     fuel_eff = data.get("fuel_efficiency", 0)
     if fuel_eff and fuel_eff > 0:
-        eff_str = str(fuel_eff)
-        if eff_str not in body:
-            print(f"  [후처리] 경고: 본문에 연비 {eff_str} 없음")
-    # 공식 사이트 섹션 제거 (프롬프트에서 금지)
+        if str(fuel_eff) not in body:
+            issues.append(f"연비 {fuel_eff} 없음")
+
+    # 5. 경쟁 모델 비교 확인
+    if comp_name and comp_name not in body:
+        issues.append(f"경쟁 모델 '{comp_name}' 비교 없음")
+
+    # 6. 금지어 검사 및 자동 치환
+    forbidden = {
+        "과연": "", "놀랍게도": "", "충격적으로": "",
+        "바랍니다": "좋겠습니다", "되시길": "되길",
+        "있으시": "있으", "알아보겠습니다": "분석합니다",
+        "살펴보겠습니다": "살펴봅니다", "도움이 되셨으면": "도움이 되었으면",
+    }
+    for word, replacement in forbidden.items():
+        if word in body:
+            body = body.replace(word, replacement)
+            logger.info(f"  [후처리] 금지어 치환: '{word}' -> '{replacement}'")
+
+    # 7. 공식 사이트 섹션 제거
     body = re.sub(r'\n*---\n*## 공식 사이트[\s\S]*$', '', body).rstrip()
     body = re.sub(r'\n*## 공식 사이트[\s\S]*$', '', body).rstrip()
+
+    # 8. "마무리" 제목 치환
+    body = re.sub(r'## 마무리', '## 최종 비용 정리', body)
+    body = re.sub(r'## 마치며', '## 최종 비용 정리', body)
+    body = re.sub(r'## 정리하며', '## 최종 비용 정리', body)
+
+    # 9. 글자수 확인
+    char_count = len(body)
+    if char_count < 2000:
+        issues.append(f"글자수 {char_count}자 (최소 2000자 필요)")
+
+    for issue in issues:
+        logger.warning(f"  [후처리] {issue}")
+
     return body

@@ -453,12 +453,48 @@ blogs:
     - '15:40'
     - '18:40'
     - '21:40'
+- cf_project: finance-hugo
+  daily_quota: 999
+  domain: finance.techpawz.com
+  id: finance-hugo
+  name: 금리·예적금 비교
+  pipeline: stock
+  platform: hugo
+  repo: finance-hugo
+  schedule:
+    times:
+    - 09:40
+    - '12:40'
+    - '15:40'
+    - '18:40'
+    - '21:40'
   site_path: /Users/twinssn/Projects/STAP/finance-hugo
   status: active
   theme: blowfish
+- cf_project: senior-hugo
+  daily_quota: 5
+  domain: senior.informationhot.kr
+  id: senior-hugo
+  name: 시니어 복지 혜택 가이드
+  pipeline: senior
+  platform: hugo
+  repo: senior-hugo
+  schedule:
+    times:
+    - '07:30'
+    - '10:30'
+    - '13:30'
+    - '16:30'
+    - '19:30'
+  site_path: /Users/twinssn/Projects/senior-hugo
+  status: active
+  theme: blowfish
+
 deploy:
   branch: main
   commit_dirty: true
   method: wrangler
+
 git_backup:
   schedule: sunday 03:00
+
