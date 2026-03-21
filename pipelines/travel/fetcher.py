@@ -250,11 +250,37 @@ def fetch_festival():
             else:
                 logger.info(f"festival 계절 제외: {item.get('title','')} ({estart}~{eend})")
         if seasonal:
-            selected = seasonal[:1]  # 계절 맞는 축제 중 1개만 선택
+            selected = seasonal[:1]
             logger.info(f"festival: 계절 필터 후 {len(seasonal)}건 중 1건 선택")
         else:
-            selected = selected[:1]  # 전부 불일치면 첫 번째 사용
-            logger.warning(f"festival: 계절 필터 후 0건, 원본 첫 항목 사용")
+            # 현재 월 기준 축제 재검색
+            logger.warning(f"festival: 계절 필터 후 0건, 현재 월 축제 재검색")
+            try:
+                now_month = now.strftime("%Y%m")
+                re_params = {
+                    "numOfRows": "50", "pageNo": "1",
+                    "contentTypeId": "15", "arrange": "C",
+                    "eventStartDate": now_month + "01",
+                }
+                re_resp = requests.get(
+                    "http://apis.data.go.kr/B551011/KorService2/searchFestival2",
+                    params={**{"serviceKey": TOUR_API_KEY, "MobileOS": "ETC", "MobileApp": "TAP", "_type": "json"}, **re_params},
+                    timeout=10
+                )
+                if re_resp.status_code == 200:
+                    re_items = re_resp.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
+                    if re_items:
+                        selected = [random.choice(re_items)]
+                        logger.info(f"festival: searchFestival로 현재 월 축제 {len(re_items)}건 중 1건 재선택: {selected[0].get('title','')}")
+                    else:
+                        selected = selected[:1]
+                        logger.warning("festival: searchFestival 결과 0건, 원본 사용")
+                else:
+                    selected = selected[:1]
+                    logger.warning(f"festival: searchFestival 실패 ({re_resp.status_code}), 원본 사용")
+            except Exception as e:
+                selected = selected[:1]
+                logger.warning(f"festival: searchFestival 예외 ({e}), 원본 사용")
 
         adapted = _adapt_korservice_items(selected)
         return {
