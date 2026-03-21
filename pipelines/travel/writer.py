@@ -121,10 +121,7 @@ def _build_data_block(data):
         # blog_info enrichment 데이터
         bi = item.get("blog_info", {})
         # 가격대는 정확한 메뉴별 가격이 아니므로 GPT에 전달하지 않음
-        if bi.get("pros"):
-            clean_pros = [p.strip()[:40] for p in bi["pros"][:3] if len(p.strip()) > 5]
-            if clean_pros:
-                lines.append(f"블로그 후기 요약: {' / '.join(clean_pros)}")
+        # 블로그 후기는 체험형 인용 위험이 있으므로 GPT에 전달하지 않음
         if bi.get("facilities"):
             lines.append(f"시설: {', '.join(bi['facilities'][:5])}")
         if bi.get("targets"):

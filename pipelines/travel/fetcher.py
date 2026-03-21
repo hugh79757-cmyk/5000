@@ -209,7 +209,7 @@ def fetch_food():
     }
     region_name = random.choice(list(AREA_CODES.keys()))
     area_code = AREA_CODES[region_name]
-    keywords = ["맛집", "한정식", "해물", "고기", "국밥", "칼국수", "냉면", "떡볶이", "카페"]
+    keywords = ["맛집"]  # 테마를 맛집으로 고정 (TourAPI가 세부 카테고리 필터링 불가)
     keyword = random.choice(keywords)
     key = os.getenv("TOUR_API_KEY", "")
     try:
