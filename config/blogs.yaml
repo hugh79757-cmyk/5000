@@ -8,8 +8,20 @@ blogs:
   name: 핫이슈
   pipeline: car
   platform: hugo
-  post_type: resale_compare
-  prompt: hotissue/resale_compare.md
+  post_type:
+  - resale_compare
+  - tco_analysis
+  - promo_deal
+  - ranking_compare
+  - ev_analysis
+  - beginner_guide
+  prompt:
+    resale_compare: hotissue/resale_compare.md
+    tco_analysis: tco/tco_analysis.md
+    promo_deal: deal/promo_deal.md
+    ranking_compare: compare/ranking_compare.md
+    ev_analysis: ev/ev_analysis.md
+    beginner_guide: guide/beginner_guide.md
   repo: hotissue-hugo
   schedule:
     times:
