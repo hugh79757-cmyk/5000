@@ -292,6 +292,22 @@ def _enrich_with_nearby(data, html):
 
 
 def _post_process(content):
+    # 문장 잘림 수정: 마지막 문자가 마침표/물음표/느낌표가 아니면 제거
+    lines = content.rstrip().split("\n")
+    while lines and lines[-1].strip() == "":
+        lines.pop()
+    if lines:
+        last = lines[-1].rstrip()
+        if last and last[-1] not in ".다!?":
+            # 마지막 온전한 문장까지만 유지
+            import re as _re
+            match = _re.search(r"(.*[.다!?])", last)
+            if match:
+                lines[-1] = match.group(1)
+            else:
+                lines.pop()  # 온전한 문장이 없으면 줄 자체 제거
+    content = "\n".join(lines)
+
     """후처리: 미완성 문장, HTML 주석, 과잉 질문 정리"""
     # 노출되면 안 되는 HTML 주석 제거
     content = re.sub(r'<!--\s*(여행용 카메라|편한 워킹화|보조배터리)\s*-->', '', content)

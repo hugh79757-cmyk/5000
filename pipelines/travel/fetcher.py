@@ -54,6 +54,30 @@ def _adapt_korservice_items(items_raw):
     return adapted
 
 
+
+def _filter_by_season(items, title_key="title"):
+    """현재 월에 맞지 않는 콘텐츠 필터링"""
+    import datetime
+    m = datetime.datetime.now().month
+    ban = {
+        1: ["벚꽃", "유채꽃", "여름", "물놀이", "해수욕", "피서"],
+        2: ["벚꽃", "유채꽃", "여름", "물놀이", "해수욕", "피서", "단풍", "억새"],
+        3: ["여름", "물놀이", "해수욕", "피서", "단풍", "억새", "눈썰매", "스키", "겨울"],
+        4: ["여름", "물놀이", "해수욕", "피서", "단풍", "억새", "눈썰매", "스키", "겨울"],
+        5: ["단풍", "억새", "눈썰매", "스키", "겨울"],
+        6: ["단풍", "억새", "눈썰매", "스키", "겨울", "벚꽃"],
+        7: ["단풍", "억새", "눈썰매", "스키", "겨울", "벚꽃"],
+        8: ["단풍", "억새", "눈썰매", "스키", "겨울", "벚꽃"],
+        9: ["눈썰매", "스키", "겨울", "벚꽃", "물놀이", "해수욕", "피서"],
+        10: ["눈썰매", "스키", "겨울", "벚꽃", "물놀이", "해수욕", "피서"],
+        11: ["벚꽃", "물놀이", "해수욕", "피서", "봄"],
+        12: ["봄", "벚꽃", "유채꽃", "여름", "물놀이", "해수욕", "피서"],
+    }
+    bw = ban.get(m, [])
+    if not bw:
+        return items
+    return [i for i in items if not any(w in i.get(title_key, "") for w in bw)]
+
 def fetch_camping():
     from core.camping_data import get_camping_data, get_random_theme
     theme_name, theme_conf = get_random_theme()
