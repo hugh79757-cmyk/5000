@@ -298,6 +298,36 @@ def _ev_solo(v):
 
 
 # ════════════════════════════════════════════════════════════
+
+
+# ════════════════════════════════════════════════════════════
+# ev 사이트 — 하이브리드 전용 템플릿
+# ════════════════════════════════════════════════════════════
+def _ev_hev_vs(v):
+    m = v['m']
+    c = v['c']
+    return [
+        f"{m} vs {c} — 연비 대결, 3년 유지비 차이 {v['dep_diff']:,}만원",
+        f"{m} 월 유지비 {v['maint_m']:,}만원 vs {c} — 어느 쪽이 경제적?",
+        f"{m} 잔존가치 {v['r_pct']}% vs {c} {v['cr_pct']}% — 감가 비교",
+        f"연비 {v['eff']}km/L {m} vs {c} — 3년 비용 비교",
+        f"{m}{v['wa']} {c}, 유지비 현실 비교",
+        f"{v['month_kr']} {m} vs {c} — 총비용 분석",
+    ]
+
+def _ev_hev_solo(v):
+    m = v['m']
+    h_tag = "" if "하이브리드" in m else " 하이브리드"
+    return [
+        f"{m} 연비 {v['eff']}km/L — 유지비 월 {v['maint_m']:,}만원의 현실",
+        f"{v['p']:,}만원 {m},{h_tag} 내연기관보다 정말 이득일까",
+        f"{m} 3년 총비용 {v['total']:,}만원 — 경제성 분석",
+        f"{m} 자동차세 {v['tax']:,}만원, 보험 {v['ins']:,}만원 — 유지비 총정리",
+        f"{m} 잔존가치 {v['r_pct']}% — 감가가 걱정된다면 이 숫자부터",
+        f"연봉 대비 {m} 유지 가능할까 — 월 {v['maint_m']:,}만원 시뮬레이션",
+        f"{v['month_kr']} {m} 구매 가이드 — 연비·세금·잔존가치",
+    ]
+
 # 메인 함수
 # ════════════════════════════════════════════════════════════
 SITE_VS = {
@@ -322,6 +352,15 @@ SITE_SOLO = {
 def generate_title(data, site_id="hotissue"):
     v = _build_vars(data)
     has_comp = bool(v["c"])
+    ftype = v.get("ftype", "")
+
+    # ev 사이트: 하이브리드이면 전용 템플릿 사용
+    if site_id == "ev" and "하이브리드" in ftype:
+        if has_comp:
+            pool = _common_vs(v) + _ev_hev_vs(v)
+        else:
+            pool = _common_solo(v) + _ev_hev_solo(v)
+        return random.choice(pool)
 
     if has_comp:
         pool = _common_vs(v) + SITE_VS.get(site_id, _hotissue_vs)(v)

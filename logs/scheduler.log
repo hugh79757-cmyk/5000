@@ -2257,3 +2257,48 @@ expected <block end>, but found '-'
 2026-03-21 14:34:12,039 [INFO] Publishing: ud-blogger
 2026-03-21 14:35:08,417 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
 2026-03-21 14:35:08,417 [INFO] Publishing: kuta-wordpress
+2026-03-21 14:36:04,442 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:36:04,444 [INFO] Publishing: gap-kuta
+2026-03-21 14:36:28,616 [INFO] CATCHUP: stock-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:36:28,616 [INFO] Publishing: stock-hugo
+2026-03-21 14:38:15,785 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:38:15,786 [INFO] Publishing: dividend-hugo
+2026-03-21 14:39:11,351 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:39:11,352 [INFO] Publishing: etf-hugo
+2026-03-21 14:39:45,103 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:39:45,103 [INFO] Publishing: sector-hugo
+2026-03-21 14:40:20,707 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:40:20,708 [INFO] Publishing: ipo-hugo
+2026-03-21 14:41:02,898 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:41:02,899 [INFO] Publishing: finance-hugo
+2026-03-21 14:41:08,621 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:41:08,622 [INFO] Publishing: senior-hugo
+2026-03-21 14:43:10,951 [INFO] Queue executing: travel2-hugo (remaining: 2)
+2026-03-21 14:43:10,952 [INFO] Publishing: travel2-hugo
+2026-03-21 14:43:11,032 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:43:11,032 [INFO] Publishing: travel-hugo
+2026-03-21 14:45:41,902 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:45:41,904 [INFO] Publishing: travel1-hugo
+2026-03-21 14:47:18,418 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Read timed out. (read timeout=10)
+2026-03-21 14:47:23,534 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:47:23,534 [INFO] Publishing: travel2-hugo
+2026-03-21 14:47:39,623 [INFO] Queue executing: ud-blogger (remaining: 1)
+2026-03-21 14:47:39,624 [INFO] Publishing: ud-blogger
+2026-03-21 14:49:34,805 [INFO] CATCHUP: travel3-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:49:34,806 [INFO] Publishing: travel3-hugo
+2026-03-21 14:51:14,978 [INFO] CATCHUP: travel4-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:51:14,981 [INFO] Publishing: travel4-hugo
+2026-03-21 14:52:20,453 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:52:20,455 [INFO] Publishing: tvshow-blogger
+2026-03-21 14:52:20,558 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-21 14:52:20,559 [INFO] Publishing: stock-hugo
+2026-03-21 14:53:10,220 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:53:10,221 [INFO] Publishing: ud-blogger
+2026-03-21 14:54:05,436 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:54:05,436 [INFO] Publishing: kuta-wordpress
+2026-03-21 14:55:10,440 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:55:10,441 [INFO] Publishing: gap-kuta
+2026-03-21 14:55:40,334 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 14:55:40,335 [INFO] Publishing: stock-hugo
+2026-03-21 14:56:31,104 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:56:31,104 [INFO] Publishing: dividend-hugo
