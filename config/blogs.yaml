@@ -25,11 +25,11 @@ blogs:
   repo: hotissue-hugo
   schedule:
     times:
-    - 07:01
-    - '10:01'
-    - '13:01'
-    - '17:01'
-    - '21:01'
+    - 07:10
+    - '10:10'
+    - '13:10'
+    - '16:10'
+    - '20:10'
   site_path: /Users/twinssn/Projects/CAP/hotissue-hugo
   status: active
   theme: PaperMod
@@ -45,11 +45,11 @@ blogs:
   repo: tco-hugo
   schedule:
     times:
-    - 07:03
-    - '10:03'
-    - '13:03'
-    - '17:03'
-    - '21:03'
+    - 07:12
+    - '10:12'
+    - '13:12'
+    - '16:12'
+    - '20:12'
   site_path: /Users/twinssn/Projects/CAP/tco-hugo
   status: active
   theme: Blowfish
@@ -65,11 +65,11 @@ blogs:
   repo: deal-hugo
   schedule:
     times:
-    - 07:05
-    - '10:05'
-    - '13:05'
-    - '17:05'
-    - '21:05'
+    - 07:14
+    - '10:14'
+    - '13:14'
+    - '16:14'
+    - '20:14'
   site_path: /Users/twinssn/Projects/CAP/deal-hugo
   status: active
   theme: Blowfish
@@ -85,11 +85,11 @@ blogs:
   repo: compare-hugo
   schedule:
     times:
-    - 07:07
-    - '10:07'
-    - '13:07'
-    - '17:07'
-    - '21:07'
+    - 07:16
+    - '10:16'
+    - '13:16'
+    - '16:16'
+    - '20:16'
   site_path: /Users/twinssn/Projects/CAP/compare-hugo
   status: active
   theme: Blowfish
@@ -105,11 +105,11 @@ blogs:
   repo: guide-hugo
   schedule:
     times:
-    - 07:09
-    - '10:09'
-    - '13:09'
-    - '17:09'
-    - '21:09'
+    - 07:18
+    - '10:18'
+    - '13:18'
+    - '16:18'
+    - '20:18'
   site_path: /Users/twinssn/Projects/CAP/guide-hugo
   status: active
   theme: Blowfish
@@ -125,11 +125,11 @@ blogs:
   repo: ev-hugo
   schedule:
     times:
-    - 07:11
-    - '10:11'
-    - '13:11'
-    - '17:11'
-    - '21:11'
+    - 07:20
+    - '10:20'
+    - '13:20'
+    - '16:20'
+    - '20:20'
   site_path: /Users/twinssn/Projects/CAP/ev-hugo
   status: active
   theme: Blowfish
@@ -160,8 +160,8 @@ blogs:
     - 07:00
     - '10:00'
     - '13:00'
-    - '17:00'
-    - '21:00'
+    - '16:00'
+    - '20:00'
   site_path: /Users/twinssn/Projects/travel-hugo
   status: active
   theme: Blowfish
@@ -181,22 +181,17 @@ blogs:
   repo: travel1-hugo
   schedule:
     times:
-    - 07:30
-    - '10:30'
-    - '14:00'
-    - '18:00'
-    - '21:30'
+    - 07:02
+    - '10:02'
+    - '13:02'
+    - '16:02'
+    - '20:02'
   site_path: /Users/twinssn/Projects/travel1-hugo
   status: active
   theme: Blowfish
 - cf_project: travel2-hugo
   daily_quota: 50
   domain: travel2.rotcha.kr
-  fetch_sources:
-  - type: heritage
-    weight: 0.6
-  - type: korservice_heritage
-    weight: 0.4
   fetch_sources:
   - type: heritage
     weight: 1.0
@@ -210,11 +205,11 @@ blogs:
   repo: travel2-hugo
   schedule:
     times:
-    - 08:00
-    - '11:00'
-    - '14:30'
-    - '18:30'
-    - '22:00'
+    - 07:04
+    - '10:04'
+    - '13:04'
+    - '16:04'
+    - '20:04'
   site_path: /Users/twinssn/Projects/travel2-hugo
   status: active
   theme: Blowfish
@@ -234,11 +229,11 @@ blogs:
   repo: travel3-hugo
   schedule:
     times:
-    - 08:30
-    - '11:30'
-    - '15:00'
-    - '19:00'
-    - '22:15'
+    - 07:06
+    - '10:06'
+    - '13:06'
+    - '16:06'
+    - '20:06'
   site_path: /Users/twinssn/Projects/travel3-hugo
   status: active
   theme: Blowfish
@@ -258,11 +253,11 @@ blogs:
   repo: travel4-hugo
   schedule:
     times:
-    - 09:00
-    - '12:00'
-    - '15:30'
-    - '19:30'
-    - '22:30'
+    - 07:08
+    - '10:08'
+    - '13:08'
+    - '16:08'
+    - '20:08'
   site_path: /Users/twinssn/Projects/travel4-hugo
   status: active
   theme: Blowfish
@@ -280,11 +275,11 @@ blogs:
   platform: blogger
   schedule:
     times:
-    - 09:00
-    - '11:00'
-    - '14:00'
-    - '16:00'
-    - '19:00'
+    - 07:36
+    - '10:36'
+    - '13:36'
+    - '16:36'
+    - '20:36'
   status: active
 - blog_id_env: BLOGGER_RECIPE_BLOG_ID
   daily_quota: 5
@@ -300,11 +295,11 @@ blogs:
   platform: blogger
   schedule:
     times:
-    - 09:30
-    - '11:30'
-    - '14:30'
-    - '16:30'
-    - '19:30'
+    - 07:38
+    - '10:38'
+    - '13:38'
+    - '16:38'
+    - '20:38'
   status: active
 - daily_quota: 5
   domain: kuta.informationhot.kr
@@ -319,11 +314,11 @@ blogs:
   platform: wordpress
   schedule:
     times:
-    - '10:00'
-    - '12:00'
-    - '15:00'
-    - '17:00'
-    - '20:00'
+    - 07:40
+    - '10:40'
+    - '13:40'
+    - '16:40'
+    - '20:40'
   status: active
   wp_pass_env: WP_KUTA_PASS
   wp_url_env: WP_KUTA_URL
@@ -336,11 +331,11 @@ blogs:
   platform: wordpress
   schedule:
     times:
-    - 08:00
-    - '10:30'
-    - '13:00'
-    - '15:30'
-    - '18:00'
+    - 07:42
+    - '10:42'
+    - '13:42'
+    - '16:42'
+    - '20:42'
   status: active
   wp_pass_env: WP_KUTA_PASS
   wp_url_env: WP_KUTA_URL
@@ -355,11 +350,11 @@ blogs:
   repo: stock-blog
   schedule:
     times:
-    - 08:30
-    - '11:30'
-    - '14:30'
-    - '17:30'
-    - '20:30'
+    - 07:22
+    - '10:22'
+    - '13:22'
+    - '16:22'
+    - '20:22'
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
   status: active
   theme: congo
@@ -391,11 +386,11 @@ blogs:
   repo: dividend-hugo
   schedule:
     times:
-    - 09:00
-    - '12:00'
-    - '15:00'
-    - '18:00'
-    - '21:00'
+    - 07:24
+    - '10:24'
+    - '13:24'
+    - '16:24'
+    - '20:24'
   site_path: /Users/twinssn/Projects/STAP/dividend-hugo
   status: active
   theme: blowfish
@@ -409,11 +404,11 @@ blogs:
   repo: etf-hugo
   schedule:
     times:
-    - 09:10
-    - '12:10'
-    - '15:10'
-    - '18:10'
-    - '21:10'
+    - 07:26
+    - '10:26'
+    - '13:26'
+    - '16:26'
+    - '20:26'
   site_path: /Users/twinssn/Projects/STAP/etf-hugo
   status: active
   theme: blowfish
@@ -427,11 +422,11 @@ blogs:
   repo: sector-hugo
   schedule:
     times:
-    - 09:20
-    - '12:20'
-    - '15:20'
-    - '18:20'
-    - '21:20'
+    - 07:28
+    - '10:28'
+    - '13:28'
+    - '16:28'
+    - '20:28'
   site_path: /Users/twinssn/Projects/STAP/sector-hugo
   status: active
   theme: blowfish
@@ -445,11 +440,11 @@ blogs:
   repo: ipo-hugo
   schedule:
     times:
-    - 09:30
-    - '12:30'
-    - '15:30'
-    - '18:30'
-    - '21:30'
+    - 07:30
+    - '10:30'
+    - '13:30'
+    - '16:30'
+    - '20:30'
   site_path: /Users/twinssn/Projects/STAP/ipo-hugo
   status: active
   theme: blowfish
@@ -463,29 +458,11 @@ blogs:
   repo: finance-hugo
   schedule:
     times:
-    - 09:40
-    - '12:40'
-    - '15:40'
-    - '18:40'
-    - '21:40'
-- cf_project: finance-hugo
-  daily_quota: 999
-  domain: finance.techpawz.com
-  id: finance-hugo
-  name: 금리·예적금 비교
-  pipeline: stock
-  platform: hugo
-  repo: finance-hugo
-  schedule:
-    times:
-    - 09:40
-    - '12:40'
-    - '15:40'
-    - '18:40'
-    - '21:40'
-  site_path: /Users/twinssn/Projects/STAP/finance-hugo
-  status: active
-  theme: blowfish
+    - 07:32
+    - '10:32'
+    - '13:32'
+    - '16:32'
+    - '20:32'
 - cf_project: senior-hugo
   daily_quota: 5
   domain: senior.informationhot.kr
@@ -496,20 +473,17 @@ blogs:
   repo: senior-hugo
   schedule:
     times:
-    - '07:30'
-    - '10:30'
-    - '13:30'
-    - '16:30'
-    - '19:30'
+    - 07:34
+    - '10:34'
+    - '13:34'
+    - '16:34'
+    - '20:34'
   site_path: /Users/twinssn/Projects/senior-hugo
   status: active
   theme: blowfish
-
 deploy:
   branch: main
   commit_dirty: true
   method: wrangler
-
 git_backup:
   schedule: sunday 03:00
-
