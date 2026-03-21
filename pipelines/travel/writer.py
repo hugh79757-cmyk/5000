@@ -118,6 +118,18 @@ def _build_data_block(data):
         if item.get("firstImageUrl"):
             lines.append(f"이미지: {item['firstImageUrl']}")
 
+        # blog_info enrichment 데이터
+        bi = item.get("blog_info", {})
+        # 가격대는 정확한 메뉴별 가격이 아니므로 GPT에 전달하지 않음
+        if bi.get("pros"):
+            clean_pros = [p.strip()[:40] for p in bi["pros"][:3] if len(p.strip()) > 5]
+            if clean_pros:
+                lines.append(f"블로그 후기 요약: {' / '.join(clean_pros)}")
+        if bi.get("facilities"):
+            lines.append(f"시설: {', '.join(bi['facilities'][:5])}")
+        if bi.get("targets"):
+            lines.append(f"추천 대상: {', '.join(bi['targets'][:3])}")
+
         lines.append("")
 
     # nearby 맛집 데이터 추가
@@ -253,7 +265,8 @@ def _enrich_with_nearby(data, html):
     items = data.get("items", [])
     sigungu = data.get("sigungu", "")
 
-    items = enrich_items_with_blog_info(items)
+    # enrichment는 generate_content에서 이미 실행됨 (중복 호출 방지)
+    # items = enrich_items_with_blog_info(items)
     nearby_data = get_nearby_info(items, sigungu)
 
     if not nearby_data:
@@ -466,6 +479,15 @@ def _validate_place_names(content, real_names, max_retries=1):
 def generate_content(data, blog_id="travel-hugo"):
     source_type = data.get("source_type", "camping")
     prompt_id = _select_prompt_id(blog_id, source_type)
+
+    # 블로그 정보 enrichment (GPT 호출 전에 실행)
+    try:
+        from core.content_processor import enrich_items_with_blog_info
+        items = data.get("items", [])
+        items = enrich_items_with_blog_info(items)
+        data["items"] = items
+    except Exception as e:
+        logger.warning(f"enrichment 실패 (무시): {e}")
 
     data_block = _build_data_block(data)
 
