@@ -291,6 +291,29 @@ def fetch_course():
             return None
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
+        # 계절 부적합 코스 필터링
+        import datetime
+        _month = datetime.datetime.now().month
+        _season_ban = {
+            12: ["봄", "벚꽃", "유채꽃", "여름", "물놀이", "해수욕", "피서"],
+            1: ["봄", "벚꽃", "유채꽃", "여름", "물놀이", "해수욕", "피서"],
+            2: ["여름", "물놀이", "해수욕", "피서", "단풍", "억새"],
+            3: ["여름", "물놀이", "해수욕", "피서", "단풍", "억새", "눈썰매", "스키", "겨울"],
+            4: ["여름", "물놀이", "해수욕", "피서", "단풍", "억새", "눈썰매", "스키", "겨울"],
+            5: ["단풍", "억새", "눈썰매", "스키", "겨울"],
+            6: ["단풍", "억새", "눈썰매", "스키", "겨울", "벚꽃"],
+            7: ["단풍", "억새", "눈썰매", "스키", "겨울", "벚꽃"],
+            8: ["단풍", "억새", "눈썰매", "스키", "겨울", "벚꽃"],
+            9: ["눈썰매", "스키", "겨울", "벚꽃", "물놀이", "해수욕", "피서"],
+            10: ["눈썰매", "스키", "겨울", "벚꽃", "물놀이", "해수욕", "피서"],
+            11: ["벚꽃", "물놀이", "해수욕", "피서", "봄"],
+        }
+        ban_words = _season_ban.get(_month, [])
+        if ban_words:
+            pool = [i for i in pool if not any(bw in i.get("title", "") for bw in ban_words)]
+            if len(pool) < 3:
+                pool = with_img if len(with_img) >= 3 else items_raw  # 필터 후 부족하면 원복
+
         selected = random.sample(pool, min(5, len(pool)))
         adapted = _adapt_korservice_items(selected)
         return {
