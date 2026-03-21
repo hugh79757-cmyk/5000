@@ -2302,3 +2302,25 @@ expected <block end>, but found '-'
 2026-03-21 14:55:40,335 [INFO] Publishing: stock-hugo
 2026-03-21 14:56:31,104 [INFO] CATCHUP: dividend-hugo expected=2 actual=0 missed=2 -> 1건만 보충
 2026-03-21 14:56:31,104 [INFO] Publishing: dividend-hugo
+2026-03-21 14:58:00,213 [INFO] CATCHUP: etf-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:58:00,214 [INFO] Publishing: etf-hugo
+2026-03-21 14:58:30,028 [INFO] CATCHUP: sector-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:58:30,029 [INFO] Publishing: sector-hugo
+2026-03-21 14:59:36,909 [INFO] CATCHUP: ipo-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 14:59:36,910 [INFO] Publishing: ipo-hugo
+2026-03-21 15:00:05,731 [INFO] CATCHUP: finance-hugo expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-21 15:00:05,732 [INFO] Publishing: finance-hugo
+2026-03-21 15:00:11,071 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:00:11,072 [INFO] Publishing: senior-hugo
+2026-03-21 15:02:51,770 [INFO] Queue executing: travel3-hugo (remaining: 2)
+2026-03-21 15:02:51,771 [INFO] Publishing: travel3-hugo
+2026-03-21 15:02:51,870 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:02:51,870 [INFO] Publishing: travel-hugo
+2026-03-21 15:04:35,438 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:04:35,438 [INFO] Publishing: travel1-hugo
+2026-03-21 15:05:49,990 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:05:49,991 [INFO] Publishing: travel2-hugo
+2026-03-21 15:07:29,998 [INFO] Queue executing: kuta-wordpress (remaining: 1)
+2026-03-21 15:07:30,003 [INFO] Publishing: kuta-wordpress
+2026-03-21 15:07:40,032 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-21 15:07:40,032 [INFO] Publishing: travel3-hugo

@@ -108,7 +108,18 @@ def run_car(blog_cfg):
     for attempt in range(1, MAX_RETRY + 1):
         logger.info("토픽 선택 (시도 " + str(attempt) + "/" + str(MAX_RETRY) + ")")
         car_site_id = blog_id.replace('-hugo', '')
-        topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=blog_cfg.get('post_type'))
+        # post_type이 리스트면 순환 선택 (종합 블로그용)
+        pt_cfg = blog_cfg.get('post_type')
+        if isinstance(pt_cfg, list):
+            import random as _rnd
+            _rnd.shuffle(pt_cfg)
+            topic = None
+            for _pt in pt_cfg:
+                topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=_pt)
+                if topic:
+                    break
+        else:
+            topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=pt_cfg)
         if not topic:
             logger.info(blog_id + " no topics available")
             conn.close()
@@ -127,7 +138,12 @@ def run_car(blog_cfg):
 
     logger.info(data['model'] + " " + data['trim'] + " (" + str(data['base_price']) + "만원)")
 
-    prompt_file = PROMPTS_DIR / blog_cfg.get("prompt", "")
+    # prompt가 dict면 post_type별 프롬프트 매핑
+    prompt_cfg = blog_cfg.get("prompt", "")
+    if isinstance(prompt_cfg, dict):
+        prompt_file = PROMPTS_DIR / prompt_cfg.get(topic['post_type'], "")
+    else:
+        prompt_file = PROMPTS_DIR / prompt_cfg
     if not prompt_file.exists():
         logger.error("Prompt not found: " + str(prompt_file))
         conn.close()
@@ -183,7 +199,7 @@ def run_car(blog_cfg):
         thumbnail_url=r2_url,
         data_source="car_db",
         source_id=str(topic['car_id']),
-        prompt_id=blog_cfg.get("post_type", ""),
+        prompt_id=topic["post_type"] if topic else blog_cfg.get("post_type", ""),
         model="gpt-4o-mini",
     )
 
