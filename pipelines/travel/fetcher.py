@@ -256,7 +256,9 @@ def fetch_food():
                         sigungu_tokens.append(parts[1])
                 if sigungu_tokens:
                     most_common = Counter(sigungu_tokens).most_common(1)[0][0]
-                    sigungu_name = most_common.replace("시", "").replace("군", "").replace("구", "")
+                    cleaned = most_common.replace("시", "").replace("군", "").replace("구", "")
+                    # 1글자면(동구→동, 서구→서) 원본 유지
+                    sigungu_name = cleaned if len(cleaned) >= 2 else most_common
         except Exception:
             pass
         display = sigungu_name if sigungu_name != region_name else region_name

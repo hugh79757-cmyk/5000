@@ -126,6 +126,34 @@ def _build_data_block(data):
             lines.append(f"시설: {', '.join(bi['facilities'][:5])}")
         if bi.get("targets"):
             lines.append(f"추천 대상: {', '.join(bi['targets'][:3])}")
+        # 다이닝코드 데이터 (메뉴, 영업시간, 주차, 평점)
+        dc = item.get("diningcode", {})
+        if dc.get("main_menus"):
+            lines.append(f"대표메뉴: {', '.join(dc['main_menus'][:5])}")
+        if dc.get("hours"):
+            lines.append(f"영업시간: {dc['hours']}")
+        if dc.get("closed_days"):
+            lines.append(f"휴무일: {dc['closed_days']}")
+        if dc.get("parking"):
+            lines.append(f"주차: {dc['parking']}")
+        if dc.get("rating"):
+            lines.append(f"평점: {dc['rating']}")
+        if dc.get("keywords"):
+            lines.append(f"특징: {', '.join(dc['keywords'][:5])}")
+        # 다이닝코드 데이터 (메뉴, 영업시간, 주차, 평점)
+        dc = item.get("diningcode", {})
+        if dc.get("main_menus"):
+            lines.append(f"대표메뉴: {', '.join(dc['main_menus'][:5])}")
+        if dc.get("hours"):
+            lines.append(f"영업시간: {dc['hours']}")
+        if dc.get("closed_days"):
+            lines.append(f"휴무일: {dc['closed_days']}")
+        if dc.get("parking"):
+            lines.append(f"주차: {dc['parking']}")
+        if dc.get("rating"):
+            lines.append(f"평점: {dc['rating']}")
+        if dc.get("keywords"):
+            lines.append(f"특징: {', '.join(dc['keywords'][:5])}")
 
         lines.append("")
 
@@ -477,14 +505,29 @@ def generate_content(data, blog_id="travel-hugo"):
     source_type = data.get("source_type", "camping")
     prompt_id = _select_prompt_id(blog_id, source_type)
 
-    # 블로그 정보 enrichment (GPT 호출 전에 실행)
+    # 블로그 정보 + 다이닝코드 enrichment (GPT 호출 전에 실행)
     try:
         from core.content_processor import enrich_items_with_blog_info
         items = data.get("items", [])
         items = enrich_items_with_blog_info(items)
         data["items"] = items
     except Exception as e:
-        logger.warning(f"enrichment 실패 (무시): {e}")
+        logger.warning(f"블로그 enrichment 실패 (무시): {e}")
+
+    # 맛집 파이프라인이면 다이닝코드로 메뉴/영업시간 보강
+    if source_type in ("food", "korservice") and prompt_id == "tour2_food":
+        try:
+            from shared.diningcode_enricher import enrich_from_diningcode
+            for item in data.get("items", []):
+                name = item.get("title", item.get("facltNm", ""))
+                addr = item.get("addr1", item.get("addr", ""))
+                if name:
+                    dc = enrich_from_diningcode(name, addr)
+                    if dc:
+                        item["diningcode"] = dc
+                        logger.info(f"다이닝코드: {name} → 메뉴 {len(dc.get('main_menus',[]))}개, 평점 {dc.get('rating','')}")
+        except Exception as e:
+            logger.warning(f"다이닝코드 enrichment 실패 (무시): {e}")
 
     data_block = _build_data_block(data)
 
