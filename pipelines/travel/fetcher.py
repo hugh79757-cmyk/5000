@@ -241,7 +241,7 @@ def fetch_food():
             return None
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
-        selected = random.sample(pool, min(5, len(pool)))
+        selected = random.sample(pool, min(3, len(pool)))
         adapted = _adapt_korservice_items(selected)
         # 시군구 추출: addr1에서 두 번째 토큰 (예: "경기도 수원시 팔달구..." → "수원시")
         sigungu_name = region_name
