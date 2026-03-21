@@ -77,10 +77,7 @@ def _drain_queue():
                 return
             blog_id = _publish_queue.pop(0)
         logger.info(f"Queue executing: {blog_id} (remaining: {len(_publish_queue)})")
-        try:
-            run_publish(blog_id)
-        except Exception as e:
-            logger.error(f"Queue publish failed: {blog_id} - {e}")
+        run_publish(blog_id)
         with _queue_lock:
             if not _publish_queue:
                 return
@@ -135,15 +132,13 @@ def catchup_missed():
 
         missed = expected - actual
         if missed > 0:
-            # 블로그당 최대 1건만 보충 (과다 catchup 방지)
-            logger.info("CATCHUP: " + blog_id + " expected=" + str(expected) + " actual=" + str(actual) + " missed=" + str(missed) + " -> 1건만 보충")
-            try:
+            logger.info("CATCHUP: " + blog_id + " expected=" + str(expected) + " actual=" + str(actual) + " missed=" + str(missed))
+            for i in range(missed):
                 success = run_publish(blog_id)
                 if not success:
-                    logger.warning("CATCHUP: " + blog_id + " 보충 실패, 다음 정규 스케줄에서 재시도")
-            except Exception as e:
-                logger.error("CATCHUP: " + blog_id + " 예외: " + str(e))
-            time.sleep(5)
+                    logger.warning("CATCHUP: " + blog_id + " retry " + str(i+1) + " failed, skip remaining")
+                    break
+                time.sleep(5)
 
 
 def batch_deploy():

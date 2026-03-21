@@ -54,10 +54,23 @@ def refresh_trims(conn):
                 raw_price = cells[-1].get_text(strip=True)
 
                 trim_name = re.sub(r'(A/T|M/T|DCT)', '', raw_name).strip()
-                price_match = re.search(r'[\d,]+', raw_price.replace('만원', '').replace(',', ''))
-                if not price_match:
-                    continue
-                price = int(price_match.group().replace(',', ''))
+                # 가격 파싱: "1억 2,345만원" → 12345, "5,745만원" → 5745
+                raw_p = raw_price.replace(',', '').strip()
+                eok_match = re.search(r'(\d+)억\s*(\d*)', raw_p)
+                man_match = re.search(r'(\d+)만', raw_p)
+                if eok_match:
+                    eok = int(eok_match.group(1)) * 10000
+                    rest = int(eok_match.group(2)) if eok_match.group(2) else 0
+                    price = eok + rest
+                elif man_match:
+                    price = int(man_match.group(1))
+                else:
+                    price_match = re.search(r'\d+', raw_p)
+                    if not price_match:
+                        continue
+                    price = int(price_match.group())
+                if price < 500:
+                    continue  # 비정상 가격 스킵
 
                 status = "시판"
                 first_cell = cells[0].get_text(strip=True) if len(cells) >= 3 else ""
@@ -126,8 +139,16 @@ def make_car_id(brand, model, year):
 
 
 def guess_fuel_type(title):
+    t = title.upper()
     if "하이브리드" in title: return "가솔린/하이브리드"
-    if "EV" in title or "일렉트릭" in title or "전기" in title: return "전기"
+    # 전기차 모델명 패턴
+    ev_keywords = ["EV", "일렉트릭", "전기", "E-트론", "이트론", "IONIQ", "아이오닉",
+                   "모델 Y", "모델 3", "MODEL", "TESLA", "테슬라", "볼트", "BOLT",
+                   "ID.", "EQE", "EQS", "EQA", "EQB", "I4", "I5", "I7", "IX",
+                   "GV60", "일렉트리파이드", "EX30", "EX90", "EC6", "ET5"]
+    for kw in ev_keywords:
+        if kw.upper() in t or kw in title:
+            return "전기"
     return "가솔린"
 
 
@@ -198,11 +219,23 @@ def scan_new_cars(conn):
 
             fuel = guess_fuel_type(title)
             segment = guess_segment(model)
+            # 배기량 추출 시도 (페이지 테이블에서)
+            disp = 0
+            try:
+                spec_cells = soup.select("td")
+                for sc in spec_cells:
+                    txt = sc.get_text(strip=True)
+                    dm = re.search(r"([\d,]+)\s*cc", txt)
+                    if dm:
+                        disp = int(dm.group(1).replace(",", ""))
+                        break
+            except:
+                pass
             body = "SUV" if "SUV" in segment else "세단" if "세단" in segment else "경차" if "경차" in segment else "기타"
 
             c.execute("""INSERT INTO cars (car_id, carisyou_id, brand, model, year, fuel_type, displacement, segment, body_type, drive_type, is_popular, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, 'FWD', 0, datetime('now'))""",
-                (car_id, cid, brand, model, year, fuel, segment, body))
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'FWD', 0, datetime('now'))""",
+                (car_id, cid, brand, model, year, fuel, disp, segment, body))
 
             for img in imgs:
                 src = img.get("src", "")

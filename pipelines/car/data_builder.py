@@ -313,7 +313,15 @@ def build_input(conn, topic, db_path):
         (topic['car_id'],)
     ).fetchall()
     trims = [dict(t) for t in trims_raw]
+    # === 데이터 품질 필터 ===
+    trims = [t for t in trims if t["price"] and t["price"] >= 500]
     if not trims:
+        print(f"  [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: {car['model']}")
+        return None
+    # 배기량 0 + 비전기 차량 차단
+    ft = str(car.get("fuel_type", ""))
+    if (not car["displacement"] or car["displacement"] == 0) and "전기" not in ft:
+        print(f"  [BLOCK] 배기량 0 + 비전기 - 발행 차단: {car['brand']} {car['model']} ({ft})")
         return None
     idx = select_representative_trim(trims)
     main_trim = trims[idx]
@@ -366,6 +374,7 @@ def build_input(conn, topic, db_path):
             (topic['competitor_car_id'],)
         ).fetchall()
         comp_trims = [dict(t) for t in comp_trims_raw]
+        comp_trims = [t for t in comp_trims if t["price"] and t["price"] >= 500]
         if comp and comp_trims:
             cidx = select_matching_trim(comp_trims, main_trim['price'])
             ct = comp_trims[cidx]

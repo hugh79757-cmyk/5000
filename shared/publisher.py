@@ -42,18 +42,27 @@ def _extract_first_image(body_md):
 
 
 def _extract_description(body_md):
+    """본문에서 SEO용 description 추출 — 도입부와 차별화"""
+    lines = []
     for line in body_md.split("\n"):
         line = line.strip()
         if not line:
             continue
         if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--") or line.startswith("|"):
             continue
-        clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]+\)', r'\1', line)
-        if len(clean) > 30:
-            return clean[:150]
-    return ""
-
-
+        clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]*\)', r'\1', line)
+        if len(clean) > 20:
+            lines.append(clean)
+        if len(lines) >= 3:
+            break
+    if not lines:
+        return ""
+    # 첫 문장이 아닌 2~3번째 문장에서 핵심 수치 포함 문장 우선
+    for line in lines[1:]:
+        if any(c.isdigit() for c in line):
+            return line[:160]
+    # 수치 문장 없으면 첫 문장 축약
+    return lines[0][:160]
 
 def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
