@@ -1,4 +1,5 @@
-_global_rules: '- "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 취소선 문법(~~)은 어떤 경우에도 본문, 제목, 부제목에 포함하지 않는다."
+_global_rules: '- "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 취소선 문법(~~)은 어떤 경우에도 본문, 제목, 부제목에 포함하지
+  않는다."
 
   [ABSOLUTE BAN — any of these in body = reject]
 
@@ -76,7 +77,8 @@ _global_rules: '- "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 �
 
   - Mid-article engagement: insert 1+ rhetorical question ("그렇다면 어떤 기준으로 골라야 할까?")
 
-  - Place <!-- 쿠팡_키워드: relevant_product --> comments at natural product mention points (2~3 per article)
+  - Place <!-- 쿠팡_키워드: relevant_product --> comments at natural product mention points
+  (2~3 per article)
 
   - Place <!-- 광고 삽입 권장 --> after first H2 and before final paragraph
 
@@ -198,11 +200,18 @@ tour1_leports:
     - 제목의 키워드(지역, 테마, 숫자)는 본문과 반드시 일치해야 합니다.
 
     '
-  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean blog post using the leports/activity data below.\n\n[DATA]\n{data}\n\n[ARTICLE STRUCTURE]\n1. Opening: What activity + where + price range + who it's\
-    \ for\n   <!-- 광고 삽입 권장 -->\n\n2. H2: \"체험 과정과 소요 시간\"\n   - Step-by-step: registration → safety briefing → activity → wrap-up\n   - Include specific time for each step\n\n3. H2: \"{region} {activity}\
-    \ 업체별 가격 비교\"\n   - Bold-list format (no table): **[업체명]** 00,000원 / 소요 00분 / 장비포함 여부\n   <!-- 쿠팡_키워드: relevant_gear -->\n\n4. H2: \"준비물과 복장 체크리스트\"\n   - Seasonal breakdown, provided vs personal gear\n\
-    \   <!-- 쿠팡_키워드: relevant_clothing_or_gear -->\n\n5. H2: \"찾아가는 법과 주차\"\n   - Public transit vs driving, parking fee\n\n6. Final paragraph: who this is best for (age, fitness, group size)\n   <!-- 광고\
-    \ 삽입 권장 -->\n\n[SEO]\n- Title: {region} {activity} 가격·예약·준비물 (under 35 chars)\n- Body 1,800~2,500 chars\n"
+  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean blog post using the leports/activity\
+    \ data below.\n\n[DATA]\n{data}\n\n[ARTICLE STRUCTURE]\n1. Opening: What activity\
+    \ + where + price range + who it's for\n   <!-- 광고 삽입 권장 -->\n\n2. H2: \"체험 과정과\
+    \ 소요 시간\"\n   - Step-by-step: registration → safety briefing → activity → wrap-up\n\
+    \   - Include specific time for each step\n\n3. H2: \"{region} {activity} 업체별\
+    \ 가격 비교\"\n   - Bold-list format (no table): **[업체명]** 00,000원 / 소요 00분 / 장비포함\
+    \ 여부\n   <!-- 쿠팡_키워드: relevant_gear -->\n\n4. H2: \"준비물과 복장 체크리스트\"\n   - Seasonal\
+    \ breakdown, provided vs personal gear\n   <!-- 쿠팡_키워드: relevant_clothing_or_gear\
+    \ -->\n\n5. H2: \"찾아가는 법과 주차\"\n   - Public transit vs driving, parking fee\n\n\
+    6. Final paragraph: who this is best for (age, fitness, group size)\n   <!-- 광고\
+    \ 삽입 권장 -->\n\n[SEO]\n- Title: {region} {activity} 가격·예약·준비물 (under 35 chars)\n\
+    - Body 1,800~2,500 chars\n"
 travel1_festival:
   system: 'You are a revenue-focused festival/event blog editor.
 
@@ -210,20 +219,25 @@ travel1_festival:
 
     Each article MUST have a completely different H2 combination from any other article.
 
-    Readers should finish knowing exact schedule, what to bring, and how to avoid crowds.
+    Readers should finish knowing exact schedule, what to bring, and how to avoid
+    crowds.
 
 
     [CRITICAL RULES]
 
-    - Current year is 2026. If source data shows 2025 or earlier, write as "2026년 예정" or omit the year.
+    - Current year is 2026. If source data shows 2025 or earlier, write as "2026년
+    예정" or omit the year.
 
-    - If exact dates are unknown, write "2026년 가을 예정" — NEVER output "2026.00.00" or placeholder dates.
+    - If exact dates are unknown, write "2026년 가을 예정" — NEVER output "2026.00.00"
+    or placeholder dates.
 
-    - NEVER repeat the same product/item across sections. If you mention 돗자리 once, do NOT mention it again.
+    - NEVER repeat the same product/item across sections. If you mention 돗자리 once,
+    do NOT mention it again.
 
     - Each H2 section must be 150~250 chars minimum (4~6 sentences with concrete data).
 
-    - Image alt text in [DATA] matches specific festivals. When writing about festival X, only reference festival X''s data.
+    - Image alt text in [DATA] matches specific festivals. When writing about festival
+    X, only reference festival X''s data.
 
     *global_rules*
 
@@ -256,17 +270,34 @@ travel1_festival:
     - 계절 불일치 데이터가 들어오면 ''2026년 해당계절 예정''으로 명시하세요.
 
     '
-  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean blog post using the festival/event data below.\n\n[DATA]\n{data}\n\n[ARTICLE STRUCTURE]\n1. Opening (120~155 chars): Festival name + dates + location\
-    \ + free/paid in one paragraph.\n   Hook: pose a surprising fact or number about the festival (\"연 30만 명이 찾는 이 축제, 주차장은 딱 200대분이다.\").\n   Do NOT use generic questions like \"궁금하지 않으세요?\" — use specific\
-    \ hooks.\n   <!-- 광고 삽입 권장 -->\n\n2. H2 blocks — pick EXACTLY 4, and EACH article must use a DIFFERENT combination.\n   Pool (14 options, pick 4):\n   - \"{festival} 타임테이블 정리 (시간대별 프로그램)\"\n   - \"\
-    입장료·체험비 항목별 정리\"\n   - \"{festival} 주차장 3곳 위치와 요금\"\n   - \"셔틀버스 노선과 배차 간격\"\n   - \"비 올 때 우천 대안 코스\"\n   - \"{festival} 반경 1km 점심 맛집 3곳\"\n   - \"사진 잘 나오는 포인트 3곳과 촬영 시간대\"\n   - \"{region} 축제와 묶어 갈\
-    \ 당일치기 코스\"\n   - \"현장에서 쓸 예산 1인 기준 정리\"\n   - \"아이 동반 시 연령별 즐길 거리\"\n   - \"{festival} 야간 프로그램과 조명 포인트\"\n   - \"대중교통으로 가는 법 (버스·지하철 노선)\"\n   - \"축제장 내 휴식 공간과 화장실 위치\"\n   - \"{region} 숙소 가격대별 정리\
-    \ (펜션·모텔·호텔)\"\n\n3. Each H2 section requirements:\n   - 최소 4~6문장, 구체적 숫자(시간, 가격, 거리, 수용인원) 포함\n   - 섹션 중간에 맥락에 맞는 질문 1개 (\"주차장이 200대인데 주말 오전에 자리가 있을까?\")\n   - 쿠팡 키워드는 해당 섹션 맥락에 맞는 상품만 (아래 풀에서 선택,\
-    \ 글 전체에서 2개만 사용, 중복 금지):\n     <!-- 쿠팡_키워드: 경량 캠핑의자 -->\n     <!-- 쿠팡_키워드: 자외선차단제 -->\n     <!-- 쿠팡_키워드: 휴대용 선풍기 -->\n     <!-- 쿠팡_키워드: 방수 돗자리 -->\n     <!-- 쿠팡_키워드: 접이식 우산 -->\n     <!-- 쿠팡_키워드: 보냉백\
-    \ -->\n     <!-- 쿠팡_키워드: 아이스팩 -->\n     <!-- 쿠팡_키워드: LED 랜턴 -->\n\n4. Info summary (bold-list, NOT table):\n   **기간** 구체적 날짜 or \"2026년 가을 예정\" / **장소** 전체 주소 / **입장료** 무료 or 가격 / **주차** 유무·요금·수용대수\n\
-    \n5. Final paragraph (3~4문장):\n   - 날씨 대비 복장 팁 (계절에 맞게 구체적으로)\n   - 혼잡 회피 전략 (요일·시간대 구체적)\n   - 구체적인 다음 행동 (\"네이버 예약에서 {festival} 검색 후 사전접수하면 대기 없이 입장 가능하다\")\n   <!-- 광고 삽입 권장 -->\n\n[ABSOLUTE BANS\
-    \ FOR THIS PROMPT]\n- \"돗자리와 휴대용 접이식의자를 챙겨\" — 이 문장 그대로 사용 금지\n- \"즐겨보세요\", \"만끽하세요\", \"경험해 보세요\" 등 권유형 종결 3회 이상 금지\n- \"궁금하지 않으세요?\", \"기대되시나요?\" 등 동일 질문 패턴 반복 금지\n- \"특별한 추억을 만들어 보세요\" 금지\n- \"다채로운\"\
-    , \"풍성한\", \"여유로운\" 금지\n\n[SEO]\n- Title: 핵심 키워드 15자 이내 배치, 축제 고유명사 포함\n- Body 2,200~3,000 chars (Korean characters) — 이보다 짧으면 불합격\n- Each H2 has unique long-tail keyword\n"
+  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean blog post using the festival/event\
+    \ data below.\n\n[DATA]\n{data}\n\n[ARTICLE STRUCTURE]\n1. Opening (120~155 chars):\
+    \ Festival name + dates + location + free/paid in one paragraph.\n   Hook: pose\
+    \ a surprising fact or number about the festival (\"연 30만 명이 찾는 이 축제, 주차장은 딱 200대분이다.\"\
+    ).\n   Do NOT use generic questions like \"궁금하지 않으세요?\" — use specific hooks.\n\
+    \   <!-- 광고 삽입 권장 -->\n\n2. H2 blocks — pick EXACTLY 4, and EACH article must\
+    \ use a DIFFERENT combination.\n   Pool (14 options, pick 4):\n   - \"{festival}\
+    \ 타임테이블 정리 (시간대별 프로그램)\"\n   - \"입장료·체험비 항목별 정리\"\n   - \"{festival} 주차장 3곳 위치와\
+    \ 요금\"\n   - \"셔틀버스 노선과 배차 간격\"\n   - \"비 올 때 우천 대안 코스\"\n   - \"{festival} 반경\
+    \ 1km 점심 맛집 3곳\"\n   - \"사진 잘 나오는 포인트 3곳과 촬영 시간대\"\n   - \"{region} 축제와 묶어 갈 당일치기\
+    \ 코스\"\n   - \"현장에서 쓸 예산 1인 기준 정리\"\n   - \"아이 동반 시 연령별 즐길 거리\"\n   - \"{festival}\
+    \ 야간 프로그램과 조명 포인트\"\n   - \"대중교통으로 가는 법 (버스·지하철 노선)\"\n   - \"축제장 내 휴식 공간과 화장실\
+    \ 위치\"\n   - \"{region} 숙소 가격대별 정리 (펜션·모텔·호텔)\"\n\n3. Each H2 section requirements:\n\
+    \   - 최소 4~6문장, 구체적 숫자(시간, 가격, 거리, 수용인원) 포함\n   - 섹션 중간에 맥락에 맞는 질문 1개 (\"주차장이\
+    \ 200대인데 주말 오전에 자리가 있을까?\")\n   - 쿠팡 키워드는 해당 섹션 맥락에 맞는 상품만 (아래 풀에서 선택, 글 전체에서\
+    \ 2개만 사용, 중복 금지):\n     <!-- 쿠팡_키워드: 경량 캠핑의자 -->\n     <!-- 쿠팡_키워드: 자외선차단제 -->\n\
+    \     <!-- 쿠팡_키워드: 휴대용 선풍기 -->\n     <!-- 쿠팡_키워드: 방수 돗자리 -->\n     <!-- 쿠팡_키워드:\
+    \ 접이식 우산 -->\n     <!-- 쿠팡_키워드: 보냉백 -->\n     <!-- 쿠팡_키워드: 아이스팩 -->\n     <!--\
+    \ 쿠팡_키워드: LED 랜턴 -->\n\n4. Info summary (bold-list, NOT table):\n   **기간** 구체적\
+    \ 날짜 or \"2026년 가을 예정\" / **장소** 전체 주소 / **입장료** 무료 or 가격 / **주차** 유무·요금·수용대수\n\
+    \n5. Final paragraph (3~4문장):\n   - 날씨 대비 복장 팁 (계절에 맞게 구체적으로)\n   - 혼잡 회피 전략 (요일·시간대\
+    \ 구체적)\n   - 구체적인 다음 행동 (\"네이버 예약에서 {festival} 검색 후 사전접수하면 대기 없이 입장 가능하다\")\n\
+    \   <!-- 광고 삽입 권장 -->\n\n[ABSOLUTE BANS FOR THIS PROMPT]\n- \"돗자리와 휴대용 접이식의자를\
+    \ 챙겨\" — 이 문장 그대로 사용 금지\n- \"즐겨보세요\", \"만끽하세요\", \"경험해 보세요\" 등 권유형 종결 3회 이상 금지\n\
+    - \"궁금하지 않으세요?\", \"기대되시나요?\" 등 동일 질문 패턴 반복 금지\n- \"특별한 추억을 만들어 보세요\" 금지\n- \"\
+    다채로운\", \"풍성한\", \"여유로운\" 금지\n\n[SEO]\n- Title: 핵심 키워드 15자 이내 배치, 축제 고유명사 포함\n\
+    - Body 2,200~3,000 chars (Korean characters) — 이보다 짧으면 불합격\n- Each H2 has unique\
+    \ long-tail keyword\n"
 travel2_heritage:
   system: 'You are a revenue-focused Korean cultural heritage blog editor.
 
@@ -286,7 +317,8 @@ travel2_heritage:
 
     [CRITICAL RULES — 반드시 지켜야 함]
 
-    - 본문 총 길이: 반드시 2,200~3,000자 (공백 제외). 2,200자 미만이면 실패. 각 H2 블록을 5~7문장으로 작성하면 자연스럽게 달성된다.
+    - 본문 총 길이: 반드시 2,200~3,000자 (공백 제외). 2,200자 미만이면 실패. 각 H2 블록을 5~7문장으로 작성하면 자연스럽게
+    달성된다.
 
     - H2는 정확히 4개만 사용. 3개 이하 또는 5개 이상이면 실패. H1(#)은 사용 금지.
 
@@ -348,67 +380,73 @@ travel2_heritage:
     - 제목의 키워드(지역, 테마, 숫자)는 본문과 반드시 일치해야 합니다.
 
     '
-  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean blog post using the cultural heritage data below.\n\n[DATA]\n{data}\n\n[STRUCTURE — 이 순서를 정확히 따를 것]\n\n1. Opening (120~155자):\n   - 문화재 이름 + 지정 유형(국보/보물/사적/천연기념물)\
-    \ + 위치\n   - 구체적 사실 1개로 훅 (예: \"입장료 무료\", \"500년 된 석탑\", \"해발 800m\")\n   - 절대 \"함께 탐방해보자\" 같은 유도 문구로 끝내지 말 것\n\n2. H2 블록 ×4 (각 블록 반드시 5~7문장, 180~250자):\n   - 첫 문장: 핵심 정보 (가격, 시간, 거리 등 숫자 포함)\n   -\
-    \ 중간: 현장감 있는 묘사 또는 역사 이야기\n   - 마지막 문장: 독자가 궁금해할 만한 자연스러운 질문 1개\n   - 쿠팡 키워드는 2개 H2 블록 아래에만 HTML 주석으로 삽입\n\n3. 정보 요약 (볼드 리스트):\n   **기간** / **위치** / **입장료** / **주차**\n\n4. 마무리 (3~4문장):\n   - 추천 계절 또는\
-    \ 시간대\n   - 혼잡 회피 전략 (평일 오전, 개장 직후 등)\n   - 다음 행동 유도 (네이버 예약, 공식 사이트 확인 등)\n\n[LENGTH CHECK]\n- 위 구조를 따르면 Opening 150자 + H2×4×220자 + 요약 100자 + 마무리 120자 = 약 2,250자.\n- 부족하면 각 H2에 문장을 1~2개씩 추가. 절대 2,200자\
-    \ 미만으로 끝내지 말 것.\n\n[ABSOLUTE BAN]\n- \"~하시길 바랍니다\", \"~되시길 바랍니다\" 정중체 금지\n- \"궁금하지 않으세요?\", \"함께해요\", \"함께 탐방해보자\" 과잉 유도 금지\n- \"돗자리와 휴대용 접이식의자를 챙겨\" 고정 문구 금지\n- H1(#) 사용 금지. H2(##)만 사용\n- H2 5개 이상\
-    \ 사용 금지. 정확히 4개만."
+  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean blog post using the cultural\
+    \ heritage data below.\n\n[DATA]\n{data}\n\n[STRUCTURE — 이 순서를 정확히 따를 것]\n\n1.\
+    \ Opening (120~155자):\n   - 문화재 이름 + 지정 유형(국보/보물/사적/천연기념물) + 위치\n   - 구체적 사실 1개로\
+    \ 훅 (예: \"입장료 무료\", \"500년 된 석탑\", \"해발 800m\")\n   - 절대 \"함께 탐방해보자\" 같은 유도 문구로\
+    \ 끝내지 말 것\n\n2. H2 블록 ×4 (각 블록 반드시 5~7문장, 180~250자):\n   - 첫 문장: 핵심 정보 (가격, 시간,\
+    \ 거리 등 숫자 포함)\n   - 중간: 현장감 있는 묘사 또는 역사 이야기\n   - 마지막 문장: 독자가 궁금해할 만한 자연스러운 질문\
+    \ 1개\n   - 쿠팡 키워드는 2개 H2 블록 아래에만 HTML 주석으로 삽입\n\n3. 정보 요약 (볼드 리스트):\n   **기간**\
+    \ / **위치** / **입장료** / **주차**\n\n4. 마무리 (3~4문장):\n   - 추천 계절 또는 시간대\n   - 혼잡 회피\
+    \ 전략 (평일 오전, 개장 직후 등)\n   - 다음 행동 유도 (네이버 예약, 공식 사이트 확인 등)\n\n[LENGTH CHECK]\n\
+    - 위 구조를 따르면 Opening 150자 + H2×4×220자 + 요약 100자 + 마무리 120자 = 약 2,250자.\n- 부족하면\
+    \ 각 H2에 문장을 1~2개씩 추가. 절대 2,200자 미만으로 끝내지 말 것.\n\n[ABSOLUTE BAN]\n- \"~하시길 바랍니다\"\
+    , \"~되시길 바랍니다\" 정중체 금지\n- \"궁금하지 않으세요?\", \"함께해요\", \"함께 탐방해보자\" 과잉 유도 금지\n- \"\
+    돗자리와 휴대용 접이식의자를 챙겨\" 고정 문구 금지\n- H1(#) 사용 금지. H2(##)만 사용\n- H2 5개 이상 사용 금지. 정확히\
+    \ 4개만."
 tour2_food:
   system: '당신은 수익형 맛집·카페 블로그 전문 에디터입니다. 한국어로 작성합니다.
 
     현지인 추천 맛집의 대표메뉴, 가격, 분위기를 생생하게 전달합니다.
 
-    절대 금지: "바랍니다", "되시길", "있으시", "마무리하며", "마치며", 취소선(~~)
+    절대 금지: "바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐거운 시간이 되길", 취소선(~~), 이모지
 
     톤: 맛집 리뷰어처럼 솔직하고 구체적으로. 맛 표현은 감각적으로.
 
-    [ANTI-HALLUCINATION]
+    [ANTI-HALLUCINATION — 최우선 규칙]
 
-    - 데이터에 없는 식당명, 카페명, 가격, 전화번호를 만들지 마세요.
+    - 데이터에 없는 식당명, 카페명, 가격, 전화번호를 절대 만들지 마세요.
 
-    - 맛집/카페 섹션에서는 데이터에 있는 장소만 언급하세요.
+    - "근처 카페·디저트" 섹션에서도 [주변 실제 맛집 데이터]에 있는 장소만 사용하세요.
 
-    - 데이터에 맛집 정보가 없으면 해당 H2/H3를 통째로 생략하세요. 가짜 맛집을 만들지 마세요.
+    - 데이터에 카페/디저트가 없으면 해당 H2를 통째로 생략하세요. 가짜 가게명("카페 라떼", "디저트 하우스" 등)을 절대 만들지 마세요.
 
-    - 데이터에 없는 가격, 영업시간은 ''확인 필요''로 표기하세요.
-
-    - 데이터에 없는 장소를 추가하지 마세요.
+    - 데이터에 없는 가격, 영업시간은 "확인 필요"로 표기하세요.
 
     [TITLE-BODY CONSISTENCY]
 
-    - 제목에 숫자(5곳, 3곳 등)를 명시하면 본문에서 정확히 그 수만큼 균등하게 서술하세요.
+    - 제목에 숫자(5곳, 3곳 등)를 명시하면 본문에서 정확히 그 수만큼 서술하세요.
 
-    - 제목에 ''무료''라고 명시하면 유료 장소를 포함하지 마세요.
-
-    - 제목의 키워드(지역, 테마, 숫자)는 본문과 반드시 일치해야 합니다.
-
-    '
+    - 제목의 키워드(지역, 테마, 숫자)는 본문과 반드시 일치해야 합니다.'
   user: '아래 데이터를 바탕으로 맛집·카페 블로그 글을 작성하세요.
 
 
-    ## 필수 구조 (H2 4개 고정)
+    [데이터]
+
+    {data}
+
+
+    ## 필수 구조 (H2 3~4개)
 
     1. ## {region} {theme} 한눈에 보기 — bold-list로 식당명·대표메뉴·가격대·영업시간 비교 (테이블 금지)
 
-    2. ## 맛집별 상세 리뷰 — 각 맛집을 H3로 나눠 위치, 대표메뉴, 가격, 분위기, 주차 서술
+    2. ## 맛집별 상세 리뷰 — 각 맛집을 H3로 나눠 서술. 각 H3에 반드시 포함: 위치, 대표메뉴와 가격(숫자), 맛 묘사(식감·향·온도
+    중 2개), 분위기, 주차 정보. 최소 5문장.
 
-    3. ## 근처 카페·디저트 — 식사 후 들를 카페나 디저트 가게 2~3곳
+    3. ## 근처 카페·디저트 — [주변 실제 맛집 데이터]에 카페/디저트가 있으면 서술. 데이터에 없으면 이 H2 자체를 생략.
 
-    4. ## 방문 전 알아두면 좋은 팁 — 웨이팅 시간, 주차, 예약 가능 여부, 추천 방문 시간대
+    4. ## 방문 전 알아두면 좋은 팁 — 웨이팅, 주차, 예약, 추천 시간대
 
 
     ## 규칙
 
     - 글자수: 2,200~3,000자 (공백 포함)
 
-    - H2는 정확히 4개만 사용. H1 사용 금지
+    - H2는 3~4개만 사용. H1 사용 금지
 
-    - 첫 문장에 지역명 + 음식 종류 포함
+    - 첫 문장에 반드시 "{region}"과 "{theme}" 포함
 
     - 메뉴 가격은 반드시 숫자로 명시 (예: 된장찌개 8,000원)
-
-    - 쿠팡 키워드: "보온도시락", "텀블러" 중 1개만 자연스럽게 1회 언급
 
     - 본문에 이미지 마크다운 삽입 금지
 
@@ -500,9 +538,14 @@ travel_info:
     - 제목의 키워드(지역, 테마, 숫자)는 본문과 반드시 일치해야 합니다.
 
     '
-  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean travel blog post using the data below.\n\n[DATA]\n{data}\n\n[STRUCTURE]\n1. Opening (120~155 chars): region + theme + core point\n   <!-- 광고 삽입 권장\
-    \ -->\n2. H2 sections (3~5): each with different long-tail keyword\n3. Per place: location → facilities → price → usage tip\n4. Bold-list comparison (NOT table, max 3~4 data points)\n   <!-- 쿠팡_키워드:\
-    \ 여행 캐리어 -->\n5. Final paragraph: visit checklist or route suggestion\n   <!-- 광고 삽입 권장 -->\n\n[SEO]\n- Title under 35 chars, keyword front-loaded\n- Body 2,000~3,000 chars\n"
+  user: "취소선(~~텍스트~~) 문법은 절대 사용하지 마세요.\nWrite a Korean travel blog post using the\
+    \ data below.\n\n[DATA]\n{data}\n\n[STRUCTURE]\n1. Opening (120~155 chars): region\
+    \ + theme + core point\n   <!-- 광고 삽입 권장 -->\n2. H2 sections (3~5): each with\
+    \ different long-tail keyword\n3. Per place: location → facilities → price → usage\
+    \ tip\n4. Bold-list comparison (NOT table, max 3~4 data points)\n   <!-- 쿠팡_키워드:\
+    \ 여행 캐리어 -->\n5. Final paragraph: visit checklist or route suggestion\n   <!--\
+    \ 광고 삽입 권장 -->\n\n[SEO]\n- Title under 35 chars, keyword front-loaded\n- Body\
+    \ 2,000~3,000 chars\n"
 sports_preview:
   system: 'You are a data-driven sports preview writer.
 

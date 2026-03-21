@@ -152,7 +152,7 @@ def _inject_naver_map(body_md, items):
     result = []
     for line in lines:
         result.append(line)
-        if not re.match(r"^##\s+", line):
+        if not re.match(r"^#{2,3}\s+", line):
             continue
         for ml_title, ml_url in map_links:
             name_parts = [p for p in ml_title.split() if len(p) >= 2]
@@ -641,6 +641,14 @@ def generate_content(data, blog_id="travel-hugo"):
     import random as _rand
     templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES["travel-hugo"])
     template = _rand.choice(templates)
+    # region/theme 빈값 보호
+    if not display_region or len(display_region) < 2:
+        display_region = data.get("display_region", data.get("region", "전국"))
+    if not display_region or len(display_region) < 2:
+        display_region = "전국"
+    if not theme or len(theme) < 2:
+        theme = "여행"
+
     fallback_title = template.format(
         region=display_region,
         theme=theme,
@@ -709,6 +717,9 @@ def generate_content(data, blog_id="travel-hugo"):
             if long_words:
                 generated_title = fallback_title
             if len(generated_title) > 45 or len(generated_title) < 15:
+                generated_title = fallback_title
+            # region 포함 검증: 지역명이 빠지면 fallback
+            if display_region and len(display_region) >= 2 and display_region not in generated_title:
                 generated_title = fallback_title
             title = generated_title
 
