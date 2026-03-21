@@ -397,7 +397,8 @@ def fetch_course():
                 "_type": "json",
                 "numOfRows": 20,
                 "pageNo": 1,
-                "contentTypeId": 25,
+                "contentTypeId": 12,
+                "cat1": "A02",
                 "areaCode": area_code,
                 "arrange": "C",
             },
@@ -558,92 +559,126 @@ def fetch_wellness():
 
 
 def fetch_heritage():
-    import requests, random
-    key = os.getenv("TOUR_API_KEY", "")
-    if not key:
-        logger.error("TOUR_API_KEY not set")
-        return None
+    """국가유산청 데이터(heritage_list.json)에서 문화유산 아이템을 가져옵니다."""
+    import json, random, time, re
 
-    area_codes = {
-        "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
-        "부산": 6, "울산": 7, "세종": 8, "경기": 31, "강원": 32,
-        "충북": 33, "충남": 34, "경북": 35, "경남": 36, "전북": 37,
-        "전남": 38, "제주": 39,
+    HERITAGE_JSON = "/Users/twinssn/Projects/heritage/scripts/data/heritage_list.json"
+
+    # 시도명 → 지역명 매핑
+    region_map = {
+        "서울": "서울", "부산": "부산", "대구": "대구", "인천": "인천",
+        "광주": "광주", "대전": "대전", "울산": "울산", "세종": "세종",
+        "경기": "경기", "강원": "강원", "충북": "충북", "충남": "충남",
+        "전북": "전북", "전남": "전남", "경북": "경북", "경남": "경남",
+        "제주": "제주",
     }
-    region_name, area_code = random.choice(list(area_codes.items()))
 
     try:
-        resp = requests.get(
-            "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
-            params={
-                "serviceKey": key,
-                "MobileOS": "ETC",
-                "MobileApp": "TAP",
-                "_type": "json",
-                "numOfRows": 50,
-                "pageNo": 1,
-                "contentTypeId": 12,
-                "areaCode": area_code,
-                "arrange": "C",
-            },
-            timeout=15,
-        )
-        data = resp.json()
-        header = data.get("response", {}).get("header", {})
-        if header.get("resultCode") != "0000":
-            logger.warning(f"heritage API: {header.get('resultCode')} {header.get('resultMsg')}")
-            return None
-
-        body = data.get("response", {}).get("body", {})
-        items_wrapper = body.get("items", "")
-        if not items_wrapper or isinstance(items_wrapper, str):
-            logger.warning(f"heritage: empty items for {region_name}")
-            return None
-
-        raw_items = items_wrapper.get("item", [])
-        if isinstance(raw_items, dict):
-            raw_items = [raw_items]
-        if not raw_items:
-            logger.warning(f"heritage: no items for {region_name}")
-            return None
-
-        with_img = [i for i in raw_items if i.get("firstimage")]
-        pool = with_img if len(with_img) >= 3 else raw_items
-        selected = random.sample(pool, min(5, len(pool)))
-
-        heritage_themes = ["국보 탐방", "보물 탐방", "사적 탐방", "문화유산 투어"]
-        theme = random.choice(heritage_themes)
-
-        items = []
-        for raw in selected:
-            items.append({
-                "title": raw.get("title", ""),
-                "addr": raw.get("addr1", ""),
-                "addr1": raw.get("addr1", ""),
-                "firstimage": raw.get("firstimage", ""),
-                "firstImageUrl": raw.get("firstimage", ""),
-                "image": raw.get("firstimage2", raw.get("firstimage", "")),
-                "overview": "",
-                "tel": raw.get("tel", ""),
-                "contentid": raw.get("contentid", ""),
-                "contenttypeid": raw.get("contenttypeid", ""),
-                "mapx": raw.get("mapx", ""),
-                "mapy": raw.get("mapy", ""),
-                "_raw": raw,
-            })
-
-        return {
-            "items": items,
-            "source_type": "heritage",
-            "theme": theme,
-            "category": "문화유산",
-            "display_region": region_name,
-            "sigungu": "",
-            "angle": theme,
-        }
+        with open(HERITAGE_JSON, "r", encoding="utf-8") as f:
+            all_items = json.load(f)
+        logger.info(f"heritage: heritage_list.json 로드 완료 ({len(all_items)}건)")
     except Exception as e:
-        logger.error(f"heritage fetch error: {e}")
+        logger.error(f"heritage: heritage_list.json 로드 실패: {e}")
         return None
+
+    # 취소되지 않은 항목만
+    # 블로그 품질 필터: 취소X, 상세정보 있음, 좌표 유효, 종목 제한
+    ALLOWED_KD = {"국보", "보물", "사적", "명승", "국가등록문화유산"}
+    valid = []
+    for i in all_items:
+        if i.get("cancel") == "Y":
+            continue
+        if i.get("kdName", "") not in ALLOWED_KD:
+            continue
+        if not i.get("city") or i.get("city") == "기타":
+            continue
+        lat = i.get("lat", 0)
+        lng = i.get("lng", 0)
+        if not lat or not lng or lat == 0 or lng == 0:
+            continue
+        det = i.get("detail") or {}
+        content = det.get("content", "")
+        if len(content) < 100:
+            continue
+        if not det.get("address"):
+            continue
+        valid.append(i)
+    logger.info(f"heritage: 품질 필터 후 {len(valid)}건 (원본 {len(all_items)}건)")
+
+    # 랜덤 지역 선택
+    cities = list(set(i.get("city", "") for i in valid if i.get("city")))
+    if not cities:
+        logger.warning("heritage: 유효한 지역 없음")
+        return None
+    region_name = random.choice(cities)
+
+    # 해당 지역 항목 필터
+    regional = [i for i in valid if i.get("city") == region_name]
+    if not regional:
+        logger.warning(f"heritage: {region_name} 지역 항목 0건")
+        return None
+
+    # 이미지 있는 항목 우선
+    with_img = [i for i in regional if (i.get("detail") or {}).get("imageUrl")]
+    pool = with_img if len(with_img) >= 3 else regional
+    selected = random.sample(pool, min(5, len(pool)))
+
+    # 종목 기반 테마 결정
+    kd_names = [i.get("kdName", "") for i in selected]
+    if any("국보" in k for k in kd_names):
+        theme = "국보 탐방"
+    elif any("보물" in k for k in kd_names):
+        theme = "보물 탐방"
+    elif any("사적" in k for k in kd_names):
+        theme = "사적 탐방"
+    elif any("명승" in k for k in kd_names):
+        theme = "명승 탐방"
+    elif any("천연기념물" in k for k in kd_names):
+        theme = "천연기념물 탐방"
+    else:
+        theme = "문화유산 투어"
+
+    logger.info(f"heritage: {region_name} / {theme} / {len(selected)}건 선택")
+
+    # TourAPI 형식으로 변환
+    items = []
+    for item in selected:
+        detail = item.get("detail") or {}
+        overview = detail.get("content", "")
+        # HTML 태그 제거
+        overview = re.sub(r"<[^>]+>", "", overview) if overview else ""
+
+        adapted = {
+            "title": item.get("nameKr", ""),
+            "addr": detail.get("address", ""),
+            "image": detail.get("imageUrl", ""),
+            "tel": "",
+            "content_id": item.get("cpno", ""),
+            "contenttypeid": "12",
+            "overview": overview,
+            "homepage": "",
+            "mapx": str(item.get("lng", "")),
+            "mapy": str(item.get("lat", "")),
+            "kdName": item.get("kdName", ""),
+            "era": detail.get("era", ""),
+            "owner": detail.get("owner", ""),
+            "quantity": detail.get("quantity", ""),
+            "designatedDate": detail.get("designatedDate", ""),
+            "category1": detail.get("category1", ""),
+            "category2": detail.get("category2", ""),
+        }
+        items.append(adapted)
+
+    if not items:
+        logger.warning(f"heritage: {region_name} 변환 후 0건")
+        return None
+
+    return {
+        "items": items,
+        "region": region_name,
+        "theme": theme,
+        "source_type": "heritage",
+    }
 
 
 def fetch_random():

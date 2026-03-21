@@ -133,6 +133,19 @@ def _build_data_block(data):
             lines.append(f"부대행사: {item['subevent']}")
         if item.get("agelimit"):
             lines.append(f"이용제한: {item['agelimit']}")
+        if item.get("kdName"):
+            lines.append(f"종목: {item['kdName']}")
+        if item.get("era"):
+            lines.append(f"시대: {item['era']}")
+        if item.get("owner"):
+            lines.append(f"소유: {item['owner']}")
+        if item.get("quantity"):
+            lines.append(f"규모: {item['quantity']}")
+        if item.get("designatedDate"):
+            lines.append(f"지정일: {item['designatedDate']}")
+        if item.get("category1"):
+            cats = " > ".join(filter(None, [item.get("category1",""), item.get("category2","")]))
+            lines.append(f"분류: {cats}")
         if item.get("blog_snippets"):
             lines.append("네이버 블로그 참고정보 (사실 확인 불가, 참고용):")
             for sn in item["blog_snippets"][:6]:
@@ -588,6 +601,29 @@ def generate_content(data, blog_id="travel-hugo"):
                     logger.info(f"축제 블로그 보강: {name} → {len(snippets)}개 스니펫")
         except Exception as e:
             logger.warning(f"축제 블로그 enrichment 실패 (무시): {e}")
+
+    # 문화유산 파이프라인이면 네이버 블로그 검색으로 추가 정보 보강
+    if source_type == "heritage":
+        try:
+            from core.naver_blog_api import load_naver_blog_api
+            blog_api = load_naver_blog_api()
+            for item in data.get("items", []):
+                name = item.get("title", "")
+                if not name:
+                    continue
+                queries = [f"{name} 역사", f"{name} 관람 후기", f"{name} 방문 팁"]
+                snippets = []
+                for q in queries:
+                    results = blog_api.search(q, display=3, sort="sim")
+                    for r in results:
+                        desc = r.get("description", "").replace("<b>", "").replace("</b>", "")
+                        if desc and len(desc) > 20:
+                            snippets.append(desc[:150])
+                if snippets:
+                    item["blog_snippets"] = snippets[:6]
+                    logger.info(f"문화유산 블로그 보강: {name} → {len(snippets)}개 스니펫")
+        except Exception as e:
+            logger.warning(f"문화유산 블로그 enrichment 실패 (무시): {e}")
 
     data_block = _build_data_block(data)
 
