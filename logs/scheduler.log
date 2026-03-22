@@ -6021,3 +6021,5 @@ openai.APIConnectionError: Connection error.
 2026-03-22 20:27:26,634 [INFO] Publishing: travel-hugo
 2026-03-22 20:28:24,737 [INFO] CATCHUP: travel1-hugo expected=5 actual=0 missed=5 -> 1건만 보충
 2026-03-22 20:28:24,737 [INFO] Publishing: travel1-hugo
+2026-03-22 20:30:46,266 [INFO] CATCHUP: travel2-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 20:30:46,267 [INFO] Publishing: travel2-hugo
