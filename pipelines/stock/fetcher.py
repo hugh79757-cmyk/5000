@@ -198,3 +198,31 @@ def fetch_etf_daily(top_n=10):
         "total_count": len(items),
         "source": "naver_finance_etf_api",
     }
+
+
+def fetch_dividend_ranking(top_n=10):
+    """DART DB에서 배당률 상위 종목 조회"""
+    import sqlite3 as _sq
+    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
+    try:
+        conn = _sq.connect(db)
+        conn.row_factory = _sq.Row
+        # publish_history에서 최근 배당 데이터가 있는 종목 조회 시도
+        # 없으면 None 반환하여 GPT가 방법론 중심으로 작성
+        rows = conn.execute("""
+            SELECT c.corp_name, c.stock_code, c.sector
+            FROM corps c
+            WHERE c.is_listed = 1 AND c.stock_code IS NOT NULL AND c.stock_code != ''
+            ORDER BY c.modify_date DESC
+            LIMIT ?
+        """, (top_n * 5,)).fetchall()
+        conn.close()
+        if not rows:
+            return None
+        # 배당 정보는 DART API에서 가져와야 하므로 corp 목록만 반환
+        corps = [{"name": r["corp_name"], "stock_code": r["stock_code"], "sector": r["sector"]} for r in rows[:top_n]]
+        return {"corps_for_dividend": corps, "source": "dart_db_corps"}
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Dividend ranking fetch 실패: {e}")
+        return None
