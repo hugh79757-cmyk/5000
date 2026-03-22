@@ -75,6 +75,7 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
 TITLE: (제목)
 CATEGORY: (카테고리 1개: 공시분석/실적분석/배당분석/IPO분석/ETF분석/시장분석 중 택1)
 TAGS: (쉼표로 구분, 5개 이내)
+DESC: (검색결과에 표시될 150자 이내 설명문. 핵심 수치 포함)
 BODY:
 (본문 마크다운)"""
 
@@ -109,10 +110,31 @@ BODY:
 def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
     prompts = {
         "dividend_ranking": """배당주 투자 전략과 고배당주를 고르는 방법을 설명하는 블로그 글을 작성하세요.
-배당수익률 계산법, 배당성향과 배당성장률의 차이, 배당락일 전후 전략, 배당 ETF 활용법을 다루세요.
-구체적인 종목명이나 수치는 제공된 데이터가 있을 때만 사용하세요.""",
+
+[필수 포함 내용]
+1. 배당수익률 계산법 (배당금 / 주가 x 100) 단계별 예시
+2. 배당성향과 배당성장률의 차이: 배당성향 100% 초과 시 리스크 경고 명시
+3. 배당락일 전후 매매 전략
+4. 제공 데이터가 있으면 배당률 TOP10 표 작성 (배당률 내림차순 정렬)
+5. 1000만원 투자 시 예상 배당금 시뮬레이션 (계산 과정 단계별 표시)
+6. 배당성향 이상치(200% 이상) 종목은 별도 리스크 분석
+
+[주의]
+- 배당금 기준일 컬럼 필수 포함
+- 구체적인 종목명이나 수치는 제공된 데이터가 있을 때만 사용""",
         "etf_comparison": """국내 인기 ETF를 비교 분석하는 블로그 글을 작성하세요.
-KODEX, TIGER, SOL 등 운용사별 대표 ETF의 수익률, 보수, 구성종목을 비교하세요.""",
+
+[필수 포함 내용]
+1. 수익률 상위 TOP10: 등락률 양수(+) 종목만 선정, 등락률 내림차순 정렬
+2. 수익률 하위 TOP10: 등락률 음수(-) 종목만 선정, 등락률 오름차순 정렬
+3. 동일 ETF가 상위/하위 양쪽에 중복 등장 금지
+4. 보수비용(TER)은 제공 데이터에 있을 때만 표기. 데이터 없으면 "공시 확인 필요" 표기
+5. 거래량 급증 ETF 별도 분석 (전일 대비 거래량 200% 이상 증가 종목)
+6. KODEX, TIGER, SOL 등 운용사별 대표 ETF 수익률/보수/구성종목 비교
+
+[주의]
+- 등락률이 전부 음수라면 "상위 TOP10" 대신 "하락폭이 적은 ETF TOP10"으로 제목 수정
+- 실제 데이터에 없는 TER 수치 절대 날조 금지""",
         "sector_analysis": """한국 주식시장에서 PER과 PBR을 활용해 저평가 종목을 찾는 방법을 설명하는 블로그 글을 작성하세요.
 PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전략(밸류 트랩 주의점 포함), 실제 스크리닝 방법(HTS/MTS 활용법)을 다루세요.
 구체적인 종목명이나 수치는 제공된 데이터가 없으면 사용하지 마세요.""",
@@ -159,6 +181,7 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
 TITLE: (제목)
 CATEGORY: (카테고리 1개: 공시분석/실적분석/배당분석/IPO분석/ETF분석/시장분석 중 택1)
 TAGS: (쉼표로 구분, 5개 이내)
+DESC: (검색결과에 표시될 150자 이내 설명문. 핵심 수치 포함)
 BODY:
 (본문 마크다운)"""
 
@@ -194,6 +217,7 @@ def _parse_response(content):
     title = ""
     category = ""
     tags = ""
+    desc = ""
     body = ""
 
     lines = content.strip().split("\n")
@@ -207,12 +231,16 @@ def _parse_response(content):
             category = line.replace("CATEGORY:", "").strip()
         elif line.startswith("TAGS:"):
             tags = line.replace("TAGS:", "").strip()
+        elif line.startswith("DESC:"):
+            desc = line.replace("DESC:", "").strip()
         elif line.startswith("BODY:"):
             body_start = True
         elif body_start:
             body_lines.append(line)
 
     body = "\n".join(body_lines).strip()
+    # H3 -> H2 통일
+    body = re.sub(r"^### ", "## ", body, flags=re.MULTILINE)
 
     if not title and body:
         for line in body_lines:
@@ -250,4 +278,5 @@ def _parse_response(content):
         "category": category,
         "tags": tags,
         "body_md": body,
+        "description": desc,
     }

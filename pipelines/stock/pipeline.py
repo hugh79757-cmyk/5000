@@ -14,6 +14,15 @@ except ImportError:
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
 EVERGREEN_TYPES = ["dividend_ranking", "etf_comparison", "sector_analysis", "ipo_schedule", "cma_savings"]
 
+BLOG_TOPIC_MAP = {
+    "stock-hugo": ["sector_analysis"],
+    "dividend-hugo": ["dividend_ranking"],
+    "etf-hugo": ["etf_comparison"],
+    "sector-hugo": ["sector_analysis"],
+    "ipo-hugo": ["ipo_schedule"],
+    "finance-hugo": ["cma_savings"],
+}
+
 
 def run(blog_cfg):
     from dotenv import load_dotenv
@@ -84,7 +93,7 @@ def run(blog_cfg):
                 if result and result.get("success"):
                     _record_publish(conn, blog_id, disc)
     else:
-        topic_type = strategy
+        topic_type = random.choice(BLOG_TOPIC_MAP.get(blog_id, EVERGREEN_TYPES))
         corps = get_listed_corps(limit=100)
         # 재무 데이터 있는 기업만 필터링
         _enriched_corps = []
@@ -157,6 +166,10 @@ def run(blog_cfg):
 
 
 def _pick_strategy(conn, blog_id):
+    """blog_id별 전략 선택: stock은 disclosure 우선, 나머지는 evergreen 우선"""
+    evergreen_blogs = ("dividend-hugo", "etf-hugo", "sector-hugo", "ipo-hugo", "finance-hugo")
+    if blog_id in evergreen_blogs:
+        return "evergreen"
     return "disclosure"
 
 
