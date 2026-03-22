@@ -200,29 +200,43 @@ def fetch_etf_daily(top_n=10):
     }
 
 
+
 def fetch_dividend_ranking(top_n=10):
-    """DART DB에서 배당률 상위 종목 조회"""
-    import sqlite3 as _sq
-    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
+    """KSD 증권정보포털(seibro)에서 배당순위 TOP50 크롤링"""
+    import requests as _req
+    from bs4 import BeautifulSoup as _BS
+    url = "https://m.seibro.or.kr/cnts/company/selectDiv50.do"
     try:
-        conn = _sq.connect(db)
-        conn.row_factory = _sq.Row
-        # publish_history에서 최근 배당 데이터가 있는 종목 조회 시도
-        # 없으면 None 반환하여 GPT가 방법론 중심으로 작성
-        rows = conn.execute("""
-            SELECT c.corp_name, c.stock_code, c.sector
-            FROM corps c
-            WHERE c.is_listed = 1 AND c.stock_code IS NOT NULL AND c.stock_code != ''
-            ORDER BY c.modify_date DESC
-            LIMIT ?
-        """, (top_n * 5,)).fetchall()
-        conn.close()
-        if not rows:
+        resp = _req.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        soup = _BS(resp.text, "html.parser")
+        rows = soup.select("table tr")
+        result = []
+        for row in rows[1:]:  # 헤더 스킵
+            cols = row.select("td")
+            if len(cols) >= 4:
+                rank = cols[0].get_text(strip=True)
+                name = cols[1].get_text(strip=True)
+                div_yield = cols[2].get_text(strip=True)
+                div_per_share = cols[3].get_text(strip=True).replace(",", "")
+                try:
+                    result.append({
+                        "rank": int(rank),
+                        "name": name,
+                        "dividend_yield": float(div_yield),
+                        "dividend_per_share": int(div_per_share) if div_per_share.isdigit() else div_per_share,
+                    })
+                except (ValueError, TypeError):
+                    continue
+        if not result:
             return None
-        # 배당 정보는 DART API에서 가져와야 하므로 corp 목록만 반환
-        corps = [{"name": r["corp_name"], "stock_code": r["stock_code"], "sector": r["sector"]} for r in rows[:top_n]]
-        return {"corps_for_dividend": corps, "source": "dart_db_corps"}
+        return {
+            "rankings": result[:top_n],
+            "total_count": len(result),
+            "source": "ksd_seibro_div50",
+            "note": "2025년 기준 시가배당률",
+        }
     except Exception as e:
         import logging
-        logging.getLogger(__name__).error(f"Dividend ranking fetch 실패: {e}")
+        logging.getLogger(__name__).error(f"KSD 배당순위 fetch 실패: {e}")
         return None
