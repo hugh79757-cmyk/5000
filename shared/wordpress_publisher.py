@@ -3,6 +3,7 @@
 import logging
 import os
 import re
+import base64
 import requests
 from typing import Optional, Dict, List
 from datetime import datetime
@@ -433,6 +434,29 @@ class WordPressPublisher:
                 logger.warning(f"태그 처리 오류 ({name}): {e}")
         
         return tag_ids
+
+
+
+
+def _upload_featured_image(wp_url, headers, image_url, title):
+    """Featured image URL → WP media 업로드 → media_id 반환"""
+    try:
+        import re as _re
+        img_resp = requests.get(image_url, timeout=15)
+        if img_resp.status_code != 200:
+            return None
+        content_type = img_resp.headers.get("Content-Type", "image/webp")
+        ext = content_type.split("/")[-1].split(";")[0]
+        filename = _re.sub(r"[^a-zA-Z0-9가-힣-]", "", title[:30]) + f".{ext}"
+        media_url = wp_url.rstrip("/") + "/wp-json/wp/v2/media"
+        media_headers = {**headers, "Content-Disposition": f'attachment; filename="{filename}"', "Content-Type": content_type}
+        media_resp = requests.post(media_url, headers=media_headers, data=img_resp.content, timeout=30, verify=False)
+        if media_resp.status_code in (200, 201):
+            return media_resp.json().get("id")
+        return None
+    except Exception as e:
+        logger.warning(f"Featured image upload failed: {e}")
+        return None
 
 
 # === wp_publisher.py에서 이관 (GAP-7) ===
