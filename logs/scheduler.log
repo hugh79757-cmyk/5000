@@ -6260,3 +6260,39 @@ NameError: name 'base64' is not defined. Did you forget to import 'base64'?
 2026-03-22 22:22:47,269 [INFO] Publishing: dividend-hugo
 2026-03-22 22:23:45,900 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
 2026-03-22 22:23:45,901 [INFO] Publishing: etf-hugo
+2026-03-22 22:24:35,135 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:24:35,136 [INFO] Publishing: sector-hugo
+2026-03-22 22:25:09,571 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:25:09,572 [INFO] Publishing: ipo-hugo
+2026-03-22 22:25:44,973 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:25:44,973 [INFO] Publishing: finance-hugo
+2026-03-22 22:26:16,540 [INFO] CATCHUP: senior-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:26:16,540 [INFO] Publishing: senior-hugo
+2026-03-22 22:27:27,895 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-22 22:27:27,913 [INFO] Publishing: travel3-hugo
+2026-03-22 22:27:27,982 [INFO] CATCHUP: travel-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:27:27,982 [INFO] Publishing: travel-hugo
+2026-03-22 22:28:13,808 [INFO] CATCHUP: travel1-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:28:13,808 [INFO] Publishing: travel1-hugo
+2026-03-22 22:29:12,660 [INFO] CATCHUP: travel2-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:29:12,660 [INFO] Publishing: travel2-hugo
+2026-03-22 22:30:33,115 [INFO] CATCHUP: travel3-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:30:33,116 [INFO] Publishing: travel3-hugo
+2026-03-22 22:31:37,858 [INFO] CATCHUP: travel4-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:31:37,858 [INFO] Publishing: travel4-hugo
+2026-03-22 22:32:40,306 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:32:40,307 [INFO] Publishing: tvshow-blogger
+2026-03-22 22:33:50,144 [INFO] CATCHUP: ud-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:33:50,144 [INFO] Publishing: ud-blogger
+2026-03-22 22:34:47,612 [INFO] CATCHUP: kuta-wordpress expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:34:47,612 [INFO] Publishing: kuta-wordpress
+2026-03-22 22:35:52,413 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:35:52,413 [INFO] Publishing: gap-kuta
+2026-03-22 22:36:18,863 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:36:18,863 [INFO] Publishing: stock-hugo
+2026-03-22 22:36:29,549 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:36:29,549 [INFO] Publishing: dividend-hugo
+2026-03-22 22:37:53,023 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:37:53,024 [INFO] Publishing: etf-hugo
+2026-03-22 22:38:41,011 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:38:41,011 [INFO] Publishing: sector-hugo
