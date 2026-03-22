@@ -44,7 +44,16 @@ def _extract_first_image(body_md):
 
 
 def _extract_description(body_md):
-    """본문에서 SEO용 description 추출 — 도입부와 차별화"""
+    """본문에서 SEO용 description 추출 — DESC 주석 우선"""
+    import re as _desc_re
+    _m = _desc_re.search(r"<!-- DESC: (.+?) -->", body_md)
+    if _m:
+        return _m.group(1).strip()[:160]
+    # 기존 로직 (아래에서 본문 기반 추출 — DESC 주석 우선, 없으면 본문 기반"""
+    import re as _re
+    _desc_match = _re.search(r'<!-- DESC: (.+?) -->', body_md)
+    if _desc_match:
+        return _desc_match.group(1).strip()[:160]
     lines = []
     for line in body_md.split("\n"):
         line = line.strip()

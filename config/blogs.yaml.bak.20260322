@@ -481,6 +481,13 @@ blogs:
   site_path: /Users/twinssn/Projects/senior-hugo
   status: active
   theme: blowfish
+deploy:
+  branch: main
+  commit_dirty: true
+  method: wrangler
+git_backup:
+  schedule: sunday 03:00
+
 - blogger_blog_id: "5484205249958557854"
   daily_quota: 5
   domain: 2.techpawz.com
@@ -496,9 +503,3 @@ blogs:
     - '17:10'
     - '21:10'
   status: active
-deploy:
-  branch: main
-  commit_dirty: true
-  method: wrangler
-git_backup:
-  schedule: sunday 03:00

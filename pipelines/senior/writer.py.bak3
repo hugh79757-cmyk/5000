@@ -65,8 +65,6 @@ def _append_links(body_md, service, category):
     svc_id = service.get("service_id", "")
     if apply_url:
         url = apply_url
-        if url and not url.startswith("http"):
-            url = "https://" + url
     elif svc_id:
         url = f"https://www.gov.kr/portal/rcvfvrSvc/dtlEx/{svc_id}"
     else:
@@ -136,12 +134,6 @@ def _build_prompt(service, topic_type, related_services, today):
     structure = ARTICLE_STRUCTURES.get(topic_type, ARTICLE_STRUCTURES["생활지원"])
     service_name = service.get("service_name", "시니어 복지 제도")
 
-    # 지역 한정 서비스 판별
-    dept = service.get("department", "")
-    region_markers = ["시 ", "시)", "군 ", "군)", "구 ", "구)", "특별자치", "광역시", "특별시"]
-    is_local = any(m in dept for m in region_markers) or any(dept.endswith(x) for x in ["시", "군", "구"])
-    region_name = dept if is_local else ""
-
     main_data = _build_data_block(service)
 
     related_block = ""
@@ -154,13 +146,11 @@ def _build_prompt(service, topic_type, related_services, today):
             related_items.append(f"- {name}: {desc} (대상: {target})")
         related_block = "\n\n[관련 서비스 — 비교 서술에 활용]\n" + "\n".join(related_items)
 
-    sections_guide = "\n".join([f"## {s}" for s in structure["sections"]])
-
-    region_line = f"\n\n이 서비스는 [{region_name}] 지역 한정입니다. 제목 앞부분에 반드시 지역명을 넣으세요." if region_name else ""
+    sections_guide = "\n".join([f"## {i+1}. {s}" for i, s in enumerate(structure["sections"])])
 
     system_msg = f"""당신은 65세 이상 어르신과 그 가족을 위한 복지 정보 전문 블로거입니다.
 
-오늘 날짜: {today}{region_line}
+오늘 날짜: {today}
 
 당신의 임무: "{service_name}" 제도에 대해, {structure['angle']}하는 글을 작성합니다.
 
@@ -180,20 +170,13 @@ def _build_prompt(service, topic_type, related_services, today):
 - 같은 패턴이 연속되면 안 됩니다. 5건 발행 시 최소 3가지 패턴을 섞으세요.
 - 제공된 데이터에서 대상자 조건, 금액, 지역명 중 가장 구체적인 정보를 제목에 포함
 - "~방법은?" "~안내" "~총정리"로 끝내지 마세요
-- 지역 한정 서비스인 경우, 반드시 제목 앞부분에 지역명(시/군/구)을 포함하세요. 예: "화성시 65세 이상 무상교통, 연 156만원 받는 조건"
-- 전국 대상 서비스라면 지역명 불필요
 - 25~50자
 
 ■ 글쓰기 원칙:
 1. 제공된 데이터의 모든 필드를 본문에 반드시 인용하세요. 특히 지원내용, 문의처(전화번호 포함), 법적 근거, 선정기준, 구비서류, 신청기한은 빠짐없이 넣으세요.
 2. 데이터에 없는 금액, 날짜, 기관명, 통계를 절대 지어내지 마세요.
 3. 어려운 행정 용어는 괄호 안에 쉬운 설명을 덧붙이세요. 예: 본인부담금(환자가 직접 내는 비용)
-4. 아래 표현은 절대 사용 금지 (발견 시 0점 처리):
-   - "확인해 보세요", "다를 수 있습니다", "도움이 될 것입니다", "도움이 될 수 있습니다"
-   - "삶의 질을 높일 수 있도록", "더욱 풍요롭게", "이러한 제도는 ~ 큰 도움이"
-   - "이와 같은 다양한 제도를 종합적으로 활용하면"
-   - "이 점을 유념하시기 바랍니다", "참고하시기 바랍니다", "권장합니다"
-   - 모든 문장은 구체적 정보(금액, 조건, 절차, 전화번호)를 포함해야 합니다. 정보 없이 분위기만 채우는 문장은 삭제하세요.
+4. "확인해 보세요", "다를 수 있습니다", "도움이 될 것입니다" 같은 빈 문장을 쓰지 마세요.
 5. 존댓말(합니다/입니다 체), 친근한 톤.
 6. 과거 연도(2023~2025년)를 현재처럼 쓰지 마세요.
 
@@ -207,17 +190,10 @@ def _build_prompt(service, topic_type, related_services, today):
 - "~됩니다", "~받을 수 있습니다", "~필요합니다", "~이루어집니다", "~드립니다" 등을 섞으세요.
 - 연속 3문장이 같은 어미로 끝나면 안 됩니다.
 
-■ 본문 구조:
-1) 도입부 (H2 없이 바로 시작): 이 글의 핵심 내용을 2~3문장으로 요약. "이 글에서는 ~을 정리했습니다" 식의 안내가 아니라, 핵심 팩트(대상, 금액, 신청처)를 바로 제시하세요.
-
-2) H2 4개 (번호 붙이지 말 것):
+■ 본문 구조 (정확히 4개 H2):
 {sections_guide}
-- 각 H2 섹션은 최소 10문장, 500자 이상. 짧으면 구체적 사례, 주의사항, 비교 정보를 추가하세요
-
-3) 마무리 (H2 없이): 핵심 내용을 1~2문장으로 재요약. "문의처: OOO (전화번호)"로 마무리.
-
-- H2 제목에 "1.", "2." 같은 번호를 붙이지 마세요. "## 수급 조건과 지급 금액" 처럼 번호 없이 쓰세요.
-- 전체 본문 2,500자 이상 (필수). 2,500자 미만이면 각 H2에 구체적 사례와 수치를 추가하세요
+- 각 H2 섹션은 최소 8문장, 350자 이상
+- 전체 본문 3,000자 이상
 - 면책 문구를 본문에 넣지 마세요 (시스템이 자동 삽입합니다)
 
 ■ SEO:
@@ -296,7 +272,13 @@ def _parse_response(content):
         clean = result["body_md"].replace("## ", "").strip()
         first_para = clean.split("\n\n")[0] if "\n\n" in clean else clean[:120]
         result["description"] = first_para[:120]
-
+    
+        # 링크 삽입
+        if result.get('body_md'):
+            result['body_md'] = _append_links(
+                result['body_md'], main_service,
+                result.get('category', topic_type or '')
+            )
     return result
 
 
@@ -342,7 +324,7 @@ def _get_related_services(services, main_service, topic_type):
     ][:3]
 
 
-def _validate_article(result, min_length=1500):
+def _validate_article(result, min_length=2000):
     """글 품질 검증"""
     issues = []
     if not result.get("title"):
@@ -383,7 +365,7 @@ def generate_senior_article(data, topic_type=None):
 
     system_msg, user_msg = _build_prompt(main_service, topic_type, related, today)
 
-    max_attempts = 2
+    max_attempts = 1
     for attempt in range(1, max_attempts + 1):
         try:
             ai_result = ai_generate(system_msg, user_msg, tier="default")
@@ -394,10 +376,10 @@ def generate_senior_article(data, topic_type=None):
 
             issues = _validate_article(result)
             if issues:
-                logger.info(f"품질 체크 (시도 {attempt}/{max_attempts}): {', '.join(issues)}")
-                if attempt < max_attempts and any("본문 부족" in i for i in issues):
-                    logger.info("본문 부족 — 재생성 시도")
-                    continue
+                logger.info(f"품질 참고: {', '.join(issues)}")
+
+            if issues:
+                logger.warning(f"최종 품질: {', '.join(issues)} (자동 보정 진행)")
 
             if not result["title"]:
                 result["title"] = main_service.get("service_name", "시니어 복지 정보")

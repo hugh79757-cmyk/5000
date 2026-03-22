@@ -260,33 +260,6 @@ def fetch_all(max_pages=10):
                 seen.add(name)
                 services.append(s)
         _save_cache(services)
-    # 만료 서비스 필터링
-    import re as _re
-    now_str = datetime.now().strftime("%Y-%m-%d")
-    now_year = datetime.now().year
-    filtered = []
-    for s in services:
-        dl = str(s.get("deadline", "")).strip()
-        # 명확히 과거 연도가 포함된 경우 제외
-        skip = False
-        for y in range(2018, now_year):
-            if str(y) in dl:
-                skip = True
-                break
-        # "마감", "신규신청 불가", "금년 접수 마감" 제외
-        if any(x in dl for x in ["마감", "신규신청 불가", "접수 마감"]):
-            skip = True
-        # YYYY.MM.DD~YYYY.MM.DD 또는 YYYY-MM-DD~YYYY-MM-DD 형태에서 종료일 추출
-        m = _re.search(r"(\d{4})[.\-](\d{2})[.\-](\d{2})\s*$", dl)
-        if m:
-            end_date = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
-            if end_date < now_str:
-                skip = True
-        if not skip:
-            filtered.append(s)
-    logger.info(f"만료 필터: {len(services)}건 -> {len(filtered)}건 ({len(services)-len(filtered)}건 제외)")
-    services = filtered
-
     jobs = fetch_senior_jobs()
     today = datetime.now().strftime("%Y년 %m월 %d일")
 
