@@ -63,17 +63,10 @@ def run(blog_cfg):
                 # 썸네일 생성 + R2 업로드
                 stock_code = company.get("stock_code", "") if company else ""
                 thumb_url = _make_thumbnail(article["title"], article.get("category", "공시분석"), company.get("stock_code", "") if company else "", disc.get("corp_name", ""))
-                # [P3] SEO description
-                _corp = disc.get("corp_name", "")
-                _report = disc.get("report_nm", "")
-                from datetime import datetime as _dt
-                _month = _dt.now().strftime("%Y년 %m월")
-                _seo_desc = f"{_corp} {_report} 핵심 분석. {_month} DART 공시 기준."
-                _body_d = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + article["body_md"]
                 result = publish(
                     blog_id=blog_id,
                     title=article["title"],
-                    body_md=_body_d,
+                    body_md=article["body_md"],
                     category=article.get("category", "공시분석"),
                     tags=article.get("tags", ""),
                     data_source="dart_disclosure",
@@ -116,15 +109,10 @@ def run(blog_cfg):
         if article.get("title") and article.get("body_md"):
             # 썸네일 생성 + R2 업로드
             thumb_url = _make_thumbnail(article["title"], article.get("category", "시장분석"), "", "")
-            # [P3] SEO description
-            from datetime import datetime as _dt2
-            _month2 = _dt2.now().strftime("%Y년 %m월")
-            _eg_desc = f"{article['title']} - {_month2} 기준 {article.get('category', '시장분석')}."
-            _body_eg = "<!-- DESC: " + _eg_desc[:160] + " -->\n" + article["body_md"]
             result = publish(
                 blog_id=blog_id,
                 title=article["title"],
-                body_md=_body_eg,
+                body_md=article["body_md"],
                 category=article.get("category", "시장분석"),
                 tags=article.get("tags", ""),
                 data_source=f"evergreen_{topic_type}",
