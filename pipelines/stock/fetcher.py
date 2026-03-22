@@ -146,3 +146,55 @@ def get_listed_corps(limit=100):
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def fetch_etf_daily(top_n=10):
+    """네이버 금융 ETF API에서 전체 ETF 시세를 가져와 상위/하위/거래량 급증 분류"""
+    import requests as _req
+    url = "https://finance.naver.com/api/sise/etfItemList.nhn"
+    try:
+        resp = _req.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        data = resp.json()
+        items = data.get("result", {}).get("etfItemList", [])
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"ETF fetch 실패: {e}")
+        return None
+
+    if not items:
+        return None
+
+    # 등락률 기준 정렬
+    gainers = sorted([e for e in items if e.get("changeRate", 0) > 0], key=lambda x: x["changeRate"], reverse=True)[:top_n]
+    losers = sorted([e for e in items if e.get("changeRate", 0) < 0], key=lambda x: x["changeRate"])[:top_n]
+
+    # 거래량 상위 (시총 대비 거래량 비율로 급증 판단은 어려우므로 절대 거래량 상위)
+    volume_top = sorted(items, key=lambda x: x.get("quant", 0), reverse=True)[:top_n]
+
+    # 중복 제거: losers에서 gainers 종목코드 제외
+    gainer_codes = {e["itemcode"] for e in gainers}
+    losers = [e for e in losers if e["itemcode"] not in gainer_codes][:top_n]
+
+    def _fmt(etf_list):
+        result = []
+        for e in etf_list:
+            result.append({
+                "name": e.get("itemname", ""),
+                "code": e.get("itemcode", ""),
+                "price": e.get("nowVal", 0),
+                "change_rate": e.get("changeRate", 0),
+                "volume": e.get("quant", 0),
+                "market_cap": e.get("marketSum", 0),
+                "nav": e.get("nav", 0),
+                "three_month_return": e.get("threeMonthEarnRate"),
+            })
+        return result
+
+    return {
+        "gainers": _fmt(gainers),
+        "losers": _fmt(losers),
+        "volume_top": _fmt(volume_top),
+        "total_count": len(items),
+        "source": "naver_finance_etf_api",
+    }
