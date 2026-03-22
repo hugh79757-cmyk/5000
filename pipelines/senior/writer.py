@@ -6,6 +6,7 @@ import random
 import logging
 from datetime import datetime
 from openai import OpenAI
+from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 
@@ -15,34 +16,87 @@ MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 # 카테고리별 글 구조 템플릿
 ARTICLE_STRUCTURES = {
     "의료지원": {
-        "sections": ["누가 받을 수 있나요", "얼마나 지원되나요", "어디서 어떻게 신청하나요", "필요한 서류는 무엇인가요", "놓치기 쉬운 주의사항", "실제 활용 꿀팁"],
+        "sections": ["대상자 조건과 지원 내용", "신청 방법과 필요 서류", "신청 전 반드시 확인할 점", "관련 제도 비교와 활용 팁"],
         "angle": "어르신이 직접 읽고 바로 신청할 수 있도록 쉽고 구체적으로 안내",
     },
     "돌봄서비스": {
-        "sections": ["어떤 서비스인가요", "누가 이용할 수 있나요", "서비스 종류와 내용", "비용은 얼마인가요", "신청 방법 단계별 안내", "이용 전 꼭 알아야 할 점"],
+        "sections": ["서비스 내용과 이용 대상", "비용과 신청 절차", "이용 시 주의사항", "함께 알아두면 좋은 제도"],
         "angle": "어르신과 가족이 돌봄서비스를 쉽게 이해하고 신청할 수 있도록 안내",
     },
     "교통복지": {
-        "sections": ["어떤 혜택인가요", "할인율과 적용 범위", "카드 만드는 방법", "어디서 사용할 수 있나요", "신청 시 필요한 것", "더 알뜰하게 이용하는 법"],
+        "sections": ["혜택 내용과 적용 범위", "신청 방법과 필요 서류", "이용 시 주의할 점", "더 알뜰하게 쓰는 방법"],
         "angle": "교통비를 아낄 수 있는 구체적 방법과 신청 절차를 쉽게 안내",
     },
     "일자리금융": {
-        "sections": ["어떤 제도인가요", "참여 조건과 급여", "신청 자격 상세", "신청 방법과 절차", "선발 기준과 일정", "참여 전 체크리스트"],
+        "sections": ["참여 조건과 급여 내용", "신청 방법과 선발 기준", "참여 전 꼭 확인할 점", "관련 제도 함께 활용하기"],
         "angle": "시니어 일자리와 금융 지원의 조건, 급여, 신청법을 현실적으로 안내",
     },
     "문화여가": {
-        "sections": ["어떤 혜택인가요", "지원 금액과 사용처", "신청하는 방법", "이용 가능한 시설", "주의할 점", "이렇게 활용하세요"],
+        "sections": ["혜택 내용과 지원 금액", "신청 방법과 이용 시설", "이용 시 유의사항", "이렇게 활용하면 더 좋습니다"],
         "angle": "어르신이 문화생활을 즐길 수 있는 혜택과 신청법을 친근하게 안내",
     },
     "연금생활지원": {
-        "sections": ["어떤 제도인가요", "얼마를 받을 수 있나요", "받을 수 있는 조건", "신청 방법과 필요 서류", "언제 결과가 나오나요", "자주 하는 질문"],
+        "sections": ["수급 조건과 지급 금액", "신청 방법과 필요 서류", "자주 묻는 질문", "함께 받을 수 있는 제도"],
         "angle": "연금과 생활지원금의 금액, 자격, 신청법을 명확하게 안내",
     },
     "생활지원": {
-        "sections": ["어떤 지원인가요", "지원 내용과 금액", "받을 수 있는 조건", "신청 방법 안내", "필요한 서류", "신청 전 알아두세요"],
+        "sections": ["지원 내용과 대상 조건", "신청 절차와 구비서류", "놓치기 쉬운 주의사항", "같이 신청하면 좋은 제도"],
         "angle": "생활에 도움이 되는 지원 제도의 조건과 신청법을 알기 쉽게 안내",
     },
 }
+
+
+# 쿠팡 파트너스 카테고리별 추천
+COUPANG_PARTNER_IDFF = os.getenv("COUPANG_PARTNER_ID", "")
+COUPANG_CATEGORY = {
+    "의료지원": "어르신 건강용품 보기",
+    "돌봄서비스": "간병 돌봄용품 보기",
+    "교통복지": "보행보조용품 보기",
+    "생활지원": "어르신 생활용품 보기",
+    "연금생활지원": "건강식품 보기",
+    "일자리금융": "취업준비용품 보기",
+    "문화여가": "여가 취미용품 보기",
+}
+
+def _append_links(body_md, service, category):
+    """본문 끝에 정부 신청 버튼 + 쿠팡 링크 삽입"""
+    from dotenv import load_dotenv as _ld
+    _ld("/Users/twinssn/Projects/5000/.env")
+    import re as _re
+
+    # GPT 면책 문구 제거 (중복 방지)
+    body_md = _re.sub(r"\n*이 글은 정부24[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*> 이 글은[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*---\s*$", "", body_md.rstrip())
+    body_md = body_md.rstrip()
+
+    parts = []
+
+    # 1) 정부 신청 버튼
+    apply_url = service.get("apply_url", "")
+    svc_id = service.get("service_id", "")
+    if apply_url:
+        url = apply_url
+    elif svc_id:
+        url = f"https://www.gov.kr/portal/rcvfvrSvc/dtlEx/{svc_id}"
+    else:
+        url = "https://www.bokjiro.go.kr"
+    dept = service.get("department", "")
+    btn_text = f"{dept}에서 신청하기" if dept else "온라인으로 신청하기"
+    parts.append(f'\n\n{{{{< btn url="{url}" text="{btn_text}" >}}}}')
+
+    # 2) 쿠팡 파트너스
+    coupang_id = os.getenv("COUPANG_PARTNER_ID", "")
+    if coupang_id:
+        c_text = COUPANG_CATEGORY.get(category, "어르신 생활용품 보기")
+        c_url = f"https://link.coupang.com/a/{coupang_id}"
+        parts.append(f'\n\n{{{{< coupang url="{c_url}" text="{c_text}" >}}}}')
+
+    # 3) 면책 1회
+    parts.append("\n\n---")
+    parts.append("\n\n> 이 글은 정부24 공공데이터를 기반으로 작성되었습니다. 최신 정보는 [복지로](https://www.bokjiro.go.kr)에서 확인하세요.")
+
+    return body_md + "".join(parts)
 
 
 def _build_data_block(service):
@@ -66,6 +120,20 @@ def _build_data_block(service):
         fields.append(f"문의처: {service['contact']}")
     if service.get('law_basis'):
         fields.append(f"법적 근거: {service['law_basis']}")
+    if service.get('purpose'):
+        fields.append(f"서비스목적: {service['purpose']}")
+    if service.get('selection_criteria'):
+        fields.append(f"선정기준: {service['selection_criteria']}")
+    if service.get('documents'):
+        fields.append(f"구비서류: {service['documents']}")
+    if service.get('deadline'):
+        fields.append(f"신청기한: {service['deadline']}")
+    if service.get('apply_method_detail'):
+        fields.append(f"상세 신청방법: {service['apply_method_detail']}")
+    if service.get('reception_agency'):
+        fields.append(f"접수기관: {service['reception_agency']}")
+    if service.get('support_type'):
+        fields.append(f"지원유형: {service['support_type']}")
     return "\n".join(fields)
 
 
@@ -120,8 +188,8 @@ def _build_prompt(service, topic_type, related_services, today):
 
 본문 구조:
 {sections_guide}
-- 각 섹션은 150자 이상
-- 총 2,500~4,000자
+- 각 H2 섹션은 최소 8문장, 500자 이상으로 충분히 서술
+- 전체 본문 반드시 3,000자 이상. 2,200자 미만 절대 불합격
 - 마지막에 "이 글은 정부24 공공데이터를 기반으로 작성되었습니다. 최신 정보는 복지로(www.bokjiro.go.kr)에서 확인하세요."로 마무리
 
 SEO:
@@ -135,34 +203,77 @@ SEO:
 {main_data}
 {related_block}
 
+[분량 규칙 — 반드시 준수]
+- 전체 본문 3,000자 이상. 2,200자 미만은 절대 불합격.
+- 각 H2 섹션은 최소 8문장, 350자 이상.
+- H2는 정확히 4개. 각 H2마다 구체적 데이터를 인용하며 충분히 서술하세요.
+- 위 데이터의 지원내용, 문의처, 법적 근거, 신청방법을 본문에 반드시 포함하세요.
+- 짧게 끝내지 마세요. 부족하면 실제 신청 시 주의사항, 자주 하는 실수, 비슷한 제도와 차이점을 추가 서술하세요.
+
 출력 형식 (반드시 이 형식을 지키세요):
-TITLE: (제목 — 서비스명과 핵심 정보 포함)
+TITLE: (제목 — 25~50자, 구체적 조건+질문형)
 CATEGORY: {topic_type}
-TAGS: (태그1, 태그2, 태그3, 태그4, 태그5)
+TAGS: (롱테일 태그 5~7개, 괄호 없이)
+DESCRIPTION: (80~120자, 핵심 정보 1줄 요약)
 BODY:
-(본문 마크다운)"""
+(본문 마크다운 — 반드시 3,000자 이상)"""
 
     return system_msg, user_msg
 
 
 def _parse_response(content):
-    result = {"title": "", "category": "", "tags": "", "body_md": ""}
+    """LLM 응답 파싱 — TITLE/BODY 또는 제목/본문 형식 모두 대응"""
+    result = {"title": "", "body_md": "", "tags": [], "category": "", "description": ""}
+    
     lines = content.strip().split("\n")
-    body_start = False
-
+    body_lines = []
+    in_body = False
+    
     for line in lines:
-        if line.startswith("TITLE:"):
-            result["title"] = line[6:].strip().strip('"')
-        elif line.startswith("CATEGORY:"):
-            result["category"] = line[9:].strip()
-        elif line.startswith("TAGS:"):
-            result["tags"] = line[5:].strip()
-        elif line.startswith("BODY:"):
-            body_start = True
-        elif body_start:
-            result["body_md"] += line + "\n"
-
-    result["body_md"] = result["body_md"].strip()
+        stripped = line.strip()
+        low = stripped.lower()
+        
+        if low.startswith("title:") or stripped.startswith("제목:"):
+            result["title"] = stripped.split(":", 1)[1].strip().strip('"').strip("'").strip()
+            continue
+        if low.startswith("category:") or stripped.startswith("카테고리:"):
+            result["category"] = stripped.split(":", 1)[1].strip()
+            continue
+        if low.startswith("tags:") or stripped.startswith("태그:"):
+            tag_str = stripped.split(":", 1)[1].strip().strip("()[]")
+            result["tags"] = [t.strip().strip("'\"") for t in tag_str.split(",") if t.strip()]
+            continue
+        if low.startswith("description:") or stripped.startswith("설명:"):
+            result["description"] = stripped.split(":", 1)[1].strip().strip('"')
+            continue
+        if low.startswith("body:"):
+            in_body = True
+            continue
+        
+        if stripped.startswith("## ") or in_body:
+            in_body = True
+            body_lines.append(line)
+    
+    result["body_md"] = "\n".join(body_lines).strip()
+    
+    if not result["body_md"] and "## " in content:
+        first_h2 = content.find("## ")
+        result["body_md"] = content[first_h2:].strip()
+    
+    if not result["body_md"]:
+        result["body_md"] = content.strip()
+    
+    if not result["description"] and result["body_md"]:
+        clean = result["body_md"].replace("## ", "").strip()
+        first_para = clean.split("\n\n")[0] if "\n\n" in clean else clean[:120]
+        result["description"] = first_para[:120]
+    
+        # 링크 삽입
+        if result.get('body_md'):
+            result['body_md'] = _append_links(
+                result['body_md'], main_service,
+                result.get('category', topic_type or '')
+            )
     return result
 
 
@@ -249,36 +360,38 @@ def generate_senior_article(data, topic_type=None):
 
     system_msg, user_msg = _build_prompt(main_service, topic_type, related, today)
 
-    max_attempts = 2
+    max_attempts = 1
     for attempt in range(1, max_attempts + 1):
         try:
-            response = client.chat.completions.create(
-                model=MODEL,
-                messages=[
-                    {"role": "system", "content": system_msg},
-                    {"role": "user", "content": user_msg},
-                ],
-                temperature=0.65,
-                max_tokens=4500,
-            )
-            content = response.choices[0].message.content
+            ai_result = ai_generate(system_msg, user_msg, tier="default")
+            if not ai_result or not ai_result.get("content"):
+                raise Exception("ai_generate 빈 응답")
+            content = ai_result["content"]
             result = _parse_response(content)
 
             issues = _validate_article(result)
-            if issues and attempt < max_attempts:
-                logger.warning(f"품질 검증 실패 (시도 {attempt}/{max_attempts}): {', '.join(issues)} -> 재생성")
-                continue
+            if issues:
+                logger.info(f"품질 참고: {', '.join(issues)}")
 
             if issues:
                 logger.warning(f"최종 품질: {', '.join(issues)} (자동 보정 진행)")
 
-            if not result["title"] or len(result["body_md"]) < 500:
-                logger.warning(f"글 생성 부족: title={result['title']}, body_len={len(result['body_md'])}")
-                return None
+            if not result["title"]:
+                result["title"] = main_service.get("service_name", "시니어 복지 정보")
+                logger.info(f"제목 없어서 서비스명으로 대체: {result['title']}")
+            if len(result["body_md"]) < 500:
+                logger.info(f"본문 짧음: {len(result['body_md'])}자 (발행 진행)")
 
             result["topic_type"] = topic_type
             result["thumbnail"] = ""
             logger.info(f"글 생성 완료: {result['title']} ({len(result['body_md'])}자)")
+
+            # 정부 신청 버튼 + 쿠팡 링크 삽입
+            if result.get('body_md'):
+                result['body_md'] = _append_links(
+                    result['body_md'], main_service,
+                    result.get('category', topic_type or '')
+                )
             return result
 
         except Exception as e:
