@@ -40,6 +40,16 @@ def run(blog_cfg):
 
     init_db()
     today_count = get_today_count(blog_id)
+
+    # 하루 첫 발행이면 ETF/배당 데이터 갱신
+    if today_count == 0:
+        try:
+            from pipelines.stock.fetcher import refresh_daily_data
+            refresh_daily_data()
+            logger.info(f"{blog_id}: 일일 데이터 갱신 완료")
+        except Exception as e:
+            logger.warning(f"{blog_id}: 일일 데이터 갱신 실패: {e}")
+
     quota = blog_cfg.get("daily_quota", 5)
     if today_count >= quota:
         logger.info(f"{blog_id}: 오늘 발행 완료 ({today_count}/{quota})")

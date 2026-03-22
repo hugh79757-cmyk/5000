@@ -152,18 +152,41 @@ def fetch_etf_daily(top_n=10):
     """네이버 금융 ETF API에서 전체 ETF 시세를 가져와 상위/하위/거래량 급증 분류"""
     import requests as _req
     url = "https://finance.naver.com/api/sise/etfItemList.nhn"
-    try:
-        resp = _req.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
-        resp.raise_for_status()
-        data = resp.json()
-        items = data.get("result", {}).get("etfItemList", [])
-    except Exception as e:
-        import logging
-        logging.getLogger(__name__).error(f"ETF fetch 실패: {e}")
-        return None
+    # DB 캐시 먼저 확인
+    cached = _get_etf_from_db()
+    if cached:
+        items_from_db = True
+        items = cached
+    else:
+        items_from_db = False
+        try:
+            resp = _req.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            data = resp.json()
+            items = data.get("result", {}).get("etfItemList", [])
+            if items:
+                saved = _save_etf_to_db(items)
+                import logging
+                logging.getLogger(__name__).info(f"ETF {saved}건 DB 캐시 저장")
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).error(f"ETF fetch 실패: {e}")
+            return None
 
     if not items:
         return None
+
+    # DB캐시와 API 응답 키 통일
+    if items_from_db:
+        for e in items:
+            e["itemcode"] = e.get("item_code", "")
+            e["itemname"] = e.get("item_name", "")
+            e["nowVal"] = e.get("price", 0)
+            e["changeRate"] = e.get("change_rate", 0)
+            e["quant"] = e.get("volume", 0)
+            e["marketSum"] = e.get("market_cap", 0)
+            e["nav"] = e.get("nav", 0)
+            e["threeMonthEarnRate"] = e.get("three_month_return")
 
     # 등락률 기준 정렬
     gainers = sorted([e for e in items if e.get("changeRate", 0) > 0], key=lambda x: x["changeRate"], reverse=True)[:top_n]
@@ -206,6 +229,12 @@ def fetch_dividend_ranking(top_n=10):
     import requests as _req
     from bs4 import BeautifulSoup as _BS
     url = "https://m.seibro.or.kr/cnts/company/selectDiv50.do"
+    # DB 캐시 먼저 확인
+    cached = _get_dividend_from_db()
+    if cached:
+        rankings = [{"rank": r["rank"], "name": r["corp_name"], "dividend_yield": r["dividend_yield"], "dividend_per_share": r["dividend_per_share"]} for r in cached[:top_n]]
+        return {"rankings": rankings, "total_count": len(cached), "source": "ksd_seibro_cached", "note": "DB 캐시 (당일)"}
+
     try:
         resp = _req.get(url, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
@@ -230,6 +259,9 @@ def fetch_dividend_ranking(top_n=10):
                     continue
         if not result:
             return None
+        saved = _save_dividend_to_db(result)
+        import logging
+        logging.getLogger(__name__).info(f"배당 {saved}건 DB 캐시 저장")
         return {
             "rankings": result[:top_n],
             "total_count": len(result),
@@ -240,3 +272,121 @@ def fetch_dividend_ranking(top_n=10):
         import logging
         logging.getLogger(__name__).error(f"KSD 배당순위 fetch 실패: {e}")
         return None
+
+
+def _save_etf_to_db(items):
+    """ETF 시세를 DB에 저장 (당일 캐시)"""
+    import sqlite3
+    from datetime import datetime
+    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect(db)
+    saved = 0
+    for e in items:
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO etf_daily (date, item_code, item_name, price, change_rate, volume, market_cap, nav, three_month_return) VALUES (?,?,?,?,?,?,?,?,?)",
+                (today, e.get("itemcode",""), e.get("itemname",""), e.get("nowVal",0), e.get("changeRate",0), e.get("quant",0), e.get("marketSum",0), e.get("nav",0), e.get("threeMonthEarnRate"))
+            )
+            saved += 1
+        except Exception:
+            continue
+    conn.commit()
+    conn.close()
+    return saved
+
+
+def _get_etf_from_db():
+    """DB에서 당일 ETF 데이터 조회"""
+    import sqlite3
+    from datetime import datetime
+    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("SELECT * FROM etf_daily WHERE date=? ORDER BY change_rate DESC", (today,)).fetchall()
+    conn.close()
+    if len(rows) < 10:
+        return None
+    return [dict(r) for r in rows]
+
+
+def _save_dividend_to_db(rankings):
+    """배당 순위를 DB에 저장"""
+    import sqlite3
+    from datetime import datetime
+    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect(db)
+    saved = 0
+    for r in rankings:
+        try:
+            conn.execute(
+                "INSERT OR IGNORE INTO dividend_ranking (date, rank, corp_name, dividend_yield, dividend_per_share) VALUES (?,?,?,?,?)",
+                (today, r.get("rank",0), r.get("name",""), r.get("dividend_yield",0), r.get("dividend_per_share",0))
+            )
+            saved += 1
+        except Exception:
+            continue
+    conn.commit()
+    conn.close()
+    return saved
+
+
+def _get_dividend_from_db():
+    """DB에서 당일 배당 데이터 조회"""
+    import sqlite3
+    from datetime import datetime
+    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = sqlite3.connect(db)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute("SELECT * FROM dividend_ranking WHERE date=? ORDER BY rank", (today,)).fetchall()
+    conn.close()
+    if len(rows) < 5:
+        return None
+    return [dict(r) for r in rows]
+
+
+def refresh_daily_data():
+    """하루 1회 ETF 시세 + 배당 순위 데이터를 API에서 가져와 DB에 저장"""
+    import logging
+    _log = logging.getLogger(__name__)
+
+    # ETF 데이터 갱신
+    import requests as _req
+    try:
+        resp = _req.get("https://finance.naver.com/api/sise/etfItemList.nhn", timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        items = resp.json().get("result", {}).get("etfItemList", [])
+        if items:
+            saved = _save_etf_to_db(items)
+            _log.info(f"[일일갱신] ETF {saved}/{len(items)}건 저장")
+    except Exception as e:
+        _log.error(f"[일일갱신] ETF 실패: {e}")
+
+    # 배당 데이터 갱신
+    try:
+        from bs4 import BeautifulSoup as _BS
+        resp = _req.get("https://m.seibro.or.kr/cnts/company/selectDiv50.do", timeout=15, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        soup = _BS(resp.text, "html.parser")
+        rows = soup.select("table tr")
+        result = []
+        for row in rows[1:]:
+            cols = row.select("td")
+            if len(cols) >= 4:
+                try:
+                    result.append({
+                        "rank": int(cols[0].get_text(strip=True)),
+                        "name": cols[1].get_text(strip=True),
+                        "dividend_yield": float(cols[2].get_text(strip=True)),
+                        "dividend_per_share": int(cols[3].get_text(strip=True).replace(",", "")),
+                    })
+                except (ValueError, TypeError):
+                    continue
+        if result:
+            saved = _save_dividend_to_db(result)
+            _log.info(f"[일일갱신] 배당 {saved}/{len(result)}건 저장")
+    except Exception as e:
+        _log.error(f"[일일갱신] 배당 실패: {e}")
