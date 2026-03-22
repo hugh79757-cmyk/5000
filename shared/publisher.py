@@ -200,6 +200,9 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
         body_md = body_md.rstrip() + links_md
 
+    # DESC 주석 제거 (front-matter에 이미 반영됨)
+    import re as _pub_re
+    body_md = _pub_re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
     content = fm + body_md
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
