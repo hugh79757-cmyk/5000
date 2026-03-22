@@ -412,7 +412,7 @@ def _post_process(content):
     return content
 
 
-def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
+def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
     """생성된 콘텐츠의 H2 수, 글자수, 금지표현을 검증하고 미달 시 재생성"""
     BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요", "느껴보세요"]
     
@@ -434,7 +434,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
             logger.info("콘텐츠 검증 통과 (H2:%d, 글자수:%d)", h2_count, char_count)
             return content
         
-        if attempt < max_retries:
+        if False:  # 재생성 비활성화 - 토큰 절약
             logger.warning("콘텐츠 검증 실패 (시도 %d/%d): %s → 재생성", 
                           attempt + 1, max_retries + 1, ", ".join(issues))
             
@@ -518,7 +518,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
 
 
 
-def _validate_place_names(content, real_names, max_retries=1):
+def _validate_place_names(content, real_names, max_retries=0):
     """AI 생성 본문에 실제 API 장소명이 포함되어 있는지 검증"""
     if not real_names:
         return content, True
@@ -667,12 +667,8 @@ def generate_content(data, blog_id="travel-hugo"):
     real_names = [it.get("title", it.get("facltNm", "")).strip() for it in place_items if it.get("title") or it.get("facltNm")]
     content, names_ok = _validate_place_names(content, real_names)
     if not names_ok:
-        logger.warning("장소명 불일치 → 재생성 시도")
-        retry = ai_generate(system_prompt, user_prompt, tier="default")
-        if retry and retry.get("content"):
-            content = retry["content"]
-            content = _validate_and_retry(content, system_prompt, user_prompt)
-            content, _ = _validate_place_names(content, real_names)
+        logger.info("장소명 불일치 감지 (재생성 안함)")
+        pass  # 재생성 비활성화 - 토큰 절약
 
     content = _post_process(content)
     content = _enrich_with_nearby(data, content)
