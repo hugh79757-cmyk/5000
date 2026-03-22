@@ -49,27 +49,24 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
 {context}
 
 [제목 작성 규칙]
-- 패턴: "기업명 + 핵심숫자(금액 또는 증감률) + 의미 요약"
+- "기업명 + 공시 핵심 + 데이터 기반 숫자" 패턴 사용
 - 제공된 데이터의 실제 숫자를 제목에 포함 (매출, 순이익, 증감률 등)
 - 예시: "삼성전자 2025 매출 300조 돌파 영업이익은 36% 감소", "카카오 당기순이익 2400억 전년비 15% 증가 의미는"
 - 데이터에 없는 숫자는 제목에 넣지 마세요
-- 의문형("~일까?") 최대 1회
-- 40~50자
+- 50자 이내
 
 [본문 작성 규칙]
-1. 첫 문단: 핵심 수치 포함 후킹 문장 + 반드시 "2026년 3월 DART 공시 기준" 명시
-2. 본문 3000자 이상, 2500자 미만 불합격
-3. H2 헤딩 정확히 5개, 각 섹션 최소 5문장, 자연스러운 소제목 (예: "이 회사가 하는 일", "실적은 어땠나", "지금 투자해도 될까")
+1. 첫 문단에서 독자의 관심을 사로잡는 후킹 문장으로 시작 (질문형 또는 충격적 사실)
+2. 본문 3000자 이상
+3. H2 헤딩 4~6개, 자연스러운 소제목 (예: "이 회사가 하는 일", "실적은 어땠나", "지금 투자해도 될까")
 4. 금액은 읽기 쉽게 표현 (12,432,454,206원 → 약 124억 원)
 5. 전문 용어는 괄호로 쉬운 설명 추가
 6. 구체적인 투자 판단 근거 제시 (PER, PBR, 동종업계 비교)
 7. 리스크 요인도 균형있게 서술
 8. 마지막에 "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
 9. 마크다운 형식, H1(#) 사용 금지
-10. "함께 읽어보기", "관련 글" 등 내부링크 섹션 절대 금지
-11. 다른 블로그 글 URL 절대 생성 금지
-12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
-13. 비교 표에 데이터 없는 행 금지 (TBD/N/A 행 금지)
+10. 절대 "함께 읽어보기", "관련 글", "추천 글" 같은 내부링크 섹션을 만들지 마세요
+11. 다른 블로그 글 URL을 절대 생성하지 마세요
 
 [출력 형식]
 TITLE: (제목)
@@ -92,18 +89,7 @@ BODY:
     )
     resp.raise_for_status()
     content = resp.json()["choices"][0]["message"]["content"]
-    parsed = _parse_response(content)
-    if parsed.get("body_md") and len(parsed["body_md"]) < 2500:
-        logger.info(f"disclosure 글자수 미달 ({len(parsed['body_md'])}자), 재생성")
-        _retry = prompt + "\n\n[경고] 이전 응답이 2500자 미만. 3000자 이상, H2 5개, 각 섹션 5문장 이상 필수."
-        _r2 = requests.post("https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": OPENAI_MODEL, "messages": [{"role": "user", "content": _retry}], "max_tokens": 8000, "temperature": 0.7}, timeout=60)
-        _r2.raise_for_status()
-        _p2 = _parse_response(_r2.json()["choices"][0]["message"]["content"])
-        if _p2.get("body_md") and len(_p2["body_md"]) > len(parsed["body_md"]):
-            parsed = _p2
-    return parsed
+    return _parse_response(content)
 
 
 def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
@@ -133,27 +119,24 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
 {base_prompt}
 
 [제목 작성 규칙]
-- 패턴: "비교 대상 + 핵심 수치 + 결론 힌트", 제공 데이터의 실제 숫자 1개 이상 포함
+- 클릭을 유도하는 흥미로운 제목, 숫자 반드시 포함
 - 예시: "2026년 고배당주 TOP 10 연 8% 수익 가능한 종목은", "KODEX vs TIGER ETF 수수료 0.01% 차이가 만드는 수익률 격차"
 - 50자 이내
 
 [본문 작성 규칙]
-1. 첫 문단: 핵심 데이터 포인트 포함 후킹 문장 + "2026년 3월 기준" 반드시 명시
-2. 본문 3000자 이상, 2500자 미만 불합격
-3. H2 헤딩 정확히 5개, 각 섹션 최소 5문장
+1. 첫 문단에서 독자의 관심을 사로잡는 후킹 문장
+2. 본문 3000자 이상
+3. H2 헤딩 4~6개, 대화체 소제목
 4. 금액은 읽기 쉽게 (억 원, 만 원 단위)
-5. 비교 표 최소 1개 필수. 표 앞뒤 빈 줄 필수. 수치 칸에 "TBD" 절대 금지, 데이터 없으면 해당 행 제외
-6. 구체적 종목명과 수치 포함. 수학 계산(배당금, 수익률 시뮬레이션)은 반드시 단계별 표시 후 검증
+5. 비교 표가 있으면 마크다운 테이블 사용
+6. 구체적 종목명과 수치 포함
 7. "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
 8. 마크다운 형식, H1(#) 사용 금지
 9. 2026년 3월 기준 최신 정보로 작성
-10. "함께 읽어보기", "관련 글" 등 내부링크 섹션 절대 금지
-11. 다른 블로그 글 URL 절대 생성 금지
-12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
-13. 비교 표에 데이터 없는 행 금지 (TBD/N/A 행 금지)
-12. 제공 데이터에 없는 수치 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
-13. 데이터 미제공 시 방법론/전략 중심 작성, 빈 수치 표 금지
-14. 비교 표에 TBD/N/A 행 절대 금지. 있는 데이터만 표에 포함
+10. 절대 "함께 읽어보기", "관련 글", "추천 글" 같은 내부링크 섹션을 만들지 마세요
+11. 다른 블로그 글 URL을 절대 생성하지 마세요
+12. [중요] 제공된 데이터에 없는 수치(금리, PER, PBR, 배당률, 주가, 수익률 등)를 절대 지어내지 마세요. 구체적 숫자가 필요한 곳에는 "○○증권 홈페이지에서 최신 금리를 확인하세요" 식으로 안내하세요
+13. 데이터가 제공되지 않은 경우, 구체적 수치 대신 분석 방법론과 투자 전략 중심으로 작성하세요
 
 [출력 형식]
 TITLE: (제목)
@@ -176,18 +159,7 @@ BODY:
     )
     resp.raise_for_status()
     content = resp.json()["choices"][0]["message"]["content"]
-    parsed = _parse_response(content)
-    if parsed.get("body_md") and len(parsed["body_md"]) < 2500:
-        logger.info(f"evergreen 글자수 미달 ({len(parsed['body_md'])}자), 재생성")
-        _retry = prompt + "\n\n[경고] 이전 응답 2500자 미만. 3000자 이상, H2 5개, 각 섹션 5문장 이상 필수."
-        _r2 = requests.post("https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": OPENAI_MODEL, "messages": [{"role": "user", "content": _retry}], "max_tokens": 8000, "temperature": 0.7}, timeout=60)
-        _r2.raise_for_status()
-        _p2 = _parse_response(_r2.json()["choices"][0]["message"]["content"])
-        if _p2.get("body_md") and len(_p2["body_md"]) > len(parsed["body_md"]):
-            parsed = _p2
-    return parsed
+    return _parse_response(content)
 
 
 def _parse_response(content):
@@ -219,31 +191,6 @@ def _parse_response(content):
             if line.startswith("# "):
                 title = line.replace("# ", "").strip()
                 break
-
-    # 후처리: "함께 읽어보기" 제거
-    import re as _re
-    _cut = _re.search(r"\n## 함께 읽어보기", body)
-    if _cut:
-        body = body[:_cut.start()]
-    _cut2 = _re.search(r"\n## 관련 글", body)
-    if _cut2:
-        body = body[:_cut2.start()]
-
-    # TBD 포함 표 행 제거
-    _blines = body.split("\n")
-    _blines = [ln for ln in _blines if not (ln.strip().startswith("|") and "TBD" in ln)]
-    body = "\n".join(_blines)
-
-    # 표 전후 빈 줄 보장
-    _out = []
-    _blines2 = body.split("\n")
-    for _i, _ln in enumerate(_blines2):
-        if _ln.strip().startswith("|") and _i > 0 and _out and not _out[-1].strip().startswith("|") and _out[-1].strip() != "":
-            _out.append("")
-        _out.append(_ln)
-        if _ln.strip().startswith("|") and _i + 1 < len(_blines2) and not _blines2[_i + 1].strip().startswith("|") and _blines2[_i + 1].strip() != "":
-            _out.append("")
-    body = "\n".join(_out)
 
     return {
         "title": title,
