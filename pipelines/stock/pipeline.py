@@ -85,8 +85,21 @@ def run(blog_cfg):
                     _record_publish(conn, blog_id, disc)
     else:
         topic_type = strategy
-        corps = get_listed_corps(limit=50)
-        sample = random.sample(corps, min(10, len(corps)))
+        corps = get_listed_corps(limit=100)
+        # 재무 데이터 있는 기업만 필터링
+        _enriched_corps = []
+        for _c in random.sample(corps, min(30, len(corps))):
+            _fins = fetch_financial_summary(_c["corp_code"])
+            if _fins and len(_fins) > 10:
+                _c["_fin_count"] = len(_fins)
+                _enriched_corps.append(_c)
+                if len(_enriched_corps) >= 10:
+                    break
+        if not _enriched_corps:
+            logger.warning("재무 데이터 있는 기업 없음, 전체에서 샘플링")
+            _enriched_corps = random.sample(corps, min(10, len(corps)))
+        sample = _enriched_corps
+        logger.info(f"재무 데이터 보유 기업 {len(sample)}개 선택")
 
         # 각 기업의 실제 재무 데이터 수집
         enriched = []

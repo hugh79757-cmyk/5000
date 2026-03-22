@@ -5935,3 +5935,23 @@ openai.APIConnectionError: Connection error.
 2026-03-22 19:27:17,582 [INFO] Publishing: ud-blogger
 2026-03-22 19:29:42,771 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
 2026-03-22 19:29:42,772 [INFO] Publishing: kuta-wordpress
+2026-03-22 19:32:17,354 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:32:17,355 [INFO] Publishing: gap-kuta
+2026-03-22 19:32:50,862 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:32:50,863 [INFO] Publishing: stock-hugo
+2026-03-22 19:33:00,240 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:33:00,240 [INFO] Publishing: dividend-hugo
+2026-03-22 19:33:57,549 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:33:57,550 [INFO] Publishing: etf-hugo
+2026-03-22 19:34:49,380 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:34:49,381 [INFO] Publishing: sector-hugo
+2026-03-22 19:35:40,706 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:35:40,707 [INFO] Publishing: ipo-hugo
+2026-03-22 19:36:20,715 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:36:20,717 [INFO] Publishing: senior-hugo
+2026-03-22 19:37:37,800 [INFO] Queue executing: travel4-hugo (remaining: 1)
+2026-03-22 19:37:37,801 [INFO] Publishing: travel4-hugo
+2026-03-22 19:37:38,028 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:37:38,028 [INFO] Publishing: travel-hugo
+2026-03-22 19:39:32,976 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 19:39:32,977 [INFO] Publishing: travel1-hugo
