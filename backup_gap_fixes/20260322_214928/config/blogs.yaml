@@ -463,7 +463,6 @@ blogs:
     - '13:32'
     - '16:32'
     - '20:32'
-  status: active
 - cf_project: senior-hugo
   daily_quota: 5
   domain: senior.informationhot.kr
@@ -482,7 +481,7 @@ blogs:
   site_path: /Users/twinssn/Projects/senior-hugo
   status: active
   theme: blowfish
-- blogger_blog_id: '5484205249958557854'
+- blogger_blog_id: "5484205249958557854"
   daily_quota: 5
   domain: 2.techpawz.com
   id: senior-blogger
@@ -491,7 +490,7 @@ blogs:
   platform: blogger
   schedule:
     times:
-    - 08:10
+    - '08:10'
     - '11:10'
     - '14:10'
     - '17:10'

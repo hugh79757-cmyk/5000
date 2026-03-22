@@ -4,11 +4,11 @@ import logging
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
-os.chdir(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
+sys.path.insert(0, "/Users/twinssn/Projects/TAP")
+os.chdir("/Users/twinssn/Projects/TAP")
 
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
+load_dotenv("/Users/twinssn/Projects/TAP/.env")
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 from shared.content_store import init_db, get_today_count, register_images, source_exists, title_similar_exists

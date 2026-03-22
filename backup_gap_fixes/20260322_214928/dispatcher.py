@@ -242,7 +242,7 @@ def run_travel(blog_cfg):
     blog_id = blog_cfg["id"]
     logger.info("Travel pipeline: " + blog_id)
 
-    os.chdir(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
+    os.chdir("/Users/twinssn/Projects/TAP")
 
     from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
@@ -375,7 +375,7 @@ def dispatch(blog_id):
         if stap_name:
             import importlib
             # STAP 경로를 최상위에 삽입 + 모듈 캐시 정리
-            stap_root = os.getenv("STAP_ROOT", "/Users/twinssn/Projects/STAP")
+            stap_root = "/Users/twinssn/Projects/STAP"
             if stap_root in sys.path:
                 sys.path.remove(stap_root)
             sys.path.insert(0, stap_root)

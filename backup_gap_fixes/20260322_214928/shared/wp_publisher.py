@@ -1,4 +1,3 @@
-# DEPRECATED: wordpress_publisher.py를 사용하세요. 이 파일은 다음 정리 시 삭제됩니다.
 """WordPress 발행기 (5000용)"""
 
 import logging
