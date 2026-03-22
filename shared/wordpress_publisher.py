@@ -433,3 +433,45 @@ class WordPressPublisher:
                 logger.warning(f"태그 처리 오류 ({name}): {e}")
         
         return tag_ids
+
+
+# === wp_publisher.py에서 이관 (GAP-7) ===
+def publish_to_wordpress(wp_url, wp_user, wp_pass, title, body_html, categories=None, tags=None, featured_image_url=None):
+    api_url = wp_url.rstrip("/") + "/wp-json/wp/v2/posts"
+    token = base64.b64encode(f"{wp_user}:{wp_pass}".encode()).decode()
+    headers = {
+        "Authorization": f"Basic {token}",
+        "Content-Type": "application/json",
+    }
+
+    post_data = {
+        "title": title,
+        "content": body_html,
+        "status": "publish",
+    }
+
+    # featured image 업로드
+    if featured_image_url:
+        media_id = _upload_featured_image(wp_url, headers, featured_image_url, title)
+        if media_id:
+            post_data["featured_media"] = media_id
+
+    if categories:
+        post_data["categories"] = categories if isinstance(categories, list) else [categories]
+    if tags:
+        post_data["tags"] = tags if isinstance(tags, list) else [tags]
+
+    try:
+        resp = requests.post(api_url, json=post_data, headers=headers, timeout=30, verify=False)
+        if resp.status_code in (200, 201):
+            data = resp.json()
+            url = data.get("link", "")
+            post_id = data.get("id", "")
+            logger.info(f"WP published: {title} -> {url}")
+            return {"success": True, "url": url, "post_id": post_id}
+        else:
+            logger.error(f"WP publish failed: {resp.status_code} {resp.text[:200]}")
+            return {"success": False, "error": f"HTTP {resp.status_code}"}
+    except Exception as e:
+        logger.error(f"WP publish error: {e}")
+        return {"success": False, "error": str(e)}

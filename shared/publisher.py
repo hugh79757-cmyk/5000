@@ -291,7 +291,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
         import os
         from dotenv import load_dotenv as _ldenv2
         _ldenv2(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
-        from shared.wp_publisher import publish_to_wordpress
+        from shared.wordpress_publisher import publish_to_wordpress
         wp_url = os.getenv(blog_cfg.get("wp_url_env", ""), "")
         wp_user = os.getenv(blog_cfg.get("wp_user_env", ""), "")
         wp_pass = os.getenv(blog_cfg.get("wp_pass_env", ""), "")

@@ -6176,3 +6176,37 @@ SyntaxError: unterminated string literal (detected at line 206)
 2026-03-22 21:55:58,569 [INFO] Publishing: finance-hugo
 2026-03-22 21:55:58,614 [INFO] CATCHUP: travel-hugo expected=5 actual=0 missed=5 -> 1건만 보충
 2026-03-22 21:55:58,614 [INFO] Publishing: travel-hugo
+2026-03-22 21:58:19,729 [INFO] CATCHUP: travel1-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:58:19,730 [INFO] Publishing: travel1-hugo
+2026-03-22 22:00:55,680 [INFO] CATCHUP: travel2-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:00:55,681 [INFO] Publishing: travel2-hugo
+2026-03-22 22:02:38,037 [INFO] CATCHUP: travel3-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:02:38,038 [INFO] Publishing: travel3-hugo
+2026-03-22 22:03:55,712 [INFO] CATCHUP: travel4-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:03:55,712 [INFO] Publishing: travel4-hugo
+2026-03-22 22:05:01,545 [INFO] CATCHUP: tvshow-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:05:01,546 [INFO] Publishing: tvshow-blogger
+2026-03-22 22:05:55,768 [INFO] CATCHUP: ud-blogger expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:05:55,769 [INFO] Publishing: ud-blogger
+2026-03-22 22:06:47,468 [INFO] CATCHUP: kuta-wordpress expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:06:47,469 [INFO] Publishing: kuta-wordpress
+2026-03-22 22:07:30,930 [ERROR]   ERR: line 441, in publish_to_wordpress
+    token = base64.b64encode(f"{wp_user}:{wp_pass}".encode()).decode()
+            ^^^^^^
+NameError: name 'base64' is not defined. Did you forget to import 'base64'?
+
+2026-03-22 22:07:33,231 [WARNING] Telegram send failed: 401
+2026-03-22 22:07:33,233 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 22:07:38,489 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:07:38,501 [INFO] Publishing: gap-kuta
+2026-03-22 22:08:08,364 [ERROR]   ERR: line 441, in publish_to_wordpress
+    token = base64.b64encode(f"{wp_user}:{wp_pass}".encode()).decode()
+            ^^^^^^
+NameError: name 'base64' is not defined. Did you forget to import 'base64'?
+
+2026-03-22 22:08:09,170 [WARNING] Telegram send failed: 401
+2026-03-22 22:08:09,172 [WARNING] CATCHUP: gap-kuta 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 22:08:14,240 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:08:14,240 [INFO] Publishing: stock-hugo
+2026-03-22 22:08:24,117 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 22:08:24,119 [INFO] Publishing: dividend-hugo
