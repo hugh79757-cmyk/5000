@@ -3,11 +3,11 @@ import os
 import random
 import logging
 
-sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
-os.chdir(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
+sys.path.insert(0, "/Users/twinssn/Projects/TAP")
+os.chdir("/Users/twinssn/Projects/TAP")
 
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
+load_dotenv("/Users/twinssn/Projects/TAP/.env")
 
 logger = logging.getLogger(__name__)
 
