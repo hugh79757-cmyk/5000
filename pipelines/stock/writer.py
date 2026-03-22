@@ -131,7 +131,7 @@ def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
 3. 동일 ETF가 상위/하위 양쪽에 중복 등장 금지
 4. 보수비용(TER)은 제공 데이터에 실제 수치가 있을 때만 표기. 데이터에 TER이 없으면 보수비용 컬럼 자체를 표에서 제외
 5. 거래량 급증 ETF 별도 분석 (거래량 상위 종목). 반드시 별도 H2 헤딩("## 거래량 급증 ETF")으로 작성
-6. KODEX, TIGER, SOL 등 운용사별 대표 ETF 수익률/보수/구성종목 비교
+6. KODEX, TIGER, SOL 등 운용사별 대표 ETF 수익률/거래량 비교. 보수비용 데이터가 없으면 보수비용 컬럼 제외하고 수익률과 거래량만으로 표 구성. 빈 표(헤더만 있는 표) 절대 금지
 
 [주의]
 - 등락률이 전부 음수라면 "상위 TOP10" 대신 "하락폭이 적은 ETF TOP10"으로 제목 수정
@@ -257,6 +257,22 @@ def _parse_response(content):
     body = "\n".join(body_lines).strip()
     # H3 -> H2 통일
     body = re.sub(r"^### ", "## ", body, flags=re.MULTILINE)
+    # 거래량 급증 섹션에 H2 없으면 추가
+    if "거래량" in body and not re.search(r"^## .*거래량", body, re.MULTILINE):
+        body = body.replace("\n거래량 급증 ETF는", "\n## 거래량 급증 ETF\n\n거래량 급증 ETF는")
+        body = body.replace("\n거래량이 전일", "\n## 거래량 급증 ETF\n\n거래량이 전일")
+    # 빈 테이블 제거 (헤더+구분선만 있고 데이터행 없는 경우)
+    _table_lines = body.split("\n")
+    _cleaned = []
+    i = 0
+    while i < len(_table_lines):
+        if _table_lines[i].startswith("|") and i + 1 < len(_table_lines) and re.match(r"^\|[-| :]+\|$", _table_lines[i + 1]):
+            if i + 2 >= len(_table_lines) or not _table_lines[i + 2].startswith("|"):
+                i += 2
+                continue
+        _cleaned.append(_table_lines[i])
+        i += 1
+    body = "\n".join(_cleaned)
 
     if not title and body:
         for line in body_lines:

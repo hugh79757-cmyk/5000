@@ -33,7 +33,7 @@ def run(blog_cfg):
 
     from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
-    from pipelines.stock.fetcher import fetch_recent_disclosure, fetch_company_info, fetch_financial_summary, get_listed_corps, fetch_etf_daily
+    from pipelines.stock.fetcher import fetch_recent_disclosure, fetch_company_info, fetch_financial_summary, get_listed_corps, fetch_etf_daily, fetch_dividend_ranking
     from pipelines.stock.writer import generate_disclosure_article, generate_evergreen_article
     from pipelines.stock.thumbnail import generate_stock_thumbnail
     from shared.r2_uploader import upload_file
@@ -134,12 +134,16 @@ def run(blog_cfg):
                 logger.warning(f"기업 데이터 수집 실패 {corp_code}: {e}")
                 continue
 
-        # ETF 블로그면 실시간 ETF 데이터 주입
+        # 블로그별 실시간 데이터 주입
         extra = None
         if blog_id == "etf-hugo":
             extra = fetch_etf_daily(top_n=10)
             if extra:
                 logger.info(f"ETF 실시간 데이터: 상승 {len(extra['gainers'])}건, 하락 {len(extra['losers'])}건")
+        elif blog_id == "dividend-hugo":
+            extra = fetch_dividend_ranking(top_n=10)
+            if extra:
+                logger.info(f"배당 종목 데이터: {len(extra.get('corps_for_dividend', []))}건")
         article = generate_evergreen_article(topic_type, corp_data=enriched if enriched else sample, extra_data=extra)
         if article.get("title") and article.get("body_md"):
             # 썸네일 생성 + R2 업로드
