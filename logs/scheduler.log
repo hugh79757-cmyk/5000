@@ -5102,3 +5102,638 @@ openai.APIConnectionError: Connection error.
 2026-03-22 13:41:32,627 [INFO] Publishing: travel2-hugo
 2026-03-22 13:43:52,430 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
 2026-03-22 13:43:52,431 [INFO] Publishing: travel3-hugo
+2026-03-22 13:47:01,653 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:47:01,654 [INFO] Publishing: travel4-hugo
+2026-03-22 13:49:22,549 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:49:22,550 [INFO] Publishing: tvshow-blogger
+2026-03-22 13:51:29,563 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:51:29,565 [INFO] Publishing: ud-blogger
+2026-03-22 13:53:30,504 [INFO] CATCHUP: kuta-wordpress expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-22 13:53:30,505 [INFO] Publishing: kuta-wordpress
+2026-03-22 13:55:30,966 [INFO] CATCHUP: gap-kuta expected=2 actual=0 missed=2 -> 1건만 보충
+2026-03-22 13:55:30,968 [INFO] Publishing: gap-kuta
+2026-03-22 13:55:53,191 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:55:53,192 [INFO] Publishing: stock-hugo
+2026-03-22 13:56:02,086 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:56:02,086 [INFO] Publishing: dividend-hugo
+2026-03-22 13:56:51,520 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:56:51,520 [INFO] Publishing: etf-hugo
+2026-03-22 13:57:35,057 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:57:35,058 [INFO] Publishing: sector-hugo
+2026-03-22 13:58:05,936 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:58:05,936 [INFO] Publishing: ipo-hugo
+2026-03-22 13:58:48,249 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:58:48,251 [INFO] Publishing: senior-hugo
+2026-03-22 13:59:35,652 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 13:59:35,652 [INFO] Publishing: travel-hugo
+2026-03-22 14:00:29,429 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:00:29,430 [INFO] Publishing: travel1-hugo
+2026-03-22 14:02:45,729 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:02:45,730 [INFO] Publishing: travel2-hugo
+2026-03-22 14:05:18,051 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:05:18,052 [INFO] Publishing: travel3-hugo
+2026-03-22 14:07:41,039 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:07:41,041 [INFO] Publishing: travel4-hugo
+2026-03-22 14:09:58,963 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:09:58,964 [INFO] Publishing: tvshow-blogger
+2026-03-22 14:12:08,339 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:12:08,340 [INFO] Publishing: ud-blogger
+2026-03-22 14:14:19,078 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:14:19,079 [INFO] Publishing: kuta-wordpress
+2026-03-22 14:16:17,622 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:16:17,623 [INFO] Publishing: gap-kuta
+2026-03-22 14:16:45,165 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:16:45,166 [INFO] Publishing: stock-hugo
+2026-03-22 14:16:52,111 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:16:52,111 [INFO] Publishing: dividend-hugo
+2026-03-22 14:17:44,726 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:17:44,727 [INFO] Publishing: etf-hugo
+2026-03-22 14:18:10,250 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:18:10,251 [INFO] Publishing: sector-hugo
+2026-03-22 14:18:50,489 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:18:50,490 [INFO] Publishing: ipo-hugo
+2026-03-22 14:19:33,542 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:19:33,544 [INFO] Publishing: senior-hugo
+2026-03-22 14:20:28,469 [INFO] Queue executing: travel1-hugo (remaining: 1)
+2026-03-22 14:20:28,487 [INFO] Publishing: travel1-hugo
+2026-03-22 14:20:28,535 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:20:28,535 [INFO] Publishing: travel-hugo
+2026-03-22 14:21:18,846 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:21:18,847 [INFO] Publishing: travel1-hugo
+2026-03-22 14:23:26,004 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:23:26,005 [INFO] Publishing: travel2-hugo
+2026-03-22 14:25:29,259 [INFO] Queue executing: tvshow-blogger (remaining: 0)
+2026-03-22 14:25:29,261 [INFO] Publishing: tvshow-blogger
+2026-03-22 14:25:52,920 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:25:52,921 [INFO] Publishing: travel3-hugo
+2026-03-22 14:28:12,631 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:28:12,632 [INFO] Publishing: travel4-hugo
+2026-03-22 14:30:40,067 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:30:40,069 [INFO] Publishing: tvshow-blogger
+2026-03-22 14:32:51,078 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:32:51,079 [INFO] Publishing: ud-blogger
+2026-03-22 14:34:56,506 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:34:56,507 [INFO] Publishing: kuta-wordpress
+2026-03-22 14:36:52,588 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:36:54,882 [WARNING] Telegram send failed: 401
+2026-03-22 14:36:54,884 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:36:59,995 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:36:59,996 [INFO] Publishing: gap-kuta
+2026-03-22 14:37:00,169 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:00,852 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:00,854 [WARNING] CATCHUP: gap-kuta 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:37:05,876 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:37:05,876 [INFO] Publishing: stock-hugo
+2026-03-22 14:37:06,006 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:06,642 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:06,643 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:37:11,695 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:37:11,695 [INFO] Publishing: dividend-hugo
+2026-03-22 14:37:11,846 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:12,675 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:12,677 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:37:17,788 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:37:17,788 [INFO] Publishing: etf-hugo
+2026-03-22 14:37:17,942 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:18,730 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:18,732 [WARNING] CATCHUP: etf-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:37:23,837 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:37:23,837 [INFO] Publishing: sector-hugo
+2026-03-22 14:37:23,987 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:24,639 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:24,640 [WARNING] CATCHUP: sector-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:37:29,689 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:37:29,689 [INFO] Publishing: ipo-hugo
+2026-03-22 14:37:29,832 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:30,468 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:30,470 [WARNING] CATCHUP: ipo-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:37:35,561 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 14:37:35,561 [INFO] Publishing: senior-hugo
+2026-03-22 14:37:35,697 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:37:36,380 [WARNING] Telegram send failed: 401
+2026-03-22 14:37:36,382 [WARNING] CATCHUP: senior-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 14:38:11,435 [INFO] Queue executing: travel2-hugo (remaining: 2)
+2026-03-22 14:38:11,449 [INFO] Publishing: travel2-hugo
+2026-03-22 14:38:11,464 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 14:38:11,689 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:38:12,525 [WARNING] Telegram send failed: 401
+2026-03-22 14:41:12,596 [INFO] Queue executing: ud-blogger (remaining: 1)
+2026-03-22 14:41:12,599 [INFO] Publishing: ud-blogger
+2026-03-22 14:41:12,804 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:41:13,492 [WARNING] Telegram send failed: 401
+2026-03-22 14:43:12,190 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 14:44:13,530 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-22 14:44:13,531 [INFO] Publishing: stock-hugo
+2026-03-22 14:44:13,729 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 14:44:14,400 [WARNING] Telegram send failed: 401
+2026-03-22 14:48:12,661 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 14:53:13,276 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 14:58:13,889 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 15:00:14,118 [INFO] Queue executing: travel3-hugo (remaining: 2)
+2026-03-22 15:00:14,119 [INFO] Publishing: travel3-hugo
+2026-03-22 15:00:14,380 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 15:00:15,038 [WARNING] Telegram send failed: 401
+2026-03-22 15:03:14,465 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 15:03:15,116 [INFO] Queue executing: kuta-wordpress (remaining: 1)
+2026-03-22 15:03:15,116 [INFO] Publishing: kuta-wordpress
+2026-03-22 15:03:15,332 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 15:03:16,046 [WARNING] Telegram send failed: 401
+2026-03-22 15:06:16,134 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-22 15:06:16,140 [INFO] Publishing: dividend-hugo
+2026-03-22 15:06:16,355 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 15:06:17,052 [WARNING] Telegram send failed: 401
+2026-03-22 15:08:15,009 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 15:10:15,391 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-22 15:10:15,393 [INFO] Publishing: etf-hugo
+2026-03-22 15:10:15,607 [ERROR]   ERR: g a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+
+2026-03-22 15:10:18,011 [WARNING] Telegram send failed: 401
+2026-03-22 15:13:15,821 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 491, column 1
+2026-03-22 15:18:16,553 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:18:16,553 [INFO] Publishing: travel-hugo
+2026-03-22 15:19:05,412 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:19:05,412 [INFO] Publishing: travel1-hugo
+2026-03-22 15:21:34,882 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:21:34,883 [INFO] Publishing: travel2-hugo
+2026-03-22 15:24:43,072 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:24:43,072 [INFO] Publishing: travel3-hugo
+2026-03-22 15:27:11,695 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:27:11,695 [INFO] Publishing: travel4-hugo
+2026-03-22 15:29:35,412 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:29:35,413 [INFO] Publishing: tvshow-blogger
+2026-03-22 15:31:48,421 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:31:48,422 [INFO] Publishing: ud-blogger
+2026-03-22 15:34:06,340 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:34:06,342 [INFO] Publishing: kuta-wordpress
+2026-03-22 15:36:06,925 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:36:06,926 [INFO] Publishing: gap-kuta
+2026-03-22 15:36:34,531 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:36:34,532 [INFO] Publishing: stock-hugo
+2026-03-22 15:36:41,473 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:36:41,474 [INFO] Publishing: dividend-hugo
+2026-03-22 15:37:37,135 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:37:37,136 [INFO] Publishing: etf-hugo
+2026-03-22 15:38:05,925 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:38:05,925 [INFO] Publishing: sector-hugo
+2026-03-22 15:38:41,061 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:38:41,062 [INFO] Publishing: ipo-hugo
+2026-03-22 15:39:17,879 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:39:17,880 [INFO] Publishing: senior-hugo
+2026-03-22 15:40:11,924 [INFO] Queue executing: sector-hugo (remaining: 4)
+2026-03-22 15:40:11,949 [INFO] Publishing: sector-hugo
+2026-03-22 15:40:12,020 [INFO] CATCHUP: travel-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:40:12,020 [INFO] Publishing: travel-hugo
+2026-03-22 15:42:42,675 [INFO] CATCHUP: travel1-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:42:42,677 [INFO] Publishing: travel1-hugo
+2026-03-22 15:43:40,538 [INFO] Queue executing: travel4-hugo (remaining: 3)
+2026-03-22 15:43:40,541 [INFO] Publishing: travel4-hugo
+2026-03-22 15:45:00,138 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:45:00,139 [INFO] Publishing: travel2-hugo
+2026-03-22 15:47:19,236 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:47:19,237 [INFO] Publishing: travel3-hugo
+2026-03-22 15:49:00,357 [INFO] Queue executing: gap-kuta (remaining: 2)
+2026-03-22 15:49:00,360 [INFO] Publishing: gap-kuta
+2026-03-22 15:49:47,355 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:49:47,358 [INFO] Publishing: travel4-hugo
+2026-03-22 15:52:15,379 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:52:15,379 [INFO] Publishing: tvshow-blogger
+2026-03-22 15:52:22,422 [INFO] Queue executing: ipo-hugo (remaining: 1)
+2026-03-22 15:52:22,423 [INFO] Publishing: ipo-hugo
+2026-03-22 15:54:29,053 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:54:29,053 [INFO] Publishing: ud-blogger
+2026-03-22 15:56:07,960 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-22 15:56:07,961 [INFO] Publishing: finance-hugo
+2026-03-22 15:56:34,858 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:56:34,858 [INFO] Publishing: kuta-wordpress
+2026-03-22 15:58:40,182 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:58:40,183 [INFO] Publishing: gap-kuta
+2026-03-22 15:59:04,525 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:59:04,526 [INFO] Publishing: stock-hugo
+2026-03-22 15:59:11,187 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:59:11,187 [INFO] Publishing: dividend-hugo
+2026-03-22 15:59:57,472 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 15:59:57,472 [INFO] Publishing: etf-hugo
+2026-03-22 16:00:50,281 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:00:50,281 [INFO] Publishing: sector-hugo
+2026-03-22 16:01:41,518 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:01:41,519 [INFO] Publishing: ipo-hugo
+2026-03-22 16:02:24,592 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:02:24,592 [INFO] Publishing: senior-hugo
+2026-03-22 16:03:42,111 [INFO] Queue executing: tvshow-blogger (remaining: 0)
+2026-03-22 16:03:42,111 [INFO] Publishing: tvshow-blogger
+2026-03-22 16:03:42,216 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:03:42,216 [INFO] Publishing: travel-hugo
+2026-03-22 16:04:36,862 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:04:36,862 [INFO] Publishing: travel1-hugo
+2026-03-22 16:06:52,160 [INFO] CATCHUP: travel2-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:06:52,161 [INFO] Publishing: travel2-hugo
+2026-03-22 16:09:38,136 [INFO] CATCHUP: travel3-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:09:38,137 [INFO] Publishing: travel3-hugo
+2026-03-22 16:12:05,257 [INFO] CATCHUP: travel4-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:12:05,258 [INFO] Publishing: travel4-hugo
+2026-03-22 16:14:25,904 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:14:25,905 [INFO] Publishing: tvshow-blogger
+2026-03-22 16:16:49,923 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:16:49,924 [INFO] Publishing: ud-blogger
+2026-03-22 16:19:26,042 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:19:26,043 [INFO] Publishing: kuta-wordpress
+2026-03-22 16:21:33,914 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:21:33,915 [INFO] Publishing: gap-kuta
+2026-03-22 16:22:01,067 [INFO] CATCHUP: stock-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:22:01,068 [INFO] Publishing: stock-hugo
+2026-03-22 16:22:09,644 [INFO] CATCHUP: dividend-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:22:09,647 [INFO] Publishing: dividend-hugo
+2026-03-22 16:23:11,247 [INFO] CATCHUP: etf-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:23:11,248 [INFO] Publishing: etf-hugo
+2026-03-22 16:24:00,634 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:24:00,635 [INFO] Publishing: sector-hugo
+2026-03-22 16:24:34,678 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:24:34,679 [INFO] Publishing: ipo-hugo
+2026-03-22 16:25:25,796 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:25:25,796 [INFO] Publishing: senior-hugo
+2026-03-22 16:27:06,195 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:27:06,195 [INFO] Publishing: travel-hugo
+2026-03-22 16:29:18,350 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:29:18,351 [INFO] Publishing: travel1-hugo
+2026-03-22 16:31:49,541 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:31:49,542 [INFO] Publishing: travel2-hugo
+2026-03-22 16:34:36,015 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:34:36,016 [INFO] Publishing: travel3-hugo
+2026-03-22 16:37:12,388 [INFO] CATCHUP: travel4-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:37:12,389 [INFO] Publishing: travel4-hugo
+2026-03-22 16:40:41,304 [INFO] CATCHUP: tvshow-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:40:41,305 [INFO] Publishing: tvshow-blogger
+2026-03-22 16:43:34,655 [INFO] CATCHUP: ud-blogger expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:43:34,656 [INFO] Publishing: ud-blogger
+2026-03-22 16:45:40,417 [INFO] CATCHUP: kuta-wordpress expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:45:40,418 [INFO] Publishing: kuta-wordpress
+2026-03-22 16:47:43,322 [INFO] CATCHUP: gap-kuta expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:47:43,322 [INFO] Publishing: gap-kuta
+2026-03-22 16:48:10,138 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:48:10,138 [INFO] Publishing: stock-hugo
+2026-03-22 16:48:17,205 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:48:17,205 [INFO] Publishing: dividend-hugo
+2026-03-22 16:49:09,286 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:49:09,287 [INFO] Publishing: etf-hugo
+2026-03-22 16:49:48,297 [INFO] CATCHUP: sector-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:49:48,298 [INFO] Publishing: sector-hugo
+2026-03-22 16:50:42,521 [INFO] CATCHUP: ipo-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:50:42,521 [INFO] Publishing: ipo-hugo
+2026-03-22 16:51:29,386 [INFO] CATCHUP: senior-hugo expected=3 actual=0 missed=3 -> 1건만 보충
+2026-03-22 16:51:29,387 [INFO] Publishing: senior-hugo
+2026-03-22 16:52:36,849 [INFO] Queue executing: ud-blogger (remaining: 0)
+2026-03-22 16:52:36,850 [INFO] Publishing: ud-blogger
+2026-03-22 16:52:36,924 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:52:36,925 [INFO] Publishing: travel-hugo
+2026-03-22 16:54:44,507 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:54:44,507 [INFO] Publishing: travel1-hugo
+2026-03-22 16:56:57,287 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:56:57,288 [INFO] Publishing: travel2-hugo
+2026-03-22 16:59:17,826 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:17,827 [INFO] Publishing: travel3-hugo
+2026-03-22 16:59:17,887 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:18,657 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:18,660 [WARNING] CATCHUP: travel3-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:23,714 [INFO] CATCHUP: travel4-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:23,714 [INFO] Publishing: travel4-hugo
+2026-03-22 16:59:23,775 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:24,411 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:24,413 [WARNING] CATCHUP: travel4-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:29,466 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:29,466 [INFO] Publishing: tvshow-blogger
+2026-03-22 16:59:29,521 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:30,202 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:30,204 [WARNING] CATCHUP: tvshow-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:35,267 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:35,267 [INFO] Publishing: ud-blogger
+2026-03-22 16:59:35,323 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:35,948 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:35,950 [WARNING] CATCHUP: ud-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:41,011 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:41,012 [INFO] Publishing: kuta-wordpress
+2026-03-22 16:59:41,079 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:41,698 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:41,699 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:46,805 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:46,806 [INFO] Publishing: gap-kuta
+2026-03-22 16:59:46,861 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:47,597 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:47,598 [WARNING] CATCHUP: gap-kuta 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:52,634 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:52,634 [INFO] Publishing: stock-hugo
+2026-03-22 16:59:52,692 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:53,501 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:53,503 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 16:59:58,581 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 16:59:58,581 [INFO] Publishing: dividend-hugo
+2026-03-22 16:59:58,640 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 16:59:59,381 [WARNING] Telegram send failed: 401
+2026-03-22 16:59:59,382 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:00:04,450 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:00:04,450 [INFO] Publishing: etf-hugo
+2026-03-22 17:00:04,522 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:00:06,757 [WARNING] Telegram send failed: 401
+2026-03-22 17:00:06,759 [WARNING] CATCHUP: etf-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:00:11,812 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:00:11,813 [INFO] Publishing: sector-hugo
+2026-03-22 17:00:11,874 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:00:14,551 [WARNING] Telegram send failed: 401
+2026-03-22 17:00:14,554 [WARNING] CATCHUP: sector-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:00:19,633 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:00:19,633 [INFO] Publishing: ipo-hugo
+2026-03-22 17:00:19,691 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:00:25,419 [WARNING] Telegram send failed: 401
+2026-03-22 17:00:25,421 [WARNING] CATCHUP: ipo-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:00:30,501 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:00:30,501 [INFO] Publishing: senior-hugo
+2026-03-22 17:00:30,567 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:00:35,843 [WARNING] Telegram send failed: 401
+2026-03-22 17:00:35,845 [WARNING] CATCHUP: senior-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:10,928 [INFO] Queue executing: travel-hugo (remaining: 2)
+2026-03-22 17:01:10,953 [INFO] Publishing: travel-hugo
+2026-03-22 17:01:10,968 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:10,968 [INFO] Publishing: travel-hugo
+2026-03-22 17:01:11,004 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:11,015 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:11,674 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:12,471 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:12,473 [WARNING] CATCHUP: travel-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:17,521 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:17,521 [INFO] Publishing: travel1-hugo
+2026-03-22 17:01:17,582 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:18,205 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:18,207 [WARNING] CATCHUP: travel1-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:24,098 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:24,100 [INFO] Publishing: travel2-hugo
+2026-03-22 17:01:25,889 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:26,862 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:26,863 [WARNING] CATCHUP: travel2-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:32,023 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:32,023 [INFO] Publishing: travel3-hugo
+2026-03-22 17:01:32,123 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:32,794 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:32,795 [WARNING] CATCHUP: travel3-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:37,809 [INFO] CATCHUP: travel4-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:37,809 [INFO] Publishing: travel4-hugo
+2026-03-22 17:01:37,867 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:38,535 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:38,558 [WARNING] CATCHUP: travel4-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:43,670 [INFO] CATCHUP: tvshow-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:43,670 [INFO] Publishing: tvshow-blogger
+2026-03-22 17:01:43,730 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:44,400 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:44,401 [WARNING] CATCHUP: tvshow-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:49,484 [INFO] CATCHUP: ud-blogger expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:49,485 [INFO] Publishing: ud-blogger
+2026-03-22 17:01:49,550 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:50,339 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:50,341 [WARNING] CATCHUP: ud-blogger 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:01:55,429 [INFO] CATCHUP: kuta-wordpress expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:01:55,429 [INFO] Publishing: kuta-wordpress
+2026-03-22 17:01:55,498 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:01:56,276 [WARNING] Telegram send failed: 401
+2026-03-22 17:01:56,281 [WARNING] CATCHUP: kuta-wordpress 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:01,388 [INFO] CATCHUP: gap-kuta expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:01,388 [INFO] Publishing: gap-kuta
+2026-03-22 17:02:01,453 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:02:02,111 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:02,113 [WARNING] CATCHUP: gap-kuta 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:07,201 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:07,201 [INFO] Publishing: stock-hugo
+2026-03-22 17:02:07,260 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:02:07,918 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:07,919 [WARNING] CATCHUP: stock-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:12,998 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:12,999 [INFO] Publishing: dividend-hugo
+2026-03-22 17:02:13,056 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 211
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 211)
+
+2026-03-22 17:02:13,685 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:13,686 [WARNING] CATCHUP: dividend-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:18,773 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:18,773 [INFO] Publishing: etf-hugo
+2026-03-22 17:02:18,865 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 232
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 232)
+
+2026-03-22 17:02:19,486 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:19,487 [WARNING] CATCHUP: etf-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:24,558 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:24,560 [INFO] Publishing: sector-hugo
+2026-03-22 17:02:24,631 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 232
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 232)
+
+2026-03-22 17:02:25,271 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:25,272 [WARNING] CATCHUP: sector-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:30,504 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:30,505 [INFO] Publishing: ipo-hugo
+2026-03-22 17:02:30,580 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 232
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 232)
+
+2026-03-22 17:02:31,263 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:31,264 [WARNING] CATCHUP: ipo-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:02:36,359 [INFO] CATCHUP: senior-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:02:36,360 [INFO] Publishing: senior-hugo
+2026-03-22 17:02:36,445 [ERROR]   ERR: winssn/Projects/5000/dispatcher.py", line 232
+    body = "<!-- DESC: " + _desc[:160] + " -->
+                                         ^
+SyntaxError: unterminated string literal (detected at line 232)
+
+2026-03-22 17:02:37,064 [WARNING] Telegram send failed: 401
+2026-03-22 17:02:37,065 [WARNING] CATCHUP: senior-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-22 17:04:11,748 [INFO] Queue executing: kuta-wordpress (remaining: 2)
+2026-03-22 17:04:11,752 [INFO] Publishing: kuta-wordpress
+2026-03-22 17:06:12,539 [INFO] CATCHUP: travel-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:06:12,539 [INFO] Publishing: travel-hugo
+2026-03-22 17:07:13,200 [INFO] CATCHUP: travel1-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:07:13,207 [INFO] Publishing: travel1-hugo
+2026-03-22 17:09:33,467 [INFO] Queue executing: hotissue-hugo (remaining: 2)
+2026-03-22 17:09:33,468 [INFO] Publishing: hotissue-hugo
+2026-03-22 17:09:34,679 [INFO] CATCHUP: travel2-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:09:34,679 [INFO] Publishing: travel2-hugo
+2026-03-22 17:12:12,247 [INFO] CATCHUP: travel3-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-22 17:12:12,248 [INFO] Publishing: travel3-hugo
+2026-03-22 17:13:38,937 [INFO] Queue executing: tco-hugo (remaining: 1)
+2026-03-22 17:13:38,940 [INFO] Publishing: tco-hugo

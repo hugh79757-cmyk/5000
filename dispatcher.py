@@ -189,6 +189,27 @@ def run_car(blog_cfg):
     tags_list = [data.get("model", ""), data.get("competitor", ""), "잔존가치", "중고시세"]
     tags_str = ",".join([t for t in tags_list if t])
 
+    # SEO description 생성
+    _comp = data.get("competitor", "")
+    if _comp:
+        _seo_desc = (
+            f"{data['model']} vs {_comp}, "
+            f"3년 총비용 {data.get('three_year_total_cost',0):,}만원 vs "
+            f"{data.get('competitor_three_year_total_cost',0):,}만원. "
+            f"감가 {data.get('three_year_depreciation',0):,}만원, "
+            f"잔존가치율 {data.get('resale_rate_percent',0)}%. "
+            f"{datetime.now().strftime('%Y년 %m월')} 기준 실비용 비교."
+        )
+    else:
+        _maint_m = round((data.get('tax_annual',0)+data.get('insurance_estimate',0)+data.get('annual_fuel_cost',0))/12)
+        _seo_desc = (
+            f"{data['model']} {data.get('trim','')} "
+            f"3년 총비용 {data.get('three_year_total_cost',0):,}만원, "
+            f"월 유지비 약 {_maint_m}만원. "
+            f"{datetime.now().strftime('%Y년 %m월')} 기준 분석."
+        )
+    body = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + body
+
     from shared.publisher import publish
     result = publish(
         blog_id=blog_id,
