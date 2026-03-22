@@ -276,11 +276,6 @@ def _inject_images(items, content, blog_id=None):
         name = item.get("facltNm", item.get("title", ""))
         img = item.get("firstImageUrl") or item.get("firstimage") or item.get("image") or ""
         if name and img and img.startswith("http"):
-            # http → https 변환 (mixed content 방지)
-            if img.startswith("http://tong.visitkorea.or.kr"):
-                img = img.replace("http://", "https://", 1)
-            if img.startswith("http://www.khs.go.kr"):
-                img = img.replace("http://", "https://", 1)
             if is_image_used(img, blog_id=blog_id):
                 logger.info("이미지 중복 스킵: %s (%s)", name[:20], img[-30:])
                 continue
@@ -913,14 +908,6 @@ def generate_content(data, blog_id="travel-hugo"):
         theme,
         display_region,
     ])))
-
-    # SEO description 생성: 지역 + 테마 + 핵심정보
-    _item_names = [it.get("title", it.get("facltNm", ""))[:15] for it in items[:3] if it.get("title") or it.get("facltNm")]
-    _names_str = ", ".join(_item_names) if _item_names else theme
-    _seo_desc = f"{display_region} {theme} — {_names_str}. {len(items)}곳 정보와 방문 팁 정리."
-    if len(_seo_desc) > 160:
-        _seo_desc = _seo_desc[:157] + "..."
-    content = "<!-- DESC: " + _seo_desc + " -->\n" + content
 
     return {
         "title": title,
