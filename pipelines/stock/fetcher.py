@@ -137,8 +137,11 @@ def fetch_dividend_info(corp_code, year=None):
 def get_listed_corps(limit=100):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    # 재무 데이터가 있을 가능성 높은 기업 우선 (stock_code 있고, 최근 수정)
     rows = conn.execute(
-        "SELECT corp_code, corp_name, stock_code, sector FROM corps WHERE is_listed=1 ORDER BY modify_date DESC LIMIT ?",
+        """SELECT corp_code, corp_name, stock_code, sector FROM corps
+           WHERE is_listed=1 AND stock_code IS NOT NULL AND stock_code != ''
+           ORDER BY modify_date DESC LIMIT ?""",
         (limit,)
     ).fetchall()
     conn.close()

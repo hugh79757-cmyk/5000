@@ -192,7 +192,8 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     # 내부 링크 삽입
     blog_id_for_links = blog_cfg.get("id", "")
-    related = _get_related_posts(blog_id_for_links, slug)
+    _skip_links = blog_id_for_links in ("stock-hugo",)
+    related = [] if _skip_links else _get_related_posts(blog_id_for_links, slug)
     if related:
         links_md = "\n\n## 함께 읽어보기\n\n"
         for rp in related:
