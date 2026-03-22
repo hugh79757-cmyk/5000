@@ -153,7 +153,7 @@ def run(blog_cfg):
         elif blog_id == "dividend-hugo":
             extra = fetch_dividend_ranking(top_n=10)
             if extra:
-                logger.info(f"배당 종목 데이터: {len(extra.get('corps_for_dividend', []))}건")
+                logger.info(f"배당 종목 데이터: {len(extra.get('rankings', []))}건")
         article = generate_evergreen_article(topic_type, corp_data=enriched if enriched else sample, extra_data=extra)
         if article.get("title") and article.get("body_md"):
             # 썸네일 생성 + R2 업로드

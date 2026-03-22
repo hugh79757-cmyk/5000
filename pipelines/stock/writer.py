@@ -67,8 +67,8 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
 7. 리스크 요인도 균형있게 서술
 8. 마지막에 "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
 9. 마크다운 형식, H1(#) 사용 금지
-10. "함께 읽어보기", "관련 글" 등 내부링크 섹션 절대 금지
-11. 다른 블로그 글 URL 절대 생성 금지
+10. "함께 읽어보기", "관련 글" 등 내부링크 섹션은 작성하지 마세요 (별도 자동 생성됩니다)
+11. 다른 블로그 글 URL은 작성하지 마세요 (별도 자동 생성됩니다)
 12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
 13. 비교 표에 데이터 없는 행 금지 (TBD/N/A 행 금지)
 
@@ -87,7 +87,6 @@ BODY:
         json={
             "model": OPENAI_MODEL,
             "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 8000,
             "temperature": 0.7,
         },
         timeout=60,
@@ -95,16 +94,6 @@ BODY:
     resp.raise_for_status()
     content = resp.json()["choices"][0]["message"]["content"]
     parsed = _parse_response(content)
-    if parsed.get("body_md") and len(parsed["body_md"]) < 2500:
-        logger.info(f"disclosure 글자수 미달 ({len(parsed['body_md'])}자), 재생성")
-        _retry = prompt + "\n\n[경고] 이전 응답이 2500자 미만. 3000자 이상, H2 5개, 각 섹션 5문장 이상 필수."
-        _r2 = requests.post("https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": OPENAI_MODEL, "messages": [{"role": "user", "content": _retry}], "max_tokens": 8000, "temperature": 0.7}, timeout=60)
-        _r2.raise_for_status()
-        _p2 = _parse_response(_r2.json()["choices"][0]["message"]["content"])
-        if _p2.get("body_md") and len(_p2["body_md"]) > len(parsed["body_md"]):
-            parsed = _p2
     return parsed
 
 
@@ -195,8 +184,8 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
 7. "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
 8. 마크다운 형식, H1(#) 사용 금지
 9. 2026년 3월 기준 최신 정보로 작성
-10. "함께 읽어보기", "관련 글" 등 내부링크 섹션 절대 금지
-11. 다른 블로그 글 URL 절대 생성 금지
+10. "함께 읽어보기", "관련 글" 등 내부링크 섹션은 작성하지 마세요 (별도 자동 생성됩니다)
+11. 다른 블로그 글 URL은 작성하지 마세요 (별도 자동 생성됩니다)
 12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
 13. 비교 표에 데이터 없는 행 금지 (TBD/N/A 행 금지)
 12. 제공 데이터에 없는 수치 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
@@ -218,7 +207,6 @@ BODY:
         json={
             "model": OPENAI_MODEL,
             "messages": [{"role": "user", "content": prompt}],
-            "max_tokens": 8000,
             "temperature": 0.7,
         },
         timeout=60,
@@ -226,16 +214,6 @@ BODY:
     resp.raise_for_status()
     content = resp.json()["choices"][0]["message"]["content"]
     parsed = _parse_response(content)
-    if parsed.get("body_md") and len(parsed["body_md"]) < 2500:
-        logger.info(f"evergreen 글자수 미달 ({len(parsed['body_md'])}자), 재생성")
-        _retry = prompt + "\n\n[경고] 이전 응답 2500자 미만. 3000자 이상, H2 5개, 각 섹션 5문장 이상 필수."
-        _r2 = requests.post("https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={"model": OPENAI_MODEL, "messages": [{"role": "user", "content": _retry}], "max_tokens": 8000, "temperature": 0.7}, timeout=60)
-        _r2.raise_for_status()
-        _p2 = _parse_response(_r2.json()["choices"][0]["message"]["content"])
-        if _p2.get("body_md") and len(_p2["body_md"]) > len(parsed["body_md"]):
-            parsed = _p2
     return parsed
 
 
