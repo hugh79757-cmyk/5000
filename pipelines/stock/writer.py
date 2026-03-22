@@ -215,25 +215,23 @@ BODY:
     content = resp.json()["choices"][0]["message"]["content"]
     parsed = _parse_response(content)
     # 후처리: 배당 데이터가 있으면 빈 배당 TOP10 표 채우기
-    if extra_data and isinstance(extra_data, dict) and extra_data.get("rankings") and parsed.get("body_md"):
-        body = parsed["body_md"]
-        # 빈 테이블 패턴 (헤더+구분선만 있고 데이터행 없음) 감지
-        import re as _re
-        empty_table = _re.search(
-            r"(\| 순위 \| 종목명 \|[^
-]*\|
-\|[-| :]+\|)
-(?!\|)",
-            body
-        )
-        if empty_table:
-            table_rows = ""
-            for r in extra_data["rankings"][:10]:
-                table_rows += f"| {r['rank']} | {r['name']} | {r['dividend_yield']} | {r['dividend_per_share']:,} | 2025년 |
-"
-            body = body.replace(empty_table.group(0), empty_table.group(0) + "
-" + table_rows)
-            parsed["body_md"] = body
+    if extra_data and isinstance(extra_data, dict) and extra_data.get('rankings') and parsed.get('body_md'):
+        _body = parsed['body_md']
+        if '| 순위 | 종목명 |' in _body:
+            _blines = _body.split('\n')
+            _out = []
+            _j = 0
+            while _j < len(_blines):
+                _out.append(_blines[_j])
+                if _blines[_j].startswith('| 순위 | 종목명') and _j + 1 < len(_blines) and _blines[_j+1].startswith('|---'):
+                    _out.append(_blines[_j+1])
+                    for _r in extra_data['rankings'][:10]:
+                        _dps = str(_r.get('dividend_per_share', ''))
+                        _out.append(f'| {_r["rank"]} | {_r["name"]} | {_r["dividend_yield"]} | {_dps} | 2025년 |')
+                    _j += 2
+                    continue
+                _j += 1
+            parsed['body_md'] = '\n'.join(_out)
 
     return parsed
 
