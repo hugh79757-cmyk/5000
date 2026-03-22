@@ -6070,3 +6070,35 @@ SyntaxError: unterminated string literal (detected at line 206)
 2026-03-22 21:01:47,311 [WARNING] CATCHUP: tvshow-blogger 보충 실패, 다음 정규 스케줄에서 재시도
 2026-03-22 21:01:52,489 [INFO] CATCHUP: ud-blogger expected=5 actual=0 missed=5 -> 1건만 보충
 2026-03-22 21:01:52,490 [INFO] Publishing: ud-blogger
+2026-03-22 21:04:03,552 [INFO] CATCHUP: kuta-wordpress expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:04:03,553 [INFO] Publishing: kuta-wordpress
+2026-03-22 21:06:13,747 [INFO] CATCHUP: gap-kuta expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:06:13,749 [INFO] Publishing: gap-kuta
+2026-03-22 21:06:46,146 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:06:46,146 [INFO] Publishing: stock-hugo
+2026-03-22 21:06:55,313 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:06:55,313 [INFO] Publishing: dividend-hugo
+2026-03-22 21:07:51,049 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:07:51,050 [INFO] Publishing: etf-hugo
+2026-03-22 21:08:20,735 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:08:20,736 [INFO] Publishing: sector-hugo
+2026-03-22 21:09:10,576 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:09:10,576 [INFO] Publishing: ipo-hugo
+2026-03-22 21:10:04,076 [INFO] CATCHUP: senior-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:10:04,077 [INFO] Publishing: senior-hugo
+2026-03-22 21:11:18,549 [INFO] Queue executing: travel-hugo (remaining: 8)
+2026-03-22 21:11:18,575 [INFO] Publishing: travel-hugo
+2026-03-22 21:11:18,605 [INFO] CATCHUP: travel-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:11:18,606 [INFO] Publishing: travel-hugo
+2026-03-22 21:12:12,764 [INFO] CATCHUP: travel1-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:12:12,764 [INFO] Publishing: travel1-hugo
+2026-03-22 21:14:37,807 [INFO] CATCHUP: travel2-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:14:37,807 [INFO] Publishing: travel2-hugo
+2026-03-22 21:15:07,388 [INFO] Queue executing: dividend-hugo (remaining: 7)
+2026-03-22 21:15:07,389 [INFO] Publishing: dividend-hugo
+2026-03-22 21:17:06,751 [INFO] CATCHUP: travel3-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:17:06,752 [INFO] Publishing: travel3-hugo
+2026-03-22 21:18:55,804 [INFO] Queue executing: hotissue-hugo (remaining: 6)
+2026-03-22 21:18:55,805 [INFO] Publishing: hotissue-hugo
+2026-03-22 21:19:29,993 [INFO] CATCHUP: travel4-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-22 21:19:29,993 [INFO] Publishing: travel4-hugo
