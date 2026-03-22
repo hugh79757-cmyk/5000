@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import re
 import requests
 
 logger = logging.getLogger(__name__)
@@ -150,6 +151,21 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
     if corp_data:
         base_prompt += f"\n\n참고 기업 데이터: {json.dumps(corp_data, ensure_ascii=False)[:1000]}"
 
+    if extra_data and isinstance(extra_data, dict):
+        if extra_data.get("gainers"):
+            base_prompt += "\n\n[실시간 ETF 수익률 상위 데이터]\n"
+            for g in extra_data["gainers"][:10]:
+                base_prompt += f"- {g['name']}: 등락률 {g['change_rate']}%, 현재가 {g['price']:,}원, 거래량 {g['volume']:,}\n"
+        if extra_data.get("losers"):
+            base_prompt += "\n[실시간 ETF 수익률 하위 데이터]\n"
+            for l in extra_data["losers"][:10]:
+                base_prompt += f"- {l['name']}: 등락률 {l['change_rate']}%, 현재가 {l['price']:,}원, 거래량 {l['volume']:,}\n"
+        if extra_data.get("volume_top"):
+            base_prompt += "\n[거래량 상위 ETF]\n"
+            for v in extra_data["volume_top"][:5]:
+                base_prompt += f"- {v['name']}: 거래량 {v['volume']:,}, 등락률 {v['change_rate']}%\n"
+        base_prompt += "\n위 데이터는 네이버 금융 실시간 API 기준입니다. 이 수치만 사용하고 날조하지 마세요."
+
     prompt = f"""당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
 
 {base_prompt}
@@ -249,11 +265,11 @@ def _parse_response(content):
                 break
 
     # 후처리: "함께 읽어보기" 제거
-    import re as _re
-    _cut = _re.search(r"\n## 함께 읽어보기", body)
+
+    _cut = re.search(r"\n## 함께 읽어보기", body)
     if _cut:
         body = body[:_cut.start()]
-    _cut2 = _re.search(r"\n## 관련 글", body)
+    _cut2 = re.search(r"\n## 관련 글", body)
     if _cut2:
         body = body[:_cut2.start()]
 
