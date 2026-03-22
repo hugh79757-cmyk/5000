@@ -166,6 +166,16 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
                 base_prompt += f"- {v['name']}: 거래량 {v['volume']:,}, 등락률 {v['change_rate']}%\n"
         base_prompt += "\n위 데이터는 네이버 금융 실시간 API 기준입니다. 이 수치만 사용하고 날조하지 마세요."
 
+    if extra_data and isinstance(extra_data, dict) and extra_data.get("rankings"):
+        base_prompt += "\n\n[실시간 배당순위 데이터 (KSD 증권정보포털 기준)]\n"
+        base_prompt += "| 순위 | 종목명 | 시가배당률(%) | 주당배당금(원) |\n"
+        base_prompt += "|---|---|---|---|\n"
+        for r in extra_data["rankings"]:
+            base_prompt += f"| {r['rank']} | {r['name']} | {r['dividend_yield']} | {r['dividend_per_share']} |\n"
+        if extra_data.get("note"):
+            base_prompt += f"\n참고: {extra_data['note']}\n"
+        base_prompt += "\n위 데이터는 KSD 증권정보포털 실시간 기준입니다. 이 수치만 사용하고 날조하지 마세요."
+
     prompt = f"""당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
 
 {base_prompt}
