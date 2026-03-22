@@ -29,18 +29,16 @@ EXCLUDE_KEYWORDS = [
     "발달장애", "청소년", "아동", "어선", "어업", "어선안전", "원양",
     "귀어", "귀산촌", "목조주택", "국산목재", "수목원", "산림복지",
     "국가유공자", "상병수당", "감염병", "한센", "스포츠 강좌 이용권",
-    "월세자금보증", "공동생활가정", "해산급여", "HIV", "AIDS",
-    "자활근로", "출산크레딧", "장애인 활동지원", "차상위 본인부담",
-    "영아", "태아", "신생아", "모자보건", "산후조리",
+    "월세자금보증", "공동생활가정",
 ]
 
 CATEGORIES = {
-    "의료지원": ["임플란트", "틀니", "건강검진", "치매", "의료", "진료", "백신", "건강보험", "수술", "검진", "안검진", "실명"],
-    "돌봄서비스": ["돌봄", "장기요양", "방문요양", "주간보호", "재가", "시설급여", "요양급여", "요양원", "방문건강", "방문간호"],
-    "연금생활지원": ["기초연금", "에너지", "난방", "주거급여", "생계급여", "보조금", "연금", "수급자"],
+    "의료지원": ["임플란트", "틀니", "건강검진", "치매", "요양", "의료", "진료", "백신", "건강보험"],
+    "돌봄서비스": ["돌봄", "장기요양", "방문요양", "주간보호", "재가"],
     "교통복지": ["교통", "지하철", "버스", "KTX", "경로우대"],
-    "일자리금융": ["일자리", "고용", "취업", "대출", "금융", "보험"],
-    "문화여가": ["문화", "여가", "바우처", "누리카드", "관광", "박물관", "스포츠", "체육"],
+    "일자리금융": ["일자리", "고용", "취업", "대출", "금융", "보험", "연금"],
+    "문화여가": ["문화", "여가", "스포츠", "바우처", "누리카드", "관광", "박물관"],
+    "연금생활지원": ["기초연금", "에너지", "난방", "주거급여", "생계급여", "보조금"],
 }
 
 
@@ -53,13 +51,13 @@ def classify_category(text):
     return "생활지원"
 
 
-def fetch_senior_services(page=1, per_page=100, max_pages=110):
+def fetch_senior_services(page=1, per_page=100):
     """공공서비스(혜택) API에서 시니어 관련 서비스 조회"""
-    logger.info("공공서비스 혜택 API 조회 시작 (최대 %d페이지)" % max_pages)
+    logger.info("공공서비스 혜택 API 조회 시작")
     all_services = []
 
     try:
-        for p in range(1, max_pages + 1):
+        for p in range(1, 4):  # 최대 3페이지 (300건)
             params = {
                 "page": p,
                 "perPage": per_page,
@@ -128,59 +126,14 @@ def fetch_senior_jobs():
         return []
 
 
-CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "senior_services.json")
-
-
-def _load_cache():
-    """오늘 날짜 캐시가 있으면 로드"""
-    import json
-    if not os.path.exists(CACHE_PATH):
-        return None
-    try:
-        with open(CACHE_PATH, encoding="utf-8") as f:
-            data = json.load(f)
-        updated = data.get("updated_at", "")[:10]
-        today = datetime.now().strftime("%Y-%m-%d")
-        if updated == today:
-            logger.info("캐시 로드: %s (%d건)" % (CACHE_PATH, data.get("total", 0)))
-            return data.get("services", [])
-        else:
-            logger.info("캐시 만료: %s (갱신 필요)" % updated)
-            return None
-    except Exception as e:
-        logger.warning("캐시 로드 실패: %s" % e)
-        return None
-
-
-def _save_cache(services):
-    """캐시 저장"""
-    import json
-    os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
-    data = {
-        "updated_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
-        "total": len(services),
-        "services": services,
-    }
-    with open(CACHE_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False)
-    logger.info("캐시 저장: %d건 -> %s" % (len(services), CACHE_PATH))
-
-
 def fetch_all(max_pages=10):
-    """모든 시니어 데이터 수집 — 캐시 우선, 없으면 API 호출"""
-    cached = _load_cache()
-    if cached:
-        services = cached
-    else:
-        raw_services = fetch_senior_services(page=1, per_page=100, max_pages=110)
-        seen = set()
-        services = []
-        for s in raw_services:
-            name = s.get("service_name", "")
-            if name not in seen:
-                seen.add(name)
-                services.append(s)
-        _save_cache(services)
+    """모든 시니어 데이터 수집 — 여러 페이지 순회"""
+    services = []
+    for page in range(1, max_pages + 1):
+        page_services = fetch_senior_services(page=page)
+        if not page_services:
+            break
+        services.extend(page_services)
     jobs = fetch_senior_jobs()
     today = datetime.now().strftime("%Y년 %m월 %d일")
 

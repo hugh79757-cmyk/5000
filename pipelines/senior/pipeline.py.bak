@@ -1,7 +1,6 @@
 """시니어 복지 파이프라인 — fetch → write → publish (Hugo / Blogger)"""
 
 import os
-import re
 import sys
 import logging
 
@@ -13,23 +12,6 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 logger = logging.getLogger(__name__)
 
 _topic_index = {}
-
-
-def _get_published_services(blog_id):
-    """이미 발행된 서비스명 목록 조회"""
-    try:
-        import glob as _glob
-        site_path = "/Users/twinssn/Projects/senior-hugo/content/posts"
-        published = set()
-        for md in _glob.glob(os.path.join(site_path, "*/index.md")):
-            with open(md, encoding="utf-8") as f:
-                content = f.read()
-            m = re.search(r'^title:\s*["\'](.*?)["\']', content, re.MULTILINE)
-            if m:
-                published.add(m.group(1).strip())
-        return published
-    except Exception:
-        return set()
 
 
 def _pick_topic(blog_id, services):
