@@ -1,0 +1,609 @@
+"""
+KorService2 기반 다양한 테마 콘텐츠 데이터 수집
+v2.5 - 부적합 테마 제거 + 지역 일관성 검증 (2026-02-16)
+- 카페/맛집/쇼핑 등 여행 부적합 테마 제거
+- 지역 필터링 강화: 모든 아이템이 같은 도(道) 내에 있어야 함
+- areaCode 기반 지역 필터링
+"""
+import os
+import random
+import logging
+from datetime import datetime
+
+logger = logging.getLogger(__name__)
+
+BASE_URL = "http://apis.data.go.kr/B551011/KorService2"
+
+# ── 지역 코드 (areaCode) ──
+AREA_CODES = {
+    "서울": "1", "인천": "2", "대전": "3", "대구": "4",
+    "광주": "5", "부산": "6", "울산": "7", "세종": "8",
+    "경기": "31", "강원": "32", "충북": "33", "충남": "34",
+    "경북": "35", "경남": "36", "전북": "37", "전남": "38", "제주": "39",
+}
+
+# areaCode → 도 이름 역매핑 (지역 검증용)
+AREA_CODE_TO_DO = {v: k for k, v in AREA_CODES.items()}
+
+# ── 콘텐츠 타입 ──
+CONTENT_TYPES = {
+    "관광지": "12", "문화시설": "14", "축제": "15",
+    "여행코스": "25", "레포츠": "28", "숙박": "32",
+    "쇼핑": "38", "음식점": "39",
+}
+
+# ── 테마 정의 (v2.5: 카페/맛집/쇼핑/호텔/지역숙소 제거) ──
+THEMES = {
+    # ── 숙박 (여행 맥락에 맞는 것만) ──
+    "오션뷰 펜션": {
+        "category": "숙박",
+        "keywords": ["오션뷰", "바다 펜션", "해변 숙소"],
+        "content_type": "32",
+        "regions": ["부산", "강원", "경남", "전남", "제주", "인천"],
+        "search_details": ["독채", "커플", "가족", "오션뷰 독채", "바다 보이는"],
+    },
+    "한옥 스테이": {
+        "category": "숙박",
+        "keywords": ["한옥", "한옥스테이", "한옥 숙소"],
+        "content_type": "32",
+        "regions": ["전북", "경북", "서울", "충남"],
+        "search_details": ["커플", "가족", "전통 체험", "조용한"],
+    },
+    "풀빌라": {
+        "category": "숙박",
+        "keywords": ["풀빌라", "수영장 펜션"],
+        "content_type": "32",
+        "search_details": ["커플", "가족", "독채", "프라이빗"],
+    },
+    "감성 펜션": {
+        "category": "숙박",
+        "keywords": ["펜션", "커플 펜션", "감성 숙소"],
+        "content_type": "32",
+        "search_details": ["커플", "독채", "조용한", "자연 속"],
+    },
+
+    # ── 봄 ──
+    "벚꽃 나들이": {
+        "category": "관광지",
+        "keywords": ["벚꽃", "봄꽃", "벚꽃길"],
+        "content_type": "12",
+        "season": ["spring"],
+        "search_details": ["가족 나들이", "산책하기 좋은", "사진 찍기 좋은", "벚꽃길"],
+    },
+    "봄 축제": {
+        "category": "축제",
+        "keywords": ["봄 축제", "꽃 축제", "벚꽃 축제"],
+        "content_type": "15",
+        "season": ["spring"],
+        "use_festival": True,
+        "search_details": ["가볼 만한", "무료 입장", "주말 나들이"],
+    },
+
+    # ── 여름 ──
+    "해수욕장": {
+        "category": "관광지",
+        "keywords": ["해수욕장", "해변", "바다"],
+        "content_type": "12",
+        "season": ["summer"],
+        "regions": ["부산", "강원", "충남", "전남", "경남", "제주", "인천"],
+        "search_details": ["한적한", "아이와 가기 좋은", "주차 편한", "물 맑은"],
+    },
+    "계곡 물놀이": {
+        "category": "관광지",
+        "keywords": ["계곡", "물놀이", "계곡 캠핑"],
+        "content_type": "12",
+        "season": ["summer"],
+        "search_details": ["아이와 가기 좋은", "수심 얕은", "무료 입장", "주차 가능한"],
+    },
+    "서핑 스팟": {
+        "category": "레포츠",
+        "keywords": ["서핑", "서핑 체험"],
+        "content_type": "28",
+        "season": ["summer"],
+        "regions": ["강원", "부산", "제주"],
+        "search_details": ["초보자", "서핑 강습", "장비 대여"],
+    },
+    "여름 축제": {
+        "category": "축제",
+        "keywords": ["여름 축제", "불꽃축제", "해변 축제"],
+        "content_type": "15",
+        "season": ["summer"],
+        "use_festival": True,
+        "search_details": ["가볼 만한", "무료", "야간"],
+    },
+
+    # ── 가을 ──
+    "단풍 명소": {
+        "category": "관광지",
+        "keywords": ["단풍", "단풍길", "가을 여행"],
+        "content_type": "12",
+        "season": ["autumn"],
+        "search_details": ["드라이브 코스", "산책하기 좋은", "사진 찍기 좋은", "단풍길"],
+    },
+    "가을 축제": {
+        "category": "축제",
+        "keywords": ["가을 축제", "단풍 축제", "억새 축제"],
+        "content_type": "15",
+        "season": ["autumn"],
+        "use_festival": True,
+        "search_details": ["가볼 만한", "주말 나들이", "무료"],
+    },
+
+    # ── 겨울 ──
+    "빙벽 등반": {
+        "category": "레포츠",
+        "keywords": ["빙벽", "빙벽등반", "아이스클라이밍"],
+        "content_type": "28",
+        "season": ["winter"],
+        "regions": ["강원", "충북"],
+        "search_details": ["초보자", "장비 대여", "체험"],
+    },
+    "스키장": {
+        "category": "레포츠",
+        "keywords": ["스키장", "스노보드", "리프트"],
+        "content_type": "28",
+        "season": ["winter"],
+        "regions": ["강원", "경기", "전북"],
+        "search_details": ["초보자", "리프트권 가격", "가족", "당일치기"],
+    },
+    "겨울 온천": {
+        "category": "관광지",
+        "keywords": ["온천", "노천온천", "온천 여행"],
+        "content_type": "12",
+        "season": ["winter"],
+        "search_details": ["노천 온천", "가족", "커플", "당일치기"],
+    },
+    "겨울 축제": {
+        "category": "축제",
+        "keywords": ["겨울 축제", "눈꽃 축제", "빙어 축제", "얼음 축제"],
+        "content_type": "15",
+        "season": ["winter"],
+        "use_festival": True,
+        "search_details": ["가볼 만한", "아이와 함께", "무료 입장", "주말"],
+    },
+
+    # ── 사계절 액티비티 ──
+    "패러글라이딩": {
+        "category": "레포츠",
+        "keywords": ["패러글라이딩", "패러글라이딩 체험"],
+        "content_type": "28",
+        "regions": ["강원", "경북", "충북", "경남"],
+        "search_details": ["초보자 체험", "가격", "2인 탠덤"],
+    },
+    "짚라인": {
+        "category": "레포츠",
+        "keywords": ["짚라인", "짚라인 체험", "짚와이어"],
+        "content_type": "28",
+        "search_details": ["가격", "아이와 함께", "체험"],
+    },
+    "래프팅": {
+        "category": "레포츠",
+        "keywords": ["래프팅", "래프팅 체험"],
+        "content_type": "28",
+        "season": ["summer"],
+        "regions": ["강원", "경북", "충북"],
+        "search_details": ["초보자", "가격", "단체"],
+    },
+    "트레킹": {
+        "category": "관광지",
+        "keywords": ["트레킹", "등산", "둘레길"],
+        "content_type": "12",
+        "search_details": ["초보자", "가벼운 산책", "코스 추천", "당일치기"],
+    },
+
+    # ── 관광지 ──
+    "섬 여행": {
+        "category": "관광지",
+        "keywords": ["섬", "섬 여행", "도서"],
+        "content_type": "12",
+        "regions": ["전남", "인천", "경남", "충남", "제주"],
+        "search_details": ["당일치기", "배편", "한적한", "자전거"],
+    },
+    "야경 명소": {
+        "category": "관광지",
+        "keywords": ["야경", "야경 명소", "야간 관광"],
+        "content_type": "12",
+        "regions": ["서울", "부산", "인천", "대구", "대전"],
+        "search_details": ["데이트", "사진 찍기 좋은", "무료", "드라이브"],
+    },
+    "테마파크": {
+        "category": "관광지",
+        "keywords": ["테마파크", "놀이공원", "워터파크"],
+        "content_type": "12",
+        "regions": ["경기", "서울", "강원", "경남", "제주"],
+        "search_details": ["할인 정보", "아이와 함께", "가족", "입장료"],
+    },
+    "사찰 여행": {
+        "category": "관광지",
+        "keywords": ["사찰", "템플스테이", "사찰여행"],
+        "content_type": "12",
+        "search_details": ["템플스테이", "조용한", "산책", "고즈넉한"],
+    },
+}
+
+
+def _get_current_season():
+    month = datetime.now().month
+    if month in (3, 4, 5):
+        return "spring"
+    elif month in (6, 7, 8):
+        return "summer"
+    elif month in (9, 10, 11):
+        return "autumn"
+    else:
+        return "winter"
+
+
+def _pick_theme():
+    current_season = _get_current_season()
+    candidates = []
+    weights = []
+
+    for name, conf in THEMES.items():
+        theme_seasons = conf.get("season")
+        if theme_seasons is None:
+            candidates.append(name)
+            weights.append(2)
+        elif current_season in theme_seasons:
+            candidates.append(name)
+            weights.append(3)
+
+    if not candidates:
+        candidates = list(THEMES.keys())
+        weights = [1] * len(candidates)
+
+    chosen = random.choices(candidates, weights=weights, k=1)[0]
+    logger.info(f"테마 선택: [{THEMES[chosen]['category']}] {chosen} (계절: {current_season})")
+    return chosen, THEMES[chosen]
+
+
+def _pick_region(conf):
+    preferred = conf.get("regions")
+    if preferred:
+        name = random.choice(preferred)
+    else:
+        name = random.choice(list(AREA_CODES.keys()))
+    return name, AREA_CODES[name]
+
+
+def _call_api(operation, params):
+    import requests
+
+    api_key = os.getenv("TOUR_API_KEY", "")
+    base_params = {
+        "serviceKey": api_key,
+        "MobileOS": "ETC",
+        "MobileApp": "TAP",
+        "_type": "json",
+        "numOfRows": "20",
+        "pageNo": "1",
+    }
+    base_params.update(params)
+
+    url = f"{BASE_URL}/{operation}"
+    try:
+        resp = requests.get(url, params=base_params, timeout=10)
+        if resp.status_code != 200:
+            logger.warning(f"API HTTP {resp.status_code}: {url}")
+            return None
+        data = resp.json()
+        body = data.get("response", {}).get("body", {})
+        total = body.get("totalCount", 0)
+        items_wrapper = body.get("items", "")
+        if not items_wrapper or isinstance(items_wrapper, str):
+            return None
+        items = items_wrapper.get("item", [])
+        if isinstance(items, dict):
+            items = [items]
+        logger.info(f"  → {operation}: total={total}, fetched={len(items)}")
+        return items
+    except Exception as e:
+        logger.error(f"API 호출 실패: {e}")
+        return None
+
+
+def _search_keyword(keyword, content_type=None, area_code=None):
+    params = {"keyword": keyword, "arrange": "R"}
+    if content_type:
+        params["contentTypeId"] = content_type
+    if area_code:
+        params["areaCode"] = area_code
+    return _call_api("searchKeyword2", params)
+
+
+def _area_based(content_type=None, area_code=None):
+    params = {"arrange": "R"}
+    if content_type:
+        params["contentTypeId"] = content_type
+    if area_code:
+        params["areaCode"] = area_code
+    return _call_api("areaBasedList2", params)
+
+
+def _search_festival(keyword=None, area_code=None):
+    now = datetime.now()
+    params = {
+        "arrange": "R",
+        "eventStartDate": now.strftime("%Y%m%d"),
+    }
+    if area_code:
+        params["areaCode"] = area_code
+    items = _call_api("searchFestival2", params)
+    if items and keyword:
+        matched = [i for i in items if keyword in i.get("title", "")]
+        if matched:
+            return matched
+    return items
+
+
+def _validate_region_consistency(items, region_name, area_code):
+    """
+    [v2.5] 지역 일관성 검증
+    - 모든 아이템의 주소가 선택된 지역(도) 내에 있는지 확인
+    - 불일치 아이템 제거
+    """
+    if not items:
+        return items
+
+    # 지역명 변형 목록 (주소에 나올 수 있는 형태들)
+    region_variants = [region_name]
+
+    # 짧은 이름 → 풀네임 매핑
+    REGION_FULLNAMES = {
+        "서울": ["서울특별시", "서울시", "서울"],
+        "인천": ["인천광역시", "인천시", "인천"],
+        "대전": ["대전광역시", "대전시", "대전"],
+        "대구": ["대구광역시", "대구시", "대구"],
+        "광주": ["광주광역시", "광주시", "광주"],
+        "부산": ["부산광역시", "부산시", "부산"],
+        "울산": ["울산광역시", "울산시", "울산"],
+        "세종": ["세종특별자치시", "세종시", "세종"],
+        "경기": ["경기도", "경기"],
+        "강원": ["강원특별자치도", "강원도", "강원"],
+        "충북": ["충청북도", "충북"],
+        "충남": ["충청남도", "충남"],
+        "경북": ["경상북도", "경북"],
+        "경남": ["경상남도", "경남"],
+        "전북": ["전라북도", "전북특별자치도", "전북"],
+        "전남": ["전라남도", "전남"],
+        "제주": ["제주특별자치도", "제주도", "제주"],
+    }
+
+    if region_name in REGION_FULLNAMES:
+        region_variants = REGION_FULLNAMES[region_name]
+
+    valid_items = []
+    removed_items = []
+
+    for item in items:
+        addr = item.get("addr1", "") or item.get("addr2", "") or ""
+        title = item.get("title", "")
+
+        # 주소에 지역명이 포함되어 있는지 확인
+        matched = False
+        for variant in region_variants:
+            if variant in addr:
+                matched = True
+                break
+
+        if matched:
+            valid_items.append(item)
+        else:
+            removed_items.append(f"{title} ({addr[:20]})")
+
+    if removed_items:
+        logger.warning(f"[지역 검증] {region_name} 불일치 제거 {len(removed_items)}건: {removed_items[:5]}")
+
+    return valid_items
+
+
+def _filter_items(items, theme_name):
+    """v4.1: 테마-데이터 매칭 검증 강화
+    1단계: 포지티브 매칭 - 테마 키워드가 제목/overview에 있는 항목 우선
+    2단계: 네거티브 필터 - 부적합 항목 제거
+    3단계: 3개 미만이면 None 반환 (원본 반환 금지)
+    """
+
+    # 포지티브 매칭: 테마 키워드가 실제로 포함된 항목만 선별
+    positive_map = {
+        "짚라인": ["짚라인", "짚와이어", "zip", "집라인"],
+        "래프팅": ["래프팅", "rafting"],
+        "서핑 스팟": ["서핑", "surf"],
+        "패러글라이딩": ["패러글라이딩", "paragliding"],
+        "스키장": ["스키", "ski", "리조트"],
+        "해수욕장": ["해수욕", "해변", "비치", "beach"],
+        "계곡 물놀이": ["계곡"],
+        "트레킹": ["트레킹", "둘레길", "등산", "산책", "트레일"],
+        "사찰 여행": ["사찰", "암자", "불교", "템플", "대웅전", "법당", "스님", "봉은사", "조계사", "해인사", "통도사", "송광사", "백담사", "화엄사", "불국사", "범어사", "선암사", "수덕사", "마곡사", "부석사", "월정사"],
+        "테마파크": ["테마파크", "놀이공원", "월드", "랜드", "어드벤처"],
+        "단풍 명소": ["단풍", "가을", "낙엽"],
+        "벚꽃 나들이": ["벚꽃", "봄꽃", "매화", "진달래"],
+        "야경 명소": ["야경", "전망", "타워", "야간", "불빛"],
+        "빙벽 등반": ["빙벽", "아이스", "클라이밍"],
+        "겨울 온천": ["온천", "스파", "온수", "탕"],
+        "감성 펜션": ["펜션"],
+        "오션뷰 펜션": ["펜션", "오션뷰", "바다"],
+        "풀빌라": ["풀빌라", "수영장", "풀"],
+        "한옥 스테이": ["한옥"],
+        "섬 여행": ["섬", "도"],
+    }
+
+    # 네거티브 필터 (기존)
+    exclude_map = {
+        "스키장": ["수상스키", "수상레저", "웨이크보드", "워터스키", "수상레포츠", "캠핑", "펜션", "골프"],
+        "패러글라이딩": ["실내", "VR", "캠핑", "펜션", "골프", "낚시"],
+        "트레킹": ["카페", "맛집", "식당", "숙소", "펜션", "골프", "캠핑"],
+        "사찰 여행": ["카페", "맛집", "식당", "골프", "캠핑"],
+        "테마파크": ["캠핑", "펜션", "골프", "낚시", "스테이", "한복", "크루즈", "유람", "매실", "피크닉"],
+        "짚라인": ["캠핑", "펜션", "골프", "CC", "스테이", "낚시", "한복"],
+        "래프팅": ["캠핑", "펜션", "골프", "CC", "스테이", "낚시"],
+        "서핑 스팟": ["캠핑", "펜션", "골프", "CC", "낚시"],
+        "해수욕장": ["캠핑", "펜션", "골프", "CC", "스테이"],
+        "계곡 물놀이": ["골프", "CC", "스테이", "한복"],
+        "단풍 명소": ["골프", "CC", "캠핑장", "펜션"],
+        "벚꽃 나들이": ["골프", "CC", "캠핑장", "펜션"],
+        "야경 명소": ["골프", "CC", "캠핑", "펜션", "낚시"],
+        "섬 여행": ["골프", "CC", "스키"],
+        "빙벽 등반": ["캠핑", "펜션", "골프", "CC", "낚시"],
+        "겨울 온천": ["골프", "CC", "캠핑", "스키"],
+        "감성 펜션": ["골프", "CC", "짚라인", "래프팅"],
+        "오션뷰 펜션": ["골프", "CC", "짚라인", "래프팅"],
+        "풀빌라": ["골프", "CC", "짚라인", "래프팅", "캠핑장"],
+        "한옥 스테이": ["골프", "CC", "짚라인", "래프팅", "캠핑장"],
+    }
+
+    positive_keywords = positive_map.get(theme_name, [])
+    exclude_words = exclude_map.get(theme_name, [])
+
+    # 공통 제외 키워드
+    common_exclude = ["카페", "커피", "베이커리", "디저트"]
+    if theme_name not in ["감성 펜션", "오션뷰 펜션", "풀빌라", "한옥 스테이"]:
+        exclude_words = list(set(exclude_words + common_exclude))
+
+    # 1단계: 네거티브 필터 (부적합 제거)
+    neg_filtered = []
+    for item in items:
+        title = item.get("title", "")
+        if exclude_words and any(word in title for word in exclude_words):
+            logger.debug(f"  [제외] {title} (네거티브 필터)")
+            continue
+        neg_filtered.append(item)
+
+    # 2단계: 포지티브 매칭 (테마 키워드 포함 여부)
+    if positive_keywords:
+        pos_matched = []
+        for item in neg_filtered:
+            title = item.get("title", "")
+            overview = item.get("overview", "")
+            search_text = f"{title} {overview}".lower()
+            # v4.2.1: 2글자 이하 키워드는 단어 경계 체크
+            import re as _re
+            def _kw_match(kw, text):
+                kw_l = kw.lower()
+                if len(kw_l) <= 1:
+                    return bool(_re.search(r"(?:^|\s)" + _re.escape(kw_l) + r"(?:\s|$)", text))
+                return kw_l in text
+            if any(_kw_match(kw, search_text) for kw in positive_keywords):
+                pos_matched.append(item)
+            else:
+                logger.debug(f"  [미매칭] {title} (포지티브 키워드 불일치)")
+
+        if len(pos_matched) >= 3:
+            logger.info(f"  포지티브 매칭: {len(pos_matched)}개 (원본 {len(items)}개)")
+            return pos_matched
+
+        # 포지티브 매칭 3개 미만 → 해당 테마로 발행 불가
+        logger.warning(f"  포지티브 매칭 {len(pos_matched)}개로 부족 (테마: {theme_name})")
+        logger.warning(f"  → 이 테마는 해당 지역에 데이터가 부족합니다. None 반환.")
+        return None
+
+    # 포지티브 맵에 없는 테마는 네거티브 필터만 적용
+    if len(neg_filtered) >= 3:
+        return neg_filtered
+
+    logger.warning(f"  네거티브 필터 후 {len(neg_filtered)}개로 부족 (테마: {theme_name})")
+    return None
+
+
+def _build_result(items, theme_name, conf, region_name, keywords):
+    # [v4.1] 테마 필터링 (포지티브 매칭 + 네거티브 필터)
+    items = _filter_items(items, theme_name)
+    if items is None:
+        logger.warning(f"테마 필터링 실패: {theme_name} - 매칭 데이터 부족")
+        return None
+
+    # [v2.5] 지역 일관성 검증
+    area_code = AREA_CODES.get(region_name, "")
+    items = _validate_region_consistency(items, region_name, area_code)
+
+    if not items or len(items) < 3:
+        logger.warning(f"지역 검증 후 아이템 부족: {len(items) if items else 0}개")
+        return None
+
+    # 이미지 있는 항목 우선
+    with_img = [i for i in items if i.get("firstimage")]
+    without_img = [i for i in items if not i.get("firstimage")]
+    sorted_items = with_img + without_img
+
+    return {
+        "items": sorted_items[:5],
+        "theme_name": theme_name,
+        "search_details": conf.get("search_details", []),
+        "category": conf.get("category", "관광지"),
+        "region": region_name,
+        "season": _get_current_season(),
+        "source": "korservice",
+        "keywords": keywords,
+        "content_type": conf.get("content_type"),
+    }
+
+
+def get_korservice_data():
+    """
+    메인 함수: 테마 선택 → 지역 선택 → API 호출 → 지역 검증 → 결과 반환
+    """
+    theme_name, conf = _pick_theme()
+    region_name, area_code = _pick_region(conf)
+    content_type = conf.get("content_type")
+    keywords = conf.get("keywords", [])
+    use_area_based = conf.get("use_area_based", False)
+    use_festival = conf.get("use_festival", False)
+
+    logger.info(f"[KorService] 테마: {theme_name} / 지역: {region_name}({area_code}) / 타입: {content_type}")
+
+    items = None
+
+    # 전략 1: 축제 검색
+    if use_festival:
+        kw = random.choice(keywords) if keywords else None
+        items = _search_festival(keyword=kw, area_code=area_code)
+        if items and len(items) >= 3:
+            result = _build_result(items, theme_name, conf, region_name, keywords)
+            if result:
+                return result
+
+    # 전략 2: areaBasedList (키워드 없이 지역+타입)
+    if use_area_based or not keywords:
+        items = _area_based(content_type=content_type, area_code=area_code)
+        if items and len(items) >= 3:
+            result = _build_result(items, theme_name, conf, region_name, keywords)
+            if result:
+                return result
+
+    # 전략 3: 키워드 검색 (지역 제한 필수)
+    if keywords:
+        for kw in keywords:
+            items = _search_keyword(kw, content_type=content_type, area_code=area_code)
+            if items and len(items) >= 3:
+                result = _build_result(items, theme_name, conf, region_name, [kw])
+                if result:
+                    return result
+
+            # [v2.5] 지역 제한 풀기 제거 - 지역 불일치 방지
+            # 기존: 지역 제한 풀고 재시도 → 서울 글에 제주가 섞이는 원인
+            # 변경: 지역 제한 유지, 다른 지역으로 재시도
+
+    # 전략 4: 지역만으로 areaBasedList
+    if not items or len(items) < 3:
+        items = _area_based(content_type=content_type, area_code=area_code)
+        if items and len(items) >= 3:
+            result = _build_result(items, theme_name, conf, region_name, keywords)
+            if result:
+                return result
+
+    # 전략 5: 다른 지역 시도 (최대 3회)
+    for _ in range(3):
+        region_name, area_code = _pick_region(conf)
+        logger.info(f"  → 지역 변경: {region_name}({area_code})")
+        if keywords:
+            kw = random.choice(keywords)
+            items = _search_keyword(kw, content_type=content_type, area_code=area_code)
+        else:
+            items = _area_based(content_type=content_type, area_code=area_code)
+        if items and len(items) >= 3:
+            result = _build_result(items, theme_name, conf, region_name, keywords)
+            if result:
+                return result
+
+    logger.warning(f"[KorService] 모든 시도 실패: {theme_name}")
+    return None

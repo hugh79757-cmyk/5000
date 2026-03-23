@@ -276,44 +276,12 @@ def fetch_all(max_pages=10):
         # "마감", "신규신청 불가", "금년 접수 마감" 제외
         if any(x in dl for x in ["마감", "신규신청 불가", "접수 마감"]):
             skip = True
-        # [PATCH] 다양한 날짜 형식의 종료일 추출
-        # 패턴1: YYYY.MM.DD 또는 YYYY-MM-DD (끝부분)
+        # YYYY.MM.DD~YYYY.MM.DD 또는 YYYY-MM-DD~YYYY-MM-DD 형태에서 종료일 추출
         m = _re.search(r"(\d{4})[.\-](\d{2})[.\-](\d{2})\s*$", dl)
         if m:
             end_date = f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
             if end_date < now_str:
                 skip = True
-        # 패턴2: ~YYYY.MM.DD 또는 ~YYYY-MM-DD (물결 뒤 종료일)
-        if not skip:
-            m2 = _re.search(r"[~∼]\s*(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})", dl)
-            if m2:
-                end_date2 = f"{m2.group(1)}-{int(m2.group(2)):02d}-{int(m2.group(3)):02d}"
-                if end_date2 < now_str:
-                    skip = True
-        # 패턴3: "YYYY년 MM월 DD일" 한글 형식
-        if not skip:
-            m3 = _re.findall(r"(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일", dl)
-            if m3:
-                last = m3[-1]  # 마지막 날짜가 종료일
-                end_date3 = f"{last[0]}-{int(last[1]):02d}-{int(last[2]):02d}"
-                if end_date3 < now_str:
-                    skip = True
-        # 패턴4: "MM.DD~MM.DD" (올해로 간주)
-        if not skip:
-            m4 = _re.search(r"(\d{1,2})[.](\d{1,2})\s*[~∼]\s*(\d{1,2})[.](\d{1,2})", dl)
-            if m4 and not _re.search(r"\d{4}", dl):
-                end_date4 = f"{now_year}-{int(m4.group(3)):02d}-{int(m4.group(4)):02d}"
-                if end_date4 < now_str:
-                    skip = True
-        # 패턴5: deadline이 비어있지만 service 데이터에 접수 마감 날짜가 있는 경우
-        if not skip and not dl:
-            apply_end = str(s.get("apply_end_date", s.get("rceptEndDe", ""))).strip()
-            if apply_end:
-                m5 = _re.search(r"(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})", apply_end)
-                if m5:
-                    end5 = f"{m5.group(1)}-{int(m5.group(2)):02d}-{int(m5.group(3)):02d}"
-                    if end5 < now_str:
-                        skip = True
         if not skip:
             filtered.append(s)
     logger.info(f"만료 필터: {len(services)}건 -> {len(filtered)}건 ({len(services)-len(filtered)}건 제외)")
