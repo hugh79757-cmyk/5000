@@ -26,6 +26,33 @@ def _safe_region(addr_str):
     return parts[0] if parts else ""
 
 
+
+
+def _select_same_sigungu(items_raw, count=3):
+    """같은 시군구의 아이템만 선택. 실패시 원본에서 랜덤."""
+    from collections import defaultdict
+    by_sigungu = defaultdict(list)
+    for item in items_raw:
+        addr = item.get("addr1", item.get("baseAddr", ""))
+        parts = (addr or "").split()
+        if len(parts) >= 2:
+            by_sigungu[parts[1]].append(item)
+    # 가장 많은 시군구 우선, 최소 count개 이상인 것
+    candidates = sorted(by_sigungu.items(), key=lambda x: -len(x[1]))
+    for sigungu, group in candidates:
+        with_img = [i for i in group if i.get("firstimage")]
+        pool = with_img if len(with_img) >= count else group
+        if len(pool) >= count:
+            import random as _r
+            return _r.sample(pool, count), sigungu
+    # 못 찾으면 가장 큰 그룹에서 있는 만큼
+    if candidates:
+        best_name, best_group = candidates[0]
+        import random as _r
+        return _r.sample(best_group, min(count, len(best_group))), best_name
+    import random as _r
+    return _r.sample(items_raw, min(count, len(items_raw))), ""
+
 def _adapt_korservice_items(items_raw):
     from core.naver_map import get_naver_map_link
     adapted = []
@@ -194,7 +221,7 @@ def fetch_festival():
 
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
-        selected = random.sample(pool, min(3, len(pool)))  # [PATCH] 5→3곳
+        selected, _ = _select_same_sigungu(pool, 3)
         
         # detailIntro API로 상세정보 보강
         for item in selected:
@@ -340,26 +367,9 @@ def fetch_food():
             return None
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
-        selected = random.sample(pool, min(3, len(pool)))
+        selected, _sg = _select_same_sigungu(pool, 3)
         adapted = _adapt_korservice_items(selected)
-        # 시군구 추출: addr1에서 두 번째 토큰 (예: "경기도 수원시 팔달구..." → "수원시")
-        sigungu_name = region_name
-        try:
-            addrs = [item.get("addr1", "") for item in selected if item.get("addr1")]
-            if addrs:
-                from collections import Counter
-                sigungu_tokens = []
-                for addr in addrs:
-                    parts = addr.split()
-                    if len(parts) >= 2:
-                        sigungu_tokens.append(parts[1])
-                if sigungu_tokens:
-                    most_common = Counter(sigungu_tokens).most_common(1)[0][0]
-                    cleaned = most_common.replace("시", "").replace("군", "").replace("구", "")
-                    # 1글자면(동구→동, 서구→서) 원본 유지
-                    sigungu_name = cleaned if len(cleaned) >= 2 else most_common
-        except Exception:
-            pass
+        sigungu_name = _sg if _sg else region_name
         display = sigungu_name if sigungu_name != region_name else region_name
         return {
             "items": adapted,
@@ -440,7 +450,7 @@ def fetch_course():
             if len(pool) < 3:
                 pool = with_img if len(with_img) >= 3 else items_raw  # 필터 후 부족하면 원복
 
-        selected = random.sample(pool, min(3, len(pool)))  # [PATCH] 5→3곳
+        selected, _ = _select_same_sigungu(pool, 3)
         
         # detailIntro API로 상세정보 보강
         for item in selected:
