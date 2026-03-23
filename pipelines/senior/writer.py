@@ -99,6 +99,11 @@ def _append_links(body_md, service, category):
                 (["영양", "건강", "급식", "식사", "반찬"], "건강식품"),
                 (["운동", "체육", "건강관리", "체력"], "운동용품"),
                 (["시력", "안경", "저시력"], "돋보기"),
+                (["전동", "보장구", "스쿠터", "전동휠체어"], "전동스쿠터"),
+                (["보험", "배상", "책임보험"], "실버보험"),
+                (["임플란트", "틀니", "치과"], "치아관리용품"),
+                (["기저귀", "배변", "요실금"], "성인기저귀"),
+                (["목욕", "세신", "위생"], "목욕용품"),
             ]
             for keywords, hint in keyword_rules:
                 if any(kw in svc_text for kw in keywords):
@@ -178,6 +183,24 @@ def _build_prompt(service, topic_type, related_services, today):
 
     related_block = ""
     if related_services:
+        # [PATCH] 메인 서비스와 같은 지역의 관련 서비스만 선택
+        main_dept = service.get("department", "")
+        main_region_tokens = [t for t in main_dept.replace("(", " ").replace(")", " ").split() 
+                              if any(t.endswith(s) for s in ["시", "군", "구"])]
+        if main_region_tokens:
+            region_filtered = []
+            for rs in related_services:
+                rs_dept = rs.get("department", "")
+                if any(tok in rs_dept for tok in main_region_tokens):
+                    region_filtered.append(rs)
+            # 지역 매칭이 없으면 전국 서비스(지역 미표기)만 사용
+            if not region_filtered:
+                region_filtered = [rs for rs in related_services 
+                                   if not any(m in rs.get("department", "") 
+                                              for m in ["시 ", "군 ", "구 ", "시)", "군)", "구)"])]
+            related_services = region_filtered[:3]
+        else:
+            related_services = related_services[:3]
         related_items = []
         for rs in related_services[:3]:
             name = rs.get("service_name", "")
@@ -399,6 +422,34 @@ def _validate_article(result, min_length=1500):
     return issues
 
 
+def _clean_vague_phrases(body_md):
+    """[PATCH] 금지 표현이 포함된 문장을 통째로 제거"""
+    import re as _re_clean
+    banned = [
+        "확인해 보세요", "확인해 보아야", "다를 수 있습니다",
+        "도움이 될 것입니다", "도움이 될 수 있습니다",
+        "삶의 질을 높일 수 있도록", "더욱 풍요롭게",
+        "이러한 제도는", "이와 같은 다양한 제도를 종합적으로",
+        "유념하시기 바랍니다", "참고하시기 바랍니다", "권장합니다",
+        "준비하는 것이 좋습니다", "미리 체크함으로써",
+        "활용할 수 있습니다", "누릴 수 있습니다",
+    ]
+    lines = body_md.split("\n")
+    cleaned = []
+    for line in lines:
+        if any(phrase in line for phrase in banned):
+            stripped = line.strip()
+            # H2 제목은 보존
+            if stripped.startswith("## "):
+                cleaned.append(line)
+            # 문장 단위로 제거
+            else:
+                continue
+        else:
+            cleaned.append(line)
+    return "\n".join(cleaned)
+
+
 def generate_senior_article(data, topic_type=None):
     """시니어 복지 글 생성 — 서비스 단위 심층 글"""
     today = data.get("today", datetime.now().strftime("%Y년 %m월 %d일"))
@@ -442,8 +493,9 @@ def generate_senior_article(data, topic_type=None):
             result["thumbnail"] = ""
             logger.info(f"글 생성 완료: {result['title']} ({len(result['body_md'])}자)")
 
-            # 정부 신청 버튼 + 쿠팡 링크 삽입
+            # [PATCH] 금지 표현 제거 후 링크 추가
             if result.get('body_md'):
+                result['body_md'] = _clean_vague_phrases(result['body_md'])
                 result['body_md'] = _append_links(
                     result['body_md'], main_service,
                     result.get('category', topic_type or '')
