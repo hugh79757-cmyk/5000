@@ -178,7 +178,18 @@ def run_car(blog_cfg):
                 logger.info(f"재생성 완료: {len(body)}자")
             else:
                 logger.warning(f"재생성도 미달: {len(body2)}자 — 긴 쪽 유지")
-    title = generate_title(data, site_id=car_site_id)
+    # 제목 생성 + 중복 체크 (최대 5회 재시도)
+    from shared.content_store import title_similar_exists
+    title = None
+    for _title_attempt in range(5):
+        candidate = generate_title(data, site_id=car_site_id)
+        if not title_similar_exists(blog_id, candidate):
+            title = candidate
+            break
+        logger.warning(f"제목 중복 재시도 {_title_attempt+1}/5: {candidate[:40]}")
+    if title is None:
+        title = generate_title(data, site_id=car_site_id)
+        logger.warning(f"5회 모두 중복 — 마지막 제목 사용: {title[:40]}")
     slug = make_slug(title)
     logger.info("제목: " + title)
 
