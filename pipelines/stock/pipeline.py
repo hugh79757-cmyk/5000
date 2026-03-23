@@ -56,7 +56,12 @@ def run(blog_cfg):
         return {"success": False, "reason": "quota_met"}
 
     conn = sqlite3.connect(DB_PATH)
-    strategy = _pick_strategy(conn, blog_id)
+    # [PATCH] 비상장/재무없음 → 강제 evergreen 전환
+    if blog_cfg.get("_force_evergreen"):
+        strategy = "evergreen"
+        logger.info(f"{blog_id}: 강제 evergreen 전환")
+    else:
+        strategy = _pick_strategy(conn, blog_id)
     logger.info(f"{blog_id}: 전략 = {strategy}")
 
     result = None
@@ -68,7 +73,44 @@ def run(blog_cfg):
             disc = disclosures[0]
             corp_code = disc.get("corp_code", "")
             company = fetch_company_info(corp_code) if corp_code else None
+            # [PATCH] 비상장(E) 기업 스킵 — DART API가 재무데이터 미제공
+            if company and company.get("corp_cls") == "E":
+                logger.info(f"비상장(E) 기업 스킵: {disc.get('corp_name', '')} ({corp_code})")
+                _record_publish(conn, blog_id, disc)  # 재처리 방지
+                # 다음 공시로 진행
+                disclosures_remaining = disclosures[1:]
+                for next_disc in disclosures_remaining:
+                    next_code = next_disc.get("corp_code", "")
+                    next_company = fetch_company_info(next_code) if next_code else None
+                    if next_company and next_company.get("corp_cls") == "E":
+                        logger.info(f"비상장(E) 스킵: {next_disc.get('corp_name', '')}")
+                        _record_publish(conn, blog_id, next_disc)
+                        continue
+                    # 상장사 찾음
+                    disc = next_disc
+                    corp_code = next_code
+                    company = next_company
+                    break
+                else:
+                    logger.warning("상장사 공시 없음, evergreen으로 전환")
+                    conn.close()
+                    # evergreen으로 재실행
+                    blog_cfg_copy = dict(blog_cfg)
+                    blog_cfg_copy["_force_evergreen"] = True
+                    return run(blog_cfg_copy)
             financials = fetch_financial_summary(corp_code) if corp_code else []
+            # [PATCH] 재무 데이터 0건이면 스킵
+            if not financials:
+                key_accounts = []
+            else:
+                key_accounts = [f for f in financials if f.get("account_nm") in ("매출액", "수익(매출액)", "영업이익", "당기순이익")]
+            if not key_accounts:
+                logger.info(f"재무 핵심 항목 0건, 스킵: {disc.get('corp_name', '')} ({corp_code})")
+                _record_publish(conn, blog_id, disc)
+                conn.close()
+                blog_cfg_copy = dict(blog_cfg)
+                blog_cfg_copy["_force_evergreen"] = True
+                return run(blog_cfg_copy)
             # 전년도 재무도 가져와서 YoY 비교 가능하게
             financials_prev = fetch_financial_summary(corp_code, year=str(datetime.now().year - 2)) if corp_code else []
             # 배당 정보도 추가
@@ -88,7 +130,7 @@ def run(blog_cfg):
                 from datetime import datetime as _dt
                 _month = _dt.now().strftime("%Y년 %m월")
                 _seo_desc = f"{_corp} {_report} 핵심 분석. {_month} DART 공시 기준."
-                _body_d = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + article["body_md"]
+                _body_d = article["body_md"]
                 result = publish(
                     blog_id=blog_id,
                     title=article["title"],
@@ -130,12 +172,26 @@ def run(blog_cfg):
                 info = fetch_company_info(corp_code)
                 fins = fetch_financial_summary(corp_code)
                 key_fins = [f for f in (fins or []) if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+                fin_data = {}
+                for f in key_fins:
+                    acct = f.get("account_nm", "")
+                    thstrm = f.get("thstrm_amount", "")
+                    frmtrm = f.get("frmtrm_amount", "")
+                    yoy = ""
+                    try:
+                        t = int(thstrm.replace(",", ""))
+                        p = int(frmtrm.replace(",", ""))
+                        if p != 0:
+                            yoy = f"{(t-p)/abs(p)*100:+.1f}%"
+                    except (ValueError, TypeError, AttributeError):
+                        pass
+                    fin_data[acct] = {"당기": thstrm, "전기": frmtrm, "YoY": yoy}
                 corp_enriched = {
                     "corp_name": corp.get("corp_name", ""),
                     "stock_code": corp.get("stock_code", ""),
-                    "sector": corp.get("sector", ""),
+                    "sector": info.get("induty_nm", corp.get("sector", "")) if info else corp.get("sector", ""),
                     "ceo": info.get("ceo_nm", "") if info else "",
-                    "financials": {f.get("account_nm"): f.get("thstrm_amount", "") for f in key_fins},
+                    "financials": fin_data,
                 }
                 enriched.append(corp_enriched)
                 if len(enriched) >= 5:
@@ -162,7 +218,7 @@ def run(blog_cfg):
             from datetime import datetime as _dt2
             _month2 = _dt2.now().strftime("%Y년 %m월")
             _eg_desc = f"{article['title']} - {_month2} 기준 {article.get('category', '시장분석')}."
-            _body_eg = "<!-- DESC: " + _eg_desc[:160] + " -->\n" + article["body_md"]
+            _body_eg = article["body_md"]
             result = publish(
                 blog_id=blog_id,
                 title=article["title"],

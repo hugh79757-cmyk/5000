@@ -85,6 +85,8 @@ def _build_data_block(data):
     lines.append(f"시군구: {data.get('sigungu', '')}")
     lines.append(f"테마: {data.get('theme', '')}")
     lines.append(f"세부조건: {data.get('angle', '')}")
+    # [PATCH] 최대 3곳만 전달
+    items = items[:3]
     lines.append(f"장소 수: {len(items)}")
     lines.append("")
 
@@ -920,7 +922,7 @@ def generate_content(data, blog_id="travel-hugo"):
     _seo_desc = f"{display_region} {theme} — {_names_str}. {len(items)}곳 정보와 방문 팁 정리."
     if len(_seo_desc) > 160:
         _seo_desc = _seo_desc[:157] + "..."
-    content = "<!-- DESC: " + _seo_desc + " -->\n" + content
+    # [PATCH] DESC 주석 제거됨
 
     return {
         "title": title,
