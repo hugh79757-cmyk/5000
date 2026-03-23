@@ -103,7 +103,9 @@ def run(blog_cfg):
             if not financials:
                 key_accounts = []
             else:
-                key_accounts = [f for f in financials if f.get("account_nm") in ("매출액", "수익(매출액)", "영업이익", "당기순이익")]
+                # [PATCH] DART 계정명 변형 대응 (disclosure 모드)
+                _KEY_NAMES = ("매출액", "수익(매출액)", "영업수익", "영업이익", "영업이익(손실)", "당기순이익", "당기순이익(손실)")
+                key_accounts = [f for f in financials if f.get("account_nm") in _KEY_NAMES]
             if not key_accounts:
                 logger.info(f"재무 핵심 항목 0건, 스킵: {disc.get('corp_name', '')} ({corp_code})")
                 _record_publish(conn, blog_id, disc)
