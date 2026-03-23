@@ -25,8 +25,19 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
         context_parts.append(f"종목코드: {company_info.get('stock_code', '')}")
     if financials:
         key_items = [f for f in financials if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
-        for f in key_items[:3]:
-            context_parts.append(f"[당기 {f.get('bsns_year', '')}] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원 (전기: {f.get('frmtrm_amount', '')}원)")
+        for f in key_items[:5]:
+            thstrm = f.get('thstrm_amount', '')
+            frmtrm = f.get('frmtrm_amount', '')
+            yoy = ""
+            try:
+                t_val = int(thstrm.replace(",", ""))
+                f_val = int(frmtrm.replace(",", ""))
+                if f_val != 0:
+                    rate = (t_val - f_val) / abs(f_val) * 100
+                    yoy = f" (YoY {rate:+.1f}%)"
+            except (ValueError, TypeError, AttributeError):
+                pass
+            context_parts.append(f"[당기 {f.get('bsns_year', '')}] {f.get('account_nm')}: {thstrm}원 | 전기: {frmtrm}원{yoy}")
     if financials_prev:
         key_prev = [f for f in financials_prev if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
         for f in key_prev[:3]:
@@ -63,13 +74,16 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
 3. H2 헤딩 정확히 5개, 각 섹션 최소 5문장, 자연스러운 소제목 (예: "이 회사가 하는 일", "실적은 어땠나", "지금 투자해도 될까")
 4. 금액은 읽기 쉽게 표현 (12,432,454,206원 → 약 124억 원)
 5. 전문 용어는 괄호로 쉬운 설명 추가
-6. 구체적인 투자 판단 근거 제시 (PER, PBR, 동종업계 비교)
+6. 제공된 재무 데이터로 계산 가능한 지표만 사용 (영업이익률 = 영업이익/매출액, 순이익률, YoY 증감률). PER/PBR은 제공 데이터에 없으므로 언급하지 마세요. 대신 "투자 판단을 위해 증권사 HTS에서 PER/PBR을 확인하세요"로 안내
 7. 리스크 요인도 균형있게 서술
 8. 마지막에 "※ 본 글은 투자 권유가 아니며, 투자 판단은 본인의 책임입니다." 포함
 9. 마크다운 형식, H1(#) 사용 금지
 10. "함께 읽어보기", "관련 글" 등 내부링크 섹션은 작성하지 마세요 (별도 자동 생성됩니다)
 11. 다른 블로그 글 URL은 작성하지 마세요 (별도 자동 생성됩니다)
-12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
+12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지
+13. [중요] 제공된 재무 데이터(매출액, 영업이익, 당기순이익)를 반드시 본문에서 구체적으로 인용하세요. 각 항목의 금액과 전기 대비 증감률을 직접 계산하여 서술하세요
+14. "확인되지 않았습니다", "데이터가 없습니다" 같은 문장은 사용 금지. 제공된 데이터가 충분하므로 반드시 활용하세요
+15. 업종 정보가 있으면 해당 업종의 일반적 특성(수요 동향, 원가 구조)을 구체적으로 서술하세요
 13. 비교 표에 데이터 없는 행 금지 (TBD/N/A 행 금지)
 
 [출력 형식]
@@ -186,7 +200,10 @@ PER/PBR 개념 설명, 업종별 평균 PER이 다른 이유, 저PBR 투자 전�
 9. 2026년 3월 기준 최신 정보로 작성
 10. "함께 읽어보기", "관련 글" 등 내부링크 섹션은 작성하지 마세요 (별도 자동 생성됩니다)
 11. 다른 블로그 글 URL은 작성하지 마세요 (별도 자동 생성됩니다)
-12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
+12. 데이터에 없는 수치(PER, PBR, 주가 등) 절대 날조 금지
+13. [중요] 제공된 재무 데이터(매출액, 영업이익, 당기순이익)를 반드시 본문에서 구체적으로 인용하세요. 각 항목의 금액과 전기 대비 증감률을 직접 계산하여 서술하세요
+14. "확인되지 않았습니다", "데이터가 없습니다" 같은 문장은 사용 금지. 제공된 데이터가 충분하므로 반드시 활용하세요
+15. 업종 정보가 있으면 해당 업종의 일반적 특성(수요 동향, 원가 구조)을 구체적으로 서술하세요
 13. 비교 표에 데이터 없는 행 금지 (TBD/N/A 행 금지)
 12. 제공 데이터에 없는 수치 절대 날조 금지. 재무 0건이면 "DART 공시 미확인" 명시
 13. 데이터 미제공 시 방법론/전략 중심 작성, 빈 수치 표 금지

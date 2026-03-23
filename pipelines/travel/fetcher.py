@@ -194,9 +194,9 @@ def fetch_festival():
 
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
-        selected = random.sample(pool, min(5, len(pool)))
+        selected = random.sample(pool, min(3, len(pool)))  # [PATCH] 5→3곳
         
-        # detailIntro API로 축제 상세정보 보강
+        # detailIntro API로 상세정보 보강
         for item in selected:
             cid = item.get("contentid")
             if not cid:
@@ -440,9 +440,9 @@ def fetch_course():
             if len(pool) < 3:
                 pool = with_img if len(with_img) >= 3 else items_raw  # 필터 후 부족하면 원복
 
-        selected = random.sample(pool, min(5, len(pool)))
+        selected = random.sample(pool, min(3, len(pool)))  # [PATCH] 5→3곳
         
-        # detailIntro API로 축제 상세정보 보강
+        # detailIntro API로 상세정보 보강
         for item in selected:
             cid = item.get("contentid")
             if not cid:
@@ -524,7 +524,22 @@ def fetch_wellness():
             return None
         with_img = [i for i in items_raw if i.get('orgImage') or i.get('thumbImage')]
         pool = with_img if len(with_img) >= 3 else items_raw
-        selected = random.sample(pool, min(5, len(pool)))
+        # [PATCH] 지역별 그룹핑 후 가장 많은 지역에서 최대 3곳 선택
+        from collections import Counter
+        _region_items = {}
+        for item in pool:
+            _addr = item.get("baseAddr", "")
+            _r = _safe_region(_addr)
+            if _r:
+                _region_items.setdefault(_r, []).append(item)
+        if _region_items:
+            # 가장 많은 아이템이 있는 지역 선택
+            _best_region = max(_region_items, key=lambda r: len(_region_items[r]))
+            _region_pool = _region_items[_best_region]
+        else:
+            _best_region = ""
+            _region_pool = pool
+        selected = random.sample(_region_pool, min(3, len(_region_pool)))
         items = []
         for item in selected:
             org_img = item.get("orgImage", "") or ""
@@ -541,7 +556,7 @@ def fetch_wellness():
                 "contentId": item.get("contentId", ""),
                 "_raw": item,
             })
-        region = _safe_region(items[0].get("addr", "")) if items else ""
+        region = _best_region if _best_region else (_safe_region(items[0].get("addr", "")) if items else "")
         return {
             "items": items,
             "display_region": region,

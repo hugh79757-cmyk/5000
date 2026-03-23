@@ -98,16 +98,22 @@ def fetch_financial_summary(corp_code, year=None, report_code="11011"):
     if year is None:
         year = str(datetime.now().year - 1)
     key = _get_key()
-    r = requests.get(f"{DART_BASE}/fnlttSinglAcntAll.json", params={
-        "crtfc_key": key,
-        "corp_code": corp_code,
-        "bsns_year": year,
-        "reprt_code": report_code,
-        "fs_div": "CFS",
-    }, timeout=15)
-    data = r.json()
-    if data.get("status") == "000":
-        return data.get("list", [])
+    # [PATCH] CFS(연결) 먼저, 없으면 OFS(개별) fallback
+    for fs_div in ("CFS", "OFS"):
+        try:
+            r = requests.get(f"{DART_BASE}/fnlttSinglAcntAll.json", params={
+                "crtfc_key": key,
+                "corp_code": corp_code,
+                "bsns_year": year,
+                "reprt_code": report_code,
+                "fs_div": fs_div,
+            }, timeout=15)
+            data = r.json()
+            if data.get("status") == "000" and data.get("list"):
+                logger.info(f"재무 {fs_div} {len(data['list'])}건: {corp_code} ({year})")
+                return data.get("list", [])
+        except Exception as e:
+            logger.warning(f"재무 {fs_div} 조회 실패 {corp_code}: {e}")
     return []
 
 
