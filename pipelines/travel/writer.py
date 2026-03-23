@@ -701,6 +701,32 @@ def generate_content(data, blog_id="travel-hugo"):
 
     content = _post_process(content)
     content = _enrich_with_nearby(data, content)
+    # [PATCH] _enrich_with_nearby 후 GPT "함께 읽어보기" 최종 제거 + 동적 내부링크
+    _final_related_idx = content.find("## 함께 읽어보기")
+    if _final_related_idx > 0:
+        content = content[:_final_related_idx].rstrip()
+    # 동적 내부링크 삽입
+    try:
+        import glob as _gl_final
+        import random as _rand_final
+        _posts_dir_final = "/Users/twinssn/Projects/travel-hugo/content/posts"
+        _all_posts_final = []
+        for _md_f in _gl_final.glob(os.path.join(_posts_dir_final, "*/index.md")):
+            with open(_md_f, encoding="utf-8") as _ff:
+                _head_f = _ff.read(500)
+            import re as _re_final
+            _tm_f = _re_final.search(r"^title:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
+            _sm_f = _re_final.search(r"^slug:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
+            if _tm_f and _sm_f:
+                _all_posts_final.append({"title": _tm_f.group(1), "slug": _sm_f.group(1)})
+        if len(_all_posts_final) > 3:
+            _picks_f = _rand_final.sample(_all_posts_final, 3)
+            _related_md_f = "\n\n## 함께 읽어보기\n\n"
+            for _p_f in _picks_f:
+                _related_md_f += '{{< article link="/posts/' + _p_f["slug"] + '/" >}}\n\n'
+            content = content.rstrip() + _related_md_f
+    except Exception:
+        pass
     # Heritage 카드 삽입 (heritage 소스 타입에서만)
     if source_type == "heritage":
         try:

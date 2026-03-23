@@ -309,6 +309,12 @@ def run_travel(blog_cfg):
         logger.warning(blog_id + " similar title: " + result["title"][:30])
         return None
 
+    # [PATCH] travel description 전달
+    _travel_desc = result.get("description", "")
+    if _travel_desc:
+        # body_md 맨 앞에 DESC 주석 삽입 (publisher가 이를 우선 사용)
+        result["body_md"] = f"<!-- DESC: {_travel_desc} -->\n" + result.get("body_md", "")
+
     pub_result = publish(
         blog_id=blog_id,
         title=result["title"],
