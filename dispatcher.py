@@ -231,6 +231,8 @@ def run_car(blog_cfg):
         "INSERT INTO publish_log (topic_id, site, title, slug, published_at, image_url, r2_url) VALUES (?,?,?,?,?,?,?)",
         (topic['id'], car_site_id, title, slug, datetime.now().isoformat(), origin_url or "", r2_url or "")
     )
+    c.execute("UPDATE topics SET status='published', published_at=? WHERE id=?",
+              (datetime.now().isoformat(), topic['id']))
     conn.commit()
     conn.close()
 
