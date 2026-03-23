@@ -407,6 +407,18 @@ def _post_process(content):
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
+    # ── 쿠팡 여행용품 추천 삽입 ──────────────────────────────
+    try:
+        from shared.coupang_travel import CoupangTravel
+        _ct = CoupangTravel()
+        if _ct.is_configured():
+            _blog_id = getattr(_post_process, '_current_blog_id', 'travel-hugo')
+            _coupang_md = _ct.get_travel_product_links(blog_id=_blog_id, count=2)
+            if _coupang_md:
+                content = content.rstrip() + _coupang_md
+    except Exception as _ce:
+        logger.warning("쿠팡 여행용품 삽입 실패: %s", _ce)
+
     # CTA 제휴 박스 삽입
     cta_html = """
 <div class="cta-box">
@@ -699,6 +711,7 @@ def generate_content(data, blog_id="travel-hugo"):
         logger.info("장소명 불일치 감지 (재생성 안함)")
         pass  # 재생성 비활성화 - 토큰 절약
 
+        _post_process._current_blog_id = blog_id
     content = _post_process(content)
     content = _enrich_with_nearby(data, content)
     # [PATCH] _enrich_with_nearby 후 GPT "함께 읽어보기" 최종 제거 + 동적 내부링크
@@ -965,6 +978,10 @@ def generate_content(data, blog_id="travel-hugo"):
     if len(_seo_desc) > 160:
         _seo_desc = _seo_desc[:157] + "..."
     # [PATCH] DESC 주석 제거됨
+
+    # 대가성 문구 삽입 (본문 최상단)
+    if "쿠팡 파트너스" not in content[:200]:
+        content = '> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**\n\n' + content
 
     return {
         "title": title,

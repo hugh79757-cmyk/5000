@@ -106,13 +106,15 @@ class CoupangSenior:
             logger.error(f"쿠팡 검색 실패 [{keyword}]: {e}")
             return []
 
-    def generate_affiliate_link(self, product_url: str) -> str:
+    def generate_affiliate_link(self, product_id) -> str:
+        """productId로 일반 URL 구성 후 deeplink API로 /a/ 단축링크 생성"""
         if not self.is_configured():
-            return product_url
+            return ""
         try:
+            normal_url = f"https://www.coupang.com/vp/products/{product_id}"
             url_path = "/v2/providers/affiliate_open_api/apis/openapi/deeplink"
             headers = self._generate_signature("POST", url_path)
-            body = {"coupangUrls": [product_url]}
+            body = {"coupangUrls": [normal_url]}
             response = requests.post(
                 f"{self.BASE_URL}{url_path}",
                 headers=headers, json=body, timeout=10
@@ -121,11 +123,14 @@ class CoupangSenior:
                 data = response.json()
                 links = data.get('data', [])
                 if links:
-                    return links[0].get('shortenUrl', product_url)
-            return product_url
+                    short = links[0].get('shortenUrl', '')
+                    if short and '/a/' in short:
+                        return short
+            logger.warning(f"deeplink 변환 실패: productId={product_id}")
+            return ""
         except Exception as e:
             logger.error(f"제휴 링크 생성 실패: {e}")
-            return product_url
+            return ""
 
     def get_senior_product_links(self, category: str = "", count: int = 2) -> str:
         if not self.is_configured():
@@ -150,10 +155,14 @@ class CoupangSenior:
                 product = results[0]
                 name = product.get('productName', search_term)
                 price = product.get('productPrice', 0)
-                url = product.get('productUrl', '')
+                product_id = product.get('productId', '')
 
-                if url:
-                    affiliate_url = self.generate_affiliate_link(url)
+                if not product_id:
+                    continue
+
+                affiliate_url = self.generate_affiliate_link(product_id)
+                if not affiliate_url:
+                    continue
                     if price:
                         price_str = f"{int(price):,}원"
                         products_md.append(f"- [{name}]({affiliate_url}) — {price_str}")
