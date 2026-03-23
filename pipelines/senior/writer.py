@@ -75,12 +75,41 @@ def _append_links(body_md, service, category):
     btn_text = f"{dept}에서 신청하기" if dept else "온라인으로 신청하기"
     parts.append(f'\n\n{{{{< btn url="{url}" text="{btn_text}" >}}}}')
 
-    # 2) 쿠팡 파트너스 API 상품 링크
+    # 2) 쿠팡 파트너스 API 상품 링크 — 서비스 내용 기반 매칭
     try:
         from shared.coupang_senior import CoupangSenior
         coupang = CoupangSenior()
         if coupang.is_configured():
-            coupang_md = coupang.get_senior_product_links(category=category, count=2)
+            # [PATCH] 서비스명/대상에서 키워드 추출하여 관련 상품만 추천
+            svc_name = service.get("service_name", "")
+            svc_target = service.get("target", "")
+            svc_desc = service.get("description", "")
+            svc_text = f"{svc_name} {svc_target} {svc_desc}"
+
+            # 서비스 내용과 매칭되는 키워드 결정
+            keyword_hint = None
+            keyword_rules = [
+                (["혈압", "고혈압", "심장", "심혈관"], "혈압계"),
+                (["혈당", "당뇨"], "혈당측정기"),
+                (["보행", "거동", "이동", "휠체어", "장애"], "보행보조기"),
+                (["난방", "동절기", "겨울", "연료", "난방비"], "난방용품"),
+                (["돌봄", "요양", "간병", "간호", "수발"], "간병용품"),
+                (["청력", "보청", "난청"], "보청기"),
+                (["낙상", "안전", "미끄럼"], "미끄럼방지"),
+                (["영양", "건강", "급식", "식사", "반찬"], "건강식품"),
+                (["운동", "체육", "건강관리", "체력"], "운동용품"),
+                (["시력", "안경", "저시력"], "돋보기"),
+            ]
+            for keywords, hint in keyword_rules:
+                if any(kw in svc_text for kw in keywords):
+                    keyword_hint = hint
+                    break
+
+            if keyword_hint:
+                coupang_md = coupang.get_senior_product_links(category=keyword_hint, count=2)
+            else:
+                coupang_md = coupang.get_senior_product_links(category=category, count=2)
+
             if coupang_md:
                 parts.append(coupang_md)
     except Exception as e:
@@ -128,6 +157,9 @@ def _build_data_block(service):
         fields.append(f"접수기관: {service['reception_agency']}")
     if service.get('support_type'):
         fields.append(f"지원유형: {service['support_type']}")
+    # [PATCH] 오늘 날짜 주입 - GPT가 마감 여부 판단하도록
+    from datetime import datetime as _dt
+    fields.append(f"\n[오늘 날짜: {_dt.now().strftime('%Y년 %m월 %d일')}]")
     return "\n".join(fields)
 
 
@@ -186,6 +218,7 @@ def _build_prompt(service, topic_type, related_services, today):
 
 ■ 글쓰기 원칙:
 1. 제공된 데이터의 모든 필드를 본문에 반드시 인용하세요. 특히 지원내용, 문의처(전화번호 포함), 법적 근거, 선정기준, 구비서류, 신청기한은 빠짐없이 넣으세요.
+   - [중요-마감판단] 데이터에 신청기한/접수기간이 있으면 오늘 날짜(데이터 블록 하단 참조)와 비교하세요. 마감일이 오늘보다 과거이면 반드시 "현재 신청기간이 종료되었습니다. 다음 접수 일정은 해당 기관(문의처 전화번호)에 문의하세요."라고 본문에 명시하세요. 마감된 기한을 마치 현재 진행 중인 것처럼 쓰면 0점 처리됩니다.
 2. 데이터에 없는 금액, 날짜, 기관명, 통계를 절대 지어내지 마세요.
 3. 어려운 행정 용어는 괄호 안에 쉬운 설명을 덧붙이세요. 예: 본인부담금(환자가 직접 내는 비용)
 4. 아래 표현은 절대 사용 금지 (발견 시 0점 처리):
