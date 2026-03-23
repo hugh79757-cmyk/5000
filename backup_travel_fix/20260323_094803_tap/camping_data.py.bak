@@ -1,0 +1,325 @@
+"""캠핑 데이터 모듈 v3.0 - themes.yaml 세부 테마 활성화 (2026-02-17)
+변경사항 (v2.x → v3.0):
+- get_random_theme() → themes.yaml에서 30개 세부 테마 랜덤 선택
+- 각 테마의 filter_key/filter_contains로 실제 필터링
+- angle 정보를 반환하여 title_generator에서 활용
+"""
+
+import random
+import logging
+import yaml
+from pathlib import Path
+from collections import defaultdict
+from core.camping_api import load_camping_client
+from core.naver_map import get_naver_map_link
+from core.config import REGION_ALIASES
+
+logger = logging.getLogger(__name__)
+
+THEMES_YAML_PATH = Path(__file__).parent.parent / "config" / "themes.yaml"
+
+
+def _load_camping_themes() -> list:
+    """themes.yaml에서 캠핑 테마 로드"""
+    try:
+        with open(THEMES_YAML_PATH, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+        return data.get('camping', [])
+    except Exception as e:
+        logger.warning(f"themes.yaml 로드 실패: {e}")
+        return []
+
+
+def get_random_region_name(api_name: str) -> str:
+    aliases = REGION_ALIASES.get(api_name, [api_name])
+    return random.choice(aliases)
+
+
+def get_recently_published_sigungu(days: int = 3) -> set:
+    """최근 N일간 발행된 시군구 조회"""
+    try:
+        from core.stats_analyzer import StatsAnalyzer
+        with StatsAnalyzer() as analyzer:
+            sigungu_dist = analyzer.get_sigungu_distribution(days=days)
+            return {f"{v['do_name']}_{v['sigungu']}" for v in sigungu_dist.values()}
+    except Exception as e:
+        logger.warning(f"최근 발행 조회 실패: {e}")
+        return set()
+
+
+def _filter_by_theme_config(items: list, theme_conf: dict) -> list:
+    """themes.yaml의 filter 설정에 따라 캠핑장 필터링"""
+    filter_key = theme_conf.get('filter_key')
+    if not filter_key:
+        return items
+
+    filter_value = theme_conf.get('filter_value')
+    filter_contains = theme_conf.get('filter_contains')
+    filter_min = theme_conf.get('filter_min')
+    filter_max = theme_conf.get('filter_max')
+
+    # 캠핑 API 필드 매핑 (themes.yaml key → API 필드)
+    FIELD_MAP = {
+        'pets': 'animalCmgCl',
+        'opentime': 'operPdCl',
+        'overview': 'intro',
+        'camptype': 'induty',
+        'facilities': 'sbrsCl',
+        'experience': 'exprnProgrm',
+        'theme_env': 'themaEnvrnCl',
+        'location_type': 'lctCl',
+        'manage_type': 'manageSttus',
+        'trailer_yn': 'trlerAcmpnyAt',
+        'brazier': 'brazierCl',
+        'nearby': 'posblFcltyCl',
+        'toilet_count': 'toiletCo',
+        'sink_count': 'wtrplCo',
+        'shower_count': 'swrmCo',
+    }
+
+    api_field = FIELD_MAP.get(filter_key, filter_key)
+    result = []
+
+    for item in items:
+        val = item.get(api_field, '')
+
+        if filter_value:
+            # 정확한 값 매칭
+            if str(val) == str(filter_value):
+                result.append(item)
+            # animalCmgCl 특수 처리: '동반 가능' → '가능' 포함
+            elif filter_value == '동반 가능' and '가능' in str(val):
+                result.append(item)
+        elif filter_contains:
+            # 부분 문자열 매칭
+            if filter_contains in str(val):
+                result.append(item)
+            # 대체 필드도 검색 (intro 없으면 lineIntro)
+            elif api_field == 'intro' and filter_contains in str(item.get('lineIntro', '')):
+                result.append(item)
+        elif filter_min is not None:
+            try:
+                if int(val or 0) >= filter_min:
+                    result.append(item)
+            except (ValueError, TypeError):
+                pass
+        elif filter_max is not None:
+            try:
+                if int(val or 0) <= filter_max:
+                    result.append(item)
+            except (ValueError, TypeError):
+                pass
+        else:
+            result.append(item)
+
+    return result
+
+
+def get_camping_data(theme: str = '글램핑', min_items: int = 3, max_items: int = 5,
+                     theme_conf: dict = None) -> dict:
+    """
+    캠핑 데이터 조회 v3.0
+    - theme_conf가 있으면 themes.yaml 세부 필터 적용
+    - 없으면 기존 방식 (글램핑/카라반/반려동물)
+    """
+
+    api = load_camping_client()
+    all_items = api.get_campsite_list(num_of_rows=1000)
+
+    if not all_items:
+        logger.error("API 데이터 없음")
+        return None
+
+    # 1. 이미지 있는 항목만
+    items_with_image = [item for item in all_items if item.get('firstImageUrl')]
+    logger.info(f"이미지 있는 캠핑장: {len(items_with_image)}개")
+
+    # 2. 테마별 필터링
+    if theme_conf:
+        # v3.0: themes.yaml 세부 필터 적용
+        filtered = _filter_by_theme_config(items_with_image, theme_conf)
+        logger.info(f"themes.yaml 필터 '{theme}' 적용 후: {len(filtered)}개")
+    else:
+        # 기존 방식 폴백
+        if theme == '글램핑':
+            filtered = [item for item in items_with_image if item.get('glampInnerFclty')]
+        elif theme == '카라반':
+            filtered = [item for item in items_with_image if item.get('caravInnerFclty')]
+        elif theme in ['반려동물 동반', '반려견 동반']:
+            filtered = [item for item in items_with_image if item.get('animalCmgCl') == '가능']
+        else:
+            filtered = items_with_image
+
+    if not filtered or len(filtered) < min_items:
+        logger.warning(f"테마 '{theme}' 데이터 부족 ({len(filtered) if filtered else 0}개), 글램핑으로 폴백")
+        filtered = [item for item in items_with_image if item.get('glampInnerFclty')]
+        if theme_conf:
+            theme = '글램핑'
+            theme_conf = None  # 폴백 시 세부 필터 해제
+
+    if not filtered:
+        logger.warning("글램핑도 없음, 전체로 폴백")
+        filtered = items_with_image
+
+    logger.info(f"테마 '{theme}' 최종 필터 후: {len(filtered)}개")
+
+    # 3. 시군구별 그룹핑
+    grouped = defaultdict(list)
+    for item in filtered:
+        do_name = item.get('doNm', '')
+        sigungu = item.get('sigunguNm', '')
+        if do_name and sigungu:
+            key = (do_name, sigungu)
+            grouped[key].append(item)
+
+    # 4. 3개 이상인 시군구만
+    valid_regions = {k: v for k, v in grouped.items() if len(v) >= min_items}
+
+    if not valid_regions:
+        logger.error("발행 가능한 시군구 없음")
+        return None
+
+    logger.info(f"발행 가능 시군구: {len(valid_regions)}개")
+
+    # ===== 균형 로직 =====
+    recent_sigungu = get_recently_published_sigungu(days=3)
+    logger.info(f"최근 3일 발행 시군구: {len(recent_sigungu)}개")
+
+    fresh_regions = []
+    for key in valid_regions.keys():
+        do_name, sigungu = key
+        sigungu_key = f"{do_name}_{sigungu}"
+        if sigungu_key not in recent_sigungu:
+            fresh_regions.append(key)
+
+    if fresh_regions:
+        selected_key = random.choice(fresh_regions)
+        logger.info(f"미발행 시군구 선택: {selected_key[0]} {selected_key[1]} (후보 {len(fresh_regions)}개 중)")
+    else:
+        selected_key = random.choice(list(valid_regions.keys()))
+        logger.warning(f"모든 시군구 최근 발행됨, 랜덤 선택: {selected_key[0]} {selected_key[1]}")
+
+    do_name, sigungu = selected_key
+    candidates = valid_regions[selected_key]
+
+    # 5. 랜덤 개수 (3~6개)
+    count = random.randint(min_items, min(max_items, len(candidates)))
+    selected_items = random.sample(candidates, count)
+
+    # 6. 결과 포맷팅
+    results = []
+    for item in selected_items:
+        name = item.get('facltNm', '')
+        results.append({
+            'title': name,
+            'addr': item.get('addr1', ''),
+            'do': do_name,
+            'sigungu': sigungu,
+            'overview': item.get('intro', '') or item.get('lineIntro', ''),
+            'image': item.get('firstImageUrl', ''),
+            'map_url': get_naver_map_link(name),
+            'tel': item.get('tel', ''),
+            'homepage': item.get('homepage', ''),
+            'source': 'api_camping'
+        })
+
+    # v3.0: angle 반환
+    angle = theme_conf.get('angle', theme) if theme_conf else theme
+
+    return {
+        'items': results,
+        'do_name': do_name,
+        'display_region': get_random_region_name(do_name),
+        'sigungu': sigungu,
+        'theme': theme,
+        'angle': angle,
+    }
+
+
+def _get_current_season() -> str:
+    """현재 계절 반환"""
+    from datetime import datetime
+    month = datetime.now().month
+    if month in (3, 4, 5):
+        return 'spring'
+    elif month in (6, 7, 8):
+        return 'summer'
+    elif month in (9, 10, 11):
+        return 'autumn'
+    else:
+        return 'winter'
+
+# 캠핑 테마 계절 매핑 (테마명에 계절 키워드 포함 시)
+_CAMPING_SEASON_MAP = {
+    '여름': ['summer'],
+    '물놀이': ['summer'],
+    '가을': ['autumn'],
+    '단풍': ['autumn'],
+    '겨울': ['winter'],
+    '눈꽃': ['winter'],
+    '사계절': ['spring', 'summer', 'autumn', 'winter'],
+}
+
+def get_random_theme() -> tuple:
+    """v3.1: themes.yaml에서 계절 맞는 테마 우선 선택"""
+    themes = _load_camping_themes()
+
+    if not themes:
+        logger.warning("themes.yaml 로드 실패, 기존 테마 사용")
+        fallback = random.choice(['글램핑', '카라반', '반려동물 동반'])
+        return fallback, None
+
+    current_season = _get_current_season()
+
+    # 계절 필터링: 계절 키워드가 있는 테마는 해당 계절에만 선택
+    filtered = []
+    for t in themes:
+        theme_name = t.get('theme', '')
+        season_restricted = False
+        for keyword, seasons in _CAMPING_SEASON_MAP.items():
+            if keyword in theme_name:
+                season_restricted = True
+                if current_season in seasons:
+                    filtered.append(t)
+                break
+        if not season_restricted:
+            filtered.append(t)
+
+    if not filtered:
+        filtered = themes
+
+    chosen = random.choice(filtered)
+    theme_name = chosen.get('theme', '글램핑')
+    logger.info(f"캠핑 테마 선택: {theme_name} (angle: {chosen.get('angle', '')}, 계절: {current_season})")
+    return theme_name, chosen
+
+
+def get_available_regions_summary() -> dict:
+    """발행 가능 지역 요약 (디버깅용)"""
+    api = load_camping_client()
+    all_items = api.get_campsite_list(num_of_rows=1000)
+
+    with_image = [item for item in all_items if item.get('firstImageUrl')]
+
+    themes = {
+        '글램핑': [item for item in with_image if item.get('glampInnerFclty')],
+        '카라반': [item for item in with_image if item.get('caravInnerFclty')],
+        '반려동물 동반': [item for item in with_image if item.get('animalCmgCl') == '가능'],
+    }
+
+    summary = {}
+    for theme_name, theme_items in themes.items():
+        by_sigungu = defaultdict(list)
+        for item in theme_items:
+            do_name = item.get('doNm', '')
+            sigungu = item.get('sigunguNm', '')
+            if do_name and sigungu:
+                by_sigungu[(do_name, sigungu)].append(item)
+
+        valid = {k: len(v) for k, v in by_sigungu.items() if len(v) >= 3}
+        summary[theme_name] = {
+            'total_items': len(theme_items),
+            'valid_sigungu_count': len(valid),
+            'valid_sigungu': dict(valid)
+        }
+    return summary
