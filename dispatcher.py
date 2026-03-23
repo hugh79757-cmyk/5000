@@ -371,6 +371,7 @@ def dispatch(blog_id):
         blog_id = cfg.get("id", "")
         # STAP 블로그별 전문 파이프라인 매핑 (확장 시 여기만 추가)
         STAP_PIPELINE_MAP = {
+            "stock-hugo": "stock",
             "dividend-hugo": "dividend",
             "etf-hugo": "etf",
             "sector-hugo": "sector",
