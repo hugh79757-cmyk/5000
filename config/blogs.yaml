@@ -341,7 +341,7 @@ blogs:
   wp_url_env: WP_KUTA_URL
   wp_user_env: WP_KUTA_USER
 - cf_project: stock-informationhot
-  daily_quota: 999
+  daily_quota: 5
   domain: stock.informationhot.kr
   id: stock-hugo
   name: 캔들트렌드 주식분석
