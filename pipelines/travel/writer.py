@@ -402,25 +402,41 @@ def _post_process(content):
         content = '\n'.join(new_lines)
     # 연속 빈줄 정리
     content = re.sub(r'\n{4,}', '\n\n\n', content)
-    # CTA 제휴 박스 삽입 (함께 읽어보기 앞에)
-    if "함께 읽어보기" in content:
-        cta_html = """
+    # [PATCH] GPT가 만든 "함께 읽어보기" 섹션 통째로 제거
+
+    if _related_idx > 0:
+        content = content[:_related_idx].rstrip()
+
+    # CTA 제휴 박스 삽입
+    cta_html = """
 <div class="cta-box">
   <p style="margin:0;font-size:1.1rem;">여행 숙소를 찾고 계신가요?</p>
   <a href="https://www.trip.com/?Allianceid=3993748&SID=travel_blog" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
 </div>
 """
-        content = content.replace("## 함께 읽어보기", cta_html + "\n## 함께 읽어보기")
-    elif content.rstrip().endswith("---"):
-        pass
-    else:
-        cta_html = """
-<div class="cta-box">
-  <p style="margin:0;font-size:1.1rem;">여행 숙소를 찾고 계신가요?</p>
-  <a href="https://www.trip.com/?Allianceid=3993748&SID=travel_blog" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
-</div>
-"""
-        content = content.rstrip() + "\n\n" + cta_html
+    content = content.rstrip() + "\n\n" + cta_html
+
+    # [PATCH] 동적 내부링크 — 실제 발행된 글 중 같은 카테고리/태그 기반 추천
+    try:
+        import glob as _gl
+        import random as _rand2
+        _posts_dir = "/Users/twinssn/Projects/travel-hugo/content/posts"
+        _all_posts = []
+        for _md in _gl.glob(os.path.join(_posts_dir, "*/index.md")):
+            with open(_md, encoding="utf-8") as _f:
+                _head = _f.read(500)
+            _tm = re.search(r'^title:\s*["\'](.*?)["\']', _head, re.MULTILINE)
+            _sm = re.search(r'^slug:\s*["\'](.*?)["\']', _head, re.MULTILINE)
+            if _tm and _sm:
+                _all_posts.append({"title": _tm.group(1), "slug": _sm.group(1)})
+        if len(_all_posts) > 3:
+            _picks = _rand2.sample(_all_posts, min(3, len(_all_posts)))
+
+            for _p in _picks:
+                _related_md += '{{< article link="/posts/' + _p["slug"] + '/" >}}\n\n'
+            content = content.rstrip() + _related_md
+    except Exception as _e:
+        pass  # 내부링크 실패해도 글 발행은 계속
 
     return content
 
@@ -760,7 +776,7 @@ def generate_content(data, blog_id="travel-hugo"):
             "{region} 역사 여행 코스, 교통과 주차 정보 정리",
             "{region}에서 탐방하는 {theme} {count}곳 비교",
             "{region} 문화재 탐방, 사진 찍기 좋은 포인트까지",
-            "{region} {theme} 탐방 코스와 소요 시간 정리",
+            "{region} {theme} 탐방 코스와 입장료 정리",
             "{region} {theme} 해설 투어 예약 방법과 일정",
             "{region} 유네스코 유산과 {theme} 코스 연계 정리",
             "아이와 함께하는 {region} {theme} 체험 {count}곳",
@@ -817,7 +833,7 @@ def generate_content(data, blog_id="travel-hugo"):
             "사진 명소 위주 {region} {theme} {count}곳 코스 추천",
             "{region} {theme} 숙소 위치별 추천 코스 {count}선",
             "3월 {region} {theme} 벚꽃과 봄꽃 코스 {count}곳",
-            "{region} {theme} 코스별 소요 시간과 이동 거리 정리",
+            "{region} {theme} 코스별 이동 거리와 주차 정보 정리",
         ],
     }
 
@@ -937,4 +953,5 @@ def generate_content(data, blog_id="travel-hugo"):
         "source_type": source_type,
         "prompt_id": prompt_id,
         "model": model_used,
+        "description": _seo_desc,
     }
