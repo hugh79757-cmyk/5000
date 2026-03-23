@@ -171,7 +171,24 @@ def run(blog_cfg):
             try:
                 info = fetch_company_info(corp_code)
                 fins = fetch_financial_summary(corp_code)
-                key_fins = [f for f in (fins or []) if f.get("account_nm") in ("매출액", "영업이익", "당기순이익")]
+                # [PATCH] DART 계정명 변형 대응 (영업이익(손실), 당기순이익(손실), 영업수익 등)
+                _TARGET_ACCOUNTS = {
+                    "매출액": ["매출액", "영업수익", "수익(매출액)"],
+                    "영업이익": ["영업이익(손실)", "영업이익"],
+                    "당기순이익": ["당기순이익(손실)", "당기순이익"],
+                }
+                key_fins = []
+                _used = set()
+                for _target, _variants in _TARGET_ACCOUNTS.items():
+                    for f in (fins or []):
+                        nm = f.get("account_nm", "")
+                        if nm in _variants and _target not in _used:
+                            # 표준 이름으로 통일
+                            f_copy = dict(f)
+                            f_copy["account_nm"] = _target
+                            key_fins.append(f_copy)
+                            _used.add(_target)
+                            break
                 fin_data = {}
                 for f in key_fins:
                     acct = f.get("account_nm", "")
