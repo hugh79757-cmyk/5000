@@ -2,7 +2,7 @@ batch_deploy:
   schedule: '22:45'
 blogs:
 - cf_project: hotissue-hugo
-  daily_quota: 50
+  daily_quota: 10
   domain: hotissue.rotcha.kr
   id: hotissue-hugo
   name: 핫이슈
@@ -34,7 +34,7 @@ blogs:
   status: active
   theme: PaperMod
 - cf_project: tco-hugo
-  daily_quota: 50
+  daily_quota: 10
   domain: tco.rotcha.kr
   id: tco-hugo
   name: TCO분석
@@ -54,7 +54,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: deal-hugo
-  daily_quota: 50
+  daily_quota: 10
   domain: deal.rotcha.kr
   id: deal-hugo
   name: 프로모션
@@ -74,7 +74,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: compare-hugo
-  daily_quota: 50
+  daily_quota: 10
   domain: compare.rotcha.kr
   id: compare-hugo
   name: 비교분석
@@ -94,7 +94,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: guide-hugo
-  daily_quota: 50
+  daily_quota: 10
   domain: guide.rotcha.kr
   id: guide-hugo
   name: 초보가이드
@@ -114,7 +114,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: ev-hugo
-  daily_quota: 50
+  daily_quota: 10
   domain: ev.rotcha.kr
   id: ev-hugo
   name: 전기차분석
