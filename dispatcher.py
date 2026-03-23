@@ -100,10 +100,19 @@ def run_car(blog_cfg):
     conn = sqlite3.connect(str(CAR_DB_PATH))
     conn.row_factory = sqlite3.Row
 
-    MAX_RETRY = 3
+    MAX_RETRY = 6
     topic = None
     data = None
     skip_ids = []
+
+    today_car_ids = set()
+    _today_rows = conn.execute(
+        "SELECT DISTINCT t.car_id FROM publish_log p JOIN topics t ON t.id=p.topic_id "
+        "WHERE p.site=? AND date(p.published_at)=date('now','localtime')",
+        (blog_id.replace('-hugo', ''),)
+    ).fetchall()
+    today_car_ids = {r[0] for r in _today_rows}
+    logger.info("today car_ids for " + blog_id + ": " + str(today_car_ids))
 
     for attempt in range(1, MAX_RETRY + 1):
         logger.info("토픽 선택 (시도 " + str(attempt) + "/" + str(MAX_RETRY) + ")")
@@ -124,6 +133,11 @@ def run_car(blog_cfg):
             logger.info(blog_id + " no topics available")
             conn.close()
             return None
+        if topic and topic['car_id'] in today_car_ids:
+            logger.info("car_id dup skip: " + str(topic['car_id']))
+            skip_ids.append(topic['id'])
+            topic = None
+            continue
         data = build_input(conn, topic, CAR_DB_PATH)
         if data:
             data['site_id'] = blog_id
