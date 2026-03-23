@@ -403,7 +403,7 @@ def _post_process(content):
     # 연속 빈줄 정리
     content = re.sub(r'\n{4,}', '\n\n\n', content)
     # [PATCH] GPT가 만든 "함께 읽어보기" 섹션 통째로 제거
-
+    _related_idx = content.find("## 함께 읽어보기")
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
