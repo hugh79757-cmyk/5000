@@ -336,7 +336,7 @@ def refresh_images(conn):
     return total_new
 
 
-def replenish_topics(conn, min_pending=30):
+def replenish_topics(conn, min_pending=50):
     """사이트별 post_type 토픽이 min_pending 미만이면 자동 보충"""
     c = conn.cursor()
 
