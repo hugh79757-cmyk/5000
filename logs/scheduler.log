@@ -10672,3 +10672,9 @@ sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
 2026-03-24 16:34:20,730 [INFO] QUOTA SKIP: senior-hugo actual=6 >= quota=5
 2026-03-24 17:10:26,167 [INFO] Queue executing: senior-blogger (remaining: 0)
 2026-03-24 17:10:26,229 [INFO] QUOTA SKIP: senior-blogger actual=5 >= quota=5
+2026-03-24 18:35:39,977 [INFO] CATCHUP: rap-hugo expected=4 actual=1 missed=3 quota=5 attempt=1/3
+2026-03-24 18:35:40,003 [INFO] Publishing: rap-hugo
+2026-03-24 18:36:19,044 [INFO] CATCHUP: rap4-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-24 18:36:19,079 [INFO] Publishing: rap4-hugo
+2026-03-24 18:36:58,860 [INFO] CATCHUP: rap5-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-24 18:36:58,899 [INFO] Publishing: rap5-hugo

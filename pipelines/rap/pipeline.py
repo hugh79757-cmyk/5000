@@ -105,6 +105,82 @@ def _pick_strategy(keyword, blog_id=None):
     return "trade"
 
 
+
+def _post_process(body_md, blog_id, keyword):
+    """발행 전 후처리: 금지표현 제거 + 면책조항 + 쿠팡 + 내부링크"""
+    import re as _re
+
+    # 1. 금지 표현 제거
+    BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요"]
+    for b in BANNED:
+        body_md = body_md.replace(b, "")
+
+    # 2. GPT가 넣은 면책 문구 제거 (중복 방지)
+    body_md = _re.sub(r"\n*이 글은 국토교통부[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*> 이 글은[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*---\s*$", "", body_md.rstrip())
+    body_md = body_md.rstrip()
+
+    parts = []
+
+    # 3. 쿠팡 파트너스 부동산 관련 상품 링크
+    try:
+        from shared.coupang_travel import CoupangTravel
+        ct = CoupangTravel()
+        if ct.is_configured():
+            coupang_md = ct.get_travel_product_links(blog_id=blog_id, count=2)
+            if coupang_md:
+                parts.append(coupang_md)
+                logger.info("쿠팡 링크 삽입 완료")
+    except Exception as e:
+        logger.warning(f"쿠팡 링크 삽입 실패: {e}")
+
+    # 4. 내부링크 (같은 사이트 기존 글 추천)
+    try:
+        import glob as _gl
+        import random as _rand
+        blog_cfg_map = {
+            "rap-hugo": "/Users/twinssn/Projects/RAP/rap-hugo",
+            "rap2-hugo": "/Users/twinssn/Projects/RAP/rap2-hugo",
+            "rap3-hugo": "/Users/twinssn/Projects/RAP/rap3-hugo",
+            "rap4-hugo": "/Users/twinssn/Projects/RAP/rap4-hugo",
+            "rap5-hugo": "/Users/twinssn/Projects/RAP/rap5-hugo",
+        }
+        posts_dir = os.path.join(blog_cfg_map.get(blog_id, ""), "content", "posts")
+        all_posts = []
+        for md in _gl.glob(os.path.join(posts_dir, "*/index.md")):
+            with open(md, encoding="utf-8") as f:
+                head = f.read(500)
+            tm = _re.search(r'^title:\s*["\'](.*?)["\']', head, _re.MULTILINE)
+            sm = _re.search(r'^slug:\s*["\'](.*?)["\']', head, _re.MULTILINE)
+            if tm and sm:
+                all_posts.append({"title": tm.group(1), "slug": sm.group(1)})
+        if len(all_posts) >= 2:
+            picks = _rand.sample(all_posts, min(3, len(all_posts)))
+            related = "\n\n## 함께 읽으면 좋은 글\n\n"
+            for p in picks:
+                related += f'- [{p["title"]}](/posts/{p["slug"]}/)\n'
+            parts.append(related)
+    except Exception as e:
+        logger.warning(f"내부링크 삽입 실패: {e}")
+
+    # 5. 면책조항 (1회만)
+    disclaimer_map = {
+        "rap-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
+        "rap2-hugo": "이 글은 한국부동산원 청약홈 공공데이터를 기반으로 작성되었습니다. 정확한 청약 일정과 자격은 [청약홈](https://www.applyhome.co.kr)에서 확인하세요.",
+        "rap3-hugo": "이 글은 국토교통부 실거래가 데이터를 기반으로 작성되었으며, 세금 계산은 참고용입니다. 정확한 세금 상담은 세무사에게 문의하세요.",
+        "rap4-hugo": "이 글은 국토교통부 전월세 공공데이터를 기반으로 작성되었습니다. 계약 전 반드시 등기부등본을 확인하고, 전세보증보험 가입을 권장합니다.",
+        "rap5-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
+    }
+    disc = disclaimer_map.get(blog_id, disclaimer_map["rap-hugo"])
+    parts.append(f"\n\n---\n\n> {disc}")
+
+    # 6. 쿠팡 파트너스 면책
+    parts.append("\n\n> 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.")
+
+    return body_md + "".join(parts)
+
+
 def run(blog_cfg):
     """dispatcher에서 호출하는 통일 인터페이스"""
     from dotenv import load_dotenv
@@ -191,6 +267,9 @@ def run(blog_cfg):
             body_html = process_gap_content(body_html, kw_category)
         except Exception as e:
             logger.warning(f"내부링크 삽입 실패: {e}")
+
+    # 후처리 (면책조항 + 쿠팡 + 내부링크)
+    article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
     # 발행
     result = publish(
