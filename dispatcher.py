@@ -173,6 +173,10 @@ def _run_pipeline(cfg):
         from pipelines.gap.pipeline import run
         return run(cfg)
 
+    elif pipeline == "rap":
+        from pipelines.rap.pipeline import run
+        return run(cfg)
+
     elif pipeline == "stock":
         stap_name = STAP_PIPELINE_MAP.get(blog_id)
         if stap_name:

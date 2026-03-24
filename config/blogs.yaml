@@ -497,6 +497,24 @@ blogs:
     - '17:10'
     - '21:10'
   status: active
+- id: rap-hugo
+  name: 부동산 시세 청약 분석
+  pipeline: rap
+  platform: hugo
+  status: inactive
+  daily_quota: 5
+  domain: ''
+  cf_project: rap-hugo
+  repo: rap-hugo
+  site_path: /Users/twinssn/Projects/RAP/rap-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 07:50
+    - '10:50'
+    - '13:50'
+    - '16:50'
+    - '20:50'
 deploy:
   branch: main
   commit_dirty: true
