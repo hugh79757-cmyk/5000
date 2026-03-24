@@ -9547,3 +9547,1128 @@ sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
 2026-03-23 19:44:21,029 [INFO] Publishing: ipo-hugo
 2026-03-23 19:44:54,666 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
 2026-03-23 19:44:54,666 [INFO] Publishing: finance-hugo
+2026-03-23 19:46:58,371 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:46:58,371 [INFO] Publishing: stock-hugo
+2026-03-23 19:47:03,885 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:47:03,886 [INFO] Publishing: dividend-hugo
+2026-03-23 19:48:12,462 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:48:12,463 [INFO] Publishing: etf-hugo
+2026-03-23 19:48:49,081 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:48:49,081 [INFO] Publishing: sector-hugo
+2026-03-23 19:49:27,061 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:49:27,061 [INFO] Publishing: ipo-hugo
+2026-03-23 19:50:08,785 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:50:08,785 [INFO] Publishing: finance-hugo
+2026-03-23 19:52:25,837 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:52:25,837 [INFO] Publishing: stock-hugo
+2026-03-23 19:52:31,325 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:52:31,326 [INFO] Publishing: dividend-hugo
+2026-03-23 19:53:31,004 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:53:31,005 [INFO] Publishing: etf-hugo
+2026-03-23 19:54:04,413 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:54:04,413 [INFO] Publishing: sector-hugo
+2026-03-23 19:54:42,197 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:54:42,197 [INFO] Publishing: ipo-hugo
+2026-03-23 19:55:14,048 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:55:14,048 [INFO] Publishing: finance-hugo
+2026-03-23 19:57:38,635 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:57:38,636 [INFO] Publishing: stock-hugo
+2026-03-23 19:57:44,092 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:57:44,092 [INFO] Publishing: dividend-hugo
+2026-03-23 19:59:01,384 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:59:01,385 [INFO] Publishing: etf-hugo
+2026-03-23 19:59:33,789 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 19:59:33,790 [INFO] Publishing: sector-hugo
+2026-03-23 20:00:17,072 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:00:17,072 [INFO] Publishing: ipo-hugo
+2026-03-23 20:00:54,158 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:00:54,158 [INFO] Publishing: finance-hugo
+2026-03-23 20:01:55,600 [INFO] Queue executing: kuta-wordpress (remaining: 0)
+2026-03-23 20:01:55,600 [INFO] Publishing: kuta-wordpress
+2026-03-23 20:02:55,787 [INFO] CATCHUP: travel-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:02:55,787 [INFO] Publishing: travel-hugo
+2026-03-23 20:04:15,148 [INFO] CATCHUP: travel1-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:04:15,149 [INFO] Publishing: travel1-hugo
+2026-03-23 20:06:38,000 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:06:38,000 [INFO] Publishing: stock-hugo
+2026-03-23 20:06:43,486 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:06:43,486 [INFO] Publishing: dividend-hugo
+2026-03-23 20:08:07,529 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:08:07,529 [INFO] Publishing: etf-hugo
+2026-03-23 20:08:45,031 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:08:45,031 [INFO] Publishing: sector-hugo
+2026-03-23 20:09:40,406 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:09:40,407 [INFO] Publishing: ipo-hugo
+2026-03-23 20:10:22,192 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:10:22,192 [INFO] Publishing: finance-hugo
+2026-03-23 20:11:32,521 [INFO] CATCHUP: travel2-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:11:32,521 [INFO] Publishing: travel2-hugo
+2026-03-23 20:14:06,320 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:14:06,321 [INFO] Publishing: stock-hugo
+2026-03-23 20:14:11,811 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:14:11,811 [INFO] Publishing: dividend-hugo
+2026-03-23 20:15:29,121 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:15:29,122 [INFO] Publishing: etf-hugo
+2026-03-23 20:16:12,697 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:16:12,697 [INFO] Publishing: sector-hugo
+2026-03-23 20:16:47,905 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:16:47,906 [INFO] Publishing: ipo-hugo
+2026-03-23 20:17:28,814 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:17:28,815 [INFO] Publishing: finance-hugo
+2026-03-23 20:19:00,667 [INFO] CATCHUP: deal-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:19:00,667 [INFO] Publishing: deal-hugo
+2026-03-23 20:20:00,210 [INFO] CATCHUP: compare-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:20:00,211 [INFO] Publishing: compare-hugo
+2026-03-23 20:20:52,000 [INFO]   [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: 모델 Y
+2026-03-23 20:20:57,079 [INFO] CATCHUP: guide-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:20:57,079 [INFO] Publishing: guide-hugo
+2026-03-23 20:22:10,288 [INFO] CATCHUP: stock-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:22:10,289 [INFO] Publishing: stock-hugo
+2026-03-23 20:22:15,743 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:22:15,743 [INFO] Publishing: dividend-hugo
+2026-03-23 20:23:18,125 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:23:18,126 [INFO] Publishing: etf-hugo
+2026-03-23 20:23:48,332 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:23:48,333 [INFO] Publishing: sector-hugo
+2026-03-23 20:24:21,629 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:24:21,629 [INFO] Publishing: ipo-hugo
+2026-03-23 20:24:57,653 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:24:57,653 [INFO] Publishing: finance-hugo
+2026-03-23 20:26:03,262 [INFO] CATCHUP: ev-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:26:03,262 [INFO] Publishing: ev-hugo
+2026-03-23 20:27:05,987 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:27:05,987 [INFO] Publishing: stock-hugo
+2026-03-23 20:27:11,463 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:27:11,464 [INFO] Publishing: dividend-hugo
+2026-03-23 20:28:24,084 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:28:24,085 [INFO] Publishing: etf-hugo
+2026-03-23 20:28:57,949 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:28:57,950 [INFO] Publishing: sector-hugo
+2026-03-23 20:29:35,230 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:29:35,230 [INFO] Publishing: ipo-hugo
+2026-03-23 20:30:08,409 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:30:08,410 [INFO] Publishing: finance-hugo
+2026-03-23 20:31:49,447 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-23 20:31:49,448 [INFO] Publishing: stock-hugo
+2026-03-23 20:31:49,513 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:31:49,513 [INFO] Publishing: stock-hugo
+2026-03-23 20:31:54,934 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:31:54,934 [INFO] Publishing: dividend-hugo
+2026-03-23 20:33:05,481 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:33:05,483 [INFO] Publishing: etf-hugo
+2026-03-23 20:33:40,393 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:33:40,394 [INFO] Publishing: sector-hugo
+2026-03-23 20:34:21,696 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:34:21,697 [INFO] Publishing: ipo-hugo
+2026-03-23 20:35:05,559 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 -> 1건만 보충
+2026-03-23 20:35:05,560 [INFO] Publishing: finance-hugo
+2026-03-23 20:37:14,182 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:37:14,183 [INFO] Publishing: stock-hugo
+2026-03-23 20:37:19,707 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:37:19,708 [INFO] Publishing: dividend-hugo
+2026-03-23 20:38:32,252 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:38:32,253 [INFO] Publishing: etf-hugo
+2026-03-23 20:39:11,184 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:39:11,184 [INFO] Publishing: sector-hugo
+2026-03-23 20:39:52,099 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:39:52,099 [INFO] Publishing: ipo-hugo
+2026-03-23 20:40:49,756 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:40:49,757 [INFO] Publishing: finance-hugo
+2026-03-23 20:41:40,235 [INFO] CATCHUP: senior-hugo expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:41:40,236 [INFO] Publishing: senior-hugo
+2026-03-23 20:43:09,542 [INFO] CATCHUP: gap-kuta expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 20:43:09,543 [INFO] Publishing: gap-kuta
+2026-03-23 20:43:44,053 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:43:44,053 [INFO] Publishing: stock-hugo
+2026-03-23 20:43:49,544 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:43:49,544 [INFO] Publishing: dividend-hugo
+2026-03-23 20:45:10,316 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:45:10,316 [INFO] Publishing: etf-hugo
+2026-03-23 20:45:59,426 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:45:59,427 [INFO] Publishing: sector-hugo
+2026-03-23 20:46:39,845 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:46:39,846 [INFO] Publishing: ipo-hugo
+2026-03-23 20:47:09,312 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:47:09,313 [INFO] Publishing: finance-hugo
+2026-03-23 20:48:12,725 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:48:12,725 [INFO] Publishing: stock-hugo
+2026-03-23 20:48:18,286 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:48:18,287 [INFO] Publishing: dividend-hugo
+2026-03-23 20:49:28,309 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:49:28,310 [INFO] Publishing: etf-hugo
+2026-03-23 20:50:01,490 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:50:01,491 [INFO] Publishing: sector-hugo
+2026-03-23 20:50:34,288 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:50:34,288 [INFO] Publishing: ipo-hugo
+2026-03-23 20:51:10,956 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:51:10,956 [INFO] Publishing: finance-hugo
+2026-03-23 20:53:24,963 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:53:24,963 [INFO] Publishing: stock-hugo
+2026-03-23 20:53:30,399 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:53:30,400 [INFO] Publishing: dividend-hugo
+2026-03-23 20:54:45,699 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:54:45,701 [INFO] Publishing: etf-hugo
+2026-03-23 20:55:21,903 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:55:21,903 [INFO] Publishing: sector-hugo
+2026-03-23 20:55:59,975 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:55:59,976 [INFO] Publishing: ipo-hugo
+2026-03-23 20:56:40,447 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:56:40,448 [INFO] Publishing: finance-hugo
+2026-03-23 20:58:54,098 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:58:54,099 [INFO] Publishing: stock-hugo
+2026-03-23 20:59:00,545 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 20:59:00,548 [INFO] Publishing: dividend-hugo
+2026-03-23 21:00:07,974 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:00:07,975 [INFO] Publishing: etf-hugo
+2026-03-23 21:00:53,370 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:00:53,371 [INFO] Publishing: sector-hugo
+2026-03-23 21:01:32,971 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:01:32,972 [INFO] Publishing: ipo-hugo
+2026-03-23 21:02:18,618 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:02:18,619 [INFO] Publishing: finance-hugo
+2026-03-23 21:03:32,070 [INFO] Queue executing: travel-hugo (remaining: 3)
+2026-03-23 21:03:32,071 [INFO] Publishing: travel-hugo
+2026-03-23 21:04:02,237 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:04:02,238 [INFO] Publishing: stock-hugo
+2026-03-23 21:04:07,761 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:04:07,761 [INFO] Publishing: dividend-hugo
+2026-03-23 21:05:44,265 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:05:44,266 [INFO] Publishing: etf-hugo
+2026-03-23 21:06:24,215 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:06:24,216 [INFO] Publishing: sector-hugo
+2026-03-23 21:07:04,965 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:07:04,965 [INFO] Publishing: ipo-hugo
+2026-03-23 21:07:51,758 [INFO] Queue executing: dividend-hugo (remaining: 2)
+2026-03-23 21:07:51,760 [INFO] Publishing: dividend-hugo
+2026-03-23 21:07:52,704 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:07:52,704 [INFO] Publishing: finance-hugo
+2026-03-23 21:09:31,591 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:09:31,591 [INFO] Publishing: stock-hugo
+2026-03-23 21:09:37,025 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:09:37,026 [INFO] Publishing: dividend-hugo
+2026-03-23 21:10:46,013 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:10:46,013 [INFO] Publishing: etf-hugo
+2026-03-23 21:11:26,579 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:11:26,580 [INFO] Publishing: sector-hugo
+2026-03-23 21:12:13,954 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:12:13,954 [INFO] Publishing: ipo-hugo
+2026-03-23 21:12:42,830 [INFO] Queue executing: hotissue-hugo (remaining: 4)
+2026-03-23 21:12:42,831 [INFO] Publishing: hotissue-hugo
+2026-03-23 21:13:02,051 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:13:02,051 [INFO] Publishing: finance-hugo
+2026-03-23 21:14:42,315 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:14:42,315 [INFO] Publishing: stock-hugo
+2026-03-23 21:14:47,761 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:14:47,761 [INFO] Publishing: dividend-hugo
+2026-03-23 21:16:11,094 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:16:11,094 [INFO] Publishing: etf-hugo
+2026-03-23 21:16:47,360 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:16:47,361 [INFO] Publishing: sector-hugo
+2026-03-23 21:17:07,912 [INFO] Queue executing: tco-hugo (remaining: 5)
+2026-03-23 21:17:07,912 [INFO] Publishing: tco-hugo
+2026-03-23 21:17:19,535 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:17:19,536 [INFO] Publishing: ipo-hugo
+2026-03-23 21:17:57,601 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:17:57,602 [INFO] Publishing: finance-hugo
+2026-03-23 21:18:40,461 [INFO] CATCHUP: senior-blogger expected=5 actual=4 missed=1 -> 1건만 보충
+2026-03-23 21:18:40,461 [INFO] Publishing: senior-blogger
+2026-03-23 21:19:55,721 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:19:55,722 [INFO] Publishing: stock-hugo
+2026-03-23 21:20:01,120 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:20:01,120 [INFO] Publishing: dividend-hugo
+2026-03-23 21:21:04,496 [INFO] Queue executing: deal-hugo (remaining: 4)
+2026-03-23 21:21:04,496 [INFO] Publishing: deal-hugo
+2026-03-23 21:21:11,646 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:21:11,646 [INFO] Publishing: etf-hugo
+2026-03-23 21:21:50,024 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:21:50,024 [INFO] Publishing: sector-hugo
+2026-03-23 21:21:51,369 [INFO]   [BLOCK] 연비 데이터 없음 - 발행 차단: 마이바흐 SL
+2026-03-23 21:21:51,370 [INFO]     [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: Q6 e-트론
+2026-03-23 21:22:29,959 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:22:29,959 [INFO] Publishing: ipo-hugo
+2026-03-23 21:23:07,150 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:23:07,150 [INFO] Publishing: finance-hugo
+2026-03-23 21:24:51,447 [INFO] Queue executing: compare-hugo (remaining: 4)
+2026-03-23 21:24:51,449 [INFO] Publishing: compare-hugo
+2026-03-23 21:25:23,802 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:25:23,803 [INFO] Publishing: stock-hugo
+2026-03-23 21:25:29,679 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:25:29,679 [INFO] Publishing: dividend-hugo
+2026-03-23 21:26:37,778 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:26:37,779 [INFO] Publishing: etf-hugo
+2026-03-23 21:27:09,718 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:27:09,719 [INFO] Publishing: sector-hugo
+2026-03-23 21:27:39,134 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:27:39,135 [INFO] Publishing: ipo-hugo
+2026-03-23 21:28:15,648 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:28:15,649 [INFO] Publishing: finance-hugo
+2026-03-23 21:28:42,345 [INFO] Queue executing: guide-hugo (remaining: 3)
+2026-03-23 21:28:42,347 [INFO] Publishing: guide-hugo
+2026-03-23 21:30:25,990 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:30:25,990 [INFO] Publishing: stock-hugo
+2026-03-23 21:30:31,488 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:30:31,488 [INFO] Publishing: dividend-hugo
+2026-03-23 21:31:39,411 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:31:39,412 [INFO] Publishing: etf-hugo
+2026-03-23 21:32:15,268 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:32:15,269 [INFO] Publishing: sector-hugo
+2026-03-23 21:32:41,975 [INFO] Queue executing: etf-hugo (remaining: 4)
+2026-03-23 21:32:41,975 [INFO] Publishing: etf-hugo
+2026-03-23 21:32:53,136 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:32:53,137 [INFO] Publishing: ipo-hugo
+2026-03-23 21:33:38,087 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:33:38,087 [INFO] Publishing: finance-hugo
+2026-03-23 21:35:40,382 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:35:40,382 [INFO] Publishing: stock-hugo
+2026-03-23 21:35:45,779 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:35:45,779 [INFO] Publishing: dividend-hugo
+2026-03-23 21:36:09,220 [INFO] Queue executing: ev-hugo (remaining: 3)
+2026-03-23 21:36:09,221 [INFO] Publishing: ev-hugo
+2026-03-23 21:37:00,243 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:37:00,243 [INFO] Publishing: etf-hugo
+2026-03-23 21:37:38,870 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:37:38,871 [INFO] Publishing: sector-hugo
+2026-03-23 21:38:11,791 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:38:11,792 [INFO] Publishing: ipo-hugo
+2026-03-23 21:38:52,056 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:38:52,057 [INFO] Publishing: finance-hugo
+2026-03-23 21:39:09,510 [INFO] Queue executing: sector-hugo (remaining: 2)
+2026-03-23 21:39:09,510 [INFO] Publishing: sector-hugo
+2026-03-23 21:41:03,623 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:41:03,624 [INFO] Publishing: stock-hugo
+2026-03-23 21:41:09,029 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:41:09,030 [INFO] Publishing: dividend-hugo
+2026-03-23 21:42:25,931 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:42:25,932 [INFO] Publishing: etf-hugo
+2026-03-23 21:42:46,448 [INFO] Queue executing: travel1-hugo (remaining: 2)
+2026-03-23 21:42:46,448 [INFO] Publishing: travel1-hugo
+2026-03-23 21:43:01,290 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:43:01,291 [INFO] Publishing: sector-hugo
+2026-03-23 21:43:37,342 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:43:37,343 [INFO] Publishing: ipo-hugo
+2026-03-23 21:44:24,098 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:44:24,098 [INFO] Publishing: finance-hugo
+2026-03-23 21:46:10,769 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:46:10,769 [INFO] Publishing: stock-hugo
+2026-03-23 21:46:16,130 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:46:16,131 [INFO] Publishing: dividend-hugo
+2026-03-23 21:47:26,920 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:47:26,928 [INFO] Publishing: etf-hugo
+2026-03-23 21:47:56,770 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:47:56,770 [INFO] Publishing: sector-hugo
+2026-03-23 21:48:35,960 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:48:35,960 [INFO] Publishing: ipo-hugo
+2026-03-23 21:48:45,689 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Read timed out. (read timeout=30)
+2026-03-23 21:48:45,689 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Read timed out. (read timeout=30)
+2026-03-23 21:48:45,689 [INFO]   Camping API Error: HTTPSConnectionPool(host='apis.data.go.kr', port=443): Read timed out. (read timeout=30)
+2026-03-23 21:49:12,517 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:49:12,517 [INFO] Publishing: finance-hugo
+2026-03-23 21:51:18,453 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:51:18,453 [INFO] Publishing: stock-hugo
+2026-03-23 21:51:23,890 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:51:23,890 [INFO] Publishing: dividend-hugo
+2026-03-23 21:51:45,765 [INFO] Queue executing: ipo-hugo (remaining: 1)
+2026-03-23 21:51:45,766 [INFO] Publishing: ipo-hugo
+2026-03-23 21:52:42,700 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:52:42,701 [INFO] Publishing: etf-hugo
+2026-03-23 21:53:12,763 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:53:12,763 [INFO] Publishing: sector-hugo
+2026-03-23 21:53:50,900 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:53:50,901 [INFO] Publishing: ipo-hugo
+2026-03-23 21:54:28,441 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:54:28,442 [INFO] Publishing: finance-hugo
+2026-03-23 21:55:16,562 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-23 21:55:16,562 [INFO] Publishing: finance-hugo
+2026-03-23 21:56:32,204 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:56:32,204 [INFO] Publishing: stock-hugo
+2026-03-23 21:56:37,577 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:56:37,577 [INFO] Publishing: dividend-hugo
+2026-03-23 21:57:41,670 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:57:41,671 [INFO] Publishing: etf-hugo
+2026-03-23 21:58:22,893 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:58:22,893 [INFO] Publishing: sector-hugo
+2026-03-23 21:58:54,642 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:58:54,642 [INFO] Publishing: ipo-hugo
+2026-03-23 21:59:29,391 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 21:59:29,392 [INFO] Publishing: finance-hugo
+2026-03-23 22:01:10,954 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-23 22:01:10,955 [INFO] Publishing: travel2-hugo
+2026-03-23 22:01:41,061 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:01:41,061 [INFO] Publishing: stock-hugo
+2026-03-23 22:01:46,510 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:01:46,510 [INFO] Publishing: dividend-hugo
+2026-03-23 22:02:45,949 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:02:45,950 [INFO] Publishing: etf-hugo
+2026-03-23 22:03:32,803 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:03:32,803 [INFO] Publishing: sector-hugo
+2026-03-23 22:04:12,412 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:04:12,413 [INFO] Publishing: ipo-hugo
+2026-03-23 22:04:59,973 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:04:59,973 [INFO] Publishing: finance-hugo
+2026-03-23 22:07:06,395 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:07:06,395 [INFO] Publishing: stock-hugo
+2026-03-23 22:07:11,788 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:07:11,789 [INFO] Publishing: dividend-hugo
+2026-03-23 22:08:37,622 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:08:37,622 [INFO] Publishing: etf-hugo
+2026-03-23 22:09:11,978 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:09:11,978 [INFO] Publishing: sector-hugo
+2026-03-23 22:09:55,898 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:09:55,899 [INFO] Publishing: ipo-hugo
+2026-03-23 22:10:38,203 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:10:38,203 [INFO] Publishing: finance-hugo
+2026-03-23 22:12:26,558 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:12:26,558 [INFO] Publishing: stock-hugo
+2026-03-23 22:12:32,005 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:12:32,006 [INFO] Publishing: dividend-hugo
+2026-03-23 22:13:57,022 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:13:57,023 [INFO] Publishing: etf-hugo
+2026-03-23 22:14:34,853 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:14:34,853 [INFO] Publishing: sector-hugo
+2026-03-23 22:15:16,388 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:15:16,388 [INFO] Publishing: ipo-hugo
+2026-03-23 22:16:01,584 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:16:01,584 [INFO] Publishing: finance-hugo
+2026-03-23 22:17:35,534 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-23 22:17:35,535 [INFO] Publishing: travel3-hugo
+2026-03-23 22:17:35,598 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:17:35,599 [INFO] Publishing: stock-hugo
+2026-03-23 22:17:41,013 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:17:41,013 [INFO] Publishing: dividend-hugo
+2026-03-23 22:19:01,195 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:19:01,195 [INFO] Publishing: etf-hugo
+2026-03-23 22:19:40,499 [INFO]   Camping API Error: Expecting value: line 1 column 1 (char 0)
+2026-03-23 22:19:40,499 [INFO]   Camping API Error: Expecting value: line 1 column 1 (char 0)
+2026-03-23 22:19:55,534 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:19:55,534 [INFO] Publishing: sector-hugo
+2026-03-23 22:20:39,790 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:20:39,791 [INFO] Publishing: ipo-hugo
+2026-03-23 22:21:19,973 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:21:19,974 [INFO] Publishing: finance-hugo
+2026-03-23 22:23:02,231 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:23:02,231 [INFO] Publishing: stock-hugo
+2026-03-23 22:23:07,701 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:23:07,701 [INFO] Publishing: dividend-hugo
+2026-03-23 22:24:18,734 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:24:18,735 [INFO] Publishing: etf-hugo
+2026-03-23 22:24:56,462 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:24:56,462 [INFO] Publishing: sector-hugo
+2026-03-23 22:25:38,207 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:25:38,207 [INFO] Publishing: ipo-hugo
+2026-03-23 22:26:11,830 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:26:11,831 [INFO] Publishing: finance-hugo
+2026-03-23 22:28:07,426 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:28:07,426 [INFO] Publishing: stock-hugo
+2026-03-23 22:28:12,906 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:28:12,907 [INFO] Publishing: dividend-hugo
+2026-03-23 22:29:54,266 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:29:54,266 [INFO] Publishing: etf-hugo
+2026-03-23 22:30:24,015 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:30:24,016 [INFO] Publishing: sector-hugo
+2026-03-23 22:31:06,250 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:31:06,250 [INFO] Publishing: ipo-hugo
+2026-03-23 22:31:51,091 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:31:51,092 [INFO] Publishing: finance-hugo
+2026-03-23 22:33:11,199 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-23 22:33:11,201 [INFO] Publishing: travel4-hugo
+2026-03-23 22:33:11,261 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:33:11,261 [INFO] Publishing: stock-hugo
+2026-03-23 22:33:16,591 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:33:16,591 [INFO] Publishing: dividend-hugo
+2026-03-23 22:34:37,763 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:34:37,764 [INFO] Publishing: etf-hugo
+2026-03-23 22:35:15,630 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:35:15,630 [INFO] Publishing: sector-hugo
+2026-03-23 22:35:55,636 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:35:55,637 [INFO] Publishing: ipo-hugo
+2026-03-23 22:36:41,859 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:36:41,860 [INFO] Publishing: finance-hugo
+2026-03-23 22:38:32,531 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:38:32,532 [INFO] Publishing: stock-hugo
+2026-03-23 22:38:37,935 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:38:37,936 [INFO] Publishing: dividend-hugo
+2026-03-23 22:39:50,731 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:39:50,732 [INFO] Publishing: etf-hugo
+2026-03-23 22:40:24,659 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:40:24,660 [INFO] Publishing: sector-hugo
+2026-03-23 22:41:04,936 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:41:04,937 [INFO] Publishing: ipo-hugo
+2026-03-23 22:41:50,184 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:41:50,184 [INFO] Publishing: finance-hugo
+2026-03-23 22:43:56,370 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:43:56,370 [INFO] Publishing: stock-hugo
+2026-03-23 22:44:01,797 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:44:01,797 [INFO] Publishing: dividend-hugo
+2026-03-23 22:44:57,127 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:44:57,128 [INFO] Publishing: etf-hugo
+2026-03-23 22:45:39,814 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:45:39,815 [INFO] Publishing: sector-hugo
+2026-03-23 22:46:11,654 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:46:11,655 [INFO] Publishing: ipo-hugo
+2026-03-23 22:46:48,211 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:46:48,211 [INFO] Publishing: finance-hugo
+2026-03-23 22:48:12,528 [INFO] Batch deploy started
+2026-03-23 22:53:11,127 [INFO]   ===== 결과 =====
+2026-03-23 22:53:11,128 [INFO]     성공: 17
+2026-03-23 22:53:11,128 [INFO]     스킵: 6
+2026-03-23 22:53:11,128 [INFO]     실패: 0
+2026-03-23 22:53:11,128 [INFO]     CF 빌드 소모: 0 (Direct Upload)
+2026-03-23 22:53:11,198 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:53:11,198 [INFO] Publishing: stock-hugo
+2026-03-23 22:53:16,655 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:53:16,655 [INFO] Publishing: dividend-hugo
+2026-03-23 22:54:27,309 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:54:27,309 [INFO] Publishing: etf-hugo
+2026-03-23 22:55:03,151 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:55:03,152 [INFO] Publishing: sector-hugo
+2026-03-23 22:55:45,802 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:55:45,802 [INFO] Publishing: ipo-hugo
+2026-03-23 22:56:31,856 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:56:31,857 [INFO] Publishing: finance-hugo
+2026-03-23 22:58:11,546 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:58:11,547 [INFO] Publishing: stock-hugo
+2026-03-23 22:58:17,037 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:58:17,037 [INFO] Publishing: dividend-hugo
+2026-03-23 22:59:33,663 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:59:33,663 [INFO] Publishing: etf-hugo
+2026-03-23 22:59:59,941 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 22:59:59,942 [INFO] Publishing: sector-hugo
+2026-03-23 23:00:44,881 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:00:44,881 [INFO] Publishing: ipo-hugo
+2026-03-23 23:01:21,215 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:01:21,215 [INFO] Publishing: finance-hugo
+2026-03-23 23:03:16,649 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:03:16,649 [INFO] Publishing: stock-hugo
+2026-03-23 23:03:22,162 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:03:22,163 [INFO] Publishing: dividend-hugo
+2026-03-23 23:04:53,337 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:04:53,338 [INFO] Publishing: etf-hugo
+2026-03-23 23:06:00,283 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:06:00,283 [INFO] Publishing: sector-hugo
+2026-03-23 23:06:39,598 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:06:39,598 [INFO] Publishing: ipo-hugo
+2026-03-23 23:07:21,128 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:07:21,129 [INFO] Publishing: finance-hugo
+2026-03-23 23:08:32,139 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:08:32,140 [INFO] Publishing: stock-hugo
+2026-03-23 23:08:37,621 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:08:37,622 [INFO] Publishing: dividend-hugo
+2026-03-23 23:10:00,010 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:10:00,012 [INFO] Publishing: etf-hugo
+2026-03-23 23:10:40,924 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:10:40,924 [INFO] Publishing: sector-hugo
+2026-03-23 23:11:27,890 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:11:27,892 [INFO] Publishing: ipo-hugo
+2026-03-23 23:12:18,620 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:12:18,622 [INFO] Publishing: finance-hugo
+2026-03-23 23:13:37,651 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:13:37,652 [INFO] Publishing: stock-hugo
+2026-03-23 23:13:43,246 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:13:43,246 [INFO] Publishing: dividend-hugo
+2026-03-23 23:14:58,637 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:14:58,638 [INFO] Publishing: etf-hugo
+2026-03-23 23:15:31,423 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:15:31,423 [INFO] Publishing: sector-hugo
+2026-03-23 23:16:08,560 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:16:08,560 [INFO] Publishing: ipo-hugo
+2026-03-23 23:16:45,313 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:16:45,313 [INFO] Publishing: finance-hugo
+2026-03-23 23:19:06,295 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:19:06,296 [INFO] Publishing: stock-hugo
+2026-03-23 23:19:11,835 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:19:11,835 [INFO] Publishing: dividend-hugo
+2026-03-23 23:20:25,663 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:20:25,670 [INFO] Publishing: etf-hugo
+2026-03-23 23:21:10,875 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:21:10,875 [INFO] Publishing: sector-hugo
+2026-03-23 23:21:49,478 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:21:49,478 [INFO] Publishing: ipo-hugo
+2026-03-23 23:22:29,234 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:22:29,235 [INFO] Publishing: finance-hugo
+2026-03-23 23:24:29,301 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:24:29,302 [INFO] Publishing: stock-hugo
+2026-03-23 23:24:34,869 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:24:34,870 [INFO] Publishing: dividend-hugo
+2026-03-23 23:25:52,470 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:25:52,471 [INFO] Publishing: etf-hugo
+2026-03-23 23:26:27,106 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:26:27,107 [INFO] Publishing: sector-hugo
+2026-03-23 23:27:02,109 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:27:02,110 [INFO] Publishing: ipo-hugo
+2026-03-23 23:27:41,323 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:27:41,323 [INFO] Publishing: finance-hugo
+2026-03-23 23:29:54,175 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:29:54,176 [INFO] Publishing: stock-hugo
+2026-03-23 23:30:00,239 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:30:00,240 [INFO] Publishing: dividend-hugo
+2026-03-23 23:31:13,556 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:31:13,556 [INFO] Publishing: etf-hugo
+2026-03-23 23:31:42,283 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:31:42,283 [INFO] Publishing: sector-hugo
+2026-03-23 23:32:16,798 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:32:16,799 [INFO] Publishing: ipo-hugo
+2026-03-23 23:32:56,011 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:32:56,013 [INFO] Publishing: finance-hugo
+2026-03-23 23:35:02,892 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:35:02,893 [INFO] Publishing: stock-hugo
+2026-03-23 23:35:08,389 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:35:08,389 [INFO] Publishing: dividend-hugo
+2026-03-23 23:36:06,115 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:36:06,115 [INFO] Publishing: etf-hugo
+2026-03-23 23:36:42,036 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:36:42,037 [INFO] Publishing: sector-hugo
+2026-03-23 23:37:21,103 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:37:21,103 [INFO] Publishing: ipo-hugo
+2026-03-23 23:37:49,743 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:37:49,747 [INFO] Publishing: finance-hugo
+2026-03-23 23:40:17,612 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:40:17,613 [INFO] Publishing: stock-hugo
+2026-03-23 23:40:23,308 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:40:23,308 [INFO] Publishing: dividend-hugo
+2026-03-23 23:41:33,789 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:41:33,790 [INFO] Publishing: etf-hugo
+2026-03-23 23:42:03,550 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:42:03,550 [INFO] Publishing: sector-hugo
+2026-03-23 23:42:45,441 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:42:45,442 [INFO] Publishing: ipo-hugo
+2026-03-23 23:43:00,759 [ERROR]   ERR: py", line 1026, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 400 Client Error: Bad Request for url: https://api.openai.com/v1/chat/completions
+
+2026-03-23 23:43:03,158 [WARNING] Telegram send failed: 401
+2026-03-23 23:43:03,160 [WARNING] CATCHUP: ipo-hugo 보충 실패, 다음 정규 스케줄에서 재시도
+2026-03-23 23:43:08,235 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:43:08,235 [INFO] Publishing: finance-hugo
+2026-03-23 23:45:38,778 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:45:38,778 [INFO] Publishing: stock-hugo
+2026-03-23 23:45:44,698 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:45:44,699 [INFO] Publishing: dividend-hugo
+2026-03-23 23:47:22,384 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:47:22,386 [INFO] Publishing: etf-hugo
+2026-03-23 23:47:52,856 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:47:52,857 [INFO] Publishing: sector-hugo
+2026-03-23 23:48:32,368 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:48:32,369 [INFO] Publishing: ipo-hugo
+2026-03-23 23:49:01,953 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:49:01,953 [INFO] Publishing: finance-hugo
+2026-03-23 23:50:03,580 [INFO] Daily report
+2026-03-23 23:50:03,825 [INFO]   Report failed: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-03-23 23:51:04,035 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:51:04,037 [INFO] Publishing: stock-hugo
+2026-03-23 23:51:09,655 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:51:09,656 [INFO] Publishing: dividend-hugo
+2026-03-23 23:52:11,587 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:52:11,588 [INFO] Publishing: etf-hugo
+2026-03-23 23:52:37,249 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:52:37,249 [INFO] Publishing: sector-hugo
+2026-03-23 23:53:17,284 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:53:17,285 [INFO] Publishing: ipo-hugo
+2026-03-23 23:53:59,265 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:53:59,266 [INFO] Publishing: finance-hugo
+2026-03-23 23:56:13,095 [INFO] CATCHUP: stock-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:56:13,096 [INFO] Publishing: stock-hugo
+2026-03-23 23:56:18,676 [INFO] CATCHUP: dividend-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:56:18,676 [INFO] Publishing: dividend-hugo
+2026-03-23 23:57:37,750 [INFO] CATCHUP: etf-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:57:37,751 [INFO] Publishing: etf-hugo
+2026-03-23 23:58:07,750 [INFO] CATCHUP: sector-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:58:07,750 [INFO] Publishing: sector-hugo
+2026-03-23 23:58:39,842 [INFO] CATCHUP: ipo-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:58:39,842 [INFO] Publishing: ipo-hugo
+2026-03-23 23:59:14,631 [INFO] CATCHUP: finance-hugo expected=5 actual=0 missed=5 -> 1건만 보충
+2026-03-23 23:59:14,633 [INFO] Publishing: finance-hugo
+2026-03-24 00:25:30,129 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 00:25:30,148 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 00:25:30,148 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 00:25:30,148 [INFO] Registered 98 jobs
+2026-03-24 00:25:30,148 [INFO] Next run: 2026-03-24 05:00:00
+2026-03-24 05:00:26,984 [INFO] GAP keyword sync:   고용/취업: 4
+2026-03-24 06:30:19,036 [INFO] === CAP 데이터 갱신 시작 ===
+2026-03-24 06:30:32,016 [WARNING] 트림 업데이트 실패 [그랜저 하이브리드]: database is locked
+2026-03-24 06:30:33,334 [WARNING] 트림 업데이트 실패 [K8 하이브리드]: database is locked
+2026-03-24 06:30:34,759 [WARNING] 트림 업데이트 실패 [그랜저 2.5]: database is locked
+2026-03-24 06:30:36,160 [WARNING] 트림 업데이트 실패 [투싼 하이브리드]: database is locked
+2026-03-24 06:30:37,617 [WARNING] 트림 업데이트 실패 [쏘렌토 하이브리드]: database is locked
+2026-03-24 06:30:38,975 [WARNING] 트림 업데이트 실패 [스포티지 하이브리드]: database is locked
+2026-03-24 06:30:40,174 [WARNING] 트림 업데이트 실패 [싼타페 하이브리드]: database is locked
+2026-03-24 06:30:41,529 [WARNING] 트림 업데이트 실패 [K5]: database is locked
+2026-03-24 06:30:42,844 [WARNING] 트림 업데이트 실패 [쏘나타]: database is locked
+2026-03-24 06:30:44,243 [WARNING] 트림 업데이트 실패 [아반떼 하이브리드]: database is locked
+2026-03-24 06:30:45,633 [WARNING] 트림 업데이트 실패 [K5 하이브리드]: database is locked
+2026-03-24 06:30:47,019 [WARNING] 트림 업데이트 실패 [아반떼]: database is locked
+2026-03-24 06:30:48,397 [WARNING] 트림 업데이트 실패 [코나]: database is locked
+2026-03-24 06:30:49,756 [WARNING] 트림 업데이트 실패 [코나 하이브리드]: database is locked
+2026-03-24 06:30:51,114 [WARNING] 트림 업데이트 실패 [아이오닉 5]: database is locked
+2026-03-24 06:30:52,552 [WARNING] 트림 업데이트 실패 [아이오닉 6]: database is locked
+2026-03-24 06:30:54,011 [WARNING] 트림 업데이트 실패 [EV6]: database is locked
+2026-03-24 06:30:55,596 [WARNING] 트림 업데이트 실패 [K9]: database is locked
+2026-03-24 06:30:57,061 [WARNING] 트림 업데이트 실패 [캐스퍼]: database is locked
+2026-03-24 06:30:58,510 [WARNING] 트림 업데이트 실패 [모닝]: database is locked
+2026-03-24 06:30:59,951 [WARNING] 트림 업데이트 실패 [쏘렌토]: database is locked
+2026-03-24 06:31:01,524 [WARNING] 트림 업데이트 실패 [모델 Y]: database is locked
+2026-03-24 06:31:03,010 [WARNING] 트림 업데이트 실패 [K8]: database is locked
+2026-03-24 06:31:04,336 [WARNING] 트림 업데이트 실패 [RS3]: database is locked
+2026-03-24 06:31:05,729 [WARNING] 트림 업데이트 실패 [EX30 크로스 컨트리]: database is locked
+2026-03-24 06:31:07,052 [WARNING] 트림 업데이트 실패 [XC40]: database is locked
+2026-03-24 06:31:08,491 [WARNING] 트림 업데이트 실패 [V60 크로스 컨트리]: database is locked
+2026-03-24 06:31:09,923 [WARNING] 트림 업데이트 실패 [프리우스]: database is locked
+2026-03-24 06:31:11,452 [WARNING] 트림 업데이트 실패 [레이]: database is locked
+2026-03-24 06:31:12,893 [WARNING] 트림 업데이트 실패 [레이 EV]: database is locked
+2026-03-24 06:31:14,298 [WARNING] 트림 업데이트 실패 [EV5]: database is locked
+2026-03-24 06:31:15,562 [WARNING] 트림 업데이트 실패 [GV80]: database is locked
+2026-03-24 06:31:16,962 [WARNING] 트림 업데이트 실패 [GV80 쿠페]: database is locked
+2026-03-24 06:31:18,341 [WARNING] 트림 업데이트 실패 [그랑 콜레오스]: database is locked
+2026-03-24 06:31:19,709 [WARNING] 트림 업데이트 실패 [그랑 콜레오스 하이브리드]: database is locked
+2026-03-24 06:31:21,093 [WARNING] 트림 업데이트 실패 [오딧세이]: database is locked
+2026-03-24 06:31:22,454 [WARNING] 트림 업데이트 실패 [AMG GT]: database is locked
+2026-03-24 06:31:23,833 [WARNING] 트림 업데이트 실패 [SL]: database is locked
+2026-03-24 06:31:25,171 [WARNING] 트림 업데이트 실패 [GLS]: database is locked
+2026-03-24 06:31:26,567 [WARNING] 트림 업데이트 실패 [GLE]: database is locked
+2026-03-24 06:31:27,902 [WARNING] 트림 업데이트 실패 [아이오닉 5 N]: database is locked
+2026-03-24 06:31:29,226 [WARNING] 트림 업데이트 실패 [쏘나타 하이브리드]: database is locked
+2026-03-24 06:31:30,712 [WARNING] 트림 업데이트 실패 [마이바흐 S클래스]: database is locked
+2026-03-24 06:31:32,038 [WARNING] 트림 업데이트 실패 [S e-트론 GT]: database is locked
+2026-03-24 06:31:33,500 [WARNING] 트림 업데이트 실패 [RS e-트론 GT]: database is locked
+2026-03-24 06:31:34,919 [WARNING] 트림 업데이트 실패 [아이오닉 6 N]: database is locked
+2026-03-24 06:31:36,299 [WARNING] 트림 업데이트 실패 [렉스턴]: database is locked
+2026-03-24 06:31:37,867 [WARNING] 트림 업데이트 실패 [무쏘 스포츠]: database is locked
+2026-03-24 06:31:39,275 [WARNING] 트림 업데이트 실패 [EX30]: database is locked
+2026-03-24 06:31:40,514 [WARNING] 트림 업데이트 실패 [S8]: database is locked
+2026-03-24 06:31:41,743 [WARNING] 트림 업데이트 실패 [GV70]: database is locked
+2026-03-24 06:31:43,133 [WARNING] 트림 업데이트 실패 [1시리즈]: database is locked
+2026-03-24 06:31:44,511 [WARNING] 트림 업데이트 실패 [2시리즈 액티브 투어러]: database is locked
+2026-03-24 06:31:45,963 [WARNING] 트림 업데이트 실패 [3시리즈]: database is locked
+2026-03-24 06:31:47,305 [WARNING] 트림 업데이트 실패 [5시리즈]: database is locked
+2026-03-24 06:31:48,756 [WARNING] 트림 업데이트 실패 [7시리즈]: database is locked
+2026-03-24 06:31:50,144 [WARNING] 트림 업데이트 실패 [i7]: database is locked
+2026-03-24 06:31:51,452 [WARNING] 트림 업데이트 실패 [iX1]: database is locked
+2026-03-24 06:31:52,818 [WARNING] 트림 업데이트 실패 [X1]: database is locked
+2026-03-24 06:31:54,114 [WARNING] 트림 업데이트 실패 [M5]: database is locked
+2026-03-24 06:31:55,506 [WARNING] 트림 업데이트 실패 [A3]: database is locked
+2026-03-24 06:31:56,755 [WARNING] 트림 업데이트 실패 [i5]: database is locked
+2026-03-24 06:31:58,128 [WARNING] 트림 업데이트 실패 [LM]: database is locked
+2026-03-24 06:31:59,500 [WARNING] 트림 업데이트 실패 [M3]: database is locked
+2026-03-24 06:32:00,866 [WARNING] 트림 업데이트 실패 [M4]: database is locked
+2026-03-24 06:32:02,247 [WARNING] 트림 업데이트 실패 [CR-V]: database is locked
+2026-03-24 06:32:03,624 [WARNING] 트림 업데이트 실패 [모델 3]: database is locked
+2026-03-24 06:32:04,910 [WARNING] 트림 업데이트 실패 [Q8]: database is locked
+2026-03-24 06:32:06,263 [WARNING] 트림 업데이트 실패 [X3]: database is locked
+2026-03-24 06:32:07,658 [WARNING] 트림 업데이트 실패 [마이바흐 SL]: database is locked
+2026-03-24 06:32:09,065 [WARNING] 트림 업데이트 실패 [X7]: database is locked
+2026-03-24 06:32:10,443 [WARNING] 트림 업데이트 실패 [8시리즈]: database is locked
+2026-03-24 06:32:11,819 [WARNING] 트림 업데이트 실패 [Z4]: database is locked
+2026-03-24 06:32:13,268 [WARNING] 트림 업데이트 실패 [2시리즈]: database is locked
+2026-03-24 06:32:14,541 [WARNING] 트림 업데이트 실패 [X2]: database is locked
+2026-03-24 06:32:15,908 [WARNING] 트림 업데이트 실패 [X5]: database is locked
+2026-03-24 06:32:17,123 [WARNING] 트림 업데이트 실패 [X6]: database is locked
+2026-03-24 06:32:18,413 [WARNING] 트림 업데이트 실패 [X5 M]: database is locked
+2026-03-24 06:32:19,736 [WARNING] 트림 업데이트 실패 [X6 M]: database is locked
+2026-03-24 06:32:21,207 [WARNING] 트림 업데이트 실패 [GR86]: database is locked
+2026-03-24 06:32:22,645 [WARNING] 트림 업데이트 실패 [M2]: database is locked
+2026-03-24 06:32:24,095 [WARNING] 트림 업데이트 실패 [마이바흐 GLS]: database is locked
+2026-03-24 06:32:25,543 [WARNING] 트림 업데이트 실패 [RSQ8]: database is locked
+2026-03-24 06:32:27,117 [WARNING] 트림 업데이트 실패 [QM6]: database is locked
+2026-03-24 06:32:28,436 [WARNING] 트림 업데이트 실패 [XM]: database is locked
+2026-03-24 06:32:29,733 [WARNING] 트림 업데이트 실패 [Q4 e-트론]: database is locked
+2026-03-24 06:32:31,167 [WARNING] 트림 업데이트 실패 [LS]: database is locked
+2026-03-24 06:32:32,385 [WARNING] 트림 업데이트 실패 [NX]: database is locked
+2026-03-24 06:32:33,685 [WARNING] 트림 업데이트 실패 [캠리]: database is locked
+2026-03-24 06:32:35,024 [WARNING] 트림 업데이트 실패 [2시리즈 그란 쿠페]: database is locked
+2026-03-24 06:32:36,304 [WARNING] 트림 업데이트 실패 [iX2]: database is locked
+2026-03-24 06:32:37,692 [WARNING] 트림 업데이트 실패 [G클래스]: database is locked
+2026-03-24 06:32:39,159 [WARNING] 트림 업데이트 실패 [포터2]: database is locked
+2026-03-24 06:32:40,884 [WARNING] 트림 업데이트 실패 [포터2 일렉트릭]: database is locked
+2026-03-24 06:32:42,262 [WARNING] 트림 업데이트 실패 [스타리아]: database is locked
+2026-03-24 06:32:43,515 [WARNING] 트림 업데이트 실패 [Q3]: database is locked
+2026-03-24 06:32:44,889 [WARNING] 트림 업데이트 실패 [Q7]: database is locked
+2026-03-24 06:32:46,297 [WARNING] 트림 업데이트 실패 [SQ7]: database is locked
+2026-03-24 06:32:47,717 [WARNING] 트림 업데이트 실패 [LX]: database is locked
+2026-03-24 06:32:49,244 [WARNING] 트림 업데이트 실패 [무쏘]: database is locked
+2026-03-24 06:32:50,641 [WARNING] 트림 업데이트 실패 [i4]: database is locked
+2026-03-24 06:32:52,067 [WARNING] 트림 업데이트 실패 [봉고3 EV]: database is locked
+2026-03-24 06:32:53,437 [WARNING] 트림 업데이트 실패 [G80]: database is locked
+2026-03-24 06:32:54,907 [WARNING] 트림 업데이트 실패 [모델 Y]: database is locked
+2026-03-24 06:32:56,312 [WARNING] 트림 업데이트 실패 [모델 3]: database is locked
+2026-03-24 06:32:57,772 [WARNING] 트림 업데이트 실패 [G70]: database is locked
+2026-03-24 06:32:59,133 [WARNING] 트림 업데이트 실패 [G70 슈팅 브레이크]: database is locked
+2026-03-24 06:33:00,472 [WARNING] 트림 업데이트 실패 [GV60 마그마]: database is locked
+2026-03-24 06:33:01,824 [WARNING] 트림 업데이트 실패 [필랑트]: database is locked
+2026-03-24 06:33:03,170 [WARNING] 트림 업데이트 실패 [EQE]: database is locked
+2026-03-24 06:33:04,622 [WARNING] 트림 업데이트 실패 [EQE SUV]: database is locked
+2026-03-24 06:33:05,944 [WARNING] 트림 업데이트 실패 [C클래스]: database is locked
+2026-03-24 06:33:07,317 [WARNING] 트림 업데이트 실패 [마이바흐 EQS SUV]: database is locked
+2026-03-24 06:33:08,706 [WARNING] 트림 업데이트 실패 [EV3]: database is locked
+2026-03-24 06:33:10,103 [WARNING] 트림 업데이트 실패 [EV4]: database is locked
+2026-03-24 06:33:11,426 [WARNING] 트림 업데이트 실패 [토레스 EVX]: database is locked
+2026-03-24 06:33:12,760 [WARNING] 트림 업데이트 실패 [EV9]: database is locked
+2026-03-24 06:33:14,139 [WARNING] 트림 업데이트 실패 [K9]: database is locked
+2026-03-24 06:33:15,507 [WARNING] 트림 업데이트 실패 [RX]: database is locked
+2026-03-24 06:33:16,784 [WARNING] 트림 업데이트 실패 [UX]: database is locked
+2026-03-24 06:33:18,162 [WARNING] 트림 업데이트 실패 [EQS SUV]: database is locked
+2026-03-24 06:33:19,523 [WARNING] 트림 업데이트 실패 [일렉트리파이드 G80]: database is locked
+2026-03-24 06:33:22,291 [WARNING] 트림 업데이트 실패 [아이오닉 9]: database is locked
+2026-03-24 06:33:22,741 [INFO] 트림 업데이트: 0건, 가격변동: 0건
+2026-03-24 06:33:34,451 [ERROR] fill_trim_efficiency 실패: database is locked
+2026-03-24 06:33:45,984 [ERROR] refresh_images 실패: database is locked
+2026-03-24 06:33:56,877 [ERROR] scan_new_cars 실패: database is locked
+2026-03-24 06:34:08,795 [ERROR] detect_price_changes 실패: database is locked
+2026-03-24 06:34:20,418 [ERROR] replenish_topics 실패: database is locked
+Traceback (most recent call last):
+  File "/Users/twinssn/Projects/5000/pipelines/car/daily_refresh.py", line 672, in <module>
+    run_refresh()
+    ~~~~~~~~~~~^^
+  File "/Users/twinssn/Projects/5000/pipelines/car/daily_refresh.py", line 658, in run_refresh
+    c.execute("INSERT INTO refresh_log (refresh_date, trims_updated, images_added, price_changes, cars_scanned) VALUES (?,?,?,?,?)",
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+              (today, trims_updated, images_added, price_changes, len(new_cars) if new_cars else 0))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: database is locked
+2026-03-24 06:34:32,184 [INFO] CAR daily_refresh completed
+2026-03-24 07:00:06,355 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-24 07:00:06,357 [INFO] Publishing: travel-hugo
+2026-03-24 07:02:06,552 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-24 07:02:06,553 [INFO] Publishing: travel1-hugo
+2026-03-24 07:04:06,905 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-24 07:04:06,906 [INFO] Publishing: travel2-hugo
+2026-03-24 07:04:37,099 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:04:37,099 [INFO] Publishing: travel2-hugo
+2026-03-24 07:06:28,594 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-24 07:06:28,595 [INFO] Publishing: travel3-hugo
+2026-03-24 07:08:29,105 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-24 07:08:29,106 [INFO] Publishing: travel4-hugo
+2026-03-24 07:10:29,661 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-24 07:10:29,663 [INFO] Publishing: hotissue-hugo
+2026-03-24 07:12:29,996 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-24 07:12:29,997 [INFO] Publishing: tco-hugo
+2026-03-24 07:14:00,323 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-24 07:14:00,324 [INFO] Publishing: deal-hugo
+2026-03-24 07:16:00,929 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-24 07:16:00,929 [INFO] Publishing: compare-hugo
+2026-03-24 07:18:01,493 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-24 07:18:01,494 [INFO] Publishing: guide-hugo
+2026-03-24 07:20:01,876 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-24 07:20:01,876 [INFO] Publishing: ev-hugo
+2026-03-24 07:20:01,916 [INFO] CATCHUP: ev-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:20:01,916 [INFO] Publishing: ev-hugo
+2026-03-24 07:22:19,675 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-24 07:22:19,677 [INFO] Publishing: stock-hugo
+2026-03-24 07:24:20,224 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-24 07:24:20,225 [INFO] Publishing: dividend-hugo
+2026-03-24 07:25:20,565 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:25:20,565 [INFO] Publishing: stock-hugo
+2026-03-24 07:27:03,612 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:27:03,613 [INFO] Publishing: dividend-hugo
+2026-03-24 07:27:25,405 [ERROR]   ERR: : /v1/chat/completions (Caused by NameResolutionError("HTTPSConnection(host='api.openai.com', port=443): Failed to resolve 'api.openai.com' ([Errno 8] nodename nor servname provided, or not known)"))
+
+2026-03-24 07:27:25,433 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-24 07:27:25,433 [WARNING] CATCHUP: dividend-hugo 보충 실패 (1/3)
+2026-03-24 07:28:00,718 [INFO] Queue executing: etf-hugo (remaining: 1)
+2026-03-24 07:28:00,719 [INFO] Publishing: etf-hugo
+2026-03-24 07:30:31,371 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:30:31,372 [INFO] Publishing: stock-hugo
+2026-03-24 07:31:00,991 [INFO] Queue executing: sector-hugo (remaining: 1)
+2026-03-24 07:31:00,992 [INFO] Publishing: sector-hugo
+2026-03-24 07:31:15,630 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:31:15,631 [INFO] Publishing: dividend-hugo
+2026-03-24 07:32:08,693 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:32:08,694 [INFO] Publishing: etf-hugo
+2026-03-24 07:32:54,977 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:32:54,978 [INFO] Publishing: sector-hugo
+2026-03-24 07:33:44,596 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:33:44,597 [INFO] Publishing: ipo-hugo
+2026-03-24 07:34:29,071 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-24 07:34:29,072 [INFO] Publishing: ipo-hugo
+2026-03-24 07:34:57,972 [INFO] Queue executing: finance-hugo (remaining: 1)
+2026-03-24 07:34:57,972 [INFO] Publishing: finance-hugo
+2026-03-24 07:35:58,157 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 07:35:58,157 [INFO] Publishing: stock-hugo
+2026-03-24 07:37:19,761 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 07:37:19,761 [INFO] Publishing: dividend-hugo
+2026-03-24 07:38:13,801 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-24 07:38:13,802 [INFO] Publishing: senior-hugo
+2026-03-24 07:38:53,045 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:38:53,045 [INFO] Publishing: etf-hugo
+2026-03-24 07:39:38,300 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:39:38,300 [INFO] Publishing: sector-hugo
+2026-03-24 07:40:06,276 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 07:40:06,300 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 07:40:06,300 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 07:40:06,300 [INFO] Registered 98 jobs
+2026-03-24 07:40:06,300 [INFO] Next run: 2026-03-24 08:10:00
+2026-03-24 07:40:06,345 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:40:06,345 [INFO] Publishing: stock-hugo
+2026-03-24 07:45:06,331 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 07:45:06,353 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 07:45:06,353 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 07:45:06,353 [INFO] Registered 98 jobs
+2026-03-24 07:45:06,353 [INFO] Next run: 2026-03-24 08:10:00
+2026-03-24 07:45:06,427 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:45:06,427 [INFO] Publishing: stock-hugo
+2026-03-24 07:45:50,687 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:45:50,688 [INFO] Publishing: dividend-hugo
+2026-03-24 07:47:20,517 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:47:20,518 [INFO] Publishing: etf-hugo
+2026-03-24 07:48:10,022 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:48:10,022 [INFO] Publishing: sector-hugo
+2026-03-24 07:48:45,005 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:48:45,006 [INFO] Publishing: ipo-hugo
+2026-03-24 07:49:36,454 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:49:36,454 [INFO] Publishing: finance-hugo
+2026-03-24 07:50:14,518 [INFO] CATCHUP: senior-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 07:50:14,520 [INFO] Publishing: senior-hugo
+2026-03-24 07:51:47,962 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:51:47,963 [INFO] Publishing: stock-hugo
+2026-03-24 07:53:20,444 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:53:20,445 [INFO] Publishing: dividend-hugo
+2026-03-24 07:54:26,757 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:54:26,759 [INFO] Publishing: etf-hugo
+2026-03-24 07:55:02,544 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:55:02,545 [INFO] Publishing: sector-hugo
+2026-03-24 07:55:51,905 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:55:51,906 [INFO] Publishing: ipo-hugo
+2026-03-24 07:56:41,806 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 07:56:41,807 [INFO] Publishing: finance-hugo
+2026-03-24 07:58:06,255 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 07:58:06,255 [INFO] Publishing: stock-hugo
+2026-03-24 07:59:30,883 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 07:59:30,884 [INFO] Publishing: dividend-hugo
+2026-03-24 08:00:59,116 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 08:00:59,117 [INFO] Publishing: etf-hugo
+2026-03-24 08:01:46,571 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 08:01:46,572 [INFO] Publishing: sector-hugo
+2026-03-24 08:02:34,275 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 08:02:34,275 [INFO] Publishing: ipo-hugo
+2026-03-24 08:03:31,158 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 08:03:31,159 [INFO] Publishing: finance-hugo
+2026-03-24 08:10:16,055 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-24 08:10:16,056 [INFO] Publishing: senior-blogger
+2026-03-24 08:20:13,293 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 08:20:13,316 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 08:20:13,316 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 08:20:13,316 [INFO] Registered 98 jobs
+2026-03-24 08:20:13,316 [INFO] Next run: 2026-03-24 10:00:00
+2026-03-24 09:07:58,789 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 09:07:58,812 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 09:07:58,812 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 09:07:58,812 [INFO] Registered 98 jobs
+2026-03-24 09:07:58,812 [INFO] Next run: 2026-03-24 10:00:00
+2026-03-24 09:07:58,832 [INFO] CATCHUP: hotissue-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:07:58,832 [INFO] Publishing: hotissue-hugo
+2026-03-24 09:08:55,353 [INFO] CATCHUP: tco-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:08:55,354 [INFO] Publishing: tco-hugo
+2026-03-24 09:09:58,067 [INFO] CATCHUP: deal-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:09:58,068 [INFO] Publishing: deal-hugo
+2026-03-24 09:11:04,410 [INFO] CATCHUP: compare-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:11:04,411 [INFO] Publishing: compare-hugo
+2026-03-24 09:11:59,405 [INFO]   [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: 모델 Y
+2026-03-24 09:12:04,482 [INFO] CATCHUP: guide-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:12:04,483 [INFO] Publishing: guide-hugo
+2026-03-24 09:12:51,601 [INFO] CATCHUP: ev-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:12:51,603 [INFO] Publishing: ev-hugo
+2026-03-24 09:13:53,743 [INFO] CATCHUP: travel-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:13:53,770 [INFO] Publishing: travel-hugo
+2026-03-24 09:15:22,765 [INFO] CATCHUP: travel1-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:15:22,766 [INFO] Publishing: travel1-hugo
+2026-03-24 09:16:31,207 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:16:31,208 [INFO] Publishing: travel2-hugo
+2026-03-24 09:17:47,508 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:17:47,509 [INFO] Publishing: travel3-hugo
+2026-03-24 09:19:06,489 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:19:06,490 [INFO] Publishing: travel4-hugo
+2026-03-24 09:20:29,580 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:20:29,582 [INFO] Publishing: stock-hugo
+2026-03-24 09:21:51,462 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:21:51,463 [INFO] Publishing: dividend-hugo
+2026-03-24 09:23:15,887 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:23:15,887 [INFO] Publishing: etf-hugo
+2026-03-24 09:24:02,306 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:24:02,306 [INFO] Publishing: sector-hugo
+2026-03-24 09:24:35,292 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:24:35,293 [INFO] Publishing: ipo-hugo
+2026-03-24 09:25:35,602 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:25:35,602 [INFO] Publishing: finance-hugo
+2026-03-24 09:26:25,548 [INFO] CATCHUP: senior-blogger expected=1 actual=0 missed=1 attempt=1/3
+2026-03-24 09:26:25,549 [INFO] Publishing: senior-blogger
+2026-03-24 09:26:57,009 [ERROR]   ERR: ^
+  File "/Users/twinssn/Projects/5000/dispatcher.py", line 183, in dispatch
+    if result and result.get("success"):
+                  ^^^^^^^^^^
+AttributeError: 'bool' object has no attribute 'get'
+
+2026-03-24 09:26:57,875 [WARNING] CATCHUP: senior-blogger 보충 실패 (1/3)
+2026-03-24 09:27:33,072 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 09:27:33,072 [INFO] Publishing: sector-hugo
+2026-03-24 09:28:10,213 [INFO] CATCHUP: senior-blogger expected=1 actual=0 missed=1 attempt=2/3
+2026-03-24 09:28:10,213 [INFO] Publishing: senior-blogger
+2026-03-24 09:28:38,562 [ERROR]   ERR: ^
+  File "/Users/twinssn/Projects/5000/dispatcher.py", line 183, in dispatch
+    if result and result.get("success"):
+                  ^^^^^^^^^^
+AttributeError: 'bool' object has no attribute 'get'
+
+2026-03-24 09:28:39,469 [WARNING] CATCHUP: senior-blogger 보충 실패 (2/3)
+2026-03-24 09:32:45,012 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 09:32:45,012 [INFO] Publishing: sector-hugo
+2026-03-24 09:33:19,473 [INFO] CATCHUP: senior-blogger expected=1 actual=0 missed=1 attempt=3/3
+2026-03-24 09:33:19,474 [INFO] Publishing: senior-blogger
+2026-03-24 09:33:57,079 [ERROR]   ERR: ^^
+  File "/Users/twinssn/Projects/5000/dispatcher.py", line 183, in dispatch
+    if result and result.get("success"):
+                  ^^^^^^^^^^
+AttributeError: 'str' object has no attribute 'get'
+
+2026-03-24 09:33:57,929 [WARNING] CATCHUP: senior-blogger 보충 실패 (3/3)
+2026-03-24 10:00:07,237 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-24 10:00:07,237 [INFO] Publishing: travel-hugo
+2026-03-24 10:02:07,391 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-24 10:02:07,393 [INFO] Publishing: travel1-hugo
+2026-03-24 10:04:07,721 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-24 10:04:07,722 [INFO] Publishing: travel2-hugo
+2026-03-24 10:06:08,002 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-24 10:06:08,003 [INFO] Publishing: travel3-hugo
+2026-03-24 10:08:08,257 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-24 10:08:08,277 [INFO] Publishing: travel4-hugo
+2026-03-24 10:10:08,607 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-24 10:10:08,608 [INFO] Publishing: hotissue-hugo
+2026-03-24 10:12:08,886 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-24 10:12:08,887 [INFO] Publishing: tco-hugo
+2026-03-24 10:12:53,926 [INFO]   [BLOCK] 연비 데이터 없음 - 발행 차단: EX30
+2026-03-24 10:12:53,926 [INFO]     [BLOCK] 연비 데이터 없음 - 발행 차단: EV5
+2026-03-24 10:14:09,219 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-24 10:14:09,219 [INFO] Publishing: deal-hugo
+2026-03-24 10:16:09,475 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-24 10:16:09,477 [INFO] Publishing: compare-hugo
+2026-03-24 10:18:09,590 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-24 10:18:09,590 [INFO] Publishing: guide-hugo
+2026-03-24 10:20:09,916 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-24 10:20:09,917 [INFO] Publishing: ev-hugo
+2026-03-24 10:22:10,172 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-24 10:22:10,173 [INFO] Publishing: stock-hugo
+2026-03-24 10:24:10,520 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-24 10:24:10,521 [INFO] Publishing: dividend-hugo
+2026-03-24 10:26:10,721 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-24 10:26:10,722 [INFO] Publishing: etf-hugo
+2026-03-24 10:26:30,395 [ERROR]   ERR: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        (published_url, article_id),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
+
+2026-03-24 10:28:10,954 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-24 10:28:10,954 [INFO] Publishing: sector-hugo
+2026-03-24 10:30:11,219 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-24 10:30:11,220 [INFO] Publishing: ipo-hugo
+2026-03-24 10:30:54,767 [ERROR]   ERR: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        (published_url, article_id),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
+
+2026-03-24 10:32:11,410 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-24 10:32:11,411 [INFO] Publishing: finance-hugo
+2026-03-24 10:34:11,730 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-24 10:34:11,731 [INFO] Publishing: senior-hugo
+2026-03-24 11:10:16,120 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-24 11:10:16,122 [INFO] Publishing: senior-blogger
+2026-03-24 11:24:50,448 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 11:24:50,470 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 11:24:50,470 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 11:24:50,470 [INFO] Registered 98 jobs
+2026-03-24 11:24:50,470 [INFO] Next run: 2026-03-24 13:00:00
+2026-03-24 11:24:50,499 [INFO] CATCHUP: sector-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-24 11:24:50,499 [INFO] Publishing: sector-hugo
+2026-03-24 11:29:41,034 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 11:29:41,056 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 11:29:41,056 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 11:29:41,056 [INFO] Registered 98 jobs
+2026-03-24 11:29:41,056 [INFO] Next run: 2026-03-24 13:00:00
+2026-03-24 13:00:28,162 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-24 13:00:28,198 [INFO] QUOTA SKIP: travel-hugo actual=7 >= quota=5
+2026-03-24 13:02:28,429 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-24 13:02:28,468 [INFO] QUOTA SKIP: travel1-hugo actual=5 >= quota=5
+2026-03-24 13:04:28,709 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-24 13:04:28,753 [INFO] QUOTA SKIP: travel2-hugo actual=6 >= quota=5
+2026-03-24 13:05:17,663 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 13:05:17,694 [INFO] Network ready
+2026-03-24 13:05:17,714 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 13:05:17,714 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 13:05:17,714 [INFO] Registered 98 jobs
+2026-03-24 13:05:17,714 [INFO] Next run: 2026-03-24 13:06:00
+2026-03-24 13:06:17,916 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-24 13:06:17,958 [INFO] QUOTA SKIP: travel3-hugo actual=5 >= quota=5
+2026-03-24 13:08:18,174 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-24 13:08:18,214 [INFO] QUOTA SKIP: travel4-hugo actual=5 >= quota=5
+2026-03-24 13:10:18,410 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-24 13:10:18,468 [INFO] QUOTA SKIP: hotissue-hugo actual=6 >= quota=5
+2026-03-24 13:12:18,639 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-24 13:12:18,674 [INFO] QUOTA SKIP: tco-hugo actual=6 >= quota=5
+2026-03-24 13:14:18,806 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-24 13:14:18,841 [INFO] Publishing: deal-hugo
+2026-03-24 13:16:19,084 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-24 13:16:19,121 [INFO] Publishing: compare-hugo
+2026-03-24 13:18:19,351 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-24 13:18:19,385 [INFO] QUOTA SKIP: guide-hugo actual=5 >= quota=5
+2026-03-24 13:20:19,533 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-24 13:20:19,586 [INFO] QUOTA SKIP: ev-hugo actual=7 >= quota=5
+2026-03-24 13:22:19,869 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-24 13:22:19,906 [INFO] Publishing: stock-hugo
+2026-03-24 13:24:20,091 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-24 13:24:20,126 [INFO] QUOTA SKIP: dividend-hugo actual=6 >= quota=5
+2026-03-24 13:26:20,343 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-24 13:26:20,378 [INFO] Publishing: etf-hugo
+2026-03-24 13:28:20,562 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-24 13:28:20,603 [INFO] Publishing: sector-hugo
+2026-03-24 13:30:20,794 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-24 13:30:20,859 [INFO] Publishing: ipo-hugo
+2026-03-24 13:32:21,097 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-24 13:32:21,135 [INFO] Publishing: finance-hugo
+2026-03-24 13:34:21,386 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-24 13:34:21,427 [INFO] QUOTA SKIP: senior-hugo actual=6 >= quota=5
+2026-03-24 14:10:26,978 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-24 14:10:27,246 [INFO] QUOTA SKIP: senior-blogger actual=5 >= quota=5
+2026-03-24 14:19:59,405 [INFO] === 5000 Scheduler Starting ===
+2026-03-24 14:19:59,428 [INFO] Network ready
+2026-03-24 14:19:59,447 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-24 14:19:59,447 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-24 14:19:59,447 [INFO] Registered 98 jobs
+2026-03-24 14:19:59,447 [INFO] Next run: 2026-03-24 16:00:00
+2026-03-24 16:00:15,466 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-24 16:00:15,521 [INFO] QUOTA SKIP: travel-hugo actual=7 >= quota=5
+2026-03-24 16:02:15,831 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-24 16:02:15,870 [INFO] QUOTA SKIP: travel1-hugo actual=5 >= quota=5
+2026-03-24 16:04:16,083 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-24 16:04:16,119 [INFO] QUOTA SKIP: travel2-hugo actual=6 >= quota=5
+2026-03-24 16:06:16,347 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-24 16:06:16,387 [INFO] QUOTA SKIP: travel3-hugo actual=5 >= quota=5
+2026-03-24 16:08:16,614 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-24 16:08:16,656 [INFO] QUOTA SKIP: travel4-hugo actual=5 >= quota=5
+2026-03-24 16:10:16,886 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-24 16:10:16,947 [INFO] QUOTA SKIP: hotissue-hugo actual=6 >= quota=5
+2026-03-24 16:12:17,242 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-24 16:12:17,279 [INFO] QUOTA SKIP: tco-hugo actual=6 >= quota=5
+2026-03-24 16:14:17,532 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-24 16:14:17,570 [INFO] QUOTA SKIP: deal-hugo actual=5 >= quota=5
+2026-03-24 16:16:17,879 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-24 16:16:17,918 [INFO] QUOTA SKIP: compare-hugo actual=5 >= quota=5
+2026-03-24 16:18:18,175 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-24 16:18:18,219 [INFO] QUOTA SKIP: guide-hugo actual=5 >= quota=5
+2026-03-24 16:20:18,423 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-24 16:20:18,496 [INFO] QUOTA SKIP: ev-hugo actual=7 >= quota=5
+2026-03-24 16:22:18,777 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-24 16:22:18,811 [INFO] QUOTA SKIP: stock-hugo actual=6 >= quota=5
+2026-03-24 16:24:19,071 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-24 16:24:19,108 [INFO] QUOTA SKIP: dividend-hugo actual=6 >= quota=5
+2026-03-24 16:26:19,339 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-24 16:26:19,373 [INFO] Publishing: etf-hugo
+2026-03-24 16:28:19,793 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-24 16:28:19,830 [INFO] Publishing: sector-hugo
+2026-03-24 16:30:20,021 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-24 16:30:20,076 [INFO] Publishing: ipo-hugo
+2026-03-24 16:32:20,337 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-24 16:32:20,375 [INFO] Publishing: finance-hugo
+2026-03-24 16:34:20,692 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-24 16:34:20,730 [INFO] QUOTA SKIP: senior-hugo actual=6 >= quota=5
+2026-03-24 17:10:26,167 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-24 17:10:26,229 [INFO] QUOTA SKIP: senior-blogger actual=5 >= quota=5
