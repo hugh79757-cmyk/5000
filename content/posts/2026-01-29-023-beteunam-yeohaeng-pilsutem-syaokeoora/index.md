@@ -10,6 +10,8 @@ cover:
   alt: ""
   hidden: false
 ---
+
+> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**
 - [샤오커오라 공식몰](https://www.littlekeola.com/shop)
 - [쿠팡 샤오커오라 100g](https://www.coupang.com/vp/products/8830355222)
 - [쿠팡 샤오커오라 2.5kg 대용량](https://www.coupang.com/vp/products/8466858420)
