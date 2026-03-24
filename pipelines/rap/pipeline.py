@@ -124,10 +124,20 @@ def _post_process(body_md, blog_id, keyword):
     parts = []
 
     # 3. 쿠팡 파트너스 부동산 관련 상품 링크
+    # 쿠팡 파트너스 부동산/인테리어 관련 상품
     try:
         from shared.coupang_travel import CoupangTravel
         ct = CoupangTravel()
         if ct.is_configured():
+            # 부동산 키워드로 검색
+            realestate_keywords = {
+                "rap-hugo": "인테리어 소품",
+                "rap2-hugo": "이사 준비물",
+                "rap3-hugo": "부동산 세금 책",
+                "rap4-hugo": "원룸 인테리어",
+                "rap5-hugo": "아파트 인테리어",
+            }
+            search_kw = realestate_keywords.get(blog_id, "인테리어")
             coupang_md = ct.get_travel_product_links(blog_id=blog_id, count=2)
             if coupang_md:
                 parts.append(coupang_md)
@@ -216,8 +226,21 @@ def run(blog_cfg):
     if strategy == "trade":
         lawd_cd, city, district = find_lawd_cd(keyword)
         if not lawd_cd:
-            lawd_cd, city, district = "11680", "서울", "강남구"
-            logger.info(f"법정동코드 미매칭, 기본값: {city} {district}")
+            # 블로그별 다른 지역 풀에서 랜덤 선택
+            import random as _rand
+            BLOG_REGION_POOL = {
+                "rap-hugo":  [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
+                              ("11440","서울","마포구"), ("11560","서울","영등포구"), ("11200","서울","성동구")],
+                "rap3-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
+                              ("11170","서울","용산구"), ("11500","서울","강서구")],
+                "rap4-hugo": [("11440","서울","마포구"), ("11200","서울","성동구"), ("11215","서울","광진구"),
+                              ("11620","서울","관악구"), ("11590","서울","동작구"), ("11470","서울","양천구")],
+                "rap5-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
+                              ("11560","서울","영등포구"), ("11170","서울","용산구")],
+            }
+            pool = BLOG_REGION_POOL.get(blog_id, [("11680","서울","강남구")])
+            lawd_cd, city, district = _rand.choice(pool)
+            logger.info(f"법정동코드 미매칭, 랜덤 선택: {city} {district}")
 
         trades = fetch_apt_trade(lawd_cd, rows=30)
         if not trades:
