@@ -10678,3 +10678,7 @@ sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
 2026-03-24 18:36:19,079 [INFO] Publishing: rap4-hugo
 2026-03-24 18:36:58,860 [INFO] CATCHUP: rap5-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
 2026-03-24 18:36:58,899 [INFO] Publishing: rap5-hugo
+2026-03-24 18:37:44,717 [INFO] CATCHUP: rap2-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-24 18:37:44,750 [INFO] Publishing: rap2-hugo
+2026-03-24 18:38:44,227 [INFO] CATCHUP: rap3-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-24 18:38:44,263 [INFO] Publishing: rap3-hugo
