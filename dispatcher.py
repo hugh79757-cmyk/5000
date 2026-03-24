@@ -62,7 +62,7 @@ def _record_ledger(blog_id):
             stap_db = "/Users/twinssn/Projects/STAP/data/stap_content.db"
             conn_src = sqlite3.connect(stap_db)
             row = conn_src.execute(
-                "SELECT title, published_url FROM articles WHERE blog_id=? ORDER BY rowid DESC LIMIT 1",
+                "SELECT title, published_url FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
                 (blog_id,)
             ).fetchone()
             if row:
@@ -72,7 +72,7 @@ def _record_ledger(blog_id):
             # 5000 content.db에서 조회
             conn_src = sqlite3.connect(str(LEDGER_DB))
             row = conn_src.execute(
-                "SELECT title, published_url FROM articles WHERE blog_id=? ORDER BY rowid DESC LIMIT 1",
+                "SELECT title, published_url FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
                 (blog_id,)
             ).fetchone()
             if row:
@@ -93,38 +93,61 @@ def _record_ledger(blog_id):
 # ─── STAP 모듈 격리 ───
 
 def _run_stap(stap_name, cfg):
-    """STAP 파이프라인을 모듈 격리하여 실행"""
+    """STAP 파이프라인을 subprocess로 완전 격리 실행"""
+    import json as _json, tempfile as _tmp, subprocess as _sp
     stap_root = os.getenv("STAP_ROOT", "/Users/twinssn/Projects/STAP")
+    stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
+    if not os.path.exists(stap_python):
+        stap_python = sys.executable
 
-    # 1. STAP 경로를 최상위에 삽입
-    if stap_root in sys.path:
-        sys.path.remove(stap_root)
-    sys.path.insert(0, stap_root)
+    cfg_json = _json.dumps(cfg, ensure_ascii=False)
+    project_env = str(PROJECT_DIR / ".env")
 
-    # 2. 기존 shared/pipelines 모듈 캐시 제거
-    for mod_name in list(sys.modules.keys()):
-        if mod_name.startswith("shared.") or mod_name.startswith("pipelines."):
-            del sys.modules[mod_name]
-    for pkg in ("shared", "pipelines"):
-        if pkg in sys.modules:
-            del sys.modules[pkg]
+    runner = "\n".join([
+        "import sys, json, os",
+        "sys.path.insert(0, " + repr(stap_root) + ")",
+        "os.chdir(" + repr(stap_root) + ")",
+        "from dotenv import load_dotenv",
+        "load_dotenv(os.path.join(" + repr(stap_root) + ", \".env\"), override=True)",
+        "load_dotenv(" + repr(project_env) + ", override=True)",
+        "cfg = json.loads(" + repr(cfg_json) + ")",
+        "from pipelines." + stap_name + ".pipeline import run",
+        "result = run(cfg)",
+        "print(json.dumps(result or {\"success\": False, \"reason\": \"no_result\"}, ensure_ascii=False))",
+    ])
 
-    # 3. 실행
-    mod = importlib.import_module(f"pipelines.{stap_name}.pipeline")
-    importlib.reload(mod)
-    result = mod.run(cfg)
+    try:
+        with _tmp.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
+            f.write(runner)
+            runner_path = f.name
 
-    # 4. 복원: STAP 경로 제거 + 모듈 캐시 정리
-    if stap_root in sys.path:
-        sys.path.remove(stap_root)
-    for mod_name in list(sys.modules.keys()):
-        if mod_name.startswith("shared.") or mod_name.startswith("pipelines."):
-            del sys.modules[mod_name]
-    for pkg in ("shared", "pipelines"):
-        if pkg in sys.modules:
-            del sys.modules[pkg]
+        proc = _sp.run(
+            [stap_python, runner_path],
+            capture_output=True, text=True, timeout=600, cwd=stap_root
+        )
+        os.unlink(runner_path)
 
-    return result
+        if proc.returncode != 0:
+            logger.error(f"STAP subprocess failed: {proc.stderr[-300:]}")
+            return {"success": False, "reason": "stap_subprocess_error"}
+
+        for line in reversed(proc.stdout.strip().split("\n")):
+            if line.strip().startswith("{"):
+                return _json.loads(line.strip())
+
+        logger.warning(f"STAP no JSON output: {proc.stdout[-200:]}")
+        return {"success": False, "reason": "stap_no_output"}
+
+    except _sp.TimeoutExpired:
+        logger.error(f"STAP {stap_name} timeout (600s)")
+        try:
+            os.unlink(runner_path)
+        except Exception:
+            pass
+        return {"success": False, "reason": "stap_timeout"}
+    except Exception as e:
+        logger.error(f"STAP {stap_name} error: {e}")
+        return {"success": False, "reason": "stap_error"}
 
 
 # ─── 파이프라인 실행 ───
