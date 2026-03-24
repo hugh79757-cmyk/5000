@@ -1,4 +1,4 @@
-"""시니어 복지 파이프라인 — fetch → write → publish (Hugo / Blogger)"""
+"""시니어 복지 파이프라인 — fetch → write → publish"""
 
 import os
 import re
@@ -15,16 +15,18 @@ logger = logging.getLogger(__name__)
 _topic_index = {}
 
 
-def _get_published_services(blog_id):
-    """이미 발행된 서비스명 목록 조회"""
+# ─── 헬퍼 함수 ───
+
+def _get_published_titles(site_path):
+    """이미 발행된 제목 목록 조회"""
     try:
         import glob as _glob
-        site_path = "/Users/twinssn/Projects/senior-hugo/content/posts"
+        posts_dir = os.path.join(site_path, "content", "posts")
         published = set()
-        for md in _glob.glob(os.path.join(site_path, "*/index.md")):
+        for md in _glob.glob(os.path.join(posts_dir, "*/index.md")):
             with open(md, encoding="utf-8") as f:
                 content = f.read()
-            m = re.search(r'^title:\s*["\'](.*?)["\']', content, re.MULTILINE)
+            m = re.search(r'^title:\s*["\'](.+?)["\']', content, re.MULTILINE)
             if m:
                 published.add(m.group(1).strip())
         return published
@@ -33,6 +35,7 @@ def _get_published_services(blog_id):
 
 
 def _pick_topic(blog_id, services):
+    """카테고리 순환 선택"""
     available = list(set(s["category"] for s in services))
     if not available:
         return "생활지원"
@@ -42,9 +45,90 @@ def _pick_topic(blog_id, services):
     return topic
 
 
+def _make_thumbnail(cfg, article, topic_type, platform):
+    """썸네일 생성 — Hugo: 로컬 feature.webp, Blogger: R2 업로드 URL"""
+    try:
+        from pipelines.senior.thumbnail import generate_senior_thumbnail
+
+        if platform == "hugo":
+            site_path = cfg.get("site_path", "")
+            slug = re.sub(r'[^가-힣a-zA-Z0-9\s-]', '', article["title"]).replace(" ", "-")[:80]
+            post_dir = os.path.join(site_path, "content", "posts", slug)
+            os.makedirs(post_dir, exist_ok=True)
+            thumb_path = os.path.join(post_dir, "feature.webp")
+            generate_senior_thumbnail(
+                title=article["title"],
+                category=article.get("category", topic_type),
+                department=article.get("department", ""),
+                output_path=thumb_path,
+            )
+            logger.info(f"[SeniorThumb] saved: {thumb_path}")
+            return "feature.webp"
+        else:
+            import tempfile
+            import hashlib
+            from shared.r2_uploader import upload_file
+            from datetime import datetime
+            thumb_path = os.path.join(tempfile.gettempdir(), f"senior_thumb_{cfg.get('id','')}.webp")
+            generate_senior_thumbnail(
+                title=article["title"],
+                category=article.get("category", topic_type),
+                department=article.get("department", ""),
+                output_path=thumb_path,
+            )
+            if os.path.exists(thumb_path):
+                title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
+                r2_key = f"senior-thumbnails/{datetime.now().strftime('%Y%m%d')}-{title_hash}.webp"
+                url = upload_file(thumb_path, r2_key, content_type="image/webp")
+                os.remove(thumb_path)
+                logger.info(f"[SeniorThumb] R2: {url}")
+                return url
+    except Exception as e:
+        logger.warning(f"Thumbnail failed: {e}")
+    return ""
+
+
+def _prepare_tags(article, topic_type):
+    """tags를 문자열로 정규화"""
+    raw = article.get("tags", [])
+    if isinstance(raw, list):
+        tags = ", ".join(str(t).strip() for t in raw if str(t).strip())
+    else:
+        tags = str(raw)
+    if "시니어복지" not in tags:
+        tags = tags + ", 시니어복지" if tags else "시니어복지"
+    return tags
+
+
+def _convert_md_to_blogger_html(body_md):
+    """마크다운을 Blogger용 HTML로 변환 (shortcode 처리 포함)"""
+    import markdown
+
+    # Hugo shortcode → HTML 버튼
+    body_md = re.sub(
+        r'\{\{<\s*btn\s+url="([^"]*)"\s+text="([^"]*)"\s*>\}\}',
+        r'<div style="text-align:center;margin:20px 0"><a href="\1" target="_blank" '
+        r'rel="noopener" style="display:inline-block;padding:14px 28px;background:#2563eb;'
+        r'color:#fff;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">\2</a></div>',
+        body_md
+    )
+    # 쿠팡 마크다운 링크 → HTML
+    body_md = re.sub(
+        r'- \[([^\]]*)\]\((https://link\.coupang\.com[^)]+)\)',
+        r'<div style="margin:8px 0"><a href="\2" target="_blank" rel="noopener" '
+        r'style="color:#e74c3c;font-weight:bold">\1</a></div>',
+        body_md
+    )
+    return markdown.markdown(body_md, extensions=["tables", "fenced_code"])
+
+
+# ─── 메인 run ───
+
 def run(cfg):
+    """시니어 파이프라인 진입점 — 통일된 dict 반환"""
     blog_id = cfg.get("id", "senior-hugo")
     platform = cfg.get("platform", "hugo")
+    site_path = cfg.get("site_path", "")
     logger.info(f"Senior pipeline: {blog_id} (platform: {platform})")
 
     # 1. Quota check
@@ -54,7 +138,7 @@ def run(cfg):
         daily_quota = cfg.get("daily_quota", 5)
         if today_count >= daily_quota:
             logger.info(f"{blog_id} quota met: {today_count}/{daily_quota}")
-            return "quota_met"
+            return {"success": False, "reason": "quota_met"}
     except Exception as e:
         logger.warning(f"Quota check failed (continue): {e}")
 
@@ -64,21 +148,20 @@ def run(cfg):
         data = fetch_all()
     except Exception as e:
         logger.error(f"Fetch failed: {e}")
-        return "fetch_error"
+        return {"success": False, "reason": "fetch_error"}
 
     if not data.get("services"):
         logger.warning("No senior services data")
-        return "no_data"
+        return {"success": False, "reason": "no_data"}
 
-    # 3. Pick topic
+    # 3. Pick topic + enrich
     topic_type = _pick_topic(blog_id, data["services"])
     logger.info(f"Topic selected: {topic_type}")
 
-    # 3.5 Enrich: 선택될 서비스 후보의 상세 데이터 보강
     try:
         from pipelines.senior.fetcher import enrich_service_detail
         from pipelines.senior.writer import _select_service
-        published = _get_published_services(blog_id)
+        published = _get_published_titles(site_path) if site_path else set()
         candidate = _select_service(data["services"], topic_type, published=published)
         if candidate and not candidate.get("support_content"):
             candidate = enrich_service_detail(candidate)
@@ -92,51 +175,39 @@ def run(cfg):
         article = generate_senior_article(data, topic_type=topic_type)
     except Exception as e:
         logger.error(f"Writer failed: {e}")
-        return "write_error"
+        return {"success": False, "reason": "write_error"}
 
     if not article:
-        return "no_content"
+        return {"success": False, "reason": "no_content"}
 
-    # 5. Publish — Hugo or Blogger
+    # 5. Thumbnail
+    thumb_url = _make_thumbnail(cfg, article, topic_type, platform)
+
+    # 6. Tags
+    tags = _prepare_tags(article, topic_type)
+
+    # 7. Publish
     if platform == "hugo":
-        return _publish_hugo(cfg, blog_id, article, topic_type)
+        return _do_publish_hugo(cfg, blog_id, article, tags, thumb_url)
     elif platform == "blogger":
-        return _publish_blogger(cfg, blog_id, article, topic_type)
+        return _do_publish_blogger(cfg, blog_id, article, tags, thumb_url)
     else:
         logger.error(f"Unknown platform: {platform}")
-        return "config_error"
+        return {"success": False, "reason": "config_error"}
 
 
-def _publish_hugo(cfg, blog_id, article, topic_type):
+# ─── 발행 함수 (각각 하나의 작업만) ───
+
+def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
+    """Hugo 발행 — shared.publisher에 위임"""
     try:
-        # 썸네일 로컬 생성 → post 디렉터리에 저장
-        thumb_url = ""
-        try:
-            from pipelines.senior.thumbnail import generate_senior_thumbnail
-            import tempfile
-            site_path = cfg.get("site_path", "/Users/twinssn/Projects/senior-hugo")
-            slug = re.sub(r'[^가-힣a-zA-Z0-9\s-]', '', article["title"]).replace(" ", "-")[:80]
-            post_dir = os.path.join(site_path, "content", "posts", slug)
-            os.makedirs(post_dir, exist_ok=True)
-            thumb_path = os.path.join(post_dir, "feature.webp")
-            generate_senior_thumbnail(
-                title=article["title"],
-                category=article.get("category", topic_type),
-                department=article.get("department", ""),
-                output_path=thumb_path,
-            )
-            thumb_url = "feature.webp"
-            logger.info(f"Hugo thumbnail: {thumb_path}")
-        except Exception as te:
-            logger.warning(f"Hugo thumbnail failed: {te}")
-
         from shared.publisher import publish
         result = publish(
             blog_id=blog_id,
             title=article["title"],
             body_md=article["body_md"],
-            category=article.get("category", topic_type),
-            tags=", ".join(article["tags"]) if isinstance(article.get("tags"), list) else article.get("tags", ""),
+            category=article.get("category", ""),
+            tags=tags,
             thumbnail_url=thumb_url,
         )
         if result and result.get("success"):
@@ -144,85 +215,38 @@ def _publish_hugo(cfg, blog_id, article, topic_type):
             return result
         else:
             logger.error(f"Hugo publish failed: {result}")
-            return "publish_error"
+            return {"success": False, "reason": "publish_error"}
     except Exception as e:
         logger.error(f"Hugo publish error: {e}")
-        return "publish_error"
+        return {"success": False, "reason": "publish_error"}
 
 
-def _publish_blogger(cfg, blog_id, article, topic_type):
+def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
+    """Blogger 발행 — shared.blogger_publisher + content_store에 위임"""
     try:
-        import os
-        import markdown
         from shared.blogger_publisher import publish_to_blogger
+        from shared.content_store import insert_article
 
-        # --- blog ID ---
-        blog_id_env = cfg.get("blog_id_env", "")
         target_blog_id = cfg.get("blogger_blog_id", "")
-        if not target_blog_id and blog_id_env:
-            target_blog_id = os.environ.get(blog_id_env, "")
+        if not target_blog_id:
+            blog_id_env = cfg.get("blog_id_env", "")
+            target_blog_id = os.environ.get(blog_id_env, "") if blog_id_env else ""
         if not target_blog_id:
             logger.error(f"blogger_blog_id not set for {blog_id}")
-            return "config_error"
+            return {"success": False, "reason": "config_error"}
 
-        # --- MD → HTML 변환 ---
-        body_md = article["body_md"]
+        body_html = _convert_md_to_blogger_html(article["body_md"])
 
-        # Hugo shortcode → HTML 변환
-        import re
-        # {{< btn url="..." text="..." >}} → HTML 버튼
-        body_md = re.sub(
-            r'\{\{<\s*btn\s+url="([^"]*)"\s+text="([^"]*)"\s*>\}\}',
-            r'<div style="text-align:center;margin:20px 0"><a href="\1" target="_blank" rel="noopener" style="display:inline-block;padding:14px 28px;background:#2563eb;color:#fff;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">\2</a></div>',
-            body_md
-        )
-
-        # 쿠팡 마크다운 링크 → HTML 스타일 링크
-        body_md = re.sub(
-            r'- \[([^\]]*)\]\((https://link\.coupang\.com[^)]+)\)',
-            r'<div style="margin:8px 0"><a href="\2" target="_blank" rel="noopener" style="color:#e74c3c;font-weight:bold">\1</a></div>',
-            body_md
-        )
-
-        body_html = markdown.markdown(body_md, extensions=["tables", "fenced_code"])
-
-        # --- 썸네일 생성 ---
-        thumb_url = ""
-        try:
-            from pipelines.senior.thumbnail import generate_senior_thumbnail
-            from shared.r2_uploader import upload_file
-            import tempfile, hashlib
-            thumb_path = os.path.join(tempfile.gettempdir(), f"senior_thumb_{blog_id}.webp")
-            generate_senior_thumbnail(
-                title=article["title"],
-                category=article.get("category", topic_type),
-                department=article.get("department", ""),
-                output_path=thumb_path,
-            )
-            if os.path.exists(thumb_path):
-                from datetime import datetime
-                title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
-                r2_key = f"senior-thumbnails/{datetime.now().strftime('%Y%m%d')}-{title_hash}.webp"
-                thumb_url = upload_file(thumb_path, r2_key, content_type="image/webp")
-                os.remove(thumb_path)
-                logger.info(f"Thumbnail uploaded: {thumb_url}")
-        except Exception as te:
-            logger.warning(f"Thumbnail failed: {te}")
-
-        # --- labels ---
-        raw_tags = article.get("tags", [])
-        if isinstance(raw_tags, str):
-            labels = [t.strip() for t in raw_tags.split(",") if t.strip()]
-        else:
-            labels = [str(t).strip() for t in raw_tags if str(t).strip()]
-        labels.append("시니어복지")
-
-        # --- 썸네일을 본문 상단에 삽입 ---
         if thumb_url:
-            thumb_html = f'<div style="text-align:center;margin-bottom:20px"><img src="{thumb_url}" alt="{article["title"]}" style="max-width:100%;border-radius:12px" /></div>'
+            thumb_html = (
+                f'<div style="text-align:center;margin-bottom:20px">'
+                f'<img src="{thumb_url}" alt="{article["title"]}" '
+                f'style="max-width:100%;border-radius:12px" /></div>'
+            )
             body_html = thumb_html + body_html
 
-        # --- 발행 ---
+        labels = [t.strip() for t in tags.split(",") if t.strip()]
+
         result = publish_to_blogger(
             blog_id=target_blog_id,
             title=article["title"],
@@ -234,10 +258,6 @@ def _publish_blogger(cfg, blog_id, article, topic_type):
             pub_url = result.get("url", "")
             logger.info(f"Blogger published: {article['title']} -> {pub_url}")
             try:
-                from shared.content_store import insert_article
-                tags_val = article.get("tags", [])
-                if isinstance(tags_val, list):
-                    tags_val = ", ".join(tags_val)
                 insert_article({
                     "blog_id": blog_id,
                     "title": article["title"],
@@ -245,8 +265,8 @@ def _publish_blogger(cfg, blog_id, article, topic_type):
                     "body_md": article["body_md"],
                     "body_html": body_html,
                     "thumbnail_url": thumb_url,
-                    "category": article.get("category", topic_type),
-                    "tags": tags_val,
+                    "category": article.get("category", ""),
+                    "tags": tags,
                     "data_source": "gov24_api",
                     "source_id": article.get("service_id", ""),
                     "prompt_id": "",
@@ -258,12 +278,11 @@ def _publish_blogger(cfg, blog_id, article, topic_type):
                 })
             except Exception as e:
                 logger.warning(f"Save article record failed: {e}")
-            return True
+            return {"success": True, "url": pub_url, "title": article["title"]}
         else:
             err = result.get("error", "unknown") if result else "no result"
             logger.error(f"Blogger publish failed: {err}")
-            return "publish_error"
+            return {"success": False, "reason": "publish_error"}
     except Exception as e:
         logger.error(f"Blogger publish error: {e}")
-        return "publish_error"
-
+        return {"success": False, "reason": "publish_error"}
