@@ -501,7 +501,7 @@ blogs:
   name: 부동산 시세 청약 분석
   pipeline: rap
   platform: hugo
-  status: inactive
+  status: active
   daily_quota: 5
   domain: apt.informationhot.kr
   cf_project: rap-hugo
@@ -519,7 +519,7 @@ blogs:
   name: 전세월세 리포트
   pipeline: rap
   platform: hugo
-  status: inactive
+  status: active
   daily_quota: 5
   domain: rent.informationhot.kr
   cf_project: rap4-hugo
@@ -537,7 +537,7 @@ blogs:
   name: 브랜드 아파트 백과
   pipeline: rap
   platform: hugo
-  status: inactive
+  status: active
   daily_quota: 5
   domain: brand.informationhot.kr
   cf_project: rap5-hugo
@@ -555,7 +555,7 @@ blogs:
   name: 청약 알리미
   pipeline: rap
   platform: hugo
-  status: inactive
+  status: active
   daily_quota: 5
   domain: apply.informationhot.kr
   cf_project: rap2-hugo
@@ -573,7 +573,7 @@ blogs:
   name: 부동산 세금 가이드
   pipeline: rap
   platform: hugo
-  status: inactive
+  status: active
   daily_quota: 5
   domain: tax.informationhot.kr
   cf_project: rap3-hugo

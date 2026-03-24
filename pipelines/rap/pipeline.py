@@ -1,5 +1,6 @@
 """RAP (Real estate Auto Publisher) pipeline — GAP 구조 기반"""
 import os
+import random
 import sqlite3
 import logging
 from datetime import datetime
@@ -23,11 +24,11 @@ SUB_PATTERNS = ["청약", "분양", "LH", "행복주택", "임대", "전세"]
 # blog_id별 키워드 필터 패턴
 BLOG_KEYWORD_FILTER = {
     "rap-hugo":  ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라", "오피스텔",
-                  "은마", "헬리오", "파크리오", "래미안", "자이", "힐스테이트", "푸르지오",
-                  "재건축", "재개발", "부동산", "드림타운", "주택", "레지던스", "하우스",
+                  "은마", "재건축", "재개발", "부동산", "드림타운", "레지던스",
                   "단지", "미소지움", "아르티스", "트인시아", "펠루시드", "팰루시드",
                   "S클래스", "브라이튼", "에테르노", "디아이엘", "하이니티", "비스타",
-                  "건설", "냉난방", "전원주택", "모아타운", "아페르", "라엘"],
+                  "건설", "냉난방", "전원주택", "모아타운", "아페르", "라엘",
+                  "서울아파트", "동탄"],
     "rap2-hugo": ["청약", "분양", "LH", "행복주택", "임대주택", "청년주택", "청년안심",
                   "국민임대", "영구임대", "매입임대", "신혼희망"],
     "rap3-hugo": ["양도", "취득세", "상속세", "증여세", "세금", "과세", "공시지가", "재산세",
@@ -197,7 +198,6 @@ def run(blog_cfg):
         title=article["title"],
         body_md=article["body_md"],
         body_html=body_html,
-        blog_cfg=blog_cfg,
         category=article.get("category", "부동산"),
         tags=article.get("tags", ""),
         data_source=data_source,
