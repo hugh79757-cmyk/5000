@@ -20,6 +20,35 @@ RAP_CATEGORIES = ("금융/부동산",)
 TRADE_PATTERNS = ["실거래", "매매", "시세", "집값", "아파트", "공시지가", "빌라", "오피스텔"]
 SUB_PATTERNS = ["청약", "분양", "LH", "행복주택", "임대", "전세"]
 
+# blog_id별 키워드 필터 패턴
+BLOG_KEYWORD_FILTER = {
+    "rap-hugo":  ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라", "오피스텔",
+                  "은마", "헬리오", "파크리오", "래미안", "자이", "힐스테이트", "푸르지오",
+                  "재건축", "재개발", "부동산", "드림타운", "주택", "레지던스", "하우스",
+                  "단지", "미소지움", "아르티스", "트인시아", "펠루시드", "팰루시드",
+                  "S클래스", "브라이튼", "에테르노", "디아이엘", "하이니티", "비스타",
+                  "건설", "냉난방", "전원주택", "모아타운", "아페르", "라엘"],
+    "rap2-hugo": ["청약", "분양", "LH", "행복주택", "임대주택", "청년주택", "청년안심",
+                  "국민임대", "영구임대", "매입임대", "신혼희망"],
+    "rap3-hugo": ["양도", "취득세", "상속세", "증여세", "세금", "과세", "공시지가", "재산세",
+                  "종부세", "종합부동산세", "절세", "세율", "면제"],
+    "rap4-hugo": ["전세", "월세", "임대", "보증금", "임대차", "전월세", "반전세",
+                  "보증보험", "전세사기", "확정일자", "임차인", "계약갱신"],
+    "rap5-hugo": ["헬리오시티", "힐스테이트", "래미안", "자이", "푸르지오", "아크로", "파크리오",
+                  "더샵", "르엘", "롯데캐슬", "SK뷰", "아이파크", "e편한세상",
+                  "디에이치", "트리우스", "브랜드", "풍림", "드파인", "브르넨",
+                  "라브르", "원펜타스", "디디하우스"],
+}
+
+# blog_id별 강제 전략
+BLOG_STRATEGY = {
+    "rap-hugo":  "trade",
+    "rap2-hugo": "subscription",
+    "rap3-hugo": "trade",
+    "rap4-hugo": "trade",
+    "rap5-hugo": "trade",
+}
+
 WP_CATEGORY_MAP = {
     "부동산": 150,
     "실거래가": 150,
@@ -29,46 +58,43 @@ WP_CATEGORY_MAP = {
 
 
 def _pick_keyword(blog_id):
-    """gap.db에서 부동산 키워드 선택 (GAP _pick_keyword 방식)"""
+    """blog_id에 맞는 부동산 키워드 선택"""
     conn = sqlite3.connect(GAP_DB_PATH)
     try:
-        # 최근 7일 발행된 키워드 제외
-        published = set()
-        try:
-            rows = conn.execute(
-                "SELECT keyword FROM publish_log WHERE site_id=? AND published_at > datetime('now', '-7 days')",
-                (blog_id,)
-            ).fetchall()
-            published = {r[0] for r in rows}
-        except sqlite3.OperationalError:
-            pass  # publish_log 테이블 없을 수 있음
-
-        placeholders = ",".join("?" * len(RAP_CATEGORIES))
-        rows = conn.execute(f"""
-            SELECT keyword, category FROM keywords
-            WHERE status='active' AND category IN ({placeholders})
-            ORDER BY use_count ASC, last_used_at ASC NULLS FIRST
-        """, RAP_CATEGORIES).fetchall()
-
-        available = [(r[0], r[1]) for r in rows if r[0] not in published]
-        if not available:
+        patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
+        rows = conn.execute(
+            "SELECT keyword, category FROM keywords "
+            "WHERE category = '금융/부동산' AND status = 'active' "
+            "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
+            "LIMIT 100",
+        ).fetchall()
+        
+        if patterns:
+            filtered = [(kw, cat) for kw, cat in rows if any(p in kw for p in patterns)]
+            if filtered:
+                rows = filtered
+        
+        if not rows:
             logger.warning(f"{blog_id}: 사용 가능한 부동산 키워드 없음")
             return None, None
-
-        keyword, category = available[0]
+        
+        keyword, category = random.choice(rows[:20])
         conn.execute(
-            "UPDATE keywords SET use_count = use_count + 1, last_used_at = ? WHERE keyword = ?",
-            (datetime.now().isoformat(), keyword)
+            "UPDATE keywords SET use_count = use_count + 1, "
+            "last_used_at = datetime('now') WHERE keyword = ?",
+            (keyword,)
         )
         conn.commit()
-        logger.info(f"{blog_id}: 키워드 선택 → {keyword} ({category})")
+        logger.info(f"{blog_id}: 키워드 선택 -> {keyword} ({category})")
         return keyword, category
     finally:
         conn.close()
 
 
-def _pick_strategy(keyword):
-    """키워드로부터 전략 결정"""
+def _pick_strategy(keyword, blog_id=None):
+    """blog_id에 따라 전략 결정, 없으면 키워드 기반"""
+    if blog_id and blog_id in BLOG_STRATEGY:
+        return BLOG_STRATEGY[blog_id]
     for p in SUB_PATTERNS:
         if p in keyword:
             return "subscription"
@@ -103,7 +129,7 @@ def run(blog_cfg):
     if not keyword:
         return {"success": False, "reason": "no_keyword"}
 
-    strategy = _pick_strategy(keyword)
+    strategy = _pick_strategy(keyword, blog_id)
     logger.info(f"{blog_id}: keyword={keyword}, strategy={strategy}")
 
     article = None
