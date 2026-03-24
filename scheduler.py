@@ -296,8 +296,25 @@ def register_schedules():
 
 # ─── 메인 ───
 
+def _wait_for_network(timeout=300):
+    """네트워크 연결 대기 — DNS 해석 가능할 때까지 최대 timeout초"""
+    import socket
+    start = time.time()
+    while time.time() - start < timeout:
+        try:
+            socket.getaddrinfo("api.openai.com", 443)
+            logger.info("Network ready")
+            return True
+        except socket.gaierror:
+            logger.warning("Network not ready, waiting 30s...")
+            time.sleep(30)
+    logger.error("Network timeout after %ds", timeout)
+    return False
+
+
 def main():
     logger.info("=== 5000 Scheduler Starting ===")
+    _wait_for_network()
     job_count = register_schedules()
     logger.info(f"Registered {job_count} jobs")
     logger.info(f"Next run: {schedule.next_run()}")
