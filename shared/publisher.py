@@ -275,8 +275,10 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
         from dotenv import load_dotenv as _ldenv
         _ldenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
         from shared.blogger_publisher import publish_to_blogger
-        blog_id_env = blog_cfg.get("blog_id_env", "")
-        blogger_blog_id = os.getenv(blog_id_env, "")
+        blogger_blog_id = blog_cfg.get("blogger_blog_id", "")
+        if not blogger_blog_id:
+            blog_id_env = blog_cfg.get("blog_id_env", "")
+            blogger_blog_id = os.getenv(blog_id_env, "") if blog_id_env else ""
         if not blogger_blog_id:
             return {"success": False, "error": "blogger blog_id not configured"}
         labels = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
