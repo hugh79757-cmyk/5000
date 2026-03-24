@@ -67,11 +67,11 @@ def insert_article(article):
             article.get("source_id", ""),
             article.get("prompt_id", ""),
             article.get("model", ""),
-            article.get("published_url", ""),
+            article.get("published_url", "") or f"pending://{article.get('blog_id','unknown')}/{datetime.now().timestamp()}",
             article.get("published_at", ""),
             article.get("platform", ""),
             article.get("status", "published"),
-            article.get("created_at", datetime.utcnow().isoformat()),
+            article.get("created_at", datetime.now().isoformat()),
         ),
     )
     row_id = cur.lastrowid
@@ -93,7 +93,7 @@ def update_published(article_id, published_url):
 
 def get_today_count(blog_id):
     conn = get_conn()
-    today = datetime.utcnow().strftime("%Y-%m-%d")
+    today = datetime.now().strftime("%Y-%m-%d")
     row = conn.execute(
         "SELECT COUNT(*) as cnt FROM articles WHERE blog_id=? AND date(created_at)=? AND status='published'",
         (blog_id, today),

@@ -145,6 +145,20 @@ def catchup_missed():
                 conn.close()
             except Exception:
                 actual = 0
+        elif pipeline == "stock":
+            # STAP 블로그는 STAP DB에서 조회
+            stap_db = "/Users/twinssn/Projects/STAP/data/stap_content.db"
+            try:
+                conn = sqlite3.connect(stap_db)
+                today_str = datetime.now().strftime("%Y-%m-%d")
+                row = conn.execute(
+                    "SELECT COUNT(*) FROM articles WHERE blog_id=? AND date(created_at)=? AND status='published'",
+                    (blog_id, today_str)
+                ).fetchone()
+                actual = row[0] if row else 0
+                conn.close()
+            except Exception:
+                actual = 0
         else:
             try:
                 sys.path.insert(0, PROJECT_DIR)
