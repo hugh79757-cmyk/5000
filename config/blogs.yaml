@@ -2,7 +2,7 @@ batch_deploy:
   schedule: '22:45'
 blogs:
 - cf_project: hotissue-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: hotissue.rotcha.kr
   id: hotissue-hugo
   name: 핫이슈
@@ -34,7 +34,7 @@ blogs:
   status: active
   theme: PaperMod
 - cf_project: tco-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: tco.rotcha.kr
   id: tco-hugo
   name: TCO분석
@@ -54,7 +54,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: deal-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: deal.rotcha.kr
   id: deal-hugo
   name: 프로모션
@@ -74,7 +74,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: compare-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: compare.rotcha.kr
   id: compare-hugo
   name: 비교분석
@@ -94,7 +94,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: guide-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: guide.rotcha.kr
   id: guide-hugo
   name: 초보가이드
@@ -114,7 +114,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: ev-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: ev.rotcha.kr
   id: ev-hugo
   name: 전기차분석
@@ -134,7 +134,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel-hugo
-  daily_quota: 50
+  daily_quota: 5
   domain: tour1.rotcha.kr
   fetch_sources:
   - type: camping
@@ -166,7 +166,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel1-hugo
-  daily_quota: 50
+  daily_quota: 5
   domain: travel1.rotcha.kr
   fetch_sources:
   - type: festival
@@ -190,7 +190,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel2-hugo
-  daily_quota: 50
+  daily_quota: 5
   domain: travel2.rotcha.kr
   fetch_sources:
   - type: heritage
@@ -214,7 +214,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel3-hugo
-  daily_quota: 50
+  daily_quota: 5
   domain: tour2.rotcha.kr
   fetch_sources:
   - type: food
@@ -238,7 +238,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel4-hugo
-  daily_quota: 50
+  daily_quota: 5
   domain: tour3.rotcha.kr
   fetch_sources:
   - type: course
@@ -359,7 +359,7 @@ blogs:
   status: active
   theme: congo
 - cf_project: gap-hugo
-  daily_quota: 10
+  daily_quota: 5
   domain: life.informationhot.kr
   id: gap-hugo
   name: 생활정보 GAP
