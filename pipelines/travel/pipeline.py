@@ -87,9 +87,10 @@ def _git_push(blog_id):
         logger.error(blog_id + " git push failed: " + str(e))
 
 
-def _run_single(target_blog_id):
+def _run_single(target_blog_id, blog_cfg=None):
     init_db()
-    blog_cfg = get_blog_config(target_blog_id)
+    if blog_cfg is None:
+        blog_cfg = get_blog_config(target_blog_id)
     quota = blog_cfg.get("daily_quota", 50)
     current = get_today_count(target_blog_id)
 
@@ -201,4 +202,4 @@ def run_all_hugo(count_per_blog=1):
 def run(cfg):
     """dispatcher에서 호출하는 통일 인터페이스"""
     blog_id = cfg["id"]
-    return _run_single(blog_id)
+    return _run_single(blog_id, blog_cfg=cfg)
