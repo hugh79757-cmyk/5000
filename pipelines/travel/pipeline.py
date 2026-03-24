@@ -155,50 +155,6 @@ def _run_single(target_blog_id, blog_cfg=None):
     return pub_result
 
 
-def run_once(target_blog_id="travel-blogger"):
-    return _run_single(target_blog_id)
-
-
-def run_hugo(target_blog_id="travel-hugo"):
-    return _run_single(target_blog_id)
-
-
-def run_batch(blogger_count=1, hugo_count=3):
-    results = {"blogger": [], "hugo": []}
-
-    for i in range(blogger_count):
-        logger.info("blogger " + str(i + 1) + "/" + str(blogger_count))
-        r = _run_single("travel-blogger")
-        if r:
-            results["blogger"].append(r)
-
-    hugo_blogs = ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"]
-    per_blog = max(1, hugo_count // len(hugo_blogs))
-
-    for blog_id in hugo_blogs:
-        for i in range(per_blog):
-            logger.info(blog_id + " " + str(i + 1) + "/" + str(per_blog))
-            r = _run_single(blog_id)
-            if r:
-                results["hugo"].append(r)
-
-    return results
-
-
-def run_all_hugo(count_per_blog=1):
-    results = []
-    hugo_blogs = ["travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"]
-
-    for blog_id in hugo_blogs:
-        for i in range(count_per_blog):
-            logger.info(blog_id + " " + str(i + 1) + "/" + str(count_per_blog))
-            r = _run_single(blog_id)
-            if r:
-                results.append(r)
-
-    return results
-
-
 def run(cfg):
     """dispatcher에서 호출하는 통일 인터페이스"""
     blog_id = cfg["id"]

@@ -222,67 +222,39 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
 
 
 def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
-    """Blogger 발행 — shared.blogger_publisher + content_store에 위임"""
+    """Blogger 발행 — shared.publisher에 위임"""
     try:
-        from shared.blogger_publisher import publish_to_blogger
-        from shared.content_store import insert_article
-
-        target_blog_id = cfg.get("blogger_blog_id", "")
-        if not target_blog_id:
-            blog_id_env = cfg.get("blog_id_env", "")
-            target_blog_id = os.environ.get(blog_id_env, "") if blog_id_env else ""
-        if not target_blog_id:
-            logger.error(f"blogger_blog_id not set for {blog_id}")
-            return {"success": False, "reason": "config_error"}
-
         body_html = _convert_md_to_blogger_html(article["body_md"])
 
+        # 썸네일을 body_html에 삽입
         if thumb_url:
             thumb_html = (
-                f'<div style="text-align:center;margin-bottom:20px">'
+                '<div style="text-align:center;margin-bottom:20px">'
                 f'<img src="{thumb_url}" alt="{article["title"]}" '
-                f'style="max-width:100%;border-radius:12px" /></div>'
+                'style="max-width:100%;border-radius:12px" /></div>'
             )
             body_html = thumb_html + body_html
 
-        labels = [t.strip() for t in tags.split(",") if t.strip()]
-
-        result = publish_to_blogger(
-            blog_id=target_blog_id,
+        from shared.publisher import publish
+        result = publish(
+            blog_id=blog_id,
             title=article["title"],
+            body_md=article["body_md"],
             body_html=body_html,
-            labels=labels,
+            category=article.get("category", ""),
+            tags=tags,
+            thumbnail_url=thumb_url,
+            data_source="gov24_api",
+            source_id=article.get("service_id", ""),
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         )
-
         if result and result.get("success"):
-            pub_url = result.get("url", "")
-            logger.info(f"Blogger published: {article['title']} -> {pub_url}")
-            try:
-                insert_article({
-                    "blog_id": blog_id,
-                    "title": article["title"],
-                    "slug": article["title"].replace(" ", "-")[:80],
-                    "body_md": article["body_md"],
-                    "body_html": body_html,
-                    "thumbnail_url": thumb_url,
-                    "category": article.get("category", ""),
-                    "tags": tags,
-                    "data_source": "gov24_api",
-                    "source_id": article.get("service_id", ""),
-                    "prompt_id": "",
-                    "model": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-                    "published_url": pub_url,
-                    "published_at": "",
-                    "platform": "blogger",
-                    "status": "published",
-                })
-            except Exception as e:
-                logger.warning(f"Save article record failed: {e}")
-            return {"success": True, "url": pub_url, "title": article["title"]}
+            logger.info(f"Blogger published: {article['title']} -> {result.get('url')}")
+            return result
         else:
-            err = result.get("error", "unknown") if result else "no result"
-            logger.error(f"Blogger publish failed: {err}")
+            logger.error(f"Blogger publish failed: {result}")
             return {"success": False, "reason": "publish_error"}
     except Exception as e:
         logger.error(f"Blogger publish error: {e}")
         return {"success": False, "reason": "publish_error"}
+
