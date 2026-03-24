@@ -145,7 +145,34 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"쿠팡 링크 삽입 실패: {e}")
 
-    # 4. 내부링크 (같은 사이트 기존 글 추천)
+    # 4. 네이버지도 버튼 (지역/단지명 기반)
+    try:
+        import urllib.parse as _up
+        # 키워드에서 지역명이나 단지명 추출
+        map_query = keyword
+        # 블로그별 지도 검색 최적화
+        map_label = {
+            "rap-hugo": "아파트 매물",
+            "rap2-hugo": "청약 단지",
+            "rap3-hugo": "부동산 중개",
+            "rap4-hugo": "전세 매물",
+            "rap5-hugo": "아파트 단지",
+        }
+        label = map_label.get(blog_id, "부동산")
+        encoded = _up.quote(f"{map_query} {label}")
+        naver_map_html = f"""
+
+<div style="margin:24px 0;padding:16px 20px;background:#f0f7ff;border-radius:12px;border:1px solid #d0e3ff;text-align:center;">
+  <p style="margin:0 0 10px 0;font-size:1.05rem;font-weight:600;">📍 {map_query} 주변 지도로 확인하기</p>
+  <a href="https://map.naver.com/v5/search/{encoded}" target="_blank" rel="nofollow" style="display:inline-block;padding:10px 24px;background:#03C75A;color:white;border-radius:8px;text-decoration:none;font-weight:600;">네이버지도에서 보기</a>
+</div>
+"""
+        parts.append(naver_map_html)
+        logger.info(f"네이버지도 버튼 삽입: {map_query}")
+    except Exception as e:
+        logger.warning(f"네이버지도 삽입 실패: {e}")
+
+    # 5. 내부링크 (같은 사이트 기존 글 추천)
     try:
         import glob as _gl
         import random as _rand
@@ -174,7 +201,7 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"내부링크 삽입 실패: {e}")
 
-    # 5. 면책조항 (1회만)
+    # 6. 면책조항 (1회만)
     disclaimer_map = {
         "rap-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
         "rap2-hugo": "이 글은 한국부동산원 청약홈 공공데이터를 기반으로 작성되었습니다. 정확한 청약 일정과 자격은 [청약홈](https://www.applyhome.co.kr)에서 확인하세요.",
@@ -185,7 +212,7 @@ def _post_process(body_md, blog_id, keyword):
     disc = disclaimer_map.get(blog_id, disclaimer_map["rap-hugo"])
     parts.append(f"\n\n---\n\n> {disc}")
 
-    # 6. 쿠팡 파트너스 면책
+    # 7. 쿠팡 파트너스 면책
     parts.append("\n\n> 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.")
 
     return body_md + "".join(parts)
