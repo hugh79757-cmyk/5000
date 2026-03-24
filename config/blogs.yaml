@@ -377,7 +377,7 @@ blogs:
   status: inactive
   theme: congo
 - cf_project: dividend-hugo
-  daily_quota: 999
+  daily_quota: 5
   domain: dividend.techpawz.com
   id: dividend-hugo
   name: 배당주 투자 가이드
@@ -395,7 +395,7 @@ blogs:
   status: active
   theme: blowfish
 - cf_project: etf-hugo
-  daily_quota: 999
+  daily_quota: 5
   domain: etf.techpawz.com
   id: etf-hugo
   name: ETF 투자 분석
@@ -413,7 +413,7 @@ blogs:
   status: active
   theme: blowfish
 - cf_project: sector-hugo
-  daily_quota: 999
+  daily_quota: 5
   domain: sector.techpawz.com
   id: sector-hugo
   name: 섹터 분석 리포트
@@ -431,7 +431,7 @@ blogs:
   status: active
   theme: blowfish
 - cf_project: ipo-hugo
-  daily_quota: 999
+  daily_quota: 5
   domain: ipo.techpawz.com
   id: ipo-hugo
   name: IPO·공모주 분석
@@ -449,7 +449,7 @@ blogs:
   status: active
   theme: blowfish
 - cf_project: finance-hugo
-  daily_quota: 999
+  daily_quota: 5
   domain: finance.techpawz.com
   id: finance-hugo
   name: 금리·예적금 비교
