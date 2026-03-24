@@ -42,7 +42,21 @@ def load_config():
 # ─── 발행 실행 ───
 
 def run_publish(blog_id):
-    """dispatcher를 subprocess로 실행"""
+    """dispatcher를 subprocess로 실행 (quota 게이트 포함)"""
+    # 중앙 quota 체크: ledger 기준으로 초과 시 skip
+    try:
+        config = load_config()
+        blog_cfg = next((b for b in config.get("blogs", []) if isinstance(b, dict) and b.get("id") == blog_id), None)
+        if blog_cfg:
+            daily_quota = blog_cfg.get("daily_quota", 50)
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            actual = _get_ledger_count(blog_id, today_str)
+            if actual >= daily_quota:
+                logger.info(f"QUOTA SKIP: {blog_id} actual={actual} >= quota={daily_quota}")
+                return True  # 성공으로 처리 (재시도 방지)
+    except Exception as e:
+        logger.warning(f"Quota check failed for {blog_id}: {e}")
+
     logger.info("Publishing: " + blog_id)
     try:
         result = subprocess.run(
