@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-from shared.content_store import init_db, get_today_count, register_images, source_exists, title_similar_exists
+from shared.content_store import init_db, get_today_count, register_images, register_places, source_exists, title_similar_exists
 from shared.publisher import publish, get_blog_config
 from pipelines.travel.fetcher import fetch_camping, fetch_korservice, fetch_korservice_heritage, fetch_wellness, fetch_heritage, fetch_festival, fetch_food, fetch_course, fetch_random
 from pipelines.travel.writer import generate_content
@@ -116,6 +116,11 @@ def _run_single(target_blog_id):
     body_md = result.get("body_md", "")
     body_html = result.get("body_html", "")
 
+    # SEO description 삽입
+    _travel_desc = result.get("description", "")
+    if _travel_desc:
+        body_md = "<!-- DESC: " + _travel_desc + " -->\n" + body_md
+
     pub_result = publish(
         blog_id=target_blog_id,
         title=result["title"],
@@ -136,6 +141,13 @@ def _run_single(target_blog_id):
             register_images(article_id, target_blog_id, body_html)
         if article_id and body_md:
             register_images(article_id, target_blog_id, body_md)
+        # 장소 발행 이력 등록
+        place_names = [it.get("title", it.get("facltNm", "")).strip()
+                       for it in data.get("items", [])
+                       if it.get("title") or it.get("facltNm")]
+        if article_id and place_names:
+            register_places(article_id, target_blog_id, place_names)
+            logger.info("장소 %d건 등록: %s", len(place_names), ", ".join(n[:10] for n in place_names))
         _git_push(target_blog_id)
 
     logger.info(target_blog_id + " result: " + str(pub_result.get("success", False)) + " " + str(pub_result.get("url", "")))
@@ -184,3 +196,9 @@ def run_all_hugo(count_per_blog=1):
                 results.append(r)
 
     return results
+
+
+def run(cfg):
+    """dispatcher에서 호출하는 통일 인터페이스"""
+    blog_id = cfg["id"]
+    return _run_single(blog_id)

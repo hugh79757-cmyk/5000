@@ -82,12 +82,22 @@ def insert_article(article):
 
 def update_published(article_id, published_url):
     conn = get_conn()
-    conn.execute(
-        "UPDATE articles SET published_url=?, status='published',"
-        " published_at=datetime('now') WHERE id=?",
-        (published_url, article_id),
-    )
-    conn.commit()
+    try:
+        conn.execute(
+            "UPDATE articles SET published_url=?, status='published',"
+            " published_at=datetime('now') WHERE id=?",
+            (published_url, article_id),
+        )
+        conn.commit()
+    except Exception as e:
+        # UNIQUE 충돌 시 status만 업데이트
+        import logging
+        logging.getLogger(__name__).warning(f"update_published 충돌: {e}")
+        conn.execute(
+            "UPDATE articles SET status='published', published_at=datetime('now') WHERE id=?",
+            (article_id,),
+        )
+        conn.commit()
     conn.close()
 
 
