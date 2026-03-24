@@ -75,8 +75,11 @@ _queue_lock = threading.Lock()
 
 
 def queue_publish(blog_id):
-    """동시간대 블로그를 큐에 넣고 순차 실행"""
+    """동시간대 블로그를 큐에 넣고 순차 실행 (중복 방지)"""
     with _queue_lock:
+        if blog_id in _publish_queue:
+            logger.info(f"Queue skip (duplicate): {blog_id}")
+            return
         _publish_queue.append(blog_id)
         if len(_publish_queue) == 1:
             threading.Thread(target=_drain_queue, daemon=True).start()
@@ -121,7 +124,7 @@ def _get_ledger_count(blog_id, date_str):
 
 
 def catchup_missed():
-    """놓친 스케줄 보충 발행 — 5분마다 체크, 블로그당 일일 3회 상한"""
+    """놓친 스케줄 보충 발행 — 5분마다 체크"""
     global _catchup_attempts, _catchup_date
 
     config = load_config()
@@ -134,41 +137,59 @@ def catchup_missed():
         _catchup_attempts = {}
         _catchup_date = today_str
 
+    # 스케줄러 시작 직후 보호: 첫 스케줄 시각 이전이면 catchup 안 함
+    first_schedule_hour = 7
+    if now.hour < first_schedule_hour:
+        return
+
     for blog in blogs:
-        if blog.get("status") != "active":
+        if not isinstance(blog, dict) or blog.get("status") != "active":
             continue
         blog_id = blog["id"]
 
-        # 일일 상한 체크
+        # 일일 catchup 상한
         attempts = _catchup_attempts.get(blog_id, 0)
         if attempts >= MAX_CATCHUP_PER_BLOG:
+            continue
+
+        # daily_quota 체크 — quota 도달 시 skip
+        daily_quota = blog.get("daily_quota", 50)
+        actual = _get_ledger_count(blog_id, today_str)
+        if actual >= daily_quota:
             continue
 
         # 오늘 발행해야 할 횟수: 현재 시각 이전 스케줄 수
         times = blog.get("schedule", {}).get("times", [])
         expected = 0
         for t in times:
-            h, m = map(int, t.split(":"))
+            h, m = map(int, str(t).split(":"))
             if h < now.hour or (h == now.hour and m <= now.minute):
                 expected += 1
 
         if expected == 0:
             continue
 
-        # 오늘 실제 발행 수 — publish_ledger 한 곳만 조회
-        actual = _get_ledger_count(blog_id, today_str)
-
         missed = expected - actual
-        if missed > 0:
-            _catchup_attempts[blog_id] = attempts + 1
-            logger.info(f"CATCHUP: {blog_id} expected={expected} actual={actual} missed={missed} attempt={attempts + 1}/{MAX_CATCHUP_PER_BLOG}")
-            try:
-                success = run_publish(blog_id)
-                if not success:
-                    logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
-            except Exception as e:
-                logger.error(f"CATCHUP: {blog_id} 예외: {e}")
-            time.sleep(5)
+        if missed <= 0:
+            continue
+
+        # 중복 방지: 현재 큐에 같은 blog_id가 있으면 skip
+        with _queue_lock:
+            if blog_id in _publish_queue:
+                continue
+
+        _catchup_attempts[blog_id] = attempts + 1
+        logger.info(
+            f"CATCHUP: {blog_id} expected={expected} actual={actual} "
+            f"missed={missed} quota={daily_quota} attempt={attempts + 1}/{MAX_CATCHUP_PER_BLOG}"
+        )
+        try:
+            success = run_publish(blog_id)
+            if not success:
+                logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
+        except Exception as e:
+            logger.error(f"CATCHUP: {blog_id} 예외: {e}")
+        time.sleep(5)
 
 
 # ─── 배치 작업 ───
