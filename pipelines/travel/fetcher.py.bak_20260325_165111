@@ -260,19 +260,6 @@ def fetch_festival():
             except Exception as e:
                 logger.warning(f"festival detailIntro 실패 (무시): {e}")
         
-
-        # [과거연도 필터] 현재 연도 이전 축제 제거
-        _cur_year = str(__import__('datetime').datetime.now().year)
-        _before_count = len(selected)
-        selected = [
-            item for item in selected
-            if not item.get("eventstartdate")
-            or str(item.get("eventstartdate", ""))[:4] >= _cur_year
-        ]
-        logger.info(f"festival 연도필터: {_before_count}건 -> {len(selected)}건 (과거 {_before_count - len(selected)}건 제외)")
-        if not selected:
-            logger.warning("festival: 연도필터 후 0건, 현재 월 재검색으로 전환")
-
         # 계절 필터: detailIntro 이후 eventstartdate 기반 필터링
         from datetime import datetime, timedelta
         now = datetime.now()
@@ -309,11 +296,6 @@ def fetch_festival():
                 )
                 if re_resp.status_code == 200:
                     re_items = re_resp.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                    if re_items:
-                        re_items = [i for i in re_items if not i.get("eventstartdate") or str(i.get("eventstartdate",""))[:4] >= _cur_year]
-                    if re_items:
-                        _cur_year = str(__import__("datetime").datetime.now().year)
-                        re_items = [i for i in re_items if not i.get("eventstartdate") or str(i.get("eventstartdate",""))[:4] >= _cur_year]
                     if re_items:
                         selected = [random.choice(re_items)]
                         logger.info(f"festival: searchFestival로 현재 월 축제 {len(re_items)}건 중 1건 재선택: {selected[0].get('title','')}")
