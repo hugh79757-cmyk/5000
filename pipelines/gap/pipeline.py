@@ -149,6 +149,22 @@ def run(blog_cfg):
 
     if result and result.get("success"):
         logger.info(f"{blog_id}: 발행 성공 - {article['title']}")
+
+        # 백링크 자동 생성 (Phase 1: Telegraph)
+        try:
+            from shared.backlink_publisher import post_publish_backlinks
+            published_url = result.get("url", "")
+            if published_url and article.get("body_md"):
+                bl_results = post_publish_backlinks(
+                    title=article["title"],
+                    body_md=article["body_md"],
+                    original_url=published_url,
+                    blog_id=blog_id,
+                )
+                if bl_results:
+                    logger.info(f"{blog_id}: 백링크 {len(bl_results)}개 생성")
+        except Exception as e:
+            logger.warning(f"백링크 생성 실패: {e}")
     else:
         reason = result.get("reason", "unknown") if result else "no_result"
         tg_error(blog_id, "publish", f"{keyword}: {reason}")

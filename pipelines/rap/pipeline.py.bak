@@ -121,56 +121,23 @@ def _post_process(body_md, blog_id, keyword):
     body_md = _re.sub(r"\n*---\s*$", "", body_md.rstrip())
     body_md = body_md.rstrip()
 
-    # 1-1. 글 중간 이탈방지 카드 삽입 (H2 3번째 뒤)
-    try:
-        import glob as _gl2
-        import random as _rand2
-        _blog_path_map = {
-            "rap-hugo": "/Users/twinssn/Projects/RAP/rap-hugo",
-            "rap2-hugo": "/Users/twinssn/Projects/RAP/rap2-hugo",
-            "rap3-hugo": "/Users/twinssn/Projects/RAP/rap3-hugo",
-            "rap4-hugo": "/Users/twinssn/Projects/RAP/rap4-hugo",
-            "rap5-hugo": "/Users/twinssn/Projects/RAP/rap5-hugo",
-        }
-        _pdir = os.path.join(_blog_path_map.get(blog_id, ""), "content", "posts")
-        _candidates = []
-        for _md in _gl2.glob(os.path.join(_pdir, "*/index.md")):
-            with open(_md, encoding="utf-8") as _f:
-                _hd = _f.read(500)
-            _tm = _re.search(r'^title:\s*["\'](.*?)["\']', _hd, _re.MULTILINE)
-            _sm = _re.search(r'^slug:\s*["\'](.*?)["\']', _hd, _re.MULTILINE)
-            if _tm and _sm:
-                _candidates.append({"title": _tm.group(1), "slug": _sm.group(1)})
-        if len(_candidates) >= 1:
-            _pick = _rand2.choice(_candidates)
-            _card_html = f'''
-
-<div style="margin:28px 0;padding:18px 22px;background:linear-gradient(135deg,#f8f9ff 0%,#e8f4fd 100%);border-radius:14px;border-left:4px solid #3182ce;">
-  <p style="margin:0 0 6px 0;font-size:0.85rem;color:#718096;">📌 놓치면 아쉬운 글</p>
-  <a href="/posts/{_pick['slug']}/" style="font-size:1.05rem;font-weight:600;color:#2d3748;text-decoration:none;">{_pick['title']}</a>
-</div>
-
-'''
-            # H2 3번째 뒤에 삽입
-            _h2_positions = [m.start() for m in _re.finditer(r'^## ', body_md, _re.MULTILINE)]
-            if len(_h2_positions) >= 4:
-                _insert_pos = _h2_positions[3]
-                body_md = body_md[:_insert_pos] + _card_html + body_md[_insert_pos:]
-                logger.info("중간 이탈방지 카드 삽입 완료")
-    except Exception as e:
-        logger.warning(f"중간 카드 삽입 실패: {e}")
-
-    # 1-1. GPT가 생성한 중복 내부링크 섹션 제거 (시스템이 별도 삽입)
-    body_md = _re.sub(r"\n*## 함께 읽어보기.*", "", body_md, flags=_re.DOTALL)
-    body_md = _re.sub(r"\n*## 함께 읽으면 좋은 글.*", "", body_md, flags=_re.DOTALL)
-
     parts = []
 
-    # 3. 쿠팡 파트너스 (blog_id별 키워드는 coupang_travel.py TRAVEL_KEYWORD_MAP에서 관리)
+    # 3. 쿠팡 파트너스 부동산 관련 상품 링크
+    # 쿠팡 파트너스 부동산/인테리어 관련 상품
     try:
         from shared.coupang_travel import CoupangTravel
         ct = CoupangTravel()
         if ct.is_configured():
+            # 부동산 키워드로 검색
+            realestate_keywords = {
+                "rap-hugo": "인테리어 소품",
+                "rap2-hugo": "이사 준비물",
+                "rap3-hugo": "부동산 세금 책",
+                "rap4-hugo": "원룸 인테리어",
+                "rap5-hugo": "아파트 인테리어",
+            }
+            search_kw = realestate_keywords.get(blog_id, "인테리어")
             coupang_md = ct.get_travel_product_links(blog_id=blog_id, count=2)
             if coupang_md:
                 parts.append(coupang_md)
@@ -312,7 +279,7 @@ def run(blog_cfg):
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
             return {"success": False, "reason": "no_trade_data"}
 
-        article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
+        article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district})
         data_source = "molit_trade_api"
 
     # ─── 청약 전략 ───
@@ -371,22 +338,6 @@ def run(blog_cfg):
 
     if result and result.get("success"):
         logger.info(f"RAP 발행 성공: {article['title']}")
-
-        # 백링크 자동 생성 (Phase 1: Telegraph)
-        try:
-            from shared.backlink_publisher import post_publish_backlinks
-            published_url = result.get("url", "")
-            if published_url and article.get("body_md"):
-                bl_results = post_publish_backlinks(
-                    title=article["title"],
-                    body_md=article["body_md"],
-                    original_url=published_url,
-                    blog_id=blog_id,
-                )
-                if bl_results:
-                    logger.info(f"{blog_id}: 백링크 {len(bl_results)}개 생성")
-        except Exception as e:
-            logger.warning(f"백링크 생성 실패: {e}")
     else:
         reason = (result or {}).get("reason", "publish_failed")
         tg_error(blog_id, "publish", f"{keyword}: {reason}")

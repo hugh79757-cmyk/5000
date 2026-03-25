@@ -121,6 +121,15 @@ def _append_links(body_md, service, category):
         logger.warning(f"쿠팡 링크 생성 실패: {e}")
 
     # 3) 면책 1회
+    # 네이버 지도 검색 버튼 (지역 서비스인 경우)
+    dept = service.get("department", "")
+    region_keywords = ["시", "구", "군"]
+    if dept and any(rk in dept for rk in region_keywords):
+        svc_name = service.get("service_name", "")
+        search_q = (dept + " " + svc_name).replace(" ", "+")
+        naver_url = f"https://map.naver.com/v5/search/{search_q}"
+        parts.append(f'\n\n{{{{< btn url="{naver_url}" text="\U0001f4cd {dept} 위치 확인하기 (네이버 지도)" >}}}}')
+
     parts.append("\n\n---")
     parts.append("\n\n> 이 글은 정부24 공공데이터를 기반으로 작성되었습니다. 최신 정보는 [복지로](https://www.bokjiro.go.kr)에서 확인하세요.")
 
@@ -361,9 +370,15 @@ def _select_service(services, topic_type, published=None):
     if published is None:
         published = set()
 
-    category_services = [s for s in services if s.get("category") == topic_type]
+    # 시니어 무관 서비스 제외 (서비스명 기준)
+    _EXCLUDE_NAMES = ["청년", "청장년", "미혼모", "미혼부", "영유아", "아동복지", "어린이", "장학금", "대학생"]
+    def _is_senior(s):
+        name = s.get("service_name", "")
+        return not any(kw in name for kw in _EXCLUDE_NAMES)
+
+    category_services = [s for s in services if s.get("category") == topic_type and _is_senior(s)]
     if not category_services:
-        category_services = services[:10]
+        category_services = [s for s in services if _is_senior(s)][:10]
 
     def richness(s):
         score = 0
