@@ -10913,3 +10913,146 @@ sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
 2026-03-25 11:50:56,130 [INFO] Publishing: rap4-hugo
 2026-03-25 12:11:12,743 [INFO] CATCHUP: rap5-hugo expected=2 actual=1 missed=1 quota=5 attempt=2/3
 2026-03-25 12:11:12,769 [INFO] Publishing: rap5-hugo
+2026-03-25 13:00:26,041 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-25 13:00:26,079 [INFO] Publishing: travel-hugo
+2026-03-25 13:00:32,466 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B0%90%EC%A7%80%EA%B8%88%EB%8B%88+%EB%8C%80%EB%B0%A9%EA%B4%91%EB%B6%88%ED%99%94%EC%97%84%EA%B2%BD%EB%B3%B4%ED%98%84%ED%96%89%EC%9B%90%ED%92%88+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:00:32,467 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B0%90%EC%A7%80%EA%B8%88%EB%8B%88+%EB%8C%80%EB%B0%A9%EA%B4%91%EB%B6%88%ED%99%94%EC%97%84%EA%B2%BD%EB%B3%B4%ED%98%84%ED%96%89%EC%9B%90%ED%92%88+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:00:32,467 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B0%90%EC%A7%80%EA%B8%88%EB%8B%88+%EB%8C%80%EB%B0%A9%EA%B4%91%EB%B6%88%ED%99%94%EC%97%84%EA%B2%BD%EB%B3%B4%ED%98%84%ED%96%89%EC%9B%90%ED%92%88+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:00:32,467 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-03-25 13:00:32,509 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:02:26,638 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-25 13:02:26,678 [INFO] Publishing: travel1-hugo
+2026-03-25 13:02:32,381 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%97%AC%EC%88%98+%EC%A7%84%EB%82%A8%EA%B4%80+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:02:32,381 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%97%AC%EC%88%98+%EC%A7%84%EB%82%A8%EA%B4%80+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:02:32,381 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%97%AC%EC%88%98+%EC%A7%84%EB%82%A8%EA%B4%80+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:02:32,381 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-03-25 13:02:32,407 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:04:27,157 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-25 13:04:27,199 [INFO] Publishing: travel2-hugo
+2026-03-25 13:04:33,089 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B9%80%EC%A0%95%ED%9D%AC+%EC%A2%85%EA%B0%80+%EC%9C%A0%EB%AC%BC+%EC%9D%BC%EA%B4%84+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:04:33,089 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B9%80%EC%A0%95%ED%9D%AC+%EC%A2%85%EA%B0%80+%EC%9C%A0%EB%AC%BC+%EC%9D%BC%EA%B4%84+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:04:33,089 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B9%80%EC%A0%95%ED%9D%AC+%EC%A2%85%EA%B0%80+%EC%9C%A0%EB%AC%BC+%EC%9D%BC%EA%B4%84+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:04:33,089 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-03-25 13:04:33,116 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:27,734 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-25 13:06:27,802 [INFO] Publishing: travel3-hugo
+2026-03-25 13:06:27,817 [INFO] CATCHUP: travel2-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-03-25 13:06:27,840 [INFO] Publishing: travel2-hugo
+2026-03-25 13:06:33,437 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B9%80%EC%A0%95%ED%9D%AC+%EC%A2%85%EA%B0%80+%EC%9C%A0%EB%AC%BC+%EC%9D%BC%EA%B4%84+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,437 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B9%80%EC%A0%95%ED%9D%AC+%EC%A2%85%EA%B0%80+%EC%9C%A0%EB%AC%BC+%EC%9D%BC%EA%B4%84+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,437 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EA%B9%80%EC%A0%95%ED%9D%AC+%EC%A2%85%EA%B0%80+%EC%9C%A0%EB%AC%BC+%EC%9D%BC%EA%B4%84+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,437 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-03-25 13:06:33,462 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,462 [WARNING] CATCHUP: travel2-hugo 보충 실패 (1/3)
+2026-03-25 13:06:33,526 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EB%B0%B1%EC%A7%80%EC%9D%80%EB%8B%88+%EB%8C%80%EB%B6%88%EC%A0%95%EC%97%AC%EB%9E%98%EB%B0%80%EC%9D%B8%EC%88%98%EC%A6%9D%EC%9A%94%EC%9D%98%EC%A0%9C%EB%B3%B4%EC%82%B4%EB%A7%8C%ED%96%89%EC%88%98%EB%8A%A5%EC%97%84%EA%B2%BD+%EA%B6%8C10+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,526 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EB%B0%B1%EC%A7%80%EC%9D%80%EB%8B%88+%EB%8C%80%EB%B6%88%EC%A0%95%EC%97%AC%EB%9E%98%EB%B0%80%EC%9D%B8%EC%88%98%EC%A6%9D%EC%9A%94%EC%9D%98%EC%A0%9C%EB%B3%B4%EC%82%B4%EB%A7%8C%ED%96%89%EC%88%98%EB%8A%A5%EC%97%84%EA%B2%BD+%EA%B6%8C10+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,526 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EB%B0%B1%EC%A7%80%EC%9D%80%EB%8B%88+%EB%8C%80%EB%B6%88%EC%A0%95%EC%97%AC%EB%9E%98%EB%B0%80%EC%9D%B8%EC%88%98%EC%A6%9D%EC%9A%94%EC%9D%98%EC%A0%9C%EB%B3%B4%EC%82%B4%EB%A7%8C%ED%96%89%EC%88%98%EB%8A%A5%EC%97%84%EA%B2%BD+%EA%B6%8C10+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:06:33,526 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-03-25 13:06:33,550 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:08:09,076 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-25 13:08:09,116 [INFO] Publishing: travel4-hugo
+2026-03-25 13:08:14,900 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EB%8C%80%EC%A0%84+%ED%9A%8C%EB%8D%95+%EB%8F%99%EC%B6%98%EB%8B%B9+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:08:14,900 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EB%8C%80%EC%A0%84+%ED%9A%8C%EB%8D%95+%EB%8F%99%EC%B6%98%EB%8B%B9+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:08:14,900 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EB%8C%80%EC%A0%84+%ED%9A%8C%EB%8D%95+%EB%8F%99%EC%B6%98%EB%8B%B9+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:08:14,900 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-03-25 13:08:14,927 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-03-25 13:10:09,544 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-25 13:10:09,585 [INFO] Publishing: hotissue-hugo
+2026-03-25 13:11:39,822 [INFO] CATCHUP: travel2-hugo expected=3 actual=2 missed=1 quota=5 attempt=2/3
+2026-03-25 13:11:39,843 [INFO] Publishing: travel2-hugo
+2026-03-25 13:13:44,661 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-25 13:13:44,699 [INFO] Publishing: tco-hugo
+2026-03-25 13:14:14,736 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-25 13:14:14,778 [INFO] Publishing: deal-hugo
+2026-03-25 13:16:15,034 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-25 13:16:15,076 [INFO] Publishing: compare-hugo
+2026-03-25 13:18:15,590 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-25 13:18:15,636 [INFO] Publishing: guide-hugo
+2026-03-25 13:20:15,990 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-25 13:20:16,033 [INFO] Publishing: ev-hugo
+2026-03-25 13:22:16,643 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-25 13:22:16,693 [INFO] Publishing: stock-hugo
+2026-03-25 13:24:17,143 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-25 13:24:17,191 [INFO] Publishing: dividend-hugo
+2026-03-25 13:26:17,702 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-25 13:26:17,733 [INFO] Publishing: etf-hugo
+2026-03-25 13:28:18,238 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-25 13:28:18,271 [INFO] Publishing: sector-hugo
+2026-03-25 13:30:18,577 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-25 13:30:18,675 [INFO] Publishing: ipo-hugo
+2026-03-25 13:31:53,054 [INFO] CATCHUP: ipo-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-03-25 13:31:53,173 [INFO] Publishing: ipo-hugo
+2026-03-25 13:33:37,030 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-25 13:33:37,070 [INFO] Publishing: finance-hugo
+2026-03-25 13:34:07,072 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-25 13:34:07,115 [INFO] Publishing: senior-hugo
+2026-03-25 13:52:10,004 [INFO] CATCHUP: rap-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-03-25 13:52:10,023 [INFO] Publishing: rap-hugo
+2026-03-25 14:10:02,513 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-25 14:10:02,557 [INFO] Publishing: senior-blogger
+2026-03-25 14:12:32,920 [INFO] CATCHUP: rap2-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-03-25 14:12:32,937 [INFO] Publishing: rap2-hugo
+2026-03-25 14:32:58,600 [INFO] CATCHUP: rap3-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-03-25 14:32:58,621 [INFO] Publishing: rap3-hugo
+2026-03-25 14:53:19,987 [INFO] CATCHUP: rap4-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-03-25 14:53:20,003 [INFO] Publishing: rap4-hugo
+2026-03-25 15:13:47,428 [INFO] CATCHUP: rap5-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-03-25 15:13:47,446 [INFO] Publishing: rap5-hugo
+2026-03-25 16:00:20,899 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-25 16:00:20,932 [INFO] Publishing: travel-hugo
+2026-03-25 16:02:21,069 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-25 16:02:21,108 [INFO] Publishing: travel1-hugo
+2026-03-25 16:04:21,291 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-25 16:04:21,341 [INFO] CATCHUP: travel2-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-25 16:04:21,354 [INFO] Publishing: travel2-hugo
+2026-03-25 16:04:21,359 [INFO] Publishing: travel2-hugo
+2026-03-25 16:06:36,493 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-25 16:06:36,529 [INFO] Publishing: travel3-hugo
+2026-03-25 16:08:06,675 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-25 16:08:06,711 [INFO] Publishing: travel4-hugo
+2026-03-25 16:10:06,966 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-25 16:10:07,008 [INFO] Publishing: hotissue-hugo
+2026-03-25 16:12:07,218 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-25 16:12:07,255 [INFO] Publishing: tco-hugo
+2026-03-25 16:14:07,494 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-25 16:14:07,531 [INFO] Publishing: deal-hugo
+2026-03-25 16:16:07,811 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-25 16:16:07,848 [INFO] Publishing: compare-hugo
+2026-03-25 16:18:08,011 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-25 16:18:08,051 [INFO] Publishing: guide-hugo
+2026-03-25 16:20:08,275 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-25 16:20:08,322 [INFO] Publishing: ev-hugo
+2026-03-25 16:22:08,455 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-25 16:22:08,511 [INFO] Publishing: stock-hugo
+2026-03-25 16:24:08,694 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-25 16:24:08,734 [INFO] Publishing: dividend-hugo
+2026-03-25 16:26:08,974 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-25 16:26:09,013 [INFO] Publishing: etf-hugo
+2026-03-25 16:28:09,274 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-25 16:28:09,314 [INFO] Publishing: sector-hugo
+2026-03-25 16:30:09,529 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-25 16:30:09,568 [INFO] Publishing: ipo-hugo
+2026-03-25 16:32:09,719 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-25 16:32:09,766 [INFO] Publishing: finance-hugo
+2026-03-25 16:34:09,958 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-25 16:34:10,003 [INFO] Publishing: senior-hugo
+2026-03-25 16:34:40,073 [INFO] CATCHUP: senior-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-25 16:34:40,094 [INFO] Publishing: senior-hugo
