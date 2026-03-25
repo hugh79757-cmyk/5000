@@ -473,20 +473,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
         
         if not issues:
             logger.info("콘텐츠 검증 통과 (H2:%d, 글자수:%d)", h2_count, char_count)
-        
-    # [과거연도 방어] 제목/본문에서 과거연도 -> 현재연도 변환
-    import re as _yre
-    _cy = str(__import__('datetime').datetime.now().year)
-    for _py in [str(y) for y in range(2020, int(_cy))]:
-        # 제목에서 변환
-        if _py in content:
-            # URL 내부의 연도는 제외하고 변환
-            content = _yre.sub(
-                r'(?<!/)(?<![\w])' + _py + r'(?=[ 년.~,\-가-힣])',
-                _cy, content
-            )
-
-    return content
+            return content
         
         if False:  # 재생성 비활성화 - 토큰 절약
             logger.warning("콘텐츠 검증 실패 (시도 %d/%d): %s → 재생성", 
