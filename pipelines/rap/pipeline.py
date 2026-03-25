@@ -160,9 +160,11 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"중간 카드 삽입 실패: {e}")
 
-    # 1-1. GPT가 생성한 중복 내부링크 섹션 제거 (시스템이 별도 삽입)
-    body_md = _re.sub(r"\n*## 함께 읽어보기.*", "", body_md, flags=_re.DOTALL)
-    body_md = _re.sub(r"\n*## 함께 읽으면 좋은 글.*", "", body_md, flags=_re.DOTALL)
+    # GPT가 생성한 모든 내부링크/추천글 섹션 제거 (시스템이 별도 삽입)
+    body_md = _re.sub(r"\n*## 함께 읽[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
+    body_md = _re.sub(r"\n*## 관련 글[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
+    body_md = _re.sub(r"\n*## 추천 글[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
+    body_md = _re.sub(r"\n*## 더 읽[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
 
     parts = []
 
