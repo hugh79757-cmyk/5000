@@ -119,7 +119,13 @@ def _convert_md_to_blogger_html(body_md):
         r'style="color:#e74c3c;font-weight:bold">\1</a></div>',
         body_md
     )
-    return markdown.markdown(body_md, extensions=["tables", "fenced_code"])
+    import re as _re
+    html = markdown.markdown(body_md, extensions=["tables", "fenced_code"])
+    def _auto_link(m):
+        url = m.group(0)
+        return f'<a href="{url}" target="_blank" rel="noopener">{url}</a>'
+    html = _re.sub(r'(?<!href=\")(?<!src=\")(https?://[^\s<>\"\)]+)', _auto_link, html)
+    return html
 
 
 # ─── 메인 run ───
@@ -162,9 +168,32 @@ def run(cfg):
         from pipelines.senior.fetcher import enrich_service_detail
         from pipelines.senior.writer import _select_service
         published = _get_published_titles(site_path) if site_path else set()
+        # DB에서도 발행 이력 체크 (Blogger 포함)
+        try:
+            from shared.content_store import get_all_articles
+            db_articles = get_all_articles(blog_id=blog_id, limit=500)
+            for a in db_articles:
+                if a.get("title"):
+                    published.add(a["title"])
+        except Exception:
+            pass
         candidate = _select_service(data["services"], topic_type, published=published)
         if candidate and not candidate.get("support_content"):
             candidate = enrich_service_detail(candidate)
+            # 만료 서비스 필터
+            dl = str(candidate.get("deadline", "")).strip()
+            if dl:
+                import re as _re
+                from datetime import datetime as _dt
+                date_match = _re.search(r"(\d{4})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})", dl)
+                if date_match:
+                    try:
+                        dl_date = _dt(int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3)))
+                        if dl_date < _dt.now():
+                            logger.warning(f"만료 서비스 스킵: {candidate.get('service_name')} (기한: {dl})")
+                            return "expired_service"
+                    except ValueError:
+                        pass
             logger.info(f"Enriched: {candidate.get('service_name')}")
     except Exception as e:
         logger.warning(f"Enrich skipped: {e}")

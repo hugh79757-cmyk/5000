@@ -10692,3 +10692,212 @@ sqlite3.IntegrityError: UNIQUE constraint failed: articles.published_url
 2026-03-24 18:43:21,258 [INFO] Publishing: rap2-hugo
 2026-03-24 18:44:08,974 [INFO] CATCHUP: rap3-hugo expected=4 actual=1 missed=3 quota=5 attempt=2/3
 2026-03-24 18:44:09,013 [INFO] Publishing: rap3-hugo
+2026-03-24 18:46:18,871 [INFO] CATCHUP: rap-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-24 18:46:18,896 [INFO] Publishing: rap-hugo
+2026-03-24 18:47:04,663 [INFO] CATCHUP: rap4-hugo expected=4 actual=2 missed=2 quota=5 attempt=3/3
+2026-03-24 18:47:04,699 [INFO] Publishing: rap4-hugo
+2026-03-24 18:47:46,423 [INFO] CATCHUP: rap5-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-24 18:47:46,464 [INFO] Publishing: rap5-hugo
+2026-03-24 18:48:32,724 [INFO] CATCHUP: rap2-hugo expected=4 actual=2 missed=2 quota=5 attempt=3/3
+2026-03-24 18:48:32,760 [INFO] Publishing: rap2-hugo
+2026-03-24 18:49:21,172 [INFO] CATCHUP: rap3-hugo expected=4 actual=2 missed=2 quota=5 attempt=3/3
+2026-03-24 18:49:21,208 [INFO] Publishing: rap3-hugo
+2026-03-24 20:00:19,944 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-24 20:00:19,985 [INFO] QUOTA SKIP: travel-hugo actual=7 >= quota=5
+2026-03-24 20:02:20,242 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-24 20:02:20,279 [INFO] QUOTA SKIP: travel1-hugo actual=5 >= quota=5
+2026-03-24 20:04:20,450 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-24 20:04:20,492 [INFO] QUOTA SKIP: travel2-hugo actual=6 >= quota=5
+2026-03-24 20:06:20,701 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-24 20:06:20,735 [INFO] QUOTA SKIP: travel3-hugo actual=5 >= quota=5
+2026-03-24 20:08:21,015 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-24 20:08:21,052 [INFO] QUOTA SKIP: travel4-hugo actual=5 >= quota=5
+2026-03-24 20:10:21,291 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-24 20:10:21,334 [INFO] QUOTA SKIP: hotissue-hugo actual=6 >= quota=5
+2026-03-24 20:12:21,684 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-24 20:12:21,793 [INFO] QUOTA SKIP: tco-hugo actual=6 >= quota=5
+2026-03-24 20:14:21,953 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-24 20:14:22,006 [INFO] QUOTA SKIP: deal-hugo actual=5 >= quota=5
+2026-03-24 20:16:22,190 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-24 20:16:22,307 [INFO] QUOTA SKIP: compare-hugo actual=5 >= quota=5
+2026-03-24 20:18:23,096 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-24 20:18:23,137 [INFO] QUOTA SKIP: guide-hugo actual=5 >= quota=5
+2026-03-24 20:20:23,378 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-24 20:20:23,434 [INFO] QUOTA SKIP: ev-hugo actual=7 >= quota=5
+2026-03-24 20:22:23,628 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-24 20:22:23,670 [INFO] QUOTA SKIP: stock-hugo actual=6 >= quota=5
+2026-03-24 20:24:23,827 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-24 20:24:23,870 [INFO] QUOTA SKIP: dividend-hugo actual=6 >= quota=5
+2026-03-24 20:26:23,980 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-24 20:26:24,019 [INFO] Publishing: etf-hugo
+2026-03-24 20:26:54,098 [INFO] CATCHUP: etf-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-24 20:26:54,123 [INFO] Publishing: etf-hugo
+2026-03-24 20:28:19,806 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-24 20:28:19,845 [INFO] Publishing: sector-hugo
+2026-03-24 20:30:19,970 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-24 20:30:20,193 [INFO] QUOTA SKIP: ipo-hugo actual=5 >= quota=5
+2026-03-24 20:32:20,326 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-24 20:32:20,400 [INFO] Publishing: finance-hugo
+2026-03-24 20:32:20,417 [INFO] CATCHUP: finance-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-24 20:32:20,451 [INFO] Publishing: finance-hugo
+2026-03-24 20:34:08,677 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-24 20:34:08,825 [INFO] QUOTA SKIP: senior-hugo actual=6 >= quota=5
+2026-03-24 20:37:39,115 [INFO] CATCHUP: finance-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-24 20:37:39,138 [INFO] Publishing: finance-hugo
+2026-03-24 20:42:51,613 [INFO] CATCHUP: finance-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-24 20:42:51,636 [INFO] Publishing: finance-hugo
+2026-03-24 21:10:10,165 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-24 21:10:10,201 [INFO] QUOTA SKIP: senior-blogger actual=5 >= quota=5
+2026-03-24 22:45:29,238 [INFO] Batch deploy started
+2026-03-24 22:52:20,682 [INFO]   ===== 결과 =====
+2026-03-24 22:52:20,682 [INFO]     성공: 22
+2026-03-24 22:52:20,683 [INFO]     스킵: 2
+2026-03-24 22:52:20,683 [INFO]     실패: 0
+2026-03-24 22:52:20,683 [INFO]     CF 빌드 소모: 0 (Direct Upload)
+2026-03-24 23:50:05,312 [INFO] Daily report
+2026-03-24 23:50:05,602 [INFO]   Report failed: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-03-25 05:00:24,405 [INFO] GAP keyword sync:   고용/취업: 5
+2026-03-25 06:30:15,412 [INFO] === CAP 데이터 갱신 시작 ===
+2026-03-25 06:33:12,850 [INFO] 트림 업데이트: 677건, 가격변동: 18건
+2026-03-25 06:33:13,235 [INFO]   [연비보충] 606/668건 매칭 완료
+2026-03-25 06:35:52,894 [INFO] 이미지 보충: 0장 (차단: 320개)
+2026-03-25 06:35:52,898 [INFO] 신규 차량 탐색: 8078~8108
+2026-03-25 06:36:13,749 [INFO] 신규 차량 0대 발견, 0대 자동 등록 (탐색범위: 8078~8108)
+2026-03-25 06:36:13,752 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 스마트: 2,141 -> 2,254만원 (인상 113만원, 5.3%)
+2026-03-25 06:36:13,754 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 스마트: 2,152 -> 2,265만원 (인상 113만원, 5.3%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 스마트: 2,254 -> 2,141만원 (인하 113만원, 5.0%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 스마트: 2,265 -> 2,152만원 (인하 113만원, 5.0%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 모던: 2,242 -> 2,355만원 (인상 113만원, 5.0%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 모던: 2,257 -> 2,370만원 (인상 113만원, 5.0%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 스마트: 2,295 -> 2,408만원 (인상 113만원, 4.9%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 모던: 2,355 -> 2,242만원 (인하 113만원, 4.8%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 모던: 2,370 -> 2,257만원 (인하 113만원, 4.8%)
+2026-03-25 06:36:13,755 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 프리미엄: 2,365 -> 2,478만원 (인상 113만원, 4.8%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 스마트: 2,408 -> 2,295만원 (인하 113만원, 4.7%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 프리미엄: 2,380 -> 2,493만원 (인상 113만원, 4.7%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 모던: 2,398 -> 2,511만원 (인상 113만원, 4.7%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 프리미엄: 2,478 -> 2,365만원 (인하 113만원, 4.6%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 프리미엄: 2,493 -> 2,380만원 (인하 113만원, 4.5%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 모던: 2,511 -> 2,398만원 (인하 113만원, 4.5%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 프리미엄: 2,513 -> 2,626만원 (인상 113만원, 4.5%)
+2026-03-25 06:36:13,756 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 프리미엄: 2,626 -> 2,513만원 (인하 113만원, 4.3%)
+2026-03-25 06:36:13,763 [INFO]   [토픽보충] hotissue/resale_compare: 17건 추가 (기존 49 → 66)
+2026-03-25 06:36:13,766 [INFO]   [토픽보충] tco/tco_analysis: 13건 추가 (기존 43 → 56)
+2026-03-25 06:36:13,769 [INFO]   [토픽보충] deal/promo_deal: 13건 추가 (기존 45 → 58)
+2026-03-25 06:36:13,774 [INFO]   [토픽보충] compare/ranking_compare: 17건 추가 (기존 43 → 60)
+2026-03-25 06:36:13,776 [INFO]   [토픽보충] guide/beginner_guide: 13건 추가 (기존 46 → 59)
+2026-03-25 06:36:13,781 [INFO]   [토픽보충] ev/ev_analysis: 17건 추가 (기존 44 → 61)
+2026-03-25 06:36:13,782 [INFO] === 갱신 완료: 차량 124대, 트림 668개, 이미지 690장, 대기토픽 478개, 신규토픽 90개 ===
+2026-03-25 06:36:13,874 [INFO] CAR daily_refresh completed
+2026-03-25 07:00:17,161 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-25 07:00:17,198 [INFO] Publishing: travel-hugo
+2026-03-25 07:01:17,282 [INFO] CATCHUP: travel-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 07:01:17,302 [INFO] Publishing: travel-hugo
+2026-03-25 07:03:48,805 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-25 07:03:48,840 [INFO] Publishing: travel1-hugo
+2026-03-25 07:04:18,836 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-25 07:04:18,872 [INFO] Publishing: travel2-hugo
+2026-03-25 07:06:19,064 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-25 07:06:19,129 [INFO] Publishing: travel3-hugo
+2026-03-25 07:06:19,136 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 07:06:19,151 [INFO] Publishing: travel3-hugo
+2026-03-25 07:08:23,638 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-25 07:08:23,686 [INFO] Publishing: travel4-hugo
+2026-03-25 07:10:23,862 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-25 07:10:23,902 [INFO] Publishing: hotissue-hugo
+2026-03-25 07:12:24,196 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-25 07:12:24,231 [INFO] Publishing: tco-hugo
+2026-03-25 07:14:24,426 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-25 07:14:24,465 [INFO] Publishing: deal-hugo
+2026-03-25 07:16:24,590 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-25 07:16:24,646 [INFO] CATCHUP: compare-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 07:16:24,664 [INFO] Publishing: compare-hugo
+2026-03-25 07:16:24,666 [INFO] Publishing: compare-hugo
+2026-03-25 07:18:18,801 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-25 07:18:18,834 [INFO] Publishing: guide-hugo
+2026-03-25 07:19:09,302 [INFO]   [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: QM6
+2026-03-25 07:19:09,302 [INFO]     [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: 무쏘 스포츠
+2026-03-25 07:20:19,051 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-25 07:20:19,089 [INFO] Publishing: ev-hugo
+2026-03-25 07:22:19,348 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-25 07:22:19,388 [INFO] Publishing: stock-hugo
+2026-03-25 07:24:19,631 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-25 07:24:19,672 [INFO] Publishing: dividend-hugo
+2026-03-25 07:26:19,853 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-25 07:26:19,894 [INFO] Publishing: etf-hugo
+2026-03-25 07:26:49,969 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 07:26:49,996 [INFO] Publishing: etf-hugo
+2026-03-25 07:28:24,663 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-25 07:28:24,703 [INFO] Publishing: sector-hugo
+2026-03-25 07:30:25,087 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-25 07:30:25,131 [INFO] Publishing: ipo-hugo
+2026-03-25 07:32:25,692 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-25 07:32:25,731 [INFO] Publishing: finance-hugo
+2026-03-25 07:34:26,055 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-25 07:34:26,089 [INFO] Publishing: senior-hugo
+2026-03-25 07:36:56,358 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 07:36:56,381 [INFO] Publishing: finance-hugo
+2026-03-25 07:42:01,646 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-25 07:42:01,671 [INFO] Publishing: finance-hugo
+2026-03-25 07:52:22,908 [INFO] CATCHUP: rap-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 07:52:22,932 [INFO] Publishing: rap-hugo
+2026-03-25 08:10:26,379 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-25 08:10:26,422 [INFO] Publishing: senior-blogger
+2026-03-25 08:12:26,695 [INFO] CATCHUP: rap2-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 08:12:26,721 [INFO] Publishing: rap2-hugo
+2026-03-25 08:32:51,424 [INFO] CATCHUP: rap3-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 08:32:51,447 [INFO] Publishing: rap3-hugo
+2026-03-25 08:52:55,834 [INFO] CATCHUP: rap4-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 08:52:55,857 [INFO] Publishing: rap4-hugo
+2026-03-25 09:13:21,168 [INFO] CATCHUP: rap5-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-25 09:13:21,202 [INFO] Publishing: rap5-hugo
+2026-03-25 10:00:02,952 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-25 10:00:02,990 [INFO] Publishing: travel-hugo
+2026-03-25 10:02:03,150 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-25 10:02:03,192 [INFO] Publishing: travel1-hugo
+2026-03-25 10:03:33,377 [INFO] CATCHUP: travel1-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-25 10:03:33,402 [INFO] Publishing: travel1-hugo
+2026-03-25 10:05:25,797 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-25 10:05:25,842 [INFO] Publishing: travel2-hugo
+2026-03-25 10:06:25,945 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-25 10:06:25,990 [INFO] Publishing: travel3-hugo
+2026-03-25 10:08:26,183 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-25 10:08:26,221 [INFO] Publishing: travel4-hugo
+2026-03-25 10:08:56,310 [INFO] CATCHUP: travel4-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-25 10:08:56,332 [INFO] Publishing: travel4-hugo
+2026-03-25 10:10:34,344 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-25 10:10:34,379 [INFO] Publishing: hotissue-hugo
+2026-03-25 10:12:04,515 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-25 10:12:04,562 [INFO] Publishing: tco-hugo
+2026-03-25 10:14:04,676 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-25 10:14:04,739 [INFO] Publishing: deal-hugo
+2026-03-25 10:14:04,752 [INFO] CATCHUP: deal-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-25 10:14:04,785 [INFO] Publishing: deal-hugo
+2026-03-25 10:16:24,549 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-25 10:16:24,588 [INFO] Publishing: compare-hugo
+2026-03-25 10:17:07,957 [INFO]   [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: 모델 Y
+2026-03-25 10:17:07,957 [INFO]     [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: 모델 Y
+2026-03-25 10:18:24,829 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-25 10:18:24,881 [INFO] Publishing: guide-hugo
+2026-03-25 10:20:25,169 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-25 10:20:25,208 [INFO] Publishing: ev-hugo
+2026-03-25 10:22:25,357 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-25 10:22:25,394 [INFO] Publishing: stock-hugo
+2026-03-25 10:24:25,608 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-25 10:24:25,673 [INFO] CATCHUP: dividend-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-25 10:24:25,696 [INFO] Publishing: dividend-hugo
+2026-03-25 10:24:25,705 [INFO] Publishing: dividend-hugo
+2026-03-25 10:26:02,771 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-25 10:26:02,818 [INFO] Publishing: etf-hugo
+2026-03-25 10:28:02,987 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-25 10:28:03,029 [INFO] Publishing: sector-hugo
+2026-03-25 10:30:03,792 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-25 10:30:03,833 [INFO] Publishing: ipo-hugo
+2026-03-25 10:32:04,323 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-25 10:32:04,367 [INFO] Publishing: finance-hugo
+2026-03-25 10:34:04,495 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-25 10:34:04,544 [INFO] Publishing: senior-hugo
+2026-03-25 10:34:34,613 [INFO] CATCHUP: finance-hugo expected=2 actual=1 missed=1 quota=5 attempt=3/3
+2026-03-25 10:34:34,635 [INFO] Publishing: finance-hugo
+2026-03-25 10:54:43,959 [INFO] CATCHUP: rap-hugo expected=2 actual=1 missed=1 quota=5 attempt=2/3
+2026-03-25 10:54:43,982 [INFO] Publishing: rap-hugo

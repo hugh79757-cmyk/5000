@@ -153,21 +153,27 @@ class CoupangSenior:
             results = [p for p in results if _is_relevant(p.get('productName', ''), category)]
             if results:
                 product = results[0]
-                name = product.get('productName', search_term)
+                name = product.get('productName', search_term)[:30]
                 price = product.get('productPrice', 0)
-                product_id = product.get('productId', '')
+                product_url = product.get('productUrl', '')
 
-                if not product_id:
-                    continue
+                # 이미 affiliate URL이면 그대로 사용
+                if product_url and 'link.coupang.com' in product_url:
+                    affiliate_url = product_url
+                else:
+                    product_id = product.get('productId', '')
+                    if not product_id:
+                        continue
+                    affiliate_url = self.generate_affiliate_link(product_id)
 
-                affiliate_url = self.generate_affiliate_link(product_id)
                 if not affiliate_url:
                     continue
-                    if price:
-                        price_str = f"{int(price):,}원"
-                        products_md.append(f"- [{name}]({affiliate_url}) — {price_str}")
-                    else:
-                        products_md.append(f"- [{name}]({affiliate_url})")
+
+                if price:
+                    price_str = f"{int(price):,}원"
+                    products_md.append(f"- [{name}]({affiliate_url}) — {price_str}")
+                else:
+                    products_md.append(f"- [{name}]({affiliate_url})")
 
         if not products_md:
             return ""
