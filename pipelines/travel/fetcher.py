@@ -358,6 +358,20 @@ def fetch_festival():
                 logger.warning(f"festival: searchFestival 예외 ({e}), 원본 사용")
 
         adapted = _adapt_korservice_items(selected)
+
+        # [GUARD] 필수 필드 검증: 축제명 + 일정 없으면 None 반환
+        if adapted:
+            _first = adapted[0]
+            _has_title = bool(_first.get("title", "").strip())
+            _has_date = bool(_first.get("eventstartdate", "").strip() or _first.get("eventenddate", "").strip())
+            _has_place = bool(_first.get("eventplace", "").strip() or _first.get("addr1", "").strip())
+            if not (_has_title and _has_date):
+                logger.warning(f"festival GUARD: 필수 필드 부족 (title={_has_title}, date={_has_date}) → None 반환")
+                return None
+        else:
+            logger.warning("festival GUARD: adapted 결과 0건 → None 반환")
+            return None
+
         return {
             "items": adapted,
             "display_region": region_name,
