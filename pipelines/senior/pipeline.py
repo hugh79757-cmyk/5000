@@ -231,6 +231,23 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
     """Hugo 발행 — shared.publisher에 위임"""
     try:
         from shared.publisher import publish
+
+    # ── 발행 전 검증 ──
+    _is_draft = False
+    try:
+        from shared.validators import validate_post_extended as _validate
+        _val_ctx = {
+            "keyword": article.get("keyword", ""),
+            "event_date": article.get("event_date", article.get("policy_date", "")),
+            "daily_quota": 5,
+        }
+        _issues = _validate(blog_id, article["title"], article.get("body_md", ""), _val_ctx, pipeline="senior")
+        if _issues:
+            _is_draft = True
+            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+    except Exception as _ve:
+        logger.warning(f"[Validate] Error (non-fatal): {_ve}")
+
         result = publish(
             blog_id=blog_id,
             title=article["title"],
@@ -265,6 +282,23 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
             body_html = thumb_html + body_html
 
         from shared.publisher import publish
+
+    # ── 발행 전 검증 ──
+    _is_draft = False
+    try:
+        from shared.validators import validate_post_extended as _validate
+        _val_ctx = {
+            "keyword": article.get("keyword", ""),
+            "event_date": article.get("event_date", article.get("policy_date", "")),
+            "daily_quota": 5,
+        }
+        _issues = _validate(blog_id, article["title"], article.get("body_md", ""), _val_ctx, pipeline="senior")
+        if _issues:
+            _is_draft = True
+            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+    except Exception as _ve:
+        logger.warning(f"[Validate] Error (non-fatal): {_ve}")
+
         result = publish(
             blog_id=blog_id,
             title=article["title"],
