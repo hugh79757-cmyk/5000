@@ -391,13 +391,30 @@ def run(blog_cfg):
     # 후처리 (면책조항 + 쿠팡 + 내부링크)
     article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
+    # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
+    _is_draft = False
+    try:
+        from shared.validators import validate_post as _validate
+        _val_ctx = {
+            "keyword": keyword,
+            "event_date": article.get("event_date", ""),
+            "daily_quota": article.get("daily_quota", 5),
+        }
+        _issues = _validate(blog_id, article.get("title", ""), article["body_md"], _val_ctx)
+        if _issues:
+            _is_draft = True
+            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+    except Exception as _ve:
+        logger.warning(f"[Validate] Error (non-fatal): {_ve}")
+    article["is_draft"] = _is_draft
+
     # 발행
     result = publish(
         blog_id=blog_id,
         title=article["title"],
         body_md=article["body_md"],
         body_html=body_html,
-        category=article.get("category", "부동산"),
+        category=article.get("category", "부동산", is_draft=article.get("is_draft", False)),
         tags=article.get("tags", ""),
         data_source=data_source,
         source_id=keyword,
