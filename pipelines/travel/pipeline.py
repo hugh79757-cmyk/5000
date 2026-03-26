@@ -122,6 +122,23 @@ def _run_single(target_blog_id, blog_cfg=None):
     if _travel_desc:
         body_md = "<!-- DESC: " + _travel_desc + " -->\n" + body_md
 
+
+    # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
+    _is_draft = False
+    try:
+        from shared.validators import validate_post_extended as _validate
+        _val_ctx = {
+            "keyword": result.get("keyword", ""),
+            "event_date": result.get("event_date", ""),
+            "daily_quota": 5,
+        }
+        _issues = _validate(target_blog_id, result["title"], body_md, _val_ctx, pipeline="travel")
+        if _issues:
+            _is_draft = True
+            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+    except Exception as _ve:
+        logger.warning(f"[Validate] Error (non-fatal): {_ve}")
+
     pub_result = publish(
         blog_id=target_blog_id,
         title=result["title"],
@@ -134,6 +151,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         source_id="",
         prompt_id=result.get("prompt_id", ""),
         model=result.get("model", ""),
+        is_draft=_is_draft,
     )
 
     if pub_result and pub_result.get("success"):

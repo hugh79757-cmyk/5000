@@ -123,15 +123,38 @@ def _post_process(body_md, blog_id, keyword):
     body_md = _re.sub(r"\n*\*이 포스팅은 쿠팡[^\n]*", "", body_md)
     body_md = _re.sub(r"\n*>\s*\*\*이 포스팅은 쿠팡[^\n]*", "", body_md)
     # GPT가 넣은 쿠팡 상품 추천 섹션도 제거
-    _coupang_headers = [
-        r"\n*## 자취[^\n]*(?:\n(?!## ).*)*",
-        r"\n*## 신혼[^\n]*추천[^\n]*(?:\n(?!## ).*)*",
-        r"\n*## 프리미엄 입주[^\n]*(?:\n(?!## ).*)*",
-        r"\n*## .*추천 가전[^\n]*(?:\n(?!## ).*)*",
-        r"\n*## .*필수 아이템[^\n]*(?:\n(?!## ).*)*",
-    ]
-    for _cp in _coupang_headers:
-        body_md = _re.sub(_cp, "", body_md)
+    # GPT 자체 쿠팡 섹션 제거 (H2부터 다음 H2 또는 ---까지)
+    _gpt_section_keywords = ["자취", "신혼", "프리미엄 입주", "추천 가전", "필수 아이템",
+                              "입주 준비", "이사 준비", "원룸 필수", "추천 용품"]
+    for _gsk in _gpt_section_keywords:
+        while True:
+            _gi = body_md.find("## " + _gsk)
+            if _gi < 0:
+                # 부분 매칭: "## 자취·원룸" 같은 경우
+                _gi2 = body_md.find("## ")
+                _found = False
+                while _gi2 >= 0:
+                    _line_end = body_md.find("\n", _gi2)
+                    if _line_end < 0:
+                        _line_end = len(body_md)
+                    _header = body_md[_gi2:_line_end]
+                    if _gsk in _header:
+                        _gi = _gi2
+                        _found = True
+                        break
+                    _gi2 = body_md.find("## ", _gi2 + 3)
+                if not _found:
+                    break
+            # 다음 H2 또는 --- 찾기
+            _ge = len(body_md)
+            _next = body_md.find("\n## ", _gi + 3)
+            _next_hr = body_md.find("\n---", _gi + 3)
+            if _next > 0:
+                _ge = min(_ge, _next)
+            if _next_hr > 0:
+                _ge = min(_ge, _next_hr)
+            body_md = body_md[:_gi] + body_md[_ge:]
+            break
     body_md = _re.sub(r"\n*---\s*$", "", body_md.rstrip())
     body_md = _re.sub(r"\n*---\s*\n*---", "", body_md)
     body_md = body_md.rstrip()

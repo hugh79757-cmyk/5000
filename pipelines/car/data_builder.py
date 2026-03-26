@@ -349,6 +349,7 @@ def build_input(conn, topic, db_path):
         "base_price": main_trim['price'],
         "engine": build_engine_desc(car),
         "fuel_type": car['fuel_type'],
+        "segment": car.get('segment', ''),
         "fuel_efficiency": fuel_eff,
         "displacement": car['displacement'],
         "discount": 0, "discount_conditions": "",
