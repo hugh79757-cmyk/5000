@@ -278,7 +278,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
         "model": model,
         "platform": blog_cfg["platform"],
         "status": "pending",
-        "published_url": "",
+        "published_url": f"pending://{blog_id}/{__import__('datetime').datetime.now().timestamp()}",
         "published_at": "",
     }
     article_id = insert_article(article)
