@@ -118,7 +118,22 @@ def _post_process(body_md, blog_id, keyword):
     # 2. GPT가 넣은 면책 문구 제거 (중복 방지)
     body_md = _re.sub(r"\n*이 글은 국토교통부[^\n]*", "", body_md)
     body_md = _re.sub(r"\n*> 이 글은[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*이 포스팅은 쿠팡[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*> 이 포스팅은 쿠팡[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*\*이 포스팅은 쿠팡[^\n]*", "", body_md)
+    body_md = _re.sub(r"\n*>\s*\*\*이 포스팅은 쿠팡[^\n]*", "", body_md)
+    # GPT가 넣은 쿠팡 상품 추천 섹션도 제거
+    _coupang_headers = [
+        r"\n*## 자취[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## 신혼[^\n]*추천[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## 프리미엄 입주[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## .*추천 가전[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## .*필수 아이템[^\n]*(?:\n(?!## ).*)*",
+    ]
+    for _cp in _coupang_headers:
+        body_md = _re.sub(_cp, "", body_md)
     body_md = _re.sub(r"\n*---\s*$", "", body_md.rstrip())
+    body_md = _re.sub(r"\n*---\s*\n*---", "", body_md)
     body_md = body_md.rstrip()
 
     # 1-1. 글 중간 이탈방지 카드 삽입 (H2 3번째 뒤)
@@ -161,10 +176,16 @@ def _post_process(body_md, blog_id, keyword):
         logger.warning(f"중간 카드 삽입 실패: {e}")
 
     # GPT가 생성한 모든 내부링크/추천글 섹션 제거 (시스템이 별도 삽입)
-    body_md = _re.sub(r"\n*## 함께 읽[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
-    body_md = _re.sub(r"\n*## 관련 글[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
-    body_md = _re.sub(r"\n*## 추천 글[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
-    body_md = _re.sub(r"\n*## 더 읽[^\n]*\n.*", "", body_md, flags=_re.DOTALL)
+    # 다음 ##까지 또는 문서 끝까지만 제거 (DOTALL 제거하여 과잉삭제 방지)
+    _strip_patterns = [
+        r"\n*## 함께 읽[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## 관련 글[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## 추천 글[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## 더 읽[^\n]*(?:\n(?!## ).*)*",
+        r"\n*## 함께 읽어보기[^\n]*(?:\n(?!## ).*)*",
+    ]
+    for _pat in _strip_patterns:
+        body_md = _re.sub(_pat, "", body_md)
 
     parts = []
 
@@ -180,11 +201,23 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"쿠팡 링크 삽입 실패: {e}")
 
-    # 4. 네이버지도 버튼 (지역/단지명 기반)
+    # 4. 네이버지도 버튼 (지역/단지명 기반 — 비지역 키워드 스킵)
+    _NO_MAP_KEYWORDS = [
+        "세금", "양도", "취득세", "종부세", "공시지가", "보증보험", "계약서",
+        "임대차", "3법", "청약", "당첨", "확률", "일정", "신청", "공고",
+        "청년", "LH", "임대주택", "공공임대", "행복주택", "안심주택",
+        "가이드", "총정리", "핵심", "방법", "높이는",
+    ]
+    _skip_map = any(nk in keyword for nk in _NO_MAP_KEYWORDS) if keyword else True
     try:
         import urllib.parse as _up
+        if _skip_map:
+            logger.info(f"네이버지도 스킵 (비지역 키워드): {keyword}")
+            raise ValueError("skip")
         # 키워드에서 지역명이나 단지명 추출
-        map_query = keyword
+        map_query = keyword.strip()
+        if not map_query:
+            raise ValueError("empty keyword")
         # 블로그별 지도 검색 최적화
         map_label = {
             "rap-hugo": "아파트 매물",
