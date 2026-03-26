@@ -75,12 +75,12 @@ def _extract_description(body_md):
     # 수치 문장 없으면 첫 문장 축약
     return lines[0][:160]
 
-def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description):
+def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
     fm += 'title: "' + title.replace('"', '\\"') + '"\n'
     fm += "date: " + date_str + "\n"
-    fm += "draft: false\n"
+    fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
         fm += 'description: "' + description[:200].replace('"', '\\"') + '"\n'
     fm += 'slug: "' + slug + '"\n'
@@ -96,13 +96,13 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
     fm += "---\n"
     return fm, date_str
 
-def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description):
+def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description, is_draft=False):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
     fm += 'title: "' + title.replace('"', '\\"') + '"\n'
     fm += "date: '" + date_str + "'\n"
     fm += "slug: '" + slug + "'\n"
-    fm += "draft: false\n"
+    fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
         fm += 'description: "' + description.replace('"', '\\"') + '"\n'
     if tags:
@@ -119,13 +119,13 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     return fm, date_str
 
 
-def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description):
+def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=False):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
     fm += 'title: "' + title.replace('"', '\\"') + '"\n'
     fm += "slug: '" + slug + "'\n"
     fm += "date: '" + date_str + "'\n"
-    fm += "draft: false\n"
+    fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
         fm += 'description: "' + description.replace('"', '\\"') + '"\n'
     if tags:
@@ -173,17 +173,17 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
 
     if theme.lower() == "blowfish":
-        fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description)
+        fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
     elif theme.lower() == "congo":
-        fm, date_str = _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description)
+        fm, date_str = _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
     else:
-        fm, date_str = _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description)
+        fm, date_str = _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
         date_prefix = datetime.now().strftime("%Y-%m-%d")
         post_dir = os.path.join(site_path, "content", "posts")
         os.makedirs(post_dir, exist_ok=True)
@@ -232,7 +232,7 @@ def deploy_site(site_path, cf_project):
 def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
             category="", tags="", thumbnail_url="",
             data_source="", source_id="", prompt_id="",
-            model="", wp_category=None):
+            model="", wp_category=None, is_draft=False):
 
     # 후처리: AI가 생성한 가짜 내부링크 제거
     import re
