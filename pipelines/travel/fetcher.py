@@ -317,6 +317,36 @@ def fetch_festival():
                     if re_items:
                         selected = [random.choice(re_items)]
                         logger.info(f"festival: searchFestival로 현재 월 축제 {len(re_items)}건 중 1건 재선택: {selected[0].get('title','')}")
+                        # searchFestival 결과에 detailIntro2 보강
+                        for _sf_item in selected:
+                            _sf_cid = _sf_item.get("contentid") or _sf_item.get("contentId")
+                            if not _sf_cid:
+                                continue
+                            try:
+                                _sf_resp = req.get(
+                                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
+                                    params={
+                                        "serviceKey": key,
+                                        "MobileOS": "ETC",
+                                        "MobileApp": "TAP",
+                                        "_type": "json",
+                                        "contentId": _sf_cid,
+                                        "contentTypeId": 15,
+                                    },
+                                    timeout=15,
+                                )
+                                _sf_d2 = _sf_resp.json()
+                                _sf_intro = _sf_d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+                                if isinstance(_sf_intro, dict):
+                                    _sf_intro = [_sf_intro]
+                                if _sf_intro:
+                                    _sf_detail = _sf_intro[0]
+                                    for _fld in ("eventstartdate", "eventenddate", "playtime", "eventplace",
+                                                 "usetimefestival", "sponsor1", "program", "subevent", "agelimit"):
+                                        _sf_item[_fld] = _sf_detail.get(_fld, "")
+                                    logger.info(f"festival searchFestival detailIntro 보강: {_sf_item.get('title','')}")
+                            except Exception as _sf_e:
+                                logger.warning(f"festival searchFestival detailIntro 실패: {_sf_e}")
                     else:
                         selected = selected[:1]
                         logger.warning("festival: searchFestival 결과 0건, 원본 사용")

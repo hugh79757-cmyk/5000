@@ -647,9 +647,8 @@ def generate_content(data, blog_id="travel-hugo"):
     content, names_ok = _validate_place_names(content, real_names)
     if not names_ok:
         logger.info("장소명 불일치 감지 (재생성 안함)")
-        pass  # 재생성 비활성화 - 토큰 절약
 
-        _post_process._current_blog_id = blog_id
+    _post_process._current_blog_id = blog_id
     content = _post_process(content)
     content = _enrich_with_nearby(data, content)
     # [PATCH] _enrich_with_nearby 후 GPT "함께 읽어보기" 최종 제거 + 동적 내부링크
