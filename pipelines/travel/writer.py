@@ -917,8 +917,9 @@ def generate_content(data, blog_id="travel-hugo"):
     # [PATCH] DESC 주석 제거됨
 
     # 대가성 문구 삽입 (본문 최상단)
-    if "쿠팡 파트너스" not in content:
-        content = '> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**\n\n' + content
+    # [FIX] 상단 쿠팡 문구 삽입 제거 — 하단 _post_process에서 1회만 삽입
+    # if "쿠팡 파트너스" not in content:
+    #     content = '> **이 포스팅은 ...** \n\n' + content
 
     return {
         "title": title,
