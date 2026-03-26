@@ -347,6 +347,16 @@ def run(blog_cfg):
 
         if not trades:
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
+            # 실거래가 0건 키워드 자동 비활성화 (동탄호수공원 같은 비아파트 키워드 방지)
+            try:
+                import sqlite3 as _sq3
+                _gc = _sq3.connect(GAP_DB_PATH)
+                _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
+                _gc.commit()
+                _gc.close()
+                logger.warning(f"키워드 자동 비활성화: {keyword} (실거래가 0건)")
+            except Exception as _dbe:
+                logger.warning(f"키워드 비활성화 실패: {_dbe}")
             return {"success": False, "reason": "no_trade_data"}
 
         article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
