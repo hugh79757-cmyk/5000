@@ -278,3 +278,250 @@ def validate_post(
         logger.warning(f"[Validate] {blog_id} | {len(issues)} issues: {issues}")
 
     return issues
+
+
+# ══════════════════════════════════════════════════════════
+# 파이프라인별 추가 검증 함수
+# ══════════════════════════════════════════════════════════
+
+def _check_gap(title: str, body: str, ctx: dict) -> list:
+    """GAP 전용 검증: 키워드-본문 관련성, 원문 복사 여부."""
+    issues = []
+    keyword = ctx.get("keyword", "")
+    
+    # 키워드가 본문에 최소 2회 이상 등장해야 함
+    if keyword and body.count(keyword) < 2:
+        issues.append(f"[WARNING] 키워드 '{keyword}' 본문 내 {body.count(keyword)}회만 등장 (최소 2회)")
+    
+    # 원문 복사 의심: 동일 문장이 3줄 연속 인용부호 없이 등장
+    lines = body.split("\n")
+    long_lines = [l.strip() for l in lines if len(l.strip()) > 80 and not l.strip().startswith(">")]
+    if len(long_lines) > 10:
+        # 80자 이상 긴 문장이 10개 넘으면 원문 복사 의심
+        issues.append(f"[WARNING] 원문 복사 의심: 80자 이상 문장 {len(long_lines)}개")
+    
+    # 참고자료 출처 표기 확인
+    has_source = any(k in body for k in ["출처", "참고", "원문", "자료:"])
+    if not has_source:
+        issues.append("[WARNING] 참고자료 출처 표기 없음")
+    
+    return issues
+
+
+def _check_car(title: str, body: str, ctx: dict) -> list:
+    """CAR 전용 검증: 차량 데이터 정확성, 제목 품질."""
+    issues = []
+    
+    # 제목에 차량명 포함 여부 확인
+    import re
+    _car_brands = ["현대", "기아", "제네시스", "쉐보레", "르노", "쌍용", "KG",
+                   "BMW", "벤츠", "아우디", "폭스바겐", "볼보", "렉서스", "토요타", "혼다", "테슬라", "포르쉐",
+                   "그랜저", "쏘나타", "아반떼", "투싼", "싼타페", "팰리세이드", "캐스퍼", "코나", "아이오닉",
+                   "K3", "K5", "K8", "K9", "셀토스", "스포티지", "쏘렌토", "카니발", "EV6", "EV9", "레이",
+                   "GV60", "GV70", "GV80", "G70", "G80", "G90",
+                   "모델 Y", "모델 3", "Model", "X5", "X3", "3시리즈", "5시리즈", "7시리즈",
+                   "E클래스", "C클래스", "S클래스", "GLC", "GLE", "A6", "A4", "Q5", "Q7",
+                   "말리부", "트랙스", "트레일블레이저", "이쿼녹스",
+                   "렉스턴", "토레스", "티볼리", "코란도",
+                   "QM6", "XM3", "SM6", "마스터",
+                   "1시리즈", "S8", "8시리즈", "RSQ8", "e-트론"]
+    title_has_car = any(brand in title for brand in _car_brands)
+    if not title_has_car:
+        issues.append(f"[CRITICAL] 제목에 차량명 없음: \"{title[:50]}\"")
+    
+    # 가격 데이터 존재 확인
+    price_pattern = re.compile(r"\d{1,2},?\d{3}만원|\d+억")
+    if not price_pattern.search(body):
+        issues.append("[WARNING] 차량 가격 정보 없음")
+    
+    # 연식/모델 정보 확인
+    year_pattern = re.compile(r"202[4-9]|203[0-9]")
+    if not year_pattern.search(body):
+        issues.append("[WARNING] 최신 연식 정보 없음 (2024~)")
+    
+    # 연비/배기량 등 핵심 스펙 확인
+    spec_keywords = ["연비", "배기량", "마력", "토크", "cc", "km/L", "kWh"]
+    has_spec = any(k in body for k in spec_keywords)
+    if not has_spec:
+        issues.append("[WARNING] 차량 핵심 스펙 정보 없음 (연비/배기량/마력)")
+    
+    return issues
+
+
+def _check_travel(title: str, body: str, ctx: dict) -> list:
+    """Travel 전용 검증: 축제/행사 날짜, 관광지 유효성."""
+    issues = []
+    
+    # 행사 날짜 경과 여부
+    event_date = ctx.get("event_date", "")
+    if event_date:
+        try:
+            from datetime import datetime
+            evt = datetime.strptime(event_date[:10], "%Y-%m-%d")
+            days_past = (datetime.now() - evt).days
+            if days_past > 3:
+                issues.append(f"[WARNING] 행사/축제 종료 {days_past}일 경과: {event_date[:10]}")
+        except ValueError:
+            pass
+    
+    # 위치/주소 정보 확인
+    addr_keywords = ["주소", "위치", "찾아가", "도로명", "지번"]
+    has_addr = any(k in body for k in addr_keywords)
+    if not has_addr:
+        issues.append("[WARNING] 관광지 위치/주소 정보 없음")
+    
+    # 운영시간/입장료 정보 확인
+    info_keywords = ["운영시간", "입장료", "관람시간", "이용료", "무료", "요금"]
+    has_info = any(k in body for k in info_keywords)
+    if not has_info:
+        issues.append("[WARNING] 운영시간/입장료 정보 없음")
+    
+    return issues
+
+
+def _check_senior(title: str, body: str, ctx: dict) -> list:
+    """Senior 전용 검증: 정책 시행일, 정부24 데이터 유효성."""
+    issues = []
+    
+    # 정책 시행일 경과 여부
+    policy_date = ctx.get("event_date", "") or ctx.get("policy_date", "")
+    if policy_date:
+        try:
+            from datetime import datetime
+            pdt = datetime.strptime(policy_date[:10], "%Y-%m-%d")
+            days_past = (datetime.now() - pdt).days
+            if days_past > 30:
+                issues.append(f"[WARNING] 정책 시행일 {days_past}일 경과: {policy_date[:10]}")
+        except ValueError:
+            pass
+    
+    # 신청 방법/자격 요건 정보 확인
+    req_keywords = ["신청", "자격", "대상", "조건", "구비서류", "제출"]
+    has_req = any(k in body for k in req_keywords)
+    if not has_req:
+        issues.append("[WARNING] 신청 자격/방법 정보 없음")
+    
+    # 정부24/복지로 등 공식 출처 확인
+    gov_sources = ["정부24", "gov.kr", "복지로", "bokjiro", "nhis", "국민건강보험"]
+    has_gov = any(k in body for k in gov_sources)
+    if not has_gov:
+        issues.append("[WARNING] 정부 공식 출처 링크 없음")
+    
+    return issues
+
+
+def _check_stap(title: str, body: str, ctx: dict) -> list:
+    """STAP 전용 검증: 종목코드 유효성, 주가 데이터 날짜."""
+    issues = []
+    import re
+    from datetime import datetime
+    
+    # 종목코드 형식 확인 (6자리 숫자)
+    stock_codes = re.findall(r"\b\d{6}\b", body)
+    # 종목코드가 아예 없는 건 괜찮을 수 있음 (에버그린 글)
+    
+    # 주가 데이터 날짜 확인: 본문에 날짜가 있으면 최신인지
+    date_matches = re.findall(r"(202[4-9])년\s*(\d{1,2})월\s*(\d{1,2})일", body)
+    if date_matches:
+        latest = None
+        for y, m, d in date_matches:
+            try:
+                dt = datetime(int(y), int(m), int(d))
+                if latest is None or dt > latest:
+                    latest = dt
+            except ValueError:
+                continue
+        if latest:
+            age = (datetime.now() - latest).days
+            if age > 7:
+                issues.append(f"[WARNING] 주가 데이터 {age}일 경과 ({latest.strftime('%Y-%m-%d')})")
+    
+    # 재무 핵심 지표 존재 확인
+    fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
+    has_fin = sum(1 for k in fin_keywords if k in body)
+    if has_fin < 2:
+        issues.append(f"[WARNING] 재무 지표 부족 ({has_fin}개, 최소 2개)")
+    
+    return issues
+
+
+# ── 파이프라인별 검증 디스패처 ──
+_PIPELINE_VALIDATORS = {
+    "gap": _check_gap,
+    "car": _check_car,
+    "travel": _check_travel,
+    "senior": _check_senior,
+    "stap": _check_stap,
+}
+
+
+def validate_post_extended(
+    blog_id: str,
+    title: str,
+    html_content: str,
+    context: dict | None = None,
+    pipeline: str = "",
+) -> list:
+    """확장 검증: 기본 validate_post + 파이프라인별 추가 검증.
+    
+    pipeline: "gap", "car", "travel", "senior", "stap", "rap" 중 하나.
+    RAP은 기존 validate_post에 이미 전용 검증이 포함되어 있으므로 추가 불필요.
+    """
+    # 기본 검증
+    issues = validate_post(blog_id, title, html_content, context)
+    
+    # 파이프라인별 추가 검증
+    pl = pipeline.lower().strip()
+    checker = _PIPELINE_VALIDATORS.get(pl)
+    if checker:
+        try:
+            extra = checker(title, html_content or "", context or {})
+            issues.extend(extra)
+        except Exception as e:
+            logger.debug(f"파이프라인 검증 오류 ({pl}): {e}")
+    
+    # 추가 이슈가 있으면 알림 갱신
+    if issues:
+        has_critical = any("[CRITICAL]" in i for i in issues)
+        try:
+            from shared.notify import alert
+            severity = "🚨 CRITICAL" if has_critical else "⚠️ WARNING"
+            ctx = context or {}
+            detail = f"blog: {blog_id}\npipeline: {pl}\ntitle: {title[:50]}\n"
+            detail += "\n".join(f"• {i}" for i in issues)
+            alert(f"[Validate] {severity} — {len(issues)}건", detail)
+        except Exception:
+            pass
+    
+
+    # ── 검증: 빈 섹션 (## 헤딩 뒤 내용 없음) ──
+    _lines = body_md.split("\n")
+    for _idx, _line in enumerate(_lines):
+        if _line.startswith("## "):
+            _has_content = False
+            for _k in range(_idx + 1, min(_idx + 5, len(_lines))):
+                _s = _lines[_k].strip()
+                if _s and not _s.startswith("## ") and not _s.startswith("#") and _s != "---" and _s != ">":
+                    _has_content = True
+                    break
+            if not _has_content:
+                issues.append(f"[ERROR] 빈 섹션: {_line.strip()[:40]}")
+
+    # ── 검증: 쿠팡 상품 관련성 (시니어 파이프라인) ──
+    if context.get("pipeline") == "senior" and "link.coupang" in body_md:
+        _senior_words = ["혈압", "혈당", "영양", "보행", "안마", "난방", "간병",
+                        "지팡이", "돋보기", "보청기", "건강", "운동", "미끄럼", "온열",
+                        "찜질", "무릎", "관절", "칼슘", "오메가", "루테인", "홍삼",
+                        "보스웰리아", "비타민", "유산균", "마그네슘", "아연", "철분",
+                        "프로바이오틱스", "혈행", "눈건강", "요가", "스텝퍼", "밴드"]
+        for _line in body_md.split("\n"):
+            if "link.coupang" in _line and _line.strip().startswith("- ["):
+                import re as _re
+                _m = _re.search(r'\[(.+?)\]', _line)
+                if _m:
+                    _product = _m.group(1)
+                    _relevant = any(_sw in _product for _sw in _senior_words)
+                    if not _relevant:
+                        issues.append(f"[ERROR] 쿠팡 비관련 상품: {_product[:40]}")
+
+    return issues

@@ -213,6 +213,23 @@ def run(blog_cfg):
         )
     body = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + body
 
+
+    # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
+    _is_draft = False
+    try:
+        from shared.validators import validate_post_extended as _validate
+        _val_ctx = {
+            "keyword": data.get("model_name", ""),
+            "event_date": "",
+            "daily_quota": 5,
+        }
+        _issues = _validate(blog_id, title, body, _val_ctx, pipeline="car")
+        if _issues:
+            _is_draft = True
+            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+    except Exception as _ve:
+        logger.warning(f"[Validate] Error (non-fatal): {_ve}")
+
     result = publish(
         blog_id=blog_id,
         title=title,

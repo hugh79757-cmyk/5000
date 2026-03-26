@@ -453,6 +453,46 @@ def _post_process(content):
     return content
 
 
+
+def _validate_place_names(content: str, real_names: list) -> tuple:
+    """API 실제 장소명이 본문에 포함되어 있는지 검증.
+    
+    Returns:
+        (content, names_ok): 수정된 본문과 검증 통과 여부
+    """
+    if not real_names:
+        return content, True
+    
+    found = 0
+    missing = []
+    for name in real_names:
+        if not name:
+            continue
+        if name in content:
+            found += 1
+        else:
+            # 부분 매칭 시도 (괄호 제거, 공백 무시)
+            import re
+            clean = re.sub(r"[\(\)\[\]\s]", "", name)
+            if len(clean) >= 3 and clean in content.replace(" ", ""):
+                found += 1
+            else:
+                missing.append(name)
+    
+    total = len([n for n in real_names if n])
+    if total == 0:
+        return content, True
+    
+    ratio = found / total
+    names_ok = ratio >= 0.5  # 50% 이상 매칭이면 통과
+    
+    if missing:
+        import logging
+        logging.getLogger(__name__).debug(
+            f"장소명 불일치 {len(missing)}/{total}: {missing[:5]}")
+    
+    return content, names_ok
+
 def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
     """생성된 콘텐츠의 H2 수, 글자수, 금지표현을 검증하고 미달 시 재생성"""
     BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요", "느껴보세요"]
@@ -878,7 +918,7 @@ def generate_content(data, blog_id="travel-hugo"):
     # [PATCH] DESC 주석 제거됨
 
     # 대가성 문구 삽입 (본문 최상단)
-    if "쿠팡 파트너스" not in content[:200]:
+    if "쿠팡 파트너스" not in content:
         content = '> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**\n\n' + content
 
     return {

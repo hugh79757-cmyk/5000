@@ -134,6 +134,23 @@ def run(blog_cfg):
         except Exception as _e:
             logger.warning(f"내부링크/CTA 삽입 실패: {_e}")
 
+
+    # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
+    _is_draft = False
+    try:
+        from shared.validators import validate_post_extended as _validate
+        _val_ctx = {
+            "keyword": keyword,
+            "event_date": "",
+            "daily_quota": 5,
+        }
+        _issues = _validate(blog_id, article.get("title", ""), article.get("body_md", ""), _val_ctx, pipeline="gap")
+        if _issues:
+            _is_draft = True
+            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+    except Exception as _ve:
+        logger.warning(f"[Validate] Error (non-fatal): {_ve}")
+
     result = publish(
         blog_id=blog_id,
         title=article["title"],

@@ -160,7 +160,7 @@ def _get_related_posts(blog_id, current_slug, max_count=3):
         return []
 
 
-def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url):
+def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
     theme = blog_cfg.get("theme", "PaperMod")
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
@@ -199,6 +199,21 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         for rp in related:
             links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
         body_md = body_md.rstrip() + links_md
+
+    # ── 쿠팡 파트너스 링크 삽입 (CAR만) ──
+    if blog_cfg.get("pipeline") == "car" or blog_cfg.get("id", "").replace("-hugo", "") in ("hotissue", "tco", "compare", "guide", "deal", "ev"):
+        try:
+            from shared.coupang_car import CoupangCar
+            coupang = CoupangCar()
+            if coupang.is_configured():
+                _segment = blog_cfg.get("_segment", "")
+                _fuel_type = blog_cfg.get("_fuel_type", "")
+                coupang_md = coupang.get_car_product_links(segment=_segment, fuel_type=_fuel_type, count=2)
+                if coupang_md:
+                    body_md = body_md.rstrip() + coupang_md
+                    logger.info("쿠팡 링크 삽입 완료")
+        except Exception as e:
+            logger.warning(f"쿠팡 링크 삽입 실패: {e}")
 
     # DESC 주석 제거 (front-matter에 이미 반영됨)
     import re as _pub_re
@@ -308,20 +323,9 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
 
 
     else:
-        # ── 쿠팡 파트너스 링크 삽입 (CAR만) ──
-        if data_source == "car_db":
-            try:
-                from shared.coupang_car import CoupangCar
-                coupang = CoupangCar()
-                if coupang.is_configured():
-                    coupang_md = coupang.get_car_product_links(segment=segment, fuel_type=fuel_type, count=2)
-                    if coupang_md:
-                        body_md = body_md.rstrip() + coupang_md
-                        logger.info("쿠팡 링크 삽입 완료")
-            except Exception as e:
-                logger.warning(f"쿠팡 링크 삽입 실패: {e}")
-
-        result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url)
+        blog_cfg["_segment"] = segment
+        blog_cfg["_fuel_type"] = fuel_type
+        result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=is_draft)
 
     if result.get("success"):
         update_published(article_id, result.get("url", ""))

@@ -12,7 +12,6 @@ cover:
 ---
 [KBO 일정 및 정보 보기](https://kbo.rotcha.kr)
 
-더 자세한 내용은 관전할 때는 [KBO 사이트](https://kbo.rotcha.kr)를 참고하기 바랍니다.
 
 ## 2026 WBC 조별리그를 넘어 8강으로
 
