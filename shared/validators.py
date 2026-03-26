@@ -391,6 +391,31 @@ def _check_travel(title: str, body: str, ctx: dict) -> list:
     if not has_info:
         issues.append("[WARNING] 운영시간/입장료 정보 없음")
     
+    # [PATCH] 빈 데이터 글 감지 — AI가 데이터 없이 채운 글 차단
+    empty_signals = [
+        "구체적인 축제명이나 일정은 제공되지 않았",
+        "구체적으로 제공되지 않았",
+        "정보를 확인할 수 없으나",
+        "정보가 제공되지 않았",
+        "데이터가 부족하여",
+        "확인되지 않았으나",
+    ]
+    empty_count = sum(1 for s in empty_signals if s in body)
+    if empty_count >= 2:
+        issues.append(f"[CRITICAL] 빈 데이터 글 감지 ({empty_count}개 빈 데이터 표현)")
+    
+    # [PATCH] 숫자 할루시네이션 감지 — 반복되는 가짜 숫자 차단
+    import re as _val_re
+    halluc_patterns = [
+        _val_re.compile(r"(?:연간?\s*(?:약\s*)?|매년\s*(?:약\s*)?)(\d+)만\s*명"),
+        _val_re.compile(r"(?:주차장은?\s*(?:딱|단|약)?\s*)(\d+)대"),
+        _val_re.compile(r"(\d+)대\s*(?:수용|분)"),
+    ]
+    for pat in halluc_patterns:
+        matches = pat.findall(body)
+        if matches:
+            issues.append(f"[CRITICAL] 숫자 할루시네이션 의심: {pat.pattern} → {matches}")
+    
     return issues
 
 
