@@ -229,8 +229,7 @@ def run(cfg):
 
 def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
     """Hugo 발행 — shared.publisher에 위임"""
-    try:
-        from shared.publisher import publish
+    from shared.publisher import publish
 
     # ── 발행 전 검증 ──
     _is_draft = False
@@ -244,10 +243,11 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
         _issues = _validate(blog_id, article["title"], article.get("body_md", ""), _val_ctx, pipeline="senior")
         if _issues:
             _is_draft = True
-            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+            logger.warning(f"[Validate] {len(_issues)} issues -> draft: {_issues}")
     except Exception as _ve:
         logger.warning(f"[Validate] Error (non-fatal): {_ve}")
 
+    try:
         result = publish(
             blog_id=blog_id,
             title=article["title"],
@@ -255,6 +255,7 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
             category=article.get("category", ""),
             tags=tags,
             thumbnail_url=thumb_url,
+            is_draft=_is_draft,
         )
         if result and result.get("success"):
             logger.info(f"Hugo published: {article['title']} -> {result.get('url')}")
@@ -269,19 +270,18 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
 
 def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
     """Blogger 발행 — shared.publisher에 위임"""
-    try:
-        body_html = _convert_md_to_blogger_html(article["body_md"])
+    body_html = _convert_md_to_blogger_html(article["body_md"])
 
-        # 썸네일을 body_html에 삽입
-        if thumb_url:
-            thumb_html = (
-                '<div style="text-align:center;margin-bottom:20px">'
-                f'<img src="{thumb_url}" alt="{article["title"]}" '
-                'style="max-width:100%;border-radius:12px" /></div>'
-            )
-            body_html = thumb_html + body_html
+    # 썸네일을 body_html에 삽입
+    if thumb_url:
+        thumb_html = (
+            '<div style="text-align:center;margin-bottom:20px">'
+            f'<img src="{thumb_url}" alt="{article["title"]}" '
+            'style="max-width:100%;border-radius:12px" /></div>'
+        )
+        body_html = thumb_html + body_html
 
-        from shared.publisher import publish
+    from shared.publisher import publish
 
     # ── 발행 전 검증 ──
     _is_draft = False
@@ -295,10 +295,11 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
         _issues = _validate(blog_id, article["title"], article.get("body_md", ""), _val_ctx, pipeline="senior")
         if _issues:
             _is_draft = True
-            logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")
+            logger.warning(f"[Validate] {len(_issues)} issues -> draft: {_issues}")
     except Exception as _ve:
         logger.warning(f"[Validate] Error (non-fatal): {_ve}")
 
+    try:
         result = publish(
             blog_id=blog_id,
             title=article["title"],
@@ -307,6 +308,7 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
             category=article.get("category", ""),
             tags=tags,
             thumbnail_url=thumb_url,
+            is_draft=_is_draft,
             data_source="gov24_api",
             source_id=article.get("service_id", ""),
             model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
@@ -320,4 +322,5 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
     except Exception as e:
         logger.error(f"Blogger publish error: {e}")
         return {"success": False, "reason": "publish_error"}
+
 
