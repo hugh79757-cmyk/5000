@@ -126,6 +126,8 @@ def _post_process(body_md, blog_id, keyword):
     # GPT 자체 쿠팡 섹션 제거 (H2부터 다음 H2 또는 ---까지)
     _gpt_section_keywords = ["자취", "신혼", "프리미엄 입주", "추천 가전", "필수 아이템",
                               "입주 준비", "이사 준비", "원룸 필수", "추천 용품"]
+    # 시스템이 삽입하는 제목은 제거하지 않음
+    _SYSTEM_TITLES = ["부동산 거래 시 유용한 추천 상품", "차량 관리에 도움되는 추천 용품", "여행 준비에 도움되는 추천 용품"]
     for _gsk in _gpt_section_keywords:
         while True:
             _gi = body_md.find("## " + _gsk)
@@ -139,6 +141,11 @@ def _post_process(body_md, blog_id, keyword):
                         _line_end = len(body_md)
                     _header = body_md[_gi2:_line_end]
                     if _gsk in _header:
+                        # 시스템 삽입 제목이면 스킵
+                        _is_sys = any(st in _header for st in _SYSTEM_TITLES)
+                        if _is_sys:
+                            _gi2 = body_md.find("## ", _gi2 + 3)
+                            continue
                         _gi = _gi2
                         _found = True
                         break
