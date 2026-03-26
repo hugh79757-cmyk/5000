@@ -280,8 +280,10 @@ def _post_process(body_md, blog_id, keyword):
     disc = disclaimer_map.get(blog_id, disclaimer_map["rap-hugo"])
     parts.append(f"\n\n---\n\n> {disc}")
 
-    # 7. 쿠팡 파트너스 면책
-    parts.append("\n\n> 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.")
+    # 7. 쿠팡 파트너스 면책 (CoupangTravel 반환값에 미포함 시에만 추가)
+    _all_parts = "".join(parts)
+    if "쿠팡 파트너스" not in _all_parts:
+        parts.append("\n\n> 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.")
 
     return body_md + "".join(parts)
 
