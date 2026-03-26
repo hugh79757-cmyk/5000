@@ -488,3 +488,411 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
 
     return content
 
+
+
+def generate_content(data, blog_id="travel-hugo"):
+    source_type = data.get("source_type", "camping")
+    prompt_id = _select_prompt_id(blog_id, source_type)
+
+    # 블로그 정보 + 다이닝코드 enrichment (GPT 호출 전에 실행)
+    try:
+        from core.content_processor import enrich_items_with_blog_info
+        items = data.get("items", [])
+        items = enrich_items_with_blog_info(items)
+        data["items"] = items
+    except Exception as e:
+        logger.warning(f"블로그 enrichment 실패 (무시): {e}")
+
+    # 맛집 파이프라인이면 다이닝코드로 메뉴/영업시간 보강
+    if source_type in ("food", "korservice") and prompt_id == "tour2_food":
+        try:
+            from shared.diningcode_enricher import enrich_from_diningcode
+            for item in data.get("items", []):
+                name = item.get("title", item.get("facltNm", ""))
+                addr = item.get("addr1", item.get("addr", ""))
+                if name:
+                    dc = enrich_from_diningcode(name, addr)
+                    if dc:
+                        item["diningcode"] = dc
+                        logger.info(f"다이닝코드: {name} → 메뉴 {len(dc.get('main_menus',[]))}개, 평점 {dc.get('rating','')}")
+        except Exception as e:
+            logger.warning(f"다이닝코드 enrichment 실패 (무시): {e}")
+
+    # 축제 파이프라인이면 네이버 블로그 검색으로 추가 정보 보강
+    if source_type in ("korservice",) and prompt_id == "travel1_festival":
+        try:
+            from core.naver_blog_api import load_naver_blog_api
+            blog_api = load_naver_blog_api()
+            for item in data.get("items", []):
+                name = item.get("title", item.get("facltNm", ""))
+                if not name:
+                    continue
+                queries = [f"{name} 프로그램", f"{name} 주차 교통", f"{name} 후기 팁"]
+                snippets = []
+                for q in queries:
+                    results = blog_api.search(q, display=3, sort="sim")
+                    for r in results:
+                        desc = r.get("description", "").replace("<b>", "").replace("</b>", "")
+                        if desc and len(desc) > 20:
+                            snippets.append(desc[:150])
+                if snippets:
+                    item["blog_snippets"] = snippets[:6]
+                    logger.info(f"축제 블로그 보강: {name} → {len(snippets)}개 스니펫")
+        except Exception as e:
+            logger.warning(f"축제 블로그 enrichment 실패 (무시): {e}")
+
+    # 문화유산 파이프라인이면 네이버 블로그 검색으로 추가 정보 보강
+    if source_type == "heritage":
+        try:
+            from core.naver_blog_api import load_naver_blog_api
+            blog_api = load_naver_blog_api()
+            for item in data.get("items", []):
+                name = item.get("title", "")
+                if not name:
+                    continue
+                queries = [f"{name} 역사", f"{name} 관람 후기", f"{name} 방문 팁"]
+                snippets = []
+                for q in queries:
+                    results = blog_api.search(q, display=3, sort="sim")
+                    for r in results:
+                        desc = r.get("description", "").replace("<b>", "").replace("</b>", "")
+                        if desc and len(desc) > 20:
+                            snippets.append(desc[:150])
+                if snippets:
+                    item["blog_snippets"] = snippets[:6]
+                    logger.info(f"문화유산 블로그 보강: {name} → {len(snippets)}개 스니펫")
+        except Exception as e:
+            logger.warning(f"문화유산 블로그 enrichment 실패 (무시): {e}")
+
+    data_block = _build_data_block(data)
+
+    extra_vars = {
+        "region": data.get("display_region", ""),
+        "theme": data.get("theme", ""),
+        "angle": data.get("angle", ""),
+        "count": str(len(data.get("items", []))),
+    }
+
+    prompt_result = build_prompt(prompt_id, data_block, extra_vars=extra_vars)
+    system_prompt = prompt_result["system"]
+    user_prompt = prompt_result["user"]
+
+    # 장소명 강제 바인딩: API 실제 데이터 이름만 사용하도록 지시
+    place_items = data.get("items", [])
+    real_names = [it.get("title", it.get("facltNm", "")).strip() for it in place_items if it.get("title") or it.get("facltNm")]
+    if real_names:
+        name_constraint = (
+            "\n\n[필수 규칙] 아래 장소명을 정확히 그대로 사용하세요. "
+            "임의로 이름을 바꾸거나 새로 만들지 마세요:\n"
+            + "\n".join(f"- {n}" for n in real_names)
+            + "\n"
+        )
+        user_prompt = name_constraint + user_prompt
+
+    result = ai_generate(system_prompt, user_prompt, tier="default")
+
+    if not result or not result.get("content"):
+        logger.error("AI 생성 실패: prompt_id=%s", prompt_id)
+        return None
+
+    content = result["content"]
+    model_used = result.get("model", "")
+
+    # 후처리: H2 수, 글자수, 금지표현 검증 및 재생성
+    content = _validate_and_retry(content, system_prompt, user_prompt)
+
+    # 장소명 검증: API 데이터의 실제 장소명이 본문에 포함되어 있는지 확인
+    place_items = data.get("items", [])
+    real_names = [it.get("title", it.get("facltNm", "")).strip() for it in place_items if it.get("title") or it.get("facltNm")]
+    content, names_ok = _validate_place_names(content, real_names)
+    if not names_ok:
+        logger.info("장소명 불일치 감지 (재생성 안함)")
+        pass  # 재생성 비활성화 - 토큰 절약
+
+        _post_process._current_blog_id = blog_id
+    content = _post_process(content)
+    content = _enrich_with_nearby(data, content)
+    # [PATCH] _enrich_with_nearby 후 GPT "함께 읽어보기" 최종 제거 + 동적 내부링크
+    _final_related_idx = content.find("## 함께 읽어보기")
+    if _final_related_idx > 0:
+        content = content[:_final_related_idx].rstrip()
+    # 동적 내부링크 삽입
+    try:
+        import glob as _gl_final
+        import random as _rand_final
+        _posts_dir_final = "/Users/twinssn/Projects/travel-hugo/content/posts"
+        _all_posts_final = []
+        for _md_f in _gl_final.glob(os.path.join(_posts_dir_final, "*/index.md")):
+            with open(_md_f, encoding="utf-8") as _ff:
+                _head_f = _ff.read(500)
+            import re as _re_final
+            _tm_f = _re_final.search(r"^title:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
+            _sm_f = _re_final.search(r"^slug:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
+            if _tm_f and _sm_f:
+                _all_posts_final.append({"title": _tm_f.group(1), "slug": _sm_f.group(1)})
+        if len(_all_posts_final) > 3:
+            _picks_f = _rand_final.sample(_all_posts_final, 3)
+            _related_md_f = "\n\n## 함께 읽어보기\n\n"
+            for _p_f in _picks_f:
+                _related_md_f += '{{< article link="/posts/' + _p_f["slug"] + '/" >}}\n\n'
+            content = content.rstrip() + _related_md_f
+    except Exception:
+        pass
+    # Heritage 카드 삽입 (heritage 소스 타입에서만)
+    if source_type == "heritage":
+        try:
+            _region = data.get("region", "") if isinstance(data, dict) else ""
+            _h_card = _build_heritage_card(_region)
+            _h2_match = re.search(r"(\n##\s)", content)
+            if _h2_match:
+                _pos = _h2_match.start()
+                content = content[:_pos] + _h_card + content[_pos:]
+            else:
+                content = _h_card + content
+        except Exception as e:
+            print(f"[heritage-card] 삽입 실패: {e}")
+
+    items = data.get("items", [])
+    content = _inject_images(items, content, blog_id=blog_id)
+    content = _inject_naver_map(content, items)
+
+    display_region = data.get("display_region", "")
+    theme = data.get("theme", "")
+    angle = data.get("angle", theme)
+    items = data.get("items", [])
+
+    TITLE_TEMPLATES = {
+        "travel-hugo": [
+            "2026 {region} {theme} {count}곳 시설과 가격 총정리",
+            "{region}에서 찾은 {theme} {count}곳 비교 정리",
+            "{region} {theme} 어디가 좋을까? {count}곳 비교해봤다",
+            "{region} {angle} 캠핑장 {count}곳, 예약 전 꼭 확인하세요",
+            "{region} 캠핑장 {count}곳 1박 가격과 시설 총정리",
+            "{region} {theme} 중 가성비 좋은 {count}곳 추천",
+            "가족 캠핑으로 좋은 {region} {theme} {count}곳 정리",
+            "{region} {angle} 캠핑장 {count}곳, 조용한 곳만 골랐다",
+            "올여름 {region} {theme} {count}곳 비교 총정리",
+            "{region} 계곡 근처 캠핑장 {count}곳 추천 리스트",
+            "{region} 반려견 동반 가능 캠핑장 {count}곳 비교",
+            "{region} {theme} 1박 요금 비교, {count}곳 정리",
+            "비 와도 걱정 없는 {region} {theme} {count}곳",
+            "{region} 글램핑과 카라반 {count}곳 가격과 시설 비교",
+            "{region} 아이와 가기 좋은 {theme} {count}곳 체크리스트",
+            "초보 캠퍼를 위한 {region} {theme} {count}곳 추천",
+            "{region} {theme} 예약 꿀팁과 {count}곳 비교",
+            "차박하기 좋은 {region} {theme} {count}곳 정리",
+            "3월 {region} {theme} {count}곳 시즌 오픈 현황",
+            "{region} 수영장 있는 캠핑장 {count}곳 총정리",
+        ],
+        "travel1-hugo": [
+            "2026 {region} {theme} 일정과 입장료 총정리",
+            "{region} {theme} 가볼만한 곳 {count}선 추천",
+            "{region} {theme} 일정과 체험 프로그램 정리",
+            "{region} {theme} 일정부터 주차까지 한눈에 보기",
+            "2026 {region} 축제 {count}곳 일정 총정리",
+            "{region} {theme}, 아이와 함께 가기 좋은 {count}곳",
+            "{region} {theme} 교통과 주차 정보 총정리",
+            "주말 나들이로 딱! {region} {theme} {count}곳 추천",
+            "{region} 무료 축제 {count}곳, 일정과 위치 총정리",
+            "2026 {region} 축제 {count}곳 일정과 위치 정리",
+            "{region} {theme} 주차장 위치와 요금 정리",
+            "{region} {theme} 대중교통 가는 법과 셔틀 안내",
+            "{region} {theme} 체험 프로그램 {count}가지 비교",
+            "비 오는 날에도 즐길 수 있는 {region} {theme} 정리",
+            "{region} {theme} 주요 프로그램과 체험 정리",
+            "{region} {theme} 포토존 위치와 인생샷 팁 정리",
+            "올해 처음 열리는 {region} {theme} 일정 총정리",
+            "{region} {theme} 야간 프로그램과 조명 행사 안내",
+            "{region} {theme}와 묶어 갈 당일치기 코스 추천",
+            "{region} {theme} 사전예약과 입장 안내 정리",
+        ],
+        "travel2-hugo": [
+            "{region} {theme} 탐방, 입장료와 운영시간 총정리",
+            "{region} 문화유산 탐방 코스, 주변 유적까지 정리",
+            "{region} 사적지 탐방, 해설 프로그램과 주차 안내",
+            "{region} 역사 여행 코스, 교통과 주차 정보 정리",
+            "{region}에서 탐방하는 {theme} {count}곳 비교",
+            "{region} 문화재 탐방, 사진 찍기 좋은 포인트까지",
+            "{region} {theme} 탐방 코스와 입장료 정리",
+            "{region} {theme} 해설 투어 예약 방법과 일정",
+            "{region} 유네스코 유산과 {theme} 코스 연계 정리",
+            "아이와 함께하는 {region} {theme} 체험 {count}곳",
+            "{region} {theme} 무료 관람 가능한 곳 {count}선",
+            "{region} {theme} 탐방 후 들르기 좋은 카페와 맛집",
+            "역사 덕후를 위한 {region} {theme} 딥코스 정리",
+            "주말 반나절 {region} {theme} 탐방 동선 추천",
+            "{region} {theme} 야간 개장 일정과 관람 팁",
+            "사진으로 보는 {region} {theme} 포인트 {count}곳",
+            "{region} {theme} 계절별 방문 적기와 관람 팁",
+            "{region} {theme} 주변 주차장과 대중교통 안내",
+            "당일치기로 돌아보는 {region} {theme} {count}곳",
+            "{region} 숨은 {theme} {count}곳, 현지인 추천 코스",
+        ],
+        "travel3-hugo": [
+            "{region} {theme} 현지인이 추천하는 식당 {count}곳",
+            "{region}에 가면 꼭 먹어야 할 {theme} {count}선",
+            "{region} {theme} 가성비 식당 {count}곳 메뉴와 위치 정리",
+            "현지인만 아는 {region} {theme} {count}곳 총정리",
+            "{region} {theme} 웨이팅 없는 식당 {count}곳 추천",
+            "{region} 로컬 맛집 {count}곳 메뉴와 영업 정보 정리",
+            "{region} {theme} 혼밥하기 좋은 식당 {count}곳",
+            "여행 중 들르기 좋은 {region} {theme} {count}곳",
+            "주말 {region} {theme} {count}곳 총정리",
+            "{region} {angle} 맛집 {count}곳, 영업시간과 휴무일 정리",
+            "{region} {theme} 가성비 식당 {count}곳 비교",
+            "{region} {theme} 주차 가능한 식당 {count}곳 정리",
+            "아이와 가기 좋은 {region} {theme} {count}곳",
+            "{region} {theme} 오래된 노포 {count}곳 탐방",
+            "{region} {theme} 점심 특선 메뉴 비교 {count}곳",
+            "관광지 근처 {region} {theme} {count}곳 동선 정리",
+            "{region} {theme} 예약 필수 식당 {count}곳과 연락처",
+            "{region} 새벽이나 심야 영업 {theme} {count}곳",
+            "{region} {theme} 테라스와 뷰 좋은 식당 {count}곳 비교",
+            "포장이나 배달 가능한 {region} {theme} {count}곳",
+        ],
+        "travel4-hugo": [
+            "{region} 당일치기 여행 코스 {count}곳 동선 총정리",
+            "{region} {theme} 1박2일 코스, 완벽한 동선 정리",
+            "주말에 떠나는 {region} {theme} {count}곳 코스 추천",
+            "{region} {angle} 베스트 코스 {count}선 추천",
+            "{region} 가족 여행 {count}곳 코스와 예산 정리",
+            "2026 {region} {theme} 추천 코스 {count}선 총정리",
+            "{region} 드라이브 코스 {count}곳, 주차 정보 포함",
+            "{region}에서 하루 만에 즐기는 {theme} {count}곳 플랜",
+            "{region} 대중교통으로 가능한 여행 코스 {count}곳",
+            "{region} {theme} 식당까지 포함한 풀코스 {count}곳",
+            "커플 여행으로 좋은 {region} {theme} {count}곳 코스",
+            "{region} {theme} 반나절 코스와 점심 맛집 추천",
+            "뚜벅이를 위한 {region} {theme} {count}곳 코스 정리",
+            "{region} {theme} 아침부터 저녁까지 타임테이블 정리",
+            "예산 10만원으로 즐기는 {region} {theme} {count}곳 코스",
+            "{region} {theme} 우천 시 대체 코스까지 정리",
+            "사진 명소 위주 {region} {theme} {count}곳 코스 추천",
+            "{region} {theme} 숙소 위치별 추천 코스 {count}선",
+            "3월 {region} {theme} 벚꽃과 봄꽃 코스 {count}곳",
+            "{region} {theme} 코스별 이동 거리와 주차 정보 정리",
+        ],
+    }
+
+
+    import random as _rand
+    templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES["travel-hugo"])
+    template = _rand.choice(templates)
+    # region/theme 빈값 보호
+    if not display_region or len(display_region) < 2:
+        display_region = data.get("display_region", data.get("region", "전국"))
+    if not display_region or len(display_region) < 2:
+        display_region = "전국"
+    if not theme or len(theme) < 2:
+        theme = "여행"
+
+    fallback_title = template.format(
+        region=display_region,
+        theme=theme,
+        angle=angle,
+        count=str(len(items)),
+    )
+
+    place_names = ', '.join([i.get('title', i.get('facltNm', ''))[:12] for i in items[:3]])
+    title_prompt = f"""블로그 제목 1개만 출력하세요. 따옴표 없이 제목 텍스트만 출력.
+
+지역: {display_region}
+테마: {theme}
+장소수: {len(items)}
+대표 장소: {place_names}
+
+필수 규칙:
+- 20~35자
+- 지역명 반드시 포함
+- 조사(에서, 의, 과, 와, 으로, 부터)를 넣어 자연스러운 문장으로 작성
+- 서술어(총정리, 비교, 추천 리스트, 정리, 한눈에 보기, 코스 안내)로 마무리
+- 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
+- 특수기호 금지 (콜론, 느낌표, 하이픈)
+- 가격 정보는 제목에 넣지 않기 (본문에서 다룸)
+- 고유명사(축제명/장소명)는 1개만 포함
+
+금지 표현:
+- "완벽 가이드", "꼭 가봐야 할", "베스트", "상세정보", "즐기기", "소개", "알아보기", "만나보기"
+
+좋은 제목 예시:
+- "2026 광주 비어페스트 일정과 인근 맛집 총정리"
+- "강릉 커피축제 일정부터 주차까지 한눈에 보기"
+- "부산에서 만나는 불꽃축제 관람 명당 4곳 정리"
+- "전주 비빔밥축제, 아이와 함께 즐기는 체험 3가지"
+- "경남 하동별맛축제 일정과 근처 맛집 추천"
+
+나쁜 제목 예시 (비문, 키워드 나열):
+- "경북 축제 추천 3곳 청도반시축제와 백두대간 봉자페스티벌 상세정보"
+- "전남 해물 맛집 5곳 숙자네 1인분 2만원"
+- "서울 한옥 스테이 5곳 평균 1박 요금 10만원"
+"""
+
+    title_result = ai_generate(
+        "블로그 제목 생성 전문가. 제목 1개만 출력.",
+        title_prompt,
+        tier="economy"
+    )
+
+    if title_result and title_result.get("content"):
+        generated_title = title_result["content"].strip().strip('"').strip("'").strip()
+        generated_title = re.sub(r'^(제목[:\s]*|Title[:\s]*)', '', generated_title).strip()
+        # "1곳" 어색한 제목 보정
+        if '1곳' in generated_title:
+            generated_title = generated_title.replace(' 1곳', '').replace('1곳 ', '')
+        if len(generated_title) > 5:
+            import random as _r
+            import re as _re
+            ban_endings = ['소개', '알아보기', '만나보기', '살펴보기', '확인하기', '코스 안내', '안내']
+            ban_phrases = ['에서 즐기는', '에서 만나는', '에서 즐길 수 있는']
+            for ban in ban_endings:
+                if generated_title.endswith(ban):
+                    replacements = ['추천', '한눈에 보기', '메뉴 비교', '코스 추천', '비교', '체크리스트', '방문 전 필독']
+                    generated_title = generated_title[:-len(ban)].rstrip() + ' ' + _r.choice(replacements)
+                    break
+            for bp in ban_phrases:
+                if bp in generated_title:
+                    generated_title = generated_title.replace(bp, ' ')
+                    generated_title = ' '.join(generated_title.split())
+            long_words = _re.findall(r'[가-힣]{8,}', generated_title)
+            if long_words:
+                generated_title = fallback_title
+            if len(generated_title) > 45 or len(generated_title) < 15:
+                generated_title = fallback_title
+            # region 포함 검증: 지역명이 빠지면 fallback
+            if display_region and len(display_region) >= 2 and display_region not in generated_title:
+                generated_title = fallback_title
+            title = generated_title
+
+    labels = list(set(filter(None, [
+        data.get("category", "국내여행"),
+        theme,
+        display_region,
+    ])))
+
+    # SEO description 생성: 지역 + 테마 + 핵심정보
+    _item_names = [it.get("title", it.get("facltNm", ""))[:15] for it in items[:3] if it.get("title") or it.get("facltNm")]
+    _names_str = ", ".join(_item_names) if _item_names else theme
+    _seo_desc = f"{display_region} {theme} — {_names_str}. {len(items)}곳 정보와 방문 팁 정리."
+    if len(_seo_desc) > 160:
+        _seo_desc = _seo_desc[:157] + "..."
+    # [PATCH] DESC 주석 제거됨
+
+    # 대가성 문구 삽입 (본문 최상단)
+    if "쿠팡 파트너스" not in content[:200]:
+        content = '> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**\n\n' + content
+
+    return {
+        "title": title,
+        "body_md": content,
+        "body_html": "",
+        "labels": labels,
+        "theme": theme,
+        "category": data.get("category", "국내여행"),
+        "region": display_region,
+        "angle": angle,
+        "items_count": len(items),
+        "source_type": source_type,
+        "prompt_id": prompt_id,
+        "model": model_used,
+        "description": _seo_desc,
+    }
