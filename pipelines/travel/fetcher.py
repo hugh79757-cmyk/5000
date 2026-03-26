@@ -401,8 +401,20 @@ def fetch_food():
         if not items_raw:
             logger.warning("food: no data for " + region_name)
             return None
-        with_img = [i for i in items_raw if i.get('firstimage')]
-        pool = with_img if len(with_img) >= 3 else items_raw
+        # [FIX] 음식점 + 카페 혼합 — 카페만으로 구성되지 않도록 보장
+        _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
+        def _is_cafe(item):
+            return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
+        _restaurants = [i for i in items_raw if not _is_cafe(i)]
+        _cafes = [i for i in items_raw if _is_cafe(i)]
+        if len(_restaurants) >= 2 and _cafes:
+            _mixed = _restaurants + _cafes[:1]
+        elif len(_restaurants) >= 3:
+            _mixed = _restaurants
+        else:
+            _mixed = items_raw
+        with_img = [i for i in _mixed if i.get('firstimage')]
+        pool = with_img if len(with_img) >= 3 else _mixed
         selected, _sg = _select_same_sigungu(pool, 3)
         adapted = _adapt_korservice_items(selected)
         sigungu_name = _sg if _sg else region_name
