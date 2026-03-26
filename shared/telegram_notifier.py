@@ -32,6 +32,13 @@ def send(message, parse_mode="HTML"):
 
 
 def send_error(blog_id, stage, error_msg):
+    # 정상 동작인 quota 초과는 알림 불필요 (로그에만 기록)
+    _SILENT_REASONS = ["quota_met", "quota_exceeded", "daily_quota_exceeded", "daily_quota"]
+    _err_lower = str(error_msg).lower()
+    if any(reason in _err_lower for reason in _SILENT_REASONS):
+        logger.info(f"[Silent] {blog_id}/{stage}: {error_msg}")
+        return False
+
     # blogs.yaml에서 도메인, 레포 정보 가져오기
     domain = ""
     repo = ""
