@@ -210,11 +210,11 @@ class CoupangTravel:
 
         # blog_id에 따라 섹션 제목 분기
         _section_titles = {
-            "rap-hugo": "## 신혼·입주 시 필요한 추천 가전",
-            "rap2-hugo": "## 새집 입주 준비 추천 가전",
-            "rap3-hugo": "## 스마트한 생활을 위한 추천 가전",
-            "rap4-hugo": "## 자취·이사 준비 추천 가전",
-            "rap5-hugo": "## 프리미엄 입주 가전 추천",
+            "rap-hugo": "## 부동산 거래 시 유용한 추천 상품",
+            "rap2-hugo": "## 부동산 거래 시 유용한 추천 상품",
+            "rap3-hugo": "## 부동산 거래 시 유용한 추천 상품",
+            "rap4-hugo": "## 부동산 거래 시 유용한 추천 상품",
+            "rap5-hugo": "## 부동산 거래 시 유용한 추천 상품",
         }
         _sec_title = _section_titles.get(blog_id, "## 여행 준비에 도움되는 추천 용품")
         lines = ["\n\n---\n", f"{_sec_title}\n"]

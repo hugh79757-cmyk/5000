@@ -139,14 +139,29 @@ def _check_coupang(body: str) -> list:
             f"[ERROR] 쿠팡 면책 {discl_count}회 중복 (허용: {_MAX_COUPANG_DISCLAIMERS}회)")
     
     # GPT가 자체 생성한 쿠팡 상품 섹션 잔존 확인
+    # 시스템 삽입 제목은 허용 (부동산 거래, 차량 관리, 여행 준비)
+    _SYSTEM_COUPANG_TITLES = [
+        "## 부동산 거래 시 유용한 추천 상품",
+        "## 차량 관리에 도움되는 추천 용품",
+        "## 여행 준비에 도움되는 추천 용품",
+    ]
     gpt_coupang_headers = [
-        "## 자취", "## 신혼", "## 프리미엄 입주", "## 추천 가전", "## 필수 아이템"
+        "## 자취", "## 신혼", "## 프리미엄 입주", "## 추천 가전",
+        "## 필수 아이템", "## 새집 입주", "## 이사 준비", "## 원룸 필수",
+        "## 스마트한 생활",
     ]
     for hdr in gpt_coupang_headers:
         if hdr in body:
-            issues.append(
-                f"[ERROR] GPT 자체 쿠팡 상품 섹션 잔존: \"{hdr}\"")
-            break
+            # 시스템 제목에 포함된 경우는 스킵
+            is_system = False
+            for sys_title in _SYSTEM_COUPANG_TITLES:
+                if sys_title in body and hdr in sys_title:
+                    is_system = True
+                    break
+            if not is_system:
+                issues.append(
+                    f"[ERROR] GPT 자체 쿠팡 상품 섹션 잔존: \"{hdr}\"")
+                break
     
     return issues
 
