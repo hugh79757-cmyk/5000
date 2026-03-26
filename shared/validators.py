@@ -495,7 +495,7 @@ def validate_post_extended(
     
 
     # ── 검증: 빈 섹션 (## 헤딩 뒤 내용 없음) ──
-    _lines = body_md.split("\n")
+    _lines = (html_content or "").split("\n")
     for _idx, _line in enumerate(_lines):
         if _line.startswith("## "):
             _has_content = False
@@ -508,14 +508,14 @@ def validate_post_extended(
                 issues.append(f"[ERROR] 빈 섹션: {_line.strip()[:40]}")
 
     # ── 검증: 쿠팡 상품 관련성 (시니어 파이프라인) ──
-    if context.get("pipeline") == "senior" and "link.coupang" in body_md:
+    if context and context.get("pipeline") == "senior" and "link.coupang" in (html_content or ""):
         _senior_words = ["혈압", "혈당", "영양", "보행", "안마", "난방", "간병",
                         "지팡이", "돋보기", "보청기", "건강", "운동", "미끄럼", "온열",
                         "찜질", "무릎", "관절", "칼슘", "오메가", "루테인", "홍삼",
                         "보스웰리아", "비타민", "유산균", "마그네슘", "아연", "철분",
                         "프로바이오틱스", "혈행", "눈건강", "요가", "스텝퍼", "밴드"]
         for _line in body_md.split("\n"):
-            if "link.coupang" in _line and _line.strip().startswith("- ["):
+            if "link.coupang" in _line and (_line.strip().startswith("- [") or _line.strip().startswith("* [")):
                 import re as _re
                 _m = _re.search(r'\[(.+?)\]', _line)
                 if _m:
