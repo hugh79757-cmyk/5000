@@ -11056,3 +11056,408 @@ openai.APIConnectionError: Connection error.
 2026-03-25 16:34:10,003 [INFO] Publishing: senior-hugo
 2026-03-25 16:34:40,073 [INFO] CATCHUP: senior-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
 2026-03-25 16:34:40,094 [INFO] Publishing: senior-hugo
+2026-03-25 17:10:20,850 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-25 17:10:20,890 [INFO] Publishing: senior-blogger
+2026-03-25 20:00:16,281 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-25 20:00:16,355 [INFO] Publishing: travel-hugo
+2026-03-25 20:00:16,365 [INFO] CATCHUP: travel-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-25 20:00:16,389 [INFO] Publishing: travel-hugo
+2026-03-25 20:00:16,640 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:00:16,640 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:00:17,936 [WARNING] Telegram send failed: 400
+2026-03-25 20:00:17,937 [WARNING] Telegram send failed: 400
+2026-03-25 20:00:17,940 [WARNING] CATCHUP: travel-hugo 보충 실패 (2/3)
+2026-03-25 20:02:23,453 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-25 20:02:23,494 [INFO] Publishing: travel1-hugo
+2026-03-25 20:02:23,724 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:02:25,557 [WARNING] Telegram send failed: 400
+2026-03-25 20:04:23,805 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-25 20:04:23,846 [INFO] QUOTA SKIP: travel2-hugo actual=5 >= quota=5
+2026-03-25 20:05:24,082 [INFO] CATCHUP: travel-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-25 20:05:24,108 [INFO] Publishing: travel-hugo
+2026-03-25 20:05:24,343 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:05:25,282 [WARNING] Telegram send failed: 400
+2026-03-25 20:05:25,284 [WARNING] CATCHUP: travel-hugo 보충 실패 (3/3)
+2026-03-25 20:05:30,434 [INFO] CATCHUP: travel1-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-25 20:05:30,474 [INFO] Publishing: travel1-hugo
+2026-03-25 20:05:30,714 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:05:32,427 [WARNING] Telegram send failed: 400
+2026-03-25 20:05:32,429 [WARNING] CATCHUP: travel1-hugo 보충 실패 (2/3)
+2026-03-25 20:06:07,546 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-25 20:06:07,604 [INFO] Publishing: travel3-hugo
+2026-03-25 20:06:07,958 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:06:08,714 [WARNING] Telegram send failed: 400
+2026-03-25 20:08:07,784 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-25 20:08:07,819 [INFO] Publishing: travel4-hugo
+2026-03-25 20:08:08,049 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:08:09,620 [WARNING] Telegram send failed: 400
+2026-03-25 20:10:08,000 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-25 20:10:08,036 [INFO] Publishing: hotissue-hugo
+2026-03-25 20:10:38,133 [INFO] CATCHUP: hotissue-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-25 20:10:38,184 [INFO] Publishing: hotissue-hugo
+2026-03-25 20:11:33,968 [INFO] CATCHUP: travel1-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-25 20:11:34,027 [INFO] Publishing: travel1-hugo
+2026-03-25 20:11:34,489 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:11:36,590 [WARNING] Telegram send failed: 400
+2026-03-25 20:11:36,592 [WARNING] CATCHUP: travel1-hugo 보충 실패 (3/3)
+2026-03-25 20:11:41,651 [INFO] CATCHUP: travel3-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-25 20:11:41,694 [INFO] Publishing: travel3-hugo
+2026-03-25 20:11:42,114 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:11:42,978 [WARNING] Telegram send failed: 400
+2026-03-25 20:11:42,982 [WARNING] CATCHUP: travel3-hugo 보충 실패 (2/3)
+2026-03-25 20:11:48,068 [INFO] CATCHUP: travel4-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-25 20:11:48,104 [INFO] Publishing: travel4-hugo
+2026-03-25 20:11:48,379 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:11:49,062 [WARNING] Telegram send failed: 400
+2026-03-25 20:11:49,064 [WARNING] CATCHUP: travel4-hugo 보충 실패 (2/3)
+2026-03-25 20:12:24,222 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-25 20:12:24,263 [INFO] Publishing: tco-hugo
+2026-03-25 20:14:24,365 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-25 20:14:24,402 [INFO] QUOTA SKIP: deal-hugo actual=5 >= quota=5
+2026-03-25 20:15:54,603 [INFO] CATCHUP: travel3-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-25 20:15:54,626 [INFO] Publishing: travel3-hugo
+2026-03-25 20:15:54,936 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:15:56,853 [WARNING] Telegram error: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
+2026-03-25 20:15:56,854 [WARNING] CATCHUP: travel3-hugo 보충 실패 (3/3)
+2026-03-25 20:16:01,876 [INFO] CATCHUP: travel4-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-25 20:16:01,913 [INFO] Publishing: travel4-hugo
+2026-03-25 20:16:02,211 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-25 20:16:03,336 [WARNING] Telegram send failed: 400
+2026-03-25 20:16:03,337 [WARNING] CATCHUP: travel4-hugo 보충 실패 (3/3)
+2026-03-25 20:16:38,656 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-25 20:16:38,697 [INFO] QUOTA SKIP: compare-hugo actual=5 >= quota=5
+2026-03-25 20:18:08,990 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-25 20:18:09,031 [INFO] Publishing: guide-hugo
+2026-03-25 20:20:09,141 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-25 20:20:09,182 [INFO] Publishing: ev-hugo
+2026-03-25 20:21:09,259 [INFO] CATCHUP: ev-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-25 20:21:09,285 [INFO] Publishing: ev-hugo
+2026-03-25 20:22:15,801 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-25 20:22:15,839 [INFO] Publishing: stock-hugo
+2026-03-25 20:24:16,038 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-25 20:24:16,325 [INFO] QUOTA SKIP: dividend-hugo actual=5 >= quota=5
+2026-03-25 20:26:16,228 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-25 20:26:16,293 [INFO] QUOTA SKIP: etf-hugo actual=5 >= quota=5
+2026-03-25 20:28:16,560 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-25 20:28:16,599 [INFO] Publishing: sector-hugo
+2026-03-25 20:30:16,802 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-25 20:30:16,847 [INFO] QUOTA SKIP: ipo-hugo actual=5 >= quota=5
+2026-03-25 20:32:17,119 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-25 20:32:17,156 [INFO] Publishing: finance-hugo
+2026-03-25 20:34:17,400 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-25 20:34:17,440 [INFO] QUOTA SKIP: senior-hugo actual=5 >= quota=5
+2026-03-25 21:10:21,622 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-25 21:10:21,662 [INFO] QUOTA SKIP: senior-blogger actual=5 >= quota=5
+2026-03-25 22:45:07,067 [INFO] Batch deploy started
+2026-03-25 22:52:11,430 [INFO]   ===== 결과 =====
+2026-03-25 22:52:11,430 [INFO]     성공: 22
+2026-03-25 22:52:11,430 [INFO]     스킵: 2
+2026-03-25 22:52:11,430 [INFO]     실패: 0
+2026-03-25 22:52:11,430 [INFO]     CF 빌드 소모: 0 (Direct Upload)
+2026-03-25 23:50:19,759 [INFO] Daily report
+2026-03-25 23:50:20,078 [INFO]   Report failed: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-03-26 05:00:21,200 [INFO] GAP keyword sync:   고용/취업: 5
+2026-03-26 06:30:13,405 [INFO] === CAP 데이터 갱신 시작 ===
+2026-03-26 06:31:36,445 [WARNING] 트림 업데이트 실패 [오딧세이]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7692 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac42490>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:31:46,899 [WARNING] 트림 업데이트 실패 [AMG GT]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7693 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac42710>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:32:02,956 [WARNING] 트림 업데이트 실패 [쏘나타 하이브리드]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7698 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac43390>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:32:18,916 [WARNING] 트림 업데이트 실패 [아이오닉 6 N]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7703 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac42e90>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:32:52,792 [WARNING] 트림 업데이트 실패 [GV70]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7713 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac425d0>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:33:03,239 [WARNING] 트림 업데이트 실패 [1시리즈]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7714 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac41e50>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:33:13,687 [WARNING] 트림 업데이트 실패 [2시리즈 액티브 투어러]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7715 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac41f90>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:33:24,067 [WARNING] 트림 업데이트 실패 [3시리즈]: HTTPSConnectionPool(host='m.carisyou.com', port=443): Max retries exceeded with url: /car/7716 (Caused by ConnectTimeoutError(<HTTPSConnection(host='m.carisyou.com', port=443) at 0x10ac41d10>, 'Connection to m.carisyou.com timed out. (connect timeout=10)'))
+2026-03-26 06:35:12,378 [INFO] 트림 업데이트: 645건, 가격변동: 18건
+2026-03-26 06:35:12,736 [INFO]   [연비보충] 574/636건 매칭 완료
+2026-03-26 06:40:38,652 [INFO] 이미지 보충: 0장 (차단: 320개)
+2026-03-26 06:40:38,655 [INFO] 신규 차량 탐색: 8109~8139
+2026-03-26 06:41:01,416 [INFO] 신규 차량 0대 발견, 0대 자동 등록 (탐색범위: 8109~8139)
+2026-03-26 06:41:01,419 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 스마트: 2,141 -> 2,254만원 (인상 113만원, 5.3%)
+2026-03-26 06:41:01,421 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 스마트: 2,152 -> 2,265만원 (인상 113만원, 5.3%)
+2026-03-26 06:41:01,421 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 스마트: 2,254 -> 2,141만원 (인하 113만원, 5.0%)
+2026-03-26 06:41:01,422 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 스마트: 2,265 -> 2,152만원 (인하 113만원, 5.0%)
+2026-03-26 06:41:01,422 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 모던: 2,242 -> 2,355만원 (인상 113만원, 5.0%)
+2026-03-26 06:41:01,422 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 모던: 2,257 -> 2,370만원 (인상 113만원, 5.0%)
+2026-03-26 06:41:01,422 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 스마트: 2,295 -> 2,408만원 (인상 113만원, 4.9%)
+2026-03-26 06:41:01,423 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 모던: 2,355 -> 2,242만원 (인하 113만원, 4.8%)
+2026-03-26 06:41:01,423 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 모던: 2,370 -> 2,257만원 (인하 113만원, 4.8%)
+2026-03-26 06:41:01,423 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 프리미엄: 2,365 -> 2,478만원 (인상 113만원, 4.8%)
+2026-03-26 06:41:01,423 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 스마트: 2,408 -> 2,295만원 (인하 113만원, 4.7%)
+2026-03-26 06:41:01,423 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 프리미엄: 2,380 -> 2,493만원 (인상 113만원, 4.7%)
+2026-03-26 06:41:01,424 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 모던: 2,398 -> 2,511만원 (인상 113만원, 4.7%)
+2026-03-26 06:41:01,424 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 프리미엄: 2,478 -> 2,365만원 (인하 113만원, 4.6%)
+2026-03-26 06:41:01,424 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 프리미엄: 2,493 -> 2,380만원 (인하 113만원, 4.5%)
+2026-03-26 06:41:01,424 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 모던: 2,511 -> 2,398만원 (인하 113만원, 4.5%)
+2026-03-26 06:41:01,424 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 프리미엄: 2,513 -> 2,626만원 (인상 113만원, 4.5%)
+2026-03-26 06:41:01,425 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 프리미엄: 2,626 -> 2,513만원 (인하 113만원, 4.3%)
+2026-03-26 06:41:01,428 [INFO] === 갱신 완료: 차량 124대, 트림 668개, 이미지 690장, 대기토픽 443개, 신규토픽 0개 ===
+2026-03-26 06:41:01,529 [INFO] CAR daily_refresh completed
+2026-03-26 07:00:05,212 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-26 07:00:05,257 [INFO] Publishing: travel-hugo
+2026-03-26 07:00:05,475 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:00:07,239 [WARNING] Telegram send failed: 400
+2026-03-26 07:01:05,325 [INFO] CATCHUP: travel-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:01:05,345 [INFO] Publishing: travel-hugo
+2026-03-26 07:01:05,522 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:01:07,266 [WARNING] Telegram send failed: 400
+2026-03-26 07:01:07,267 [WARNING] CATCHUP: travel-hugo 보충 실패 (1/3)
+2026-03-26 07:02:12,501 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-26 07:02:12,542 [INFO] Publishing: travel1-hugo
+2026-03-26 07:02:12,731 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:02:14,941 [WARNING] Telegram send failed: 400
+2026-03-26 07:04:12,713 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-26 07:04:12,753 [INFO] Publishing: travel2-hugo
+2026-03-26 07:04:12,971 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:04:14,742 [WARNING] Telegram send failed: 400
+2026-03-26 07:06:12,898 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-26 07:06:12,955 [INFO] CATCHUP: travel-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-26 07:06:12,971 [INFO] Publishing: travel3-hugo
+2026-03-26 07:06:12,977 [INFO] Publishing: travel-hugo
+2026-03-26 07:06:13,164 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:06:13,164 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:06:14,880 [WARNING] Telegram send failed: 400
+2026-03-26 07:06:14,917 [WARNING] Telegram send failed: 400
+2026-03-26 07:06:14,918 [WARNING] CATCHUP: travel-hugo 보충 실패 (2/3)
+2026-03-26 07:06:19,946 [INFO] CATCHUP: travel1-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:06:19,987 [INFO] Publishing: travel1-hugo
+2026-03-26 07:06:20,123 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:06:20,836 [WARNING] Telegram send failed: 400
+2026-03-26 07:06:20,838 [WARNING] CATCHUP: travel1-hugo 보충 실패 (1/3)
+2026-03-26 07:06:25,902 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:06:25,939 [INFO] Publishing: travel2-hugo
+2026-03-26 07:06:26,081 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:06:30,814 [WARNING] Telegram send failed: 400
+2026-03-26 07:06:30,815 [WARNING] CATCHUP: travel2-hugo 보충 실패 (1/3)
+2026-03-26 07:06:35,867 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:06:35,902 [INFO] Publishing: travel3-hugo
+2026-03-26 07:06:36,207 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:06:36,937 [WARNING] Telegram send failed: 400
+2026-03-26 07:06:36,938 [WARNING] CATCHUP: travel3-hugo 보충 실패 (1/3)
+2026-03-26 07:08:12,207 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-26 07:08:12,245 [INFO] Publishing: travel4-hugo
+2026-03-26 07:08:12,470 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:08:25,462 [WARNING] Telegram error: HTTPSConnectionPool(host='api.telegram.org', port=443): Read timed out. (read timeout=10)
+2026-03-26 07:10:12,459 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-26 07:10:12,498 [INFO] Publishing: hotissue-hugo
+2026-03-26 07:11:42,660 [INFO] CATCHUP: hotissue-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:11:42,681 [INFO] Publishing: hotissue-hugo
+2026-03-26 07:13:59,808 [INFO] CATCHUP: travel-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-03-26 07:13:59,843 [INFO] Publishing: travel-hugo
+2026-03-26 07:14:00,025 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:14:00,763 [WARNING] Telegram send failed: 400
+2026-03-26 07:14:00,765 [WARNING] CATCHUP: travel-hugo 보충 실패 (3/3)
+2026-03-26 07:14:05,837 [INFO] CATCHUP: travel1-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-26 07:14:05,878 [INFO] Publishing: travel1-hugo
+2026-03-26 07:14:06,005 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:14:06,849 [WARNING] Telegram send failed: 400
+2026-03-26 07:14:06,851 [WARNING] CATCHUP: travel1-hugo 보충 실패 (2/3)
+2026-03-26 07:14:11,928 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-26 07:14:11,967 [INFO] Publishing: travel2-hugo
+2026-03-26 07:14:12,095 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:14:12,804 [WARNING] Telegram send failed: 400
+2026-03-26 07:14:12,806 [WARNING] CATCHUP: travel2-hugo 보충 실패 (2/3)
+2026-03-26 07:14:17,819 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-26 07:14:17,862 [INFO] Publishing: travel3-hugo
+2026-03-26 07:14:17,990 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:14:18,718 [WARNING] Telegram send failed: 400
+2026-03-26 07:14:18,719 [WARNING] CATCHUP: travel3-hugo 보충 실패 (2/3)
+2026-03-26 07:14:23,761 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:14:23,795 [INFO] Publishing: travel4-hugo
+2026-03-26 07:14:23,941 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:14:24,726 [WARNING] Telegram send failed: 400
+2026-03-26 07:14:24,727 [WARNING] CATCHUP: travel4-hugo 보충 실패 (1/3)
+2026-03-26 07:14:59,868 [INFO] Queue executing: tco-hugo (remaining: 1)
+2026-03-26 07:14:59,913 [INFO] Publishing: tco-hugo
+2026-03-26 07:17:00,050 [INFO] CATCHUP: travel1-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-03-26 07:17:00,068 [INFO] Publishing: travel1-hugo
+2026-03-26 07:17:00,259 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:17:00,929 [WARNING] Telegram send failed: 400
+2026-03-26 07:17:00,932 [WARNING] CATCHUP: travel1-hugo 보충 실패 (3/3)
+2026-03-26 07:17:06,009 [INFO] CATCHUP: travel2-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-03-26 07:17:06,047 [INFO] Publishing: travel2-hugo
+2026-03-26 07:17:06,246 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:17:07,368 [WARNING] Telegram send failed: 400
+2026-03-26 07:17:07,370 [WARNING] CATCHUP: travel2-hugo 보충 실패 (3/3)
+2026-03-26 07:17:12,402 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-03-26 07:17:12,441 [INFO] Publishing: travel3-hugo
+2026-03-26 07:17:12,570 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:17:19,974 [WARNING] Telegram send failed: 400
+2026-03-26 07:17:19,976 [WARNING] CATCHUP: travel3-hugo 보충 실패 (3/3)
+2026-03-26 07:17:25,053 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-26 07:17:25,086 [INFO] Publishing: travel4-hugo
+2026-03-26 07:17:25,278 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:17:28,687 [WARNING] Telegram send failed: 400
+2026-03-26 07:17:28,689 [WARNING] CATCHUP: travel4-hugo 보충 실패 (2/3)
+2026-03-26 07:19:03,953 [INFO] Queue executing: deal-hugo (remaining: 2)
+2026-03-26 07:19:03,993 [INFO] Publishing: deal-hugo
+2026-03-26 07:22:04,243 [INFO] CATCHUP: travel4-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-03-26 07:22:04,263 [INFO] Publishing: travel4-hugo
+2026-03-26 07:22:04,450 [ERROR]   ERR:   from pipelines.travel.writer import generate_content
+  File "/Users/twinssn/Projects/5000/pipelines/travel/writer.py", line 491
+    if False:  # 재생성 비활성화 - 토큰 절약
+IndentationError: unexpected indent
+
+2026-03-26 07:22:06,374 [WARNING] Telegram send failed: 400
+2026-03-26 07:22:06,376 [WARNING] CATCHUP: travel4-hugo 보충 실패 (3/3)
+2026-03-26 07:23:27,515 [INFO] Queue executing: compare-hugo (remaining: 3)
+2026-03-26 07:23:27,559 [INFO] Publishing: compare-hugo
+2026-03-26 07:27:34,891 [INFO] Queue executing: guide-hugo (remaining: 4)
+2026-03-26 07:27:34,941 [INFO] Publishing: guide-hugo
+2026-03-26 07:28:45,028 [INFO]   [BLOCK] 연비 데이터 없음 - 발행 차단: EV5
+2026-03-26 07:31:45,104 [INFO] Queue executing: ev-hugo (remaining: 5)
+2026-03-26 07:31:45,147 [INFO] Publishing: ev-hugo
+2026-03-26 07:32:12,714 [INFO] CATCHUP: ev-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:32:12,737 [INFO] Publishing: ev-hugo
+2026-03-26 07:36:18,322 [INFO] Queue executing: stock-hugo (remaining: 6)
+2026-03-26 07:36:18,363 [INFO] Publishing: stock-hugo
+2026-03-26 07:37:21,885 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:37:21,908 [INFO] Publishing: stock-hugo
+2026-03-26 07:41:17,940 [INFO] Queue executing: dividend-hugo (remaining: 5)
+2026-03-26 07:41:17,981 [INFO] Publishing: dividend-hugo
+2026-03-26 07:42:34,197 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:42:34,220 [INFO] Publishing: dividend-hugo
+2026-03-26 07:46:05,772 [INFO] Queue executing: etf-hugo (remaining: 4)
+2026-03-26 07:46:05,815 [INFO] Publishing: etf-hugo
+2026-03-26 07:47:35,174 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:47:35,197 [INFO] Publishing: etf-hugo
+2026-03-26 07:49:31,641 [INFO] Queue executing: sector-hugo (remaining: 3)
+2026-03-26 07:49:31,675 [INFO] Publishing: sector-hugo
+2026-03-26 07:49:48,441 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:49:48,480 [INFO] Publishing: sector-hugo
+2026-03-26 07:52:41,079 [INFO] CATCHUP: rap-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 07:52:41,102 [INFO] Publishing: rap-hugo
+2026-03-26 07:53:22,339 [INFO] Queue executing: ipo-hugo (remaining: 2)
+2026-03-26 07:53:22,380 [INFO] Publishing: ipo-hugo
+2026-03-26 07:57:12,773 [INFO] Queue executing: finance-hugo (remaining: 1)
+2026-03-26 07:57:12,826 [INFO] Publishing: finance-hugo
+2026-03-26 07:57:49,019 [INFO] CATCHUP: rap-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-03-26 07:57:49,042 [INFO] Publishing: rap-hugo
+2026-03-26 08:00:41,522 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-26 08:00:41,571 [INFO] Publishing: senior-hugo
+2026-03-26 08:10:04,973 [INFO] Queue executing: senior-blogger (remaining: 0)
+2026-03-26 08:10:05,014 [INFO] Publishing: senior-blogger
+2026-03-26 08:13:05,383 [INFO] CATCHUP: rap2-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-03-26 08:13:05,406 [INFO] Publishing: rap2-hugo
