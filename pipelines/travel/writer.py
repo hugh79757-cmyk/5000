@@ -606,7 +606,15 @@ def generate_content(data, blog_id="travel-hugo"):
 
     data_block = _build_data_block(data)
 
+    # blog_snippets 수집 (프롬프트 변수용)
+    _all_snippets = []
+    for _item in data.get("items", []):
+        for _sn in _item.get("blog_snippets", []):
+            _all_snippets.append(_sn)
+    _snippets_text = "\n".join(f"- {s}" for s in _all_snippets[:8]) if _all_snippets else "(참고 정보 없음)"
+
     extra_vars = {
+        "blog_snippets": _snippets_text,
         "region": data.get("display_region", ""),
         "theme": data.get("theme", ""),
         "angle": data.get("angle", ""),
@@ -746,26 +754,16 @@ def generate_content(data, blog_id="travel-hugo"):
             "{region} {theme} 사전예약과 입장 안내 정리",
         ],
         "travel2-hugo": [
-            "{region} {theme} 탐방, 입장료와 운영시간 총정리",
-            "{region} 문화유산 탐방 코스, 주변 유적까지 정리",
-            "{region} 사적지 탐방, 해설 프로그램과 주차 안내",
-            "{region} 역사 여행 코스, 교통과 주차 정보 정리",
-            "{region}에서 탐방하는 {theme} {count}곳 비교",
-            "{region} 문화재 탐방, 사진 찍기 좋은 포인트까지",
-            "{region} {theme} 탐방 코스와 입장료 정리",
-            "{region} {theme} 해설 투어 예약 방법과 일정",
-            "{region} 유네스코 유산과 {theme} 코스 연계 정리",
-            "아이와 함께하는 {region} {theme} 체험 {count}곳",
-            "{region} {theme} 무료 관람 가능한 곳 {count}선",
-            "{region} {theme} 탐방 후 들르기 좋은 카페와 맛집",
-            "역사 덕후를 위한 {region} {theme} 딥코스 정리",
-            "주말 반나절 {region} {theme} 탐방 동선 추천",
-            "{region} {theme} 야간 개장 일정과 관람 팁",
-            "사진으로 보는 {region} {theme} 포인트 {count}곳",
-            "{region} {theme} 계절별 방문 적기와 관람 팁",
-            "{region} {theme} 주변 주차장과 대중교통 안내",
-            "당일치기로 돌아보는 {region} {theme} {count}곳",
-            "{region} 숨은 {theme} {count}곳, 현지인 추천 코스",
+            "{region} {theme} 탐방, {count}곳 소개",
+            "{region}에서 만나는 {theme} 탐방지 {count}곳 소개",
+            "{region} {theme} 탐방, {first_name}부터 추천",
+            "{region} 문화유산 투어, {first_name} 소개",
+            "{region} {theme} {count}곳 한눈에 보기",
+            "{region}에서 즐기는 {theme} 탐방 가이드",
+            "{region} {theme} 탐방 코스 추천",
+            "역사와 함께하는 {region} {theme} 탐방 {count}곳",
+            "{region} {theme} 탐방, 방문 전 알아둘 것 정리",
+            "주말에 가볼 만한 {region} {theme} {count}곳",
         ],
         "travel3-hugo": [
             "{region} {theme} 현지인이 추천하는 식당 {count}곳",
