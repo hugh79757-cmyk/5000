@@ -33,6 +33,75 @@ def slugify(text):
     return text.lower()[:80]
 
 
+def _clean_body(body_md):
+    """AI가 생성한 가짜 내부링크 제거"""
+    if not body_md:
+        return ""
+    import re
+    body_md = re.sub(r"\n+##\s*(함께|관련|추천)\s*(읽어보기|읽을거리|글|포스트).*", "", body_md, flags=re.DOTALL)
+    return body_md.rstrip()
+
+
+def _insert_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
+    """
+    쿠팡 파트너스 링크 삽입
+    
+    Returns:
+        tuple[str, str]: (수정된 body_md, 상태) 상태는 "OK", "FAIL", "SKIP" 중 하나
+    """
+    # blog_cfg 없으면 SKIP (publish()에서 조건 필터링)
+    if not blog_cfg:
+        return body_md, "SKIP"
+    
+    try:
+        from shared.coupang_car import CoupangCar
+        coupang = CoupangCar()
+        if not coupang.is_configured():
+            return body_md, "SKIP"
+        
+        coupang_md = coupang.get_car_product_links(segment=segment, fuel_type=fuel_type, count=2)
+        if not coupang_md:
+            return body_md, "SKIP"
+        
+        body_md = body_md.rstrip() + coupang_md
+        return body_md, "OK"
+        
+    except ImportError as e:
+        logger.error(f"[COUPANG_ERROR] Import failed: {e}")
+        return body_md, "FAIL"
+    except Exception as e:
+        logger.error(f"[COUPANG_ERROR] Insert failed: {e}")
+        return body_md, "FAIL"
+
+
+def _insert_internal_links(body_md, blog_id, slug):
+    """
+    관련 포스트 내부 링크 삽입
+    
+    Returns:
+        tuple[str, int]: (수정된 body_md, 삽입된 링크 수)
+    """
+    # stock-hugo 블로그는 내부 링크 생략
+    if blog_id in ("stock-hugo",):
+        return body_md, 0
+    
+    try:
+        related = _get_related_posts(blog_id, slug)
+        if not related:
+            return body_md, 0
+        
+        links_md = "\n\n## 함께 읽어보기\n\n"
+        for rp in related:
+            links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
+        
+        body_md = body_md.rstrip() + links_md
+        return body_md, len(related)
+        
+    except Exception as e:
+        logger.error(f"[INTERNAL_LINKS_ERROR] Failed to insert links: {e}")
+        return body_md, 0
+
+
 def _extract_first_image(body_md):
     m = re.search(r'!\[.*?\]\((https?://[^)]+)\)', body_md)
     if not m:
@@ -190,31 +259,6 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
 
 
-    # 내부 링크 삽입
-    blog_id_for_links = blog_cfg.get("id", "")
-    _skip_links = blog_id_for_links in ("stock-hugo",)
-    related = [] if _skip_links else _get_related_posts(blog_id_for_links, slug)
-    if related:
-        links_md = "\n\n## 함께 읽어보기\n\n"
-        for rp in related:
-            links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
-        body_md = body_md.rstrip() + links_md
-
-    # ── 쿠팡 파트너스 링크 삽입 (CAR만) ──
-    if blog_cfg.get("pipeline") == "car" or blog_cfg.get("id", "").replace("-hugo", "") in ("hotissue", "tco", "compare", "guide", "deal", "ev"):
-        try:
-            from shared.coupang_car import CoupangCar
-            coupang = CoupangCar()
-            if coupang.is_configured():
-                _segment = blog_cfg.get("_segment", "")
-                _fuel_type = blog_cfg.get("_fuel_type", "")
-                coupang_md = coupang.get_car_product_links(segment=_segment, fuel_type=_fuel_type, count=2)
-                if coupang_md:
-                    body_md = body_md.rstrip() + coupang_md
-                    logger.info("쿠팡 링크 삽입 완료")
-        except Exception as e:
-            logger.warning(f"쿠팡 링크 삽입 실패: {e}")
-
     # DESC 주석 제거 (front-matter에 이미 반영됨)
     import re as _pub_re
     body_md = _pub_re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
@@ -248,12 +292,6 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
             category="", tags="", thumbnail_url="",
             data_source="", source_id="", prompt_id="",
             model="", wp_category=None, is_draft=False):
-
-    # 후처리: AI가 생성한 가짜 내부링크 제거
-    import re
-    if body_md:
-        body_md = re.sub(r"\n+##\s*(함께|관련|추천)\s*(읽어보기|읽을거리|글|포스트).*", "", body_md, flags=re.DOTALL)
-        body_md = body_md.rstrip()
 
     blog_cfg = get_blog_config(blog_id)
 
@@ -303,6 +341,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
             import markdown
             html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
         result = publish_to_blogger(blogger_blog_id, title, html_content, labels)
+        logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang=SKIP | internal_links=0 | chars={len(body_md)}')
 
     elif platform == "wordpress":
         import os
@@ -320,12 +359,24 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
             import markdown
             html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
         result = publish_to_wordpress(wp_url, wp_user, wp_pass, title, html_content, categories=[wp_category] if wp_category else None, featured_image_url=thumbnail_url)
+        logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang=SKIP | internal_links=0 | chars={len(body_md)}')
 
 
     else:
-        blog_cfg["_segment"] = segment
-        blog_cfg["_fuel_type"] = fuel_type
+        # 서브함수 순서대로 호출
+        if body_md:
+            body_md = _clean_body(body_md)
+        
+        coupang_status = "SKIP"
+        if data_source == "car_db":
+            body_md, coupang_status = _insert_coupang(body_md, segment, fuel_type, blog_cfg)
+        
+        body_md, link_count = _insert_internal_links(body_md, blog_id, slug)
+        
         result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=is_draft)
+        
+        # 로그 추가
+        logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang={coupang_status} | internal_links={link_count} | chars={len(body_md)}')
 
     if result.get("success"):
         update_published(article_id, result.get("url", ""))
