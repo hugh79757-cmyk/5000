@@ -119,7 +119,7 @@ def run(blog_cfg):
         if _row:
             kw_category = _row[0]
         _conn.close()
-    except:
+    except sqlite3.Error:
         pass
     wp_cat_id = WP_CATEGORY_MAP.get(kw_category, 150)
 

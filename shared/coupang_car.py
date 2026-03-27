@@ -126,8 +126,8 @@ class CoupangCar:
                 data = response.json()
                 return data.get('data', {}).get('productData', [])
             return []
-        except Exception as e:
-            logger.error(f"쿠팡 검색 실패 [{keyword}]: {e}")
+        except requests.RequestException as e:
+            logger.error(f"[COUPANG_ERROR] Search failed [{keyword}]: {e}")
             return []
 
     def generate_affiliate_link(self, product_id) -> str:
@@ -154,8 +154,8 @@ class CoupangCar:
                         return short
             logger.warning(f"deeplink 변환 실패: productId={product_id}")
             return ""
-        except Exception as e:
-            logger.error(f"제휴 링크 생성 실패: {e}")
+        except requests.RequestException as e:
+            logger.error(f"[COUPANG_ERROR] Affiliate link generation failed: {e}")
             return ""
 
     def get_car_product_links(self, segment: str = "", fuel_type: str = "", count: int = 2) -> str:

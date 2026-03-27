@@ -119,7 +119,7 @@ def run(blog_cfg):
             try:
                 from pipelines.stock.fetcher import fetch_dividend_info
                 dividend = fetch_dividend_info(corp_code) if corp_code else None
-            except:
+            except (ImportError, Exception):
                 dividend = None
             article = generate_disclosure_article(disc, company, financials, financials_prev, dividend)
             if article.get("title") and article.get("body_md"):
