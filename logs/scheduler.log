@@ -12286,3 +12286,71 @@ IndentationError: expected an indented block after 'if' statement on line 184
 2026-03-27 16:48:04,227 [INFO] Publishing: ipo-hugo
 2026-03-27 16:48:29,408 [INFO] CATCHUP: ipo-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
 2026-03-27 16:48:29,459 [INFO] Publishing: ipo-hugo
+2026-03-27 16:52:01,368 [INFO] Queue executing: finance-hugo (remaining: 2)
+2026-03-27 16:52:01,413 [INFO] Publishing: finance-hugo
+2026-03-27 16:55:50,760 [INFO] Queue executing: senior-hugo (remaining: 1)
+2026-03-27 16:55:50,810 [INFO] Publishing: senior-hugo
+2026-03-27 16:59:50,615 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-03-27 16:59:50,662 [INFO] Publishing: rap-hugo
+2026-03-27 17:10:04,489 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-03-27 17:10:04,528 [INFO] Publishing: senior-blogger
+2026-03-27 17:13:33,883 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-03-27 17:13:33,926 [INFO] Publishing: rap2-hugo
+2026-03-27 17:13:35,062 [INFO] CATCHUP: senior-blogger expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-27 17:13:35,108 [INFO] Publishing: senior-blogger
+2026-03-27 17:30:21,713 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-03-27 17:30:21,780 [INFO] Publishing: rap3-hugo
+2026-03-27 17:50:25,161 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-03-27 17:50:25,201 [INFO] Publishing: rap4-hugo
+2026-03-27 18:10:28,564 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-03-27 18:10:28,611 [INFO] Publishing: rap5-hugo
+2026-03-27 20:00:15,053 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-27 20:00:15,095 [INFO] Publishing: travel-hugo
+2026-03-27 20:02:15,196 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-27 20:02:15,238 [INFO] QUOTA SKIP: travel1-hugo actual=5 >= quota=5
+2026-03-27 20:04:15,457 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-27 20:04:15,528 [INFO] CATCHUP: travel-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-27 20:04:15,550 [INFO] Publishing: travel2-hugo
+2026-03-27 20:04:15,556 [INFO] Publishing: travel-hugo
+2026-03-27 20:06:07,749 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-27 20:06:07,918 [INFO] QUOTA SKIP: travel3-hugo actual=5 >= quota=5
+2026-03-27 20:08:07,956 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-27 20:08:07,996 [INFO] QUOTA SKIP: travel4-hugo actual=5 >= quota=5
+2026-03-27 20:10:08,238 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-27 20:10:08,276 [INFO] Publishing: hotissue-hugo
+2026-03-27 20:12:08,423 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-27 20:12:08,463 [INFO] Publishing: tco-hugo
+2026-03-27 20:14:08,653 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-27 20:14:08,694 [INFO] Publishing: deal-hugo
+2026-03-27 20:14:38,696 [INFO] CATCHUP: deal-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-27 20:14:38,718 [INFO] Publishing: deal-hugo
+2026-03-27 20:16:24,432 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-27 20:16:24,464 [INFO] QUOTA SKIP: compare-hugo actual=5 >= quota=5
+2026-03-27 20:18:24,695 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-27 20:18:24,745 [INFO] Publishing: guide-hugo
+2026-03-27 20:20:25,008 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-27 20:20:25,045 [INFO] Publishing: ev-hugo
+2026-03-27 20:22:25,260 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-27 20:22:25,305 [INFO] QUOTA SKIP: stock-hugo actual=5 >= quota=5
+2026-03-27 20:24:25,483 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-27 20:24:25,522 [INFO] QUOTA SKIP: dividend-hugo actual=5 >= quota=5
+2026-03-27 20:26:25,707 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-27 20:26:25,757 [INFO] QUOTA SKIP: etf-hugo actual=5 >= quota=5
+2026-03-27 20:28:25,865 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-27 20:28:25,915 [INFO] Publishing: sector-hugo
+2026-03-27 20:30:26,208 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-27 20:30:26,248 [INFO] QUOTA SKIP: ipo-hugo actual=5 >= quota=5
+2026-03-27 20:32:26,502 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-27 20:32:26,542 [INFO] Publishing: finance-hugo
+2026-03-27 20:34:26,710 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-27 20:34:26,745 [INFO] QUOTA SKIP: senior-hugo actual=5 >= quota=5
+2026-03-27 20:34:56,780 [INFO] CATCHUP: finance-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-27 20:34:56,792 [INFO] Publishing: finance-hugo
+2026-03-27 20:50:05,363 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-03-27 20:50:05,475 [INFO] Publishing: rap-hugo
+2026-03-27 20:50:05,486 [INFO] CATCHUP: rap-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-27 20:50:05,504 [INFO] Publishing: rap-hugo
+2026-03-27 21:10:11,157 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-03-27 21:10:11,215 [INFO] Publishing: senior-blogger
+2026-03-27 21:10:11,229 [INFO] CATCHUP: senior-blogger expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-27 21:10:11,243 [INFO] Publishing: senior-blogger
