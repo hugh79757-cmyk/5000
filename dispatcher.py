@@ -19,6 +19,7 @@ load_dotenv("/Users/twinssn/Projects/TAP/.env")
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 from shared.telegram_notifier import send_error as _tg_error
+from shared.validators import sanitize_title
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -51,6 +52,38 @@ def get_blog_config(blog_id):
 
 
 # ─── 중앙 발행 기록 ───
+
+
+def _is_duplicate(blog_id: str) -> bool:
+    """오늘 동일 blog_id + 동일 title이 이미 ledger에 있으면 True"""
+    try:
+        import sqlite3
+        from datetime import datetime
+        conn = sqlite3.connect(str(LEDGER_DB))
+        # 최신 발행 제목 가져오기
+        title = ""
+        for db_path in (PROJECT_DIR / "data").glob("*.db"):
+            try:
+                c2 = sqlite3.connect(str(db_path))
+                row = c2.execute(
+                    "SELECT title FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
+                    (blog_id,)).fetchone()
+                c2.close()
+                if row and row[0]:
+                    title = row[0]
+                    break
+            except Exception:
+                continue
+        if not title:
+            return False
+        today = datetime.now().strftime("%Y-%m-%d")
+        existing = conn.execute(
+            "SELECT COUNT(*) FROM publish_ledger WHERE blog_id=? AND title=? AND DATE(created_at)=?",
+            (blog_id, title, today)).fetchone()[0]
+        conn.close()
+        return existing > 0
+    except Exception:
+        return False
 
 def _record_ledger(blog_id):
     """publish_ledger에 발행 사실 기록 — 각 파이프라인 DB에서 최신 건 조회"""
@@ -221,7 +254,10 @@ def dispatch(blog_id):
 
     # 성공 시 중앙 ledger에 기록
     if result.get("success"):
-        _record_ledger(blog_id)
+        if _is_duplicate(blog_id):
+            logger.warning(f"[DEDUP] {blog_id} 동일 제목 중복 발행 차단")
+        else:
+            _record_ledger(blog_id)
 
     return result
 

@@ -8,6 +8,7 @@ import logging
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from dotenv import load_dotenv
+from shared.validators import sanitize_title
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
 logger = logging.getLogger(__name__)
@@ -240,6 +241,7 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
             "event_date": article.get("event_date", article.get("policy_date", "")),
             "daily_quota": 5,
         }
+        article["title"] = sanitize_title(article["title"])
         _issues = _validate(blog_id, article["title"], article.get("body_md", ""), _val_ctx, pipeline="senior")
         if _issues:
             _is_draft = True
