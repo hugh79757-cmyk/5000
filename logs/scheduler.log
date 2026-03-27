@@ -12098,3 +12098,55 @@ IndentationError: expected an indented block after 'if' statement on line 104
 2026-03-27 11:11:55,699 [INFO] Publishing: senior-blogger
 2026-03-27 11:15:50,664 [INFO] Queue executing: rap2-hugo (remaining: 0)
 2026-03-27 11:15:50,697 [INFO] Publishing: rap2-hugo
+2026-03-27 11:30:28,102 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-03-27 11:30:28,145 [INFO] Publishing: rap3-hugo
+2026-03-27 11:50:00,729 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-03-27 11:50:00,791 [INFO] Publishing: rap4-hugo
+2026-03-27 11:50:00,809 [INFO] CATCHUP: rap4-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-27 11:50:00,832 [INFO] Publishing: rap4-hugo
+2026-03-27 12:10:21,846 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-03-27 12:10:21,909 [INFO] CATCHUP: rap5-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-27 12:10:21,931 [INFO] Publishing: rap5-hugo
+2026-03-27 12:10:21,934 [INFO] Publishing: rap5-hugo
+2026-03-27 12:15:26,673 [INFO] === 5000 Scheduler Starting ===
+2026-03-27 12:15:26,756 [INFO] Network ready
+2026-03-27 12:15:26,780 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-27 12:15:26,780 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-27 12:15:26,780 [INFO] Registered 123 jobs
+2026-03-27 12:15:26,780 [INFO] Next run: 2026-03-27 13:00:00
+2026-03-27 12:18:47,507 [INFO] === 5000 Scheduler Starting ===
+2026-03-27 12:18:47,532 [INFO] Network ready
+2026-03-27 12:18:47,555 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-27 12:18:47,555 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-27 12:18:47,555 [INFO] Registered 123 jobs
+2026-03-27 12:18:47,555 [INFO] Next run: 2026-03-27 13:00:00
+2026-03-27 13:00:22,582 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-27 13:00:22,618 [INFO] Publishing: travel-hugo
+2026-03-27 13:02:22,808 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-27 13:02:22,855 [INFO] Publishing: travel1-hugo
+2026-03-27 13:03:53,057 [INFO] CATCHUP: travel-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-03-27 13:03:53,080 [INFO] Publishing: travel-hugo
+2026-03-27 13:05:28,083 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-27 13:05:28,124 [INFO] Publishing: travel2-hugo
+2026-03-27 13:06:28,257 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-27 13:06:28,347 [INFO] Publishing: travel3-hugo
+2026-03-27 13:08:28,722 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-27 13:08:28,763 [INFO] Publishing: travel4-hugo
+2026-03-27 13:08:58,786 [INFO] CATCHUP: travel4-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-03-27 13:08:58,815 [INFO] Publishing: travel4-hugo
+2026-03-27 13:10:32,871 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-27 13:10:32,909 [INFO] Publishing: hotissue-hugo
+2026-03-27 13:10:33,800 [ERROR]   ERR: R_DB_PATH)
+  File "/Users/twinssn/Projects/5000/pipelines/car/data_builder.py", line 347, in build_input
+    annual_km = ANNUAL_KM
+                ^^^^^^^^^
+NameError: name 'ANNUAL_KM' is not defined
+
+2026-03-27 13:12:03,123 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-27 13:12:03,161 [INFO] Publishing: tco-hugo
+2026-03-27 13:12:04,756 [ERROR]   ERR: R_DB_PATH)
+  File "/Users/twinssn/Projects/5000/pipelines/car/data_builder.py", line 347, in build_input
+    annual_km = ANNUAL_KM
+                ^^^^^^^^^
+NameError: name 'ANNUAL_KM' is not defined
+
