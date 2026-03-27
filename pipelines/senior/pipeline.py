@@ -30,7 +30,7 @@ def _get_published_titles(site_path):
             if m:
                 published.add(m.group(1).strip())
         return published
-    except Exception:
+    except Exception as e:
         return set()
 
 
@@ -175,8 +175,8 @@ def run(cfg):
             for a in db_articles:
                 if a.get("title"):
                     published.add(a["title"])
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"[SENIOR] thumbnail transform failed: {e}")
         candidate = _select_service(data["services"], topic_type, published=published)
         if candidate and not candidate.get("support_content"):
             candidate = enrich_service_detail(candidate)
