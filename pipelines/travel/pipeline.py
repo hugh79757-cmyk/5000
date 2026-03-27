@@ -24,6 +24,7 @@ except ImportError:
     tg_error = lambda *a, **k: None
 
 import random
+from shared.validators import sanitize_title
 
 BLOG_FETCH_MAP = {
     "travel-hugo": [
@@ -110,6 +111,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         tg_error(target_blog_id, "content_generation", "AI 본문 생성 실패")
         return None
 
+    result["title"] = sanitize_title(result["title"])
     if title_similar_exists(target_blog_id, result["title"]):
         logger.warning(target_blog_id + " similar title exists: " + result["title"][:30])
         return None

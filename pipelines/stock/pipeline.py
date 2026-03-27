@@ -3,6 +3,7 @@ import random
 import logging
 import sqlite3
 from datetime import datetime
+from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
 
@@ -125,6 +126,7 @@ def run(blog_cfg):
             if article.get("title") and article.get("body_md"):
                 # 썸네일 생성 + R2 업로드
                 stock_code = company.get("stock_code", "") if company else ""
+                article["title"] = sanitize_title(article["title"])
                 thumb_url = _make_thumbnail(article["title"], article.get("category", "공시분석"), company.get("stock_code", "") if company else "", disc.get("corp_name", ""))
                 # [P3] SEO description
                 _corp = disc.get("corp_name", "")

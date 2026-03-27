@@ -13,6 +13,54 @@ logger = logging.getLogger(__name__)
 
 # ── 상수 ──
 _AI_RESIDUES = ["다듬은 제목", "추천 제목", "```", "##", "title:", "제목 후보"]
+
+def sanitize_title(title: str) -> str:
+    """제목에서 마크다운 잔여물 제거 + 연속 중복 단어 제거 + 부분 중복 제거"""
+    if not title:
+        return title
+    t = title.strip()
+    # 1) 마크다운 볼드/이탤릭 기호 제거
+    t = t.replace("**", "").replace("__", "")
+    # 2) 연속 동일 단어 제거: "청주시 청주시" → "청주시"
+    words = t.split()
+    deduped = []
+    for w in words:
+        if not deduped or w != deduped[-1]:
+            deduped.append(w)
+    t = " ".join(deduped)
+    # 3) 연속 2어절 중복: "A B A B" → "A B"
+    import re as _re
+    t = _re.sub(r'(\S+\s+\S+)\s+\1', r'\1', t)
+    # 4) 뒤쪽 단어가 앞쪽 복합어에 이미 포함된 경우 제거
+    #    "여행코스 3곳 코스 추천" → "여행코스 3곳 추천"
+    words = t.split()
+    cleaned = []
+    for i, w in enumerate(words):
+        duplicate = False
+        for j in range(max(0, i - 3), i):
+            if len(w) >= 2 and w in cleaned[j] and w != cleaned[j]:
+                duplicate = True
+                break
+        if not duplicate:
+            cleaned.append(w)
+        else:
+            cleaned.append(w)  # placeholder
+    # 실제 제거 로직
+    final = []
+    for i, w in enumerate(words):
+        is_substr = False
+        for j in range(max(0, i - 4), i):
+            if len(w) >= 2 and w != words[j] and w in words[j]:
+                is_substr = True
+                break
+        if not is_substr:
+            final.append(w)
+    t = " ".join(final)
+    # 5) 공백 정리
+    t = _re.sub(r'\s+', ' ', t).strip()
+    return t
+
+
 _MIN_TITLE_LEN = 10
 _MAX_TITLE_LEN = 80
 _MIN_BODY_CHARS = 500

@@ -4,6 +4,7 @@ import random
 import sqlite3
 import logging
 from datetime import datetime
+from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
 
@@ -414,6 +415,7 @@ def run(blog_cfg):
         return {"success": False, "reason": "write_failed"}
 
     # 썸네일
+    article["title"] = sanitize_title(article["title"])
     thumb_url = upload_thumbnail(article["title"], article.get("category", "부동산"))
 
     # WordPress용 카테고리 ID

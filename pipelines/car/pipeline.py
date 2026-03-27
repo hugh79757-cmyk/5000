@@ -19,6 +19,7 @@ from shared.ai_writer import generate_car
 from shared.telegram_notifier import send_error as _tg_error
 from pipelines.car.topic_manager import select_topic, generate_title, make_slug, validate_body
 from pipelines.car.data_builder import build_input
+from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
 
@@ -181,6 +182,7 @@ def run(blog_cfg):
             break
         logger.warning(f"제목 중복 재시도 {_title_attempt+1}/5: {candidate[:40]}")
     if title is None:
+    title = sanitize_title(title) if title else title
         title = generate_title(data, site_id=car_site_id)
         logger.warning(f"5회 모두 중복 — 마지막 제목 사용: {title[:40]}")
     slug = make_slug(title)
