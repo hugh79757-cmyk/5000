@@ -704,7 +704,7 @@ def generate_content(data, blog_id="travel-hugo"):
             else:
                 content = _h_card + content
         except Exception as e:
-            print(f"[heritage-card] 삽입 실패: {e}")
+            logger.warning(f"[heritage-card] 삽입 실패: {e}")
 
     items = data.get("items", [])
     content = _inject_images(items, content, blog_id=blog_id)

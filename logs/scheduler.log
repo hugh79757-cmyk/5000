@@ -12096,3 +12096,5 @@ IndentationError: expected an indented block after 'if' statement on line 104
 2026-03-27 11:10:47,227 [INFO] Publishing: finance-hugo
 2026-03-27 11:11:55,657 [INFO] Queue executing: senior-blogger (remaining: 1)
 2026-03-27 11:11:55,699 [INFO] Publishing: senior-blogger
+2026-03-27 11:15:50,664 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-03-27 11:15:50,697 [INFO] Publishing: rap2-hugo
