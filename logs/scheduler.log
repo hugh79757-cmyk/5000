@@ -12084,3 +12084,15 @@ IndentationError: expected an indented block after 'if' statement on line 104
 2026-03-27 10:35:10,660 [INFO] Publishing: senior-hugo
 2026-03-27 10:50:05,511 [INFO] Queue executing: rap-hugo (remaining: 0)
 2026-03-27 10:50:05,549 [INFO] Publishing: rap-hugo
+2026-03-27 11:09:37,417 [INFO] === 5000 Scheduler Starting ===
+2026-03-27 11:09:37,450 [INFO] Network ready
+2026-03-27 11:09:37,521 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-27 11:09:37,521 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-27 11:09:37,522 [INFO] Registered 123 jobs
+2026-03-27 11:09:37,522 [INFO] Next run: 2026-03-27 11:10:00
+2026-03-27 11:09:38,165 [INFO] CATCHUP: guide-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-27 11:09:38,794 [INFO] Publishing: guide-hugo
+2026-03-27 11:10:47,180 [INFO] CATCHUP: finance-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-03-27 11:10:47,227 [INFO] Publishing: finance-hugo
+2026-03-27 11:11:55,657 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-03-27 11:11:55,699 [INFO] Publishing: senior-blogger

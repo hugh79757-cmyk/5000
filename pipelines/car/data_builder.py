@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 import sqlite3
 import json
 import random
@@ -331,12 +333,12 @@ def build_input(conn, topic, db_path):
     # === 데이터 품질 필터 ===
     trims = [t for t in trims if t["price"] and t["price"] >= 500]
     if not trims:
-        print(f"  [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: {car['model']}")
+        logger.warning(f"[BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: {car['model']}")
         return None
     # 배기량 0 + 비전기 차량 차단
     ft = str(car.get("fuel_type", ""))
     if (not car["displacement"] or car["displacement"] == 0) and "전기" not in ft:
-        print(f"  [BLOCK] 배기량 0 + 비전기 - 발행 차단: {car['brand']} {car['model']} ({ft})")
+        logger.warning(f"[BLOCK] 배기량 0 + 비전기 - 발행 차단: {car['brand']} {car['model']} ({ft})")
         return None
     idx = select_representative_trim(trims)
     main_trim = trims[idx]
@@ -347,7 +349,7 @@ def build_input(conn, topic, db_path):
     if not fuel_eff or fuel_eff == 0:
         fuel_eff = lookup_fuel_efficiency(conn, car['brand'], car['model'], car['displacement'])
     if not fuel_eff or fuel_eff == 0:
-        print("  [BLOCK] 연비 데이터 없음 - 발행 차단: " + car['model'])
+        logger.warning("[BLOCK] 연비 데이터 없음 - 발행 차단: " + car['model'])
         return None
     fuel_cost = calc_fuel_cost(annual_km, fuel_eff, car['fuel_type'], db_path)
     resale = estimate_resale(main_trim['price'], car['brand'], car['fuel_type'], car.get('segment', ''), car.get('model', ''))
