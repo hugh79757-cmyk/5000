@@ -55,8 +55,8 @@ def _get_font(size):
         if os.path.exists(fp):
             try:
                 return ImageFont.truetype(fp, size)
-            except Exception:
-                continue
+            except Exception as e:
+                logger.debug(f"[STOCK_THUMB] failed: {e}"); continue
     return ImageFont.load_default()
 
 
@@ -72,8 +72,8 @@ def _fetch_logo(stock_code):
             if r.status_code == 200 and len(r.content) > 500:
                 logo = Image.open(io.BytesIO(r.content)).convert("RGBA")
                 return logo
-        except Exception:
-            continue
+        except Exception as e:
+            logger.debug(f"[STOCK_THUMB] failed: {e}"); continue
     return None
 
 

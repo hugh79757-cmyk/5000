@@ -683,8 +683,8 @@ def generate_content(data, blog_id="travel-hugo"):
             for _p_f in _picks_f:
                 _related_md_f += '{{< article link="/posts/' + _p_f["slug"] + '/" >}}\n\n'
             content = content.rstrip() + _related_md_f
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"[TRAVEL_WRITER] failed: {e}")
     # Heritage 카드 삽입 (heritage 소스 타입에서만)
     if source_type == "heritage":
         try:

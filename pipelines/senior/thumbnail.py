@@ -65,8 +65,8 @@ def _get_font(size):
         if os.path.exists(fp):
             try:
                 return ImageFont.truetype(fp, size)
-            except Exception:
-                continue
+            except Exception as e:
+                logger.debug(f"[SENIOR_THUMB] failed: {e}"); continue
     return ImageFont.load_default()
 
 
