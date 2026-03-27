@@ -284,6 +284,20 @@ def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
         "resale_rate_percent": round(yr3_rate),
     }
 
+# ── 상수 ──
+ANNUAL_KM = 15000
+FINANCE_RATE = 3.9
+FINANCE_TERMS = [48, 36, 60]
+DEFAULT_FUEL_PRICE = 1650
+EV_KWH_PRICE = 292
+MIN_TRIM_PRICE = 500
+
+
+def calc_monthly_payment(price_manwon, annual_rate, months):
+    """월 할부금 계산 (만원 단위 반환)"""
+    r = annual_rate / 100 / 12
+    return round(price_manwon * 10000 * r * (1 + r) ** months / ((1 + r) ** months - 1) / 10000)
+
 def select_representative_trim(trims):
     if len(trims) == 1:
         return 0
@@ -326,7 +340,7 @@ def build_input(conn, topic, db_path):
         return None
     idx = select_representative_trim(trims)
     main_trim = trims[idx]
-    annual_km = 15000
+    annual_km = ANNUAL_KM
     tax = calc_tax(car['displacement'], car['fuel_type'])
     insurance = calc_insurance(main_trim['price'])
     fuel_eff = main_trim['fuel_efficiency']
@@ -354,12 +368,12 @@ def build_input(conn, topic, db_path):
         "fuel_efficiency": fuel_eff,
         "displacement": car['displacement'],
         "discount": 0, "discount_conditions": "",
-        "finance_rate": 3.9, "finance_term_months": 48,
-        "monthly_payment_48": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**48 / ((1+3.9/100/12)**48 - 1) / 10000),
-        "monthly_payment_36": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**36 / ((1+3.9/100/12)**36 - 1) / 10000),
-        "monthly_payment_60": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**60 / ((1+3.9/100/12)**60 - 1) / 10000),
+        "finance_rate": FINANCE_RATE, "finance_term_months": FINANCE_TERMS[0],
+        "monthly_payment_48": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 48),
+        "monthly_payment_36": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 36),
+        "monthly_payment_60": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 60),
         "annual_km": annual_km, "fuel_price_source": "opinet", "tax_annual": tax, "tax_annual_3yr": tax * 3,
-        "insurance_estimate": insurance, "fuel_price": 1650,
+        "insurance_estimate": insurance, "fuel_price": DEFAULT_FUEL_PRICE,
         "annual_fuel_cost": fuel_cost,
         **resale,
         "three_year_depreciation": dep_3yr,
