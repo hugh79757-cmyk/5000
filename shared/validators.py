@@ -90,7 +90,8 @@ def _get_today_count(blog_id: str) -> int:
         count = cur.fetchone()[0]
         conn.close()
         return count
-    except Exception:
+    except sqlite3.Error as e:
+        logger.error(f"[DB_ERROR] Failed to get today count for blog {blog_id}: {e}")
         return 0
 
 
