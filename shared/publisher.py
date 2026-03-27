@@ -286,6 +286,9 @@ def deploy_site(site_path, cf_project):
     result = subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=str(site), capture_output=True, text=True)
     if result.returncode != 0:
         raise Exception("Hugo build failed: " + result.stderr[:500])
+    index_file = site / "public" / "index.html"
+    if not index_file.exists():
+        raise Exception("Hugo build produced empty site: public/index.html not found")
     result = subprocess.run(
         ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
          "--project-name=" + cf_project, "--branch=main", "--commit-dirty=true"],
@@ -293,9 +296,6 @@ def deploy_site(site_path, cf_project):
     )
     if result.returncode != 0:
         raise Exception("Wrangler deploy failed: " + result.stderr[:500])
-    public_dir = site / "public"
-    if public_dir.exists():
-        subprocess.run(["rm", "-rf", str(public_dir)])
     return True
 
 
