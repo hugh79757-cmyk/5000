@@ -237,7 +237,12 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     description = _extract_description(body_md)
 
     if not thumbnail_url:
-        thumbnail_url = _extract_first_image(body_md)
+         thumbnail_url = _extract_first_image(body_md)
+    if not thumbnail_url:
+        _blog_id = blog_cfg.get("id", "")
+        if "stock" in _blog_id:
+         thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
+        
     if thumbnail_url and thumbnail_url.startswith("http://tong.visitkorea.or.kr"):
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
 
