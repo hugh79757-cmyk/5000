@@ -12200,3 +12200,11 @@ NameError: name 'ANNUAL_KM' is not defined
 2026-03-27 14:30:05,287 [INFO] Publishing: rap3-hugo
 2026-03-27 14:50:30,004 [INFO] Queue executing: rap4-hugo (remaining: 0)
 2026-03-27 14:50:30,070 [INFO] Publishing: rap4-hugo
+2026-03-27 15:07:55,369 [INFO] === 5000 Scheduler Starting ===
+2026-03-27 15:07:55,398 [INFO] Network ready
+2026-03-27 15:07:55,438 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-27 15:07:55,438 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-27 15:07:55,438 [INFO] Registered 123 jobs
+2026-03-27 15:07:55,438 [INFO] Next run: 2026-03-27 15:10:00
+2026-03-27 15:10:25,908 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-03-27 15:10:25,957 [INFO] Publishing: rap5-hugo
