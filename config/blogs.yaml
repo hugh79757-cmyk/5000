@@ -358,6 +358,7 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
   status: active
   theme: congo
+  cf_project: stock-informationhot
 - cf_project: gap-hugo
   daily_quota: 5
   domain: life.informationhot.kr
