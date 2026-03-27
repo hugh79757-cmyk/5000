@@ -95,7 +95,7 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
             if eff and eff != "NULL":
                 try:
                     return float(eff)
-                except:
+                except (ValueError, TypeError):
                     pass
     return None
 
@@ -179,8 +179,9 @@ def get_live_fuel_price(fuel_type, db_path):
         conn_tmp.close()
         if row and row["price"]:
             return float(row["price"])
-    except:
-        pass
+    except (sqlite3.Error, ValueError) as e:
+        import logging
+        logging.getLogger(__name__).debug(f"[DATA_BUILDER] Failed to get fuel price: {e}")
     defaults = {"B027": 1833, "D047": 1832, "K015": 1012, "B034": 2090}
     return defaults.get(code, 1833)
 

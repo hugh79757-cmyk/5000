@@ -339,7 +339,7 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                    "E클래스", "C클래스", "S클래스", "GLC", "GLE", "A6", "A4", "Q5", "Q7",
                    "말리부", "트랙스", "트레일블레이저", "이쿼녹스",
                    "렉스턴", "토레스", "티볼리", "코란도",
-                   "QM6", "XM3", "SM6", "마스터",
+                   "QM6", "XM3", "SM6", "마스터", "콜레오스", "그랑 콜레오스", "아르카나", "캡처",
                    "1시리즈", "S8", "8시리즈", "RSQ8", "e-트론"]
     title_has_car = any(brand in title for brand in _car_brands)
     if not title_has_car:
