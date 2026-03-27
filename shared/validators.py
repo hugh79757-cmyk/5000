@@ -396,7 +396,7 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                     # 제네시스 추가
                     "GV90", "네오룬",
                     # BMW 추가
-                    "i4", "i5", "i7", "iX", "iX1", "iX3", "2시리즈", "4시리즈", "6시리즈",
+                    "i4", "i5", "i7", "iX", "iX1", "iX3", "XM", "2시리즈", "4시리즈", "6시리즈",
                     # 벤츠 추가
                     "A클래스", "B클래스", "CLA", "CLE", "EQA", "EQB", "EQE", "EQS",
                     "GLA", "GLB", "GLS", "AMG",
