@@ -182,9 +182,9 @@ def run(blog_cfg):
             break
         logger.warning(f"제목 중복 재시도 {_title_attempt+1}/5: {candidate[:40]}")
     if title is None:
-    title = sanitize_title(title) if title else title
         title = generate_title(data, site_id=car_site_id)
         logger.warning(f"5회 모두 중복 — 마지막 제목 사용: {title[:40]}")
+    title = sanitize_title(title) if title else title
     slug = make_slug(title)
     logger.info("제목: " + title)
 

@@ -12208,3 +12208,49 @@ NameError: name 'ANNUAL_KM' is not defined
 2026-03-27 15:07:55,438 [INFO] Next run: 2026-03-27 15:10:00
 2026-03-27 15:10:25,908 [INFO] Queue executing: rap5-hugo (remaining: 0)
 2026-03-27 15:10:25,957 [INFO] Publishing: rap5-hugo
+2026-03-27 15:17:13,153 [INFO] === 5000 Scheduler Starting ===
+2026-03-27 15:17:13,177 [INFO] Network ready
+2026-03-27 15:17:13,218 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-27 15:17:13,218 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-27 15:17:13,223 [INFO] Registered 123 jobs
+2026-03-27 15:17:13,223 [INFO] Next run: 2026-03-27 16:00:00
+2026-03-27 16:00:22,405 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-27 16:00:22,452 [INFO] Publishing: travel-hugo
+2026-03-27 16:02:22,674 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-27 16:02:22,778 [INFO] Publishing: travel1-hugo
+2026-03-27 16:04:23,052 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-27 16:04:23,091 [INFO] Publishing: travel2-hugo
+2026-03-27 16:06:23,274 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-27 16:06:23,313 [INFO] Publishing: travel3-hugo
+2026-03-27 16:08:23,558 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-27 16:08:23,596 [INFO] Publishing: travel4-hugo
+2026-03-27 16:10:23,748 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-27 16:10:23,790 [INFO] Publishing: hotissue-hugo
+2026-03-27 16:10:24,027 [ERROR]   ERR: winssn/Projects/5000/pipelines/car/pipeline.py", line 185
+    title = sanitize_title(title) if title else title
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 184
+
+2026-03-27 16:12:24,022 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-27 16:12:24,086 [INFO] CATCHUP: hotissue-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-27 16:12:24,109 [INFO] Publishing: tco-hugo
+2026-03-27 16:12:24,112 [INFO] Publishing: hotissue-hugo
+2026-03-27 16:12:24,384 [ERROR]   ERR: winssn/Projects/5000/pipelines/car/pipeline.py", line 185
+    title = sanitize_title(title) if title else title
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 184
+
+2026-03-27 16:12:24,384 [ERROR]   ERR: winssn/Projects/5000/pipelines/car/pipeline.py", line 185
+    title = sanitize_title(title) if title else title
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 184
+
+2026-03-27 16:12:25,304 [WARNING] CATCHUP: hotissue-hugo 보충 실패 (1/3)
+2026-03-27 16:12:30,378 [INFO] CATCHUP: tco-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-27 16:12:30,414 [INFO] Publishing: tco-hugo
+2026-03-27 16:12:30,668 [ERROR]   ERR: winssn/Projects/5000/pipelines/car/pipeline.py", line 185
+    title = sanitize_title(title) if title else title
+    ^^^^^
+IndentationError: expected an indented block after 'if' statement on line 184
+
+2026-03-27 16:12:31,563 [WARNING] CATCHUP: tco-hugo 보충 실패 (1/3)
