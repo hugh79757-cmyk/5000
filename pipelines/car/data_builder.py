@@ -286,13 +286,22 @@ def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
         "resale_rate_percent": round(yr3_rate),
     }
 
-# ── 상수 ──
-ANNUAL_KM = 15000
-FINANCE_RATE = 3.9
-FINANCE_TERMS = [48, 36, 60]
-DEFAULT_FUEL_PRICE = 1650
-EV_KWH_PRICE = 292
-MIN_TRIM_PRICE = 500
+# ── 상수 정의 ──
+CAR_CONSTANTS = {
+    "annual_km": 15000,
+    "finance_rate": 3.9,
+    "finance_terms": [48, 36, 60],
+    "default_fuel_price": 1650,
+    "ev_kwh_price": 292,
+    "min_trim_price": 500,
+}
+
+ANNUAL_KM = CAR_CONSTANTS["annual_km"]
+FINANCE_RATE = CAR_CONSTANTS["finance_rate"]
+FINANCE_TERMS = CAR_CONSTANTS["finance_terms"]
+DEFAULT_FUEL_PRICE = CAR_CONSTANTS["default_fuel_price"]
+EV_KWH_PRICE = CAR_CONSTANTS["ev_kwh_price"]
+MIN_TRIM_PRICE = CAR_CONSTANTS["min_trim_price"]
 
 
 def calc_monthly_payment(price_manwon, annual_rate, months):
