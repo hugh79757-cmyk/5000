@@ -144,7 +144,7 @@ def _extract_description(body_md):
     # 수치 문장 없으면 첫 문장 축약
     return lines[0][:160]
 
-def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False):
+def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
     fm += 'title: "' + title.replace('"', '\\"') + '"\n'
@@ -161,7 +161,10 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
     if thumbnail_url:
         fm += 'image: "' + thumbnail_url + '"\n'
     else:
-        fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
+        if "stock" in blog_id:
+            fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
+        else:
+            fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n"
     return fm, date_str
 
@@ -188,7 +191,7 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     return fm, date_str
 
 
-def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=False):
+def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
     fm += 'title: "' + title.replace('"', '\\"') + '"\n'
@@ -207,7 +210,10 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
             thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
         fm += 'featureimage: "' + thumbnail_url + '"\n'
     else:
-        fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
+        if "stock" in blog_id:
+            fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
+        else:
+            fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n\n"
     return fm, date_str
 
@@ -247,12 +253,12 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
 
     if theme.lower() == "blowfish":
-        fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
+        fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft, blog_id=blog_cfg.get("id", ""))
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
     elif theme.lower() == "congo":
-        fm, date_str = _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
+        fm, date_str = _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft, blog_id=blog_cfg.get("id", ""))
         post_dir = os.path.join(site_path, "content", "posts", slug)
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
