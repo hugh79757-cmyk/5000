@@ -184,11 +184,14 @@ def fetch_korservice_heritage():
 
 
 def fetch_festival():
-    """festival.db에서 현재 시즌 축제를 선택하여 반환"""
+    """festival.db 기반 스마트 발행: 축제 시작일 역산으로 발행 대상 자동 선택"""
     import sqlite3
     from datetime import datetime, timedelta
+    from collections import defaultdict
 
     DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "festival.db")
+    CONTENT_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "content.db")
+
     if not os.path.exists(DB_PATH):
         logger.warning("festival.db not found: " + DB_PATH)
         return None
@@ -201,110 +204,169 @@ def fetch_festival():
     }
 
     try:
+        # 이미 발행된 축제 contentid 조회 (중복 방지)
+        published_ids = set()
+        if os.path.exists(CONTENT_DB):
+            cconn = sqlite3.connect(CONTENT_DB)
+            published_ids = set(
+                r[0] for r in cconn.execute(
+                    "SELECT source_id FROM publish_ledger WHERE blog_id='travel1-hugo' AND source_id != ''"
+                ).fetchall()
+            )
+            # articles 테이블도 확인
+            published_ids.update(
+                r[0] for r in cconn.execute(
+                    "SELECT source_id FROM articles WHERE blog_id='travel1-hugo' AND source_id != ''"
+                ).fetchall()
+            )
+            cconn.close()
+
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         now = datetime.now()
-        date_start = (now - timedelta(days=7)).strftime("%Y%m%d")
-        date_end = (now + timedelta(days=60)).strftime("%Y%m%d")
+        today = now.strftime("%Y%m%d")
 
-        # 현재 진행 중이거나 곧 시작하는 축제 (이미지 있는 것 우선)
+        # 미래 축제만 조회
         rows = conn.execute("""
             SELECT * FROM festivals
-            WHERE eventstartdate <= ? AND eventenddate >= ?
-               AND firstimage != ''
-            ORDER BY RANDOM()
-        """, (date_end, date_start)).fetchall()
+            WHERE eventstartdate >= ?
+            ORDER BY eventstartdate ASC
+        """, (today,)).fetchall()
 
         if not rows:
-            # 이미지 없어도 포함
-            rows = conn.execute("""
-                SELECT * FROM festivals
-                WHERE eventstartdate <= ? AND eventenddate >= ?
-                ORDER BY RANDOM()
-            """, (date_end, date_start)).fetchall()
-
-        if not rows:
-            logger.warning("festival.db: 현재 시즌 축제 0건")
+            logger.warning("festival.db: 미래 축제 0건")
             conn.close()
             return None
 
-        # 같은 시군구 축제 묶기 시도
-        from collections import defaultdict
-        by_sigungu = defaultdict(list)
+        # 스마트 발행: 축제 시작일 역산으로 분류
+        # 0~13일: 색인 불가 → 발행 안 함
+        # 14~21일: 긴급 → 최대 5건/일
+        # 22~28일: 높음 → 최대 3건/일
+        # 29~42일: 보통 → 최대 2건/일
+        # 43~60일: 낮음 → 최대 1건/일
+        # 61일+: 대기 → 발행 안 함
+        urgent = []   # 14~21일
+        high = []     # 22~28일
+        normal = []   # 29~42일
+        low = []      # 43~60일
+
         for r in rows:
+            title = r["title"]
+            if str(r['contentid']) in published_ids:
+                continue
+            estart = r["eventstartdate"]
+            start_date = datetime.strptime(estart, "%Y%m%d")
+            days_left = (start_date - now).days
+
+            if days_left < 14:
+                continue  # 색인 불가
+            elif days_left <= 21:
+                urgent.append(r)
+            elif days_left <= 28:
+                high.append(r)
+            elif days_left <= 42:
+                normal.append(r)
+            elif days_left <= 60:
+                low.append(r)
+            # 61일+ 대기
+
+        # 우선순위 순서대로 후보 선택
+        if urgent:
+            candidates = urgent
+            logger.info(f"festival 스마트발행: 긴급(14~21일) {len(urgent)}건")
+        elif high:
+            candidates = high
+            logger.info(f"festival 스마트발행: 높음(22~28일) {len(high)}건")
+        elif normal:
+            candidates = normal
+            logger.info(f"festival 스마트발행: 보통(29~42일) {len(normal)}건")
+        elif low:
+            candidates = low
+            logger.info(f"festival 스마트발행: 낮음(43~60일) {len(low)}건")
+        else:
+            logger.warning("festival 스마트발행: 발행 대상 0건")
+            conn.close()
+            return None
+
+        # 이미지 있는 것 우선
+        with_image = [r for r in candidates if r["firstimage"]]
+        if with_image:
+            candidates = with_image
+
+        # 같은 시군구 묶기
+        by_sigungu = defaultdict(list)
+        for r in candidates:
             key = (r["areacode"], r["sigungucode"])
             by_sigungu[key].append(r)
 
-        # 3건 이상 있는 시군구 우선, 없으면 1건이라도
-        candidates = [v for v in by_sigungu.values() if len(v) >= 3]
-        if candidates:
-            group = random.choice(candidates)
+        # 3건 이상 있는 시군구 우선
+        groups_3 = [v for v in by_sigungu.values() if len(v) >= 3]
+        if groups_3:
+            group = random.choice(groups_3)
             selected = random.sample(group, min(3, len(group)))
         else:
-            candidates = [v for v in by_sigungu.values() if len(v) >= 1]
-            if candidates:
-                group = random.choice(candidates)
-                selected = group[:1]
+            groups_any = [v for v in by_sigungu.values() if len(v) >= 1]
+            if groups_any:
+                group = random.choice(groups_any)
+                selected = group[:3]
             else:
                 conn.close()
                 return None
 
-        # region_name 결정
-        area_code = selected[0]["areacode"]
-        region_name = AREA_NAMES.get(str(area_code), "")
+        # 결과 구성
+        region_name = AREA_NAMES.get(str(selected[0]["areacode"]), "")
+        sigungu_name = selected[0]["sigungucode"] or ""
+        if not sigungu_name and selected[0]["addr1"]:
+            parts = selected[0]["addr1"].split()
+            if len(parts) >= 2:
+                sigungu_name = parts[1]
 
-        # sigungu_name: addr1에서 추출
-        addr1 = selected[0]["addr1"] or ""
-        parts = addr1.split()
-        sigungu_name = parts[1] if len(parts) >= 2 else region_name
-
-        # adapted 형식으로 변환
         adapted = []
         for r in selected:
-            item = {
+            adapted.append({
                 "title": r["title"],
-                "addr1": r["addr1"],
-                "addr2": r["addr2"] or "",
-                "mapx": r["mapx"],
-                "mapy": r["mapy"],
-                "firstimage": r["firstimage"] or "",
+                "addr1": r["addr1"] or "",
+                "mapx": r["mapx"] or "",
+                "mapy": r["mapy"] or "",
+                "firstimage": _fix_image_https(r["firstimage"] or ""),
                 "tel": r["tel"] or "",
-                "contentid": r["contentid"],
-                "eventstartdate": r["eventstartdate"],
-                "eventenddate": r["eventenddate"],
-                "playtime": r["playtime"] or "",
+                "eventstartdate": r["eventstartdate"] or "",
+                "eventenddate": r["eventenddate"] or "",
                 "eventplace": r["eventplace"] or "",
+                "playtime": r["playtime"] or "",
                 "usetimefestival": r["usetimefestival"] or "",
                 "sponsor1": r["sponsor1"] or "",
                 "program": r["program"] or "",
                 "subevent": r["subevent"] or "",
                 "agelimit": r["agelimit"] or "",
-                "region": region_name,
-            }
-            adapted.append(item)
+            })
 
-        conn.close()
-
-        # 필수 필드 검증
-        first = adapted[0]
-        if not first.get("title", "").strip():
-            logger.warning("festival DB: 제목 없음 → None")
+        if not adapted or not adapted[0].get("title"):
+            logger.warning("festival GUARD: adapted 결과 0건 → None 반환")
+            conn.close()
             return None
 
-        logger.info(f"festival DB: {region_name} {sigungu_name} {len(adapted)}건 선택 - {adapted[0]['title']}")
+        conn.close()
+        # contentid 리스트 (중복 발행 방지용)
+        content_ids = [str(r["contentid"]) for r in selected if r["contentid"]]
 
-        return {
+        result = {
             "items": adapted,
-            "display_region": region_name,
+            "display_region": f"{region_name} {sigungu_name}".strip(),
             "sigungu": sigungu_name,
             "do_name": region_name,
-            "theme": "축제·행사",
-            "category": "축제",
-            "angle": "축제·행사",
+            "theme": "축제",
+            "category": "festival",
+            "angle": "축제 일정과 방문 정보",
             "source_type": "festival",
+            "region": region_name,
+            "content_ids": content_ids,
         }
+        logger.info(f"festival 선택: {adapted[0]['title']} ({adapted[0]['eventstartdate']})")
+        return result
+
     except Exception as e:
-        logger.warning("festival DB fetch failed: " + str(e))
+        logger.warning("festival fetch failed: " + str(e))
         return None
 
 

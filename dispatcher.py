@@ -88,34 +88,34 @@ def _is_duplicate(blog_id: str) -> bool:
 def _record_ledger(blog_id):
     """publish_ledger에 발행 사실 기록 — 각 파이프라인 DB에서 최신 건 조회"""
     try:
-        title, url = "", ""
+        title, url, source_id = "", "", ""
 
         # STAP 블로그는 STAP DB에서 조회
         if blog_id in STAP_PIPELINE_MAP:
             stap_db = "/Users/twinssn/Projects/STAP/data/stap_content.db"
             conn_src = sqlite3.connect(stap_db)
             row = conn_src.execute(
-                "SELECT title, published_url FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
+                "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
                 (blog_id,)
             ).fetchone()
             if row:
-                title, url = row[0], row[1]
+                title, url, source_id = row[0], row[1], row[2] or ""
             conn_src.close()
         else:
             # 5000 content.db에서 조회
             conn_src = sqlite3.connect(str(LEDGER_DB))
             row = conn_src.execute(
-                "SELECT title, published_url FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
+                "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
                 (blog_id,)
             ).fetchone()
             if row:
-                title, url = row[0], row[1]
+                title, url, source_id = row[0], row[1], row[2] or ""
             conn_src.close()
 
         conn = sqlite3.connect(str(LEDGER_DB))
         conn.execute(
-            "INSERT INTO publish_ledger (blog_id, title, published_url, status, created_at) VALUES (?,?,?,?,?)",
-            (blog_id, title, url or "", "published", datetime.now().isoformat())
+            "INSERT INTO publish_ledger (blog_id, title, published_url, status, created_at, source_id) VALUES (?,?,?,?,?,?)",
+            (blog_id, title, url or "", "published", datetime.now().isoformat(), source_id)
         )
         conn.commit()
         conn.close()
