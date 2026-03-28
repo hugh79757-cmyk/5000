@@ -400,3 +400,46 @@ tests/
 
 이 리팩토링 원칙은 코드 품질을 지속적으로 향상시키고 기술 부채를 방지합니다.
 ```
+
+## 데이터 필드 매핑 규칙
+
+새 데이터 소스 추가 시 반드시 아래 절차를 따릅니다.
+
+1. 설정 파일 우선: API 필드 -> 표준 키 매핑은 config/field_mapping.yaml에 정의 (TAP)
+2. 표준 키 사용: ai_writer가 읽는 키는 standard_keys만 사용
+3. 필수 필드 체크: required 필드가 비면 AI에 전달하지 않음
+4. 폴백 키 지원: overview: intro|lineIntro 형태로 pipe 구분
+
+새 데이터 소스 추가 체크리스트:
+- config/field_mapping.yaml에 소스 추가
+- standard_keys에 매핑 확인
+- required 필드 정의
+- ai_writer에서 item.get() 매칭 확인
+- content_generator에서 item dict에 필드 포함 확인
+
+흔한 실수 방지:
+- 필드명 불일치: API sbrsCl vs ai_writer facilities -> 양쪽 키 모두 전달
+- 주소 키 차이: camping addr1, tour addr -> 폴백 처리 필수
+- competitor 없을 때 AI가 임의 생성 -> 경쟁 모델 없음 명시 블록 필수
+
+
+## 데이터 필드 매핑 규칙
+
+새 데이터 소스 추가 시 반드시 아래 절차를 따릅니다.
+
+1. 설정 파일 우선: API 필드 -> 표준 키 매핑은 config/field_mapping.yaml에 정의 (TAP)
+2. 표준 키 사용: ai_writer가 읽는 키는 standard_keys만 사용
+3. 필수 필드 체크: required 필드가 비면 AI에 전달하지 않음
+4. 폴백 키 지원: overview: intro|lineIntro 형태로 pipe 구분
+
+새 데이터 소스 추가 체크리스트:
+- config/field_mapping.yaml에 소스 추가
+- standard_keys에 매핑 확인
+- required 필드 정의
+- ai_writer에서 item.get() 매칭 확인
+- content_generator에서 item dict에 필드 포함 확인
+
+흔한 실수 방지:
+- 필드명 불일치: API sbrsCl vs ai_writer facilities -> 양쪽 키 모두 전달
+- 주소 키 차이: camping addr1, tour addr -> 폴백 처리 필수
+- competitor 없을 때 AI가 임의 생성 -> 경쟁 모델 없음 명시 블록 필수
