@@ -184,180 +184,127 @@ def fetch_korservice_heritage():
 
 
 def fetch_festival():
-    import requests as req
-    AREA_CODES = {
-        "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
-        "부산": 6, "울산": 7, "세종": 8, "경기": 31, "강원": 32,
-        "충북": 33, "충남": 34, "경북": 35, "경남": 36,
-        "전북": 37, "전남": 38, "제주": 39,
+    """festival.db에서 현재 시즌 축제를 선택하여 반환"""
+    import sqlite3
+    from datetime import datetime, timedelta
+
+    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "festival.db")
+    if not os.path.exists(DB_PATH):
+        logger.warning("festival.db not found: " + DB_PATH)
+        return None
+
+    AREA_NAMES = {
+        "1": "서울", "2": "인천", "3": "대전", "4": "대구", "5": "광주",
+        "6": "부산", "7": "울산", "8": "세종", "31": "경기", "32": "강원",
+        "33": "충북", "34": "충남", "35": "경북", "36": "경남",
+        "37": "전북", "38": "전남", "39": "제주",
     }
-    region_name = random.choice(list(AREA_CODES.keys()))
-    area_code = AREA_CODES[region_name]
-    key = os.getenv("TOUR_API_KEY", "")
+
     try:
-        resp = req.get(
-            "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
-            params={
-                "serviceKey": key,
-                "MobileOS": "ETC",
-                "MobileApp": "TAP",
-                "_type": "json",
-                "numOfRows": 20,
-                "pageNo": 1,
-                "contentTypeId": 15,
-                "areaCode": area_code,
-                "arrange": "C",
-            },
-            timeout=15,
-        )
-        data = resp.json()
-        header = data.get("response", {}).get("header", {})
-        if header.get("resultCode") != "0000":
-            logger.warning("festival API error: " + str(header))
-            return None
-        items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items_raw, dict):
-            items_raw = [items_raw]
-        if not items_raw:
-            logger.warning("festival: no data for " + region_name)
-            return None
-
-        # 계절 필터는 detailIntro 이후로 이동됨
-
-        with_img = [i for i in items_raw if i.get('firstimage')]
-        pool = with_img if len(with_img) >= 3 else items_raw
-        selected, _sigungu_name = _select_same_sigungu(pool, 3)
-        
-        # detailIntro API로 상세정보 보강
-        for item in selected:
-            cid = item.get("contentid")
-            if not cid:
-                continue
-            try:
-                detail_resp = req.get(
-                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
-                    params={
-                        "serviceKey": key,
-                        "MobileOS": "ETC",
-                        "MobileApp": "TAP",
-                        "_type": "json",
-                        "contentId": cid,
-                        "contentTypeId": 15,
-                    },
-                    timeout=15,
-                )
-                d2 = detail_resp.json()
-                intro_items = d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                if isinstance(intro_items, dict):
-                    intro_items = [intro_items]
-                if intro_items:
-                    detail = intro_items[0]
-                    item["eventstartdate"] = detail.get("eventstartdate", "")
-                    item["eventenddate"] = detail.get("eventenddate", "")
-                    item["playtime"] = detail.get("playtime", "")
-                    item["eventplace"] = detail.get("eventplace", "")
-                    item["usetimefestival"] = detail.get("usetimefestival", "")
-                    item["sponsor1"] = detail.get("sponsor1", "")
-                    item["program"] = detail.get("program", "")
-                    item["subevent"] = detail.get("subevent", "")
-                    item["agelimit"] = detail.get("agelimit", "")
-                    logger.info(f"festival detailIntro: {item.get('title','')} 보강 완료")
-            except Exception as e:
-                logger.warning(f"festival detailIntro 실패 (무시): {e}")
-        
-
-        # [과거연도 필터] 현재 연도 이전 축제 제거
-        _cur_year = str(__import__('datetime').datetime.now().year)
-        _before_count = len(selected)
-        selected = [
-            item for item in selected
-            if not item.get("eventstartdate")
-            or str(item.get("eventstartdate", ""))[:4] >= _cur_year
-        ]
-        logger.info(f"festival 연도필터: {_before_count}건 -> {len(selected)}건 (과거 {_before_count - len(selected)}건 제외)")
-        if not selected:
-            logger.warning("festival: 연도필터 후 0건, 현재 월 재검색으로 전환")
-
-        # 계절 필터: detailIntro 이후 eventstartdate 기반 필터링
-        from datetime import datetime, timedelta
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
         now = datetime.now()
-        month_ago = (now - timedelta(days=30)).strftime("%Y%m%d")
-        month_later = (now + timedelta(days=60)).strftime("%Y%m%d")
-        seasonal = []
-        for item in selected:
-            estart = str(item.get("eventstartdate", ""))
-            eend = str(item.get("eventenddate", "")) or estart
-            if not estart:
-                continue  # 날짜 없는 축제는 제외
-            if eend >= month_ago and estart <= month_later:
-                seasonal.append(item)
-                logger.info(f"festival 계절 통과: {item.get('title','')} ({estart}~{eend})")
-            else:
-                logger.info(f"festival 계절 제외: {item.get('title','')} ({estart}~{eend})")
-        if seasonal:
-            selected = seasonal[:1]
-            logger.info(f"festival: 계절 필터 후 {len(seasonal)}건 중 1건 선택")
-        else:
-            # 현재 월 기준 축제 재검색
-            logger.warning(f"festival: 계절 필터 후 0건, 현재 월 축제 재검색")
-            try:
-                now_month = now.strftime("%Y%m")
-                re_params = {
-                    "numOfRows": "50", "pageNo": "1",
-                    "contentTypeId": "15", "arrange": "C",
-                    "eventStartDate": now_month + "01",
-                }
-                re_resp = req.get(
-                    "http://apis.data.go.kr/B551011/KorService2/searchFestival2",
-                    params={**{"serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP", "_type": "json"}, **re_params},
-                    timeout=10
-                )
-                if re_resp.status_code == 200:
-                    re_items = re_resp.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                    if re_items:
-                        re_items = [i for i in re_items if not i.get("eventstartdate") or str(i.get("eventstartdate",""))[:4] >= _cur_year]
-                    if re_items:
-                        _cur_year = str(__import__("datetime").datetime.now().year)
-                        re_items = [i for i in re_items if not i.get("eventstartdate") or str(i.get("eventstartdate",""))[:4] >= _cur_year]
-                    if re_items:
-                        selected = [random.choice(re_items)]
-                        logger.info(f"festival: searchFestival로 현재 월 축제 {len(re_items)}건 중 1건 재선택: {selected[0].get('title','')}")
-                    else:
-                        selected = selected[:1]
-                        logger.warning("festival: searchFestival 결과 0건, 원본 사용")
-                else:
-                    selected = selected[:1]
-                    logger.warning(f"festival: searchFestival 실패 ({re_resp.status_code}), 원본 사용")
-            except Exception as e:
-                selected = selected[:1]
-                logger.warning(f"festival: searchFestival 예외 ({e}), 원본 사용")
+        date_start = (now - timedelta(days=7)).strftime("%Y%m%d")
+        date_end = (now + timedelta(days=60)).strftime("%Y%m%d")
 
-        adapted = _adapt_korservice_items(selected)
+        # 현재 진행 중이거나 곧 시작하는 축제 (이미지 있는 것 우선)
+        rows = conn.execute("""
+            SELECT * FROM festivals
+            WHERE eventstartdate <= ? AND eventenddate >= ?
+               AND firstimage != ''
+            ORDER BY RANDOM()
+        """, (date_end, date_start)).fetchall()
 
-        # [GUARD] 필수 필드 검증: 축제명 + 일정 없으면 None 반환
-        if adapted:
-            _first = adapted[0]
-            _has_title = bool(_first.get("title", "").strip())
-            _has_date = bool(_first.get("eventstartdate", "").strip() or _first.get("eventenddate", "").strip())
-            if not (_has_title and _has_date):
-                logger.warning(f"festival GUARD: 필수 필드 부족 (title={_has_title}, date={_has_date}) → None 반환")
-                return None
-        else:
-            logger.warning("festival GUARD: adapted 결과 0건 → None 반환")
+        if not rows:
+            # 이미지 없어도 포함
+            rows = conn.execute("""
+                SELECT * FROM festivals
+                WHERE eventstartdate <= ? AND eventenddate >= ?
+                ORDER BY RANDOM()
+            """, (date_end, date_start)).fetchall()
+
+        if not rows:
+            logger.warning("festival.db: 현재 시즌 축제 0건")
+            conn.close()
             return None
+
+        # 같은 시군구 축제 묶기 시도
+        from collections import defaultdict
+        by_sigungu = defaultdict(list)
+        for r in rows:
+            key = (r["areacode"], r["sigungucode"])
+            by_sigungu[key].append(r)
+
+        # 3건 이상 있는 시군구 우선, 없으면 1건이라도
+        candidates = [v for v in by_sigungu.values() if len(v) >= 3]
+        if candidates:
+            group = random.choice(candidates)
+            selected = random.sample(group, min(3, len(group)))
+        else:
+            candidates = [v for v in by_sigungu.values() if len(v) >= 1]
+            if candidates:
+                group = random.choice(candidates)
+                selected = group[:1]
+            else:
+                conn.close()
+                return None
+
+        # region_name 결정
+        area_code = selected[0]["areacode"]
+        region_name = AREA_NAMES.get(str(area_code), "")
+
+        # sigungu_name: addr1에서 추출
+        addr1 = selected[0]["addr1"] or ""
+        parts = addr1.split()
+        sigungu_name = parts[1] if len(parts) >= 2 else region_name
+
+        # adapted 형식으로 변환
+        adapted = []
+        for r in selected:
+            item = {
+                "title": r["title"],
+                "addr1": r["addr1"],
+                "addr2": r["addr2"] or "",
+                "mapx": r["mapx"],
+                "mapy": r["mapy"],
+                "firstimage": r["firstimage"] or "",
+                "tel": r["tel"] or "",
+                "contentid": r["contentid"],
+                "eventstartdate": r["eventstartdate"],
+                "eventenddate": r["eventenddate"],
+                "playtime": r["playtime"] or "",
+                "eventplace": r["eventplace"] or "",
+                "usetimefestival": r["usetimefestival"] or "",
+                "sponsor1": r["sponsor1"] or "",
+                "program": r["program"] or "",
+                "subevent": r["subevent"] or "",
+                "agelimit": r["agelimit"] or "",
+                "region": region_name,
+            }
+            adapted.append(item)
+
+        conn.close()
+
+        # 필수 필드 검증
+        first = adapted[0]
+        if not first.get("title", "").strip():
+            logger.warning("festival DB: 제목 없음 → None")
+            return None
+
+        logger.info(f"festival DB: {region_name} {sigungu_name} {len(adapted)}건 선택 - {adapted[0]['title']}")
 
         return {
             "items": adapted,
             "display_region": region_name,
-            "sigungu": _sigungu_name or region_name,
+            "sigungu": sigungu_name,
             "do_name": region_name,
             "theme": "축제·행사",
             "category": "축제",
             "angle": "축제·행사",
-            "source_type": "korservice",
+            "source_type": "festival",
         }
     except Exception as e:
-        logger.warning("festival fetch failed: " + str(e))
+        logger.warning("festival DB fetch failed: " + str(e))
         return None
 
 
