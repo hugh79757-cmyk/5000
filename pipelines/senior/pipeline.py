@@ -170,15 +170,19 @@ def run(cfg):
         from pipelines.senior.writer import _select_service
         published = _get_published_titles(site_path) if site_path else set()
         # DB에서도 발행 이력 체크 (Blogger 포함)
+        published_svc_ids = set()
         try:
             from shared.content_store import get_all_articles
             db_articles = get_all_articles(blog_id=blog_id, limit=500)
             for a in db_articles:
                 if a.get("title"):
                     published.add(a["title"])
+                if a.get("source_id"):
+                    published_svc_ids.add(a["source_id"])
+            logger.info(f"발행 이력: 제목 {len(published)}건, service_id {len(published_svc_ids)}건")
         except Exception as e:
-            logger.debug(f"[SENIOR] thumbnail transform failed: {e}")
-        candidate = _select_service(data["services"], topic_type, published=published)
+            logger.debug(f"[SENIOR] DB 이력 조회 실패: {e}")
+        candidate = _select_service(data["services"], topic_type, published=published, published_svc_ids=published_svc_ids)
         if candidate and not candidate.get("support_content"):
             candidate = enrich_service_detail(candidate)
             # 만료 서비스 필터
@@ -202,7 +206,9 @@ def run(cfg):
     # 4. Generate article
     try:
         from pipelines.senior.writer import generate_senior_article
-        article = generate_senior_article(data, topic_type=topic_type)
+        # enriched candidate를 writer에 전달 (재선택 방지)
+        _enriched = candidate if candidate and candidate.get("support_content") else None
+        article = generate_senior_article(data, topic_type=topic_type, enriched_service=_enriched)
     except Exception as e:
         logger.error(f"Writer failed: {e}")
         return {"success": False, "reason": "write_error"}
@@ -258,6 +264,9 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
             tags=tags,
             thumbnail_url=thumb_url,
             is_draft=_is_draft,
+            data_source="gov24_api",
+            source_id=article.get("service_id", ""),
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         )
         if result and result.get("success"):
             logger.info(f"Hugo published: {article['title']} -> {result.get('url')}")
