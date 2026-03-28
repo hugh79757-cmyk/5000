@@ -67,6 +67,11 @@ def _fetch_for_blog(blog_id):
             if data:
                 return data
 
+    # 단일 소스 블로그는 random 폴백 금지 (축제/맛집 전용 블로그 보호)
+    if len(fetch_list) == 1:
+        logger.warning(blog_id + " 단일 소스 fetch 실패, random 폴백 차단")
+        return None
+
     return fetch_random()
 
 
