@@ -226,7 +226,7 @@ def fetch_festival():
 
         with_img = [i for i in items_raw if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else items_raw
-        selected, _ = _select_same_sigungu(pool, 3)
+        selected, _sigungu_name = _select_same_sigungu(pool, 3)
         
         # detailIntro API로 상세정보 보강
         for item in selected:
@@ -349,7 +349,7 @@ def fetch_festival():
         return {
             "items": adapted,
             "display_region": region_name,
-            "sigungu": region_name,
+            "sigungu": _sigungu_name or region_name,
             "do_name": region_name,
             "theme": "축제·행사",
             "category": "축제",
