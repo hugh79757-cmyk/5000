@@ -307,9 +307,9 @@ def fetch_festival():
                     "contentTypeId": "15", "arrange": "C",
                     "eventStartDate": now_month + "01",
                 }
-                re_resp = requests.get(
+                re_resp = req.get(
                     "http://apis.data.go.kr/B551011/KorService2/searchFestival2",
-                    params={**{"serviceKey": TOUR_API_KEY, "MobileOS": "ETC", "MobileApp": "TAP", "_type": "json"}, **re_params},
+                    params={**{"serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP", "_type": "json"}, **re_params},
                     timeout=10
                 )
                 if re_resp.status_code == 200:
