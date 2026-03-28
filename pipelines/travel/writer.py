@@ -428,27 +428,7 @@ def _post_process(content):
 """
     content = content.rstrip() + "\n\n" + cta_html
 
-    # [PATCH] 동적 내부링크 — 실제 발행된 글 중 같은 카테고리/태그 기반 추천
-    try:
-        import glob as _gl
-        import random as _rand2
-        _posts_dir = "/Users/twinssn/Projects/travel-hugo/content/posts"
-        _all_posts = []
-        for _md in _gl.glob(os.path.join(_posts_dir, "*/index.md")):
-            with open(_md, encoding="utf-8") as _f:
-                _head = _f.read(500)
-            _tm = re.search(r'^title:\s*["\'](.*?)["\']', _head, re.MULTILINE)
-            _sm = re.search(r'^slug:\s*["\'](.*?)["\']', _head, re.MULTILINE)
-            if _tm and _sm:
-                _all_posts.append({"title": _tm.group(1), "slug": _sm.group(1)})
-        if len(_all_posts) > 3:
-            _picks = _rand2.sample(_all_posts, min(3, len(_all_posts)))
 
-            for _p in _picks:
-                _related_md += '{{< article link="/posts/' + _p["slug"] + '/" >}}\n\n'
-            content = content.rstrip() + _related_md
-    except Exception as _e:
-        pass  # 내부링크 실패해도 글 발행은 계속
 
     return content
 
