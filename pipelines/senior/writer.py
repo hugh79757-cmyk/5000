@@ -8,6 +8,21 @@ from datetime import datetime
 from openai import OpenAI
 from shared.ai_writer import generate as ai_generate
 
+# 상세 데이터 보강
+def _enrich_service(service):
+    """서비스 상세 API로 데이터 보강 (캐시 체크 후 1회만)"""
+    if service.get('_enriched'):
+        return service
+    try:
+        import sys, os
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from fetcher import enrich_service_detail
+        service = enrich_service_detail(service)
+        service['_enriched'] = True
+    except Exception as e:
+        logger.warning(f"상세 보강 실패: {e}")
+    return service
+
 logger = logging.getLogger(__name__)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
@@ -365,13 +380,17 @@ def _parse_response(content):
     return result
 
 
-def _select_service(services, topic_type, published=None):
+def _select_service(services, topic_type, published=None, published_svc_ids=None):
     """카테고리 내에서 미발행 + 데이터 풍부한 서비스 우선 선택"""
     if published is None:
         published = set()
+    if published_svc_ids is None:
+        published_svc_ids = set()
 
     # 시니어 무관 서비스 제외 (서비스명 기준)
-    _EXCLUDE_NAMES = ["청년", "청장년", "미혼모", "미혼부", "영유아", "아동복지", "어린이", "장학금", "대학생"]
+    _EXCLUDE_NAMES = ["청년", "청장년", "미혼모", "미혼부", "영유아", "아동복지", "어린이", 
+                      "장학금", "대학생", "세대융합", "예비창업", "창업지원", "청소년", 
+                      "신혼부부", "다자녀", "영아", "산모", "출산"]
     def _is_senior(s):
         name = s.get("service_name", "")
         return not any(kw in name for kw in _EXCLUDE_NAMES)
@@ -394,7 +413,26 @@ def _select_service(services, topic_type, published=None):
             score += 1
         return score
 
-    unpublished = [s for s in category_services if not any(s.get("service_name", "") in p for p in published)]
+    # [PATCH] 서비스명 포함 매칭 + 핵심 키워드 중복 체크 (제목만 다른 중복 방지)
+    def _is_dup(svc_name, published_set):
+        if not svc_name:
+            return False
+        for p in published_set:
+            if svc_name in p or p in svc_name:
+                return True
+            # 핵심 단어 3개 이상 겹치면 중복 간주
+            svc_words = set(svc_name.replace("(", " ").replace(")", " ").split())
+            pub_words = set(p.replace("(", " ").replace(")", " ").split())
+            overlap = svc_words & pub_words
+            if len(overlap) >= 3 and len(overlap) / max(len(svc_words), 1) >= 0.5:
+                return True
+        return False
+    
+    unpublished = [
+        s for s in category_services 
+        if not _is_dup(s.get("service_name", ""), published)
+        and s.get("service_id", "") not in published_svc_ids
+    ]
 
     if unpublished:
         unpublished.sort(key=richness, reverse=True)
@@ -465,8 +503,11 @@ def _clean_vague_phrases(body_md):
     return "\n".join(cleaned)
 
 
-def generate_senior_article(data, topic_type=None):
-    """시니어 복지 글 생성 — 서비스 단위 심층 글"""
+def generate_senior_article(data, topic_type=None, enriched_service=None):
+    """시니어 복지 글 생성 — 서비스 단위 심층 글
+    
+    enriched_service: pipeline에서 상세 API로 보강된 서비스 (있으면 재선택 안 함)
+    """
     today = data.get("today", datetime.now().strftime("%Y년 %m월 %d일"))
     services = data.get("services", [])
 
@@ -476,9 +517,16 @@ def generate_senior_article(data, topic_type=None):
 
     logger.info(f"시니어 글 생성: 토픽={topic_type}")
 
-    main_service = _select_service(services, topic_type)
+    if enriched_service and enriched_service.get("support_content"):
+        main_service = enriched_service
+        logger.info(f"pipeline에서 전달된 enriched 서비스 사용: {main_service.get('service_name', '?')}")
+    else:
+        main_service = _select_service(services, topic_type)
+        main_service = _enrich_service(main_service)
+
     related = _get_related_services(services, main_service, topic_type)
-    logger.info(f"선택 서비스: {main_service.get('service_name', '?')} (관련 {len(related)}건)")
+    related = [_enrich_service(rs) for rs in related]
+    logger.info(f"선택 서비스: {main_service.get('service_name', '?')} (관련 {len(related)}건, enriched)")
 
     system_msg, user_msg = _build_prompt(main_service, topic_type, related, today)
 
@@ -505,6 +553,9 @@ def generate_senior_article(data, topic_type=None):
                 logger.info(f"본문 짧음: {len(result['body_md'])}자 (발행 진행)")
 
             result["topic_type"] = topic_type
+            result["service_id"] = main_service.get("service_id", "")
+            result["service_name"] = main_service.get("service_name", "")
+            result["department"] = main_service.get("department", "")
             result["thumbnail"] = ""
             logger.info(f"글 생성 완료: {result['title']} ({len(result['body_md'])}자)")
 
