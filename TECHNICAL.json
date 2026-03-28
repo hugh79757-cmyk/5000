@@ -1,0 +1,3290 @@
+{
+  "generated_at": "2026-03-28T19:44:42.021212",
+  "pipelines": [
+    {
+      "name": "car",
+      "modules": [
+        {
+          "path": "pipelines/car/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        },
+        {
+          "path": "pipelines/car/daily_refresh.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "get_conn",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "refresh_trims",
+              "args": [
+                "conn"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "parse_car_info",
+              "args": [
+                "title"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "make_car_id",
+              "args": [
+                "brand",
+                "model",
+                "year"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "guess_fuel_type",
+              "args": [
+                "title"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "guess_segment",
+              "args": [
+                "title"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "scan_new_cars",
+              "args": [
+                "conn"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fill_trim_efficiency",
+              "args": [
+                "conn"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "refresh_images",
+              "args": [
+                "conn"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "replenish_topics",
+              "args": [
+                "conn",
+                "min_pending"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "detect_price_changes",
+              "args": [
+                "conn"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "run_refresh",
+              "args": [],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "DB_PATH",
+            "HEADERS",
+            "AUTO_REGISTER_BRANDS"
+          ],
+          "imports": [
+            "sqlite3",
+            "requests",
+            "bs4",
+            "time",
+            "re",
+            "logging",
+            "datetime",
+            "pathlib"
+          ],
+          "lines": 672
+        },
+        {
+          "path": "pipelines/car/data_builder.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "lookup_fuel_efficiency",
+              "args": [
+                "conn",
+                "brand",
+                "model",
+                "displacement"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "lookup_ev_specs",
+              "args": [
+                "conn",
+                "brand",
+                "model"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "build_engine_desc",
+              "args": [
+                "car"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "calc_tax",
+              "args": [
+                "displacement",
+                "fuel_type"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fuel_type_to_code",
+              "args": [
+                "fuel_type"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "get_live_fuel_price",
+              "args": [
+                "fuel_type",
+                "db_path"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "calc_fuel_cost",
+              "args": [
+                "annual_km",
+                "efficiency",
+                "fuel_type",
+                "db_path"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "calc_insurance",
+              "args": [
+                "price"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "estimate_resale",
+              "args": [
+                "base_price",
+                "brand",
+                "fuel_type",
+                "segment",
+                "model"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "calc_monthly_payment",
+              "args": [
+                "price_manwon",
+                "annual_rate",
+                "months"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "select_representative_trim",
+              "args": [
+                "trims"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "select_matching_trim",
+              "args": [
+                "comp_trims",
+                "target_price"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "build_input",
+              "args": [
+                "conn",
+                "topic",
+                "db_path"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "MODEL_NAME_MAP",
+            "BRAND_URLS",
+            "BRAND_MAP_API",
+            "CAR_CONSTANTS",
+            "ANNUAL_KM",
+            "FINANCE_RATE",
+            "FINANCE_TERMS",
+            "DEFAULT_FUEL_PRICE",
+            "EV_KWH_PRICE",
+            "MIN_TRIM_PRICE"
+          ],
+          "imports": [
+            "logging",
+            "sqlite3",
+            "json",
+            "random",
+            "re",
+            "pathlib"
+          ],
+          "lines": 456
+        },
+        {
+          "path": "pipelines/car/pipeline.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_select_car_image",
+              "args": [
+                "conn",
+                "car_id",
+                "slug"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "run",
+              "args": [
+                "blog_cfg"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "PROJECT_DIR",
+            "CAR_DB_PATH",
+            "PROMPTS_DIR"
+          ],
+          "imports": [
+            "os",
+            "sys",
+            "re",
+            "sqlite3",
+            "logging",
+            "urllib.request",
+            "datetime",
+            "pathlib",
+            "dotenv",
+            "shared.content_store",
+            "shared.publisher",
+            "shared.image_handler",
+            "shared.ai_writer",
+            "shared.telegram_notifier",
+            "pipelines.car.topic_manager",
+            "pipelines.car.data_builder",
+            "shared.validators"
+          ],
+          "lines": 262
+        },
+        {
+          "path": "pipelines/car/title_engine.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_has_batchim",
+              "args": [
+                "word"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_jwa",
+              "args": [
+                "w"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_jeul",
+              "args": [
+                "w"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_ji",
+              "args": [
+                "w"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_build_vars",
+              "args": [
+                "data"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_common_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_common_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_hotissue_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_hotissue_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_tco_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_tco_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_deal_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_deal_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_compare_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_compare_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_guide_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_guide_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_ev_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_ev_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_ev_hev_vs",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_ev_hev_solo",
+              "args": [
+                "v"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_title",
+              "args": [
+                "data",
+                "site_id"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "SITE_VS",
+            "SITE_SOLO"
+          ],
+          "imports": [
+            "random",
+            "datetime"
+          ],
+          "lines": 390
+        },
+        {
+          "path": "pipelines/car/topic_manager.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "has_batchim",
+              "args": [
+                "text"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "josa_wa",
+              "args": [
+                "text"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "josa_eul",
+              "args": [
+                "text"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "josa_i",
+              "args": [
+                "text"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "select_topic",
+              "args": [
+                "conn",
+                "site_id",
+                "days_window",
+                "skip_ids",
+                "post_type"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_title",
+              "args": [
+                "data",
+                "site_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "make_slug",
+              "args": [
+                "title"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "validate_body",
+              "args": [
+                "body",
+                "data"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [],
+          "imports": [
+            "sqlite3",
+            "random",
+            "re",
+            "json",
+            "datetime",
+            "pipelines.car.data_builder"
+          ],
+          "lines": 136
+        }
+      ]
+    },
+    {
+      "name": "ecommerce",
+      "modules": [
+        {
+          "path": "pipelines/ecommerce/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        }
+      ]
+    },
+    {
+      "name": "gap",
+      "modules": [
+        {
+          "path": "pipelines/gap/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        },
+        {
+          "path": "pipelines/gap/fetcher.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_headers",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "search_web",
+              "args": [
+                "keyword",
+                "display"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "search_blog",
+              "args": [
+                "keyword",
+                "display"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "search_news",
+              "args": [
+                "keyword",
+                "display"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "search_image",
+              "args": [
+                "keyword",
+                "display"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_keyword_data",
+              "args": [
+                "keyword"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "NAVER_SEARCH_URL"
+          ],
+          "imports": [
+            "os",
+            "logging",
+            "requests",
+            "datetime"
+          ],
+          "lines": 89
+        },
+        {
+          "path": "pipelines/gap/internal_links.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_load_entity_links",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "inject_internal_links",
+              "args": [
+                "html_content",
+                "max_links"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "build_cta_block",
+              "args": [
+                "category",
+                "count"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "process_gap_content",
+              "args": [
+                "html_content",
+                "category"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "ENTITIES_DB",
+            "CTA_BLOCKS",
+            "CATEGORY_CTA_MAP"
+          ],
+          "imports": [
+            "sqlite3",
+            "re",
+            "logging",
+            "random"
+          ],
+          "lines": 187
+        },
+        {
+          "path": "pipelines/gap/keyword_sync.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "classify_category",
+              "args": [
+                "query"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "is_gap_suitable",
+              "args": [
+                "query"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "is_high_value",
+              "args": [
+                "query"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_d1_keywords",
+              "args": [
+                "limit"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "sync_keywords",
+              "args": [],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "D1_API_URL",
+            "D1_API_KEY",
+            "GAP_DB_PATH",
+            "HIGH_VALUE_PATTERNS",
+            "EXCLUDE_PATTERNS",
+            "CATEGORY_MAP"
+          ],
+          "imports": [
+            "os",
+            "sys",
+            "sqlite3",
+            "logging",
+            "requests",
+            "datetime"
+          ],
+          "lines": 183
+        },
+        {
+          "path": "pipelines/gap/pipeline.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_pick_keyword",
+              "args": [
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "run",
+              "args": [
+                "blog_cfg"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "WP_CATEGORY_MAP",
+            "GAP_DB_PATH"
+          ],
+          "imports": [
+            "os",
+            "random",
+            "logging",
+            "sqlite3",
+            "datetime",
+            "shared.validators"
+          ],
+          "lines": 194
+        },
+        {
+          "path": "pipelines/gap/thumbnail.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_get_font",
+              "args": [
+                "size"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_wrap_text",
+              "args": [
+                "text",
+                "font",
+                "max_width",
+                "draw"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_gap_thumbnail",
+              "args": [
+                "title",
+                "category",
+                "output_path"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "upload_thumbnail",
+              "args": [
+                "title",
+                "category"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "PALETTE"
+          ],
+          "imports": [
+            "os",
+            "hashlib",
+            "logging",
+            "tempfile",
+            "datetime",
+            "PIL"
+          ],
+          "lines": 94
+        },
+        {
+          "path": "pipelines/gap/writer.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_clean_html",
+              "args": [
+                "text"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_build_reference_block",
+              "args": [
+                "data"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_gap_article",
+              "args": [
+                "keyword",
+                "fetched_data",
+                "model"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_parse_article",
+              "args": [
+                "response",
+                "keyword"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [],
+          "imports": [
+            "os",
+            "re",
+            "logging"
+          ],
+          "lines": 137
+        }
+      ]
+    },
+    {
+      "name": "life",
+      "modules": [
+        {
+          "path": "pipelines/life/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        }
+      ]
+    },
+    {
+      "name": "rap",
+      "modules": [
+        {
+          "path": "pipelines/rap/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        },
+        {
+          "path": "pipelines/rap/fetcher.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_get_key",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_apt_trade",
+              "args": [
+                "lawd_cd",
+                "deal_ymd",
+                "rows"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_apt_trade_multi",
+              "args": [
+                "lawd_cd",
+                "months",
+                "rows"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_subscription_info",
+              "args": [
+                "region_cd",
+                "page_size"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "find_lawd_cd",
+              "args": [
+                "keyword"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "API_KEY",
+            "LAWD_MAP",
+            "REGION_CD_MAP",
+            "BRAND_LAWD_MAP"
+          ],
+          "imports": [
+            "os",
+            "logging",
+            "requests",
+            "xml.etree.ElementTree",
+            "datetime"
+          ],
+          "lines": 197
+        },
+        {
+          "path": "pipelines/rap/pipeline.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_pick_keyword",
+              "args": [
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_pick_strategy",
+              "args": [
+                "keyword",
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_post_process",
+              "args": [
+                "body_md",
+                "blog_id",
+                "keyword"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "run",
+              "args": [
+                "blog_cfg"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "GAP_DB_PATH",
+            "RAP_CATEGORIES",
+            "TRADE_PATTERNS",
+            "SUB_PATTERNS",
+            "BLOG_KEYWORD_FILTER",
+            "BLOG_STRATEGY",
+            "WP_CATEGORY_MAP"
+          ],
+          "imports": [
+            "os",
+            "random",
+            "sqlite3",
+            "logging",
+            "datetime",
+            "shared.validators"
+          ],
+          "lines": 496
+        },
+        {
+          "path": "pipelines/rap/thumbnail.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_get_font",
+              "args": [
+                "size"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_wrap_text",
+              "args": [
+                "text",
+                "font",
+                "max_width",
+                "draw"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_draw_gradient",
+              "args": [
+                "draw",
+                "width",
+                "height",
+                "color1",
+                "color2"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_draw_rounded_rect",
+              "args": [
+                "draw",
+                "xy",
+                "fill",
+                "radius"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_rap_thumbnail",
+              "args": [
+                "title",
+                "category",
+                "output_path"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "upload_thumbnail",
+              "args": [
+                "title",
+                "category"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "PALETTE"
+          ],
+          "imports": [
+            "os",
+            "hashlib",
+            "logging",
+            "tempfile",
+            "datetime",
+            "PIL"
+          ],
+          "lines": 157
+        },
+        {
+          "path": "pipelines/rap/writer.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_build_trade_reference",
+              "args": [
+                "keyword",
+                "trades",
+                "region_info"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_build_subscription_reference",
+              "args": [
+                "keyword",
+                "subscriptions"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_base_trade_rules",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "_base_output_format",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "_build_trade_system_prompt",
+              "args": [
+                "keyword",
+                "month",
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_trade_article",
+              "args": [
+                "keyword",
+                "trades",
+                "region_info",
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_subscription_article",
+              "args": [
+                "keyword",
+                "subscriptions"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_parse_article",
+              "args": [
+                "response",
+                "keyword"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [],
+          "imports": [
+            "os",
+            "re",
+            "logging",
+            "datetime"
+          ],
+          "lines": 360
+        }
+      ]
+    },
+    {
+      "name": "realestate",
+      "modules": [
+        {
+          "path": "pipelines/realestate/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        }
+      ]
+    },
+    {
+      "name": "senior",
+      "modules": [
+        {
+          "path": "pipelines/senior/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        },
+        {
+          "path": "pipelines/senior/fetcher.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "classify_category",
+              "args": [
+                "text"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_senior_services",
+              "args": [
+                "page",
+                "per_page",
+                "max_pages"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_senior_jobs",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "_load_cache",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "_save_cache",
+              "args": [
+                "services"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "enrich_service_detail",
+              "args": [
+                "service"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "enrich_naver_blog",
+              "args": [
+                "service"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_all",
+              "args": [
+                "max_pages"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "API_KEY",
+            "SERVICE_LIST_URL",
+            "SERVICE_DETAIL_URL",
+            "SENIOR_JOB_URL",
+            "SENIOR_KEYWORDS",
+            "EXCLUDE_KEYWORDS",
+            "CATEGORIES",
+            "CACHE_PATH"
+          ],
+          "imports": [
+            "os",
+            "re",
+            "logging",
+            "requests",
+            "datetime",
+            "dotenv"
+          ],
+          "lines": 340
+        },
+        {
+          "path": "pipelines/senior/pipeline.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_get_published_titles",
+              "args": [
+                "site_path"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_pick_topic",
+              "args": [
+                "blog_id",
+                "services"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_make_thumbnail",
+              "args": [
+                "cfg",
+                "article",
+                "topic_type",
+                "platform"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_prepare_tags",
+              "args": [
+                "article",
+                "topic_type"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_convert_md_to_blogger_html",
+              "args": [
+                "body_md"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "run",
+              "args": [
+                "cfg"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_do_publish_hugo",
+              "args": [
+                "cfg",
+                "blog_id",
+                "article",
+                "tags",
+                "thumb_url"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_do_publish_blogger",
+              "args": [
+                "cfg",
+                "blog_id",
+                "article",
+                "tags",
+                "thumb_url"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [],
+          "imports": [
+            "os",
+            "re",
+            "sys",
+            "logging",
+            "dotenv",
+            "shared.validators"
+          ],
+          "lines": 328
+        },
+        {
+          "path": "pipelines/senior/thumbnail.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_make_gradient",
+              "args": [
+                "width",
+                "height",
+                "color1",
+                "color2"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_get_font",
+              "args": [
+                "size"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_calc_title_layout",
+              "args": [
+                "draw",
+                "title",
+                "max_width",
+                "max_lines"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_senior_thumbnail",
+              "args": [
+                "title",
+                "category",
+                "department",
+                "output_path"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "WIDTH",
+            "HEIGHT",
+            "CATEGORY_COLORS",
+            "BADGE_COLORS",
+            "CATEGORY_ICONS"
+          ],
+          "imports": [
+            "os",
+            "textwrap",
+            "logging",
+            "PIL",
+            "datetime"
+          ],
+          "lines": 173
+        },
+        {
+          "path": "pipelines/senior/writer.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_append_links",
+              "args": [
+                "body_md",
+                "service",
+                "category"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_build_data_block",
+              "args": [
+                "service"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_build_prompt",
+              "args": [
+                "service",
+                "topic_type",
+                "related_services",
+                "today"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_parse_response",
+              "args": [
+                "content"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_select_service",
+              "args": [
+                "services",
+                "topic_type",
+                "published"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_get_related_services",
+              "args": [
+                "services",
+                "main_service",
+                "topic_type"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_validate_article",
+              "args": [
+                "result",
+                "min_length"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_clean_vague_phrases",
+              "args": [
+                "body_md"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_senior_article",
+              "args": [
+                "data",
+                "topic_type"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "MODEL",
+            "ARTICLE_STRUCTURES"
+          ],
+          "imports": [
+            "os",
+            "re",
+            "random",
+            "logging",
+            "datetime",
+            "openai",
+            "shared.ai_writer"
+          ],
+          "lines": 536
+        }
+      ]
+    },
+    {
+      "name": "sports",
+      "modules": [
+        {
+          "path": "pipelines/sports/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        }
+      ]
+    },
+    {
+      "name": "stock",
+      "modules": [
+        {
+          "path": "pipelines/stock/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        },
+        {
+          "path": "pipelines/stock/fetcher.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "get_induty_name",
+              "args": [
+                "code"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_get_key",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_recent_disclosure",
+              "args": [
+                "days",
+                "page_count"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_major_disclosure",
+              "args": [
+                "days"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_company_info",
+              "args": [
+                "corp_code"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_financial_summary",
+              "args": [
+                "corp_code",
+                "year",
+                "report_code"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_ipo_securities",
+              "args": [
+                "days"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_dividend_info",
+              "args": [
+                "corp_code",
+                "year"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "get_listed_corps",
+              "args": [
+                "limit"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_etf_daily",
+              "args": [
+                "top_n"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_dividend_ranking",
+              "args": [
+                "top_n"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_save_etf_to_db",
+              "args": [
+                "items"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_get_etf_from_db",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "_save_dividend_to_db",
+              "args": [
+                "rankings"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_get_dividend_from_db",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "refresh_daily_data",
+              "args": [],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "INDUTY_MAP",
+            "DART_BASE",
+            "DB_PATH"
+          ],
+          "imports": [
+            "os",
+            "requests",
+            "logging",
+            "sqlite3",
+            "datetime"
+          ],
+          "lines": 398
+        },
+        {
+          "path": "pipelines/stock/pipeline.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "run",
+              "args": [
+                "blog_cfg"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_pick_strategy",
+              "args": [
+                "conn",
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_filter_unpublished",
+              "args": [
+                "conn",
+                "blog_id",
+                "disclosures"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_record_publish",
+              "args": [
+                "conn",
+                "blog_id",
+                "disclosure"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_make_thumbnail",
+              "args": [
+                "title",
+                "category",
+                "stock_code",
+                "corp_name"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "DB_PATH",
+            "EVERGREEN_TYPES",
+            "BLOG_TOPIC_MAP"
+          ],
+          "imports": [
+            "os",
+            "random",
+            "logging",
+            "sqlite3",
+            "datetime",
+            "shared.validators"
+          ],
+          "lines": 316
+        },
+        {
+          "path": "pipelines/stock/thumbnail.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_make_gradient",
+              "args": [
+                "width",
+                "height",
+                "color1",
+                "color2"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_get_font",
+              "args": [
+                "size"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_fetch_logo",
+              "args": [
+                "stock_code"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_calc_title_layout",
+              "args": [
+                "draw",
+                "title",
+                "max_width",
+                "max_lines"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_stock_thumbnail",
+              "args": [
+                "title",
+                "category",
+                "stock_code",
+                "corp_name",
+                "output_path"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "WIDTH",
+            "HEIGHT",
+            "CATEGORY_COLORS",
+            "BADGE_COLORS"
+          ],
+          "imports": [
+            "os",
+            "io",
+            "textwrap",
+            "logging",
+            "requests",
+            "PIL",
+            "datetime"
+          ],
+          "lines": 188
+        },
+        {
+          "path": "pipelines/stock/writer.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "generate_disclosure_article",
+              "args": [
+                "disclosure",
+                "company_info",
+                "financials",
+                "financials_prev",
+                "dividend"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_evergreen_article",
+              "args": [
+                "topic_type",
+                "corp_data",
+                "extra_data"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_parse_response",
+              "args": [
+                "content"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "OPENAI_MODEL"
+          ],
+          "imports": [
+            "os",
+            "json",
+            "logging",
+            "re",
+            "requests"
+          ],
+          "lines": 359
+        }
+      ]
+    },
+    {
+      "name": "travel",
+      "modules": [
+        {
+          "path": "pipelines/travel/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        },
+        {
+          "path": "pipelines/travel/fetcher.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_fix_image_https",
+              "args": [
+                "url"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_safe_region",
+              "args": [
+                "addr_str"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_select_same_sigungu",
+              "args": [
+                "items_raw",
+                "count"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_adapt_korservice_items",
+              "args": [
+                "items_raw"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_filter_by_season",
+              "args": [
+                "items",
+                "title_key"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_camping",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_korservice",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_korservice_heritage",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_festival",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_food",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_course",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_wellness",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_heritage",
+              "args": [],
+              "docstring": ""
+            },
+            {
+              "name": "fetch_random",
+              "args": [],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "HERITAGE_TYPES",
+            "HERITAGE_KEYWORDS"
+          ],
+          "imports": [
+            "sys",
+            "os",
+            "random",
+            "logging",
+            "dotenv"
+          ],
+          "lines": 778
+        },
+        {
+          "path": "pipelines/travel/pipeline.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_fetch_for_blog",
+              "args": [
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_git_push",
+              "args": [
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_run_single",
+              "args": [
+                "target_blog_id",
+                "blog_cfg"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "run",
+              "args": [
+                "cfg"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "BLOG_FETCH_MAP"
+          ],
+          "imports": [
+            "os",
+            "sys",
+            "logging",
+            "datetime",
+            "dotenv",
+            "shared.content_store",
+            "shared.publisher",
+            "pipelines.travel.fetcher",
+            "pipelines.travel.writer",
+            "random",
+            "shared.validators"
+          ],
+          "lines": 181
+        },
+        {
+          "path": "pipelines/travel/writer.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [
+            {
+              "name": "_build_heritage_card",
+              "args": [
+                "region"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_select_prompt_id",
+              "args": [
+                "blog_id",
+                "source_type"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_build_data_block",
+              "args": [
+                "data"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_inject_naver_map",
+              "args": [
+                "body_md",
+                "items"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_fallback_image_from_korservice",
+              "args": [
+                "items",
+                "theme"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_inject_images",
+              "args": [
+                "items",
+                "content",
+                "blog_id"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_enrich_with_nearby",
+              "args": [
+                "data",
+                "html"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_post_process",
+              "args": [
+                "content"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_validate_place_names",
+              "args": [
+                "content",
+                "real_names"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "_validate_and_retry",
+              "args": [
+                "content",
+                "system_prompt",
+                "user_prompt",
+                "max_retries"
+              ],
+              "docstring": ""
+            },
+            {
+              "name": "generate_content",
+              "args": [
+                "data",
+                "blog_id"
+              ],
+              "docstring": ""
+            }
+          ],
+          "constants": [
+            "HERITAGE_CARDS",
+            "BLOG_PROMPT_MAP"
+          ],
+          "imports": [
+            "sys",
+            "os",
+            "logging",
+            "re",
+            "dotenv",
+            "shared.ai_writer",
+            "shared.prompt_builder"
+          ],
+          "lines": 943
+        }
+      ]
+    },
+    {
+      "name": "tvshow",
+      "modules": [
+        {
+          "path": "pipelines/tvshow/__init__.py",
+          "docstring": "",
+          "classes": [],
+          "functions": [],
+          "constants": [],
+          "imports": [],
+          "lines": 0
+        }
+      ]
+    }
+  ],
+  "shared": [
+    {
+      "path": "shared/__init__.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [],
+      "constants": [],
+      "imports": [],
+      "lines": 0
+    },
+    {
+      "path": "shared/ai_writer.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "load_models_config",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "get_client",
+          "args": [
+            "provider_name",
+            "providers"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "generate",
+          "args": [
+            "system_prompt",
+            "user_prompt",
+            "tier"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "generate_car",
+          "args": [
+            "prompt_text",
+            "data"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "CONFIG_DIR"
+      ],
+      "imports": [
+        "os",
+        "yaml",
+        "openai",
+        "dotenv"
+      ],
+      "lines": 111
+    },
+    {
+      "path": "shared/backlink_publisher.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_md_to_telegraph_content",
+          "args": [
+            "body_md",
+            "original_url"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "publish_to_telegraph",
+          "args": [
+            "title",
+            "body_md",
+            "original_url",
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "post_publish_backlinks",
+          "args": [
+            "title",
+            "body_md",
+            "original_url",
+            "blog_id"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "TELEGRAPH_TOKEN",
+        "BLOG_AUTHOR",
+        "DEFAULT_AUTHOR"
+      ],
+      "imports": [
+        "os",
+        "re",
+        "logging",
+        "requests"
+      ],
+      "lines": 122
+    },
+    {
+      "path": "shared/blogger_publisher.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_get_credentials",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "publish_to_blogger",
+          "args": [
+            "blog_id",
+            "title",
+            "body_html",
+            "labels"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "SCOPES",
+        "BASE_DIR",
+        "TOKEN_PATH",
+        "CREDENTIALS_PATH"
+      ],
+      "imports": [
+        "pickle",
+        "logging",
+        "os",
+        "pathlib",
+        "typing",
+        "google.oauth2.credentials",
+        "google_auth_oauthlib.flow",
+        "google.auth.transport.requests",
+        "googleapiclient.discovery"
+      ],
+      "lines": 63
+    },
+    {
+      "path": "shared/content_store.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "get_conn",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "init_db",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "insert_article",
+          "args": [
+            "article"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "update_published",
+          "args": [
+            "article_id",
+            "published_url"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "get_today_count",
+          "args": [
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "article_exists",
+          "args": [
+            "published_url"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "get_all_articles",
+          "args": [
+            "blog_id",
+            "limit",
+            "offset"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "register_images",
+          "args": [
+            "article_id",
+            "blog_id",
+            "html"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "is_image_used",
+          "args": [
+            "image_url",
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "filter_unused_images",
+          "args": [
+            "image_urls"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "get_used_image_count",
+          "args": [
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "source_exists",
+          "args": [
+            "blog_id",
+            "data_source",
+            "source_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "title_similar_exists",
+          "args": [
+            "blog_id",
+            "title"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "init_used_places",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "is_place_used",
+          "args": [
+            "place_name",
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "register_places",
+          "args": [
+            "article_id",
+            "blog_id",
+            "place_names",
+            "content_ids"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "filter_unused_places",
+          "args": [
+            "place_names",
+            "blog_id"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "DB_PATH"
+      ],
+      "imports": [
+        "re",
+        "sqlite3",
+        "os",
+        "datetime"
+      ],
+      "lines": 290
+    },
+    {
+      "path": "shared/coupang_car.py",
+      "docstring": "",
+      "classes": [
+        {
+          "name": "CoupangCar",
+          "methods": [
+            "__init__",
+            "is_configured",
+            "_generate_signature",
+            "search_products",
+            "generate_affiliate_link",
+            "get_car_product_links"
+          ],
+          "docstring": ""
+        }
+      ],
+      "functions": [
+        {
+          "name": "_is_car_relevant",
+          "args": [
+            "product_name"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "CAR_KEYWORD_MAP",
+        "DEFAULT_CAR_KEYWORDS",
+        "SEGMENT_KEYWORDS",
+        "CAR_INCLUDE_WORDS",
+        "CAR_EXCLUDE_WORDS"
+      ],
+      "imports": [
+        "hmac",
+        "hashlib",
+        "time",
+        "random",
+        "requests",
+        "os",
+        "logging",
+        "urllib.parse",
+        "typing"
+      ],
+      "lines": 233
+    },
+    {
+      "path": "shared/coupang_senior.py",
+      "docstring": "",
+      "classes": [
+        {
+          "name": "CoupangSenior",
+          "methods": [
+            "__init__",
+            "is_configured",
+            "_generate_signature",
+            "search_products",
+            "generate_affiliate_link",
+            "get_senior_product_links"
+          ],
+          "docstring": ""
+        }
+      ],
+      "functions": [
+        {
+          "name": "_is_relevant",
+          "args": [
+            "product_name",
+            "category"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "SENIOR_KEYWORD_MAP",
+        "CATEGORY_KEYWORDS",
+        "DEFAULT_KEYWORDS",
+        "EXCLUDE_WORDS"
+      ],
+      "imports": [
+        "hmac",
+        "hashlib",
+        "time",
+        "random",
+        "requests",
+        "os",
+        "logging",
+        "urllib.parse",
+        "typing"
+      ],
+      "lines": 227
+    },
+    {
+      "path": "shared/coupang_travel.py",
+      "docstring": "",
+      "classes": [
+        {
+          "name": "CoupangTravel",
+          "methods": [
+            "__init__",
+            "is_configured",
+            "_generate_signature",
+            "search_products",
+            "generate_affiliate_link",
+            "_is_travel_relevant",
+            "get_travel_product_links"
+          ],
+          "docstring": ""
+        }
+      ],
+      "functions": [],
+      "constants": [
+        "TRAVEL_KEYWORD_MAP",
+        "DEFAULT_TRAVEL_KEYWORDS",
+        "TRAVEL_INCLUDE_WORDS",
+        "TRAVEL_EXCLUDE_WORDS"
+      ],
+      "imports": [
+        "os",
+        "sys",
+        "time",
+        "hmac",
+        "hashlib",
+        "logging",
+        "requests",
+        "urllib.parse",
+        "dotenv"
+      ],
+      "lines": 227
+    },
+    {
+      "path": "shared/daily_report.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "load_active_blogs",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "_get_tap_blogger_posts",
+          "args": [
+            "target_date"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_get_lap_posts",
+          "args": [
+            "target_date"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "generate_report",
+          "args": [
+            "target_date"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "send_report",
+          "args": [
+            "target_date"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "CONFIG_DIR",
+        "TAP_DB",
+        "LAP_LOG"
+      ],
+      "imports": [
+        "os",
+        "sys",
+        "json",
+        "sqlite3",
+        "yaml",
+        "datetime",
+        "shared.content_store",
+        "shared.telegram_notifier"
+      ],
+      "lines": 160
+    },
+    {
+      "path": "shared/diningcode_enricher.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_extract_dong",
+          "args": [
+            "address"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_search_rid_naver",
+          "args": [
+            "shop_name",
+            "dong"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_search_rid_google",
+          "args": [
+            "shop_name",
+            "dong"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_search_rid",
+          "args": [
+            "shop_name",
+            "address"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_crawl_profile",
+          "args": [
+            "rid"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_extract_menus_from_reviews",
+          "args": [
+            "reviews",
+            "shop_name"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "enrich_from_diningcode",
+          "args": [
+            "shop_name",
+            "address"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "HEADERS",
+        "TIMEOUT"
+      ],
+      "imports": [
+        "re",
+        "logging",
+        "requests",
+        "typing",
+        "bs4"
+      ],
+      "lines": 339
+    },
+    {
+      "path": "shared/image_handler.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "get_r2_client",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "process_and_upload",
+          "args": [
+            "image_data",
+            "bucket"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [],
+      "imports": [
+        "os",
+        "hashlib",
+        "boto3",
+        "io",
+        "datetime",
+        "PIL"
+      ],
+      "lines": 56
+    },
+    {
+      "path": "shared/monitor.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "send_telegram",
+          "args": [
+            "message"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "daily_report",
+          "args": [],
+          "docstring": ""
+        }
+      ],
+      "constants": [],
+      "imports": [
+        "os",
+        "requests",
+        "datetime",
+        "dotenv",
+        "shared.content_store"
+      ],
+      "lines": 36
+    },
+    {
+      "path": "shared/notify.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "send_telegram",
+          "args": [
+            "message",
+            "parse_mode"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "alert",
+          "args": [
+            "title",
+            "detail"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "_BOT_TOKEN",
+        "_CHAT_ID"
+      ],
+      "imports": [
+        "os",
+        "logging",
+        "urllib.request",
+        "urllib.parse",
+        "json"
+      ],
+      "lines": 39
+    },
+    {
+      "path": "shared/prompt_builder.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "load_prompts",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "build",
+          "args": [
+            "prompt_id",
+            "data",
+            "extra_vars"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "CONFIG_DIR"
+      ],
+      "imports": [
+        "os",
+        "yaml"
+      ],
+      "lines": 31
+    },
+    {
+      "path": "shared/publisher.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "load_blogs",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "get_blog_config",
+          "args": [
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "slugify",
+          "args": [
+            "text"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_clean_body",
+          "args": [
+            "body_md"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_insert_coupang",
+          "args": [
+            "body_md",
+            "segment",
+            "fuel_type",
+            "blog_cfg"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_insert_internal_links",
+          "args": [
+            "body_md",
+            "blog_id",
+            "slug"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_extract_first_image",
+          "args": [
+            "body_md"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_extract_description",
+          "args": [
+            "body_md"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_build_frontmatter_congo",
+          "args": [
+            "title",
+            "slug",
+            "category",
+            "tags",
+            "thumbnail_url",
+            "description",
+            "is_draft",
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_build_frontmatter_papermod",
+          "args": [
+            "title",
+            "slug",
+            "category",
+            "tags",
+            "thumbnail_url",
+            "description",
+            "is_draft"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_build_frontmatter_blowfish",
+          "args": [
+            "title",
+            "slug",
+            "category",
+            "tags",
+            "thumbnail_url",
+            "description",
+            "is_draft",
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_get_related_posts",
+          "args": [
+            "blog_id",
+            "current_slug",
+            "max_count"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_write_hugo_post",
+          "args": [
+            "blog_cfg",
+            "title",
+            "body_md",
+            "slug",
+            "category",
+            "tags",
+            "thumbnail_url",
+            "is_draft"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "deploy_site",
+          "args": [
+            "site_path",
+            "cf_project"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "publish",
+          "args": [
+            "blog_id",
+            "title",
+            "body_md",
+            "body_html",
+            "segment",
+            "fuel_type",
+            "category",
+            "tags",
+            "thumbnail_url",
+            "data_source",
+            "source_id",
+            "prompt_id",
+            "model",
+            "wp_category",
+            "is_draft"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "CONFIG_DIR"
+      ],
+      "imports": [
+        "logging",
+        "os",
+        "sqlite3",
+        "re",
+        "yaml",
+        "subprocess",
+        "datetime",
+        "pathlib",
+        "dotenv",
+        "shared.content_store"
+      ],
+      "lines": 407
+    },
+    {
+      "path": "shared/r2_uploader.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "_get_client",
+          "args": [],
+          "docstring": ""
+        },
+        {
+          "name": "upload_file",
+          "args": [
+            "local_path",
+            "r2_key",
+            "content_type"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "upload_bytes",
+          "args": [
+            "data",
+            "r2_key",
+            "content_type"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "file_exists",
+          "args": [
+            "r2_key"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "R2_ENDPOINT",
+        "R2_ACCESS_KEY",
+        "R2_SECRET_KEY",
+        "R2_BUCKET",
+        "R2_PUBLIC_BASE"
+      ],
+      "imports": [
+        "os",
+        "logging",
+        "boto3",
+        "dotenv"
+      ],
+      "lines": 71
+    },
+    {
+      "path": "shared/telegram_notifier.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "send",
+          "args": [
+            "message",
+            "parse_mode"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "send_error",
+          "args": [
+            "blog_id",
+            "stage",
+            "error_msg"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "send_daily_report",
+          "args": [
+            "report_text"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "BOT_TOKEN",
+        "CHAT_ID",
+        "API_URL"
+      ],
+      "imports": [
+        "os",
+        "requests",
+        "logging",
+        "dotenv"
+      ],
+      "lines": 71
+    },
+    {
+      "path": "shared/validators.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [
+        {
+          "name": "sanitize_title",
+          "args": [
+            "title"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_strip_html",
+          "args": [
+            "html"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_jaccard",
+          "args": [
+            "a",
+            "b"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_get_recent_titles",
+          "args": [
+            "blog_id",
+            "hours"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_get_today_count",
+          "args": [
+            "blog_id"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_naver_map",
+          "args": [
+            "body",
+            "keyword"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_coupang",
+          "args": [
+            "body"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_internal_links",
+          "args": [
+            "body"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_disclaimer",
+          "args": [
+            "body"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "validate_post",
+          "args": [
+            "blog_id",
+            "title",
+            "html_content",
+            "context"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_gap",
+          "args": [
+            "title",
+            "body",
+            "ctx"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_car",
+          "args": [
+            "title",
+            "body",
+            "ctx"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_travel",
+          "args": [
+            "title",
+            "body",
+            "ctx"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_senior",
+          "args": [
+            "title",
+            "body",
+            "ctx"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "_check_stap",
+          "args": [
+            "title",
+            "body",
+            "ctx"
+          ],
+          "docstring": ""
+        },
+        {
+          "name": "validate_post_extended",
+          "args": [
+            "blog_id",
+            "title",
+            "html_content",
+            "context",
+            "pipeline"
+          ],
+          "docstring": ""
+        }
+      ],
+      "constants": [
+        "_AI_RESIDUES",
+        "_MIN_TITLE_LEN",
+        "_MAX_TITLE_LEN",
+        "_MIN_BODY_CHARS",
+        "_DUP_HOURS",
+        "_DUP_JACCARD_THRESHOLD",
+        "_STALE_DAYS",
+        "_DAILY_QUOTA_DEFAULT",
+        "_DB_PATH",
+        "_NO_MAP_KEYWORDS",
+        "_MAX_COUPANG_DISCLAIMERS",
+        "_COUPANG_DISCLAIMER_PATTERN",
+        "_INTERNAL_LINK_HEADERS",
+        "_PIPELINE_VALIDATORS"
+      ],
+      "imports": [
+        "re",
+        "os",
+        "sqlite3",
+        "logging",
+        "datetime"
+      ],
+      "lines": 680
+    },
+    {
+      "path": "shared/wordpress_publisher.py",
+      "docstring": "",
+      "classes": [],
+      "functions": [],
+      "constants": [],
+      "imports": [],
+      "lines": 501,
+      "error": "expected 'except' or 'finally' block (<unknown>, line 55)"
+    }
+  ],
+  "config": {
+    "api_keys.yaml": "parse error",
+    "blogger_token.json": "json file (credentials)",
+    "blogs.yaml": "parse error",
+    "client_secret_hugh7973.json": "json file (credentials)",
+    "models.yaml": "parse error",
+    "prompts.yaml": "parse error"
+  },
+  "scheduler": {
+    "jobs": [
+      "queue_publish, blog_id",
+      "batch_deploy",
+      "_run_gap_keyword_sync",
+      "_run_car_refresh",
+      "daily_report"
+    ],
+    "patterns": [
+      "every().day.at(t).do(queue_publish, blog_id)",
+      "every().day.at(batch_time).do(batch_deploy)",
+      "every().day.at(\"05:00\").do(_run_gap_keyword_sync)",
+      "every().day.at(\"06:30\").do(_run_car_refresh)",
+      "every().day.at(\"23:50\").do(daily_report)"
+    ],
+    "lines": 336
+  }
+}

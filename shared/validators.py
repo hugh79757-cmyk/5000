@@ -219,9 +219,14 @@ def _check_internal_links(body: str) -> list:
     """내부링크 섹션 중복 검증."""
     issues = []
     
+    # 부분 문자열 중복 매칭 방지: 가장 긴 패턴부터 매칭하고 해당 위치 제거
+    _sorted_headers = sorted(_INTERNAL_LINK_HEADERS, key=len, reverse=True)
+    _temp_body = body
     link_section_count = 0
-    for hdr in _INTERNAL_LINK_HEADERS:
-        link_section_count += body.count(hdr)
+    for hdr in _sorted_headers:
+        c = _temp_body.count(hdr)
+        link_section_count += c
+        _temp_body = _temp_body.replace(hdr, "")  # 매칭된 부분 제거하여 중복 카운트 방지
     
     if link_section_count > 1:
         issues.append(
@@ -533,16 +538,50 @@ def _check_senior(title: str, body: str, ctx: dict) -> list:
 
 
 def _check_stap(title: str, body: str, ctx: dict) -> list:
-    """STAP 전용 검증: 종목코드 유효성, 주가 데이터 날짜."""
+    """STAP 전용 검증: 종목코드, 주가 날짜, 빈 데이터 차단."""
     issues = []
     import re
     from datetime import datetime
-    
-    # 종목코드 형식 확인 (6자리 숫자)
+
+    combined = title + " " + body
+    zero_patterns = [
+        (r"\b0억\s*원?", "0억 원"),
+        (r"\b0%", "0%"),
+        (r"희석률\s*0%", "희석률 0%"),
+        (r"공모가\s*0원", "공모가 0원"),
+        (r"\b0만\s*주", "0만 주"),
+    ]
+    zero_hits = []
+    for pat, label in zero_patterns:
+        if re.search(pat, combined):
+            zero_hits.append(label)
+    if zero_hits:
+        issues.append(f"[CRITICAL] 파싱 실패 데이터 발행 차단: {', '.join(zero_hits)}")
+
+    missing_signals = [
+        "아직 공개되지 않았습니다",
+        "아직 공개되지 않은",
+        "공개되지 않았습니다",
+        "확정되지 않았습니다",
+        "미정입니다",
+        "미정으로",
+        "미공개",
+        "추후 공개",
+        "추후 확정",
+        "아직 확정되지",
+        "발표되지 않았",
+        "정해지지 않았",
+    ]
+    missing_count = sum(1 for s in missing_signals if s in body)
+    if missing_count >= 3:
+        issues.append(f"[CRITICAL] 핵심 데이터 부재 ({missing_count}개 미공개 표현 감지)")
+
+    title_placeholders = re.findall(r"\*\*\d+[억만%원주]", title)
+    if title_placeholders:
+        issues.append(f"[CRITICAL] 제목에 빈 플레이스홀더: {title_placeholders}")
+
     stock_codes = re.findall(r"\b\d{6}\b", body)
-    # 종목코드가 아예 없는 건 괜찮을 수 있음 (에버그린 글)
-    
-    # 주가 데이터 날짜 확인: 본문에 날짜가 있으면 최신인지
+
     date_matches = re.findall(r"(202[4-9])년\s*(\d{1,2})월\s*(\d{1,2})일", body)
     if date_matches:
         latest = None
@@ -557,17 +596,14 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
             age = (datetime.now() - latest).days
             if age > 7:
                 issues.append(f"[WARNING] 주가 데이터 {age}일 경과 ({latest.strftime('%Y-%m-%d')})")
-    
-    # 재무 핵심 지표 존재 확인
+
     fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
     has_fin = sum(1 for k in fin_keywords if k in body)
     if has_fin < 2:
         issues.append(f"[WARNING] 재무 지표 부족 ({has_fin}개, 최소 2개)")
-    
+
     return issues
 
-
-# ── 파이프라인별 검증 디스패처 ──
 _PIPELINE_VALIDATORS = {
     "gap": _check_gap,
     "car": _check_car,
