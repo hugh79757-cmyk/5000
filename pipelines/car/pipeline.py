@@ -245,6 +245,7 @@ def run(blog_cfg):
         model="gpt-4o-mini",
         segment=data.get("segment", ""),
         fuel_type=data.get("fuel_type", ""),
+        is_draft=_is_draft,
     )
 
     c = conn.cursor()

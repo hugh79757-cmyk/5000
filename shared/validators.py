@@ -397,6 +397,7 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                     "GV90", "네오룬",
                     # BMW 추가
                     "i4", "i5", "i7", "iX", "iX1", "iX3", "XM", "2시리즈", "4시리즈", "6시리즈",
+                    "X1", "X2", "X4", "X6", "X7", "M2", "M3", "M4", "M5", "M8",
                     # 벤츠 추가
                     "A클래스", "B클래스", "CLA", "CLE", "EQA", "EQB", "EQE", "EQS",
                     "GLA", "GLB", "GLS", "AMG",
@@ -409,7 +410,8 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                     # 폭스바겐
                     "골프", "티구안", "투아렉", "아테온", "ID.4", "ID.7",
                     # 토요타/렉서스
-                    "캠리", "라브4", "프리우스", "bZ4X", "ES", "RX", "NX", "UX", "IS",
+                    "캠리", "라브4", "프리우스", "bZ4X", "GR86", "GR수프라", "수프라", "코롤라", "하이랜더",
+                    "ES", "RX", "NX", "UX", "IS", "LS", "LC", "ES300h", "RX350", "NX350h",
                     # 혼다
                     "시빅", "어코드", "CR-V",
                     # 포르쉐
