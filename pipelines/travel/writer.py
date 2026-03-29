@@ -91,6 +91,34 @@ def _select_prompt_id(blog_id, source_type):
 def _build_data_block(data):
     items = data.get("items", [])
     lines = []
+
+    # ── course 전용 데이터 블록 ──
+    if data.get("source_type") == "course":
+        lines.append(f"지역: {data.get('display_region', '')}")
+        lines.append(f"코스명: {data.get('course_title', '')}")
+        lines.append(f"테마: {data.get('theme', '')}")
+        overview = data.get("course_overview", "")
+        if overview:
+            lines.append(f"코스 개요: {overview[:300]}")
+        lines.append(f"코스 장소 수: {len(items)}")
+        lines.append("")
+        for i, item in enumerate(items, 1):
+            lines.append(f"[코스 {i}번째 장소]")
+            lines.append(f"이름: {item.get('title', item.get('facltNm', ''))}")
+            addr = item.get("addr1", item.get("addr", ""))
+            if addr:
+                lines.append(f"주소: {addr}")
+            ov = item.get("overview", "")
+            if ov:
+                lines.append(f"설명: {ov[:400]}")
+            if item.get("tel"):
+                lines.append(f"전화: {item['tel']}")
+            img = item.get("firstimage") or item.get("firstImageUrl") or item.get("image") or ""
+            if img:
+                lines.append(f"이미지: {img}")
+            lines.append("")
+        return "\n".join(lines)
+
     lines.append(f"지역: {data.get('display_region', '')}")
     lines.append(f"시군구: {data.get('sigungu', '')}")
     lines.append(f"테마: {data.get('theme', '')}")
@@ -318,20 +346,69 @@ def _inject_images(items, content, blog_id=None):
     img_idx = 0
     for line in lines:
         result.append(line)
-        if line.startswith("## ") and img_idx < len(img_list):
+        if (line.startswith("## ") or line.startswith("### ")) and img_idx < len(img_list) and not any(skip in line for skip in ["여행 준비", "함께 읽어보기", "코스 주변 맛집", "반경 10km"]):
             name, img_url = img_list[img_idx]
             result.append("")
             result.append(f"![{name}]({img_url})")
             result.append("")
             img_idx += 1
 
-    if img_idx < len(img_list):
-        result.append("")
-        for name, img_url in img_list[img_idx:]:
-            result.append(f"![{name}]({img_url})")
-            result.append("")
+    # 잔여 이미지는 삽입하지 않음 (본문 끝에 이미지가 쌓이는 문제 방지)
 
     return "\n".join(result)
+
+
+def _enrich_with_nearby_restaurants_only(data, html):
+    """travel4-hugo 전용: nearby 맛집 카드만 삽입 (가볼만한곳 제외)"""
+    import urllib.parse
+    try:
+        from core.content_processor import get_nearby_info
+    except ImportError:
+        logger.warning("core.content_processor 모듈 없음 — nearby 생략")
+        return html
+
+    items = data.get("items", [])
+    sigungu = data.get("sigungu", "")
+
+    try:
+        nearby_data = get_nearby_info(items, sigungu)
+    except Exception as e:
+        logger.warning(f"nearby 조회 실패: {e}")
+        return html
+
+    if not nearby_data:
+        return html
+
+    def _nearby_card(item, map_url):
+        img = (item.get("image") or "").replace("http://", "https://", 1)
+        name = item.get("title", "")
+        addr = item.get("addr", "")
+        card = '<div class="nearby-card">'
+        if img:
+            card += '<img class="nearby-card-img" src="' + img + '" alt="' + name + '" loading="lazy">'
+        card += '<div class="nearby-card-body">'
+        card += '<strong class="nearby-card-name">' + name + '</strong>'
+        if addr:
+            card += '<span class="nearby-card-addr">' + addr + '</span>'
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도에서 보기</a>'
+        card += '</div></div>'
+        return card
+
+    restaurants = nearby_data.get("restaurants", [])
+    if not restaurants:
+        return html
+
+    nearby_html = "\n\n## 코스 주변 맛집\n\n"
+    for r in restaurants[:5]:
+        name = r.get("title", "")
+        if not name:
+            continue
+        encoded = urllib.parse.quote(name)
+        url = "https://map.naver.com/v5/search/" + encoded
+        nearby_html += _nearby_card(r, url) + "\n\n"
+
+    return html + nearby_html
+
 
 def _enrich_with_nearby(data, html):
     import urllib.parse
@@ -471,6 +548,47 @@ def _post_process(content):
     for _pat, _repl in _REPLACE_MAP:
         content = re.sub(_pat, _repl, content)
 
+    # ── 문체 통일: ~다/~한다 종결 → ~습니다 체 (포괄 치환) ──
+    _STYLE_RULES = [
+        # 고정 패턴
+        ('잊지 말아야 한다.', '잊지 말아야 합니다.'),
+        ('경험해 보길 바란다.', '경험해 보시는 것을 추천합니다.'),
+        ('보내기 좋다.', '보내기 좋습니다.'),
+    ]
+    for _old, _new in _STYLE_RULES:
+        content = content.replace(_old, _new)
+
+    # 포괄 정규식: "~ㄹ 수 있다." → "~ㄹ 수 있습니다."
+    content = re.sub(r'할 수 있다\.', '할 수 있습니다.', content)
+    content = re.sub(r'될 수 있다\.', '될 수 있습니다.', content)
+    content = re.sub(r'([가-힣])ㄹ 수 있다\.', r'\1ㄹ 수 있습니다.', content)
+
+    # "~하다." → "~합니다." 포괄 치환
+    _DA_PATTERNS = [
+        ('필요하다.', '필요합니다.'),
+        ('적합하다.', '적합합니다.'),
+        ('가능하다.', '가능합니다.'),
+        ('유명하다.', '유명합니다.'),
+        ('좋다.', '좋습니다.'),
+        ('많다.', '많습니다.'),
+        ('크다.', '큽니다.'),
+        ('없다.', '없습니다.'),
+        ('있다.', '있습니다.'),
+        ('된다.', '됩니다.'),
+        ('한다.', '합니다.'),
+        ('간다.', '갑니다.'),
+        ('온다.', '옵니다.'),
+        ('본다.', '봅니다.'),
+        ('준다.', '줍니다.'),
+        ('난다.', '납니다.'),
+    ]
+    for _da_old, _da_new in _DA_PATTERNS:
+        content = content.replace(_da_old, _da_new)
+
+    # 추가 금지 표현 변형 제거
+    content = content.replace('만끽하며', '충분히 경험하며')
+    content = content.replace('만끽할', '충분히 즐길')
+
     # ── H2 없는 H3 가드: 첫 H3 위에 H2가 없으면 자동 삽입 ─────
     _lines = content.split("\n")
     _found_first_h2 = False
@@ -607,13 +725,15 @@ def generate_content(data, blog_id="travel-hugo"):
     prompt_id = _select_prompt_id(blog_id, source_type)
 
     # 블로그 정보 + 다이닝코드 enrichment (GPT 호출 전에 실행)
-    try:
-        from core.content_processor import enrich_items_with_blog_info
-        items = data.get("items", [])
-        items = enrich_items_with_blog_info(items)
-        data["items"] = items
-    except Exception as e:
-        logger.warning(f"블로그 enrichment 실패 (무시): {e}")
+    # travel4-hugo(여행코스)는 enrichment 스킵 — 가격 데이터가 부정확하여 환각 유발
+    if blog_id != "travel4-hugo":
+        try:
+            from core.content_processor import enrich_items_with_blog_info
+            items = data.get("items", [])
+            items = enrich_items_with_blog_info(items)
+            data["items"] = items
+        except Exception as e:
+            logger.warning(f"블로그 enrichment 실패 (무시): {e}")
 
     # 맛집 파이프라인이면 다이닝코드로 메뉴/영업시간 보강
     if source_type in ("food", "korservice") and prompt_id == "tour2_food":
@@ -730,7 +850,11 @@ def generate_content(data, blog_id="travel-hugo"):
 
     _post_process._current_blog_id = blog_id
     content = _post_process(content)
-    content = _enrich_with_nearby(data, content)
+    # travel4-hugo(여행코스)는 맛집 카드만 삽입 (가볼만한곳은 코스 장소와 중복 가능)
+    if blog_id == "travel4-hugo":
+        content = _enrich_with_nearby_restaurants_only(data, content)
+    else:
+        content = _enrich_with_nearby(data, content)
     # [PATCH] _enrich_with_nearby 후 GPT "함께 읽어보기" 최종 제거 + 동적 내부링크
     _final_related_idx = content.find("## 함께 읽어보기")
     if _final_related_idx > 0:
@@ -858,26 +982,16 @@ def generate_content(data, blog_id="travel-hugo"):
             "포장이나 배달 가능한 {region} {theme} {count}곳",
         ],
         "travel4-hugo": [
-            "{region} 당일치기 여행 코스 {count}곳 동선 총정리",
-            "{region} {theme} 1박2일 코스, 완벽한 동선 정리",
-            "주말에 떠나는 {region} {theme} {count}곳 코스 추천",
-            "{region} {angle} 베스트 코스 {count}선 추천",
-            "{region} 가족 여행 {count}곳 코스와 예산 정리",
-            "2026 {region} {theme} 추천 코스 {count}선 총정리",
-            "{region} 드라이브 코스 {count}곳, 주차 정보 포함",
-            "{region}에서 하루 만에 즐기는 {theme} {count}곳 플랜",
-            "{region} 대중교통으로 가능한 여행 코스 {count}곳",
-            "{region} {theme} 식당까지 포함한 풀코스 {count}곳",
-            "커플 여행으로 좋은 {region} {theme} {count}곳 코스",
-            "{region} {theme} 반나절 코스와 점심 맛집 추천",
-            "뚜벅이를 위한 {region} {theme} {count}곳 코스 정리",
-            "{region} {theme} 아침부터 저녁까지 타임테이블 정리",
-            "예산 10만원으로 즐기는 {region} {theme} {count}곳 코스",
-            "{region} {theme} 우천 시 대체 코스까지 정리",
-            "사진 명소 위주 {region} {theme} {count}곳 코스 추천",
-            "{region} {theme} 숙소 위치별 추천 코스 {count}선",
-            "3월 {region} {theme} 벚꽃과 봄꽃 코스 {count}곳",
-            "{region} {theme} 코스별 이동 거리와 주차 정보 정리",
+            "{region} {first_name} 포함 여행코스 {count}곳 정리",
+            "{region} {theme} {first_name}부터 {last_camp}까지 코스 정리",
+            "{region} {theme} 추천 코스 {count}곳 총정리",
+            "{region} 당일치기 여행코스 {first_name} 포함 {count}곳",
+            "{region} {theme} {count}곳 코스 동선과 볼거리 정리",
+            "{region} {first_name} 주변 여행코스 {count}곳 추천",
+            "주말 {region} {theme} 코스 {count}곳 총정리",
+            "{region} {theme} 코스 {first_name} 등 {count}곳 비교",
+            "{region} 여행코스 {first_name}과 {last_camp} 포함 정리",
+            "{region} {theme} {count}곳 코스 순서와 볼거리 총정리",
         ],
     }
 
