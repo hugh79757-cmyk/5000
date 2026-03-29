@@ -210,17 +210,23 @@ def _inject_naver_map(body_md, items):
         return body_md
     lines = body_md.split("\n")
     result = []
+    pending_map = None
     for line in lines:
+        if re.match(r"^#{2,3}\s+", line) and pending_map:
+            result.append("")
+            result.append(pending_map)
+            result.append("")
+            pending_map = None
         result.append(line)
-        if not re.match(r"^#{2,3}\s+", line):
-            continue
-        for ml_title, ml_url in map_links:
-            name_parts = [p for p in ml_title.split() if len(p) >= 2]
-            if any(part in line for part in name_parts):
-                btn = "> [" + ml_title + " 네이버 지도에서 보기](" + ml_url + ")"
-                result.append("")
-                result.append(btn)
-                break
+        if re.match(r"^#{2,3}\s+", line):
+            for ml_title, ml_url in map_links:
+                name_parts = [p for p in ml_title.split() if len(p) >= 2]
+                if any(part in line for part in name_parts):
+                    pending_map = "> [" + ml_title + " 네이버 지도에서 보기](" + ml_url + ")"
+                    break
+    if pending_map:
+        result.append("")
+        result.append(pending_map)
     return "\n".join(result)
 
 
