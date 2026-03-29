@@ -1,4 +1,4 @@
-"""RAP (Real estate Auto Publisher) pipeline — GAP 구조 기반"""
+"""RAP (Real estate Auto Publisher) pipeline — RAP 전용 DB 사용"""
 import os
 import random
 import sqlite3
@@ -13,7 +13,16 @@ try:
 except ImportError:
     tg_error = lambda *a, **k: None
 
+RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
 GAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "gap.db")
+
+# 부동산 무관 키워드 제외 패턴
+RAP_EXCLUDE = [
+    "기능사", "요리", "조리", "흑백", "레시피", "양식조리", "제과", "봉제",
+    "롤러운전", "콘크리트", "전자기능", "주조", "인베디드", "견적서",
+    "운세", "로또", "날씨", "웹툰", "게임", "파전", "킷트", "래시피",
+    "키친보스", "오스틴강", "이탈리안", "이탈리아", "명태살", "1분링",
+]
 
 # 부동산 카테고리 목록
 RAP_CATEGORIES = ("금융/부동산",)
@@ -60,27 +69,60 @@ WP_CATEGORY_MAP = {
 
 
 def _pick_keyword(blog_id):
-    """blog_id에 맞는 부동산 키워드 선택"""
-    conn = sqlite3.connect(GAP_DB_PATH)
+    """RAP DB에서 키워드 선택 — 오염 필터 + 중복 발행 방지"""
+    # RAP DB 우선, 없으면 GAP DB 폴백
+    db_path = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
+    conn = sqlite3.connect(db_path)
     try:
         patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
-        rows = conn.execute(
-            "SELECT keyword, category FROM keywords "
-            "WHERE category = '금융/부동산' AND status = 'active' "
-            "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
-            "LIMIT 100",
-        ).fetchall()
-        
+
+        if db_path == RAP_DB_PATH:
+            # RAP DB: blog_target 필터 우선
+            rows = conn.execute(
+                "SELECT keyword, category FROM keywords "
+                "WHERE status='active' "
+                "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
+                "LIMIT 200"
+            ).fetchall()
+        else:
+            # GAP DB 폴백
+            rows = conn.execute(
+                "SELECT keyword, category FROM keywords "
+                "WHERE category='금융/부동산' AND status='active' "
+                "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
+                "LIMIT 200"
+            ).fetchall()
+
+        # 1단계: 오염 키워드 제거
+        rows = [(kw, cat) for kw, cat in rows
+                if not any(ex in kw for ex in RAP_EXCLUDE)]
+
+        # 2단계: blog_id별 패턴 필터
         if patterns:
             filtered = [(kw, cat) for kw, cat in rows if any(p in kw for p in patterns)]
             if filtered:
                 rows = filtered
-        
+
+        # 3단계: 이미 발행된 키워드 제외 (최근 7일)
+        try:
+            rap_conn = sqlite3.connect(RAP_DB_PATH) if db_path != RAP_DB_PATH else conn
+            published = {r[0] for r in rap_conn.execute(
+                "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
+                (blog_id,)
+            ).fetchall()}
+            if db_path != RAP_DB_PATH:
+                rap_conn.close()
+            rows = [(kw, cat) for kw, cat in rows if kw not in published]
+        except Exception:
+            pass  # publish_log 테이블 없으면 스킵
+
         if not rows:
             logger.warning(f"{blog_id}: 사용 가능한 부동산 키워드 없음")
             return None, None
-        
+
         keyword, category = random.choice(rows[:20])
+
+        # 사용 기록 갱신
         conn.execute(
             "UPDATE keywords SET use_count = use_count + 1, "
             "last_used_at = datetime('now') WHERE keyword = ?",
@@ -106,8 +148,11 @@ def _pick_strategy(keyword, blog_id=None):
     return "trade"
 
 
-
 def _post_process(body_md, blog_id, keyword):
+    # 금지어 자동 치환
+    body_md = body_md.replace("특히 ", "").replace("특히, ", "")
+    body_md = body_md.replace("특히,", "").replace("  ", " ")
+
     """발행 전 후처리: 금지표현 제거 + 면책조항 + 쿠팡 + 내부링크"""
     import re as _re
 
@@ -123,17 +168,14 @@ def _post_process(body_md, blog_id, keyword):
     body_md = _re.sub(r"\n*> 이 포스팅은 쿠팡[^\n]*", "", body_md)
     body_md = _re.sub(r"\n*\*이 포스팅은 쿠팡[^\n]*", "", body_md)
     body_md = _re.sub(r"\n*>\s*\*\*이 포스팅은 쿠팡[^\n]*", "", body_md)
-    # GPT가 넣은 쿠팡 상품 추천 섹션도 제거
-    # GPT 자체 쿠팡 섹션 제거 (H2부터 다음 H2 또는 ---까지)
+
     _gpt_section_keywords = ["자취", "신혼", "프리미엄 입주", "추천 가전", "필수 아이템",
                               "입주 준비", "이사 준비", "원룸 필수", "추천 용품"]
-    # 시스템이 삽입하는 제목은 제거하지 않음
     _SYSTEM_TITLES = ["부동산 거래 시 유용한 추천 상품", "차량 관리에 도움되는 추천 용품", "여행 준비에 도움되는 추천 용품"]
     for _gsk in _gpt_section_keywords:
         while True:
             _gi = body_md.find("## " + _gsk)
             if _gi < 0:
-                # 부분 매칭: "## 자취·원룸" 같은 경우
                 _gi2 = body_md.find("## ")
                 _found = False
                 while _gi2 >= 0:
@@ -142,7 +184,6 @@ def _post_process(body_md, blog_id, keyword):
                         _line_end = len(body_md)
                     _header = body_md[_gi2:_line_end]
                     if _gsk in _header:
-                        # 시스템 삽입 제목이면 스킵
                         _is_sys = any(st in _header for st in _SYSTEM_TITLES)
                         if _is_sys:
                             _gi2 = body_md.find("## ", _gi2 + 3)
@@ -153,7 +194,6 @@ def _post_process(body_md, blog_id, keyword):
                     _gi2 = body_md.find("## ", _gi2 + 3)
                 if not _found:
                     break
-            # 다음 H2 또는 --- 찾기
             _ge = len(body_md)
             _next = body_md.find("\n## ", _gi + 3)
             _next_hr = body_md.find("\n---", _gi + 3)
@@ -197,7 +237,6 @@ def _post_process(body_md, blog_id, keyword):
 </div>
 
 '''
-            # H2 3번째 뒤에 삽입
             _h2_positions = [m.start() for m in _re.finditer(r'^## ', body_md, _re.MULTILINE)]
             if len(_h2_positions) >= 4:
                 _insert_pos = _h2_positions[3]
@@ -206,8 +245,7 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"중간 카드 삽입 실패: {e}")
 
-    # GPT가 생성한 모든 내부링크/추천글 섹션 제거 (시스템이 별도 삽입)
-    # 다음 ##까지 또는 문서 끝까지만 제거 (DOTALL 제거하여 과잉삭제 방지)
+    # GPT가 생성한 내부링크/추천글 섹션 제거
     _strip_patterns = [
         r"\n*## 함께 읽[^\n]*(?:\n(?!## ).*)*",
         r"\n*## 관련 글[^\n]*(?:\n(?!## ).*)*",
@@ -220,7 +258,7 @@ def _post_process(body_md, blog_id, keyword):
 
     parts = []
 
-    # 3. 쿠팡 파트너스 (blog_id별 키워드는 coupang_travel.py TRAVEL_KEYWORD_MAP에서 관리)
+    # 3. 쿠팡 파트너스
     try:
         from shared.coupang_travel import CoupangTravel
         ct = CoupangTravel()
@@ -232,7 +270,7 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"쿠팡 링크 삽입 실패: {e}")
 
-    # 4. 네이버지도 버튼 (지역/단지명 기반 — 비지역 키워드 스킵)
+    # 4. 네이버지도 버튼
     _NO_MAP_KEYWORDS = [
         "세금", "양도", "취득세", "종부세", "공시지가", "보증보험", "계약서",
         "임대차", "3법", "청약", "당첨", "확률", "일정", "신청", "공고",
@@ -244,14 +282,13 @@ def _post_process(body_md, blog_id, keyword):
     _skip_map = any(nk in keyword for nk in _NO_MAP_KEYWORDS) if keyword else True
     try:
         import urllib.parse as _up
+        import requests as _req
         if _skip_map:
             logger.info(f"네이버지도 스킵 (비지역 키워드): {keyword}")
             raise ValueError("skip")
-        # 키워드에서 지역명이나 단지명 추출
         map_query = keyword.strip()
         if not map_query:
             raise ValueError("empty keyword")
-        # 블로그별 지도 검색 최적화
         map_label = {
             "rap-hugo": "아파트 매물",
             "rap2-hugo": "분양 단지",
@@ -260,11 +297,34 @@ def _post_process(body_md, blog_id, keyword):
             "rap5-hugo": "아파트 단지",
         }
         label = map_label.get(blog_id, "부동산")
-        # label에서 비지역 키워드 제거 (validator 충돌 방지)
         _clean_parts = [w for w in label.split() if w not in _NO_MAP_KEYWORDS]
         _clean_label = " ".join(_clean_parts) if _clean_parts else ""
         _search_q = f"{map_query} {_clean_label}".strip() if _clean_label else map_query
         encoded = _up.quote(_search_q)
+
+        # 네이버 지역검색 API로 부동산/주거 장소 존재 검증
+        _naver_cid = os.getenv("NAVER_CLIENT_ID", "")
+        _naver_csec = os.getenv("NAVER_CLIENT_SECRET", "")
+        _PLACE_CATS = ["부동산", "아파트", "주거", "주택", "오피스텔", "공인중개", "중개업"]
+        _has_place = False
+        if _naver_cid and _naver_csec:
+            _local_resp = _req.get(
+                "https://openapi.naver.com/v1/search/local.json",
+                params={"query": _search_q, "display": 5},
+                headers={"X-Naver-Client-Id": _naver_cid, "X-Naver-Client-Secret": _naver_csec},
+                timeout=5,
+            )
+            if _local_resp.status_code == 200:
+                _items = _local_resp.json().get("items", [])
+                _has_place = any(
+                    any(pc in it.get("category", "") for pc in _PLACE_CATS)
+                    for it in _items[:5]
+                )
+        
+        if not _has_place:
+            logger.info(f"네이버지도 부동산 결과 없음 → 버튼 생략: {_search_q}")
+            raise ValueError("no place result")
+
         naver_map_html = f"""
 
 <div style="margin:24px 0;padding:16px 20px;background:#f0f7ff;border-radius:12px;border:1px solid #d0e3ff;text-align:center;">
@@ -273,11 +333,11 @@ def _post_process(body_md, blog_id, keyword):
 </div>
 """
         parts.append(naver_map_html)
-        logger.info(f"네이버지도 버튼 삽입: {map_query}")
+        logger.info(f"네이버지도 버튼 삽입 (검증완료): {_search_q}")
     except Exception as e:
-        logger.warning(f"네이버지도 삽입 실패: {e}")
+        logger.warning(f"네이버지도 삽입 스킵: {e}")
 
-    # 5. 내부링크 (같은 사이트 기존 글 추천)
+    # 5. 내부링크
     try:
         import glob as _gl
         import random as _rand
@@ -306,18 +366,18 @@ def _post_process(body_md, blog_id, keyword):
     except Exception as e:
         logger.warning(f"내부링크 삽입 실패: {e}")
 
-    # 6. 면책조항 (1회만)
+    # 6. 면책조항
     disclaimer_map = {
         "rap-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
         "rap2-hugo": "이 글은 한국부동산원 청약홈 공공데이터를 기반으로 작성되었습니다. 정확한 청약 일정과 자격은 [청약홈](https://www.applyhome.co.kr)에서 확인하세요.",
         "rap3-hugo": "이 글은 국토교통부 실거래가 데이터를 기반으로 작성되었으며, 세금 계산은 참고용입니다. 정확한 세금 상담은 세무사에게 문의하세요.",
-        "rap4-hugo": "이 글은 국토교통부 전월세 공공데이터를 기반으로 작성되었습니다. 계약 전 반드시 등기부등본을 확인하고, 전세보증보험 가입을 권장합니다.",
+        "rap4-hugo": "이 글은 국토교통부 매매 실거래가 데이터를 기반으로 전세가를 추정한 것입니다. 실제 전월세 시세는 다를 수 있으니 반드시 현장 확인 후 계약하세요.",
         "rap5-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
     }
     disc = disclaimer_map.get(blog_id, disclaimer_map["rap-hugo"])
     parts.append(f"\n\n---\n\n> {disc}")
 
-    # 7. 쿠팡 파트너스 면책 (CoupangTravel 반환값에 미포함 시에만 추가)
+    # 7. 쿠팡 파트너스 면책
     _all_parts = "".join(parts)
     if "쿠팡 파트너스" not in _all_parts:
         parts.append("\n\n> 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.")
@@ -329,6 +389,14 @@ def run(blog_cfg):
     """dispatcher에서 호출하는 통일 인터페이스"""
     from dotenv import load_dotenv
     load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
+
+    # ★ RAP DB 일일 갱신 (첫 발행 시 자동 실행)
+    try:
+        from pipelines.rap.rap_data_sync import daily_refresh
+        daily_refresh()
+    except Exception as e:
+        logger.warning(f"RAP DB 갱신 실패 (non-fatal): {e}")
+
     from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
     from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, find_lawd_cd, REGION_CD_MAP
@@ -360,7 +428,6 @@ def run(blog_cfg):
     if strategy == "trade":
         lawd_cd, city, district = find_lawd_cd(keyword)
         if not lawd_cd:
-            # 블로그별 다른 지역 풀에서 랜덤 선택
             import random as _rand
             BLOG_REGION_POOL = {
                 "rap-hugo":  [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
@@ -384,10 +451,10 @@ def run(blog_cfg):
 
         if not trades:
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
-            # 실거래가 0건 키워드 자동 비활성화 (동탄호수공원 같은 비아파트 키워드 방지)
+            # 실거래가 0건 키워드 자동 비활성화
             try:
-                import sqlite3 as _sq3
-                _gc = _sq3.connect(GAP_DB_PATH)
+                db = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
+                _gc = sqlite3.connect(db)
                 _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                 _gc.commit()
                 _gc.close()
@@ -439,7 +506,7 @@ def run(blog_cfg):
     # 후처리 (면책조항 + 쿠팡 + 내부링크)
     article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
-    # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
+    # ── 발행 전 검증 ──
     _is_draft = False
     try:
         from shared.validators import validate_post as _validate
@@ -475,7 +542,19 @@ def run(blog_cfg):
     if result and result.get("success"):
         logger.info(f"RAP 발행 성공: {article['title']}")
 
-        # 백링크 자동 생성 (Phase 1: Telegraph)
+        # ★ RAP DB에 발행 기록 (중복 방지)
+        try:
+            rap_conn = sqlite3.connect(RAP_DB_PATH)
+            rap_conn.execute(
+                "INSERT OR IGNORE INTO publish_log (blog_id, data_type, data_key, title) VALUES (?,?,?,?)",
+                (blog_id, strategy, keyword, article["title"])
+            )
+            rap_conn.commit()
+            rap_conn.close()
+        except Exception as e:
+            logger.warning(f"RAP publish_log 기록 실패: {e}")
+
+        # 백링크 자동 생성
         try:
             from shared.backlink_publisher import post_publish_backlinks
             published_url = result.get("url", "")
