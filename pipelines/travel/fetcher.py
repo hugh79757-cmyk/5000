@@ -427,7 +427,7 @@ def fetch_food():
         selected, _sg = _select_same_sigungu(pool, 3)
         adapted = _adapt_korservice_items(selected)
         sigungu_name = _sg if _sg else region_name
-        display = sigungu_name if sigungu_name != region_name else region_name
+        display = f"{region_name} {sigungu_name}".strip() if sigungu_name and sigungu_name != region_name else region_name
         return {
             "items": adapted,
             "display_region": display,
