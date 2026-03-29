@@ -426,6 +426,10 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                     # KG모빌리티
                     "액티언",
                     # 기타
+                    "모닝", "올 뉴 모닝", "피칸토",
+                    "포터", "마이티", "엑센트",
+                    "스파크", "볼트", "콜로라도", "타호",
+                    "클리오",
                     "폴스타"]
     title_has_car = any(brand in title for brand in _car_brands)
     if not title_has_car:

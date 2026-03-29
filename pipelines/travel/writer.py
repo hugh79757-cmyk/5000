@@ -436,6 +436,61 @@ def _post_process(content):
         content = '\n'.join(new_lines)
     # 연속 빈줄 정리
     content = re.sub(r'\n{4,}', '\n\n\n', content)
+
+    # ── 금지 표현 자동 치환 ──────────────────────────────
+    _REPLACE_MAP = [
+        # 문장 잘림 수정 ("참고하시기 ." → 완성 문장)
+        (r'참고하시기\s*\.', '참고하시는 것이 좋습니다.'),
+        (r'유의하시기\s*\.', '유의하셔야 합니다.'),
+        (r'방문하시기\s*\.', '방문하시는 것이 좋습니다.'),
+        (r'이용하시기\s*\.', '이용하시는 것이 좋습니다.'),
+        (r'확인하시기\s*\.', '확인하시는 것이 좋습니다.'),
+        (r'준비하시기\s*\.', '준비하시는 것이 좋습니다.'),
+        # 상투적 블로그 표현 → 정중한 비즈니스 톤
+        (r'추천드립니다', '추천합니다'),
+        (r'참고하시기 바랍니다', '참고하시면 좋겠습니다'),
+        (r'참고하시기를 권장합니다', '참고하시면 좋겠습니다'),
+        (r'많은 이들에게 사랑받고 있습니다', '꾸준히 찾는 분들이 많습니다'),
+        (r'많은 사랑을 받고 있으며', '꾸준히 찾는 분들이 많으며'),
+        (r'많은 사랑을 받고 있습니다', '꾸준히 찾는 분들이 많습니다'),
+        (r'사랑받고 있습니다', '찾는 분들이 많습니다'),
+        (r'많은 고객들에게 사랑받고 있습니다', '단골 손님이 많은 편입니다'),
+        (r'인기를 끌고 있으며', '찾는 손님이 많으며'),
+        (r'인기를 끌고 있습니다', '찾는 손님이 많습니다'),
+        (r'인기가 많습니다', '찾는 분들이 많습니다'),
+        (r'인기가 많은', '자주 찾는'),
+        (r'인기가 높습니다', '찾는 분들이 많습니다'),
+        (r'인기 있는 메뉴들로 인해', '대표 메뉴로 인해'),
+        (r'많은 손님들이 만족할 수 있는', '만족도가 높은'),
+        (r'많은 이들이 찾고 있습니다', '방문객이 꾸준한 편입니다'),
+        (r'느껴보는 것은 좋은 선택이 될 것입니다', '경험해 보시는 것도 좋습니다'),
+        (r'느껴보자', '확인해 보시기 바랍니다'),
+        (r'것을 추천드립니다', '것을 추천합니다'),
+        (r'것을 권장합니다', '것이 좋습니다'),
+    ]
+    for _pat, _repl in _REPLACE_MAP:
+        content = re.sub(_pat, _repl, content)
+
+    # ── H2 없는 H3 가드: 첫 H3 위에 H2가 없으면 자동 삽입 ─────
+    _lines = content.split("\n")
+    _found_first_h2 = False
+    _insert_idx = None
+    for _i, _line in enumerate(_lines):
+        if _line.startswith("## "):
+            _found_first_h2 = True
+        if _line.startswith("### ") and _found_first_h2 and _insert_idx is None:
+            # 바로 위에 H2가 있는지 확인
+            _prev_non_empty = None
+            for _j in range(_i - 1, -1, -1):
+                if _lines[_j].strip():
+                    _prev_non_empty = _lines[_j]
+                    break
+            if _prev_non_empty and not _prev_non_empty.startswith("## "):
+                _insert_idx = _i
+    if _insert_idx is not None:
+        _lines.insert(_insert_idx, "## 식당별 상세 정보\n")
+        content = "\n".join(_lines)
+
     # [PATCH] GPT가 만든 "함께 읽어보기" 섹션 통째로 제거
     _related_idx = content.find("## 함께 읽어보기")
     if _related_idx > 0:
