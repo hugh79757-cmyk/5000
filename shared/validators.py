@@ -162,7 +162,7 @@ def _check_naver_map(body: str, keyword: str) -> list:
             f"[CRITICAL] 비지역 키워드에 네이버지도 삽입됨: \"{keyword}\"")
     
     # 지도 검색어 추출하여 비정상 검색어 확인
-    map_queries = re.findall(r'map\.naver\.com/v5/search/([^"]+)"', body)
+    map_queries = re.findall(r'map\.naver\.com/v5/search/([^"\)\s>]+)', body)
     if map_queries:
         from urllib.parse import unquote
         for mq in map_queries:

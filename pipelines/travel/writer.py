@@ -333,6 +333,21 @@ def _enrich_with_nearby(data, html):
 
     nearby_html = ""
 
+    def _nearby_card(item, map_url):
+        img = (item.get("image") or "").replace("http://", "https://", 1)
+        name = item.get("title", "")
+        addr = item.get("addr", "")
+        card = '<div class="nearby-card">'
+        if img:
+            card += '<img class="nearby-card-img" src="' + img + '" alt="' + name + '" loading="lazy">'
+        card += '<div class="nearby-card-body">'
+        card += '<strong class="nearby-card-name">' + name + '</strong>'
+        if addr:
+            card += '<span class="nearby-card-addr">' + addr + '</span>'
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도에서 보기</a>'
+        card += '</div></div>'
+        return card
+
     attractions = nearby_data.get("attractions", [])
     if attractions:
         nearby_html += "\n\n## 반경 10km 내 가볼만한 곳\n\n"
@@ -342,7 +357,7 @@ def _enrich_with_nearby(data, html):
                 continue
             encoded = urllib.parse.quote(name)
             url = "https://map.naver.com/v5/search/" + encoded
-            nearby_html += '<a class="nearby-link" href="' + url + '" target="_blank">' + name + ' 지도에서 보기</a>\n\n'
+            nearby_html += _nearby_card(a, url) + "\n\n"
 
     restaurants = nearby_data.get("restaurants", [])
     if restaurants:
@@ -353,10 +368,7 @@ def _enrich_with_nearby(data, html):
                 continue
             encoded = urllib.parse.quote(name)
             url = "https://map.naver.com/v5/search/" + encoded
-            tel = r.get("tel", "")
-            nearby_html += '<a class="nearby-link" href="' + url + '" target="_blank">' + name + ' 지도에서 보기</a>\n\n'
-            if tel:
-                nearby_html += "전화: " + tel + "\n\n"
+            nearby_html += _nearby_card(r, url) + "\n\n"
 
     return html + nearby_html
 
