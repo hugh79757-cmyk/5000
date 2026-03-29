@@ -194,7 +194,7 @@ def _build_data_block(data):
 
 
 
-def _inject_naver_map(body_md, items):
+def _inject_naver_map(body_md, items, is_festival=False):
     import urllib.parse
     if not items:
         return body_md
@@ -204,7 +204,10 @@ def _inject_naver_map(body_md, items):
         if not title:
             continue
         encoded = urllib.parse.quote(title)
-        url = "https://map.naver.com/v5/search/" + encoded
+        if is_festival:
+            url = "https://search.naver.com/search.naver?query=" + encoded
+        else:
+            url = "https://map.naver.com/v5/search/" + encoded
         map_links.append((title, url))
     if not map_links:
         return body_md
@@ -223,7 +226,9 @@ def _inject_naver_map(body_md, items):
                 name_parts = [p for p in ml_title.split() if len(p) >= 2]
                 match_count = sum(1 for part in name_parts if part in line)
                 if match_count >= 2 or (len(name_parts) == 1 and name_parts[0] in line):
-                    pending_map = '<a class="naver-map-btn" href="' + ml_url + '" target="_blank" rel="nofollow">' + ml_title + ' 네이버 지도에서 보기</a>'
+                    _btn_label = " 네이버에서 검색하기" if is_festival else " 네이버 지도에서 보기"
+                    _btn_cls = "naver-search-btn" if is_festival else "naver-map-btn"
+                    pending_map = '<a class="' + _btn_cls + '" href="' + ml_url + '" target="_blank" rel="nofollow">' + ml_title + _btn_label + '</a>'
                     break
     if pending_map:
         result.append("")
@@ -710,7 +715,8 @@ def generate_content(data, blog_id="travel-hugo"):
 
     items = data.get("items", [])
     content = _inject_images(items, content, blog_id=blog_id)
-    content = _inject_naver_map(content, items)
+    _is_festival = (source_type in ("korservice",) and _select_prompt_id(blog_id, source_type) == "travel1_festival")
+    content = _inject_naver_map(content, items, is_festival=_is_festival)
 
     display_region = data.get("display_region", "")
     theme = data.get("theme", "")
