@@ -221,8 +221,9 @@ def _inject_naver_map(body_md, items):
         if re.match(r"^#{2,3}\s+", line):
             for ml_title, ml_url in map_links:
                 name_parts = [p for p in ml_title.split() if len(p) >= 2]
-                if any(part in line for part in name_parts):
-                    pending_map = "> [" + ml_title + " 네이버 지도에서 보기](" + ml_url + ")"
+                match_count = sum(1 for part in name_parts if part in line)
+                if match_count >= 2 or (len(name_parts) == 1 and name_parts[0] in line):
+                    pending_map = '<a class="naver-map-btn" href="' + ml_url + '" target="_blank" rel="nofollow">' + ml_title + ' 네이버 지도에서 보기</a>'
                     break
     if pending_map:
         result.append("")
@@ -447,6 +448,9 @@ def _post_process(content):
     content = content.rstrip() + "\n\n" + cta_html
 
 
+
+    # GPT가 생성한 인라인 네이버 지도 링크 제거
+    content = re.sub(r'\s*\[네이버 지도에서 보기\]\(https://map\.naver\.com[^)]*\)', '', content)
 
     return content
 
