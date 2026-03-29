@@ -64,7 +64,7 @@ def _build_heritage_card(region: str) -> str:
 
 
 BLOG_PROMPT_MAP = {
-    "travel-hugo": {"camping": "tour1_camping", "korservice": "tour1_leports", "wellness": "tour1_leports", "heritage": "tour1_leports"},
+    "travel-hugo": {"camping": "tour1_camping"},
     "travel1-hugo": {"korservice": "travel1_festival", "festival": "travel1_festival"},
     "travel2-hugo": {"heritage": "travel2_heritage", "korservice": "travel2_heritage"},
     "travel3-hugo": {"korservice": "tour2_food", "food": "tour2_food"},
@@ -75,7 +75,17 @@ BLOG_PROMPT_MAP = {
 
 def _select_prompt_id(blog_id, source_type):
     blog_map = BLOG_PROMPT_MAP.get(blog_id, BLOG_PROMPT_MAP.get("travel-hugo", {}))
-    return blog_map.get(source_type, "tour1_camping")
+    _DEFAULT_PROMPT = {
+        "travel-hugo": "tour1_camping",
+        "travel1-hugo": "travel1_festival",
+        "travel2-hugo": "travel2_heritage",
+        "travel3-hugo": "tour2_food",
+        "travel4-hugo": "tour3_course",
+        "tvshow-blogger": "tour2_food",
+        "ud-blogger": "tour2_food",
+        "kuta-wordpress": "tour2_food",
+    }
+    return blog_map.get(source_type, _DEFAULT_PROMPT.get(blog_id, "tour1_camping"))
 
 
 def _build_data_block(data):
