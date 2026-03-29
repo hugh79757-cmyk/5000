@@ -466,6 +466,7 @@ def fetch_food():
 
 
 def fetch_course():
+    """TourAPI contentTypeId=25(여행코스) + detailInfo2로 코스 하위 장소 데이터 확보"""
     import requests as req
     AREA_CODES = {
         "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
@@ -477,6 +478,7 @@ def fetch_course():
     area_code = AREA_CODES[region_name]
     key = os.getenv("TOUR_API_KEY", "")
     try:
+        # 1단계: 여행코스 목록 조회 (contentTypeId=25)
         resp = req.get(
             "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
             params={
@@ -484,10 +486,9 @@ def fetch_course():
                 "MobileOS": "ETC",
                 "MobileApp": "TAP",
                 "_type": "json",
-                "numOfRows": 20,
+                "numOfRows": 30,
                 "pageNo": 1,
-                "contentTypeId": 12,
-                "cat1": "A02",
+                "contentTypeId": 25,
                 "areaCode": area_code,
                 "arrange": "C",
             },
@@ -496,17 +497,20 @@ def fetch_course():
         data = resp.json()
         header = data.get("response", {}).get("header", {})
         if header.get("resultCode") != "0000":
-            logger.warning("course API error: " + str(header))
+            logger.warning("course API error: %s", header)
             return None
         items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
         if isinstance(items_raw, dict):
             items_raw = [items_raw]
         if not items_raw:
-            logger.warning("course: no data for " + region_name)
+            logger.warning("course: no data for %s", region_name)
             return None
-        with_img = [i for i in items_raw if i.get('firstimage')]
+
+        # 이미지 있는 코스 우선
+        with_img = [i for i in items_raw if i.get("firstimage")]
         pool = with_img if len(with_img) >= 3 else items_raw
-        # 계절 부적합 코스 필터링
+
+        # 계절 필터링
         import datetime
         _month = datetime.datetime.now().month
         _season_ban = {
@@ -525,62 +529,150 @@ def fetch_course():
         }
         ban_words = _season_ban.get(_month, [])
         if ban_words:
-            pool = [i for i in pool if not any(bw in i.get("title", "") for bw in ban_words)]
-            if len(pool) < 3:
-                pool = with_img if len(with_img) >= 3 else items_raw  # 필터 후 부족하면 원복
+            filtered = [i for i in pool if not any(bw in i.get("title", "") for bw in ban_words)]
+            if len(filtered) >= 1:
+                pool = filtered
 
-        selected, _ = _select_same_sigungu(pool, 3)
-        
-        # detailIntro API로 상세정보 보강
-        for item in selected:
-            cid = item.get("contentid")
-            if not cid:
-                continue
-            try:
-                detail_resp = req.get(
-                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
-                    params={
-                        "serviceKey": key,
-                        "MobileOS": "ETC",
-                        "MobileApp": "TAP",
-                        "_type": "json",
-                        "contentId": cid,
-                        "contentTypeId": 15,
-                    },
-                    timeout=15,
-                )
-                d2 = detail_resp.json()
-                intro_items = d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                if isinstance(intro_items, dict):
-                    intro_items = [intro_items]
-                if intro_items:
-                    detail = intro_items[0]
-                    item["eventstartdate"] = detail.get("eventstartdate", "")
-                    item["eventenddate"] = detail.get("eventenddate", "")
-                    item["playtime"] = detail.get("playtime", "")
-                    item["eventplace"] = detail.get("eventplace", "")
-                    item["usetimefestival"] = detail.get("usetimefestival", "")
-                    item["sponsor1"] = detail.get("sponsor1", "")
-                    item["program"] = detail.get("program", "")
-                    item["subevent"] = detail.get("subevent", "")
-                    item["agelimit"] = detail.get("agelimit", "")
-                    logger.info(f"festival detailIntro: {item.get('title','')} 보강 완료")
-            except Exception as e:
-                logger.warning(f"festival detailIntro 실패 (무시): {e}")
-        
-        adapted = _adapt_korservice_items(selected)
+        # 기존 발행 contentid 제외
+        _published_cids = set()
+        try:
+            import sqlite3 as _sql
+            _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+            for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel4-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel4-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            _db.close()
+        except Exception as _e:
+            logger.warning("course dup-check DB error: %s", _e)
+        pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+        if not pool:
+            logger.warning("course: 중복 제외 후 아이템 0건")
+            return None
+
+        # 랜덤 1개 코스 선택
+        course_item = random.choice(pool)
+        course_cid = course_item.get("contentid")
+        course_title = course_item.get("title", "")
+        course_image = _fix_image_https(course_item.get("firstimage", ""))
+
+        # 2단계: detailInfo2로 코스 하위 장소 조회
+        resp2 = req.get(
+            "http://apis.data.go.kr/B551011/KorService2/detailInfo2",
+            params={
+                "serviceKey": key,
+                "MobileOS": "ETC",
+                "MobileApp": "TAP",
+                "_type": "json",
+                "contentId": course_cid,
+                "contentTypeId": 25,
+            },
+            timeout=15,
+        )
+        data2 = resp2.json()
+        sub_items = data2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+        if isinstance(sub_items, dict):
+            sub_items = [sub_items]
+        if not sub_items:
+            logger.warning("course detailInfo: %s 하위장소 0건", course_title)
+            return None
+
+        # 3단계: detailCommon2로 코스 overview 조회
+        course_overview = ""
+        try:
+            resp3 = req.get(
+                "http://apis.data.go.kr/B551011/KorService2/detailCommon2",
+                params={
+                    "serviceKey": key,
+                    "MobileOS": "ETC",
+                    "MobileApp": "TAP",
+                    "_type": "json",
+                    "contentId": course_cid,
+                    "contentTypeId": 25,
+                    "defaultYN": "Y",
+                    "overviewYN": "Y",
+                },
+                timeout=15,
+            )
+            data3 = resp3.json()
+            common_items = data3.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(common_items, dict):
+                common_items = [common_items]
+            if common_items:
+                import re as _re_ov
+                ov = common_items[0].get("overview", "")
+                course_overview = _re_ov.sub(r"<[^>]+>", "", ov).strip() if ov else ""
+        except Exception as _e3:
+            logger.warning("course detailCommon failed: %s", _e3)
+
+        # 4단계: 하위 장소를 adapted items로 변환
+        adapted = []
+        for idx, sub in enumerate(sub_items):
+            import re as _re_html
+            sub_overview = sub.get("subdetailoverview", "")
+            sub_overview = _re_html.sub(r"<[^>]+>", "", sub_overview).strip() if sub_overview else ""
+            sub_img = _fix_image_https(sub.get("subdetailimg", ""))
+            adapted.append({
+                "title": sub.get("subname", ""),
+                "facltNm": sub.get("subname", ""),
+                "addr1": "",
+                "addr": "",
+                "firstimage": sub_img,
+                "firstImageUrl": sub_img,
+                "image": sub_img,
+                "overview": sub_overview,
+                "subnum": sub.get("subnum", str(idx)),
+                "subcontentid": sub.get("subcontentid", ""),
+                "tel": "",
+                "contenttypeid": "25",
+            })
+
+        if not adapted:
+            logger.warning("course: adapted 결과 0건")
+            return None
+
+        # 코스 제목에서 지역 보정
+        display_region = region_name
+        addr1 = course_item.get("addr1", "")
+        if addr1:
+            parts = addr1.split()
+            if parts:
+                display_region = parts[0]
+
+        # 코스 테마 추출 (cat2 기반)
+        cat2_map = {
+            "C0112": "가족코스",
+            "C0113": "나홀로코스",
+            "C0114": "힐링코스",
+            "C0115": "도보코스",
+            "C0116": "캠핑코스",
+            "C0117": "맛코스",
+        }
+        cat2 = course_item.get("cat2", "")
+        theme_label = cat2_map.get(cat2, "여행코스")
+
+        logger.info("course: %s / %s / %d개 하위장소", course_title, region_name, len(adapted))
+
         return {
             "items": adapted,
-            "display_region": region_name,
-            "sigungu": region_name,
+            "display_region": display_region,
+            "sigungu": display_region,
             "do_name": region_name,
-            "theme": "여행코스",
+            "theme": theme_label,
             "category": "여행코스",
-            "angle": region_name + " 여행코스",
-            "source_type": "korservice",
+            "angle": course_title,
+            "source_type": "course",
+            "course_title": course_title,
+            "course_overview": course_overview,
+            "course_image": course_image,
+            "content_ids": [str(course_cid)],
         }
     except Exception as e:
-        logger.warning("course fetch failed: " + str(e))
+        logger.warning("course fetch failed: %s", e)
         return None
 
 

@@ -110,6 +110,19 @@ def _run_single(target_blog_id, blog_cfg=None):
         tg_error(target_blog_id, "data_fetch", "데이터 수집 실패 (fetcher 반환값 없음)")
         return None
 
+    # ── source_id 기반 중복 발행 방지 ──
+    _content_ids = data.get("content_ids", [])
+    if _content_ids:
+        _sid = ",".join(_content_ids)
+        if source_exists(target_blog_id, data.get("source_type", ""), _sid):
+            logger.warning(target_blog_id + " source_id 중복: " + _sid[:60])
+            return None
+        # 개별 contentid도 체크 (복합 source_id 대응)
+        for _cid in _content_ids:
+            if _cid and source_exists(target_blog_id, data.get("source_type", ""), _cid):
+                logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
+                return None
+
     result = generate_content(data, blog_id=target_blog_id)
     if not result:
         logger.error("Content generation failed for " + target_blog_id)
