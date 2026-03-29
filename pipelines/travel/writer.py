@@ -725,26 +725,16 @@ def generate_content(data, blog_id="travel-hugo"):
 
     TITLE_TEMPLATES = {
         "travel-hugo": [
-            "2026 {region} {theme} {count}곳 시설과 가격 총정리",
-            "{region}에서 찾은 {theme} {count}곳 비교 정리",
-            "{region} {theme} 어디가 좋을까? {count}곳 비교해봤다",
-            "{region} {angle} 캠핑장 {count}곳, 예약 전 꼭 확인하세요",
-            "{region} 캠핑장 {count}곳 1박 가격과 시설 총정리",
-            "{region} {theme} 중 가성비 좋은 {count}곳 추천",
-            "가족 캠핑으로 좋은 {region} {theme} {count}곳 정리",
-            "{region} {angle} 캠핑장 {count}곳, 조용한 곳만 골랐다",
-            "올여름 {region} {theme} {count}곳 비교 총정리",
-            "{region} 계곡 근처 캠핑장 {count}곳 추천 리스트",
-            "{region} 반려견 동반 가능 캠핑장 {count}곳 비교",
-            "{region} {theme} 1박 요금 비교, {count}곳 정리",
-            "비 와도 걱정 없는 {region} {theme} {count}곳",
-            "{region} 글램핑과 카라반 {count}곳 가격과 시설 비교",
-            "{region} 아이와 가기 좋은 {theme} {count}곳 체크리스트",
-            "초보 캠퍼를 위한 {region} {theme} {count}곳 추천",
-            "{region} {theme} 예약 꿀팁과 {count}곳 비교",
-            "차박하기 좋은 {region} {theme} {count}곳 정리",
-            "3월 {region} {theme} {count}곳 시즌 오픈 현황",
-            "{region} 수영장 있는 캠핑장 {count}곳 총정리",
+            "{region} {angle} {first_camp}과 {count}곳 시설 비교",
+            "{region} {first_camp} 포함 {theme} {count}곳 총정리",
+            "{region} {angle} 캠핑장 {first_camp} 등 {count}곳 비교",
+            "{region} {first_camp}부터 {last_camp}까지 {count}곳 정리",
+            "{region} {theme} {first_camp} 주변 {count}곳 추천",
+            "{region} {angle} {first_camp} 시설과 예약 정보 정리",
+            "{region} {theme} {count}곳 {first_camp} 포함 비교",
+            "{first_camp}과 {region} {angle} 캠핑장 {count}곳 리뷰",
+            "{region} {angle} {count}곳 {first_camp} 등 시설 총정리",
+            "{region} {first_camp} 예약 전 알아둘 것과 {count}곳 비교",
         ],
         "travel1-hugo": [
             "2026 {region} {theme} 일정과 입장료 총정리",
@@ -838,11 +828,20 @@ def generate_content(data, blog_id="travel-hugo"):
     if not theme or len(theme) < 2:
         theme = "여행"
 
+    # 캠핑장 실명 변수 추출
+    _camp_names = [i.get('title', i.get('facltNm', ''))[:15] for i in items if i.get('title') or i.get('facltNm')]
+    first_camp = _camp_names[0] if _camp_names else theme
+    last_camp = _camp_names[-1] if len(_camp_names) > 1 else first_camp
+    first_name = first_camp  # travel2용 호환
+
     fallback_title = template.format(
         region=display_region,
         theme=theme,
         angle=angle,
         count=str(len(items)),
+        first_camp=first_camp,
+        last_camp=last_camp,
+        first_name=first_name,
     )
 
     place_names = ', '.join([i.get('title', i.get('facltNm', ''))[:12] for i in items[:3]])
@@ -861,17 +860,18 @@ def generate_content(data, blog_id="travel-hugo"):
 - 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
 - 특수기호 금지 (콜론, 느낌표, 하이픈)
 - 가격 정보는 제목에 넣지 않기 (본문에서 다룸)
-- 고유명사(축제명/장소명)는 1개만 포함
+- 캠핑장 실제 이름을 1개 이상 포함 (검색 노출 핵심)
+- 예: "부산 반딧불이 캠핑장 포함 계곡 캠핑 3곳 비교"
 
 금지 표현:
 - "완벽 가이드", "꼭 가봐야 할", "베스트", "상세정보", "즐기기", "소개", "알아보기", "만나보기"
 
 좋은 제목 예시:
-- "2026 광주 비어페스트 일정과 인근 맛집 총정리"
-- "강릉 커피축제 일정부터 주차까지 한눈에 보기"
-- "부산에서 만나는 불꽃축제 관람 명당 4곳 정리"
-- "전주 비빔밥축제, 아이와 함께 즐기는 체험 3가지"
-- "경남 하동별맛축제 일정과 근처 맛집 추천"
+- "경남 지리산 당근 오토캠핑장 포함 계곡 캠핑 3곳 비교"
+- "강원 소나무숲 캠핑장부터 별빛야영장까지 3곳 정리"
+- "충남 태안 글램핑 해솔오토캠핑장 등 3곳 시설 총정리"
+- "경기 포천 산속 캠핑장 힐링포레스트 주변 3곳 추천"
+- "전남 담양 대나무숲 캠핑장과 가성비 글램핑 3곳 비교"
 
 나쁜 제목 예시 (비문, 키워드 나열):
 - "경북 축제 추천 3곳 청도반시축제와 백두대간 봉자페스티벌 상세정보"
