@@ -83,6 +83,63 @@ def fetch_apt_trade_multi(lawd_cd, months=3, rows=50):
 
 # ─── 청약홈 분양정보 ───
 
+
+def fetch_apt_rent(lawd_cd: str, deal_ymd: str, rows: int = 30) -> list:
+    """아파트 전월세 실거래 데이터 조회"""
+    url = "https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent"
+    params = {
+        "serviceKey": _get_key(),
+        "LAWD_CD": lawd_cd,
+        "DEAL_YMD": deal_ymd,
+        "pageNo": "1",
+        "numOfRows": str(rows),
+    }
+    try:
+        resp = requests.get(url, params=params, timeout=15)
+        if resp.status_code == 403:
+            logger.warning(f"전월세 API 403 (미승인 또는 반영대기): {lawd_cd}/{deal_ymd}")
+            return []
+        resp.raise_for_status()
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(resp.text, "xml")
+        items = soup.select("item")
+        results = []
+        for it in items:
+            deposit = it.select_one("deposit")
+            monthly = it.select_one("monthlyRent")
+            deposit_val = deposit.text.strip().replace(",", "") if deposit else "0"
+            monthly_val = monthly.text.strip().replace(",", "") if monthly else "0"
+            try:
+                deposit_int = int(deposit_val)
+            except ValueError:
+                deposit_int = 0
+            try:
+                monthly_int = int(monthly_val)
+            except ValueError:
+                monthly_int = 0
+            rent_type = "월세" if monthly_int > 0 else "전세"
+            entry = {
+                "aptNm": it.select_one("aptNm").text.strip() if it.select_one("aptNm") else "",
+                "excluUseAr": it.select_one("excluUseAr").text.strip() if it.select_one("excluUseAr") else "",
+                "floor": it.select_one("floor").text.strip() if it.select_one("floor") else "",
+                "buildYear": it.select_one("buildYear").text.strip() if it.select_one("buildYear") else "",
+                "umdNm": it.select_one("umdNm").text.strip() if it.select_one("umdNm") else "",
+                "dealYear": it.select_one("dealYear").text.strip() if it.select_one("dealYear") else "",
+                "dealMonth": it.select_one("dealMonth").text.strip() if it.select_one("dealMonth") else "",
+                "dealDay": it.select_one("dealDay").text.strip() if it.select_one("dealDay") else "",
+                "deposit": deposit_val,
+                "depositInt": deposit_int,
+                "monthlyRent": monthly_val,
+                "monthlyRentInt": monthly_int,
+                "rentType": rent_type,
+            }
+            results.append(entry)
+        logger.info(f"전월세 조회: {lawd_cd}/{deal_ymd} → {len(results)}건 (전세 {sum(1 for r in results if r['rentType']=='전세')}, 월세 {sum(1 for r in results if r['rentType']=='월세')})")
+        return results
+    except Exception as e:
+        logger.error(f"전월세 API 실패: {e}")
+        return []
+
 def fetch_subscription_info(region_cd=None, page_size=10):
     """청약홈 분양/임대 공고 조회
     Args:
