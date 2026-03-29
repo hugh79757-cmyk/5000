@@ -487,7 +487,7 @@ def _post_process(content):
                     break
             if _prev_non_empty and not _prev_non_empty.startswith("## "):
                 _insert_idx = _i
-    if _insert_idx is not None:
+    if _insert_idx is not None and getattr(_post_process, '_current_blog_id', '') == 'travel3-hugo':
         _lines.insert(_insert_idx, "## 식당별 상세 정보\n")
         content = "\n".join(_lines)
 
