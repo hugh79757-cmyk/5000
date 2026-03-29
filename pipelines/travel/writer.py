@@ -435,7 +435,7 @@ def _post_process(content):
     cta_html = """
 <div class="cta-box">
   <p style="margin:0;font-size:1.1rem;">여행 숙소를 찾고 계신가요?</p>
-  <a href="https://www.trip.com/?Allianceid=3993748&SID=travel_blog" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
+  <a href="https://kr.trip.com/?Allianceid=7451816&SID=283255449&trip_sub1=&trip_sub3=D14664967" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
 </div>
 """
     content = content.rstrip() + "\n\n" + cta_html
