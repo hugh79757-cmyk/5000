@@ -424,10 +424,31 @@ def fetch_food():
             _mixed = items_raw
         with_img = [i for i in _mixed if i.get('firstimage')]
         pool = with_img if len(with_img) >= 3 else _mixed
+        # ── 기존 발행 contentid 제외 (중복 방지) ──
+        _published_cids = set()
+        try:
+            import sqlite3 as _sql
+            _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+            for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel3-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel3-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            _db.close()
+        except Exception as _e:
+            logger.warning(f"food dup-check DB error: {_e}")
+        pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+        if len(pool) < 3:
+            logger.warning(f"food: 중복 제외 후 아이템 부족 ({len(pool)}개)")
+            return None
         selected, _sg = _select_same_sigungu(pool, 3)
         adapted = _adapt_korservice_items(selected)
         sigungu_name = _sg if _sg else region_name
         display = f"{region_name} {sigungu_name}".strip() if sigungu_name and sigungu_name != region_name else region_name
+        content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
         return {
             "items": adapted,
             "display_region": display,
@@ -437,6 +458,7 @@ def fetch_food():
             "category": "맛집",
             "angle": display + " " + keyword,
             "source_type": "korservice",
+            "content_ids": content_ids,
         }
     except Exception as e:
         logger.warning("food fetch failed: " + str(e))
