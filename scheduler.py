@@ -18,6 +18,31 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
+# ── 패키지 의존성 체크 ──
+REQUIRED_PACKAGES = {
+    "boto3": "boto3",
+    "bs4": "beautifulsoup4",
+    "openai": "openai",
+    "dotenv": "python-dotenv",
+    "yaml": "pyyaml",
+    "requests": "requests",
+    "schedule": "schedule",
+}
+
+def _check_dependencies():
+    missing = []
+    for module, pip_name in REQUIRED_PACKAGES.items():
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(pip_name)
+    if missing:
+        print(f"[FATAL] 누락 패키지: {', '.join(missing)}")
+        print(f"  실행: pip install {' '.join(missing)}")
+        sys.exit(1)
+
+_check_dependencies()
+
 from shared.telegram_notifier import send_error as _tg_error
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
