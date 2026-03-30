@@ -138,22 +138,13 @@ blogs:
   domain: tour1.rotcha.kr
   fetch_sources:
   - type: camping
-    weight: 0.45
-  - type: korservice
-    weight: 0.25
-  - type: wellness
-    weight: 0.15
-  - type: heritage
-    weight: 0.15
+    weight: 1.0
   id: travel-hugo
   name: 캠핑·아웃도어
   pipeline: travel
   platform: hugo
   prompt_map:
     camping: tour1_camping
-    heritage: tour1_leports
-    korservice: tour1_leports
-    wellness: tour1_leports
   repo: travel-hugo
   schedule:
     times:
@@ -358,6 +349,7 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
   status: active
   theme: congo
+  cf_project: stock-informationhot
 - cf_project: gap-hugo
   daily_quota: 5
   domain: life.informationhot.kr

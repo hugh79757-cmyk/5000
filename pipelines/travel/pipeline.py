@@ -24,6 +24,7 @@ except ImportError:
     tg_error = lambda *a, **k: None
 
 import random
+from shared.validators import sanitize_title
 
 BLOG_FETCH_MAP = {
     "travel-hugo": [
@@ -66,6 +67,11 @@ def _fetch_for_blog(blog_id):
             if data:
                 return data
 
+    # 단일 소스 블로그는 random 폴백 금지 (축제/맛집 전용 블로그 보호)
+    if len(fetch_list) == 1:
+        logger.warning(blog_id + " 단일 소스 fetch 실패, random 폴백 차단")
+        return None
+
     return fetch_random()
 
 
@@ -104,12 +110,26 @@ def _run_single(target_blog_id, blog_cfg=None):
         tg_error(target_blog_id, "data_fetch", "데이터 수집 실패 (fetcher 반환값 없음)")
         return None
 
+    # ── source_id 기반 중복 발행 방지 ──
+    _content_ids = data.get("content_ids", [])
+    if _content_ids:
+        _sid = ",".join(_content_ids)
+        if source_exists(target_blog_id, data.get("source_type", ""), _sid):
+            logger.warning(target_blog_id + " source_id 중복: " + _sid[:60])
+            return None
+        # 개별 contentid도 체크 (복합 source_id 대응)
+        for _cid in _content_ids:
+            if _cid and source_exists(target_blog_id, data.get("source_type", ""), _cid):
+                logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
+                return None
+
     result = generate_content(data, blog_id=target_blog_id)
     if not result:
         logger.error("Content generation failed for " + target_blog_id)
         tg_error(target_blog_id, "content_generation", "AI 본문 생성 실패")
         return None
 
+    result["title"] = sanitize_title(result["title"])
     if title_similar_exists(target_blog_id, result["title"]):
         logger.warning(target_blog_id + " similar title exists: " + result["title"][:30])
         return None
@@ -148,7 +168,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         tags=",".join(result.get("labels", [])),
         thumbnail_url="",
         data_source=result.get("source_type", ""),
-        source_id="",
+        source_id=",".join(data.get("content_ids", [])),
         prompt_id=result.get("prompt_id", ""),
         model=result.get("model", ""),
         is_draft=_is_draft,

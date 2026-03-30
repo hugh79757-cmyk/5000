@@ -52,9 +52,9 @@ class WordPressPublisher:
                 else:
                     logger.warning(f"[WordPress] 블로그 ID 없음: {blog_id}, 기본값 사용")
                     self._load_from_settings()
-            except Exception as e:
-                logger.warning(f"[WordPress] blog_manager 로드 실패: {e}, 기본값 사용")
-                self._load_from_settings()
+except (ImportError, IOError, OSError) as e:
+            logger.warning(f"[WordPress] blog_manager load failed: {e}, using defaults")
+            self._load_from_settings()
         else:
             self._load_from_settings()
         
@@ -90,8 +90,8 @@ class WordPressPublisher:
             else:
                 logger.error(f"워드프레스 연결 실패: {response.status_code}")
                 return False
-        except Exception as e:
-            logger.error(f"워드프레스 연결 오류: {e}")
+        except requests.RequestException as e:
+            logger.error(f"[WordPress] Connection error: {e}")
             return False
     
     def _convert_to_blocks(self, html: str) -> str:

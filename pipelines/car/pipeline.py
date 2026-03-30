@@ -19,6 +19,7 @@ from shared.ai_writer import generate_car
 from shared.telegram_notifier import send_error as _tg_error
 from pipelines.car.topic_manager import select_topic, generate_title, make_slug, validate_body
 from pipelines.car.data_builder import build_input
+from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
 
@@ -183,6 +184,7 @@ def run(blog_cfg):
     if title is None:
         title = generate_title(data, site_id=car_site_id)
         logger.warning(f"5회 모두 중복 — 마지막 제목 사용: {title[:40]}")
+    title = sanitize_title(title) if title else title
     slug = make_slug(title)
     logger.info("제목: " + title)
 
@@ -243,6 +245,7 @@ def run(blog_cfg):
         model="gpt-4o-mini",
         segment=data.get("segment", ""),
         fuel_type=data.get("fuel_type", ""),
+        is_draft=_is_draft,
     )
 
     c = conn.cursor()

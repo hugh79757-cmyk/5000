@@ -229,7 +229,7 @@ def scan_new_cars(conn):
                     if dm:
                         disp = int(dm.group(1).replace(",", ""))
                         break
-            except:
+            except (AttributeError, ValueError):
                 pass
             body = "SUV" if "SUV" in segment else "세단" if "세단" in segment else "경차" if "경차" in segment else "기타"
 
@@ -322,13 +322,13 @@ def refresh_images(conn):
                               (car['car_id'], src, "carisyou"))
                     if c.rowcount > 0:
                         added += 1
-                except:
+                except (AttributeError, ValueError):
                     pass
             if added > 0:
                 total_new += added
                 logger.info(f"  [{car['brand']} {car['model']}] +{added}장")
-        except:
-            pass
+        except (AttributeError, ValueError):
+            logger.debug(f"[DAILY_REFRESH] Image fetch failed: {e}")
         time.sleep(0.3)
 
     conn.commit()

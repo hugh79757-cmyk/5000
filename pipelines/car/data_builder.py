@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger(__name__)
 import sqlite3
 import json
 import random
@@ -95,7 +97,7 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
             if eff and eff != "NULL":
                 try:
                     return float(eff)
-                except:
+                except (ValueError, TypeError):
                     pass
     return None
 
@@ -179,8 +181,9 @@ def get_live_fuel_price(fuel_type, db_path):
         conn_tmp.close()
         if row and row["price"]:
             return float(row["price"])
-    except:
-        pass
+    except (sqlite3.Error, ValueError) as e:
+        import logging
+        logging.getLogger(__name__).debug(f"[DATA_BUILDER] Failed to get fuel price: {e}")
     defaults = {"B027": 1833, "D047": 1832, "K015": 1012, "B034": 2090}
     return defaults.get(code, 1833)
 
@@ -283,6 +286,29 @@ def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
         "resale_rate_percent": round(yr3_rate),
     }
 
+# ── 상수 정의 ──
+CAR_CONSTANTS = {
+    "annual_km": 15000,
+    "finance_rate": 3.9,
+    "finance_terms": [48, 36, 60],
+    "default_fuel_price": 1650,
+    "ev_kwh_price": 292,
+    "min_trim_price": 500,
+}
+
+ANNUAL_KM = CAR_CONSTANTS["annual_km"]
+FINANCE_RATE = CAR_CONSTANTS["finance_rate"]
+FINANCE_TERMS = CAR_CONSTANTS["finance_terms"]
+DEFAULT_FUEL_PRICE = CAR_CONSTANTS["default_fuel_price"]
+EV_KWH_PRICE = CAR_CONSTANTS["ev_kwh_price"]
+MIN_TRIM_PRICE = CAR_CONSTANTS["min_trim_price"]
+
+
+def calc_monthly_payment(price_manwon, annual_rate, months):
+    """월 할부금 계산 (만원 단위 반환)"""
+    r = annual_rate / 100 / 12
+    return round(price_manwon * 10000 * r * (1 + r) ** months / ((1 + r) ** months - 1) / 10000)
+
 def select_representative_trim(trims):
     if len(trims) == 1:
         return 0
@@ -316,23 +342,23 @@ def build_input(conn, topic, db_path):
     # === 데이터 품질 필터 ===
     trims = [t for t in trims if t["price"] and t["price"] >= 500]
     if not trims:
-        print(f"  [BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: {car['model']}")
+        logger.warning(f"[BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: {car['model']}")
         return None
     # 배기량 0 + 비전기 차량 차단
     ft = str(car.get("fuel_type", ""))
     if (not car["displacement"] or car["displacement"] == 0) and "전기" not in ft:
-        print(f"  [BLOCK] 배기량 0 + 비전기 - 발행 차단: {car['brand']} {car['model']} ({ft})")
+        logger.warning(f"[BLOCK] 배기량 0 + 비전기 - 발행 차단: {car['brand']} {car['model']} ({ft})")
         return None
     idx = select_representative_trim(trims)
     main_trim = trims[idx]
-    annual_km = 15000
+    annual_km = ANNUAL_KM
     tax = calc_tax(car['displacement'], car['fuel_type'])
     insurance = calc_insurance(main_trim['price'])
     fuel_eff = main_trim['fuel_efficiency']
     if not fuel_eff or fuel_eff == 0:
         fuel_eff = lookup_fuel_efficiency(conn, car['brand'], car['model'], car['displacement'])
     if not fuel_eff or fuel_eff == 0:
-        print("  [BLOCK] 연비 데이터 없음 - 발행 차단: " + car['model'])
+        logger.warning("[BLOCK] 연비 데이터 없음 - 발행 차단: " + car['model'])
         return None
     fuel_cost = calc_fuel_cost(annual_km, fuel_eff, car['fuel_type'], db_path)
     resale = estimate_resale(main_trim['price'], car['brand'], car['fuel_type'], car.get('segment', ''), car.get('model', ''))
@@ -353,12 +379,12 @@ def build_input(conn, topic, db_path):
         "fuel_efficiency": fuel_eff,
         "displacement": car['displacement'],
         "discount": 0, "discount_conditions": "",
-        "finance_rate": 3.9, "finance_term_months": 48,
-        "monthly_payment_48": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**48 / ((1+3.9/100/12)**48 - 1) / 10000),
-        "monthly_payment_36": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**36 / ((1+3.9/100/12)**36 - 1) / 10000),
-        "monthly_payment_60": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**60 / ((1+3.9/100/12)**60 - 1) / 10000),
+        "finance_rate": FINANCE_RATE, "finance_term_months": FINANCE_TERMS[0],
+        "monthly_payment_48": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 48),
+        "monthly_payment_36": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 36),
+        "monthly_payment_60": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 60),
         "annual_km": annual_km, "fuel_price_source": "opinet", "tax_annual": tax, "tax_annual_3yr": tax * 3,
-        "insurance_estimate": insurance, "fuel_price": 1650,
+        "insurance_estimate": insurance, "fuel_price": DEFAULT_FUEL_PRICE,
         "annual_fuel_cost": fuel_cost,
         **resale,
         "three_year_depreciation": dep_3yr,

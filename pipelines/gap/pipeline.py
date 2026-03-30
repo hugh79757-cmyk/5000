@@ -3,6 +3,7 @@ import random
 import logging
 import sqlite3
 from datetime import datetime
+from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +109,7 @@ def run(blog_cfg):
 
     logger.info(f"{blog_id}: 글 생성 완료 - {article['title']}")
 
+    article["title"] = sanitize_title(article["title"])
     thumb_url = upload_thumbnail(article["title"], article.get("category", "생활정보"))
 
     # 키워드 카테고리에서 WP 카테고리 ID 결정
@@ -119,7 +121,7 @@ def run(blog_cfg):
         if _row:
             kw_category = _row[0]
         _conn.close()
-    except:
+    except sqlite3.Error:
         pass
     wp_cat_id = WP_CATEGORY_MAP.get(kw_category, 150)
 

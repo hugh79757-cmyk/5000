@@ -8,6 +8,7 @@ import logging
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from dotenv import load_dotenv
+from shared.validators import sanitize_title
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ def _get_published_titles(site_path):
             if m:
                 published.add(m.group(1).strip())
         return published
-    except Exception:
+    except Exception as e:
         return set()
 
 
@@ -169,15 +170,19 @@ def run(cfg):
         from pipelines.senior.writer import _select_service
         published = _get_published_titles(site_path) if site_path else set()
         # DB에서도 발행 이력 체크 (Blogger 포함)
+        published_svc_ids = set()
         try:
             from shared.content_store import get_all_articles
             db_articles = get_all_articles(blog_id=blog_id, limit=500)
             for a in db_articles:
                 if a.get("title"):
                     published.add(a["title"])
-        except Exception:
-            pass
-        candidate = _select_service(data["services"], topic_type, published=published)
+                if a.get("source_id"):
+                    published_svc_ids.add(a["source_id"])
+            logger.info(f"발행 이력: 제목 {len(published)}건, service_id {len(published_svc_ids)}건")
+        except Exception as e:
+            logger.debug(f"[SENIOR] DB 이력 조회 실패: {e}")
+        candidate = _select_service(data["services"], topic_type, published=published, published_svc_ids=published_svc_ids)
         if candidate and not candidate.get("support_content"):
             candidate = enrich_service_detail(candidate)
             # 만료 서비스 필터
@@ -201,7 +206,9 @@ def run(cfg):
     # 4. Generate article
     try:
         from pipelines.senior.writer import generate_senior_article
-        article = generate_senior_article(data, topic_type=topic_type)
+        # enriched candidate를 writer에 전달 (재선택 방지)
+        _enriched = candidate if candidate and candidate.get("support_content") else None
+        article = generate_senior_article(data, topic_type=topic_type, enriched_service=_enriched)
     except Exception as e:
         logger.error(f"Writer failed: {e}")
         return {"success": False, "reason": "write_error"}
@@ -240,6 +247,7 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
             "event_date": article.get("event_date", article.get("policy_date", "")),
             "daily_quota": 5,
         }
+        article["title"] = sanitize_title(article["title"])
         _issues = _validate(blog_id, article["title"], article.get("body_md", ""), _val_ctx, pipeline="senior")
         if _issues:
             _is_draft = True
@@ -256,6 +264,9 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
             tags=tags,
             thumbnail_url=thumb_url,
             is_draft=_is_draft,
+            data_source="gov24_api",
+            source_id=article.get("service_id", ""),
+            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
         )
         if result and result.get("success"):
             logger.info(f"Hugo published: {article['title']} -> {result.get('url')}")

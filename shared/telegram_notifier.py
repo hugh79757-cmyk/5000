@@ -26,8 +26,8 @@ def send(message, parse_mode="HTML"):
             return True
         logger.warning("Telegram send failed: " + str(resp.status_code))
         return False
-    except Exception as e:
-        logger.warning("Telegram error: " + str(e))
+    except requests.RequestException as e:
+        logger.error(f"[TELEGRAM_ERROR] Request failed: {e}")
         return False
 
 
@@ -53,8 +53,8 @@ def send_error(blog_id, stage, error_msg):
                 domain = blog.get("domain", "")
                 repo = blog.get("repo", "")
                 break
-    except:
-        pass
+    except (IOError, yaml.YAMLError) as e:
+        logger.error(f"[CONFIG_ERROR] Failed to load blogs.yaml: {e}")
 
     text = "🚨 <b>발행 오류</b>\n"
     text += "<b>블로그:</b> " + blog_id + "\n"

@@ -67,5 +67,5 @@ def file_exists(r2_key):
         s3 = _get_client()
         s3.head_object(Bucket=R2_BUCKET, Key=r2_key)
         return True
-    except:
+    except Exception:
         return False
