@@ -188,6 +188,29 @@ def _run_single(target_blog_id, blog_cfg=None):
         if article_id and place_names:
             register_places(article_id, target_blog_id, place_names)
             logger.info("장소 %d건 등록: %s", len(place_names), ", ".join(n[:10] for n in place_names))
+        # course_published 테이블에 코스 contentid 등록 (travel4-hugo 중복 방지)
+        if data.get("source_type") == "course" and data.get("content_ids"):
+            try:
+                import sqlite3 as _sq
+                _dbp = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db")
+                _cn = _sq.connect(_dbp)
+                _cn.execute(
+                    "CREATE TABLE IF NOT EXISTS course_published ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, blog_id TEXT NOT NULL, "
+                    "course_contentid TEXT NOT NULL, course_title TEXT NOT NULL, "
+                    "published_at TEXT DEFAULT (datetime('now')), "
+                    "UNIQUE(blog_id, course_contentid))"
+                )
+                for _cid in data["content_ids"]:
+                    _cn.execute(
+                        "INSERT OR IGNORE INTO course_published (blog_id, course_contentid, course_title) VALUES (?, ?, ?)",
+                        (target_blog_id, str(_cid), result.get("title", ""))
+                    )
+                _cn.commit()
+                _cn.close()
+                logger.info("course_published 등록: %s", ",".join(data["content_ids"]))
+            except Exception as _ec:
+                logger.warning("course_published 등록 실패: %s", _ec)
         _git_push(target_blog_id)
 
     logger.info(target_blog_id + " result: " + str(pub_result.get("success", False)) + " " + str(pub_result.get("url", "")))
