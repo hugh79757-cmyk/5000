@@ -476,11 +476,14 @@ def _check_travel(title: str, body: str, ctx: dict) -> list:
     if not has_addr:
         issues.append("[WARNING] 관광지 위치/주소 정보 없음")
     
-    # 운영시간/입장료 정보 확인
-    info_keywords = ["운영시간", "영업시간", "브레이크타임", "라스트오더", "입장료", "관람시간", "이용료", "무료", "요금"]
-    has_info = any(k in body for k in info_keywords)
-    if not has_info:
-        issues.append("[WARNING] 운영시간/입장료 정보 없음")
+    # 운영시간/입장료 정보 확인 (문화유산 블로그는 면제 — anti-hallucination 정책)
+    _heritage_blogs = ["travel2-hugo"]
+    _blog_id = ctx.get("blog_id", "")
+    if _blog_id not in _heritage_blogs:
+        info_keywords = ["운영시간", "영업시간", "브레이크타임", "라스트오더", "입장료", "관람시간", "이용료", "무료", "요금"]
+        has_info = any(k in body for k in info_keywords)
+        if not has_info:
+            issues.append("[WARNING] 운영시간/입장료 정보 없음")
     
     # [PATCH] 빈 데이터 글 감지 — AI가 데이터 없이 채운 글 차단
     empty_signals = [

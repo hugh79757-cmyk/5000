@@ -148,6 +148,7 @@ def _run_single(target_blog_id, blog_cfg=None):
     try:
         from shared.validators import validate_post_extended as _validate
         _val_ctx = {
+            "blog_id": target_blog_id,
             "keyword": result.get("keyword", ""),
             "event_date": result.get("event_date", ""),
             "daily_quota": 5,
