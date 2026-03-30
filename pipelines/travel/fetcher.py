@@ -160,7 +160,7 @@ def fetch_korservice():
 
 
 # Filtered korservice fetchers for blog-specific topics
-HERITAGE_TYPES = {"12", "14"}  # 12=tourist, 14=cultural
+HERITAGE_TYPES = {"14"}  # 14=cultural only (12=tourist 제거 — 테마파크 유입 차단)
 HERITAGE_KEYWORDS = {"국보", "보물", "사적", "유산", "문화재", "사찰", "고궁", "서원", "탑", "성곽", "역사"}
 
 def fetch_korservice_heritage():
@@ -801,6 +801,23 @@ def fetch_heritage():
         valid.append(i)
     logger.info(f"heritage: 품질 필터 후 {len(valid)}건 (원본 {len(all_items)}건)")
 
+    # ── 기존 발행 content_id 제외 (중복 방지) ──
+    _published_cids = set()
+    try:
+        import sqlite3 as _sql
+        _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+        for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel2-hugo' AND source_id != ''"):
+            for _cid in str(row[0]).split(","):
+                if _cid.strip():
+                    _published_cids.add(_cid.strip())
+        _db.close()
+    except Exception as _e:
+        logger.warning("heritage dup-check DB error: %s", _e)
+    if _published_cids:
+        before_count = len(valid)
+        valid = [i for i in valid if str(i.get("cpno", "")) not in _published_cids]
+        logger.info("heritage 중복 제외: %d → %d건", before_count, len(valid))
+
     # 랜덤 지역 선택
     cities = list(set(i.get("city", "") for i in valid if i.get("city")))
     if not cities:
@@ -816,25 +833,79 @@ def fetch_heritage():
 
     # 이미지 있는 항목 우선
     with_img = [i for i in regional if (i.get("detail") or {}).get("imageUrl")]
-    pool = with_img if len(with_img) >= 3 else regional
-    selected = random.sample(pool, min(5, len(pool)))
+    pool = with_img if len(with_img) >= 1 else regional
+
+    # ── 전략 선택: 심층(1곳) 70% / 맥락묶기(2~3곳) 30% ──
+    _roll = random.random()
+    _deep_candidates = [i for i in pool if len((i.get("detail") or {}).get("content", "")) >= 500]
+
+    if _roll < 0.7 and _deep_candidates:
+        # 심층 전략: overview 500자 이상, 데이터 풍부한 1곳
+        selected = [random.choice(_deep_candidates)]
+        _strategy = "deep"
+        logger.info(f"heritage 심층전략: {selected[0].get('nameKr', '')[:20]} (overview {len((selected[0].get('detail') or {}).get('content', ''))}자)")
+    else:
+        # 맥락묶기 전략: 같은 종목 + 같은 시대계열 우선, 2~3곳
+        # 종목별 그룹핑
+        from collections import defaultdict
+        _kd_groups = defaultdict(list)
+        for i in pool:
+            _kd_groups[i.get("kdName", "")].append(i)
+
+        # 같은 종목에서 2~3곳 선택, 시대 유사성 우선
+        _best_group = None
+        for _kd, _items in sorted(_kd_groups.items(), key=lambda x: -len(x[1])):
+            if len(_items) >= 2:
+                _best_group = (_kd, _items)
+                break
+
+        if _best_group:
+            _kd, _items = _best_group
+            # 시대별 하위 그룹핑 시도 (시대 앞 2글자 기준: 고려, 조선, 신라 등)
+            _era_groups = defaultdict(list)
+            for i in _items:
+                _era = (i.get("detail") or {}).get("era", "")[:2]
+                _era_groups[_era if _era else "미상"].append(i)
+            # 같은 시대 2곳 이상 있으면 그 그룹에서 선택
+            _era_match = None
+            for _era, _eitems in sorted(_era_groups.items(), key=lambda x: -len(x[1])):
+                if len(_eitems) >= 2 and _era != "미상":
+                    _era_match = _eitems
+                    break
+            if _era_match:
+                selected = random.sample(_era_match, min(3, len(_era_match)))
+            else:
+                selected = random.sample(_items, min(3, len(_items)))
+        else:
+            # 종목 그룹 2곳 미만이면 그냥 1~2곳
+            selected = random.sample(pool, min(2, len(pool)))
+        _strategy = "grouped"
+        logger.info(f"heritage 묶기전략: {len(selected)}곳, 종목 {[i.get('kdName','') for i in selected]}")
 
     # 종목 기반 테마 결정
     kd_names = [i.get("kdName", "") for i in selected]
     if any("국보" in k for k in kd_names):
-        theme = "국보 탐방"
+        theme = "국보"
     elif any("보물" in k for k in kd_names):
-        theme = "보물 탐방"
+        theme = "보물"
     elif any("사적" in k for k in kd_names):
-        theme = "사적 탐방"
+        theme = "사적"
     elif any("명승" in k for k in kd_names):
-        theme = "명승 탐방"
-    elif any("천연기념물" in k for k in kd_names):
-        theme = "천연기념물 탐방"
+        theme = "명승"
     else:
-        theme = "문화유산 투어"
+        theme = "문화유산"
 
-    logger.info(f"heritage: {region_name} / {theme} / {len(selected)}건 선택")
+    # 심층 전략일 때 테마를 더 구체적으로
+    if _strategy == "deep":
+        _det = selected[0].get("detail") or {}
+        _cat1 = _det.get("category1", "")
+        _cat2 = _det.get("category2", "")
+        if _cat2:
+            theme = f"{kd_names[0]} {_cat2}"
+        elif _cat1:
+            theme = f"{kd_names[0]} {_cat1}"
+
+    logger.info(f"heritage: {region_name} / {theme} / {len(selected)}건 / {_strategy}")
 
     # TourAPI 형식으로 변환
     items = []
@@ -869,11 +940,20 @@ def fetch_heritage():
         logger.warning(f"heritage: {region_name} 변환 후 0건")
         return None
 
+    # content_ids: cpno 기반 중복 방지용
+    _content_ids = [str(item.get("content_id", "")) for item in items if item.get("content_id")]
+
     return {
         "items": items,
         "region": region_name,
+        "display_region": region_name,
+        "sigungu": region_name,
+        "do_name": region_name,
         "theme": theme,
+        "category": theme,
+        "angle": f"{region_name} {theme}",
         "source_type": "heritage",
+        "content_ids": _content_ids,
     }
 
 
