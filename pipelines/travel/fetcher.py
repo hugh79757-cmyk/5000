@@ -382,7 +382,7 @@ def fetch_food():
     area_code = AREA_CODES[region_name]
     keywords = ["맛집"]  # 테마를 맛집으로 고정 (TourAPI가 세부 카테고리 필터링 불가)
     keyword = random.choice(keywords)
-    key = os.getenv("TOUR_API_KEY", "")
+    key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
     try:
         resp = req.get(
             "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
@@ -476,7 +476,7 @@ def fetch_course():
     }
     region_name = random.choice(list(AREA_CODES.keys()))
     area_code = AREA_CODES[region_name]
-    key = os.getenv("TOUR_API_KEY", "")
+    key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
     try:
         # 1단계: 여행코스 목록 조회 (contentTypeId=25)
         resp = req.get(
@@ -533,8 +533,9 @@ def fetch_course():
             if len(filtered) >= 1:
                 pool = filtered
 
-        # 기존 발행 contentid 제외
+        # 기존 발행 contentid 제외 (articles + publish_ledger + course_published)
         _published_cids = set()
+        _published_titles = set()
         try:
             import sqlite3 as _sql
             _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
@@ -546,10 +547,22 @@ def fetch_course():
                 for _cid in row[0].split(","):
                     if _cid.strip():
                         _published_cids.add(_cid.strip())
+            # course_published 테이블에서 contentid + 제목 수집
+            try:
+                for row in _db.execute("SELECT course_contentid, course_title FROM course_published WHERE blog_id='travel4-hugo'"):
+                    cid_val = row[0] or ""
+                    if cid_val and not cid_val.startswith("title_"):
+                        _published_cids.add(cid_val)
+                    if row[1]:
+                        _published_titles.add(row[1].strip())
+            except Exception:
+                pass  # 테이블 없으면 무시
             _db.close()
         except Exception as _e:
             logger.warning("course dup-check DB error: %s", _e)
-        pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+        pool = [item for item in pool
+                if str(item.get("contentid", "")) not in _published_cids
+                and item.get("title", "").strip() not in _published_titles]
         if not pool:
             logger.warning("course: 중복 제외 후 아이템 0건")
             return None
@@ -592,14 +605,15 @@ def fetch_course():
                     "MobileApp": "TAP",
                     "_type": "json",
                     "contentId": course_cid,
-                    "contentTypeId": 25,
-                    "defaultYN": "Y",
-                    "overviewYN": "Y",
                 },
                 timeout=15,
             )
             data3 = resp3.json()
-            common_items = data3.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            _items_raw3 = data3.get("response", {}).get("body", {}).get("items", "")
+            if isinstance(_items_raw3, str):
+                common_items = []
+            else:
+                common_items = _items_raw3.get("item", [])
             if isinstance(common_items, dict):
                 common_items = [common_items]
             if common_items:
@@ -609,26 +623,74 @@ def fetch_course():
         except Exception as _e3:
             logger.warning("course detailCommon failed: %s", _e3)
 
-        # 4단계: 하위 장소를 adapted items로 변환
+        # 4단계: 하위 장소를 adapted items로 변환 (subcontentid로 보강)
+        import re as _re_html
+        course_mapx = course_item.get("mapx", "")
+        course_mapy = course_item.get("mapy", "")
         adapted = []
         for idx, sub in enumerate(sub_items):
-            import re as _re_html
             sub_overview = sub.get("subdetailoverview", "")
             sub_overview = _re_html.sub(r"<[^>]+>", "", sub_overview).strip() if sub_overview else ""
             sub_img = _fix_image_https(sub.get("subdetailimg", ""))
+            sub_addr = ""
+            sub_mapx = course_mapx
+            sub_mapy = course_mapy
+            sub_tel = ""
+            # subcontentid로 detailCommon2 호출하여 주소/좌표/overview 보강
+            scid = sub.get("subcontentid", "")
+            if scid:
+                try:
+                    _resp_sub = req.get(
+                        "http://apis.data.go.kr/B551011/KorService2/detailCommon2",
+                        params={
+                            "serviceKey": key,
+                            "MobileOS": "ETC",
+                            "MobileApp": "TAP",
+                            "_type": "json",
+                            "contentId": scid,
+                        },
+                        timeout=10,
+                    )
+                    _d_sub = _resp_sub.json()
+                    _items_sub = _d_sub.get("response", {}).get("body", {}).get("items", "")
+                    if isinstance(_items_sub, str):
+                        _items_sub_list = []
+                    else:
+                        _items_sub_list = _items_sub.get("item", [])
+                    if isinstance(_items_sub_list, dict):
+                        _items_sub_list = [_items_sub_list]
+                    if _items_sub_list:
+                        _si = _items_sub_list[0]
+                        sub_addr = _si.get("addr1", "")
+                        if _si.get("mapx"):
+                            sub_mapx = _si["mapx"]
+                        if _si.get("mapy"):
+                            sub_mapy = _si["mapy"]
+                        if _si.get("tel"):
+                            sub_tel = _si["tel"]
+                        # overview가 비었으면 보강
+                        if not sub_overview and _si.get("overview"):
+                            sub_overview = _re_html.sub(r"<[^>]+>", "", _si["overview"]).strip()
+                        # 이미지가 비었으면 보강
+                        if not sub_img and _si.get("firstimage"):
+                            sub_img = _fix_image_https(_si["firstimage"])
+                except Exception as _e_sub:
+                    logger.debug("course sub detail failed for %s: %s", scid, _e_sub)
             adapted.append({
                 "title": sub.get("subname", ""),
                 "facltNm": sub.get("subname", ""),
-                "addr1": "",
-                "addr": "",
+                "addr1": sub_addr,
+                "addr": sub_addr,
                 "firstimage": sub_img,
                 "firstImageUrl": sub_img,
                 "image": sub_img,
                 "overview": sub_overview,
                 "subnum": sub.get("subnum", str(idx)),
-                "subcontentid": sub.get("subcontentid", ""),
-                "tel": "",
+                "subcontentid": scid,
+                "tel": sub_tel,
                 "contenttypeid": "25",
+                "mapx": str(sub_mapx),
+                "mapy": str(sub_mapy),
             })
 
         if not adapted:
