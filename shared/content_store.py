@@ -151,8 +151,9 @@ def register_images(article_id, blog_id, html):
                 (url, article_id, blog_id),
             )
             count += 1
-        except Exception:
-            pass
+        except sqlite3.IntegrityError as e:
+            import logging
+            logging.getLogger(__name__).warning(f"[DB_ERROR] INSERT used_images failed: {e}")
     conn.commit()
     conn.close()
     return count
@@ -214,8 +215,11 @@ def source_exists(blog_id, data_source, source_id):
 
 
 def title_similar_exists(blog_id, title):
+    import re
     conn = get_conn()
-    core = title[:15]
+    # 숫자·조사 제거 후 핵심 키워드로 비교 (20자)
+    _normalized = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", title).strip()
+    core = _normalized[:20] if len(_normalized) >= 20 else _normalized[:15]
     row = conn.execute(
         "SELECT 1 FROM articles WHERE blog_id=? AND title LIKE ?",
         (blog_id, "%" + core + "%"),
@@ -262,8 +266,9 @@ def register_places(article_id, blog_id, place_names, content_ids=None):
                 (name, cid, blog_id, article_id),
             )
             count += 1
-        except Exception:
-            pass
+        except sqlite3.Error as e:
+            import logging
+            logging.getLogger(__name__).error(f"[DB_ERROR] INSERT used_places failed: {e}")
     conn.commit()
     conn.close()
     return count

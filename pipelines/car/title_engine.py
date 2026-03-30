@@ -31,8 +31,28 @@ def _ji(w):
 
 
 def _build_vars(data):
-    m = data.get("model", "").replace("현대 ", "").replace("기아 ", "")
-    c = data.get("competitor", "").replace("현대 ", "").replace("기아 ", "")
+    _raw_m = data.get("model", "")
+    _raw_c = data.get("competitor", "")
+    _KR_BRANDS = ["현대 ", "기아 ", "제네시스 ", "쉐보레 ", "르노 ", "쌍용 ", "KG "]
+    m = _raw_m
+    for _b in _KR_BRANDS:
+        m = m.replace(_b, "")
+    c = _raw_c
+    for _b in _KR_BRANDS:
+        c = c.replace(_b, "")
+    # 수입차 브랜드는 모델명에 유지 (BMW X7, 토요타 GR86 등)
+    _IMPORT_BRANDS = ["BMW", "벤츠", "아우디", "폭스바겐", "볼보", "렉서스",
+                       "토요타", "혼다", "테슬라", "포르쉐", "링컨", "캐딜락",
+                       "지프", "랜드로버", "재규어", "마세라티", "람보르기니",
+                       "페라리", "벤틀리", "롤스로이스", "미니", "푸조", "시트로엥"]
+    for _ib in _IMPORT_BRANDS:
+        if _ib in _raw_m and _ib not in m:
+            m = _ib + " " + m
+            break
+    for _ib in _IMPORT_BRANDS:
+        if _ib in _raw_c and _ib not in c:
+            c = _ib + " " + c
+            break
     p = data.get("base_price", 0)
     t = data.get("trim", "")
     r_pct = data.get("resale_rate_percent", 0)

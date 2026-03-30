@@ -136,6 +136,11 @@ def fetch_korservice():
     if not ks:
         return None
     adapted_items = _adapt_korservice_items(ks.get("items", []))
+
+    # [GUARD] 빈 데이터 방지
+    if not adapted_items:
+        logger.warning("korservice GUARD: adapted_items 0건 → None 반환")
+        return None
     search_details = ks.get("search_details", [])
     search_detail = random.choice(search_details) if search_details else ""
     return {
@@ -179,195 +184,187 @@ def fetch_korservice_heritage():
 
 
 def fetch_festival():
-    import requests as req
-    AREA_CODES = {
-        "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
-        "부산": 6, "울산": 7, "세종": 8, "경기": 31, "강원": 32,
-        "충북": 33, "충남": 34, "경북": 35, "경남": 36,
-        "전북": 37, "전남": 38, "제주": 39,
+    """festival.db 기반 스마트 발행: 축제 시작일 역산으로 발행 대상 자동 선택"""
+    import sqlite3
+    from datetime import datetime, timedelta
+    from collections import defaultdict
+
+    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "festival.db")
+    CONTENT_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "content.db")
+
+    if not os.path.exists(DB_PATH):
+        logger.warning("festival.db not found: " + DB_PATH)
+        return None
+
+    AREA_NAMES = {
+        "1": "서울", "2": "인천", "3": "대전", "4": "대구", "5": "광주",
+        "6": "부산", "7": "울산", "8": "세종", "31": "경기", "32": "강원",
+        "33": "충북", "34": "충남", "35": "경북", "36": "경남",
+        "37": "전북", "38": "전남", "39": "제주",
     }
-    region_name = random.choice(list(AREA_CODES.keys()))
-    area_code = AREA_CODES[region_name]
-    key = os.getenv("TOUR_API_KEY", "")
+
     try:
-        resp = req.get(
-            "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
-            params={
-                "serviceKey": key,
-                "MobileOS": "ETC",
-                "MobileApp": "TAP",
-                "_type": "json",
-                "numOfRows": 20,
-                "pageNo": 1,
-                "contentTypeId": 15,
-                "areaCode": area_code,
-                "arrange": "C",
-            },
-            timeout=15,
-        )
-        data = resp.json()
-        header = data.get("response", {}).get("header", {})
-        if header.get("resultCode") != "0000":
-            logger.warning("festival API error: " + str(header))
-            return None
-        items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items_raw, dict):
-            items_raw = [items_raw]
-        if not items_raw:
-            logger.warning("festival: no data for " + region_name)
-            return None
+        # 이미 발행된 축제 contentid 조회 (중복 방지)
+        published_ids = set()
+        if os.path.exists(CONTENT_DB):
+            cconn = sqlite3.connect(CONTENT_DB)
+            published_ids = set(
+                r[0] for r in cconn.execute(
+                    "SELECT source_id FROM publish_ledger WHERE blog_id='travel1-hugo' AND source_id != ''"
+                ).fetchall()
+            )
+            # articles 테이블도 확인
+            published_ids.update(
+                r[0] for r in cconn.execute(
+                    "SELECT source_id FROM articles WHERE blog_id='travel1-hugo' AND source_id != ''"
+                ).fetchall()
+            )
+            cconn.close()
 
-        # 계절 필터는 detailIntro 이후로 이동됨
-
-        with_img = [i for i in items_raw if i.get('firstimage')]
-        pool = with_img if len(with_img) >= 3 else items_raw
-        selected, _ = _select_same_sigungu(pool, 3)
-        
-        # detailIntro API로 상세정보 보강
-        for item in selected:
-            cid = item.get("contentid")
-            if not cid:
-                continue
-            try:
-                detail_resp = req.get(
-                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
-                    params={
-                        "serviceKey": key,
-                        "MobileOS": "ETC",
-                        "MobileApp": "TAP",
-                        "_type": "json",
-                        "contentId": cid,
-                        "contentTypeId": 15,
-                    },
-                    timeout=15,
-                )
-                d2 = detail_resp.json()
-                intro_items = d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                if isinstance(intro_items, dict):
-                    intro_items = [intro_items]
-                if intro_items:
-                    detail = intro_items[0]
-                    item["eventstartdate"] = detail.get("eventstartdate", "")
-                    item["eventenddate"] = detail.get("eventenddate", "")
-                    item["playtime"] = detail.get("playtime", "")
-                    item["eventplace"] = detail.get("eventplace", "")
-                    item["usetimefestival"] = detail.get("usetimefestival", "")
-                    item["sponsor1"] = detail.get("sponsor1", "")
-                    item["program"] = detail.get("program", "")
-                    item["subevent"] = detail.get("subevent", "")
-                    item["agelimit"] = detail.get("agelimit", "")
-                    logger.info(f"festival detailIntro: {item.get('title','')} 보강 완료")
-            except Exception as e:
-                logger.warning(f"festival detailIntro 실패 (무시): {e}")
-        
-
-        # [과거연도 필터] 현재 연도 이전 축제 제거
-        _cur_year = str(__import__('datetime').datetime.now().year)
-        _before_count = len(selected)
-        selected = [
-            item for item in selected
-            if not item.get("eventstartdate")
-            or str(item.get("eventstartdate", ""))[:4] >= _cur_year
-        ]
-        logger.info(f"festival 연도필터: {_before_count}건 -> {len(selected)}건 (과거 {_before_count - len(selected)}건 제외)")
-        if not selected:
-            logger.warning("festival: 연도필터 후 0건, 현재 월 재검색으로 전환")
-
-        # 계절 필터: detailIntro 이후 eventstartdate 기반 필터링
-        from datetime import datetime, timedelta
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
         now = datetime.now()
-        month_ago = (now - timedelta(days=30)).strftime("%Y%m%d")
-        month_later = (now + timedelta(days=60)).strftime("%Y%m%d")
-        seasonal = []
-        for item in selected:
-            estart = str(item.get("eventstartdate", ""))
-            eend = str(item.get("eventenddate", "")) or estart
-            if not estart:
-                continue  # 날짜 없는 축제는 제외
-            if eend >= month_ago and estart <= month_later:
-                seasonal.append(item)
-                logger.info(f"festival 계절 통과: {item.get('title','')} ({estart}~{eend})")
-            else:
-                logger.info(f"festival 계절 제외: {item.get('title','')} ({estart}~{eend})")
-        if seasonal:
-            selected = seasonal[:1]
-            logger.info(f"festival: 계절 필터 후 {len(seasonal)}건 중 1건 선택")
-        else:
-            # 현재 월 기준 축제 재검색
-            logger.warning(f"festival: 계절 필터 후 0건, 현재 월 축제 재검색")
-            try:
-                now_month = now.strftime("%Y%m")
-                re_params = {
-                    "numOfRows": "50", "pageNo": "1",
-                    "contentTypeId": "15", "arrange": "C",
-                    "eventStartDate": now_month + "01",
-                }
-                re_resp = requests.get(
-                    "http://apis.data.go.kr/B551011/KorService2/searchFestival2",
-                    params={**{"serviceKey": TOUR_API_KEY, "MobileOS": "ETC", "MobileApp": "TAP", "_type": "json"}, **re_params},
-                    timeout=10
-                )
-                if re_resp.status_code == 200:
-                    re_items = re_resp.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                    if re_items:
-                        re_items = [i for i in re_items if not i.get("eventstartdate") or str(i.get("eventstartdate",""))[:4] >= _cur_year]
-                    if re_items:
-                        _cur_year = str(__import__("datetime").datetime.now().year)
-                        re_items = [i for i in re_items if not i.get("eventstartdate") or str(i.get("eventstartdate",""))[:4] >= _cur_year]
-                    if re_items:
-                        selected = [random.choice(re_items)]
-                        logger.info(f"festival: searchFestival로 현재 월 축제 {len(re_items)}건 중 1건 재선택: {selected[0].get('title','')}")
-                        # searchFestival 결과에 detailIntro2 보강
-                        for _sf_item in selected:
-                            _sf_cid = _sf_item.get("contentid") or _sf_item.get("contentId")
-                            if not _sf_cid:
-                                continue
-                            try:
-                                _sf_resp = req.get(
-                                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
-                                    params={
-                                        "serviceKey": key,
-                                        "MobileOS": "ETC",
-                                        "MobileApp": "TAP",
-                                        "_type": "json",
-                                        "contentId": _sf_cid,
-                                        "contentTypeId": 15,
-                                    },
-                                    timeout=15,
-                                )
-                                _sf_d2 = _sf_resp.json()
-                                _sf_intro = _sf_d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                                if isinstance(_sf_intro, dict):
-                                    _sf_intro = [_sf_intro]
-                                if _sf_intro:
-                                    _sf_detail = _sf_intro[0]
-                                    for _fld in ("eventstartdate", "eventenddate", "playtime", "eventplace",
-                                                 "usetimefestival", "sponsor1", "program", "subevent", "agelimit"):
-                                        _sf_item[_fld] = _sf_detail.get(_fld, "")
-                                    logger.info(f"festival searchFestival detailIntro 보강: {_sf_item.get('title','')}")
-                            except Exception as _sf_e:
-                                logger.warning(f"festival searchFestival detailIntro 실패: {_sf_e}")
-                    else:
-                        selected = selected[:1]
-                        logger.warning("festival: searchFestival 결과 0건, 원본 사용")
-                else:
-                    selected = selected[:1]
-                    logger.warning(f"festival: searchFestival 실패 ({re_resp.status_code}), 원본 사용")
-            except Exception as e:
-                selected = selected[:1]
-                logger.warning(f"festival: searchFestival 예외 ({e}), 원본 사용")
+        today = now.strftime("%Y%m%d")
 
-        adapted = _adapt_korservice_items(selected)
-        return {
+        # 미래 축제만 조회
+        rows = conn.execute("""
+            SELECT * FROM festivals
+            WHERE eventstartdate >= ?
+            ORDER BY eventstartdate ASC
+        """, (today,)).fetchall()
+
+        if not rows:
+            logger.warning("festival.db: 미래 축제 0건")
+            conn.close()
+            return None
+
+        # 스마트 발행: 축제 시작일 역산으로 분류
+        # 0~13일: 색인 불가 → 발행 안 함
+        # 14~21일: 긴급 → 최대 5건/일
+        # 22~28일: 높음 → 최대 3건/일
+        # 29~42일: 보통 → 최대 2건/일
+        # 43~60일: 낮음 → 최대 1건/일
+        # 61일+: 대기 → 발행 안 함
+        urgent = []   # 14~21일
+        high = []     # 22~28일
+        normal = []   # 29~42일
+        low = []      # 43~60일
+
+        for r in rows:
+            title = r["title"]
+            if str(r['contentid']) in published_ids:
+                continue
+            estart = r["eventstartdate"]
+            start_date = datetime.strptime(estart, "%Y%m%d")
+            days_left = (start_date - now).days
+
+            if days_left < 14:
+                continue  # 색인 불가
+            elif days_left <= 21:
+                urgent.append(r)
+            elif days_left <= 28:
+                high.append(r)
+            elif days_left <= 42:
+                normal.append(r)
+            elif days_left <= 60:
+                low.append(r)
+            # 61일+ 대기
+
+        # 우선순위 순서대로 후보 선택
+        if urgent:
+            candidates = urgent
+            logger.info(f"festival 스마트발행: 긴급(14~21일) {len(urgent)}건")
+        elif high:
+            candidates = high
+            logger.info(f"festival 스마트발행: 높음(22~28일) {len(high)}건")
+        elif normal:
+            candidates = normal
+            logger.info(f"festival 스마트발행: 보통(29~42일) {len(normal)}건")
+        elif low:
+            candidates = low
+            logger.info(f"festival 스마트발행: 낮음(43~60일) {len(low)}건")
+        else:
+            logger.warning("festival 스마트발행: 발행 대상 0건")
+            conn.close()
+            return None
+
+        # 이미지 있는 것 우선
+        with_image = [r for r in candidates if r["firstimage"]]
+        if with_image:
+            candidates = with_image
+
+        # 같은 시군구 묶기
+        by_sigungu = defaultdict(list)
+        for r in candidates:
+            key = (r["areacode"], r["sigungucode"])
+            by_sigungu[key].append(r)
+
+        # 3건 이상 있는 시군구 우선
+        groups_3 = [v for v in by_sigungu.values() if len(v) >= 3]
+        if groups_3:
+            group = random.choice(groups_3)
+            selected = random.sample(group, min(3, len(group)))
+        else:
+            groups_any = [v for v in by_sigungu.values() if len(v) >= 1]
+            if groups_any:
+                group = random.choice(groups_any)
+                selected = group[:3]
+            else:
+                conn.close()
+                return None
+
+        # 결과 구성
+        region_name = AREA_NAMES.get(str(selected[0]["areacode"]), "")
+        sigungu_name = selected[0]["sigungucode"] or ""
+        if not sigungu_name and selected[0]["addr1"]:
+            parts = selected[0]["addr1"].split()
+            if len(parts) >= 2:
+                sigungu_name = parts[1]
+
+        adapted = []
+        for r in selected:
+            adapted.append({
+                "title": r["title"],
+                "addr1": r["addr1"] or "",
+                "mapx": r["mapx"] or "",
+                "mapy": r["mapy"] or "",
+                "firstimage": _fix_image_https(r["firstimage"] or ""),
+                "tel": r["tel"] or "",
+                "eventstartdate": r["eventstartdate"] or "",
+                "eventenddate": r["eventenddate"] or "",
+                "eventplace": r["eventplace"] or "",
+                "playtime": r["playtime"] or "",
+                "usetimefestival": r["usetimefestival"] or "",
+                "sponsor1": r["sponsor1"] or "",
+                "program": r["program"] or "",
+                "subevent": r["subevent"] or "",
+                "agelimit": r["agelimit"] or "",
+            })
+
+        if not adapted or not adapted[0].get("title"):
+            logger.warning("festival GUARD: adapted 결과 0건 → None 반환")
+            conn.close()
+            return None
+
+        conn.close()
+        # contentid 리스트 (중복 발행 방지용)
+        content_ids = [str(r["contentid"]) for r in selected if r["contentid"]]
+
+        result = {
             "items": adapted,
-            "display_region": region_name,
-            "sigungu": region_name,
+            "display_region": f"{region_name} {sigungu_name}".strip(),
+            "sigungu": sigungu_name,
             "do_name": region_name,
-            "theme": "축제·행사",
-            "category": "축제",
-            "angle": "축제·행사",
-            "source_type": "korservice",
+            "theme": "축제",
+            "category": "festival",
+            "angle": "축제 일정과 방문 정보",
+            "source_type": "festival",
+            "region": region_name,
+            "content_ids": content_ids,
         }
+        logger.info(f"festival 선택: {adapted[0]['title']} ({adapted[0]['eventstartdate']})")
+        return result
+
     except Exception as e:
         logger.warning("festival fetch failed: " + str(e))
         return None
@@ -413,12 +410,45 @@ def fetch_food():
         if not items_raw:
             logger.warning("food: no data for " + region_name)
             return None
-        with_img = [i for i in items_raw if i.get('firstimage')]
-        pool = with_img if len(with_img) >= 3 else items_raw
+        # [FIX] 음식점 + 카페 혼합 — 카페만으로 구성되지 않도록 보장
+        _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
+        def _is_cafe(item):
+            return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
+        _restaurants = [i for i in items_raw if not _is_cafe(i)]
+        _cafes = [i for i in items_raw if _is_cafe(i)]
+        if len(_restaurants) >= 2 and _cafes:
+            _mixed = _restaurants + _cafes[:1]
+        elif len(_restaurants) >= 3:
+            _mixed = _restaurants
+        else:
+            _mixed = items_raw
+        with_img = [i for i in _mixed if i.get('firstimage')]
+        pool = with_img if len(with_img) >= 3 else _mixed
+        # ── 기존 발행 contentid 제외 (중복 방지) ──
+        _published_cids = set()
+        try:
+            import sqlite3 as _sql
+            _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+            for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel3-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel3-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            _db.close()
+        except Exception as _e:
+            logger.warning(f"food dup-check DB error: {_e}")
+        pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+        if len(pool) < 3:
+            logger.warning(f"food: 중복 제외 후 아이템 부족 ({len(pool)}개)")
+            return None
         selected, _sg = _select_same_sigungu(pool, 3)
         adapted = _adapt_korservice_items(selected)
         sigungu_name = _sg if _sg else region_name
-        display = sigungu_name if sigungu_name != region_name else region_name
+        display = f"{region_name} {sigungu_name}".strip() if sigungu_name and sigungu_name != region_name else region_name
+        content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
         return {
             "items": adapted,
             "display_region": display,
@@ -428,6 +458,7 @@ def fetch_food():
             "category": "맛집",
             "angle": display + " " + keyword,
             "source_type": "korservice",
+            "content_ids": content_ids,
         }
     except Exception as e:
         logger.warning("food fetch failed: " + str(e))
@@ -435,6 +466,7 @@ def fetch_food():
 
 
 def fetch_course():
+    """TourAPI contentTypeId=25(여행코스) + detailInfo2로 코스 하위 장소 데이터 확보"""
     import requests as req
     AREA_CODES = {
         "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
@@ -446,6 +478,7 @@ def fetch_course():
     area_code = AREA_CODES[region_name]
     key = os.getenv("TOUR_API_KEY", "")
     try:
+        # 1단계: 여행코스 목록 조회 (contentTypeId=25)
         resp = req.get(
             "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
             params={
@@ -453,10 +486,9 @@ def fetch_course():
                 "MobileOS": "ETC",
                 "MobileApp": "TAP",
                 "_type": "json",
-                "numOfRows": 20,
+                "numOfRows": 30,
                 "pageNo": 1,
-                "contentTypeId": 12,
-                "cat1": "A02",
+                "contentTypeId": 25,
                 "areaCode": area_code,
                 "arrange": "C",
             },
@@ -465,17 +497,20 @@ def fetch_course():
         data = resp.json()
         header = data.get("response", {}).get("header", {})
         if header.get("resultCode") != "0000":
-            logger.warning("course API error: " + str(header))
+            logger.warning("course API error: %s", header)
             return None
         items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
         if isinstance(items_raw, dict):
             items_raw = [items_raw]
         if not items_raw:
-            logger.warning("course: no data for " + region_name)
+            logger.warning("course: no data for %s", region_name)
             return None
-        with_img = [i for i in items_raw if i.get('firstimage')]
+
+        # 이미지 있는 코스 우선
+        with_img = [i for i in items_raw if i.get("firstimage")]
         pool = with_img if len(with_img) >= 3 else items_raw
-        # 계절 부적합 코스 필터링
+
+        # 계절 필터링
         import datetime
         _month = datetime.datetime.now().month
         _season_ban = {
@@ -494,62 +529,150 @@ def fetch_course():
         }
         ban_words = _season_ban.get(_month, [])
         if ban_words:
-            pool = [i for i in pool if not any(bw in i.get("title", "") for bw in ban_words)]
-            if len(pool) < 3:
-                pool = with_img if len(with_img) >= 3 else items_raw  # 필터 후 부족하면 원복
+            filtered = [i for i in pool if not any(bw in i.get("title", "") for bw in ban_words)]
+            if len(filtered) >= 1:
+                pool = filtered
 
-        selected, _ = _select_same_sigungu(pool, 3)
-        
-        # detailIntro API로 상세정보 보강
-        for item in selected:
-            cid = item.get("contentid")
-            if not cid:
-                continue
-            try:
-                detail_resp = req.get(
-                    "http://apis.data.go.kr/B551011/KorService2/detailIntro2",
-                    params={
-                        "serviceKey": key,
-                        "MobileOS": "ETC",
-                        "MobileApp": "TAP",
-                        "_type": "json",
-                        "contentId": cid,
-                        "contentTypeId": 15,
-                    },
-                    timeout=15,
-                )
-                d2 = detail_resp.json()
-                intro_items = d2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-                if isinstance(intro_items, dict):
-                    intro_items = [intro_items]
-                if intro_items:
-                    detail = intro_items[0]
-                    item["eventstartdate"] = detail.get("eventstartdate", "")
-                    item["eventenddate"] = detail.get("eventenddate", "")
-                    item["playtime"] = detail.get("playtime", "")
-                    item["eventplace"] = detail.get("eventplace", "")
-                    item["usetimefestival"] = detail.get("usetimefestival", "")
-                    item["sponsor1"] = detail.get("sponsor1", "")
-                    item["program"] = detail.get("program", "")
-                    item["subevent"] = detail.get("subevent", "")
-                    item["agelimit"] = detail.get("agelimit", "")
-                    logger.info(f"festival detailIntro: {item.get('title','')} 보강 완료")
-            except Exception as e:
-                logger.warning(f"festival detailIntro 실패 (무시): {e}")
-        
-        adapted = _adapt_korservice_items(selected)
+        # 기존 발행 contentid 제외
+        _published_cids = set()
+        try:
+            import sqlite3 as _sql
+            _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+            for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel4-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel4-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            _db.close()
+        except Exception as _e:
+            logger.warning("course dup-check DB error: %s", _e)
+        pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+        if not pool:
+            logger.warning("course: 중복 제외 후 아이템 0건")
+            return None
+
+        # 랜덤 1개 코스 선택
+        course_item = random.choice(pool)
+        course_cid = course_item.get("contentid")
+        course_title = course_item.get("title", "")
+        course_image = _fix_image_https(course_item.get("firstimage", ""))
+
+        # 2단계: detailInfo2로 코스 하위 장소 조회
+        resp2 = req.get(
+            "http://apis.data.go.kr/B551011/KorService2/detailInfo2",
+            params={
+                "serviceKey": key,
+                "MobileOS": "ETC",
+                "MobileApp": "TAP",
+                "_type": "json",
+                "contentId": course_cid,
+                "contentTypeId": 25,
+            },
+            timeout=15,
+        )
+        data2 = resp2.json()
+        sub_items = data2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+        if isinstance(sub_items, dict):
+            sub_items = [sub_items]
+        if not sub_items:
+            logger.warning("course detailInfo: %s 하위장소 0건", course_title)
+            return None
+
+        # 3단계: detailCommon2로 코스 overview 조회
+        course_overview = ""
+        try:
+            resp3 = req.get(
+                "http://apis.data.go.kr/B551011/KorService2/detailCommon2",
+                params={
+                    "serviceKey": key,
+                    "MobileOS": "ETC",
+                    "MobileApp": "TAP",
+                    "_type": "json",
+                    "contentId": course_cid,
+                    "contentTypeId": 25,
+                    "defaultYN": "Y",
+                    "overviewYN": "Y",
+                },
+                timeout=15,
+            )
+            data3 = resp3.json()
+            common_items = data3.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(common_items, dict):
+                common_items = [common_items]
+            if common_items:
+                import re as _re_ov
+                ov = common_items[0].get("overview", "")
+                course_overview = _re_ov.sub(r"<[^>]+>", "", ov).strip() if ov else ""
+        except Exception as _e3:
+            logger.warning("course detailCommon failed: %s", _e3)
+
+        # 4단계: 하위 장소를 adapted items로 변환
+        adapted = []
+        for idx, sub in enumerate(sub_items):
+            import re as _re_html
+            sub_overview = sub.get("subdetailoverview", "")
+            sub_overview = _re_html.sub(r"<[^>]+>", "", sub_overview).strip() if sub_overview else ""
+            sub_img = _fix_image_https(sub.get("subdetailimg", ""))
+            adapted.append({
+                "title": sub.get("subname", ""),
+                "facltNm": sub.get("subname", ""),
+                "addr1": "",
+                "addr": "",
+                "firstimage": sub_img,
+                "firstImageUrl": sub_img,
+                "image": sub_img,
+                "overview": sub_overview,
+                "subnum": sub.get("subnum", str(idx)),
+                "subcontentid": sub.get("subcontentid", ""),
+                "tel": "",
+                "contenttypeid": "25",
+            })
+
+        if not adapted:
+            logger.warning("course: adapted 결과 0건")
+            return None
+
+        # 코스 제목에서 지역 보정
+        display_region = region_name
+        addr1 = course_item.get("addr1", "")
+        if addr1:
+            parts = addr1.split()
+            if parts:
+                display_region = parts[0]
+
+        # 코스 테마 추출 (cat2 기반)
+        cat2_map = {
+            "C0112": "가족코스",
+            "C0113": "나홀로코스",
+            "C0114": "힐링코스",
+            "C0115": "도보코스",
+            "C0116": "캠핑코스",
+            "C0117": "맛코스",
+        }
+        cat2 = course_item.get("cat2", "")
+        theme_label = cat2_map.get(cat2, "여행코스")
+
+        logger.info("course: %s / %s / %d개 하위장소", course_title, region_name, len(adapted))
+
         return {
             "items": adapted,
-            "display_region": region_name,
-            "sigungu": region_name,
+            "display_region": display_region,
+            "sigungu": display_region,
             "do_name": region_name,
-            "theme": "여행코스",
+            "theme": theme_label,
             "category": "여행코스",
-            "angle": region_name + " 여행코스",
-            "source_type": "korservice",
+            "angle": course_title,
+            "source_type": "course",
+            "course_title": course_title,
+            "course_overview": course_overview,
+            "course_image": course_image,
+            "content_ids": [str(course_cid)],
         }
     except Exception as e:
-        logger.warning("course fetch failed: " + str(e))
+        logger.warning("course fetch failed: %s", e)
         return None
 
 

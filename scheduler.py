@@ -18,6 +18,31 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
+# ── 패키지 의존성 체크 ──
+REQUIRED_PACKAGES = {
+    "boto3": "boto3",
+    "bs4": "beautifulsoup4",
+    "openai": "openai",
+    "dotenv": "python-dotenv",
+    "yaml": "pyyaml",
+    "requests": "requests",
+    "schedule": "schedule",
+}
+
+def _check_dependencies():
+    missing = []
+    for module, pip_name in REQUIRED_PACKAGES.items():
+        try:
+            __import__(module)
+        except ImportError:
+            missing.append(pip_name)
+    if missing:
+        print(f"[FATAL] 누락 패키지: {', '.join(missing)}")
+        print(f"  실행: pip install {' '.join(missing)}")
+        sys.exit(1)
+
+_check_dependencies()
+
 from shared.telegram_notifier import send_error as _tg_error
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -256,6 +281,15 @@ def _run_car_refresh():
     logger.info("CAR daily_refresh completed")
 
 
+def _run_festival_refresh():
+    try:
+        subprocess.run([sys.executable, "scripts/refresh_festival.py"],
+                       cwd=os.path.dirname(os.path.abspath(__file__)), timeout=600)
+        logger.info("Festival refresh completed")
+    except Exception as e:
+        logger.error(f"Festival refresh failed: {e}")
+
+
 def _send_morning_report():
     subprocess.run([sys.executable, "-m", "shared.daily_report"],
                    cwd=os.path.dirname(os.path.abspath(__file__)))
@@ -283,6 +317,9 @@ def register_schedules():
     schedule.every().day.at("05:00").do(_run_gap_keyword_sync)
     logger.info("GAP keyword sync scheduled at 05:00")
     job_count += 1
+
+    schedule.every().day.at("06:00").do(_run_festival_refresh)
+    logger.info("Festival refresh scheduled at 06:00")
 
     schedule.every().day.at("06:30").do(_run_car_refresh)
     logger.info("CAR daily_refresh scheduled at 06:30")

@@ -295,8 +295,8 @@ def _save_etf_to_db(items):
                 (today, e.get("itemcode",""), e.get("itemname",""), e.get("nowVal",0), e.get("changeRate",0), e.get("quant",0), e.get("marketSum",0), e.get("nav",0), e.get("threeMonthEarnRate"))
             )
             saved += 1
-        except Exception:
-            continue
+        except Exception as e:
+            logger.debug(f"[STOCK_FETCH] failed: {e}"); continue
     conn.commit()
     conn.close()
     return saved
@@ -332,8 +332,8 @@ def _save_dividend_to_db(rankings):
                 (today, r.get("rank",0), r.get("name",""), r.get("dividend_yield",0), r.get("dividend_per_share",0))
             )
             saved += 1
-        except Exception:
-            continue
+        except Exception as e:
+            logger.debug(f"[STOCK_FETCH] failed: {e}"); continue
     conn.commit()
     conn.close()
     return saved

@@ -13,6 +13,54 @@ logger = logging.getLogger(__name__)
 
 # ── 상수 ──
 _AI_RESIDUES = ["다듬은 제목", "추천 제목", "```", "##", "title:", "제목 후보"]
+
+def sanitize_title(title: str) -> str:
+    """제목에서 마크다운 잔여물 제거 + 연속 중복 단어 제거 + 부분 중복 제거"""
+    if not title:
+        return title
+    t = title.strip()
+    # 1) 마크다운 볼드/이탤릭 기호 제거
+    t = t.replace("**", "").replace("__", "")
+    # 2) 연속 동일 단어 제거: "청주시 청주시" → "청주시"
+    words = t.split()
+    deduped = []
+    for w in words:
+        if not deduped or w != deduped[-1]:
+            deduped.append(w)
+    t = " ".join(deduped)
+    # 3) 연속 2어절 중복: "A B A B" → "A B"
+    import re as _re
+    t = _re.sub(r'(\S+\s+\S+)\s+\1', r'\1', t)
+    # 4) 뒤쪽 단어가 앞쪽 복합어에 이미 포함된 경우 제거
+    #    "여행코스 3곳 코스 추천" → "여행코스 3곳 추천"
+    words = t.split()
+    cleaned = []
+    for i, w in enumerate(words):
+        duplicate = False
+        for j in range(max(0, i - 3), i):
+            if len(w) >= 2 and w in cleaned[j] and w != cleaned[j]:
+                duplicate = True
+                break
+        if not duplicate:
+            cleaned.append(w)
+        else:
+            cleaned.append(w)  # placeholder
+    # 실제 제거 로직
+    final = []
+    for i, w in enumerate(words):
+        is_substr = False
+        for j in range(max(0, i - 4), i):
+            if len(w) >= 2 and w != words[j] and w in words[j]:
+                is_substr = True
+                break
+        if not is_substr:
+            final.append(w)
+    t = " ".join(final)
+    # 5) 공백 정리
+    t = _re.sub(r'\s+', ' ', t).strip()
+    return t
+
+
 _MIN_TITLE_LEN = 10
 _MAX_TITLE_LEN = 80
 _MIN_BODY_CHARS = 500
@@ -90,7 +138,8 @@ def _get_today_count(blog_id: str) -> int:
         count = cur.fetchone()[0]
         conn.close()
         return count
-    except Exception:
+    except sqlite3.Error as e:
+        logger.error(f"[DB_ERROR] Failed to get today count for blog {blog_id}: {e}")
         return 0
 
 
@@ -113,7 +162,7 @@ def _check_naver_map(body: str, keyword: str) -> list:
             f"[CRITICAL] 비지역 키워드에 네이버지도 삽입됨: \"{keyword}\"")
     
     # 지도 검색어 추출하여 비정상 검색어 확인
-    map_queries = re.findall(r'map\.naver\.com/v5/search/([^"]+)"', body)
+    map_queries = re.findall(r'map\.naver\.com/v5/search/([^"\)\s>]+)', body)
     if map_queries:
         from urllib.parse import unquote
         for mq in map_queries:
@@ -170,9 +219,14 @@ def _check_internal_links(body: str) -> list:
     """내부링크 섹션 중복 검증."""
     issues = []
     
+    # 부분 문자열 중복 매칭 방지: 가장 긴 패턴부터 매칭하고 해당 위치 제거
+    _sorted_headers = sorted(_INTERNAL_LINK_HEADERS, key=len, reverse=True)
+    _temp_body = body
     link_section_count = 0
-    for hdr in _INTERNAL_LINK_HEADERS:
-        link_section_count += body.count(hdr)
+    for hdr in _sorted_headers:
+        c = _temp_body.count(hdr)
+        link_section_count += c
+        _temp_body = _temp_body.replace(hdr, "")  # 매칭된 부분 제거하여 중복 카운트 방지
     
     if link_section_count > 1:
         issues.append(
@@ -335,11 +389,48 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                    "K3", "K5", "K8", "K9", "셀토스", "스포티지", "쏘렌토", "카니발", "EV6", "EV9", "레이",
                    "GV60", "GV70", "GV80", "G70", "G80", "G90",
                    "모델 Y", "모델 3", "Model", "X5", "X3", "3시리즈", "5시리즈", "7시리즈",
-                   "E클래스", "C클래스", "S클래스", "GLC", "GLE", "A6", "A4", "Q5", "Q7",
+                   "E클래스", "C클래스", "S클래스", "GLC", "GLE", "A6", "A4", "Q5", "Q7", "Q8",
                    "말리부", "트랙스", "트레일블레이저", "이쿼녹스",
                    "렉스턴", "토레스", "티볼리", "코란도",
-                   "QM6", "XM3", "SM6", "마스터",
-                   "1시리즈", "S8", "8시리즈", "RSQ8", "e-트론"]
+                   "QM6", "XM3", "SM6", "마스터", "콜레오스", "그랑 콜레오스", "아르카나", "캡처",
+                   "1시리즈", "S8", "8시리즈", "RSQ8", "e-트론",
+                    # 현대 추가
+                    "스타리아", "넥쏘", "베뉴", "아이오닉 5", "아이오닉 6", "아이오닉 9", "아이오닉 3",
+                    # 기아 추가
+                    "EV3", "EV5", "니로", "스팅어", "모하비", "타스만", "봉고",
+                    # 제네시스 추가
+                    "GV90", "네오룬",
+                    # BMW 추가
+                    "i4", "i5", "i7", "iX", "iX1", "iX3", "XM", "2시리즈", "4시리즈", "6시리즈",
+                    "X1", "X2", "X4", "X6", "X7", "M2", "M3", "M4", "M5", "M8",
+                    # 벤츠 추가
+                    "A클래스", "B클래스", "CLA", "CLE", "EQA", "EQB", "EQE", "EQS",
+                    "GLA", "GLB", "GLS", "AMG",
+                    # 아우디 추가
+                    "A3", "A5", "A7", "A8", "Q2", "Q3", "Q4", "e-트론 GT",
+                    # 볼보
+                    "XC40", "XC60", "XC90", "C40", "S60", "S90", "EX30", "EX90",
+                    # 테슬라 추가
+                    "모델 S", "모델 X", "사이버트럭",
+                    # 폭스바겐
+                    "골프", "티구안", "투아렉", "아테온", "ID.4", "ID.7",
+                    # 토요타/렉서스
+                    "캠리", "라브4", "프리우스", "bZ4X", "GR86", "GR수프라", "수프라", "코롤라", "하이랜더",
+                    "ES", "RX", "NX", "UX", "IS", "LS", "LC", "ES300h", "RX350", "NX350h",
+                    # 혼다
+                    "시빅", "어코드", "CR-V",
+                    # 포르쉐
+                    "카이엔", "마칸", "파나메라", "타이칸", "911", "718",
+                    # BYD
+                    "BYD", "씰", "돌핀", "아토3",
+                    # KG모빌리티
+                    "액티언",
+                    # 기타
+                    "모닝", "올 뉴 모닝", "피칸토",
+                    "포터", "마이티", "엑센트",
+                    "스파크", "볼트", "콜로라도", "타호",
+                    "클리오",
+                    "폴스타"]
     title_has_car = any(brand in title for brand in _car_brands)
     if not title_has_car:
         issues.append(f"[CRITICAL] 제목에 차량명 없음: \"{title[:50]}\"")
@@ -386,7 +477,7 @@ def _check_travel(title: str, body: str, ctx: dict) -> list:
         issues.append("[WARNING] 관광지 위치/주소 정보 없음")
     
     # 운영시간/입장료 정보 확인
-    info_keywords = ["운영시간", "입장료", "관람시간", "이용료", "무료", "요금"]
+    info_keywords = ["운영시간", "영업시간", "브레이크타임", "라스트오더", "입장료", "관람시간", "이용료", "무료", "요금"]
     has_info = any(k in body for k in info_keywords)
     if not has_info:
         issues.append("[WARNING] 운영시간/입장료 정보 없음")
@@ -451,16 +542,50 @@ def _check_senior(title: str, body: str, ctx: dict) -> list:
 
 
 def _check_stap(title: str, body: str, ctx: dict) -> list:
-    """STAP 전용 검증: 종목코드 유효성, 주가 데이터 날짜."""
+    """STAP 전용 검증: 종목코드, 주가 날짜, 빈 데이터 차단."""
     issues = []
     import re
     from datetime import datetime
-    
-    # 종목코드 형식 확인 (6자리 숫자)
+
+    combined = title + " " + body
+    zero_patterns = [
+        (r"\b0억\s*원?", "0억 원"),
+        (r"\b0%", "0%"),
+        (r"희석률\s*0%", "희석률 0%"),
+        (r"공모가\s*0원", "공모가 0원"),
+        (r"\b0만\s*주", "0만 주"),
+    ]
+    zero_hits = []
+    for pat, label in zero_patterns:
+        if re.search(pat, combined):
+            zero_hits.append(label)
+    if zero_hits:
+        issues.append(f"[CRITICAL] 파싱 실패 데이터 발행 차단: {', '.join(zero_hits)}")
+
+    missing_signals = [
+        "아직 공개되지 않았습니다",
+        "아직 공개되지 않은",
+        "공개되지 않았습니다",
+        "확정되지 않았습니다",
+        "미정입니다",
+        "미정으로",
+        "미공개",
+        "추후 공개",
+        "추후 확정",
+        "아직 확정되지",
+        "발표되지 않았",
+        "정해지지 않았",
+    ]
+    missing_count = sum(1 for s in missing_signals if s in body)
+    if missing_count >= 3:
+        issues.append(f"[CRITICAL] 핵심 데이터 부재 ({missing_count}개 미공개 표현 감지)")
+
+    title_placeholders = re.findall(r"\*\*\d+[억만%원주]", title)
+    if title_placeholders:
+        issues.append(f"[CRITICAL] 제목에 빈 플레이스홀더: {title_placeholders}")
+
     stock_codes = re.findall(r"\b\d{6}\b", body)
-    # 종목코드가 아예 없는 건 괜찮을 수 있음 (에버그린 글)
-    
-    # 주가 데이터 날짜 확인: 본문에 날짜가 있으면 최신인지
+
     date_matches = re.findall(r"(202[4-9])년\s*(\d{1,2})월\s*(\d{1,2})일", body)
     if date_matches:
         latest = None
@@ -475,17 +600,14 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
             age = (datetime.now() - latest).days
             if age > 7:
                 issues.append(f"[WARNING] 주가 데이터 {age}일 경과 ({latest.strftime('%Y-%m-%d')})")
-    
-    # 재무 핵심 지표 존재 확인
+
     fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
     has_fin = sum(1 for k in fin_keywords if k in body)
     if has_fin < 2:
         issues.append(f"[WARNING] 재무 지표 부족 ({has_fin}개, 최소 2개)")
-    
+
     return issues
 
-
-# ── 파이프라인별 검증 디스패처 ──
 _PIPELINE_VALIDATORS = {
     "gap": _check_gap,
     "car": _check_car,
