@@ -73,7 +73,7 @@ BLOG_PROMPT_MAP = {
 }
 
 
-def _select_prompt_id(blog_id, source_type):
+def _select_prompt_id(blog_id, source_type, item_count=None):
     blog_map = BLOG_PROMPT_MAP.get(blog_id, BLOG_PROMPT_MAP.get("travel-hugo", {}))
     _DEFAULT_PROMPT = {
         "travel-hugo": "tour1_camping",
@@ -85,7 +85,14 @@ def _select_prompt_id(blog_id, source_type):
         "ud-blogger": "tour2_food",
         "kuta-wordpress": "tour2_food",
     }
-    return blog_map.get(source_type, _DEFAULT_PROMPT.get(blog_id, "tour1_camping"))
+    base = blog_map.get(source_type, _DEFAULT_PROMPT.get(blog_id, "tour1_camping"))
+    # travel2-hugo heritage: 심층(1곳) vs 묶기(2~3곳) 프롬프트 분기
+    if blog_id == "travel2-hugo" and source_type == "heritage" and item_count is not None:
+        if item_count == 1:
+            return "travel2_heritage_deep"
+        else:
+            return "travel2_heritage_grouped"
+    return base
 
 
 def _build_data_block(data):
@@ -116,6 +123,44 @@ def _build_data_block(data):
             img = item.get("firstimage") or item.get("firstImageUrl") or item.get("image") or ""
             if img:
                 lines.append(f"이미지: {img}")
+            lines.append("")
+        return "\n".join(lines)
+
+    # ── heritage 전용 데이터 블록 ──
+    if data.get("source_type") == "heritage":
+        lines.append(f"지역: {data.get('display_region', data.get('region', ''))}")
+        lines.append(f"테마: {data.get('theme', '')}")
+        lines.append(f"문화유산 수: {len(items)}")
+        lines.append("")
+        for i, item in enumerate(items, 1):
+            lines.append(f"[문화유산 {i}]")
+            lines.append(f"이름: {item.get('title', '')}")
+            lines.append(f"주소: {item.get('addr', '')}")
+            if item.get("kdName"):
+                lines.append(f"종목: {item['kdName']}")
+            if item.get("era"):
+                lines.append(f"시대: {item['era']}")
+            if item.get("owner"):
+                lines.append(f"소유: {item['owner']}")
+            if item.get("quantity"):
+                lines.append(f"규모: {item['quantity']}")
+            if item.get("designatedDate"):
+                lines.append(f"지정일: {item['designatedDate']}")
+            if item.get("category1"):
+                cats = " > ".join(filter(None, [item.get("category1",""), item.get("category2","")]))
+                lines.append(f"분류: {cats}")
+            ov = item.get("overview", "")
+            if ov:
+                lines.append(f"상세설명: {ov[:600]}")
+            if item.get("mapx") and item.get("mapy"):
+                lines.append(f"좌표: {item['mapx']}, {item['mapy']}")
+            img = item.get("image") or ""
+            if img:
+                lines.append(f"이미지: {img}")
+            if item.get("blog_snippets"):
+                lines.append("네이버 블로그 참고정보 (사실 확인 불가, 참고용):")
+                for sn in item["blog_snippets"][:6]:
+                    lines.append(f"  - {sn}")
             lines.append("")
         return "\n".join(lines)
 
@@ -233,9 +278,12 @@ def _build_data_block(data):
 
 
 def _inject_naver_map(body_md, items, is_festival=False):
+    """v3.1: 장소당 1회만 삽입, 본문 마지막 H2 뒤에 배치"""
     import urllib.parse
     if not items:
         return body_md
+
+    # 장소별 버튼 HTML 준비
     map_links = []
     for item in items:
         title = item.get("title", item.get("facltNm", "")).strip()
@@ -246,31 +294,57 @@ def _inject_naver_map(body_md, items, is_festival=False):
             url = "https://search.naver.com/search.naver?query=" + encoded
         else:
             url = "https://map.naver.com/v5/search/" + encoded
-        map_links.append((title, url))
+        _btn_label = " 네이버에서 검색하기" if is_festival else " 네이버 지도에서 보기"
+        _btn_cls = "naver-search-btn" if is_festival else "naver-map-btn"
+        btn_html = '<a class="' + _btn_cls + '" href="' + url + '" target="_blank" rel="nofollow">' + title + _btn_label + '</a>'
+        map_links.append((title, btn_html))
     if not map_links:
         return body_md
+
+    # H2/H3 위치 수집
     lines = body_md.split("\n")
+    heading_indices = [i for i, ln in enumerate(lines) if re.match(r"^#{2,3}\s+", ln)]
+
+    # 각 장소를 매칭되는 첫 번째 H2/H3 뒤에 1회만 삽입
+    used_titles = set()
+    insert_map = {}  # {line_index: btn_html}
+
+    for ml_title, btn_html in map_links:
+        if ml_title in used_titles:
+            continue
+        name_core = ml_title.replace(" ", "")
+        for h_idx in heading_indices:
+            h_line = lines[h_idx]
+            # 매칭: 3글자 이상 핵심어가 H2에 포함
+            name_parts = [p for p in ml_title.split() if len(p) >= 2]
+            match_count = sum(1 for part in name_parts if part in h_line)
+            core_match = any(name_core[i:i+3] in h_line.replace(" ", "") for i in range(len(name_core)-2)) if len(name_core) >= 3 else False
+            if match_count >= 2 or (len(name_parts) == 1 and name_parts[0] in h_line) or core_match:
+                if h_idx not in insert_map:
+                    insert_map[h_idx] = btn_html
+                    used_titles.add(ml_title)
+                break
+
+    # 매칭 안 된 장소는 본문 끝에 삽입
+    tail_btns = []
+    for ml_title, btn_html in map_links:
+        if ml_title not in used_titles:
+            tail_btns.append(btn_html)
+
+    # 조립
     result = []
-    pending_map = None
-    for line in lines:
-        if re.match(r"^#{2,3}\s+", line) and pending_map:
-            result.append("")
-            result.append(pending_map)
-            result.append("")
-            pending_map = None
+    for i, line in enumerate(lines):
         result.append(line)
-        if re.match(r"^#{2,3}\s+", line):
-            for ml_title, ml_url in map_links:
-                name_parts = [p for p in ml_title.split() if len(p) >= 2]
-                match_count = sum(1 for part in name_parts if part in line)
-                if match_count >= 2 or (len(name_parts) == 1 and name_parts[0] in line):
-                    _btn_label = " 네이버에서 검색하기" if is_festival else " 네이버 지도에서 보기"
-                    _btn_cls = "naver-search-btn" if is_festival else "naver-map-btn"
-                    pending_map = '<a class="' + _btn_cls + '" href="' + ml_url + '" target="_blank" rel="nofollow">' + ml_title + _btn_label + '</a>'
-                    break
-    if pending_map:
+        if i in insert_map:
+            result.append("")
+            result.append(insert_map[i])
+            result.append("")
+
+    # 매칭 안 된 버튼은 맨 끝에 추가
+    for btn in tail_btns:
         result.append("")
-        result.append(pending_map)
+        result.append(btn)
+
     return "\n".join(result)
 
 
@@ -398,7 +472,7 @@ def _enrich_with_nearby_restaurants_only(data, html):
     if not restaurants:
         return html
 
-    nearby_html = "\n\n## 코스 주변 맛집\n\n"
+    nearby_html = "\n\n"
     for r in restaurants[:5]:
         name = r.get("title", "")
         if not name:
@@ -449,7 +523,7 @@ def _enrich_with_nearby(data, html):
 
     attractions = nearby_data.get("attractions", [])
     if attractions:
-        nearby_html += "\n\n## 반경 10km 내 가볼만한 곳\n\n"
+        nearby_html += "\n\n"
         for a in attractions[:3]:
             name = a.get("title", "")
             if not name:
@@ -459,9 +533,12 @@ def _enrich_with_nearby(data, html):
             nearby_html += _nearby_card(a, url) + "\n\n"
 
     restaurants = nearby_data.get("restaurants", [])
-    if restaurants:
-        nearby_html += "\n\n## 반경 10km 내 맛집\n\n"
-        for r in restaurants[:3]:
+    # 가볼만한곳 + 맛집 합계 6개 이하
+    _nearby_total = len([a for a in attractions[:3] if a.get("title")])
+    _restaurant_limit = max(0, 6 - _nearby_total)
+    if restaurants and _restaurant_limit > 0:
+        nearby_html += "\n\n"
+        for r in restaurants[:min(3, _restaurant_limit)]:
             name = r.get("title", "")
             if not name:
                 continue
@@ -614,6 +691,13 @@ def _post_process(content):
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
+    # H2 과다 방지: GPT가 5개 초과 H2를 생성하면 마지막 H2 섹션들을 제거
+    _h2_positions = [m.start() for m in re.finditer(r'^## ', content, re.MULTILINE)]
+    if len(_h2_positions) > 5:
+        _cut_pos = _h2_positions[5]
+        content = content[:_cut_pos].rstrip()
+        logger.info("H2 과다 방지: %d개 → 5개로 절단", len(_h2_positions))
+
     # ── 쿠팡 여행용품 추천 삽입 ──────────────────────────────
     try:
         from shared.coupang_travel import CoupangTravel
@@ -637,8 +721,11 @@ def _post_process(content):
 
 
 
-    # GPT가 생성한 인라인 네이버 지도 링크 제거
+    # GPT가 생성한 인라인 네이버 지도 링크 제거 (마크다운 + blockquote 모두)
     content = re.sub(r'\s*\[네이버 지도에서 보기\]\(https://map\.naver\.com[^)]*\)', '', content)
+    content = re.sub(r'^>\s*.*네이버 지도에서 보기.*$', '', content, flags=re.MULTILINE)
+    content = re.sub(r'^>\s*\[.*?\]\(https://map\.naver\.com[^)]*\)\s*', '', content, flags=re.MULTILINE)
+    content = re.sub(r'\[네이버 지도에서 보기\]\(https://search\.naver\.com[^)]*\)', '', content)
 
     return content
 
@@ -689,7 +776,10 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
     
     for attempt in range(max_retries + 1):
         # 검증
-        h2_count = len(re.findall(r'^## ', content, re.MULTILINE))
+        # GPT 생성 H2만 카운트 (후처리 자동삽입 H2 제외)
+        _auto_h2_skip = ["여행 준비", "함께 읽어보기", "추천 용품"]
+        _all_h2_titles = re.findall(r"^## (.+)", content, re.MULTILINE)
+        h2_count = len([h for h in _all_h2_titles if not any(s in h for s in _auto_h2_skip)])
         char_count = len(content)
         banned_found = [b for b in BANNED if b in content]
         
@@ -722,7 +812,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
 
 def generate_content(data, blog_id="travel-hugo"):
     source_type = data.get("source_type", "camping")
-    prompt_id = _select_prompt_id(blog_id, source_type)
+    prompt_id = _select_prompt_id(blog_id, source_type, item_count=len(data.get("items", [])))
 
     # 블로그 정보 + 다이닝코드 enrichment (GPT 호출 전에 실행)
     # travel4-hugo(여행코스)는 enrichment 스킵 — 가격 데이터가 부정확하여 환각 유발
@@ -805,12 +895,20 @@ def generate_content(data, blog_id="travel-hugo"):
             _all_snippets.append(_sn)
     _snippets_text = "\n".join(f"- {s}" for s in _all_snippets[:8]) if _all_snippets else "(참고 정보 없음)"
 
+    _item_count = len(data.get("items", []))
+    if data.get("source_type") != "heritage" and data.get("source_type") != "course":
+        _item_count = min(_item_count, 3)
+    # heritage 심층 프롬프트용 {name} 변수
+    _first_item_name = ""
+    if data.get("items"):
+        _first_item_name = data["items"][0].get("title", data["items"][0].get("facltNm", ""))
     extra_vars = {
         "blog_snippets": _snippets_text,
-        "region": data.get("display_region", ""),
+        "region": data.get("display_region", data.get("region", "")),
         "theme": data.get("theme", ""),
         "angle": data.get("angle", ""),
-        "count": str(len(data.get("items", []))),
+        "count": str(_item_count),
+        "name": _first_item_name,
     }
 
     prompt_result = build_prompt(prompt_id, data_block, extra_vars=extra_vars)
@@ -893,12 +991,13 @@ def generate_content(data, blog_id="travel-hugo"):
         try:
             _region = data.get("region", "") if isinstance(data, dict) else ""
             _h_card = _build_heritage_card(_region)
-            _h2_match = re.search(r"(\n##\s)", content)
-            if _h2_match:
-                _pos = _h2_match.start()
-                content = content[:_pos] + _h_card + content[_pos:]
-            else:
-                content = _h_card + content
+            # heritage 카드: 중복 방지 + nearby 카드 바로 앞에 삽입
+            if "K-Heritage Guide" not in content:
+                _nb_pos = content.find('<div class="nearby-card"')
+                if _nb_pos > 0:
+                    content = content[:_nb_pos] + "\n" + _h_card + "\n\n" + content[_nb_pos:]
+                else:
+                    content = content + "\n\n" + _h_card
         except Exception as e:
             logger.warning(f"[heritage-card] 삽입 실패: {e}")
 
@@ -948,16 +1047,16 @@ def generate_content(data, blog_id="travel-hugo"):
             "{region} {theme} 사전예약과 입장 안내 정리",
         ],
         "travel2-hugo": [
-            "{region} {theme} 탐방, {count}곳 소개",
-            "{region}에서 만나는 {theme} 탐방지 {count}곳 소개",
-            "{region} {theme} 탐방, {first_name}부터 추천",
-            "{region} 문화유산 투어, {first_name} 소개",
-            "{region} {theme} {count}곳 한눈에 보기",
-            "{region}에서 즐기는 {theme} 탐방 가이드",
-            "{region} {theme} 탐방 코스 추천",
-            "역사와 함께하는 {region} {theme} 탐방 {count}곳",
-            "{region} {theme} 탐방, 방문 전 알아둘 것 정리",
-            "주말에 가볼 만한 {region} {theme} {count}곳",
+            "{region} {first_name}의 역사와 건축 양식 정리",
+            "{region} {first_name}, 방문 전 알아야 할 역사 정리",
+            "{first_name}의 시대적 배경과 건축적 특징 분석",
+            "{region} {theme} {first_name}, 지정 배경과 가치 해설",
+            "{first_name} 탐방 가이드, 역사와 볼거리 총정리",
+            "{region} {first_name} 역사 해설과 방문 정보",
+            "{region} {theme} {first_name} 양식과 특징 비교",
+            "{first_name}이 {theme}로 지정된 이유와 역사",
+            "{region} {first_name} 완전 해설, 시대부터 양식까지",
+            "{region} {theme} {first_name} 탐방과 주변 정보",
         ],
         "travel3-hugo": [
             "{region} {theme} 현지인이 추천하는 식당 {count}곳",
@@ -1024,7 +1123,44 @@ def generate_content(data, blog_id="travel-hugo"):
     )
 
     place_names = ', '.join([i.get('title', i.get('facltNm', ''))[:12] for i in items[:3]])
-    title_prompt = f"""블로그 제목 1개만 출력하세요. 따옴표 없이 제목 텍스트만 출력.
+
+    # blog_id별 제목 프롬프트 분기
+    if blog_id == "travel2-hugo":
+        title_prompt = f"""블로그 제목 1개만 출력하세요. 따옴표 없이 제목 텍스트만 출력.
+
+지역: {display_region}
+테마: {theme}
+장소수: {len(items)}
+대표 유산: {place_names}
+
+필수 규칙:
+- 20~40자
+- 지역명 반드시 포함
+- 문화유산 실제 이름을 반드시 포함 (검색 노출 핵심)
+- 조사(의, 과, 와, 에서)를 넣어 자연스러운 문장으로
+- 서술어(역사 정리, 건축 분석, 탐방 정보, 양식 해설, 가치 해설)로 마무리
+- 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
+- 특수기호 금지 (콜론, 느낌표, 하이픈)
+- 가격 표현 금지
+
+금지 표현:
+- "완벽 가이드", "꼭 가봐야 할", "베스트", "상세정보", "소개", "알아보기", "만나보기", "즐기기"
+- "N곳 정리", "N곳 추천" (1곳 심층일 때)
+
+좋은 제목 예시:
+- "제주 관덕정의 역사와 건축 양식 정리"
+- "경주 불국사 다보탑, 보물 지정 배경과 석조 기법 분석"
+- "강화 전등사 철종의 시대적 배경과 예술적 가치"
+- "서울 숭례문 복원 과정과 국보로서의 건축적 의미"
+- "경북 봉정사 극락전, 한국 최고 목조건축의 양식 해설"
+
+나쁜 제목 예시:
+- "서울 국보 탐방 명소 5곳 정리"
+- "부산 보물 탐방 토기와 총통 등 5곳"
+- "경남 테마파크 주변 주차장과 대중교통 안내"
+"""
+    else:
+        title_prompt = f"""블로그 제목 1개만 출력하세요. 따옴표 없이 제목 텍스트만 출력.
 
 지역: {display_region}
 테마: {theme}
