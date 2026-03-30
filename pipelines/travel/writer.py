@@ -1011,6 +1011,13 @@ def generate_content(data, blog_id="travel-hugo"):
     angle = data.get("angle", theme)
     items = data.get("items", [])
 
+    # 실제 본문에서 다룬 장소 수 산출 (H3 또는 H2 내 장소명 매칭)
+    _body_h3 = re.findall(r"^### (.+)", content, re.MULTILINE)
+    _body_place_count = len(_body_h3) if _body_h3 else len(items)
+    # H3가 없으면 items 수 사용, 단 data_block 절단([:3]) 반영
+    if _body_place_count == 0:
+        _body_place_count = min(len(items), 3)
+
     TITLE_TEMPLATES = {
         "travel-hugo": [
             "{region} {angle} {first_camp}과 {count}곳 시설 비교",
@@ -1097,6 +1104,11 @@ def generate_content(data, blog_id="travel-hugo"):
 
     import random as _rand
     templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES["travel-hugo"])
+    # 1곳일 때 "{count}" 포함 템플릿 제외 (제목-본문 불일치 방지)
+    if _body_place_count <= 1:
+        _filtered = [t for t in templates if "{count}" not in t]
+        if _filtered:
+            templates = _filtered
     template = _rand.choice(templates)
     # region/theme 빈값 보호
     if not display_region or len(display_region) < 2:
@@ -1116,7 +1128,7 @@ def generate_content(data, blog_id="travel-hugo"):
         region=display_region,
         theme=theme,
         angle=angle,
-        count=str(len(items)),
+        count=str(_body_place_count),
         first_camp=first_camp,
         last_camp=last_camp,
         first_name=first_name,
@@ -1130,7 +1142,7 @@ def generate_content(data, blog_id="travel-hugo"):
 
 지역: {display_region}
 테마: {theme}
-장소수: {len(items)}
+장소수: {_body_place_count}
 대표 유산: {place_names}
 
 필수 규칙:
@@ -1164,7 +1176,7 @@ def generate_content(data, blog_id="travel-hugo"):
 
 지역: {display_region}
 테마: {theme}
-장소수: {len(items)}
+장소수: {_body_place_count}
 대표 장소: {place_names}
 
 필수 규칙:
