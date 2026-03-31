@@ -99,7 +99,7 @@ def _common_vs(v):
         f"{v['m']}{v['wa']} {v['c']} 중 3년 후 덜 손해 보는 차는? [{v['month_kr']} 기준]",
         f"신차값 {v['price_diff']:,}만원 차이, 3년 총비용은 {v['dep_diff']:,}만원 차이 — {v['m']} vs {v['c']}",
         f"{v['m']} 잔존가치 {v['r_pct']}% vs {v['c']} {v['cr_pct']}% — 감가 적은 쪽이 이긴다",
-        f"{v['m']} {v['c']} 유지비 비교 — 보험·세금·유류비 월 {v['maint_m']:,}만원의 차이",
+        f"{v['m']} vs {v['c']} 유지비 비교 — 보험·세금·유류비 월 {v['maint_m']:,}만원의 차이",
         f"같은 세그먼트 {v['m']}{v['wa']} {v['c']}, 어느 쪽이 돈 덜 드는 차일까",
         f"{v['yr']} {v['m']} vs {v['c']} 비교 — 감가·유지비·잔존가치 총정리 [{v['month_kr']}]",
         f"중고로 팔 때 덜 떨어지는 차는? {v['m']} vs {v['c']} 잔존가치 비교",
@@ -230,10 +230,10 @@ def _compare_vs(v):
         f"가격은 {v['m']}, 연비는 {v['c']}? 항목별 승자 비교표",
         f"같은 예산 {v['p']:,}만원대, {v['m']}{v['wa']} {v['c']} 중 합리적인 선택은",
         f"{v['m']} vs {v['c']} 항목별 승패 — 5전 3선 결과는?",
-        f"잔존가치 {v['r_pct']}% vs {v['cr_pct']}%, 유지비 {v['maint_m']:,}만원 vs ? — {v['m']} {v['c']} 데이터 대결",
+        f"잔존가치 {v['r_pct']}% vs {v['cr_pct']}%, 유지비 {v['maint_m']:,}만원 vs ? — {v['m']} vs {v['c']} 데이터 대결",
         f"{v['m']}{v['wa']} {v['c']}, 데이터로 보면 답은 하나다 [{v['month_kr']}]",
         f"스펙·비용·잔존가치 종합 비교 — {v['m']} vs {v['c']} 최종 판정",
-        f"{v['m']} {v['c']} 구매 고민 중이라면 이 7가지 수치를 보세요",
+        f"{v['m']}{v['wa']} {v['c']} 구매 고민 중이라면 이 7가지 수치를 보세요",
         f"예산별 추천: {v['p']:,}만원 {v['m']} vs {v['cp']:,}만원 {v['c']}",
         f"{v['yr']} {v['m']} vs {v['c']} 비교 — 승자가 갈리는 단 하나의 항목",
     ]
@@ -382,7 +382,13 @@ def generate_title(data, site_id="hotissue"):
             pool = _common_solo(v) + _ev_hev_solo(v)
         return random.choice(pool)
 
-    if has_comp:
+    if site_id == "guide":
+        # guide는 첫차/초보 전용 풀만 사용 (공용 풀 제외)
+        if has_comp:
+            pool = _guide_vs(v)
+        else:
+            pool = _guide_solo(v)
+    elif has_comp:
         pool = _common_vs(v) + SITE_VS.get(site_id, _hotissue_vs)(v)
     else:
         pool = _common_solo(v) + SITE_SOLO.get(site_id, _hotissue_solo)(v)
