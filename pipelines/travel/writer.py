@@ -64,7 +64,7 @@ def _build_heritage_card(region: str) -> str:
 
 
 BLOG_PROMPT_MAP = {
-    "travel-hugo": {"camping": "tour1_camping", "korservice": "tour1_leports", "wellness": "tour1_leports", "heritage": "tour1_leports"},
+    "travel-hugo": {"camping": "tour1_camping", "korservice": "tour1_leports", "wellness": "tour1_leports"},
     "travel1-hugo": {"korservice": "travel1_festival", "festival": "travel1_festival"},
     "travel2-hugo": {"heritage": "travel2_heritage", "korservice": "travel2_heritage"},
     "travel3-hugo": {"korservice": "tour2_food", "food": "tour2_food"},

@@ -28,10 +28,9 @@ from shared.validators import sanitize_title
 
 BLOG_FETCH_MAP = {
     "travel-hugo": [
-        (fetch_camping, 0.45),
-        (fetch_korservice, 0.25),
+        (fetch_camping, 0.55),
+        (fetch_korservice, 0.30),
         (fetch_wellness, 0.15),
-        (fetch_heritage, 0.15),
     ],
     "travel1-hugo": [
         (fetch_festival, 1.0),
@@ -59,7 +58,17 @@ def _fetch_for_blog(blog_id):
 
     data = selected()
     if data:
-        return data
+        # korservice에서 축제(contenttypeid=15) 유입 차단 (travel1-hugo 전용)
+        if data.get("source_type") == "korservice" and blog_id != "travel1-hugo":
+            items = data.get("items", [])
+            filtered = [i for i in items if str(i.get("contenttypeid", "")) != "15"]
+            if filtered:
+                data["items"] = filtered
+            elif not filtered and items:
+                logger.warning(blog_id + " korservice 전체가 축제 → 다른 소스로 재시도")
+                data = None
+        if data:
+            return data
 
     for func, _ in fetch_list:
         if func != selected:
