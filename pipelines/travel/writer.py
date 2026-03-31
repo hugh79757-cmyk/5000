@@ -1020,87 +1020,74 @@ def generate_content(data, blog_id="travel-hugo"):
 
     TITLE_TEMPLATES = {
         "travel-hugo": [
-            "{region} {angle} {first_camp}과 {count}곳 시설 비교",
-            "{region} {first_camp} 포함 {theme} {count}곳 총정리",
-            "{region} {angle} 캠핑장 {first_camp} 등 {count}곳 비교",
-            "{region} {first_camp}부터 {last_camp}까지 {count}곳 정리",
-            "{region} {theme} {first_camp} 주변 {count}곳 추천",
-            "{region} {angle} {first_camp} 시설과 예약 정보 정리",
-            "{region} {theme} {count}곳 {first_camp} 포함 비교",
-            "{first_camp}과 {region} {angle} 캠핑장 {count}곳 리뷰",
-            "{region} {angle} {count}곳 {first_camp} 등 시설 총정리",
-            "{region} {first_camp} 예약 전 알아둘 것과 {count}곳 비교",
+            "{region} {first_camp}, 예약 전 꼭 확인할 시설 정보",
+            "{region} {first_camp} 포함 {theme} {count}곳 실제 후기 비교",
+            "{first_camp}부터 {last_camp}까지, {region} {theme} {count}곳 솔직 비교",
+            "{region} {theme} {count}곳, {first_camp} 가기 전 이것만 확인",
+            "{region} {first_camp} 실제 시설과 예약 꿀팁",
+            "{region} {angle} {count}곳, 가격부터 시설까지 한눈에",
+            "{first_camp} 다녀온 사람들이 말하는 {region} {theme} {count}곳",
+            "{region} {theme} 어디로 갈까? {first_camp} 등 {count}곳 비교",
+            "{region} {first_camp}, 이 가격에 이 시설? {count}곳 비교",
+            "{region} {theme} {count}곳 중 {first_camp}을 추천하는 이유",
         ],
         "travel1-hugo": [
-            "2026 {region} {theme} 일정과 입장료 총정리",
-            "{region} {theme} 가볼만한 곳 {count}선 추천",
-            "{region} {theme} 일정과 체험 프로그램 정리",
-            "{region} {theme} 일정부터 주차까지 한눈에 보기",
-            "2026 {region} 축제 {count}곳 일정 총정리",
-            "{region} {theme}, 아이와 함께 가기 좋은 {count}곳",
-            "{region} {theme} 교통과 주차 정보 총정리",
-            "주말 나들이로 딱! {region} {theme} {count}곳 추천",
-            "{region} 무료 축제 {count}곳, 일정과 위치 총정리",
-            "2026 {region} 축제 {count}곳 일정과 위치 정리",
-            "{region} {theme} 주차장 위치와 요금 정리",
-            "{region} {theme} 대중교통 가는 법과 셔틀 안내",
-            "{region} {theme} 체험 프로그램 {count}가지 비교",
-            "비 오는 날에도 즐길 수 있는 {region} {theme} 정리",
-            "{region} {theme} 주요 프로그램과 체험 정리",
-            "{region} {theme} 포토존 위치와 인생샷 팁 정리",
-            "올해 처음 열리는 {region} {theme} 일정 총정리",
-            "{region} {theme} 야간 프로그램과 조명 행사 안내",
-            "{region} {theme}와 묶어 갈 당일치기 코스 추천",
-            "{region} {theme} 사전예약과 입장 안내 정리",
+            "2026 {region} {theme}, 놓치면 후회할 일정과 꿀팁",
+            "{region} {theme} 가기 전 꼭 알아야 할 {count}가지",
+            "{region} {theme}, 현지인이 알려주는 알짜 코스",
+            "{region} {theme} 입장료 무료? 일정과 교통 총정리",
+            "올해 {region} {theme}, 뭐가 달라졌을까?",
+            "{region} {theme} 주차난 피하는 법과 셔틀 안내",
+            "아이와 함께 가기 좋은 {region} {theme} {count}곳",
+            "{region} {theme}, 비 와도 즐길 수 있는 프로그램",
+            "주말 {region} {theme} {count}곳, 동선까지 정리",
+            "{region} {theme} 야간 프로그램과 포토존 위치",
+            "2026 {region} 축제 달력, {theme} 포함 {count}곳",
+            "{region} {theme}와 묶어 가면 좋은 당일치기 코스",
+            "{region} {theme} 사전예약 필수? 입장 방법 정리",
+            "{region} {theme} 먹거리와 체험 부스 미리 보기",
         ],
         "travel2-hugo": [
-            "{region} {first_name}의 역사와 건축 양식 정리",
-            "{region} {first_name}, 방문 전 알아야 할 역사 정리",
-            "{first_name}의 시대적 배경과 건축적 특징 분석",
-            "{region} {theme} {first_name}, 지정 배경과 가치 해설",
-            "{first_name} 탐방 가이드, 역사와 볼거리 총정리",
-            "{region} {first_name} 역사 해설과 방문 정보",
-            "{region} {theme} {first_name} 양식과 특징 비교",
-            "{first_name}이 {theme}로 지정된 이유와 역사",
-            "{region} {first_name} 완전 해설, 시대부터 양식까지",
-            "{region} {theme} {first_name} 탐방과 주변 정보",
+            "{region} {first_name}, 왜 {theme}로 지정되었을까",
+            "{region} {first_name}의 숨겨진 역사와 건축 비밀",
+            "{first_name}, 알고 가면 두 배로 재미있는 {region} 문화유산",
+            "{region} {first_name} 탐방 전 꼭 읽어야 할 해설",
+            "{first_name}에서 만나는 {region}의 시간 여행",
+            "{region} {theme} {first_name}, 시대별 변화와 건축 양식",
+            "{region} {first_name}, 교과서에 안 나오는 뒷이야기",
+            "{first_name}이 특별한 이유, {region} {theme} 심층 해설",
+            "{region} {first_name} 방문 가이드, 역사부터 동선까지",
+            "{region} {first_name}, 건축 양식으로 읽는 조선의 기술",
         ],
         "travel3-hugo": [
-            "{region} {theme} 현지인이 추천하는 식당 {count}곳",
-            "{region}에 가면 꼭 먹어야 할 {theme} {count}선",
-            "{region} {theme} 가성비 식당 {count}곳 메뉴와 위치 정리",
-            "현지인만 아는 {region} {theme} {count}곳 총정리",
-            "{region} {theme} 웨이팅 없는 식당 {count}곳 추천",
-            "{region} 로컬 맛집 {count}곳 메뉴와 영업 정보 정리",
-            "{region} {theme} 혼밥하기 좋은 식당 {count}곳",
-            "여행 중 들르기 좋은 {region} {theme} {count}곳",
-            "주말 {region} {theme} {count}곳 총정리",
-            "{region} {angle} 맛집 {count}곳, 영업시간과 휴무일 정리",
-            "{region} {theme} 가성비 식당 {count}곳 비교",
-            "{region} {theme} 주차 가능한 식당 {count}곳 정리",
-            "아이와 가기 좋은 {region} {theme} {count}곳",
-            "{region} {theme} 오래된 노포 {count}곳 탐방",
-            "{region} {theme} 점심 특선 메뉴 비교 {count}곳",
-            "관광지 근처 {region} {theme} {count}곳 동선 정리",
+            "{region} {theme}, 현지인이 줄 서는 식당 {count}곳",
+            "{region} {theme} {count}곳, 메뉴와 가격 미리 확인",
+            "{region}에서 이 집은 꼭 가야 한다, {theme} {count}곳",
+            "{region} {theme} {count}곳, 웨이팅 없이 먹는 법",
+            "관광객은 모르는 {region} {theme} 숨은 맛집 {count}곳",
+            "{region} {theme} 점심 vs 저녁, {count}곳 영업시간 비교",
+            "{region} {angle} {count}곳, 주차부터 메뉴까지 한눈에",
+            "아이와 가기 좋은 {region} {theme} {count}곳 엄선",
+            "{region} {theme} 노포 {count}곳, 오래된 데는 이유가 있다",
             "{region} {theme} 예약 필수 식당 {count}곳과 연락처",
-            "{region} 새벽이나 심야 영업 {theme} {count}곳",
-            "{region} {theme} 테라스와 뷰 좋은 식당 {count}곳 비교",
-            "포장이나 배달 가능한 {region} {theme} {count}곳",
+            "여행 중 들르기 좋은 {region} {theme} {count}곳 동선",
+            "{region} {theme} 포장 가능한 맛집 {count}곳",
+            "{region} {theme} {count}곳, 1만원대로 배부르게",
+            "{region} {angle}, 실패 없는 식당 {count}곳 비교",
         ],
         "travel4-hugo": [
-            "{region} {first_name} 포함 여행코스 {count}곳 정리",
-            "{region} {theme} {first_name}부터 {last_camp}까지 코스 정리",
-            "{region} {theme} 추천 코스 {count}곳 총정리",
-            "{region} 당일치기 여행코스 {first_name} 포함 {count}곳",
-            "{region} {theme} {count}곳 코스 동선과 볼거리 정리",
-            "{region} {first_name} 주변 여행코스 {count}곳 추천",
-            "주말 {region} {theme} 코스 {count}곳 총정리",
-            "{region} {theme} 코스 {first_name} 등 {count}곳 비교",
-            "{region} 여행코스 {first_name}과 {last_camp} 포함 정리",
-            "{region} {theme} {count}곳 코스 순서와 볼거리 총정리",
+            "{region} {theme}, {first_name}부터 {last_camp}까지 하루 코스",
+            "{region} {first_name} 포함 도보코스 {count}곳 동선",
+            "{region} 당일치기 {theme} {count}곳, 이 순서로 돌면 딱",
+            "{region} {theme} {count}곳, 걸어서 다 돌 수 있을까?",
+            "{region} {first_name} 주변까지 묶어 가는 {theme} {count}곳",
+            "주말 {region} {theme}, {first_name} 포함 {count}곳 동선",
+            "{region} {theme} {count}곳 순서와 소요 시간 정리",
+            "{region} {first_name} 코스, 놓치기 쉬운 볼거리까지",
+            "{region} {theme} {count}곳, 점심 어디서 먹을지까지",
+            "{region} {theme} 대중교통으로 도는 {count}곳 코스",
         ],
     }
-
 
     import random as _rand
     templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES["travel-hugo"])
@@ -1150,7 +1137,7 @@ def generate_content(data, blog_id="travel-hugo"):
 - 지역명 반드시 포함
 - 문화유산 실제 이름을 반드시 포함 (검색 노출 핵심)
 - 조사(의, 과, 와, 에서)를 넣어 자연스러운 문장으로
-- 서술어(역사 정리, 건축 분석, 탐방 정보, 양식 해설, 가치 해설)로 마무리
+- 호기심을 유발하는 종결어 사용 (예: '비밀', '이유', '심층 해설', '뒷이야기', '시간 여행')
 - 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
 - 특수기호 금지 (콜론, 느낌표, 하이픈)
 - 가격 표현 금지
@@ -1183,7 +1170,7 @@ def generate_content(data, blog_id="travel-hugo"):
 - 20~35자
 - 지역명 반드시 포함
 - 조사(에서, 의, 과, 와, 으로, 부터)를 넣어 자연스러운 문장으로 작성
-- 서술어(총정리, 비교, 추천 리스트, 정리, 한눈에 보기, 코스 안내)로 마무리
+- 호기심을 유발하는 종결어 사용 (예: '한눈에', '이유', '꿀팁', '미리 확인', '비교', '솔직 후기')
 - 경어체 금지 (입니다, 합니다, 드립니다, 하세요)
 - 특수기호 금지 (콜론, 느낌표, 하이픈)
 - 가격 정보는 제목에 넣지 않기 (본문에서 다룸)
@@ -1225,7 +1212,7 @@ def generate_content(data, blog_id="travel-hugo"):
             ban_phrases = ['에서 즐기는', '에서 만나는', '에서 즐길 수 있는']
             for ban in ban_endings:
                 if generated_title.endswith(ban):
-                    replacements = ['추천', '한눈에 보기', '메뉴 비교', '코스 추천', '비교', '체크리스트', '방문 전 필독']
+                    replacements = ['한눈에', '꿀팁', '미리 확인', '솔직 비교', '가기 전 필독', '핵심 정리', '실속 가이드']
                     generated_title = generated_title[:-len(ban)].rstrip() + ' ' + _r.choice(replacements)
                     break
             for bp in ban_phrases:
