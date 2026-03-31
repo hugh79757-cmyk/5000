@@ -1,0 +1,120 @@
+"""쿠팡 Search API → curation.db 캐싱
+
+- 키워드별 상품 10개 수집
+- 캐시 유효기간 3일, 만료 시 재수집
+- Search API 시간당 10회 제한 준수
+"""
+import os
+import sys
+import sqlite3
+import logging
+import time
+import hmac
+import hashlib
+import requests
+from datetime import datetime, timedelta
+from urllib.parse import urlencode
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from dotenv import load_dotenv
+load_dotenv("/Users/twinssn/Projects/5000/.env")
+
+logger = logging.getLogger(__name__)
+
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "curation.db")
+BASE_URL = "https://api-gateway.coupang.com"
+CACHE_DAYS = 3
+
+
+def _get_api_keys():
+    access_key = os.getenv("COUPANG_ACCESS_KEY", "")
+    secret_key = os.getenv("COUPANG_SECRET_KEY", "")
+    return access_key, secret_key
+
+
+def _generate_signature(method, url_path, query_string=""):
+    access_key, secret_key = _get_api_keys()
+    if not access_key or not secret_key:
+        return None
+    datetime_str = datetime.utcnow().strftime("%y%m%dT%H%M%SZ")
+    message = datetime_str + method + url_path + query_string
+    signature = hmac.new(
+        secret_key.encode("utf-8"),
+        message.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+    authorization = f"CEA algorithm=HmacSHA256, access-key={access_key}, signed-date={datetime_str}, signature={signature}"
+    return {"Authorization": authorization, "Content-Type": "application/json"}
+
+
+def _search_api(keyword, limit=10):
+    url_path = "/v2/providers/affiliate_open_api/apis/openapi/products/search"
+    params = {"keyword": keyword, "limit": limit}
+    query_string = urlencode(params)
+    headers = _generate_signature("GET", url_path, query_string)
+    if not headers:
+        logger.error("쿠팡 API 키 미설정")
+        return []
+    try:
+        resp = requests.get(f"{BASE_URL}{url_path}?{query_string}", headers=headers, timeout=10)
+        if resp.status_code == 200:
+            return resp.json().get("data", {}).get("productData", [])
+        logger.error(f"Search API {resp.status_code}: {keyword}")
+        return []
+    except Exception as e:
+        logger.error(f"Search API 오류 [{keyword}]: {e}")
+        return []
+
+
+def is_cache_valid(keyword):
+    conn = sqlite3.connect(DB_PATH)
+    row = conn.execute(
+        "SELECT MAX(collected_at) FROM products WHERE keyword=?", (keyword,)
+    ).fetchone()
+    conn.close()
+    if not row or not row[0]:
+        return False
+    last = datetime.fromisoformat(row[0])
+    return datetime.now() - last < timedelta(days=CACHE_DAYS)
+
+
+def collect_keyword(keyword):
+    if is_cache_valid(keyword):
+        logger.info(f"캐시 유효: {keyword}")
+        return True
+
+    logger.info(f"Search API 호출: {keyword}")
+    products = _search_api(keyword, limit=7)
+    if not products:
+        return False
+
+    conn = sqlite3.connect(DB_PATH)
+    now = datetime.now().isoformat()
+    for p in products:
+        conn.execute(
+            """INSERT OR REPLACE INTO products
+               (keyword, product_id, product_name, product_price, product_image,
+                product_url, category_name, rank, is_rocket, is_free_shipping, collected_at)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            (keyword, p["productId"], p["productName"], p.get("productPrice", 0),
+             p.get("productImage", ""), p.get("productUrl", ""),
+             p.get("categoryName", ""), p.get("rank", 0),
+             1 if p.get("isRocket") else 0,
+             1 if p.get("isFreeShipping") else 0, now)
+        )
+    conn.commit()
+    conn.close()
+    logger.info(f"수집 완료: {keyword} → {len(products)}개")
+    return True
+
+
+def get_products(keyword, limit=5):
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        """SELECT * FROM products WHERE keyword=?
+           ORDER BY collected_at DESC, rank ASC LIMIT ?""",
+        (keyword, limit)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
