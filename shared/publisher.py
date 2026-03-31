@@ -161,8 +161,11 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
     if thumbnail_url:
         fm += 'image: "' + thumbnail_url + '"\n'
     else:
-        if "stock" in blog_id:
+        _bid = blog_id.replace("-hugo", "")
+        if "stock" in blog_id or "dividend" in blog_id or "etf" in blog_id or "sector" in blog_id or "ipo" in blog_id or "finance" in blog_id:
             fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
+        elif _bid in ("hotissue", "tco", "deal", "compare", "guide", "ev"):
+            fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/car-default-thumbnail.webp"\n'
         else:
             fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n"
@@ -210,8 +213,11 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
             thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
         fm += 'featureimage: "' + thumbnail_url + '"\n'
     else:
-        if "stock" in blog_id:
+        _bid = blog_id.replace("-hugo", "")
+        if "stock" in blog_id or "dividend" in blog_id or "etf" in blog_id or "sector" in blog_id or "ipo" in blog_id or "finance" in blog_id:
             fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
+        elif _bid in ("hotissue", "tco", "deal", "compare", "guide", "ev"):
+            fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/car-default-thumbnail.webp"\n'
         else:
             fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n\n"
@@ -246,8 +252,11 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
          thumbnail_url = _extract_first_image(body_md)
     if not thumbnail_url:
         _blog_id = blog_cfg.get("id", "")
-        if "stock" in _blog_id:
+        _bid2 = _blog_id.replace("-hugo", "")
+        if "stock" in _blog_id or "dividend" in _blog_id or "etf" in _blog_id or "sector" in _blog_id or "ipo" in _blog_id or "finance" in _blog_id:
          thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
+        elif _bid2 in ("hotissue", "tco", "deal", "compare", "guide", "ev"):
+            thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/car-default-thumbnail.webp"
         
     if thumbnail_url and thumbnail_url.startswith("http://tong.visitkorea.or.kr"):
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)

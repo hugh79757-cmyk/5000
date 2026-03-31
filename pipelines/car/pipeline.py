@@ -29,46 +29,48 @@ PROMPTS_DIR = PROJECT_DIR / "prompts"
 
 
 def _select_car_image(conn, car_id, slug):
-    try:
-        c = conn.cursor()
-        used = c.execute(
-            "SELECT image_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND image_url IS NOT NULL AND image_url != ''"
-        ).fetchall()
-        used_urls = {r['image_url'] for r in used} if used else set()
-        images = c.execute(
-            "SELECT image_url, source FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
-            (car_id,)
-        ).fetchall()
-        selected_url = None
-        for img in images:
-            if img['image_url'] not in used_urls:
-                selected_url = img['image_url']
-                break
-        if not selected_url and images:
-            selected_url = images[0]['image_url']
-        if not selected_url:
-            base_id = re.sub(r'_(hev|phev|ev|25|35|lpg)(?=_)', '', car_id)
-            if base_id != car_id:
-                fallback_imgs = c.execute(
-                    "SELECT image_url FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
-                    (base_id,)
-                ).fetchall()
-                for img in fallback_imgs:
-                    if img['image_url'] not in used_urls:
-                        selected_url = img['image_url']
-                        break
-                if not selected_url and fallback_imgs:
-                    selected_url = fallback_imgs[0]['image_url']
-        if not selected_url:
-            return "", ""
-        req = urllib.request.Request(selected_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            image_data = resp.read()
-        r2_url = process_and_upload(image_data)
-        return r2_url, selected_url
-    except Exception as e:
-        logger.warning("Image failed: " + str(e))
+    import time as _time
+    c = conn.cursor()
+    used = c.execute(
+        "SELECT image_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND image_url IS NOT NULL AND image_url != ''"
+    ).fetchall()
+    used_urls = {r['image_url'] for r in used} if used else set()
+    images = c.execute(
+        "SELECT image_url, source FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
+        (car_id,)
+    ).fetchall()
+    candidates = [img['image_url'] for img in images if img['image_url'] not in used_urls]
+    if not candidates:
+        candidates = [img['image_url'] for img in images]
+    if not candidates:
+        base_id = re.sub(r'_(hev|phev|ev|25|35|lpg)(?=_)', '', car_id)
+        if base_id != car_id:
+            fallback_imgs = c.execute(
+                "SELECT image_url FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
+                (base_id,)
+            ).fetchall()
+            candidates = [img['image_url'] for img in fallback_imgs if img['image_url'] not in used_urls]
+            if not candidates:
+                candidates = [img['image_url'] for img in fallback_imgs]
+    if not candidates:
+        logger.warning("Image: no candidates for " + car_id)
         return "", ""
+    MAX_IMG_RETRY = 3
+    for attempt in range(MAX_IMG_RETRY):
+        selected_url = candidates[attempt % len(candidates)]
+        try:
+            req = urllib.request.Request(selected_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=20) as resp:
+                image_data = resp.read()
+            r2_url = process_and_upload(image_data)
+            return r2_url, selected_url
+        except Exception as e:
+            logger.warning("Image attempt " + str(attempt+1) + "/" + str(MAX_IMG_RETRY) + " failed for " + car_id + ": " + str(e))
+            if attempt < MAX_IMG_RETRY - 1:
+                _time.sleep(2)
+    logger.error("Image: all " + str(MAX_IMG_RETRY) + " attempts failed for " + car_id)
+    _tg_error(car_id, "image_upload", "이미지 3회 재시도 모두 실패")
+    return "", ""
 
 
 def run(blog_cfg):
