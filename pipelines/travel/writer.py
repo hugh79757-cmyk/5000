@@ -64,7 +64,7 @@ def _build_heritage_card(region: str) -> str:
 
 
 BLOG_PROMPT_MAP = {
-    "travel-hugo": {"camping": "tour1_camping"},
+    "travel-hugo": {"camping": "tour1_camping", "korservice": "tour1_leports", "wellness": "tour1_leports", "heritage": "tour1_leports"},
     "travel1-hugo": {"korservice": "travel1_festival", "festival": "travel1_festival"},
     "travel2-hugo": {"heritage": "travel2_heritage", "korservice": "travel2_heritage"},
     "travel3-hugo": {"korservice": "tour2_food", "food": "tour2_food"},
@@ -472,7 +472,7 @@ def _enrich_with_nearby_restaurants_only(data, html):
     if not restaurants:
         return html
 
-    nearby_html = "\n\n"
+    nearby_html = "\n\n## 근처 맛집\n\n"
     for r in restaurants[:5]:
         name = r.get("title", "")
         if not name:
@@ -523,7 +523,7 @@ def _enrich_with_nearby(data, html):
 
     attractions = nearby_data.get("attractions", [])
     if attractions:
-        nearby_html += "\n\n"
+        nearby_html += "\n\n## 근처 가볼 만한 곳\n\n"
         for a in attractions[:3]:
             name = a.get("title", "")
             if not name:
@@ -537,7 +537,7 @@ def _enrich_with_nearby(data, html):
     _nearby_total = len([a for a in attractions[:3] if a.get("title")])
     _restaurant_limit = max(0, 6 - _nearby_total)
     if restaurants and _restaurant_limit > 0:
-        nearby_html += "\n\n"
+        nearby_html += "\n\n## 근처 맛집\n\n"
         for r in restaurants[:min(3, _restaurant_limit)]:
             name = r.get("title", "")
             if not name:
