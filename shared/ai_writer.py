@@ -62,7 +62,8 @@ def generate_car(prompt_text, data):
 
     # 메인 차량 데이터
     main_keys = ["model", "brand", "year", "trim", "base_price", "engine", "fuel_type",
-                 "fuel_efficiency", "displacement", "seats", "discount", "discount_conditions",
+                 "fuel_efficiency", "displacement", "seats", "segment", "body_type", "drive_type",
+                 "discount", "discount_conditions",
                  "finance_rate", "finance_term_months", "monthly_payment_36", "monthly_payment_48",
                  "monthly_payment_60", "annual_km", "tax_annual", "insurance_estimate",
                  "annual_fuel_cost", "resale_1yr", "resale_2yr", "resale_3yr", "resale_rate_percent",

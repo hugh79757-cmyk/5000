@@ -376,6 +376,8 @@ def build_input(conn, topic, db_path):
         "engine": build_engine_desc(car),
         "fuel_type": car['fuel_type'],
         "segment": car.get('segment', ''),
+        "body_type": car.get('body_type', ''),
+        "drive_type": car.get('drive_type', ''),
         "fuel_efficiency": fuel_eff,
         "displacement": car['displacement'],
         "discount": 0, "discount_conditions": "",
