@@ -131,11 +131,29 @@ def make_car_id(brand, model, year):
         "스포티지 하이브리드": "sportage_hev", "스포티지": "sportage",
         "모닝": "morning", "레이 EV": "ray_ev", "레이": "ray", "모델 Y": "model_y",
         "GV80 쿠페": "gv80_coupe", "GV80": "gv80",
+        "GV60 마그마": "gv60_magma", "G70 슈팅 브레이크": "g70_shooting_brake",
+        "일렉트리파이드 G80": "electrified_g80",
+        "마이바흐 EQS SUV": "maybach_eqs_suv", "마이바흐 GLS": "maybach_gls",
+        "마이바흐 S클래스": "maybach_s_class", "마이바흐 SL": "maybach_sl",
+        "C클래스": "c_class", "G클래스": "g_class",
+        "1시리즈": "1_series", "2시리즈 그란 쿠페": "2_series_gran_coupe",
+        "2시리즈 액티브 투어러": "2_series_active_tourer",
+        "2시리즈": "2_series", "3시리즈": "3_series",
+        "5시리즈": "5_series", "7시리즈": "7_series", "8시리즈": "8_series",
+        "오딧세이": "odyssey", "무쏘 스포츠": "musso_sports", "무쏘": "musso",
+        "렉스턴": "rexton", "토레스 EVX": "torres_evx",
+        "그랑 콜레오스 하이브리드": "grand_koleos_hev", "그랑 콜레오스": "grand_koleos",
+        "필랑트": "philant", "모델 3": "model_3",
+        "캠리": "camry", "프리우스": "prius",
+        "Q4 e-트론": "q4_etron", "Q6 e-트론": "q6_etron",
+        "RS e-트론 GT": "rs_etron_gt", "S e-트론 GT": "s_etron_gt",
+        "EX30 크로스 컨트리": "ex30_cross_country", "V60 크로스 컨트리": "v60_cross_country",
+        "포터2 일렉트릭": "porter2_electric", "아이오닉 9": "ioniq9",
     }
     model_key = model_map.get(model, re.sub(r'[^a-zA-Z0-9]', '_', model.lower()))
     prefix = brand_map.get(brand, brand.lower())
     cid = f"{prefix}_{model_key}_{year}" if prefix else f"{model_key}_{year}"
-    return cid.strip("_").replace("__", "_")
+    return re.sub(r'_+', '_', cid).strip('_')
 
 
 def guess_fuel_type(title):
