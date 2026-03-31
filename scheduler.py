@@ -297,6 +297,26 @@ def _send_morning_report():
 
 # ─── 스케줄 등록 ───
 
+
+def _run_etap_batch():
+    """ETAP 배치 — 3건 생성 + 1회 빌드/배포."""
+    try:
+        from pipelines.etap.pipeline import run_batch
+        cfg = {
+            "id": "tour-hugo",
+            "domain": "tour.techpawz.com",
+            "site_path": "/Users/twinssn/Projects/ETAP/tour-hugo",
+            "cf_project": "tour-hugo",
+        }
+        results = run_batch(cfg, count=3)
+        logger.info(f"[ETAP] 배치 완료: {len(results)}건")
+    except Exception as e:
+        logger.error(f"[ETAP] 배치 실패: {e}")
+        try:
+            _tg_error(f"[ETAP] 배치 실패: {e}")
+        except Exception:
+            pass
+
 def register_schedules():
     config = load_config()
     blogs = config.get("blogs", [])
@@ -327,6 +347,13 @@ def register_schedules():
 
     schedule.every().day.at("23:50").do(daily_report)
     job_count += 1
+
+    # ── ETAP 배치 (하루 15건 = 5회 × 3건) ──
+    etap_times = ["07:30", "10:30", "13:30", "16:30", "20:30"]
+    for t in etap_times:
+        schedule.every().day.at(t).do(_run_etap_batch)
+        job_count += 1
+    logger.info(f"ETAP batch scheduled: {etap_times}")
 
     return job_count
 

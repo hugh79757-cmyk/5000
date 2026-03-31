@@ -677,3 +677,23 @@ deploy:
   method: wrangler
 git_backup:
   schedule: sunday 03:00
+- cf_project: tour-hugo
+  daily_quota: 5
+  domain: tour.techpawz.com
+  id: tour-hugo
+  name: Travel Guide (EN)
+  pipeline: etap
+  platform: hugo
+  repo: tour-hugo
+  schedule:
+    times:
+    - '07:30'
+    - '10:30'
+    - '13:30'
+    - '16:30'
+    - '20:30'
+  site_path: /Users/twinssn/Projects/ETAP/tour-hugo
+  status: inactive
+  theme: blowfish
+  language: en
+  blog_type: destination
