@@ -186,31 +186,12 @@ def _run_stap(stap_name, cfg):
 # ─── 파이프라인 실행 ───
 
 def _run_pipeline(cfg):
-    """pipeline 종류에 따라 해당 모듈의 run(cfg)를 호출"""
+    """pipeline 종류에 따라 해당 모듈의 run(cfg)를 동적 로딩하여 호출"""
     pipeline = cfg.get("pipeline", "")
     blog_id = cfg["id"]
 
-    if pipeline == "car":
-        from pipelines.car.pipeline import run
-        return run(cfg)
-
-    elif pipeline == "travel":
-        from pipelines.travel.pipeline import run
-        return run(cfg)
-
-    elif pipeline == "senior":
-        from pipelines.senior.pipeline import run
-        return run(cfg)
-
-    elif pipeline == "gap":
-        from pipelines.gap.pipeline import run
-        return run(cfg)
-
-    elif pipeline == "rap":
-        from pipelines.rap.pipeline import run
-        return run(cfg)
-
-    elif pipeline == "stock":
+    # stock → STAP subprocess 격리 실행 (자체 코드베이스)
+    if pipeline == "stock":
         stap_name = STAP_PIPELINE_MAP.get(blog_id)
         if stap_name:
             return _run_stap(stap_name, cfg)
@@ -218,10 +199,21 @@ def _run_pipeline(cfg):
             logger.error(f"STAP 매핑 없음: {blog_id}")
             return {"success": False, "reason": "unknown_stap_blog"}
 
-    else:
-        logger.error(f"Unknown pipeline: {pipeline}")
-        _tg_error(blog_id, "pipeline", f"Unknown pipeline: {pipeline}")
+    # 내장 파이프라인 — 동적 import
+    module_path = f"pipelines.{pipeline}.pipeline"
+    try:
+        module = importlib.import_module(module_path)
+    except ModuleNotFoundError:
+        logger.error(f"파이프라인 모듈 없음: {module_path}")
+        _tg_error(blog_id, "pipeline", f"모듈 없음: {module_path}")
         return {"success": False, "reason": "unknown_pipeline"}
+
+    if not hasattr(module, "run"):
+        logger.error(f"run() 함수 없음: {module_path}")
+        _tg_error(blog_id, "pipeline", f"run() 없음: {module_path}")
+        return {"success": False, "reason": "pipeline_no_run"}
+
+    return module.run(cfg)
 
 
 # ─── 메인 디스패치 ───
