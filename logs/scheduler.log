@@ -12795,3 +12795,752 @@ expected <block end>, but found '-'
   in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
 expected <block end>, but found '-'
   in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 680, column 1
+2026-03-31 16:57:02,798 [ERROR] Catchup error: while parsing a block mapping
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 1, column 1
+expected <block end>, but found '-'
+  in "/Users/twinssn/Projects/5000/config/blogs.yaml", line 680, column 1
+2026-03-31 17:02:03,439 [INFO] CATCHUP: tco-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:02:03,496 [INFO] Publishing: tco-hugo
+2026-03-31 17:03:45,701 [INFO] === 5000 Scheduler Starting ===
+2026-03-31 17:03:45,720 [INFO] Network ready
+2026-03-31 17:03:45,735 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-31 17:03:45,735 [INFO] Festival refresh scheduled at 06:00
+2026-03-31 17:03:45,735 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-31 17:03:45,735 [INFO] ETAP batch scheduled: ['07:30', '10:30', '13:30', '16:30', '20:30']
+2026-03-31 17:03:45,735 [INFO] Registered 153 jobs
+2026-03-31 17:03:45,735 [INFO] Next run: 2026-03-31 17:10:00
+2026-03-31 17:03:45,756 [INFO] CATCHUP: tco-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:03:45,770 [INFO] Publishing: tco-hugo
+2026-03-31 17:05:42,807 [INFO] CATCHUP: deal-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:05:42,862 [INFO] Publishing: deal-hugo
+2026-03-31 17:06:38,849 [INFO] === 5000 Scheduler Starting ===
+2026-03-31 17:06:38,874 [INFO] Network ready
+2026-03-31 17:06:38,916 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-31 17:06:38,916 [INFO] Festival refresh scheduled at 06:00
+2026-03-31 17:06:38,916 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-31 17:06:38,916 [INFO] ETAP batch scheduled: ['07:30', '10:30', '13:30', '16:30', '20:30']
+2026-03-31 17:06:38,916 [INFO] Registered 153 jobs
+2026-03-31 17:06:38,917 [INFO] Next run: 2026-03-31 17:10:00
+2026-03-31 17:06:38,961 [INFO] CATCHUP: deal-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:06:39,009 [INFO] Publishing: deal-hugo
+2026-03-31 17:07:29,139 [INFO] CATCHUP: compare-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:07:29,185 [INFO] Publishing: compare-hugo
+2026-03-31 17:08:36,555 [INFO] CATCHUP: guide-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:08:36,613 [INFO] Publishing: guide-hugo
+2026-03-31 17:09:55,606 [INFO] CATCHUP: ev-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:09:55,648 [INFO] Publishing: ev-hugo
+2026-03-31 17:10:59,655 [INFO] CATCHUP: travel1-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:10:59,694 [INFO] Publishing: travel1-hugo
+2026-03-31 17:11:05,327 [INFO] CATCHUP: stock-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:11:05,365 [INFO] Publishing: stock-hugo
+2026-03-31 17:12:00,286 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:12:00,325 [INFO] Publishing: dividend-hugo
+2026-03-31 17:12:14,120 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:12:14,159 [INFO] Publishing: etf-hugo
+2026-03-31 17:12:23,556 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:12:23,594 [INFO] Publishing: sector-hugo
+2026-03-31 17:12:36,201 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:12:36,297 [INFO] Publishing: ipo-hugo
+2026-03-31 17:12:53,039 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:12:53,082 [INFO] Publishing: finance-hugo
+2026-03-31 17:13:04,816 [INFO] CATCHUP: senior-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:13:04,857 [INFO] Publishing: senior-hugo
+2026-03-31 17:13:49,324 [INFO] CATCHUP: rap-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:13:49,385 [INFO] Publishing: rap-hugo
+2026-03-31 17:14:35,925 [INFO] CATCHUP: laptop-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:14:35,961 [INFO] Publishing: laptop-hugo
+2026-03-31 17:14:41,620 [INFO] CATCHUP: appliance-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:14:41,659 [INFO] Publishing: appliance-hugo
+2026-03-31 17:15:35,785 [INFO] CATCHUP: interior-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:15:35,826 [INFO] Publishing: interior-hugo
+2026-03-31 17:17:52,931 [INFO] CATCHUP: baby-hugo expected=4 actual=1 missed=3 quota=5 attempt=1/3
+2026-03-31 17:17:52,972 [INFO] Publishing: baby-hugo
+2026-03-31 17:17:58,417 [INFO] CATCHUP: fitness-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:17:58,459 [INFO] Publishing: fitness-hugo
+2026-03-31 17:19:30,446 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-03-31 17:19:30,507 [INFO] Publishing: senior-blogger
+2026-03-31 17:19:30,514 [INFO] CATCHUP: travel1-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-03-31 17:19:30,531 [INFO] Publishing: travel1-hugo
+2026-03-31 17:19:35,907 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:19:35,939 [INFO] Publishing: dividend-hugo
+2026-03-31 17:19:49,016 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:19:49,062 [INFO] Publishing: etf-hugo
+2026-03-31 17:19:56,549 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:19:56,572 [INFO] Publishing: sector-hugo
+2026-03-31 17:20:07,750 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:20:07,790 [INFO] Publishing: ipo-hugo
+2026-03-31 17:20:21,434 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:20:21,473 [INFO] Publishing: finance-hugo
+2026-03-31 17:20:33,877 [INFO] CATCHUP: laptop-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-03-31 17:20:33,913 [INFO] Publishing: laptop-hugo
+2026-03-31 17:20:39,355 [INFO] CATCHUP: baby-hugo expected=4 actual=1 missed=3 quota=5 attempt=2/3
+2026-03-31 17:20:39,391 [INFO] Publishing: baby-hugo
+2026-03-31 17:22:59,912 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-03-31 17:22:59,955 [INFO] Publishing: rap2-hugo
+2026-03-31 17:24:45,372 [INFO] CATCHUP: travel1-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-31 17:24:45,400 [INFO] Publishing: travel1-hugo
+2026-03-31 17:24:51,205 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:24:51,244 [INFO] Publishing: dividend-hugo
+2026-03-31 17:25:04,513 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:25:04,554 [INFO] Publishing: etf-hugo
+2026-03-31 17:25:11,916 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:25:11,958 [INFO] Publishing: sector-hugo
+2026-03-31 17:25:23,628 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:25:23,665 [INFO] Publishing: ipo-hugo
+2026-03-31 17:25:36,652 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:25:36,693 [INFO] Publishing: finance-hugo
+2026-03-31 17:25:48,295 [INFO] CATCHUP: laptop-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-31 17:25:48,325 [INFO] Publishing: laptop-hugo
+2026-03-31 17:25:54,020 [INFO] CATCHUP: baby-hugo expected=4 actual=1 missed=3 quota=5 attempt=3/3
+2026-03-31 17:25:54,058 [INFO] Publishing: baby-hugo
+2026-03-31 17:30:00,423 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-03-31 17:30:00,489 [INFO] Publishing: rap3-hugo
+2026-03-31 17:30:00,502 [INFO] CATCHUP: rap3-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:30:00,518 [INFO] Publishing: rap3-hugo
+2026-03-31 17:32:08,954 [INFO] === 5000 Scheduler Starting ===
+2026-03-31 17:32:09,006 [INFO] Network ready
+2026-03-31 17:32:09,035 [INFO] GAP keyword sync scheduled at 05:00
+2026-03-31 17:32:09,035 [INFO] Festival refresh scheduled at 06:00
+2026-03-31 17:32:09,035 [INFO] CAR daily_refresh scheduled at 06:30
+2026-03-31 17:32:09,035 [INFO] ETAP batch scheduled: ['07:30', '10:30', '13:30', '16:30', '20:30']
+2026-03-31 17:32:09,035 [INFO] Registered 153 jobs
+2026-03-31 17:32:09,035 [INFO] Next run: 2026-03-31 17:50:00
+2026-03-31 17:32:09,071 [INFO] CATCHUP: travel1-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:32:09,098 [INFO] Publishing: travel1-hugo
+2026-03-31 17:32:14,888 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:32:14,948 [INFO] Publishing: dividend-hugo
+2026-03-31 17:32:28,315 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:32:28,359 [INFO] Publishing: etf-hugo
+2026-03-31 17:32:35,822 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:32:35,861 [INFO] Publishing: sector-hugo
+2026-03-31 17:32:48,201 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:32:48,253 [INFO] Publishing: ipo-hugo
+2026-03-31 17:33:00,818 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 17:33:00,853 [INFO] Publishing: finance-hugo
+2026-03-31 17:33:12,722 [INFO] CATCHUP: laptop-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:33:12,761 [INFO] Publishing: laptop-hugo
+2026-03-31 17:33:18,819 [INFO] CATCHUP: baby-hugo expected=4 actual=1 missed=3 quota=5 attempt=1/3
+2026-03-31 17:33:18,853 [INFO] Publishing: baby-hugo
+2026-03-31 17:37:25,124 [INFO] CATCHUP: travel1-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-03-31 17:37:25,153 [INFO] Publishing: travel1-hugo
+2026-03-31 17:37:31,320 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:37:31,365 [INFO] Publishing: dividend-hugo
+2026-03-31 17:37:44,854 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:37:44,895 [INFO] Publishing: etf-hugo
+2026-03-31 17:37:52,253 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:37:52,320 [INFO] Publishing: sector-hugo
+2026-03-31 17:38:04,320 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:38:04,358 [INFO] Publishing: ipo-hugo
+2026-03-31 17:38:16,882 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 17:38:16,923 [INFO] Publishing: finance-hugo
+2026-03-31 17:38:29,120 [INFO] CATCHUP: laptop-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-03-31 17:38:29,157 [INFO] Publishing: laptop-hugo
+2026-03-31 17:38:35,704 [INFO] CATCHUP: baby-hugo expected=4 actual=1 missed=3 quota=5 attempt=2/3
+2026-03-31 17:38:35,737 [INFO] Publishing: baby-hugo
+2026-03-31 17:42:43,394 [INFO] CATCHUP: travel1-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-31 17:42:43,422 [INFO] Publishing: travel1-hugo
+2026-03-31 17:42:49,471 [INFO] CATCHUP: dividend-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:42:49,508 [INFO] Publishing: dividend-hugo
+2026-03-31 17:42:55,168 [INFO] CATCHUP: etf-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:42:55,211 [INFO] Publishing: etf-hugo
+2026-03-31 17:43:00,713 [INFO] CATCHUP: sector-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:43:00,754 [INFO] Publishing: sector-hugo
+2026-03-31 17:43:06,371 [INFO] CATCHUP: ipo-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:43:06,412 [INFO] Publishing: ipo-hugo
+2026-03-31 17:43:11,953 [INFO] CATCHUP: finance-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 17:43:11,992 [INFO] Publishing: finance-hugo
+2026-03-31 17:43:17,504 [INFO] CATCHUP: laptop-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-31 17:43:17,538 [INFO] Publishing: laptop-hugo
+2026-03-31 17:43:23,682 [INFO] CATCHUP: baby-hugo expected=4 actual=1 missed=3 quota=5 attempt=3/3
+2026-03-31 17:43:23,719 [INFO] Publishing: baby-hugo
+2026-03-31 17:50:00,954 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-03-31 17:50:01,004 [INFO] Publishing: rap4-hugo
+2026-03-31 17:53:01,681 [INFO] CATCHUP: rap4-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-03-31 17:53:01,707 [INFO] Publishing: rap4-hugo
+2026-03-31 17:58:08,723 [INFO] CATCHUP: rap4-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-03-31 17:58:08,749 [INFO] Publishing: rap4-hugo
+2026-03-31 18:03:15,377 [INFO] CATCHUP: rap4-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-03-31 18:03:15,403 [INFO] Publishing: rap4-hugo
+2026-03-31 18:10:22,447 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-03-31 18:10:22,490 [INFO] Publishing: rap5-hugo
+2026-03-31 18:28:25,715 [INFO] CATCHUP: tour-hugo expected=4 actual=0 missed=4 quota=5 attempt=1/3
+2026-03-31 18:28:25,794 [INFO] Publishing: tour-hugo
+2026-03-31 18:29:14,715 [INFO]   [ETAP] 이미지 R2 업로드: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/bangkok-thailand/cover.jpg (Noppon Meenuch)
+2026-03-31 18:29:14,718 [INFO]   [ETAP] 파일 생성: /Users/twinssn/Projects/ETAP/tour-hugo/content/posts/bangkok-thailand/index.md
+2026-03-31 18:29:14,718 [INFO]   [ETAP] Deployed to tour.techpawz.com
+2026-03-31 18:33:50,444 [INFO] CATCHUP: tour-hugo expected=4 actual=0 missed=4 quota=5 attempt=2/3
+2026-03-31 18:33:50,471 [INFO] Publishing: tour-hugo
+2026-03-31 18:34:59,274 [INFO]   [ETAP] 이미지 R2 업로드: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/london-uk/cover.jpg (Frederick Wallace)
+2026-03-31 18:34:59,274 [INFO]   [ETAP] 파일 생성: /Users/twinssn/Projects/ETAP/tour-hugo/content/posts/london-uk/index.md
+2026-03-31 18:34:59,274 [INFO]   [ETAP] Deployed to tour.techpawz.com
+2026-03-31 18:39:04,845 [INFO] CATCHUP: tour-hugo expected=4 actual=0 missed=4 quota=5 attempt=3/3
+2026-03-31 18:39:04,874 [INFO] Publishing: tour-hugo
+2026-03-31 18:40:20,155 [INFO]   [ETAP] 이미지 R2 업로드: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/rome-italy/cover.jpg (Charlotte Peacock)
+2026-03-31 18:40:20,157 [INFO]   [ETAP] 파일 생성: /Users/twinssn/Projects/ETAP/tour-hugo/content/posts/rome-italy/index.md
+2026-03-31 18:40:20,157 [INFO]   [ETAP] Deployed to tour.techpawz.com
+2026-03-31 20:00:06,217 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-03-31 20:00:06,263 [INFO] QUOTA SKIP: travel-hugo actual=5 >= quota=5
+2026-03-31 20:02:06,401 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-03-31 20:02:06,439 [INFO] Publishing: travel1-hugo
+2026-03-31 20:04:06,623 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-03-31 20:04:06,663 [INFO] Publishing: travel2-hugo
+2026-03-31 20:04:36,743 [INFO] CATCHUP: travel2-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:04:36,770 [INFO] Publishing: travel2-hugo
+2026-03-31 20:06:07,002 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-03-31 20:06:07,048 [INFO] QUOTA SKIP: travel3-hugo actual=5 >= quota=5
+2026-03-31 20:08:07,256 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-03-31 20:08:07,299 [INFO] Publishing: travel4-hugo
+2026-03-31 20:09:37,454 [INFO] CATCHUP: travel4-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:09:37,482 [INFO] Publishing: travel4-hugo
+2026-03-31 20:10:13,384 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-03-31 20:10:13,424 [INFO] Publishing: hotissue-hugo
+2026-03-31 20:12:13,627 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-03-31 20:12:13,908 [INFO] Publishing: tco-hugo
+2026-03-31 20:14:13,848 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-03-31 20:14:13,914 [INFO] Publishing: deal-hugo
+2026-03-31 20:14:43,969 [INFO] CATCHUP: tco-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:14:43,996 [INFO] Publishing: tco-hugo
+2026-03-31 20:14:50,747 [INFO] CATCHUP: deal-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:14:50,788 [INFO] Publishing: deal-hugo
+2026-03-31 20:14:56,972 [INFO] CATCHUP: travel4-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:14:57,008 [INFO] Publishing: travel4-hugo
+2026-03-31 20:16:03,070 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-03-31 20:16:03,116 [INFO] Publishing: compare-hugo
+2026-03-31 20:18:03,315 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-03-31 20:18:03,359 [INFO] Publishing: guide-hugo
+2026-03-31 20:20:03,511 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-03-31 20:20:03,579 [INFO] CATCHUP: tco-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:20:03,580 [INFO] Publishing: ev-hugo
+2026-03-31 20:20:03,614 [INFO] Publishing: tco-hugo
+2026-03-31 20:20:09,915 [INFO] CATCHUP: deal-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:20:09,955 [INFO] Publishing: deal-hugo
+2026-03-31 20:20:15,957 [INFO] CATCHUP: guide-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:20:16,000 [INFO] Publishing: guide-hugo
+2026-03-31 20:20:22,031 [INFO] CATCHUP: ev-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:20:22,068 [INFO] Publishing: ev-hugo
+2026-03-31 20:21:36,220 [INFO] CATCHUP: travel4-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 20:21:36,255 [INFO] Publishing: travel4-hugo
+2026-03-31 20:22:12,193 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-03-31 20:22:12,236 [INFO] Publishing: stock-hugo
+2026-03-31 20:24:12,394 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-03-31 20:24:12,441 [INFO] Publishing: dividend-hugo
+2026-03-31 20:25:12,588 [INFO] CATCHUP: tco-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 20:25:12,622 [INFO] Publishing: tco-hugo
+2026-03-31 20:25:18,480 [INFO] CATCHUP: deal-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 20:25:18,547 [INFO] Publishing: deal-hugo
+2026-03-31 20:25:24,482 [INFO] CATCHUP: guide-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:25:24,521 [INFO] Publishing: guide-hugo
+2026-03-31 20:26:00,427 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-03-31 20:26:00,467 [INFO] Publishing: etf-hugo
+2026-03-31 20:28:00,650 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-03-31 20:28:00,689 [INFO] Publishing: sector-hugo
+2026-03-31 20:30:00,843 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-03-31 20:30:00,881 [INFO] Publishing: ipo-hugo
+2026-03-31 20:30:36,755 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 20:30:38,355 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/barcelona-spain/cover.jpg
+2026-03-31 20:31:24,917 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 20:31:26,557 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/new-york-usa/cover.jpg
+2026-03-31 20:32:09,835 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-31 20:32:11,409 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/istanbul-turkey/cover.jpg
+2026-03-31 20:32:28,023 [INFO] [ETAP] 배치 완료: 3건
+2026-03-31 20:32:28,055 [INFO] CATCHUP: guide-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 20:32:28,084 [INFO] Publishing: guide-hugo
+2026-03-31 20:33:04,108 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-03-31 20:33:04,147 [INFO] Publishing: finance-hugo
+2026-03-31 20:34:04,187 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-03-31 20:34:04,226 [INFO] Publishing: senior-hugo
+2026-03-31 20:40:04,887 [INFO] Queue executing: laptop-hugo (remaining: 0)
+2026-03-31 20:40:04,930 [INFO] Publishing: laptop-hugo
+2026-03-31 20:42:05,111 [INFO] Queue executing: appliance-hugo (remaining: 0)
+2026-03-31 20:42:05,154 [INFO] Publishing: appliance-hugo
+2026-03-31 20:42:35,276 [INFO] CATCHUP: appliance-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:42:35,305 [INFO] Publishing: appliance-hugo
+2026-03-31 20:44:11,545 [INFO] Queue executing: interior-hugo (remaining: 0)
+2026-03-31 20:44:11,589 [INFO] Publishing: interior-hugo
+2026-03-31 20:46:11,810 [INFO] Queue executing: baby-hugo (remaining: 0)
+2026-03-31 20:46:11,854 [INFO] Publishing: baby-hugo
+2026-03-31 20:47:42,042 [INFO] CATCHUP: appliance-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:47:42,069 [INFO] Publishing: appliance-hugo
+2026-03-31 20:47:48,020 [INFO] CATCHUP: interior-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:47:48,063 [INFO] Publishing: interior-hugo
+2026-03-31 20:48:24,067 [INFO] Queue executing: fitness-hugo (remaining: 0)
+2026-03-31 20:48:24,110 [INFO] Publishing: fitness-hugo
+2026-03-31 20:50:24,246 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-03-31 20:50:24,289 [INFO] Publishing: rap-hugo
+2026-03-31 20:52:54,604 [INFO] CATCHUP: appliance-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 20:52:54,632 [INFO] Publishing: appliance-hugo
+2026-03-31 20:53:00,767 [INFO] CATCHUP: interior-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:53:00,835 [INFO] Publishing: interior-hugo
+2026-03-31 20:53:06,794 [INFO] CATCHUP: fitness-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 20:53:06,840 [INFO] Publishing: fitness-hugo
+2026-03-31 20:58:13,593 [INFO] CATCHUP: interior-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 20:58:13,619 [INFO] Publishing: interior-hugo
+2026-03-31 20:58:19,590 [INFO] CATCHUP: fitness-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 20:58:19,633 [INFO] Publishing: fitness-hugo
+2026-03-31 21:03:26,625 [INFO] CATCHUP: fitness-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 21:03:26,675 [INFO] Publishing: fitness-hugo
+2026-03-31 21:10:04,801 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-03-31 21:10:04,850 [INFO] Publishing: senior-blogger
+2026-03-31 21:13:48,341 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-03-31 21:13:48,384 [INFO] Publishing: rap2-hugo
+2026-03-31 21:30:07,318 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-03-31 21:30:07,363 [INFO] Publishing: rap3-hugo
+2026-03-31 21:33:37,744 [INFO] CATCHUP: rap3-hugo expected=5 actual=4 missed=1 quota=5 attempt=1/3
+2026-03-31 21:33:37,801 [INFO] Publishing: rap3-hugo
+2026-03-31 21:38:44,404 [INFO] CATCHUP: rap3-hugo expected=5 actual=4 missed=1 quota=5 attempt=2/3
+2026-03-31 21:38:44,430 [INFO] Publishing: rap3-hugo
+2026-03-31 21:43:50,500 [INFO] CATCHUP: rap3-hugo expected=5 actual=4 missed=1 quota=5 attempt=3/3
+2026-03-31 21:43:50,526 [INFO] Publishing: rap3-hugo
+2026-03-31 21:50:26,851 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-03-31 21:50:26,891 [INFO] Publishing: rap4-hugo
+2026-03-31 22:10:29,388 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-03-31 22:10:29,435 [INFO] QUOTA SKIP: rap5-hugo actual=5 >= quota=5
+2026-03-31 22:45:03,474 [INFO] Batch deploy started
+2026-03-31 22:52:05,581 [INFO]   ===== 결과 =====
+2026-03-31 22:52:05,582 [INFO]     성공: 27
+2026-03-31 22:52:05,582 [INFO]     스킵: 2
+2026-03-31 22:52:05,582 [INFO]     실패: 1
+2026-03-31 22:52:05,582 [INFO]     CF 빌드 소모: 0 (Direct Upload)
+2026-03-31 23:50:12,805 [INFO] Daily report
+2026-03-31 23:50:13,040 [INFO]   Report failed: cannot import name 'send_daily_report' from 'shared.monitor' (/Users/twinssn/Projects/5000/shared/monitor.py)
+2026-04-01 05:00:24,254 [INFO] GAP keyword sync:   엔터테인먼트: 8
+2026-04-01 06:00:10,042 page 1: 100건 (전체 235건)
+2026-04-01 06:03:00,434 page 2: 100건 (전체 235건)
+2026-04-01 06:04:38,954 page 3: 35건 (전체 235건)
+2026-04-01 06:05:18,081 festival refresh 완료: 235건
+2026-04-01 06:05:18,177 [INFO] Festival refresh completed
+2026-04-01 06:30:21,131 [INFO] === CAP 데이터 갱신 시작 ===
+2026-04-01 06:33:05,600 [INFO] 트림 업데이트: 677건, 가격변동: 18건
+2026-04-01 06:33:06,281 [INFO]   [연비보충] 606/668건 매칭 완료
+2026-04-01 06:35:45,292 [INFO] 이미지 보충: 0장 (차단: 320개)
+2026-04-01 06:35:45,296 [INFO] 신규 차량 탐색: 8264~8294
+2026-04-01 06:36:05,996 [INFO] 신규 차량 0대 발견, 0대 자동 등록 (탐색범위: 8264~8294)
+2026-04-01 06:36:06,000 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 스마트: 2,141 -> 2,254만원 (인상 113만원, 5.3%)
+2026-04-01 06:36:06,002 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 스마트: 2,152 -> 2,265만원 (인상 113만원, 5.3%)
+2026-04-01 06:36:06,002 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 스마트: 2,254 -> 2,141만원 (인하 113만원, 5.0%)
+2026-04-01 06:36:06,002 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 스마트: 2,265 -> 2,152만원 (인하 113만원, 5.0%)
+2026-04-01 06:36:06,002 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 모던: 2,242 -> 2,355만원 (인상 113만원, 5.0%)
+2026-04-01 06:36:06,002 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 모던: 2,257 -> 2,370만원 (인상 113만원, 5.0%)
+2026-04-01 06:36:06,002 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 스마트: 2,295 -> 2,408만원 (인상 113만원, 4.9%)
+2026-04-01 06:36:06,003 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 모던: 2,355 -> 2,242만원 (인하 113만원, 4.8%)
+2026-04-01 06:36:06,003 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 모던: 2,370 -> 2,257만원 (인하 113만원, 4.8%)
+2026-04-01 06:36:06,003 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 프리미엄: 2,365 -> 2,478만원 (인상 113만원, 4.8%)
+2026-04-01 06:36:06,003 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 스마트: 2,408 -> 2,295만원 (인하 113만원, 4.7%)
+2026-04-01 06:36:06,003 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 프리미엄: 2,380 -> 2,493만원 (인상 113만원, 4.7%)
+2026-04-01 06:36:06,003 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 모던: 2,398 -> 2,511만원 (인상 113만원, 4.7%)
+2026-04-01 06:36:06,004 [INFO]   [가격변동] 현대 포터2 2WD 일반캡 초장축 프리미엄: 2,478 -> 2,365만원 (인하 113만원, 4.6%)
+2026-04-01 06:36:06,004 [INFO]   [가격변동] 현대 포터2 2WD 슈퍼캡 초장축 프리미엄: 2,493 -> 2,380만원 (인하 113만원, 4.5%)
+2026-04-01 06:36:06,004 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 모던: 2,511 -> 2,398만원 (인하 113만원, 4.5%)
+2026-04-01 06:36:06,004 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 프리미엄: 2,513 -> 2,626만원 (인상 113만원, 4.5%)
+2026-04-01 06:36:06,004 [INFO]   [가격변동] 현대 포터2 2WD 더블캡 초장축 프리미엄: 2,626 -> 2,513만원 (인하 113만원, 4.3%)
+2026-04-01 06:36:06,014 [INFO]   [토픽보충] tco/tco_analysis: 13건 추가 (기존 48 → 61)
+2026-04-01 06:36:06,019 [INFO]   [토픽보충] deal/promo_deal: 13건 추가 (기존 48 → 61)
+2026-04-01 06:36:06,030 [INFO]   [토픽보충] ev/ev_analysis: 17건 추가 (기존 46 → 63)
+2026-04-01 06:36:06,030 [INFO] === 갱신 완료: 차량 124대, 트림 668개, 이미지 690장, 대기토픽 415개, 신규토픽 43개 ===
+2026-04-01 06:36:06,185 [INFO] CAR daily_refresh completed
+2026-04-01 07:00:09,849 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-04-01 07:00:09,892 [INFO] Publishing: travel-hugo
+2026-04-01 07:01:09,966 [INFO] CATCHUP: travel-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:01:09,994 [INFO] Publishing: travel-hugo
+2026-04-01 07:02:49,914 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-04-01 07:02:49,959 [INFO] Publishing: travel1-hugo
+2026-04-01 07:04:20,094 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-04-01 07:04:20,138 [INFO] Publishing: travel2-hugo
+2026-04-01 07:06:20,321 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-04-01 07:06:20,385 [INFO] CATCHUP: travel3-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:06:20,410 [INFO] Publishing: travel3-hugo
+2026-04-01 07:06:20,416 [INFO] Publishing: travel3-hugo
+2026-04-01 07:08:28,828 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-04-01 07:08:28,877 [INFO] Publishing: travel4-hugo
+2026-04-01 07:10:29,293 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-04-01 07:10:29,339 [INFO] Publishing: hotissue-hugo
+2026-04-01 07:11:29,580 [INFO] CATCHUP: hotissue-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:11:29,606 [INFO] Publishing: hotissue-hugo
+2026-04-01 07:12:53,557 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-04-01 07:12:53,601 [INFO] Publishing: tco-hugo
+2026-04-01 07:14:23,958 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-04-01 07:14:24,003 [INFO] Publishing: deal-hugo
+2026-04-01 07:16:24,415 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-04-01 07:16:24,458 [INFO] Publishing: compare-hugo
+2026-04-01 07:16:54,611 [INFO] CATCHUP: compare-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:16:54,637 [INFO] Publishing: compare-hugo
+2026-04-01 07:18:12,991 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-04-01 07:18:13,038 [INFO] Publishing: guide-hugo
+2026-04-01 07:20:13,562 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-04-01 07:20:13,648 [INFO] Publishing: ev-hugo
+2026-04-01 07:22:14,103 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-04-01 07:22:14,176 [INFO] Publishing: stock-hugo
+2026-04-01 07:22:14,189 [INFO] CATCHUP: stock-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:22:14,214 [INFO] Publishing: stock-hugo
+2026-04-01 07:24:20,196 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-04-01 07:24:20,244 [INFO] Publishing: dividend-hugo
+2026-04-01 07:26:20,485 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-04-01 07:26:20,528 [INFO] Publishing: etf-hugo
+2026-04-01 07:27:20,647 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:27:20,672 [INFO] Publishing: dividend-hugo
+2026-04-01 07:27:33,583 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:27:33,625 [INFO] Publishing: etf-hugo
+2026-04-01 07:28:15,868 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-04-01 07:28:15,906 [INFO] Publishing: sector-hugo
+2026-04-01 07:30:16,194 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-04-01 07:30:16,238 [INFO] Publishing: ipo-hugo
+2026-04-01 07:30:16,272 [INFO] Retrying request to /chat/completions in 0.468502 seconds
+2026-04-01 07:30:16,849 [INFO] Retrying request to /chat/completions in 0.812865 seconds
+2026-04-01 07:30:17,803 [ERROR] [ETAP] 배치 실패: Connection error.
+2026-04-01 07:32:18,240 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-04-01 07:32:18,282 [INFO] Publishing: finance-hugo
+2026-04-01 07:32:48,420 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-04-01 07:32:48,446 [INFO] Publishing: dividend-hugo
+2026-04-01 07:32:54,131 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-04-01 07:32:54,174 [INFO] Publishing: etf-hugo
+2026-04-01 07:32:59,766 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:32:59,807 [INFO] Publishing: sector-hugo
+2026-04-01 07:33:05,442 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:33:05,484 [INFO] Publishing: ipo-hugo
+2026-04-01 07:33:11,072 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:33:11,111 [INFO] Publishing: finance-hugo
+2026-04-01 07:33:16,713 [INFO] CATCHUP: tour-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:33:16,745 [INFO] Publishing: tour-hugo
+2026-04-01 07:33:19,249 [INFO]   [ETAP] tour-hugo: Dubai, United Arab Emirates 글 생성 시작
+2026-04-01 07:33:19,250 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 07:33:19,279 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 07:33:19,279 [WARNING] CATCHUP: tour-hugo 보충 실패 (1/3)
+2026-04-01 07:34:24,714 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-04-01 07:34:24,756 [INFO] Publishing: senior-hugo
+2026-04-01 07:37:55,356 [INFO] CATCHUP: dividend-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-04-01 07:37:55,382 [INFO] Publishing: dividend-hugo
+2026-04-01 07:38:08,995 [INFO] CATCHUP: etf-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-04-01 07:38:09,038 [INFO] Publishing: etf-hugo
+2026-04-01 07:38:16,864 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-04-01 07:38:16,900 [INFO] Publishing: sector-hugo
+2026-04-01 07:38:29,269 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-04-01 07:38:29,309 [INFO] Publishing: ipo-hugo
+2026-04-01 07:38:48,261 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-04-01 07:38:48,301 [INFO] Publishing: finance-hugo
+2026-04-01 07:39:00,320 [INFO] CATCHUP: senior-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:39:00,359 [INFO] Publishing: senior-hugo
+2026-04-01 07:41:11,769 [INFO] CATCHUP: tour-hugo expected=1 actual=0 missed=1 quota=5 attempt=2/3
+2026-04-01 07:41:11,800 [INFO] Publishing: tour-hugo
+2026-04-01 07:42:07,749 [INFO]   [ETAP] 이미지 R2 업로드: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/dubai-uae/cover.jpg (Adharsh K Ravindran)
+2026-04-01 07:42:07,750 [INFO]   [ETAP] 파일 생성: /Users/twinssn/Projects/ETAP/tour-hugo/content/posts/dubai-uae/index.md
+2026-04-01 07:42:07,750 [INFO]   [ETAP] Deployed to tour.techpawz.com
+2026-04-01 07:42:42,876 [INFO] Queue executing: laptop-hugo (remaining: 1)
+2026-04-01 07:42:42,920 [INFO] Publishing: laptop-hugo
+2026-04-01 07:43:12,995 [INFO] CATCHUP: sector-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-04-01 07:43:13,021 [INFO] Publishing: sector-hugo
+2026-04-01 07:43:26,156 [INFO] CATCHUP: ipo-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-04-01 07:43:26,194 [INFO] Publishing: ipo-hugo
+2026-04-01 07:43:39,212 [INFO] CATCHUP: finance-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-04-01 07:43:39,253 [INFO] Publishing: finance-hugo
+2026-04-01 07:43:52,475 [INFO] CATCHUP: laptop-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 07:43:52,514 [INFO] Publishing: laptop-hugo
+2026-04-01 07:44:46,797 [INFO] CATCHUP: tour-hugo expected=1 actual=0 missed=1 quota=5 attempt=3/3
+2026-04-01 07:44:46,881 [INFO] Publishing: tour-hugo
+2026-04-01 07:45:51,114 [INFO]   [ETAP] 이미지 R2 업로드: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/singapore/cover.jpg (Shan A. Rajpoot)
+2026-04-01 07:45:51,115 [INFO]   [ETAP] 파일 생성: /Users/twinssn/Projects/ETAP/tour-hugo/content/posts/singapore/index.md
+2026-04-01 07:45:51,115 [INFO]   [ETAP] Deployed to tour.techpawz.com
+2026-04-01 07:47:09,270 [INFO] Queue executing: appliance-hugo (remaining: 2)
+2026-04-01 07:47:09,316 [INFO] Publishing: appliance-hugo
+2026-04-01 07:51:16,757 [INFO] Queue executing: interior-hugo (remaining: 3)
+2026-04-01 07:51:16,800 [INFO] Publishing: interior-hugo
+2026-04-01 07:55:13,365 [INFO] Queue executing: baby-hugo (remaining: 2)
+2026-04-01 07:55:13,408 [INFO] Publishing: baby-hugo
+2026-04-01 07:59:02,992 [INFO] Queue executing: fitness-hugo (remaining: 1)
+2026-04-01 07:59:03,038 [INFO] Publishing: fitness-hugo
+2026-04-01 08:02:54,760 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-04-01 08:02:54,860 [INFO] Publishing: rap-hugo
+2026-04-01 08:03:28,324 [INFO] CATCHUP: rap-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 08:03:28,351 [INFO] Publishing: rap-hugo
+2026-04-01 08:10:02,675 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-04-01 08:10:02,719 [INFO] Publishing: senior-blogger
+2026-04-01 08:13:32,870 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-04-01 08:13:32,910 [INFO] Publishing: rap2-hugo
+2026-04-01 08:13:33,124 [INFO] CATCHUP: rap2-hugo expected=1 actual=0 missed=1 quota=5 attempt=1/3
+2026-04-01 08:13:33,154 [INFO] Publishing: rap2-hugo
+2026-04-01 08:30:21,847 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-04-01 08:30:21,889 [INFO] Publishing: rap3-hugo
+2026-04-01 08:50:24,238 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-04-01 08:50:24,279 [INFO] Publishing: rap4-hugo
+2026-04-01 09:10:26,774 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-04-01 09:10:26,822 [INFO] Publishing: rap5-hugo
+2026-04-01 10:00:02,717 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-04-01 10:00:02,772 [INFO] Publishing: travel-hugo
+2026-04-01 10:02:02,992 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-04-01 10:02:03,042 [INFO] Publishing: travel1-hugo
+2026-04-01 10:04:03,179 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-04-01 10:04:03,255 [INFO] Publishing: travel2-hugo
+2026-04-01 10:04:03,270 [INFO] CATCHUP: travel2-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-04-01 10:04:03,299 [INFO] Publishing: travel2-hugo
+2026-04-01 10:06:20,329 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-04-01 10:06:20,364 [INFO] Publishing: travel3-hugo
+2026-04-01 10:08:20,527 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-04-01 10:08:20,569 [INFO] Publishing: travel4-hugo
+2026-04-01 10:09:20,694 [INFO] CATCHUP: travel4-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-04-01 10:09:20,720 [INFO] Publishing: travel4-hugo
+2026-04-01 10:11:03,976 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-04-01 10:11:04,015 [INFO] Publishing: hotissue-hugo
+2026-04-01 10:12:04,109 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-04-01 10:12:04,149 [INFO] Publishing: tco-hugo
+2026-04-01 10:14:04,358 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-04-01 10:14:04,398 [INFO] Publishing: deal-hugo
+2026-04-01 10:14:34,469 [INFO] CATCHUP: deal-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-04-01 10:14:34,495 [INFO] Publishing: deal-hugo
+2026-04-01 10:16:19,186 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-04-01 10:16:19,245 [INFO] Publishing: compare-hugo
+2026-04-01 10:18:19,458 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-04-01 10:18:19,510 [INFO] Publishing: guide-hugo
+2026-04-01 10:20:19,758 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-04-01 10:20:19,800 [INFO] Publishing: ev-hugo
+2026-04-01 10:22:20,518 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-04-01 10:22:20,575 [INFO] Publishing: stock-hugo
+2026-04-01 10:24:20,688 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-04-01 10:24:20,755 [INFO] Publishing: dividend-hugo
+2026-04-01 10:26:20,984 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-04-01 10:26:21,034 [INFO] Publishing: etf-hugo
+2026-04-01 10:28:21,205 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-04-01 10:28:21,245 [INFO] Publishing: sector-hugo
+2026-04-01 10:30:21,449 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-04-01 10:30:21,676 [INFO] Publishing: ipo-hugo
+2026-04-01 10:31:01,959 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 10:31:03,923 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/bali-indonesia/cover.jpg
+2026-04-01 10:31:44,455 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 10:31:46,601 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/amsterdam-netherlands/cover.jpg
+2026-04-01 10:32:37,116 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 10:32:39,031 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/prague-czech-republic/cover.jpg
+2026-04-01 10:32:55,173 [INFO] [ETAP] 배치 완료: 3건
+2026-04-01 10:33:25,255 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-04-01 10:33:25,311 [INFO] Publishing: finance-hugo
+2026-04-01 10:34:25,372 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-04-01 10:34:25,422 [INFO] Publishing: senior-hugo
+2026-04-01 10:34:55,502 [INFO] CATCHUP: senior-hugo expected=2 actual=1 missed=1 quota=5 attempt=2/3
+2026-04-01 10:34:55,572 [INFO] Publishing: senior-hugo
+2026-04-01 10:40:18,848 [INFO] Queue executing: laptop-hugo (remaining: 0)
+2026-04-01 10:40:19,188 [INFO] Publishing: laptop-hugo
+2026-04-01 10:40:19,259 [INFO] CATCHUP: laptop-hugo expected=2 actual=1 missed=1 quota=5 attempt=2/3
+2026-04-01 10:40:19,434 [INFO] Publishing: laptop-hugo
+2026-04-01 10:42:05,215 [INFO] Queue executing: appliance-hugo (remaining: 0)
+2026-04-01 10:42:05,255 [INFO] Publishing: appliance-hugo
+2026-04-01 10:44:05,498 [INFO] Queue executing: interior-hugo (remaining: 0)
+2026-04-01 10:44:05,547 [INFO] Publishing: interior-hugo
+2026-04-01 10:46:05,658 [INFO] Queue executing: baby-hugo (remaining: 0)
+2026-04-01 10:46:05,697 [INFO] Publishing: baby-hugo
+2026-04-01 10:48:05,758 [INFO] Queue executing: fitness-hugo (remaining: 0)
+2026-04-01 10:48:05,804 [INFO] Publishing: fitness-hugo
+2026-04-01 10:50:05,970 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-04-01 10:50:06,066 [INFO] Publishing: rap-hugo
+2026-04-01 10:50:36,098 [INFO] CATCHUP: rap-hugo expected=2 actual=1 missed=1 quota=5 attempt=2/3
+2026-04-01 10:50:36,126 [INFO] Publishing: rap-hugo
+2026-04-01 11:10:10,485 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-04-01 11:10:10,656 [INFO] Publishing: senior-blogger
+2026-04-01 11:13:40,056 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-04-01 11:13:40,109 [INFO] Publishing: rap2-hugo
+2026-04-01 11:30:13,794 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-04-01 11:30:13,840 [INFO] Publishing: rap3-hugo
+2026-04-01 11:30:43,926 [INFO] CATCHUP: rap3-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-04-01 11:30:43,953 [INFO] Publishing: rap3-hugo
+2026-04-01 11:50:17,605 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-04-01 11:50:17,650 [INFO] Publishing: rap4-hugo
+2026-04-01 11:50:47,726 [INFO] CATCHUP: rap4-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-04-01 11:50:47,753 [INFO] Publishing: rap4-hugo
+2026-04-01 12:10:20,058 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-04-01 12:10:20,100 [INFO] Publishing: rap5-hugo
+2026-04-01 12:10:50,182 [INFO] CATCHUP: rap5-hugo expected=2 actual=1 missed=1 quota=5 attempt=1/3
+2026-04-01 12:10:50,210 [INFO] Publishing: rap5-hugo
+2026-04-01 13:00:00,197 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-04-01 13:00:00,241 [INFO] Publishing: travel-hugo
+2026-04-01 13:00:06,497 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%9A%B8%EC%A3%BC+%EC%B2%9C%EC%A0%84%EB%A6%AC+%EB%AA%85%EB%AC%B8%EA%B3%BC+%EC%95%94%EA%B0%81%ED%99%94+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:00:06,497 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%9A%B8%EC%A3%BC+%EC%B2%9C%EC%A0%84%EB%A6%AC+%EB%AA%85%EB%AC%B8%EA%B3%BC+%EC%95%94%EA%B0%81%ED%99%94+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:00:06,497 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%9A%B8%EC%A3%BC+%EC%B2%9C%EC%A0%84%EB%A6%AC+%EB%AA%85%EB%AC%B8%EA%B3%BC+%EC%95%94%EA%B0%81%ED%99%94+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:00:06,497 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:00:06,526 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:02:00,813 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-04-01 13:02:00,862 [INFO] Publishing: travel1-hugo
+2026-04-01 13:04:01,375 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-04-01 13:04:01,418 [INFO] Publishing: travel2-hugo
+2026-04-01 13:04:07,373 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%ED%9D%A5%EA%B5%AD%EC%82%AC+%EB%8C%80%EC%9B%85%EC%A0%84+%ED%9B%84%EB%B6%88%ED%83%B1+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:04:07,374 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%ED%9D%A5%EA%B5%AD%EC%82%AC+%EB%8C%80%EC%9B%85%EC%A0%84+%ED%9B%84%EB%B6%88%ED%83%B1+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:04:07,374 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%ED%9D%A5%EA%B5%AD%EC%82%AC+%EB%8C%80%EC%9B%85%EC%A0%84+%ED%9B%84%EB%B6%88%ED%83%B1+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:04:07,374 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:04:07,402 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:06:01,794 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-04-01 13:06:01,861 [INFO] Publishing: travel3-hugo
+2026-04-01 13:06:01,876 [INFO] CATCHUP: travel1-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-04-01 13:06:01,901 [INFO] Publishing: travel1-hugo
+2026-04-01 13:06:07,758 [INFO] CATCHUP: travel2-hugo expected=3 actual=2 missed=1 quota=5 attempt=2/3
+2026-04-01 13:06:07,801 [INFO] Publishing: travel2-hugo
+2026-04-01 13:06:13,434 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%A0%84%EB%93%B1%EC%82%AC+%EC%B2%A0%EC%A2%85+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:06:13,434 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%A0%84%EB%93%B1%EC%82%AC+%EC%B2%A0%EC%A2%85+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:06:13,434 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%A0%84%EB%93%B1%EC%82%AC+%EC%B2%A0%EC%A2%85+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:06:13,434 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:06:13,463 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:06:13,463 [WARNING] CATCHUP: travel2-hugo 보충 실패 (2/3)
+2026-04-01 13:06:18,616 [INFO] CATCHUP: travel3-hugo expected=3 actual=2 missed=1 quota=5 attempt=2/3
+2026-04-01 13:06:18,658 [INFO] Publishing: travel3-hugo
+2026-04-01 13:08:24,747 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-04-01 13:08:24,790 [INFO] Publishing: travel4-hugo
+2026-04-01 13:10:25,327 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-04-01 13:10:25,370 [INFO] Publishing: hotissue-hugo
+2026-04-01 13:10:31,539 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:10:31,567 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:11:25,666 [INFO] CATCHUP: travel1-hugo expected=3 actual=2 missed=1 quota=5 attempt=2/3
+2026-04-01 13:11:25,692 [INFO] Publishing: travel1-hugo
+2026-04-01 13:11:31,507 [INFO] CATCHUP: travel2-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-04-01 13:11:31,548 [INFO] Publishing: travel2-hugo
+2026-04-01 13:11:37,443 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%97%AC%EC%A3%BC+%EA%B3%A0%EB%8B%AC%EC%82%AC%EC%A7%80+%EC%9B%90%EC%A2%85%EB%8C%80%EC%82%AC%ED%83%91+%EC%97%AD%EC%82%AC&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:11:37,444 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%97%AC%EC%A3%BC+%EA%B3%A0%EB%8B%AC%EC%82%AC%EC%A7%80+%EC%9B%90%EC%A2%85%EB%8C%80%EC%82%AC%ED%83%91+%EA%B4%80%EB%9E%8C+%ED%9B%84%EA%B8%B0&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:11:37,444 [INFO]   블로그 검색 실패: HTTPSConnectionPool(host='openapi.naver.com', port=443): Max retries exceeded with url: /v1/search/blog.json?query=%EC%97%AC%EC%A3%BC+%EA%B3%A0%EB%8B%AC%EC%82%AC%EC%A7%80+%EC%9B%90%EC%A2%85%EB%8C%80%EC%82%AC%ED%83%91+%EB%B0%A9%EB%AC%B8+%ED%8C%81&display=3&sort=sim (Caused by NameResolutionError("HTTPSConnection(host='openapi.naver.com', port=443): Failed to resolve 'openapi.naver.com' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:11:37,444 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:11:37,472 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:11:37,472 [WARNING] CATCHUP: travel2-hugo 보충 실패 (3/3)
+2026-04-01 13:11:42,626 [INFO] CATCHUP: travel3-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-04-01 13:11:42,666 [INFO] Publishing: travel3-hugo
+2026-04-01 13:12:18,691 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-04-01 13:12:18,735 [INFO] Publishing: tco-hugo
+2026-04-01 13:12:24,731 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:12:24,761 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:14:18,964 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-04-01 13:14:19,011 [INFO] Publishing: deal-hugo
+2026-04-01 13:14:24,942 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:14:24,970 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:16:19,273 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-04-01 13:16:19,315 [INFO] Publishing: compare-hugo
+2026-04-01 13:16:25,137 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:16:25,165 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:16:49,468 [INFO] CATCHUP: tco-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-04-01 13:16:49,493 [INFO] Publishing: tco-hugo
+2026-04-01 13:16:55,236 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:16:55,265 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:16:55,265 [WARNING] CATCHUP: tco-hugo 보충 실패 (1/3)
+2026-04-01 13:17:00,429 [INFO] CATCHUP: travel1-hugo expected=3 actual=2 missed=1 quota=5 attempt=3/3
+2026-04-01 13:17:00,466 [INFO] Publishing: travel1-hugo
+2026-04-01 13:18:06,387 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-04-01 13:18:06,430 [INFO] Publishing: guide-hugo
+2026-04-01 13:18:12,003 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:18:12,031 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:20:06,905 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-04-01 13:20:06,948 [INFO] Publishing: ev-hugo
+2026-04-01 13:20:12,662 [ERROR]   ERR: ssn/Projects/5000/.venv/lib/python3.14/site-packages/openai/_base_client.py", line 1037, in request
+    raise APIConnectionError(request=request) from err
+openai.APIConnectionError: Connection error.
+
+2026-04-01 13:20:12,689 [ERROR] [TELEGRAM_ERROR] Request failed: HTTPSConnectionPool(host='api.telegram.org', port=443): Max retries exceeded with url: /bot8511728557:AAHbhwBVV55g38IrMVkJA22rst0SE9yJqfg/sendMessage (Caused by NameResolutionError("HTTPSConnection(host='api.telegram.org', port=443): Failed to resolve 'api.telegram.org' ([Errno 8] nodename nor servname provided, or not known)"))
+2026-04-01 13:22:07,391 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-04-01 13:22:07,454 [INFO] Publishing: stock-hugo
+2026-04-01 13:22:07,459 [INFO] CATCHUP: tco-hugo expected=3 actual=2 missed=1 quota=5 attempt=2/3
+2026-04-01 13:22:07,478 [INFO] Publishing: tco-hugo
+2026-04-01 13:23:14,113 [INFO] CATCHUP: guide-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-04-01 13:23:14,152 [INFO] Publishing: guide-hugo
+2026-04-01 13:24:12,721 [INFO] CATCHUP: ev-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-04-01 13:24:12,760 [INFO] Publishing: ev-hugo
+2026-04-01 13:25:27,916 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-04-01 13:25:27,955 [INFO] Publishing: dividend-hugo
+2026-04-01 13:26:28,006 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-04-01 13:26:28,049 [INFO] Publishing: etf-hugo
+2026-04-01 13:28:28,428 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-04-01 13:28:28,473 [INFO] Publishing: sector-hugo
+2026-04-01 13:30:28,733 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-04-01 13:30:28,773 [INFO] Publishing: ipo-hugo
+2026-04-01 13:31:07,911 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 13:31:09,538 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/seoul-south-korea/cover.jpg
+2026-04-01 13:31:53,771 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 13:31:55,598 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/lisbon-portugal/cover.jpg
+2026-04-01 13:32:37,191 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 13:32:38,622 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/sydney-australia/cover.jpg
+2026-04-01 13:32:50,619 [INFO] [ETAP] 배치 완료: 3건
+2026-04-01 13:33:20,738 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-04-01 13:33:20,784 [INFO] Publishing: finance-hugo
+2026-04-01 13:34:20,853 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-04-01 13:34:20,930 [INFO] Publishing: senior-hugo
+2026-04-01 13:40:21,581 [INFO] Queue executing: laptop-hugo (remaining: 0)
+2026-04-01 13:40:21,623 [INFO] Publishing: laptop-hugo
+2026-04-01 13:42:21,752 [INFO] Queue executing: appliance-hugo (remaining: 0)
+2026-04-01 13:42:21,792 [INFO] Publishing: appliance-hugo
+2026-04-01 13:42:51,882 [INFO] CATCHUP: appliance-hugo expected=3 actual=2 missed=1 quota=5 attempt=1/3
+2026-04-01 13:42:51,902 [INFO] Publishing: appliance-hugo
+2026-04-01 13:44:22,221 [INFO] Queue executing: interior-hugo (remaining: 0)
+2026-04-01 13:44:22,260 [INFO] Publishing: interior-hugo
+2026-04-01 13:46:22,397 [INFO] Queue executing: baby-hugo (remaining: 0)
+2026-04-01 13:46:22,439 [INFO] Publishing: baby-hugo
+2026-04-01 13:48:22,508 [INFO] Queue executing: fitness-hugo (remaining: 0)
+2026-04-01 13:48:22,548 [INFO] Publishing: fitness-hugo
+2026-04-01 13:50:22,798 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-04-01 13:50:22,832 [INFO] Publishing: rap-hugo
+2026-04-01 14:10:25,156 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-04-01 14:10:25,189 [INFO] Publishing: senior-blogger
+2026-04-01 14:14:03,144 [INFO] Queue executing: rap2-hugo (remaining: 0)
+2026-04-01 14:14:03,199 [INFO] Publishing: rap2-hugo
+2026-04-01 14:30:27,523 [INFO] Queue executing: rap3-hugo (remaining: 0)
+2026-04-01 14:30:27,562 [INFO] Publishing: rap3-hugo
+2026-04-01 14:50:00,670 [INFO] Queue executing: rap4-hugo (remaining: 0)
+2026-04-01 14:50:00,717 [INFO] Publishing: rap4-hugo
+2026-04-01 15:10:03,110 [INFO] Queue executing: rap5-hugo (remaining: 0)
+2026-04-01 15:10:03,153 [INFO] Publishing: rap5-hugo
+2026-04-01 16:00:09,529 [INFO] Queue executing: travel-hugo (remaining: 0)
+2026-04-01 16:00:09,577 [INFO] Publishing: travel-hugo
+2026-04-01 16:02:09,764 [INFO] Queue executing: travel1-hugo (remaining: 0)
+2026-04-01 16:02:09,816 [INFO] Publishing: travel1-hugo
+2026-04-01 16:04:10,071 [INFO] Queue executing: travel2-hugo (remaining: 0)
+2026-04-01 16:04:10,113 [INFO] Publishing: travel2-hugo
+2026-04-01 16:06:10,293 [INFO] Queue executing: travel3-hugo (remaining: 0)
+2026-04-01 16:06:10,330 [INFO] Publishing: travel3-hugo
+2026-04-01 16:08:10,527 [INFO] Queue executing: travel4-hugo (remaining: 0)
+2026-04-01 16:08:10,706 [INFO] Publishing: travel4-hugo
+2026-04-01 16:08:10,722 [INFO] CATCHUP: travel4-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-04-01 16:08:10,830 [INFO] Publishing: travel4-hugo
+2026-04-01 16:10:17,329 [INFO] Queue executing: hotissue-hugo (remaining: 0)
+2026-04-01 16:10:17,483 [INFO] Publishing: hotissue-hugo
+2026-04-01 16:12:17,594 [INFO] Queue executing: tco-hugo (remaining: 0)
+2026-04-01 16:12:17,924 [INFO] Publishing: tco-hugo
+2026-04-01 16:13:17,789 [INFO] CATCHUP: tco-hugo expected=4 actual=3 missed=1 quota=5 attempt=3/3
+2026-04-01 16:13:17,812 [INFO] Publishing: tco-hugo
+2026-04-01 16:15:06,483 [INFO] Queue executing: deal-hugo (remaining: 0)
+2026-04-01 16:15:06,530 [INFO] Publishing: deal-hugo
+2026-04-01 16:16:06,567 [INFO] Queue executing: compare-hugo (remaining: 0)
+2026-04-01 16:16:06,606 [INFO] Publishing: compare-hugo
+2026-04-01 16:18:06,861 [INFO] Queue executing: guide-hugo (remaining: 0)
+2026-04-01 16:18:06,907 [INFO] Publishing: guide-hugo
+2026-04-01 16:18:36,970 [INFO] CATCHUP: guide-hugo expected=4 actual=3 missed=1 quota=5 attempt=2/3
+2026-04-01 16:18:36,996 [INFO] Publishing: guide-hugo
+2026-04-01 16:20:09,507 [INFO] Queue executing: ev-hugo (remaining: 0)
+2026-04-01 16:20:09,549 [INFO] Publishing: ev-hugo
+2026-04-01 16:22:09,746 [INFO] Queue executing: stock-hugo (remaining: 0)
+2026-04-01 16:22:09,787 [INFO] Publishing: stock-hugo
+2026-04-01 16:24:10,023 [INFO] Queue executing: dividend-hugo (remaining: 0)
+2026-04-01 16:24:10,066 [INFO] Publishing: dividend-hugo
+2026-04-01 16:26:10,266 [INFO] Queue executing: etf-hugo (remaining: 0)
+2026-04-01 16:26:10,314 [INFO] Publishing: etf-hugo
+2026-04-01 16:28:10,543 [INFO] Queue executing: sector-hugo (remaining: 0)
+2026-04-01 16:28:10,603 [INFO] Publishing: sector-hugo

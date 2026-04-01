@@ -2,7 +2,9 @@
 import os
 import sys
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+KST = timezone(timedelta(hours=9))
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -12,7 +14,7 @@ load_dotenv(PROJECT_ROOT / ".env")
 
 from pipelines.etap.topic_manager import pick_topic, mark_published
 from pipelines.etap.writer import generate_city_guide
-from pipelines.etap.image_fetcher import fetch_city_image
+from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 
 
 def _write_hugo_post(cfg: dict, article: dict) -> str:
@@ -130,6 +132,10 @@ def run_batch(cfg: dict, count: int = 3) -> list:
         image = fetch_city_image(topic["city"], topic["country"], article["slug"])
         if image:
             article["image"] = image
+        # 본문 이미지 삽입
+        body_imgs = fetch_body_images(topic.get("city", ""), topic.get("country", ""), article["slug"], count=3)
+        if body_imgs:
+            article["body_images"] = body_imgs
         _write_hugo_post(cfg, article)
 
         mark_published(

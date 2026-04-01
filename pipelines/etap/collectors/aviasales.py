@@ -196,20 +196,180 @@ def collect_calendar(origin="NYC", destination="TYO", month=None):
         return 0
 
 
+
+
+def collect_direct_prices(origin="NYC", destinations=None):
+    """직항 최저가 수집 -> flight_direct"""
+    if destinations is None:
+        destinations = [code for code, _, _ in _get_destination_iata_codes()]
+
+    url = f"{BASE_URL}/v1/prices/direct"
+    db = _get_db()
+    total = 0
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    for dest in destinations[:50]:
+        if dest == origin:
+            continue
+        params = {"origin": origin, "destination": dest, "currency": "usd"}
+        try:
+            resp = requests.get(url, headers=_headers(), params=params, timeout=15)
+            if resp.status_code != 200:
+                continue
+            data = resp.json().get("data", {})
+            for dest_code, stops_dict in data.items():
+                for stop_key, info in stops_dict.items():
+                    db.execute("""
+                        INSERT INTO flight_direct
+                        (origin, destination, price, currency, airline, flight_number,
+                         departure_date, return_date, expires_at, fetched_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        origin, dest_code, info.get("price", 0), "USD",
+                        info.get("airline", ""), info.get("flight_number", 0),
+                        info.get("departure_at", ""), info.get("return_at", ""),
+                        info.get("expires_at", ""), now,
+                    ))
+                    total += 1
+            time.sleep(0.5)
+        except Exception as e:
+            logger.error(f"[Aviasales] direct {origin}-{dest}: {e}")
+    db.commit()
+    db.close()
+    logger.info(f"[Aviasales] {origin} direct prices: {total}건 저장")
+    return total
+
+
+def collect_monthly_prices(origin="NYC", destination="TYO"):
+    """월별 최저가 수집 -> flight_monthly"""
+    url = f"{BASE_URL}/v1/prices/monthly"
+    params = {"origin": origin, "destination": destination, "currency": "usd"}
+    try:
+        resp = requests.get(url, headers=_headers(), params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json().get("data", {})
+        db = _get_db()
+        count = 0
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for month_str, info in data.items():
+            try:
+                db.execute("""
+                    INSERT OR REPLACE INTO flight_monthly
+                    (origin, destination, month, price, currency, airline, stops,
+                     departure_date, return_date, fetched_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    origin, destination, month_str, info.get("price", 0), "USD",
+                    info.get("airline", ""), info.get("transfers", 0),
+                    info.get("departure_at", ""), info.get("return_at", ""), now,
+                ))
+                count += 1
+            except Exception:
+                pass
+        db.commit()
+        db.close()
+        logger.info(f"[Aviasales] {origin}-{destination} monthly: {count}건 저장")
+        return count
+    except Exception as e:
+        logger.error(f"[Aviasales] monthly error ({origin}-{destination}): {e}")
+        return 0
+
+
+def collect_nearby_prices(origin="NYC", destination="TYO"):
+    """인근 공항 대안 가격 수집 -> flight_nearby"""
+    url = f"{BASE_URL}/v2/prices/nearest-places-matrix"
+    params = {"origin": origin, "destination": destination, "currency": "usd", "show_to_affiliates": "true", "limit": 10}
+    try:
+        resp = requests.get(url, headers=_headers(), params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json().get("data", [])
+        db = _get_db()
+        count = 0
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for item in data:
+            db.execute("""
+                INSERT INTO flight_nearby
+                (origin, destination, price, currency, stops, airline,
+                 departure_date, return_date, distance, fetched_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                item.get("origin", ""), item.get("destination", ""),
+                item.get("value", 0), "USD",
+                item.get("number_of_changes", 0), "",
+                item.get("depart_date", ""), item.get("return_date", ""),
+                item.get("distance", 0), now,
+            ))
+            count += 1
+        db.commit()
+        db.close()
+        logger.info(f"[Aviasales] {origin}-{destination} nearby: {count}건 저장")
+        return count
+    except Exception as e:
+        logger.error(f"[Aviasales] nearby error ({origin}-{destination}): {e}")
+        return 0
+
+
+def collect_airline_routes(airline_code="AA", limit=50):
+    """항공사별 인기 노선 수집 -> airline_routes"""
+    url = f"{BASE_URL}/v1/airline-directions"
+    params = {"airline_code": airline_code, "limit": limit}
+    try:
+        resp = requests.get(url, headers=_headers(), params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json().get("data", {})
+        db = _get_db()
+        count = 0
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        for route, popularity in data.items():
+            parts = route.split("-")
+            if len(parts) == 2:
+                db.execute("""
+                    INSERT INTO airline_routes
+                    (airline, origin, destination, popularity, fetched_at)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (airline_code, parts[0], parts[1], popularity, now))
+                count += 1
+        db.commit()
+        db.close()
+        logger.info(f"[Aviasales] {airline_code} routes: {count}건 저장")
+        return count
+    except Exception as e:
+        logger.error(f"[Aviasales] airline routes error ({airline_code}): {e}")
+        return 0
+
 def run_full_collection():
     """전체 수집 실행"""
     total = 0
+    destinations = _get_destination_iata_codes()
+
+    # Phase 1: latest + popular + direct (10개 출발도시)
     for origin in ORIGIN_CITIES:
         total += collect_latest_prices(origin)
         total += collect_popular_directions(origin)
         time.sleep(1)
 
-    destinations = _get_destination_iata_codes()[:10]
+    # Phase 2: 직항 (상위 5개 출발도시 × 전체 도착지)
     for origin in ORIGIN_CITIES[:5]:
-        for iata, city, country in destinations:
+        total += collect_direct_prices(origin, [c for c, _, _ in destinations])
+        time.sleep(1)
+
+    # Phase 3: 캘린더 + 월별 + 인근공항 (상위 5개 × 상위 10개)
+    top_dests = destinations[:10]
+    for origin in ORIGIN_CITIES[:5]:
+        for iata, city, country in top_dests:
             if iata and iata != origin:
                 total += collect_calendar(origin, iata)
+                total += collect_monthly_prices(origin, iata)
+                total += collect_nearby_prices(origin, iata)
                 time.sleep(0.5)
+
+    # Phase 4: 주요 항공사 인기 노선
+    major_airlines = ["AA", "UA", "DL", "WN", "B6", "NK", "F9", "AS",
+                      "BA", "LH", "AF", "EK", "SQ", "CX", "NH", "JL",
+                      "TG", "QR", "TK", "KE", "OZ"]
+    for airline in major_airlines:
+        total += collect_airline_routes(airline, limit=30)
+        time.sleep(0.3)
 
     logger.info(f"[Aviasales] 전체 수집 완료: {total}건")
     return total

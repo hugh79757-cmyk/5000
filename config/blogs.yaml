@@ -671,12 +671,6 @@ blogs:
     - '13:48'
     - '16:48'
     - '20:48'
-deploy:
-  branch: main
-  commit_dirty: true
-  method: wrangler
-git_backup:
-  schedule: sunday 03:00
 - cf_project: tour-hugo
   daily_quota: 5
   domain: tour.techpawz.com
@@ -693,7 +687,7 @@ git_backup:
     - '16:30'
     - '20:30'
   site_path: /Users/twinssn/Projects/ETAP/tour-hugo
-  status: inactive
+  status: active
   theme: blowfish
   language: en
   blog_type: destination
