@@ -113,5 +113,8 @@ def generate_car(prompt_text, data):
             _out.append(_ln)
             if _ln.startswith("|") and _i + 1 < len(_lines) and not _lines[_i + 1].startswith("|") and _lines[_i + 1].strip() != "":
                 _out.append("")
+        # 미치환 플레이스홀더 제거
+        import re as _re
+        _out = [_re.sub(r"\{[a-z_]*\}", "", line) for line in _out]
         return "\n".join(_out)
     return None
