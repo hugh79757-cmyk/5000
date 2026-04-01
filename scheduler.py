@@ -298,6 +298,20 @@ def _send_morning_report():
 # ─── 스케줄 등록 ───
 
 
+
+def _run_aviasales_collection():
+    """항공권 가격 데이터 일일 수집"""
+    try:
+        from pipelines.etap.collectors.aviasales import run_full_collection
+        count = run_full_collection()
+        logger.info(f'[ETAP] Aviasales 수집 완료: {count}건')
+    except Exception as e:
+        logger.error(f'[ETAP] Aviasales 수집 실패: {e}')
+        try:
+            _tg_error(f'[ETAP] Aviasales collection failed: {e}')
+        except:
+            pass
+
 def _run_etap_batch():
     """ETAP 배치 — 3건 생성 + 1회 빌드/배포."""
     try:
@@ -349,6 +363,8 @@ def register_schedules():
     job_count += 1
 
     # ── ETAP 배치 (하루 15건 = 5회 × 3건) ──
+    schedule.every().day.at("06:00").do(_run_aviasales_collection)
+    logger.info("ETAP Aviasales collection scheduled at 06:00")
     etap_times = ["07:30", "10:30", "13:30", "16:30", "20:30"]
     for t in etap_times:
         schedule.every().day.at(t).do(_run_etap_batch)
@@ -393,6 +409,12 @@ def main():
             except Exception as e:
                 logger.error(f"Catchup error: {e}")
             last_catchup = now_ts
+            # heartbeat 기록
+            try:
+                with open("/Users/twinssn/Projects/5000/logs/heartbeat", "w") as _hb:
+                    _hb.write(str(int(now_ts)))
+            except Exception:
+                pass
         time.sleep(30)
 
 
