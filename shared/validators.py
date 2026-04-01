@@ -557,11 +557,11 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
 
     combined = title + " " + body
     zero_patterns = [
-        (r"\b0억\s*원?", "0억 원"),
-        (r"\b0%", "0%"),
+        (r"(?<![.\d])0억\s*원?", "0억 원"),
+        (r"(?<![.\d])0%", "0%"),
         (r"희석률\s*0%", "희석률 0%"),
         (r"공모가\s*0원", "공모가 0원"),
-        (r"\b0만\s*주", "0만 주"),
+        (r"(?<![.\d])0만\s*주", "0만 주"),
     ]
     zero_hits = []
     for pat, label in zero_patterns:
@@ -609,10 +609,12 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
             if age > 7:
                 issues.append(f"[WARNING] 주가 데이터 {age}일 경과 ({latest.strftime('%Y-%m-%d')})")
 
-    fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
-    has_fin = sum(1 for k in fin_keywords if k in body)
-    if has_fin < 2:
-        issues.append(f"[WARNING] 재무 지표 부족 ({has_fin}개, 최소 2개)")
+    skip_fin_check = any(k in ctx.get("data_source", "") for k in ("finance", "etf"))
+    if not skip_fin_check:
+        fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
+        has_fin = sum(1 for k in fin_keywords if k in body)
+        if has_fin < 2:
+            issues.append(f"[WARNING] 재무 지표 부족 ({has_fin}개, 최소 2개)")
 
     return issues
 
