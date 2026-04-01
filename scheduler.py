@@ -336,6 +336,25 @@ def _run_omio_collection():
         except:
             pass
 
+
+def _run_flight_publish():
+    try:
+        from pipelines.etap.flight_pipeline import run
+        cfg = {
+            "id": "flights-hugo",
+            "domain": "flights.techpawz.com",
+            "site_path": "/Users/twinssn/Projects/ETAP/flights-hugo",
+            "cf_project": "flights-hugo"
+        }
+        result = run(cfg)
+        logger.info(f'[ETAP] Flight publish: {result.get("status")} - {result.get("title", "N/A")}')
+    except Exception as e:
+        logger.error(f'[ETAP] Flight publish failed: {e}')
+        try:
+            _tg_error(f'[ETAP] Flight publish failed: {e}')
+        except:
+            pass
+
 def _run_aviasales_collection():
     """항공권 가격 데이터 일일 수집"""
     try:
@@ -402,6 +421,12 @@ def register_schedules():
     # ── ETAP 배치 (하루 15건 = 5회 × 3건) ──
     schedule.every().day.at("06:00").do(_run_aviasales_collection)
     logger.info("ETAP Aviasales collection scheduled at 06:00")
+    schedule.every().day.at("08:00").do(_run_flight_publish)
+    schedule.every().day.at("11:00").do(_run_flight_publish)
+    schedule.every().day.at("14:00").do(_run_flight_publish)
+    schedule.every().day.at("17:00").do(_run_flight_publish)
+    schedule.every().day.at("21:00").do(_run_flight_publish)
+    logger.info("ETAP Flight publish scheduled 5x daily (08,11,14,17,21)")
     schedule.every().day.at("06:30").do(_run_viator_collection)
     logger.info("ETAP Viator collection scheduled at 06:30")
     schedule.every().day.at("06:30").do(_run_airalo_collection)

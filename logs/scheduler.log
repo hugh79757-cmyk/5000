@@ -13573,3 +13573,5 @@ openai.APIConnectionError: Connection error.
 2026-04-01 16:49:28,647 [INFO] Publishing: fitness-hugo
 2026-04-01 16:51:32,916 [INFO] Queue executing: rap-hugo (remaining: 0)
 2026-04-01 16:51:32,960 [INFO] Publishing: rap-hugo
+2026-04-01 17:10:05,706 [INFO] Queue executing: senior-blogger (remaining: 1)
+2026-04-01 17:10:05,757 [INFO] Publishing: senior-blogger
