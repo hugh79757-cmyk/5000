@@ -13544,3 +13544,32 @@ openai.APIConnectionError: Connection error.
 2026-04-01 16:26:10,314 [INFO] Publishing: etf-hugo
 2026-04-01 16:28:10,543 [INFO] Queue executing: sector-hugo (remaining: 0)
 2026-04-01 16:28:10,603 [INFO] Publishing: sector-hugo
+2026-04-01 16:30:10,826 [INFO] Queue executing: ipo-hugo (remaining: 0)
+2026-04-01 16:30:10,873 [INFO] Publishing: ipo-hugo
+2026-04-01 16:30:47,665 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 16:30:49,692 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/kyoto-japan/cover.jpg
+2026-04-01 16:31:34,948 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 16:31:36,501 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/vienna-austria/cover.jpg
+2026-04-01 16:32:22,004 [INFO] HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2026-04-01 16:32:23,984 [INFO] R2 업로드 완료: https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/etap/athens-greece/cover.jpg
+2026-04-01 16:32:37,565 [INFO] [ETAP] 배치 완료: 3건
+2026-04-01 16:33:07,638 [INFO] Queue executing: finance-hugo (remaining: 0)
+2026-04-01 16:33:07,700 [INFO] Publishing: finance-hugo
+2026-04-01 16:34:07,769 [INFO] Queue executing: senior-hugo (remaining: 0)
+2026-04-01 16:34:07,830 [INFO] Publishing: senior-hugo
+2026-04-01 16:40:08,642 [INFO] Queue executing: laptop-hugo (remaining: 0)
+2026-04-01 16:40:08,680 [INFO] Publishing: laptop-hugo
+2026-04-01 16:42:08,817 [INFO] Queue executing: appliance-hugo (remaining: 0)
+2026-04-01 16:42:08,864 [INFO] Publishing: appliance-hugo
+2026-04-01 16:44:09,065 [INFO] Queue executing: interior-hugo (remaining: 0)
+2026-04-01 16:44:09,135 [INFO] CATCHUP: interior-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-04-01 16:44:09,155 [INFO] Publishing: interior-hugo
+2026-04-01 16:44:09,160 [INFO] Publishing: interior-hugo
+2026-04-01 16:46:28,160 [INFO] Queue executing: baby-hugo (remaining: 0)
+2026-04-01 16:46:28,194 [INFO] Publishing: baby-hugo
+2026-04-01 16:48:28,442 [INFO] Queue executing: fitness-hugo (remaining: 0)
+2026-04-01 16:48:28,499 [INFO] Publishing: fitness-hugo
+2026-04-01 16:49:28,625 [INFO] CATCHUP: fitness-hugo expected=4 actual=3 missed=1 quota=5 attempt=1/3
+2026-04-01 16:49:28,647 [INFO] Publishing: fitness-hugo
+2026-04-01 16:51:32,916 [INFO] Queue executing: rap-hugo (remaining: 0)
+2026-04-01 16:51:32,960 [INFO] Publishing: rap-hugo

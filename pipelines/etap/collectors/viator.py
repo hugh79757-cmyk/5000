@@ -1,90 +1,119 @@
-"""
-Viator 투어 피드 수집기
-- gzip JSON 피드 다운로드 -> viator_tours 테이블
-- 피드 URL: Travelpayouts 지원팀에 요청 (support@travelpayouts.com)
-"""
-import os
-import gzip
-import json
-import sqlite3
-import logging
-import requests
+"""Viator deals feed collector – downloads gzipped JSON from Travelpayouts."""
+import os, sys, json, gzip, sqlite3, logging, io
 from datetime import datetime
+
+try:
+    import requests
+except ImportError:
+    requests = None
 
 logger = logging.getLogger(__name__)
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "data", "travel-en.db")
-
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
 def _get_db():
     return sqlite3.connect(DB_PATH)
 
+def _token():
+    return os.getenv("TRAVELPAYOUTS_API_TOKEN", "")
 
-def collect_viator_tours():
-    """Viator 할인 투어 피드 다운로드 및 DB 저장"""
-    feed_url = os.getenv("VIATOR_FEED_URL", "")
-    if not feed_url:
-        logger.warning("[Viator] VIATOR_FEED_URL 미설정 — .env에 추가 필요")
+def _safe_float(val):
+    if val is None:
+        return None
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return None
+
+def collect_viator_feed():
+    """Viator deals feed (JSON.gz) 다운로드 및 DB 저장"""
+    token = _token()
+    if not token:
+        logger.error("[Viator] TRAVELPAYOUTS_API_TOKEN 없음")
         return 0
 
+    feed_url = f"https://api.travelpayouts.com/data/viator_deals_feed.json.gz?token={token}"
+    logger.info(f"[Viator] 피드 다운로드: {feed_url[:60]}...")
+
+    if requests is None:
+        logger.error("[Viator] requests 모듈 없음")
+        return 0
+
+    resp = requests.get(feed_url, timeout=120)
+    resp.raise_for_status()
+
+    # gzip 해제
     try:
-        resp = requests.get(feed_url, timeout=120, stream=True)
-        resp.raise_for_status()
+        buf = io.BytesIO(resp.content)
+        with gzip.GzipFile(fileobj=buf) as gz:
+            raw = gz.read().decode("utf-8")
+        data = json.loads(raw)
+    except Exception:
+        # gzip이 아닌 경우 직접 JSON 파싱
+        data = resp.json()
 
-        raw = gzip.decompress(resp.content)
-        tours = json.loads(raw)
-        if not isinstance(tours, list):
-            tours = [tours]
+    # data 구조 확인 (리스트 또는 dict with key)
+    if isinstance(data, dict):
+        items = data.get("data", data.get("deals", data.get("products", [])))
+        if not isinstance(items, list):
+            items = [data]
+    elif isinstance(data, list):
+        items = data
+    else:
+        logger.error(f"[Viator] 예상치 못한 데이터 형식: {type(data)}")
+        return 0
 
-        db = _get_db()
-        count = 0
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logger.info(f"[Viator] {len(items)}개 항목 수신")
 
-        for t in tours:
-            savings = t.get("savings_percent", "0%").replace("%", "")
-            try:
-                discount = float(savings)
-            except ValueError:
-                discount = 0.0
+    db = _get_db()
+    count = 0
 
-            price = float(t.get("search_price", 0) or 0)
-            original_price = price / (1 - discount / 100) if discount > 0 else price
+    for item in items:
+        try:
+            merchant_id = str(item.get("merchant_product_id", item.get("id", item.get("productCode", ""))))
+            product_name = item.get("product_name", item.get("name", item.get("title", "")))
+            if not merchant_id and not product_name:
+                continue
+
+            description = item.get("description", "")
+            category = item.get("category", item.get("product_category", ""))
+            image_url = item.get("image_url", item.get("image", ""))
+            thumbnail_url = item.get("thumbnail_url", item.get("thumbnail", ""))
+            price = _safe_float(item.get("price", item.get("retail_price")))
+            currency = item.get("currency", "USD")
+            discount = _safe_float(item.get("discount_percent", item.get("discount", 0)))
+            sale_flag = str(item.get("sale_flag", item.get("on_sale", "")))
+            promo_text = item.get("promotional_text", item.get("promo_text", ""))
+            valid_from = item.get("valid_from", item.get("start_date", ""))
+            valid_to = item.get("valid_to", item.get("end_date", ""))
+            deep_link = item.get("deep_link", item.get("link", item.get("url", "")))
 
             db.execute("""
                 INSERT OR REPLACE INTO viator_tours
-                (tour_id, title, description, destination_city, destination_country,
-                 price, original_price, discount_pct, currency, photo_url, tour_url,
-                 rating, review_count, duration, category, fetched_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                t.get("merchant_product_id", ""),
-                t.get("product_name", ""),
-                t.get("description", "")[:500],
-                t.get("merchant_product_category_path", ""),
-                t.get("merchant_product_second_category", ""),
-                price, round(original_price, 2), discount,
-                t.get("currency", "USD"),
-                t.get("merchant_image_url", ""),
-                t.get("merchant_deep_link", ""),
-                0, 0, "",
-                t.get("merchant_category", ""),
-                now,
-            ))
+                (merchant_id, product_name, description, category, image_url, thumbnail_url,
+                 price, currency, discount_percent, sale_flag, promotional_text,
+                 valid_from, valid_to, deep_link)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (merchant_id, product_name, description, category, image_url, thumbnail_url,
+                  price, currency, discount, sale_flag, promo_text,
+                  valid_from, valid_to, deep_link))
             count += 1
+        except Exception as e:
+            logger.warning(f"[Viator] item 파싱 오류: {e}")
+            continue
 
-        db.commit()
-        db.close()
-        logger.info(f"[Viator] {count}건 투어 저장 완료")
-        return count
+    db.commit()
+    db.close()
+    logger.info(f"[Viator] {count}건 저장 완료")
+    return count
 
-    except Exception as e:
-        logger.error(f"[Viator] 수집 실패: {e}")
-        return 0
-
+def run_full_collection():
+    return collect_viator_feed()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), ".env"))
-    count = collect_viator_tours()
-    print(f"Viator tours: {count}건")
+    load_dotenv(os.path.join(BASE_DIR, ".env"))
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s:%(message)s")
+    total = run_full_collection()
+    print(f"Viator tours: {total}건")

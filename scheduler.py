@@ -299,6 +299,43 @@ def _send_morning_report():
 
 
 
+
+def _run_viator_collection():
+    try:
+        from pipelines.etap.collectors.viator import run_full_collection
+        count = run_full_collection()
+        logger.info(f'[ETAP] Viator 수집 완료: {count}건')
+    except Exception as e:
+        logger.error(f'[ETAP] Viator 수집 실패: {e}')
+        try:
+            _tg_error(f'[ETAP] Viator collection failed: {e}')
+        except:
+            pass
+
+def _run_airalo_collection():
+    try:
+        from pipelines.etap.collectors.airalo import run_full_collection
+        count = run_full_collection()
+        logger.info(f'[ETAP] Airalo 수집 완료: {count}건')
+    except Exception as e:
+        logger.error(f'[ETAP] Airalo 수집 실패: {e}')
+        try:
+            _tg_error(f'[ETAP] Airalo collection failed: {e}')
+        except:
+            pass
+
+def _run_omio_collection():
+    try:
+        from pipelines.etap.collectors.omio import run_full_collection
+        count = run_full_collection()
+        logger.info(f'[ETAP] Omio 수집 완료: {count}건')
+    except Exception as e:
+        logger.error(f'[ETAP] Omio 수집 실패: {e}')
+        try:
+            _tg_error(f'[ETAP] Omio collection failed: {e}')
+        except:
+            pass
+
 def _run_aviasales_collection():
     """항공권 가격 데이터 일일 수집"""
     try:
@@ -365,6 +402,12 @@ def register_schedules():
     # ── ETAP 배치 (하루 15건 = 5회 × 3건) ──
     schedule.every().day.at("06:00").do(_run_aviasales_collection)
     logger.info("ETAP Aviasales collection scheduled at 06:00")
+    schedule.every().day.at("06:30").do(_run_viator_collection)
+    logger.info("ETAP Viator collection scheduled at 06:30")
+    schedule.every().day.at("06:30").do(_run_airalo_collection)
+    logger.info("ETAP Airalo collection scheduled at 06:30")
+    schedule.every().day.at("06:30").do(_run_omio_collection)
+    logger.info("ETAP Omio collection scheduled at 06:30")
     etap_times = ["07:30", "10:30", "13:30", "16:30", "20:30"]
     for t in etap_times:
         schedule.every().day.at(t).do(_run_etap_batch)
