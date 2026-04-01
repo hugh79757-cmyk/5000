@@ -24,7 +24,7 @@ def _get_db():
     return sqlite3.connect(DB_PATH)
 
 
-def pick_flight_topic():
+def pick_flight_topic(blog_id="flights-hugo"):
     db = _get_db()
     row = db.execute("""
         SELECT ft.id, ft.origin, ft.destination, ft.origin_city, ft.dest_city,
@@ -33,7 +33,7 @@ def pick_flight_topic():
         WHERE ft.exhausted = 0
         AND NOT EXISTS (
             SELECT 1 FROM publish_log pl WHERE pl.topic_id = ft.id
-            AND pl.blog_id = 'tour-hugo-flight'
+            AND pl.blog_id = ?
         )
         AND EXISTS (
             SELECT 1 FROM flight_prices fp
@@ -41,7 +41,7 @@ def pick_flight_topic():
         )
         ORDER BY ft.priority DESC, RANDOM()
         LIMIT 1
-    """).fetchone()
+    """, (blog_id,)).fetchone()
     if not row:
         row = db.execute("""
             SELECT ft.id, ft.origin, ft.destination, ft.origin_city, ft.dest_city,
@@ -50,11 +50,11 @@ def pick_flight_topic():
             WHERE ft.exhausted = 0
             AND NOT EXISTS (
                 SELECT 1 FROM publish_log pl WHERE pl.topic_id = ft.id
-                AND pl.blog_id = 'tour-hugo-flight'
+                AND pl.blog_id = ?
             )
             ORDER BY ft.priority DESC, RANDOM()
             LIMIT 1
-        """).fetchone()
+        """, (blog_id,)).fetchone()
     db.close()
     if not row:
         return None
@@ -137,7 +137,16 @@ def mark_published(topic_id, blog_id, title, slug):
 
 
 def run(cfg):
-    topic = pick_flight_topic()
+    topic = pick_flight_topic(blog_id=cfg.get("id", "flights-hugo"))
+    if topic:
+        post_dir = os.path.join(cfg["site_path"], "content", "posts", topic["slug"])
+        if os.path.exists(post_dir):
+            logger.warning(f"[ETAP-Flight] 이미 존재하는 슬러그, 스킵: {topic['slug']}")
+            db = _get_db()
+            db.execute("UPDATE flight_topics SET exhausted = 1 WHERE id = ?", (topic["id"],))
+            db.commit()
+            db.close()
+            topic = pick_flight_topic(blog_id=cfg.get("id", "flights-hugo"))
     if not topic:
         logger.info("[ETAP-Flight] 발행 가능한 토픽 없음")
         return {"status": "skip"}
@@ -153,7 +162,7 @@ def run(cfg):
     if body_imgs:
         article["body_images"] = body_imgs
     _write_hugo_post(cfg, article)
-    mark_published(topic["id"], "tour-hugo-flight", article["title"], article["slug"])
+    mark_published(topic["id"], cfg.get("id", "flights-hugo"), article["title"], article["slug"])
     return {"status": "ok", "title": article["title"], "slug": article["slug"]}
 
 
@@ -180,8 +189,8 @@ if __name__ == "__main__":
     cfg = {
         "id": "tour-hugo",
         "domain": "tour.techpawz.com",
-        "site_path": "/Users/twinssn/Projects/ETAP/tour-hugo",
-        "cf_project": "tour-hugo",
+        "site_path": "/Users/twinssn/Projects/ETAP/flights-hugo",
+        "cf_project": "flights-hugo",
     }
     result = run(cfg)
     print(result)
