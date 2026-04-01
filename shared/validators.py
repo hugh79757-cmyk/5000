@@ -430,7 +430,12 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                     "포터", "마이티", "엑센트",
                     "스파크", "볼트", "콜로라도", "타호",
                     "클리오",
-                    "폴스타"]
+                    "폴스타",
+                    "RS3", "RS4", "RS5", "RS6", "RS7", "RSQ3", "RS e-트론 GT", "S e-트론 GT",
+                    "S3", "S4", "S5", "S6", "S7", "SQ5", "SQ7", "SQ8", "Q6 e-트론",
+                    "마이바흐", "필랑트", "오딧세이",
+                    "무쏘", "무쏘 스포츠", "GV80 쿠페",
+                    "SL", "V60", "V90",]
     title_has_car = any(brand in title for brand in _car_brands)
     if not title_has_car:
         issues.append(f"[CRITICAL] 제목에 차량명 없음: \"{title[:50]}\"")
