@@ -18,8 +18,10 @@ GAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 
 # 부동산 무관 키워드 제외 패턴
 
-def _dedup_read_together(article: str) -> str:
+def _dedup_read_together(article) -> str:
     """'## 함께 읽어보기' 섹션이 2개 이상이면 첫 번째만 유지"""
+    if not isinstance(article, str):
+        return article if isinstance(article, str) else str(article) if article else ""
     import re
     pattern = r'(## 함께 읽어보기.*?)(?=\n## |\Z)'
     matches = list(re.finditer(pattern, article, re.DOTALL))
@@ -87,7 +89,7 @@ def _pick_keyword(blog_id):
     """RAP DB에서 키워드 선택 — 오염 필터 + 중복 발행 방지"""
     # RAP DB 우선, 없으면 GAP DB 폴백
     db_path = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=10)
     try:
         patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
 
@@ -120,7 +122,7 @@ def _pick_keyword(blog_id):
 
         # 3단계: 이미 발행된 키워드 제외 (최근 7일)
         try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH) if db_path != RAP_DB_PATH else conn
+            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=10) if db_path != RAP_DB_PATH else conn
             published = {r[0] for r in rap_conn.execute(
                 "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
                 (blog_id,)
@@ -483,7 +485,7 @@ def run(blog_cfg):
                 tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
                 try:
                     db = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-                    _gc = sqlite3.connect(db)
+                    _gc = sqlite3.connect(db, timeout=10)
                     _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                     _gc.commit()
                     _gc.close()
@@ -493,7 +495,8 @@ def run(blog_cfg):
                 continue
 
             article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
-            article = _dedup_read_together(article)
+            if isinstance(article, dict) and "body_md" in article:
+                article["body_md"] = _dedup_read_together(article["body_md"])
             data_source = "molit_trade_api"
 
         # ─── 청약 전략 ───
@@ -513,7 +516,8 @@ def run(blog_cfg):
             # 상세보기 URL이 있는 항목 우선 정렬
                 subs = sorted(subs, key=lambda x: (0 if x.get('detail_url') else 1))
                 article = generate_subscription_article(keyword, subs)
-            article = _dedup_read_together(article)
+            if isinstance(article, dict) and "body_md" in article:
+                article["body_md"] = _dedup_read_together(article["body_md"])
             data_source = "applyhome_db"
 
         if article:
@@ -585,7 +589,7 @@ def run(blog_cfg):
 
         # ★ RAP DB에 발행 기록 (중복 방지)
         try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH)
+            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=10)
             rap_conn.execute(
                 "INSERT OR IGNORE INTO publish_log (blog_id, data_type, data_key, title) VALUES (?,?,?,?)",
                 (blog_id, strategy, keyword, article["title"])

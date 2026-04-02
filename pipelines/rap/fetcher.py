@@ -323,7 +323,7 @@ def fetch_subscription_from_db(blog_id, keyword=None, region_nm=None, limit=10):
     import sqlite3
     import os
     db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=10)
     conn.row_factory = sqlite3.Row
 
     try:
