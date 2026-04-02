@@ -22,7 +22,7 @@ def _safe_float(val):
     if val is None:
         return None
     try:
-        return float(val)
+        return float(str(val).replace("%", "").replace(",", "").strip())
     except (ValueError, TypeError):
         return None
 
@@ -43,17 +43,14 @@ def collect_viator_feed():
     resp = requests.get(feed_url, timeout=120)
     resp.raise_for_status()
 
-    # gzip 해제
     try:
         buf = io.BytesIO(resp.content)
         with gzip.GzipFile(fileobj=buf) as gz:
             raw = gz.read().decode("utf-8")
         data = json.loads(raw)
     except Exception:
-        # gzip이 아닌 경우 직접 JSON 파싱
         data = resp.json()
 
-    # data 구조 확인 (리스트 또는 dict with key)
     if isinstance(data, dict):
         items = data.get("data", data.get("deals", data.get("products", [])))
         if not isinstance(items, list):
@@ -67,37 +64,40 @@ def collect_viator_feed():
     logger.info(f"[Viator] {len(items)}개 항목 수신")
 
     db = _get_db()
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     count = 0
 
     for item in items:
         try:
-            merchant_id = str(item.get("merchant_product_id", item.get("id", item.get("productCode", ""))))
-            product_name = item.get("product_name", item.get("name", item.get("title", "")))
+            merchant_id = str(item.get("merchant_product_id", ""))
+            product_name = item.get("product_name", "")
             if not merchant_id and not product_name:
                 continue
 
             description = item.get("description", "")
-            category = item.get("category", item.get("product_category", ""))
-            image_url = item.get("image_url", item.get("image", ""))
-            thumbnail_url = item.get("thumbnail_url", item.get("thumbnail", ""))
-            price = _safe_float(item.get("price", item.get("retail_price")))
+            category = item.get("merchant_category", "")
+            image_url = item.get("merchant_image_url", "")
+            thumbnail_url = item.get("aw_thumb_url", "")
+            price = _safe_float(item.get("search_price"))
             currency = item.get("currency", "USD")
-            discount = _safe_float(item.get("discount_percent", item.get("discount", 0)))
-            sale_flag = str(item.get("sale_flag", item.get("on_sale", "")))
-            promo_text = item.get("promotional_text", item.get("promo_text", ""))
-            valid_from = item.get("valid_from", item.get("start_date", ""))
-            valid_to = item.get("valid_to", item.get("end_date", ""))
-            deep_link = item.get("deep_link", item.get("link", item.get("url", "")))
+            discount = _safe_float(item.get("savings_percent"))
+            sale_flag = str(item.get("is_for_sale", ""))
+            promo_text = item.get("promotional_text", "")
+            valid_from = item.get("valid_from", "")
+            valid_to = item.get("valid_to", "")
+            deep_link = item.get("merchant_deep_link", "")
+            city = item.get("merchant_product_category_path", "")
+            country = item.get("merchant_product_second_category", "")
 
             db.execute("""
                 INSERT OR REPLACE INTO viator_tours
                 (merchant_id, product_name, description, category, image_url, thumbnail_url,
                  price, currency, discount_percent, sale_flag, promotional_text,
-                 valid_from, valid_to, deep_link)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 valid_from, valid_to, deep_link, city, country, collected_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (merchant_id, product_name, description, category, image_url, thumbnail_url,
                   price, currency, discount, sale_flag, promo_text,
-                  valid_from, valid_to, deep_link))
+                  valid_from, valid_to, deep_link, city, country, now))
             count += 1
         except Exception as e:
             logger.warning(f"[Viator] item 파싱 오류: {e}")

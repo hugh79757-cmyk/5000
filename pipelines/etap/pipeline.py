@@ -17,6 +17,30 @@ from pipelines.etap.writer import generate_city_guide
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 
 
+
+def _insert_body_images(content, images):
+    """H2 헤딩 뒤에 본문 이미지 삽입 (최대 3장)"""
+    if not images:
+        return content
+    lines = content.split("\n")
+    h2_indices = [i for i, line in enumerate(lines) if line.startswith("## ")]
+    # 2번째, 3번째, 4번째 H2 뒤에 삽입
+    insert_after = h2_indices[1:4] if len(h2_indices) > 1 else h2_indices
+    inserted = 0
+    offset = 0
+    for idx in insert_after:
+        if inserted >= len(images):
+            break
+        img = images[inserted]
+        img_md = f"\n![Photo]({img['url']})\n*{img['credit']}*\n"
+        pos = idx + offset + 2  # H2 다음 줄 + 한 줄 여유
+        if pos > len(lines):
+            pos = len(lines)
+        lines.insert(pos, img_md)
+        offset += 1
+        inserted += 1
+    return "\n".join(lines)
+
 def _write_hugo_post(cfg: dict, article: dict) -> str:
     """Hugo 마크다운 파일 생성. 발행된 파일 경로 반환."""
     site_path = Path(cfg["site_path"])
@@ -47,7 +71,10 @@ showTableOfContents: true
 
 {credit_line}"""
     filepath = post_dir / "index.md"
-    filepath.write_text(frontmatter + article["content"], encoding="utf-8")
+    final_content = article["content"]
+    if article.get("body_images"):
+        final_content = _insert_body_images(final_content, article["body_images"])
+    filepath.write_text(frontmatter + final_content, encoding="utf-8")
     return str(filepath)
 
 

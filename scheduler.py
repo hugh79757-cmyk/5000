@@ -338,22 +338,25 @@ def _run_omio_collection():
 
 
 def _run_flight_publish():
-    try:
+    from pipelines.etap.safeguard import safe_run
+    cfg = {
+        "id": "flights-hugo",
+        "domain": "flights.techpawz.com",
+        "site_path": "/Users/twinssn/Projects/ETAP/flights-hugo",
+        "cf_project": "flights-hugo"
+    }
+    def _do():
         from pipelines.etap.flight_pipeline import run
-        cfg = {
-            "id": "flights-hugo",
-            "domain": "flights.techpawz.com",
-            "site_path": "/Users/twinssn/Projects/ETAP/flights-hugo",
-            "cf_project": "flights-hugo"
-        }
-        result = run(cfg)
-        logger.info(f'[ETAP] Flight publish: {result.get("status")} - {result.get("title", "N/A")}')
-    except Exception as e:
-        logger.error(f'[ETAP] Flight publish failed: {e}')
-        try:
-            _tg_error(f'[ETAP] Flight publish failed: {e}')
-        except:
-            pass
+        return run(cfg)
+    result = safe_run(
+        blog_id="flights-hugo",
+        topic_table="flight_topics",
+        data_table="flight_prices",
+        run_fn=_do,
+        tg_func=_tg_error,
+        min_data=10
+    )
+    logger.info(f'[ETAP] Flight: {result}')
 
 def _run_aviasales_collection():
     """항공권 가격 데이터 일일 수집"""

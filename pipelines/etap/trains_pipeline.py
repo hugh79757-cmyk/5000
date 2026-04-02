@@ -1,0 +1,184 @@
+import os, sys, sqlite3, logging, time, subprocess, re
+from datetime import datetime, timezone, timedelta
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
+
+from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
+from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block
+from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
+
+logger = logging.getLogger(__name__)
+KST = timezone(timedelta(hours=9))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
+
+from pipelines.etap.trains_writer import generate_route_guide
+
+BLOG_ID = "trains-hugo"
+SITE_PATH = "/Users/twinssn/Projects/ETAP/trains-hugo"
+TOPIC_TABLE = "trains_topics"
+CATEGORY = "Route Guide"
+
+def _get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, site_path=None, category=None):
+    slug = article["slug"]
+    post_dir = os.path.join(site_path, "content", "posts", slug)
+    os.makedirs(post_dir, exist_ok=True)
+    now = datetime.now(KST).strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    tags_str = chr(10).join(f'  - "{t}"' for t in article.get("tags", []) if t)
+    cover_line = ""
+    credit_line = ""
+    if cover_image and cover_image.get("url"):
+        cover_line = 'featureimage: "' + cover_image["url"] + '"'
+    if cover_image and cover_image.get("credit"):
+        credit_line = 'featureimagecredit: "' + cover_image.get("credit", "") + '"'
+    title_safe = article["title"].replace('"', "'")
+    desc_safe = article.get("description", "").replace('"', "'")
+    fm = "---\n"
+    fm += f'title: "{title_safe}"\n'
+    fm += f"date: {now}\n"
+    fm += f'description: "{desc_safe}"\n'
+    if cover_line:
+        fm += cover_line + "\n"
+    if credit_line:
+        fm += credit_line + "\n"
+    fm += "tags:\n" + tags_str + "\n"
+    fm += f'categories:\n  - "{category}"\n'
+    fm += "showTableOfContents: true\n"
+    fm += "---\n"
+    content = article["content"]
+    content = inject_internal_links(content, current_blog=blog_id, max_links=5)
+    if body_images:
+        h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
+        for idx in range(min(len(body_images), max(0, len(h2_positions) - 1))):
+            img = body_images[idx]
+            img_block = "\n\n![Photo](" + img["url"] + ")\n*" + img.get("credit", "") + "*\n"
+            h2_line_end = content.index("\n", h2_positions[idx]) + 1
+            next_pp = content.find("\n\n", h2_line_end)
+            if next_pp == -1:
+                next_pp = len(content)
+            content = content[:next_pp] + img_block + content[next_pp:]
+            h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
+    country = article.get("country", "")
+    city = article.get("city", "")
+    cross_html = build_cross_sell_html(country=country, city=city, exclude_blog=blog_id, max_items=3)
+    if cross_html:
+        content = insert_cross_sell_block(content, cross_html, position="top")
+    if cover_image and cover_image.get("credit"):
+        content = cover_image["credit"] + "\n\n" + content
+    with open(os.path.join(post_dir, "index.md"), "w") as f:
+        f.write(fm + "\n" + content)
+    logger.info(f"Post written: {post_dir}")
+    return post_dir
+
+def _build_and_deploy(site_path, blog_id):
+    hugo = "/opt/homebrew/bin/hugo"
+    wrangler = "/opt/homebrew/bin/wrangler"
+    try:
+        subprocess.run([hugo, "--gc", "--minify"], cwd=site_path, check=True, capture_output=True)
+        subprocess.run([wrangler, "pages", "deploy", "public", "--project-name", blog_id],
+                      cwd=site_path, check=True, capture_output=True)
+        logger.info(f"Deploy OK: {blog_id}")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Deploy failed: {e}")
+        return False
+
+def _mark_published(article, blog_id, topic_table):
+    conn = _get_db()
+    conn.execute("INSERT INTO publish_log (blog_id, slug, title, published_at) VALUES (?,?,?,?)",
+                 (blog_id, article["slug"], article["title"], datetime.now(KST).isoformat()))
+    conn.execute(f"UPDATE {topic_table} SET exhausted = 1 WHERE slug = ?", (article["slug"],))
+    conn.commit()
+    conn.close()
+    mark_entity_published(blog_id, article["slug"])
+
+def _safe_price(val):
+    try:
+        return float(str(val).replace("$","").replace(",","").strip())
+    except:
+        return 0
+
+def pick_topic():
+    conn = _get_db()
+    row = conn.execute(
+        "SELECT * FROM trains_topics WHERE exhausted = 0 "
+        "AND slug NOT IN (SELECT slug FROM publish_log WHERE blog_id = 'trains-hugo') "
+        "ORDER BY priority DESC, id ASC LIMIT 1"
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+def _add_product_cards(article):
+    routes = article.get("routes", [])
+    if not routes:
+        return article
+    r = routes[0]
+    currency = r.get("currency", "USD")
+    rows = []
+    if r.get("train_min_price"):
+        rows.append(["Train", currency + " " + str(r["train_min_price"]), str(r.get("train_min_duration","N/A"))])
+    if r.get("bus_min_price"):
+        rows.append(["Bus", currency + " " + str(r["bus_min_price"]), str(r.get("bus_min_duration","N/A"))])
+    if r.get("flight_min_price"):
+        rows.append(["Flight", currency + " " + str(r["flight_min_price"]), str(r.get("flight_min_duration","N/A"))])
+    if r.get("ferry_min_price"):
+        rows.append(["Ferry", currency + " " + str(r["ferry_min_price"]), str(r.get("ferry_min_duration","N/A"))])
+    if rows:
+        article["content"] = insert_comparison_table(
+            article["content"], rows,
+            headers=["Mode", "From Price", "Duration"],
+            after_section="at a Glance"
+        )
+    link_url = r.get("link_url", "")
+    if link_url:
+        origin = article.get("origin", "")
+        dest = article.get("destination", "")
+        cards = [dict(
+            name="Compare and book " + origin + " to " + dest,
+            price="", currency="", discount="",
+            image_url=r.get("image_url",""),
+            link=link_url, category="Train / Bus / Flight",
+        )]
+        article["content"] = insert_product_cards(article["content"], cards, max_cards=1, position="bottom")
+    return article
+
+def run():
+    topic = pick_topic()
+    if not topic:
+        logger.info("[trains-hugo] No topics")
+        return False
+    origin = topic.get("origin", "")
+    dest = topic.get("destination", "")
+    logger.info(f"[trains-hugo] {origin} to {dest} generating")
+    article = generate_route_guide(topic)
+    if not article:
+        return False
+    article = _add_product_cards(article)
+    search_term = origin or dest
+    cover = fetch_city_image(search_term, "", article["slug"]) if search_term else None
+    body = fetch_body_images(search_term, "", article["slug"], count=3) if search_term else []
+    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    _mark_published(article, BLOG_ID, TOPIC_TABLE)
+    if origin:
+        register_entity("city", origin, BLOG_ID, article["slug"], "train routes from " + origin, 55, 1)
+    if dest:
+        register_entity("city", dest, BLOG_ID, article["slug"], "how to get to " + dest, 55, 1)
+    return True
+
+def run_batch(count=3):
+    ok = 0
+    for _ in range(count):
+        if run():
+            ok += 1
+        time.sleep(5)
+    if ok > 0:
+        _build_and_deploy(SITE_PATH, BLOG_ID)
+    logger.info(f"[trains-hugo] Batch {ok}/{count}")
+    return ok

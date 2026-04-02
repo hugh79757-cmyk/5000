@@ -1,4 +1,4 @@
-"""Omio popular routes collector – parses local CSV.gz files."""
+"""Omio popular routes collector – parses local CSV.gz files. US (USD) first, UK supplements."""
 import os, sys, csv, gzip, sqlite3, logging, glob
 from datetime import datetime
 
@@ -27,10 +27,15 @@ def _safe_int(val):
     except (ValueError, TypeError):
         return None
 
-def collect_from_csv(csv_path):
-    """단일 CSV 파일에서 Omio 루트 수집"""
+def collect_from_csv(csv_path, mode="insert_or_replace"):
+    """단일 CSV 파일에서 Omio 루트 수집.
+    mode='insert_or_ignore': 이미 있는 route_id는 건너뜀 (보충용)
+    mode='insert_or_replace': 덮어쓰기 (우선 데이터)
+    """
     db = _get_db()
     count = 0
+    verb = "INSERT OR REPLACE" if mode == "insert_or_replace" else "INSERT OR IGNORE"
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     try:
         if csv_path.endswith(".gz"):
@@ -45,15 +50,15 @@ def collect_from_csv(csv_path):
                 if not route_id:
                     continue
 
-                db.execute("""
-                    INSERT OR REPLACE INTO omio_routes
+                db.execute(f"""
+                    {verb} INTO omio_routes
                     (route_id, title, image_url, description, travel_mode, top_seller_rank,
                      origin_name, origin_country, origin_station, origin_lat, origin_lon,
                      destination_name, destination_country, destination_station, dest_lat, dest_lon,
                      train_min_price, bus_min_price, flight_min_price, ferry_min_price,
                      train_min_duration, bus_min_duration, flight_min_duration, ferry_min_duration,
-                     currency, link_url)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     currency, link_url, collected_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     route_id,
                     row.get("title", ""),
@@ -80,7 +85,8 @@ def collect_from_csv(csv_path):
                     _safe_int(row.get("flight_min_duration")),
                     _safe_int(row.get("ferry_min_duration")),
                     row.get("domain_currency", "USD"),
-                    row.get("link_URL", "")
+                    row.get("link_URL", ""),
+                    now
                 ))
                 count += 1
             except Exception as e:
@@ -96,24 +102,29 @@ def collect_from_csv(csv_path):
     return count
 
 def collect_all_archive():
-    """Archive 폴더의 모든 CSV.gz 파일 수집 (영어 우선)"""
+    """Archive 폴더: US CSV 우선 (USD), UK CSV로 보충 (신규 route만)"""
     if not os.path.isdir(ARCHIVE_DIR):
         logger.error(f"[Omio] Archive 폴더 없음: {ARCHIVE_DIR}")
         return 0
 
-    # 영어 파일 우선
-    en_files = glob.glob(os.path.join(ARCHIVE_DIR, "English*CUSTOM*.csv.gz"))
-    if not en_files:
-        en_files = glob.glob(os.path.join(ARCHIVE_DIR, "English*CUSTOM*.csv"))
-    if not en_files:
-        # 모든 파일
-        en_files = glob.glob(os.path.join(ARCHIVE_DIR, "*.csv.gz")) + glob.glob(os.path.join(ARCHIVE_DIR, "*.csv"))
-
     total = 0
-    for fpath in sorted(en_files):
+
+    # Phase 1: US CSV 먼저 (USD 가격)
+    us_files = glob.glob(os.path.join(ARCHIVE_DIR, "English-(US)*CUSTOM*.csv.gz"))
+    us_files += glob.glob(os.path.join(ARCHIVE_DIR, "English-(US)*CUSTOM*.csv"))
+    for fpath in sorted(us_files):
         fname = os.path.basename(fpath)
-        cnt = collect_from_csv(fpath)
-        logger.info(f"[Omio] {fname}: {cnt}건")
+        cnt = collect_from_csv(fpath, mode="insert_or_replace")
+        logger.info(f"[Omio] {fname}: {cnt}건 (USD, primary)")
+        total += cnt
+
+    # Phase 2: UK CSV 보충 (US에 없는 route만 추가)
+    uk_files = glob.glob(os.path.join(ARCHIVE_DIR, "English-(UK)*CUSTOM*.csv.gz"))
+    uk_files += glob.glob(os.path.join(ARCHIVE_DIR, "English-(UK)*CUSTOM*.csv"))
+    for fpath in sorted(uk_files):
+        fname = os.path.basename(fpath)
+        cnt = collect_from_csv(fpath, mode="insert_or_ignore")
+        logger.info(f"[Omio] {fname}: {cnt}건 (GBP, supplement)")
         total += cnt
 
     logger.info(f"[Omio] 전체 수집: {total}건")
