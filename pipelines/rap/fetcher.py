@@ -310,3 +310,78 @@ def find_lawd_cd(keyword):
             if district in keyword or city in keyword:
                 return code, city, district
     return None, None, None
+
+
+# ─── DB 기반 청약 공고 조회 ───
+
+def fetch_subscription_from_db(blog_id, keyword=None, region_nm=None, limit=10):
+    """rap.db subscriptions 테이블에서 청약 공고 조회
+    - publish_log 기반 중복 제외 (최근 30일)
+    - 공고중/접수중/정정공고중 우선
+    - keyword 매칭 시 관련 공고 우선 정렬
+    """
+    import sqlite3
+    import os
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+
+    try:
+        # 최근 30일 발행된 pan_id 제외
+        published_ids = set()
+        try:
+            rows = conn.execute(
+                "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-30 days')",
+                (blog_id,)
+            ).fetchall()
+            published_ids = {r[0] for r in rows}
+        except Exception:
+            pass
+
+        # 활성 공고 조회 (공고중/접수중/정정공고중)
+        query = """
+            SELECT pan_id, pan_nm, pan_type, region_cd, region_nm,
+                   pan_start, pan_end, pan_status, detail_url
+            FROM subscriptions
+            WHERE pan_status IN ('공고중', '접수중', '정정공고중')
+        """
+        params = []
+
+        if region_nm:
+            query += " AND region_nm = ?"
+            params.append(region_nm)
+
+        query += " ORDER BY pan_start DESC"
+        rows = conn.execute(query, params).fetchall()
+
+        # 중복 제외
+        results = []
+        for r in rows:
+            row_dict = dict(r)
+            if row_dict["pan_id"] in published_ids:
+                continue
+
+            # keyword 매칭 점수
+            score = 0
+            if keyword:
+                kw_parts = keyword.replace("[", "").replace("]", "").split()
+                for part in kw_parts:
+                    if len(part) >= 2 and part in row_dict.get("pan_nm", ""):
+                        score += 1
+
+            row_dict["_match_score"] = score
+            results.append(row_dict)
+
+        # 매칭 점수 높은 순 → 최신 순
+        results.sort(key=lambda x: (-x["_match_score"], x.get("pan_start", "")), reverse=False)
+        results.sort(key=lambda x: -x["_match_score"])
+
+        # _match_score 제거 후 반환
+        for r in results[:limit]:
+            r.pop("_match_score", None)
+
+        logger.info(f"DB 청약 조회: blog={blog_id}, keyword={keyword}, region={region_nm} -> {len(results[:limit])}건 (전체 {len(results)}건, 제외 {len(published_ids)}건)")
+        return results[:limit]
+
+    finally:
+        conn.close()

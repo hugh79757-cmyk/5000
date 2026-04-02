@@ -22,6 +22,8 @@ RAP_EXCLUDE = [
     "롤러운전", "콘크리트", "전자기능", "주조", "인베디드", "견적서",
     "운세", "로또", "날씨", "웹툰", "게임", "파전", "킷트", "래시피",
     "키친보스", "오스틴강", "이탈리안", "이탈리아", "명태살", "1분링",
+    "상가", "용지", "어린이집", "임차운영", "근린생활", "산업단지",
+    "재입찰", "수의계약", "매각 공고", "주차장용지", "점포겸용",
 ]
 
 # 부동산 카테고리 목록
@@ -35,9 +37,9 @@ SUB_PATTERNS = ["청약", "분양", "LH", "행복주택", "임대", "전세"]
 BLOG_KEYWORD_FILTER = {
     "rap-hugo":  ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라", "오피스텔",
                   "은마", "재건축", "재개발", "부동산", "드림타운", "레지던스",
-                  "단지", "미소지움", "아르티스", "트인시아", "펠루시드", "팰루시드",
+                  "미소지움", "아르티스", "트인시아", "펠루시드", "팰루시드",
                   "S클래스", "브라이튼", "에테르노", "디아이엘", "하이니티", "비스타",
-                  "건설", "냉난방", "전원주택", "모아타운", "아페르", "라엘",
+                  "냉난방", "전원주택", "모아타운", "아페르", "라엘",
                   "서울아파트", "동탄"],
     "rap2-hugo": ["청약", "분양", "LH", "행복주택", "임대주택", "청년주택", "청년안심",
                   "국민임대", "영구임대", "매입임대", "신혼희망"],
@@ -135,8 +137,21 @@ def _pick_keyword(blog_id):
         conn.close()
 
 
+# trade 전략에 부적합한 키워드 패턴 (2차 방어)
+TRADE_INCOMPATIBLE = ["상가", "용지", "어린이집", "임차운영", "근린생활",
+                      "산업단지", "재입찰", "수의계약", "매각 공고", "주차장용지",
+                      "점포겸용", "입점자 모집", "운영자 선정", "운영자 모집"]
+
+
 def _pick_strategy(keyword, blog_id=None):
-    """blog_id에 따라 전략 결정, 없으면 키워드 기반"""
+    """blog_id에 따라 전략 결정, 없으면 키워드 기반
+    2차 방어: trade 강제 blog라도 키워드가 trade 부적합이면 subscription으로 전환
+    """
+    # 키워드 기반 trade 부적합 감지 (blog 강제보다 우선)
+    if any(p in keyword for p in TRADE_INCOMPATIBLE):
+        logger.info(f"2차 방어: trade 부적합 키워드 → subscription 전환: {keyword}")
+        return "subscription"
+
     if blog_id and blog_id in BLOG_STRATEGY:
         return BLOG_STRATEGY[blog_id]
     for p in SUB_PATTERNS:
@@ -400,7 +415,7 @@ def run(blog_cfg):
 
     from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
-    from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, find_lawd_cd, REGION_CD_MAP
+    from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, fetch_subscription_from_db, find_lawd_cd, REGION_CD_MAP
     from pipelines.rap.writer import generate_trade_article, generate_subscription_article
     from pipelines.rap.thumbnail import upload_thumbnail
 
@@ -435,6 +450,11 @@ def run(blog_cfg):
 
         # ─── 실거래가 전략 ───
         if strategy == "trade":
+            # 3차 방어: trade 진입 직전 최종 검증
+            if any(p in keyword for p in TRADE_INCOMPATIBLE):
+                logger.warning(f"3차 방어: trade 부적합 키워드 최종 차단: {keyword}")
+                continue
+
             lawd_cd, city, district = find_lawd_cd(keyword)
             if not lawd_cd:
                 logger.warning(f"{blog_id}: 법정동코드 미매칭, 키워드 스킵: {keyword}")
@@ -464,26 +484,20 @@ def run(blog_cfg):
 
         # ─── 청약 전략 ───
         elif strategy == "subscription":
-            region_cd = None
-            for region, code in REGION_CD_MAP.items():
+            # DB 기반 청약 공고 조회 (중복 자동 제외)
+            region_nm = None
+            for region in REGION_CD_MAP:
                 if region in keyword:
-                    region_cd = code
+                    region_nm = region
                     break
 
-            subs = fetch_subscription_info(region_cd=region_cd, page_size=10)
+            subs = fetch_subscription_from_db(blog_id, keyword=keyword, region_nm=region_nm, limit=10)
             if not subs:
-                tg_error(blog_id, "fetcher", f"청약 공고 0건: {keyword}")
+                logger.warning(f"{blog_id}: DB 청약 공고 0건, 키워드 스킵: {keyword}")
                 continue
-
-            # "미상" 데이터만 있는 공고 필터링
-            valid_subs = [s for s in subs if s.get("pan_nm", "미상") != "미상"]
-            if not valid_subs:
-                logger.warning(f"{blog_id}: 유효 청약 공고 0건 (전부 미상), 키워드 스킵: {keyword}")
-                continue
-            subs = valid_subs
 
             article = generate_subscription_article(keyword, subs)
-            data_source = "applyhome_api"
+            data_source = "applyhome_db"
 
         if article:
             break
