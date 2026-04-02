@@ -475,4 +475,65 @@ def build_input(conn, topic, db_path):
         if car["battery_capacity_kwh"]:
             data["battery_capacity_kwh"] = car["battery_capacity_kwh"]
 
+    # ── 데이터 Sanity Check (발행 전 최종 검증) ──
+    _issues = []
+    _ft = str(data.get("fuel_type", ""))
+    _price = data.get("base_price", 0)
+    _eff = data.get("fuel_efficiency", 0)
+    _tax = data.get("tax_annual", 0)
+    _ins = data.get("insurance_estimate", 0)
+    _fuel = data.get("annual_fuel_cost", 0)
+    _dep = data.get("three_year_depreciation", 0)
+    _total = data.get("three_year_total_cost", 0)
+    _resale_rate = data.get("resale_rate_percent", 0)
+
+    # 연비 범위 (전기차: 2~8 km/kWh, 내연기관: 5~30 km/L)
+    if "전기" in _ft:
+        if _eff < 2 or _eff > 8:
+            _issues.append(f"연비 비정상(전기): {_eff} km/kWh")
+    else:
+        if _eff < 5 or _eff > 30:
+            _issues.append(f"연비 비정상(내연): {_eff} km/L")
+
+    # 가격 범위 (최소 500만원, 최대 50000만원=5억)
+    if _price < 500 or _price > 50000:
+        _issues.append(f"가격 비정상: {_price}만원")
+
+    # 브랜드별 가격 최소값 (수입차 1000만원 이상)
+    _import_brands = ["BMW", "벤츠", "아우디", "볼보", "렉서스", "포르쉐", "테슬라"]
+    if data.get("brand") in _import_brands and _price < 3000:
+        _issues.append(f"수입차 가격 비정상: {data['brand']} {_price}만원")
+
+    # 세금 범위 (0~200만원)
+    if _tax < 0 or _tax > 200:
+        _issues.append(f"자동차세 비정상: {_tax}만원")
+
+    # 보험 범위 (30~300만원)
+    if _ins < 30 or _ins > 300:
+        _issues.append(f"보험료 비정상: {_ins}만원")
+
+    # 연간 유류비 범위 (전기 0~50, 내연 50~500만원)
+    if "전기" in _ft:
+        if _fuel > 50:
+            _issues.append(f"전기차 유류비 비정상: {_fuel}만원")
+    else:
+        if _fuel > 500:
+            _issues.append(f"유류비 비정상: {_fuel}만원")
+
+    # 잔존가치율 범위 (30~72%)
+    if _resale_rate < 25 or _resale_rate > 80:
+        _issues.append(f"잔존가치율 비정상: {_resale_rate}%")
+
+    # 3년 감가 > 차량 가격이면 비정상
+    if _dep > _price:
+        _issues.append(f"감가 > 차량가: 감가 {_dep}만원 > 가격 {_price}만원")
+
+    # 3년 총비용 상한 (차량가의 2배 초과 시 의심)
+    if _total > _price * 2:
+        _issues.append(f"3년 총비용 과다: {_total}만원 (차량가 {_price}만원의 {round(_total/_price*100)}%)")
+
+    if _issues:
+        logger.warning(f"[SANITY BLOCK] {data.get('brand')} {data.get('model')} — {_issues}")
+        return None
+
     return data
