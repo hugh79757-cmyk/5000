@@ -72,7 +72,7 @@ def _build_product_block(products):
         spec_lines = []
         for k, v in specs.items():
             spec_lines.append(f"  {k}: {v}")
-        spec_str = "\n".join(spec_lines) if spec_lines else "  (스펙 정보 없음)"
+        spec_str = "\n".join(spec_lines) if spec_lines else "  (상품명에서 스펙을 확인하세요)"
 
         lines.append(
             f"[상품{i}]\n"
@@ -144,6 +144,8 @@ def _build_system_prompt(keyword):
 - "이번 포스팅에서는", "이번 글에서는" 표현
 - 【】, ★, ♥ 등 특수 장식 문자
 - 제품 번호 붙이기 (1., 2., 첫 번째, 두 번째 등)
+- "스펙 정보가 부족", "스펙 정보가 없", "무게 범위가 불확실" 등 메타 문구
+- "아쉬운 점: 스펙 정보가 부족" 같은 스펙 미상 언급. 모르면 해당 항목을 생략할 것
 
 [상품 필터 규칙 — 반드시 준수]
 - 키워드와 명백히 무관한 상품은 소개하지 마세요.

@@ -198,6 +198,29 @@ def _record_products(blog_id, keyword, products):
     conn.close()
 
 
+
+def _title_is_duplicate(blog_id, title):
+    """publish_log에서 유사 제목 체크 (3일 이내, 핵심 20자 LIKE 비교)"""
+    import re as _re
+    normalized = _re.sub(
+        r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|추천|및|과|와|TOP\d+",
+        "", title
+    ).strip()
+    core = normalized[:20] if len(normalized) >= 20 else normalized[:12]
+    if not core or len(core) < 5:
+        return False
+    conn = sqlite3.connect(str(DB_PATH))
+    row = conn.execute(
+        """SELECT 1 FROM publish_log
+           WHERE blog_id=? AND title LIKE ? AND published_at > datetime('now', '-3 days')""",
+        (blog_id, "%" + core + "%"),
+    ).fetchone()
+    conn.close()
+    if row:
+        logger.info(f"[중복체크] 유사 제목 발견: core='{core}'")
+    return row is not None
+
+
 def _make_slug(keyword):
     slug = keyword.replace(" ", "-").lower()
     slug = re.sub(r'[^a-z0-9가-힣\-]', '', slug)
@@ -273,7 +296,7 @@ def run(cfg):
         thumbnail_url = _upload_thumbnail(products[0]["product_image"])
 
     # 유사 제목 체크
-    if title_similar_exists(blog_id, title):
+    if _title_is_duplicate(blog_id, title):
         logger.warning(f"[{blog_id}] 유사 제목 존재: {title}")
         return {"success": False, "reason": "similar_title"}
 
