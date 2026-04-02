@@ -279,6 +279,82 @@ def scan_new_cars(conn):
     return found
 
 
+
+def validate_ingested_data(conn):
+    """데이터 수집 직후 이상값 검출 — 자동 보정 또는 플래그"""
+    import logging
+    logger = logging.getLogger(__name__)
+    c = conn.cursor()
+    fixed = 0
+    flagged = 0
+
+    # ── 1. 가격 이상값: 500만원 미만 또는 50,000만원(5억) 초과 ──
+    bad_prices = c.execute("""
+        SELECT t.rowid, c.brand, c.model, t.trim_name, t.price
+        FROM trims t JOIN cars c ON c.car_id=t.car_id
+        WHERE t.price IS NOT NULL AND (t.price < 500 OR t.price > 50000)
+    """).fetchall()
+    for r in bad_prices:
+        logger.warning(f"[INGEST CHECK] 가격 이상: {r['brand']} {r['model']} {r['trim_name']} = {r['price']}만원")
+        flagged += 1
+
+    # ── 2. 연비와 배기량 혼입: 비전기차인데 연비가 배기량/1000과 동일 ──
+    disp_mix = c.execute("""
+        SELECT t.rowid AS rid, c.brand, c.model, t.trim_name, t.fuel_efficiency, c.displacement
+        FROM trims t JOIN cars c ON c.car_id=t.car_id
+        WHERE c.fuel_type NOT LIKE '%전기%'
+          AND t.fuel_efficiency IS NOT NULL AND t.fuel_efficiency > 0
+          AND c.displacement > 0
+          AND ABS(t.fuel_efficiency - CAST(c.displacement AS REAL)/1000) < 0.1
+    """).fetchall()
+    if disp_mix:
+        from pipelines.car.data_builder import lookup_fuel_efficiency
+        for r in disp_mix:
+            correct = lookup_fuel_efficiency(conn, r["brand"], r["model"], r["displacement"])
+            if correct and correct > 4:
+                c.execute("UPDATE trims SET fuel_efficiency=? WHERE rowid=?", (correct, r["rid"]))
+                logger.info(f"[INGEST FIX] 배기량 혼입 수정: {r['brand']} {r['model']} {r['trim_name']} {r['fuel_efficiency']} → {correct}")
+                fixed += 1
+            else:
+                logger.warning(f"[INGEST FLAG] 배기량 혼입 의심 (보정 실패): {r['brand']} {r['model']} {r['trim_name']} = {r['fuel_efficiency']}")
+                flagged += 1
+
+    # ── 3. 비전기차 연비 5미만: 이상값 ──
+    low_eff = c.execute("""
+        SELECT t.rowid AS rid, c.brand, c.model, t.trim_name, t.fuel_efficiency, c.displacement
+        FROM trims t JOIN cars c ON c.car_id=t.car_id
+        WHERE c.fuel_type NOT LIKE '%전기%'
+          AND t.fuel_efficiency > 0 AND t.fuel_efficiency < 5
+    """).fetchall()
+    if low_eff:
+        from pipelines.car.data_builder import lookup_fuel_efficiency
+        for r in low_eff:
+            correct = lookup_fuel_efficiency(conn, r["brand"], r["model"], r["displacement"])
+            if correct and correct >= 5:
+                c.execute("UPDATE trims SET fuel_efficiency=? WHERE rowid=?", (correct, r["rid"]))
+                logger.info(f"[INGEST FIX] 저연비 수정: {r['brand']} {r['model']} {r['trim_name']} {r['fuel_efficiency']} → {correct}")
+                fixed += 1
+            else:
+                logger.warning(f"[INGEST FLAG] 저연비 보정 실패: {r['brand']} {r['model']} {r['trim_name']} = {r['fuel_efficiency']}")
+                flagged += 1
+
+    # ── 4. 수입차 최소 가격 위반 ──
+    import_brands = ["BMW", "벤츠", "아우디", "볼보", "렉서스", "포르쉐", "테슬라", "토요타", "혼다"]
+    placeholders = ",".join(["?"] * len(import_brands))
+    cheap_imports = c.execute(f"""
+        SELECT c.brand, c.model, t.trim_name, t.price
+        FROM trims t JOIN cars c ON c.car_id=t.car_id
+        WHERE c.brand IN ({placeholders}) AND t.price > 0 AND t.price < 2000
+    """, import_brands).fetchall()
+    for r in cheap_imports:
+        logger.warning(f"[INGEST FLAG] 수입차 저가: {r['brand']} {r['model']} {r['trim_name']} = {r['price']}만원")
+        flagged += 1
+
+    conn.commit()
+    if fixed or flagged:
+        logger.info(f"[INGEST CHECK] 완료 — 자동수정: {fixed}건, 플래그: {flagged}건")
+    return fixed, flagged
+
 def fill_trim_efficiency(conn):
     """trims 테이블의 fuel_efficiency가 NULL인 항목을 public_fuel_data에서 보충"""
     import sys
@@ -647,6 +723,11 @@ def run_refresh():
         fill_trim_efficiency(conn)
     except Exception as e:
         logger.error(f"fill_trim_efficiency 실패: {e}")
+
+    try:
+        validate_ingested_data(conn)
+    except Exception as e:
+        logger.error(f"validate_ingested_data 실패: {e}")
 
     try:
         images_added = refresh_images(conn)

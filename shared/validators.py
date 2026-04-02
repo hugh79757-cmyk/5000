@@ -653,4 +653,59 @@ def validate_post_extended(
                     if not _relevant:
                         issues.append(f"[ERROR] 쿠팡 비관련 상품: {_product[:40]}")
 
+
+    # ── Post-Publish Audit: 본문 내 비정상 수치 검출 (car 파이프라인) ──
+    if pl == "car" and html_content:
+        import re as _re
+
+        # 1. 연비 비정상값 (내연기관 5 미만, 전기차 2 미만)
+        _fuel_matches = _re.findall(r'(\d+\.?\d*)\s*km/[Llℓ]', html_content)
+        for _fm in _fuel_matches:
+            _fv = float(_fm)
+            if 0 < _fv < 4.0:
+                issues.append(f"[CRITICAL] 본문 연비 비정상: {_fv} km/L (배기량 혼입 의심)")
+            elif 4.0 <= _fv < 5.0:
+                issues.append(f"[WARNING] 본문 연비 낮음: {_fv} km/L (확인 필요)")
+
+        # 2. 가격 비정상 (차량 가격이 만원 단위인데 1,000만원 미만으로 표기)
+        #    ex) "2,177만원" (실제 2억1,770만원을 잘못 표기)
+        _price_ctx = context or {}
+        _base_price = _price_ctx.get("base_price", 0)
+        if _base_price and _base_price >= 10000:
+            # 1억 이상 차량인데 본문에 억 단위 표기가 없으면 경고
+            _has_eok = _re.search(r'\d+억', html_content)
+            if not _has_eok:
+                issues.append(f"[WARNING] 1억 이상 차량({_base_price}만원)인데 억원 표기 없음")
+
+        # 3. 자동차세 비정상 (300만원 이상)
+        _tax_matches = _re.findall(r'자동차세[^0-9]*?(\d{1,3}(?:,\d{3})*)\s*만원', html_content)
+        for _tm in _tax_matches:
+            _tv = int(_tm.replace(',', ''))
+            if _tv > 300:
+                issues.append(f"[CRITICAL] 본문 자동차세 비정상: {_tv}만원")
+
+        # 4. 보험료 비정상 (500만원 이상)
+        _ins_matches = _re.findall(r'보험[료비][^0-9]*?(\d{1,3}(?:,\d{3})*)\s*만원', html_content)
+        for _im in _ins_matches:
+            _iv = int(_im.replace(',', ''))
+            if _iv > 500:
+                issues.append(f"[CRITICAL] 본문 보험료 비정상: {_iv}만원")
+
+        # 5. 월 유지비 비정상 (500만원 이상)
+        _monthly_matches = _re.findall(r'월[^0-9]*?(\d{1,3}(?:,\d{3})*)\s*만원', html_content)
+        for _mm in _monthly_matches:
+            _mv = int(_mm.replace(',', ''))
+            if _mv > 500:
+                issues.append(f"[WARNING] 월 비용 과다: {_mv}만원 (확인 필요)")
+
+        # 6. 잔존가치율 비정상 (0~20% 또는 90% 이상)
+        _resale_matches = _re.findall(r'잔존가치[율]?\s*(\d{1,3})%', html_content)
+        for _rm in _resale_matches:
+            _rv = int(_rm)
+            if _rv < 20:
+                issues.append(f"[WARNING] 잔존가치율 비정상 낮음: {_rv}%")
+            elif _rv > 90:
+                issues.append(f"[WARNING] 잔존가치율 비정상 높음: {_rv}%")
+
+
     return issues

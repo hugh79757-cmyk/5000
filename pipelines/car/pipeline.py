@@ -226,6 +226,11 @@ def run(blog_cfg):
             "keyword": data.get("model_name", ""),
             "event_date": "",
             "daily_quota": 5,
+            "base_price": data.get("base_price", 0),
+            "fuel_efficiency": data.get("fuel_efficiency", 0),
+            "fuel_type": data.get("fuel_type", ""),
+            "brand": data.get("brand", ""),
+            "model": data.get("model", ""),
         }
         _issues = _validate(blog_id, title, body, _val_ctx, pipeline="car")
         if _issues:

@@ -57,6 +57,14 @@ def generate(system_prompt, user_prompt, tier="default"):
 
 
 def generate_car(prompt_text, data):
+
+    # 공통 규칙 자동 주입
+    _common_rules_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prompts", "common", "rules.md")
+    if os.path.exists(_common_rules_path):
+        with open(_common_rules_path, "r") as _crf:
+            _common_rules = _crf.read()
+    else:
+        _common_rules = ""
     import json
     from datetime import datetime
 
@@ -89,8 +97,11 @@ def generate_car(prompt_text, data):
         data_block += "단독 분석으로 작성하세요. 비교 표에 다른 차량을 넣지 마세요."
 
     today = datetime.now().strftime("%Y년 %m월 %d일")
+    _rules_block = f"\n{_common_rules}\n" if _common_rules else ""
     system_prompt = f"""당신은 자동차 전문 블로그 에디터입니다. 한국어로 작성합니다.
 오늘 날짜: {today}
+
+{_rules_block}
 
 기준일 필수: 본문 첫 H2 섹션의 첫 문장에 반드시 오늘 날짜 기준을 포함하세요. 모든 가격/시세/잔존가치 표에도 기준일을 명시하세요.
 절대 금지어: "과연", "놀랍게도", "충격적으로", "바랍니다", "되시길", "있으시", "마무리하며", "마치며", "정리하며", "알아보겠습니다"
