@@ -4,6 +4,20 @@ import re
 import logging
 from datetime import datetime
 
+def _format_price_eok(price_man: int) -> str:
+    """만원 단위 → 억 환산 문자열. 예: 152000 → '15억 2,000만원 (152,000만원)'"""
+    if price_man <= 0:
+        return "0만원"
+    eok = price_man // 10000
+    remainder = price_man % 10000
+    if eok > 0 and remainder > 0:
+        return f"{eok}억 {remainder:,}만원 ({price_man:,}만원)"
+    elif eok > 0:
+        return f"{eok}억 ({price_man:,}만원)"
+    else:
+        return f"{price_man:,}만원"
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -22,9 +36,9 @@ def _build_trade_reference(keyword, trades, region_info=None):
     prices = [t.get("dealAmountInt", 0) for t in trades if t.get("dealAmountInt")]
     if prices:
         lines.append("### 시세 요약")
-        lines.append(f"- 최고가: {max(prices):,}만원")
-        lines.append(f"- 최저가: {min(prices):,}만원")
-        lines.append(f"- 평균: {sum(prices)//len(prices):,}만원")
+        lines.append(f"- 최고가: {_format_price_eok(max(prices))}")
+        lines.append(f"- 최저가: {_format_price_eok(min(prices))}")
+        lines.append(f"- 평균: {_format_price_eok(sum(prices)//len(prices))}")
         lines.append("")
 
     lines.append("### 최근 거래 내역")
@@ -40,15 +54,15 @@ def _build_trade_reference(keyword, trades, region_info=None):
         price_int = t.get("dealAmountInt", 0)
         if price_int > 0:
             if price_int <= 60000:
-                tax_info = f"취득세구간: 6억이하 1.1%→{int(price_int*0.011):,}만원"
+                tax_info = f"취득세구간: 6억이하 1.1%→{_format_price_eok(int(price_int*0.011))}"
             elif price_int <= 90000:
                 rate = 0.01 + (price_int - 60000) / 30000 * 0.02
-                tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{int(price_int*rate):,}만원"
+                tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{_format_price_eok(int(price_int*rate))}"
             else:
-                tax_info = f"취득세구간: 9억초과 3.3%→{int(price_int*0.033):,}만원"
+                tax_info = f"취득세구간: 9억초과 3.3%→{_format_price_eok(int(price_int*0.033))}"
         else:
             tax_info = ""
-        lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {amount}만원 ({deal_date}) [{tax_info}]")
+        lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {_format_price_eok(price_int) if price_int > 0 else amount + "만원"} ({deal_date}) [{tax_info}]")
 
     return "\n".join(lines)
 
@@ -92,6 +106,8 @@ def _build_subscription_reference(keyword, subscriptions):
         lines.append(f"  - 상태: {pan_status}")
         if detail_url:
             lines.append(f"  - 상세보기: {detail_url}")
+        else:
+            lines.append("  - 상세보기: (링크 없음 — 청약홈에서 직접 검색)")
 
     return "\n".join(lines)
 
@@ -109,7 +125,10 @@ def _base_trade_rules():
 8. 전월 데이터가 참고자료에 없으면 '전월 대비' 비교를 절대 하지 마세요. 데이터 없이 추측 금지
 9. '상승세', '하락세' 등 시장 전망은 참고자료 수치 근거가 있을 때만 사용하세요
 10. 거래 건수가 10건 미만이면 '거래 사례가 제한적이므로 참고용'이라고 반드시 명시하세요
-11. 금액이 10억 이상일 때는 괄호 안에 억 환산을 병기하세요. 예: 250,000만원(25억)"""
+11. 금액이 10억 이상일 때는 괄호 안에 억 환산을 병기하세요. 예: 250,000만원(25억)
+12. 참고자료에 없는 지역 특성, 교통, 학군, 편의시설 정보를 지어내지 마세요. 데이터에 포함되지 않은 주변 정보는 작성하지 않습니다
+13. 전월 데이터가 없으면 '전월 대비' 표현을 사용하지 마세요. '향후 전망', '상승/하락 예상' 등 예측 문구도 금지입니다
+14. 참고자료의 억 환산 표기를 그대로 사용하세요. 만원 단위를 직접 억으로 변환하지 마세요"""
 
 
 def _base_output_format():
@@ -424,6 +443,12 @@ def generate_trade_article(keyword, trades, region_info=None, blog_id=None):
 
     system_prompt = _build_trade_system_prompt(keyword, month, blog_id)
 
+    # 상세보기 링크 삽입 규칙
+    system_prompt += """
+[추가 규칙]
+- 참고자료에 '상세보기' URL이 있으면 해당 공고 설명 끝에 반드시 '[상세보기 →](URL)' 형태로 링크를 삽입하세요
+- 참고자료에 없는 URL을 절대 지어내지 마세요
+- '미상', '미정'만 있는 공고는 언급하지 마세요"""
     user_prompt = f"키워드: {keyword}\n\n참고자료:\n{reference}"
     result = ai_generate(system_prompt, user_prompt)
     if not result or not result.get("content"):
@@ -509,6 +534,12 @@ description: "120자 이내 설명"
 
 본문 마크다운"""
 
+    # 상세보기 링크 삽입 규칙
+    system_prompt += """
+[추가 규칙]
+- 참고자료에 '상세보기' URL이 있으면 해당 공고 설명 끝에 반드시 '[상세보기 →](URL)' 형태로 링크를 삽입하세요
+- 참고자료에 없는 URL을 절대 지어내지 마세요
+- '미상', '미정'만 있는 공고는 언급하지 마세요"""
     user_prompt = f"키워드: {keyword}\n\n참고자료:\n{reference}"
     result = ai_generate(system_prompt, user_prompt)
     if not result or not result.get("content"):

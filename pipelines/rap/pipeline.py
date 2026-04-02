@@ -17,6 +17,19 @@ RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 GAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "gap.db")
 
 # 부동산 무관 키워드 제외 패턴
+
+def _dedup_read_together(article: str) -> str:
+    """'## 함께 읽어보기' 섹션이 2개 이상이면 첫 번째만 유지"""
+    import re
+    pattern = r'(## 함께 읽어보기.*?)(?=\n## |\Z)'
+    matches = list(re.finditer(pattern, article, re.DOTALL))
+    if len(matches) <= 1:
+        return article
+    # 첫 번째만 유지, 나머지 제거
+    for m in reversed(matches[1:]):
+        article = article[:m.start()] + article[m.end():]
+    return article.strip()
+
 RAP_EXCLUDE = [
     "기능사", "요리", "조리", "흑백", "레시피", "양식조리", "제과", "봉제",
     "롤러운전", "콘크리트", "전자기능", "주조", "인베디드", "견적서",
@@ -480,6 +493,7 @@ def run(blog_cfg):
                 continue
 
             article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
+            article = _dedup_read_together(article)
             data_source = "molit_trade_api"
 
         # ─── 청약 전략 ───
@@ -496,7 +510,10 @@ def run(blog_cfg):
                 logger.warning(f"{blog_id}: DB 청약 공고 0건, 키워드 스킵: {keyword}")
                 continue
 
-            article = generate_subscription_article(keyword, subs)
+            # 상세보기 URL이 있는 항목 우선 정렬
+                subs = sorted(subs, key=lambda x: (0 if x.get('detail_url') else 1))
+                article = generate_subscription_article(keyword, subs)
+            article = _dedup_read_together(article)
             data_source = "applyhome_db"
 
         if article:
