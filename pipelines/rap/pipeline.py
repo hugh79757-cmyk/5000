@@ -414,74 +414,83 @@ def run(blog_cfg):
         logger.info(f"{blog_id} quota met: {today_count}/{daily_quota}")
         return {"success": False, "reason": "quota_met"}
 
-    # 키워드 선택
-    keyword, kw_category = _pick_keyword(blog_id)
-    if not keyword:
-        return {"success": False, "reason": "no_keyword"}
-
-    strategy = _pick_strategy(keyword, blog_id)
-    logger.info(f"{blog_id}: keyword={keyword}, strategy={strategy}")
-
+    # 키워드 선택 (최대 5회 재시도, 데이터 매칭 실패 시 다음 키워드)
+    MAX_KEYWORD_RETRY = 5
+    _tried_keywords = set()
     article = None
     data_source = ""
+    keyword = None
+    kw_category = None
 
-    # ─── 실거래가 전략 ───
-    if strategy == "trade":
-        lawd_cd, city, district = find_lawd_cd(keyword)
-        if not lawd_cd:
-            import random as _rand
-            BLOG_REGION_POOL = {
-                "rap-hugo":  [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
-                              ("11440","서울","마포구"), ("11560","서울","영등포구"), ("11200","서울","성동구")],
-                "rap3-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
-                              ("11170","서울","용산구"), ("11500","서울","강서구")],
-                "rap4-hugo": [("11440","서울","마포구"), ("11200","서울","성동구"), ("11215","서울","광진구"),
-                              ("11620","서울","관악구"), ("11590","서울","동작구"), ("11470","서울","양천구")],
-                "rap5-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
-                              ("11560","서울","영등포구"), ("11170","서울","용산구")],
-            }
-            pool = BLOG_REGION_POOL.get(blog_id, [("11680","서울","강남구")])
-            lawd_cd, city, district = _rand.choice(pool)
-            logger.info(f"법정동코드 미매칭, 랜덤 선택: {city} {district}")
+    for _attempt in range(MAX_KEYWORD_RETRY):
+        keyword, kw_category = _pick_keyword(blog_id)
+        if not keyword or keyword in _tried_keywords:
+            if _attempt < MAX_KEYWORD_RETRY - 1:
+                continue
+            return {"success": False, "reason": "no_keyword"}
+        _tried_keywords.add(keyword)
 
-        trades = fetch_apt_trade(lawd_cd, rows=30)
-        if not trades:
-            from dateutil.relativedelta import relativedelta
-            prev_ym = (datetime.now() - relativedelta(months=1)).strftime("%Y%m")
-            trades = fetch_apt_trade(lawd_cd, deal_ymd=prev_ym, rows=30)
+        strategy = _pick_strategy(keyword, blog_id)
+        logger.info(f"{blog_id}: keyword={keyword}, strategy={strategy} (attempt {_attempt+1}/{MAX_KEYWORD_RETRY})")
 
-        if not trades:
-            tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
-            # 실거래가 0건 키워드 자동 비활성화
-            try:
-                db = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-                _gc = sqlite3.connect(db)
-                _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
-                _gc.commit()
-                _gc.close()
-                logger.warning(f"키워드 자동 비활성화: {keyword} (실거래가 0건)")
-            except Exception as _dbe:
-                logger.warning(f"키워드 비활성화 실패: {_dbe}")
-            return {"success": False, "reason": "no_trade_data"}
+        # ─── 실거래가 전략 ───
+        if strategy == "trade":
+            lawd_cd, city, district = find_lawd_cd(keyword)
+            if not lawd_cd:
+                logger.warning(f"{blog_id}: 법정동코드 미매칭, 키워드 스킵: {keyword}")
+                continue
 
-        article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
-        data_source = "molit_trade_api"
+            trades = fetch_apt_trade(lawd_cd, rows=30)
+            if not trades:
+                from dateutil.relativedelta import relativedelta
+                prev_ym = (datetime.now() - relativedelta(months=1)).strftime("%Y%m")
+                trades = fetch_apt_trade(lawd_cd, deal_ymd=prev_ym, rows=30)
 
-    # ─── 청약 전략 ───
-    elif strategy == "subscription":
-        region_cd = None
-        for region, code in REGION_CD_MAP.items():
-            if region in keyword:
-                region_cd = code
-                break
+            if not trades:
+                tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
+                try:
+                    db = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
+                    _gc = sqlite3.connect(db)
+                    _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
+                    _gc.commit()
+                    _gc.close()
+                    logger.warning(f"키워드 자동 비활성화: {keyword} (실거래가 0건)")
+                except Exception as _dbe:
+                    logger.warning(f"키워드 비활성화 실패: {_dbe}")
+                continue
 
-        subs = fetch_subscription_info(region_cd=region_cd, page_size=10)
-        if not subs:
-            tg_error(blog_id, "fetcher", f"청약 공고 0건: {keyword}")
-            return {"success": False, "reason": "no_subscription_data"}
+            article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
+            data_source = "molit_trade_api"
 
-        article = generate_subscription_article(keyword, subs)
-        data_source = "applyhome_api"
+        # ─── 청약 전략 ───
+        elif strategy == "subscription":
+            region_cd = None
+            for region, code in REGION_CD_MAP.items():
+                if region in keyword:
+                    region_cd = code
+                    break
+
+            subs = fetch_subscription_info(region_cd=region_cd, page_size=10)
+            if not subs:
+                tg_error(blog_id, "fetcher", f"청약 공고 0건: {keyword}")
+                continue
+
+            # "미상" 데이터만 있는 공고 필터링
+            valid_subs = [s for s in subs if s.get("pan_nm", "미상") != "미상"]
+            if not valid_subs:
+                logger.warning(f"{blog_id}: 유효 청약 공고 0건 (전부 미상), 키워드 스킵: {keyword}")
+                continue
+            subs = valid_subs
+
+            article = generate_subscription_article(keyword, subs)
+            data_source = "applyhome_api"
+
+        if article:
+            break
+        else:
+            if _attempt < MAX_KEYWORD_RETRY - 1:
+                logger.warning(f"{blog_id}: 글 생성 실패, 다음 키워드 시도 ({_attempt+1}/{MAX_KEYWORD_RETRY})")
+            continue
 
     if not article:
         return {"success": False, "reason": "write_failed"}
