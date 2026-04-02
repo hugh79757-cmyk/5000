@@ -34,7 +34,7 @@ MODEL_NAME_MAP = {
     "마이바흐 SL": "Maybach SL",
     "RS3": "RS 3",
     "무쏘": "무쏘 2.3",
-    "G클래스": "G 580",
+    "G클래스": "G 450",
 }
 
 
@@ -65,7 +65,7 @@ BRAND_MAP_API = {
     "쉐보레": ["한국지엠(주)", "쉐보레"],
     "테슬라": ["테슬라코리아(유)"],
     "BMW": ["비엠더블유코리아(주)"],
-    "벤츠": ["메르세데스-벤츠코리아(주)"],
+    "벤츠": ["메르세데스-벤츠코리아(주)", "벤츠"],
     "아우디": ["아우디폭스바겐코리아(주)"],
     "볼보": ["볼보자동차코리아(주)"],
     "토요타": ["한국토요타자동차(주)"],
@@ -76,6 +76,8 @@ BRAND_MAP_API = {
 def lookup_fuel_efficiency(conn, brand, model, displacement=None):
     c = conn.cursor()
     model_clean = model
+    is_ev = "전기" in str(model)
+    is_hev = "하이브리드" in str(model)
     for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보", " LPi", " LPG", " 2.5", " 2.2", " 1.6"]:
         model_clean = model_clean.replace(suffix, "")
     # 모델명 매핑 적용
@@ -85,18 +87,30 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
         search_key = model_clean.split()[0] if model_clean.split() else model_clean
     brand_names = BRAND_MAP_API.get(brand, [brand])
     placeholders = ",".join(["?" for _ in brand_names])
-    query = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
+    # 연료타입 기반 필터
+    fuel_filter = ""
+    if is_ev:
+        fuel_filter = " AND fuel_nm = '전기'"
+    elif is_hev:
+        fuel_filter = " AND model_nm LIKE '%하이브리드%'"
+    else:
+        fuel_filter = " AND fuel_nm != '전기' AND model_nm NOT LIKE '%하이브리드%'"
+    query = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ")" + fuel_filter + " ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
     params = ["%" + search_key + "%"] + brand_names
     rows = c.execute(query, params).fetchall()
     if not rows:
-        query2 = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
+        query2 = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ?" + fuel_filter + " ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
         rows = c.execute(query2, ["%" + search_key + "%"]).fetchall()
     if rows:
         for r in rows:
             eff = r["display_eff"]
             if eff and eff != "NULL":
                 try:
-                    return float(eff)
+                    val = float(eff)
+                    # 비전기 차량인데 연비 5 미만이면 전기차 데이터 혼입 — 스킵
+                    if not is_ev and val < 5:
+                        continue
+                    return val
                 except (ValueError, TypeError):
                     pass
     return None
@@ -355,6 +369,11 @@ def build_input(conn, topic, db_path):
     tax = calc_tax(car['displacement'], car['fuel_type'])
     insurance = calc_insurance(main_trim['price'])
     fuel_eff = main_trim['fuel_efficiency']
+    # 연비 비정상 감지: 5 미만(비전기)이면 배기량이 연비로 잘못 저장된 케이스
+    ft_check = str(car.get("fuel_type", ""))
+    if fuel_eff and fuel_eff > 0 and fuel_eff < 5 and "전기" not in ft_check:
+        logger.warning(f"[연비보정] {car['brand']} {car['model']} trims 연비 {fuel_eff} 비정상 → public_fuel_data 재조회")
+        fuel_eff = None
     if not fuel_eff or fuel_eff == 0:
         fuel_eff = lookup_fuel_efficiency(conn, car['brand'], car['model'], car['displacement'])
     if not fuel_eff or fuel_eff == 0:
@@ -373,6 +392,7 @@ def build_input(conn, topic, db_path):
         "trim": main_trim['trim_name'],
         "seats": "5인승",
         "base_price": main_trim['price'],
+        "base_price_display": f"{main_trim['price'] / 10000:.1f}억원" if main_trim['price'] >= 10000 else f"{main_trim['price']:,}만원",
         "engine": build_engine_desc(car),
         "fuel_type": car['fuel_type'],
         "segment": car.get('segment', ''),
@@ -393,7 +413,7 @@ def build_input(conn, topic, db_path):
         "three_year_maintenance": maint_3yr,
         "three_year_total_cost": total_3yr,
         "final_price": main_trim['price'],
-        "trim_lineup": [{"name": t['trim_name'], "price": t['price'], "fuel_eff": t.get('fuel_efficiency') or fuel_eff, "fuel": t.get('fuel', car['fuel_type'])} for t in trims],
+        "trim_lineup": [{"name": t['trim_name'], "price": t['price'], "price_display": f"{t['price'] / 10000:.1f}억원" if t['price'] >= 10000 else f"{t['price']:,}만원", "fuel_eff": fuel_eff if (t.get('fuel_efficiency') and t['fuel_efficiency'] < 5 and "전기" not in ft_check) else (t.get('fuel_efficiency') or fuel_eff), "fuel": t.get('fuel', car['fuel_type'])} for t in trims],
     }
     if topic['competitor_car_id']:
         comp_row = c.execute('SELECT * FROM cars WHERE car_id = ?', (topic['competitor_car_id'],)).fetchone()

@@ -405,7 +405,7 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
                     "X1", "X2", "X4", "X6", "X7", "M2", "M3", "M4", "M5", "M8",
                     # 벤츠 추가
                     "A클래스", "B클래스", "CLA", "CLE", "EQA", "EQB", "EQE", "EQS",
-                    "GLA", "GLB", "GLS", "AMG",
+                    "GLA", "GLB", "GLS", "G클래스", "AMG",
                     # 아우디 추가
                     "A3", "A5", "A7", "A8", "Q2", "Q3", "Q4", "e-트론 GT",
                     # 볼보

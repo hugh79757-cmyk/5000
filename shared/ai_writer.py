@@ -61,7 +61,7 @@ def generate_car(prompt_text, data):
     from datetime import datetime
 
     # 메인 차량 데이터
-    main_keys = ["model", "brand", "year", "trim", "base_price", "engine", "fuel_type",
+    main_keys = ["model", "brand", "year", "trim", "base_price", "base_price_display", "engine", "fuel_type",
                  "fuel_efficiency", "displacement", "seats", "segment", "body_type", "drive_type",
                  "discount", "discount_conditions",
                  "finance_rate", "finance_term_months", "monthly_payment_36", "monthly_payment_48",
