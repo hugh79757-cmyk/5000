@@ -25,6 +25,51 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 BASE_URL = "https://api-gateway.coupang.com"
 CACHE_DAYS = 3
 
+# -- 키워드 변형으로 상품 풀 확대 --
+KEYWORD_VARIANTS = {
+    "노트북": ["노트북", "랩탑", "laptop"],
+    "추천": [],
+    "가성비": ["가성비", "저렴한"],
+    "무선청소기": ["무선청소기", "무선 청소기", "스틱청소기"],
+    "에어프라이어": ["에어프라이어", "에어 프라이어"],
+    "러닝머신": ["러닝머신", "런닝머신", "트레드밀"],
+    "워킹머신": ["워킹머신", "워킹패드"],
+    "카시트": ["카시트", "카 시트", "carseat"],
+    "유모차": ["유모차", "스트롤러"],
+    "덤벨": ["덤벨", "아령", "덤벨세트"],
+    "실내자전거": ["실내자전거", "스핀바이크", "실내 자전거"],
+    "스핀바이크": ["스핀바이크", "실내자전거"],
+    "의자": ["의자", "체어"],
+    "매트리스": ["매트리스", "메트리스"],
+    "책상": ["책상", "데스크"],
+}
+
+
+def _generate_keyword_variants(keyword):
+    """원본 키워드 + 변형 키워드 생성 (최대 3개)"""
+    variants = [keyword]
+    kw_lower = keyword.lower()
+
+    for base_word, alts in KEYWORD_VARIANTS.items():
+        if base_word in kw_lower:
+            for alt in alts:
+                if alt != base_word and alt not in kw_lower:
+                    variant = keyword.replace(base_word, alt)
+                    if variant != keyword and variant not in variants:
+                        variants.append(variant)
+                    if len(variants) >= 3:
+                        return variants
+
+    # 접미사 변형: "XX 추천" → "XX" (추천 제거하고 검색)
+    if keyword.endswith(" 추천"):
+        bare = keyword.replace(" 추천", "")
+        if bare not in variants:
+            variants.append(bare)
+
+    return variants[:3]
+
+
+
 
 def _get_api_keys():
     access_key = os.getenv("COUPANG_ACCESS_KEY", "")
@@ -85,6 +130,19 @@ def collect_keyword(keyword):
 
     logger.info(f"Search API 호출: {keyword}")
     products = _search_api(keyword, limit=7)
+
+    # 변형 키워드로 추가 수집 (상품 풀 확대)
+    variants = _generate_keyword_variants(keyword)
+    seen_ids = {p["productId"] for p in products} if products else set()
+    for vk in variants[1:]:  # 첫 번째는 원본이므로 스킵
+        extra = _search_api(vk, limit=5)
+        if extra:
+            for ep in extra:
+                if ep["productId"] not in seen_ids:
+                    products.append(ep)
+                    seen_ids.add(ep["productId"])
+            logger.info(f"변형 키워드 '{vk}' → {len(extra)}개 추가 후보")
+
     if not products:
         return False
 

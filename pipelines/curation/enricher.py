@@ -21,8 +21,12 @@ SPEC_PATTERNS = {
         (r'(\d+(?:\.\d+)?)\s*(?:인치|inch|")', 'screen', '인치'),
         (r'(\d+(?:\.\d+)?)\s*cm', 'screen_cm', 'cm'),
         (r'(\d+(?:\.\d+)?)\s*kg', 'weight', 'kg'),
-        (r'(i[3579]|Ultra\s*\d|라이젠\s*\d|Ryzen\s*\d|M[1-4])', 'cpu', ''),
-        (r'(WIN\d+|윈도우\s*\d+|Windows\s*\d+)', 'os', ''),
+        (r'(코어\s*(?:i[3579]|Ultra\s*\d)|Core\s*(?:i[3579]|Ultra\s*\d))', 'cpu', ''),
+        (r'(라이젠\s*\d|Ryzen\s*\d)', 'cpu', ''),
+        (r'(M[1-4]\s*(?:Pro|Max|Ultra)?)', 'cpu', ''),
+        (r'(지포스\s*RTX\s*\d+|GeForce\s*RTX\s*\d+|RTX\s*\d+)', 'gpu', ''),
+        (r'(라데온|Radeon\s*\w+)', 'gpu', ''),
+        (r'(WIN\s*\d+|윈도우\s*\d+|Windows\s*\d+)', 'os', ''),
     ],
     "appliance-hugo": [
         (r'(\d+(?:\.\d+)?)\s*[Ll리터]', 'capacity', 'L'),
@@ -74,6 +78,24 @@ def _parse_specs_from_name(product_name, blog_id):
             val = m.group(1) if m.group(1) else m.group(0)
             if key not in specs:
                 specs[key] = f"{val}{unit}" if unit else val
+    # 쿠팡 상품명 "..., 512GB, 16GB, WIN11" 구조 파싱
+    # 큰 GB=SSD, 작은 GB=RAM
+    if 'ram' not in specs or 'ssd' not in specs:
+        import re as _re
+        gb_values = _re.findall(r'(?:,\s*)(\d+)GB', product_name)
+        if len(gb_values) >= 2:
+            nums = sorted([int(v) for v in gb_values], reverse=True)
+            if 'ssd' not in specs and nums[0] >= 128:
+                specs['ssd'] = f"{nums[0]}GB"
+            if 'ram' not in specs and nums[1] <= 64:
+                specs['ram'] = f"{nums[1]}GB"
+        elif len(gb_values) == 1:
+            val = int(gb_values[0])
+            if val >= 128 and 'ssd' not in specs:
+                specs['ssd'] = f"{val}GB"
+            elif val <= 64 and 'ram' not in specs:
+                specs['ram'] = f"{val}GB"
+
     return specs
 
 
@@ -84,7 +106,7 @@ def _naver_shop_search(query):
     try:
         resp = requests.get(
             NAVER_SHOP_URL,
-            params={"query": query, "display": 1, "sort": "sim"},
+            params={"query": query, "display": 3, "sort": "sim"},
             headers={
                 "X-Naver-Client-Id": NAVER_CLIENT_ID,
                 "X-Naver-Client-Secret": NAVER_CLIENT_SECRET,
@@ -95,11 +117,22 @@ def _naver_shop_search(query):
             items = resp.json().get("items", [])
             if items:
                 item = items[0]
+                # 여러 결과 중 brand가 있는 첫 결과 우선
+                best = item
+                for it in items[:3]:
+                    if it.get("brand"):
+                        best = it
+                        break
                 return {
-                    "brand": item.get("brand", ""),
-                    "maker": item.get("maker", ""),
-                    "category": item.get("category2", "") or item.get("category1", ""),
-                    "naver_lprice": item.get("lprice", ""),
+                    "brand": best.get("brand", ""),
+                    "maker": best.get("maker", ""),
+                    "category": best.get("category2", "") or best.get("category1", ""),
+                    "naver_category3": best.get("category3", ""),
+                    "naver_category4": best.get("category4", ""),
+                    "naver_lprice": best.get("lprice", ""),
+                    "naver_hprice": best.get("hprice", ""),
+                    "naver_mall": best.get("mallName", ""),
+                    "naver_product_id": best.get("productId", ""),
                 }
     except Exception as e:
         logger.warning(f"네이버 쇼핑 API 실패: {e}")
@@ -115,7 +148,7 @@ def enrich_products(products, blog_id):
         p["parsed_specs"] = _parse_specs_from_name(name, blog_id)
 
         # 2) 네이버 쇼핑 API (상위 2개 상품만 — API 호출 절약)
-        if products.index(p) < 2:
+        if products.index(p) < 5:
             naver_info = _naver_shop_search(name[:50])
             p["brand"] = naver_info.get("brand", "")
             p["maker"] = naver_info.get("maker", "")
@@ -125,5 +158,8 @@ def enrich_products(products, blog_id):
                 p["brand"] = ""
             if not p.get("maker"):
                 p["maker"] = ""
+            p["naver_category3"] = ""
+            p["naver_category4"] = ""
+            p["naver_mall"] = ""
 
     return products

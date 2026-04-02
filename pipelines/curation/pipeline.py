@@ -28,6 +28,30 @@ from pipelines.curation.enricher import enrich_products
 
 logger = logging.getLogger(__name__)
 
+# -- 동시실행 방지 락 --
+import fcntl
+
+def _acquire_lock(blog_id):
+    """블로그별 파일 락 - 동시 실행 방지"""
+    lock_dir = PROJECT_DIR / "data"
+    lock_dir.mkdir(exist_ok=True)
+    lock_path = lock_dir / f".lock_{blog_id}"
+    lock_file = open(lock_path, "w")
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return lock_file
+    except BlockingIOError:
+        lock_file.close()
+        return None
+
+def _release_lock(lock_file):
+    if lock_file:
+        try:
+            fcntl.flock(lock_file, fcntl.LOCK_UN)
+            lock_file.close()
+        except Exception:
+            pass
+
 PROJECT_DIR = Path(__file__).parent.parent.parent
 DB_PATH = PROJECT_DIR / "data" / "curation.db"
 
@@ -86,7 +110,8 @@ CATEGORY_FILTERS = {
                      "스티커", "마우스패드", "장패드", "키보드", "마우스",
                      "가방", "파우치", "거치대", "받침대", "쿨링패드",
                      "모니터", "데스크탑", "태블릿", "아이패드", "헤드셋",
-                     "웹캠", "책상", "의자"],
+                     "웹캠", "책상", "의자", "케이블", "HDMI", "USB허브",
+                     "독", "dock", "어댑터", "충전기", "보호필름", "스킨"],
     },
     "appliance-hugo": {
         "allowed": ["청소기", "에어프라이어", "공기청정기", "제습기", "가습기",
@@ -200,25 +225,51 @@ def _record_products(blog_id, keyword, products):
 
 
 def _title_is_duplicate(blog_id, title):
-    """publish_log에서 유사 제목 체크 (3일 이내, 핵심 20자 LIKE 비교)"""
+    """publish_log에서 유사 제목 체크 (3일 이내, 다중 기준)"""
     import re as _re
+    conn = sqlite3.connect(str(DB_PATH))
+
+    # 방법1: 핵심 20자 LIKE 비교
     normalized = _re.sub(
-        r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|추천|및|과|와|TOP\d+",
+        r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|추천|비교|체크리스트|및|과|와|vs|VS|TOP[0-9]+|[0-9]{4}년?",
         "", title
     ).strip()
+    normalized = _re.sub(r"\s+", " ", normalized).strip()
     core = normalized[:20] if len(normalized) >= 20 else normalized[:12]
-    if not core or len(core) < 5:
-        return False
-    conn = sqlite3.connect(str(DB_PATH))
-    row = conn.execute(
-        """SELECT 1 FROM publish_log
-           WHERE blog_id=? AND title LIKE ? AND published_at > datetime('now', '-3 days')""",
-        (blog_id, "%" + core + "%"),
-    ).fetchone()
+
+    found = False
+    if core and len(core) >= 5:
+        row = conn.execute(
+            """SELECT title FROM publish_log
+               WHERE blog_id=? AND title LIKE ? AND published_at > datetime('now', '-3 days')""",
+            (blog_id, "%" + core + "%"),
+        ).fetchone()
+        if row:
+            logger.info(f"[중복체크] 핵심어 일치: core='{core}' -> '{row[0][:40]}'")
+            found = True
+
+    # 방법2: 주요 단어 3개 이상 겹치면 중복
+    if not found:
+        title_words = set(_re.findall(r"[가-힣a-zA-Z0-9]{2,}", title))
+        stop_words = {"추천", "비교", "가성비", "인기", "순위", "정리", "선택", "소개"}
+        title_words -= stop_words
+        if len(title_words) >= 3:
+            recent = conn.execute(
+                """SELECT title FROM publish_log
+                   WHERE blog_id=? AND published_at > datetime('now', '-3 days')""",
+                (blog_id,),
+            ).fetchall()
+            for (prev_title,) in recent:
+                prev_words = set(_re.findall(r"[가-힣a-zA-Z0-9]{2,}", prev_title))
+                prev_words -= stop_words
+                overlap = title_words & prev_words
+                if len(overlap) >= 3:
+                    logger.info(f"[중복체크] 단어 겹침: {overlap} -> '{prev_title[:40]}'")
+                    found = True
+                    break
+
     conn.close()
-    if row:
-        logger.info(f"[중복체크] 유사 제목 발견: core='{core}'")
-    return row is not None
+    return found
 
 
 def _make_slug(keyword):
@@ -244,6 +295,20 @@ def run(cfg):
     blog_id = cfg.get("id", "")
     daily_quota = cfg.get("daily_quota", 5)
 
+    # 동시실행 방지
+    lock_file = _acquire_lock(blog_id)
+    if lock_file is None:
+        logger.warning(f"[{blog_id}] 이미 실행 중 (락 획득 실패)")
+        return {"success": False, "reason": "already_running"}
+
+    try:
+        return _run_inner(cfg, blog_id, daily_quota)
+    finally:
+        _release_lock(lock_file)
+
+
+def _run_inner(cfg, blog_id, daily_quota):
+    """실제 파이프라인 로직 (락 내부에서 실행)"""
     # 할당량 체크
     today_count = get_today_count(blog_id)
     if today_count >= daily_quota:
