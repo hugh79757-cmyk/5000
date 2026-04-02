@@ -285,6 +285,49 @@ def batch_deploy():
         logger.error("Batch deploy failed: " + str(e))
 
 
+
+# ─── Blogdex-Lite Analytics ───
+
+def _run_analytics_sync():
+    """매일 05:30 — GSC/GA4 데이터 수집 + 효율 스코어 산출"""
+    logger.info("[analytics] 수집 시작")
+    try:
+        from analytics.gsc_collector import collect_all as gsc_collect, collect_keywords
+        from analytics.ga4_collector import collect_all as ga4_collect
+        from analytics.efficiency_scorer import update_scores
+
+        gsc_collect(days_back=7, verbose=False)
+        collect_keywords(days_back=7, verbose=False)
+        ga4_collect(days_back=7, verbose=False)
+        update_scores(verbose=False)
+        logger.info("[analytics] 수집 + 스코어 완료")
+    except Exception as e:
+        logger.error(f"[analytics] 수집 실패: {e}")
+        _tg_error("analytics", "scheduler", str(e)[:300])
+
+
+def _run_analytics_report():
+    """매일 23:40 — 성과 리포트 텔레그램 전송"""
+    logger.info("[analytics] 리포트 전송")
+    try:
+        from analytics.analytics_report import send_report
+        send_report(test=False)
+        logger.info("[analytics] 리포트 전송 완료")
+    except Exception as e:
+        logger.error(f"[analytics] 리포트 실패: {e}")
+
+
+def _run_daily_indexing():
+    """매일 23:00 — 오늘 발행된 URL 색인 제출 (Google + IndexNow)"""
+    logger.info("[indexing] 색인 제출 시작")
+    try:
+        from analytics.indexing import daily_index_submit
+        result = daily_index_submit(verbose=False)
+        logger.info(f"[indexing] 완료: {result['total_urls']}개 URL")
+    except Exception as e:
+        logger.error(f"[indexing] 실패: {e}")
+
+
 def daily_report():
     logger.info("Daily report")
     try:
@@ -456,6 +499,9 @@ def register_schedules():
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
 
+    schedule.every().day.at("05:30").do(_run_analytics_sync)
+    schedule.every().day.at("23:00").do(_run_daily_indexing)
+    schedule.every().day.at("23:40").do(_run_analytics_report)
     schedule.every().day.at("23:50").do(daily_report)
     job_count += 1
 

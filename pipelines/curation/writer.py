@@ -15,6 +15,44 @@ from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 
+# -- 금지어 목록 및 검증 --
+BANNED_PHRASES = [
+    "알아보겠습니다", "소개합니다", "소개해 드리겠습니다", "소개해드리겠습니다",
+    "드립니다", "놓치지 마세요", "이번 포스팅에서는", "이번 글에서는",
+    "살펴보겠습니다", "안내하겠습니다", "안내해 드리겠습니다",
+    "확인해 보겠습니다", "비교해 보겠습니다", "추천해 드리겠습니다",
+]
+
+BANNED_REPLACEMENTS = {
+    "알아보겠습니다": "정리했습니다",
+    "소개합니다": "추천합니다",
+    "소개해 드리겠습니다": "추천합니다",
+    "소개해드리겠습니다": "추천합니다",
+    "놓치지 마세요": "확인해 보세요",
+    "이번 포스팅에서는": "",
+    "이번 글에서는": "",
+    "살펴보겠습니다": "비교했습니다",
+    "안내하겠습니다": "정리했습니다",
+    "안내해 드리겠습니다": "정리했습니다",
+    "확인해 보겠습니다": "확인했습니다",
+    "비교해 보겠습니다": "비교했습니다",
+    "추천해 드리겠습니다": "추천합니다",
+}
+
+
+def _sanitize_body(body):
+    """금지어 치환 + 스펙부족 메타문구 제거"""
+    for phrase, replacement in BANNED_REPLACEMENTS.items():
+        if phrase in body:
+            body = body.replace(phrase, replacement)
+    # 스펙 부족 메타문구 제거
+    body = re.sub(r"[^\.]*스펙\s*정보가?\s*(?:부족|없|미상)[^\.]*\.?\s*", "", body)
+    body = re.sub(r"[^\.]*무게\s*범위가?\s*불확실[^\.]*\.?\s*", "", body)
+    # 빈 줄 정리
+    body = re.sub(r"\n{3,}", "\n\n", body)
+    return body.strip()
+
+
 
 def _build_product_block(products):
     """상품 데이터를 프롬프트용 텍스트로 변환 (enriched 데이터 포함)"""
@@ -119,7 +157,10 @@ def _build_system_prompt(keyword):
 - 구체적으로 작성: "가성비를 중시한다면 ○○, 프리미엄 기능이 필요하다면 ○○이 적합합니다" 형태로.
 
 [글자수]
-- 총 2000~3000자"""
+- 총 2000~3000자 (한글 기준). 이 범위 미만이면 불합격입니다.
+- 각 상품 소개는 최소 150자 이상 서술하세요.
+- 선택 가이드는 최소 300자 이상 서술하세요.
+- 전체 글이 2000자 미만이면 절대 안 됩니다. 반드시 2000자를 넘기세요."""
 
 
 def _build_user_prompt(keyword, product_block):
@@ -156,14 +197,27 @@ def generate_curation_article(keyword, products):
     system_prompt = _build_system_prompt(keyword)
     user_prompt = _build_user_prompt(keyword, product_block)
 
-    result = ai_generate(system_prompt, user_prompt)
-    if not result:
-        logger.error(f"AI 생성 실패: {keyword}")
-        return None
+    # 글자수 미달 시 최대 2회 시도
+    body = ""
+    for attempt in range(2):
+        result = ai_generate(system_prompt, user_prompt)
+        if not result:
+            logger.error(f"AI 생성 실패 (시도 {attempt+1}): {keyword}")
+            continue
 
-    body = result if isinstance(result, str) else result.get("content", "")
-    if not body or len(body) < 500:
-        logger.error(f"생성 결과 너무 짧음: {keyword} ({len(body)}자)")
+        body = result if isinstance(result, str) else result.get("content", "")
+        if not body:
+            continue
+
+        # 금지어 치환 + 메타문구 제거
+        body = _sanitize_body(body)
+
+        if len(body) >= 1800:
+            break
+        logger.warning(f"글자수 미달 (시도 {attempt+1}): {keyword} ({len(body)}자)")
+
+    if not body or len(body) < 800:
+        logger.error(f"최종 생성 결과 부족: {keyword} ({len(body)}자)")
         return None
 
     # 제목 추출: 첫 번째 # 헤딩 또는 첫 줄

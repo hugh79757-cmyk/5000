@@ -33,6 +33,8 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/hotissue-hugo
   status: active
   theme: PaperMod
+  gsc_site: https://hotissue.rotcha.kr/
+  ga4_property: '520232186'
 - cf_project: tco-hugo
   daily_quota: 5
   domain: tco.rotcha.kr
@@ -53,6 +55,8 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/tco-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://tco.rotcha.kr/
+  ga4_property: '529135373'
 - cf_project: deal-hugo
   daily_quota: 5
   domain: deal.rotcha.kr
@@ -73,6 +77,8 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/deal-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://deal.rotcha.kr/
+  ga4_property: '529150625'
 - cf_project: compare-hugo
   daily_quota: 5
   domain: compare.rotcha.kr
@@ -93,6 +99,8 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/compare-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://compare.rotcha.kr/
+  ga4_property: '529150626'
 - cf_project: guide-hugo
   daily_quota: 5
   domain: guide.rotcha.kr
@@ -113,6 +121,8 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/guide-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://guide.rotcha.kr/
+  ga4_property: '529158015'
 - cf_project: ev-hugo
   daily_quota: 5
   domain: ev.rotcha.kr
@@ -133,6 +143,8 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/ev-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://ev.rotcha.kr/
+  ga4_property: '529144463'
 - cf_project: travel-hugo
   daily_quota: 5
   domain: tour1.rotcha.kr
@@ -156,6 +168,8 @@ blogs:
   site_path: /Users/twinssn/Projects/travel-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://tour1.rotcha.kr/
+  ga4_property: '529365364'
 - cf_project: travel1-hugo
   daily_quota: 5
   domain: travel1.rotcha.kr
@@ -180,6 +194,8 @@ blogs:
   site_path: /Users/twinssn/Projects/travel1-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://travel1.rotcha.kr/
+  ga4_property: '529354403'
 - cf_project: travel2-hugo
   daily_quota: 5
   domain: travel2.rotcha.kr
@@ -204,6 +220,8 @@ blogs:
   site_path: /Users/twinssn/Projects/travel2-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://travel2.rotcha.kr/
+  ga4_property: '529351202'
 - cf_project: travel3-hugo
   daily_quota: 5
   domain: tour2.rotcha.kr
@@ -228,6 +246,8 @@ blogs:
   site_path: /Users/twinssn/Projects/travel3-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://tour2.rotcha.kr/
+  ga4_property: '529355746'
 - cf_project: travel4-hugo
   daily_quota: 5
   domain: tour3.rotcha.kr
@@ -252,6 +272,8 @@ blogs:
   site_path: /Users/twinssn/Projects/travel4-hugo
   status: active
   theme: Blowfish
+  gsc_site: https://tour3.rotcha.kr/
+  ga4_property: '529368606'
 - blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
   daily_quota: 5
   domain: tv-show.informationhot.kr
@@ -349,7 +371,8 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
   status: active
   theme: congo
-  cf_project: stock-informationhot
+  gsc_site: https://stock.informationhot.kr/
+  ga4_property: '518365064'
 - cf_project: gap-hugo
   daily_quota: 5
   domain: life.informationhot.kr
@@ -386,6 +409,8 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/dividend-hugo
   status: active
   theme: blowfish
+  gsc_site: https://dividend.techpawz.com/
+  ga4_property: '529144464'
 - cf_project: etf-hugo
   daily_quota: 5
   domain: etf.techpawz.com
@@ -404,6 +429,8 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/etf-hugo
   status: active
   theme: blowfish
+  gsc_site: https://etf.techpawz.com/
+  ga4_property: '529144841'
 - cf_project: sector-hugo
   daily_quota: 5
   domain: sector.techpawz.com
@@ -422,6 +449,8 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/sector-hugo
   status: active
   theme: blowfish
+  gsc_site: https://sector.techpawz.com/
+  ga4_property: '529088575'
 - cf_project: ipo-hugo
   daily_quota: 5
   domain: ipo.techpawz.com
@@ -440,6 +469,8 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/ipo-hugo
   status: active
   theme: blowfish
+  gsc_site: https://ipo.techpawz.com/
+  ga4_property: '529152161'
 - cf_project: finance-hugo
   daily_quota: 5
   domain: finance.techpawz.com
@@ -456,6 +487,8 @@ blogs:
     - '16:32'
     - '20:32'
   status: active
+  gsc_site: https://finance.techpawz.com/
+  ga4_property: '529142332'
 - cf_project: senior-hugo
   daily_quota: 5
   domain: senior.informationhot.kr
@@ -474,6 +507,8 @@ blogs:
   site_path: /Users/twinssn/Projects/SEAP/senior-hugo
   status: active
   theme: blowfish
+  gsc_site: https://senior.informationhot.kr/
+  ga4_property: '531055912'
 - blogger_blog_id: '5484205249958557854'
   daily_quota: 5
   domain: 2.techpawz.com
@@ -489,6 +524,8 @@ blogs:
     - '17:10'
     - '21:10'
   status: active
+  gsc_site: https://2.techpawz.com/
+  ga4_property: '502880375'
 - id: rap-hugo
   name: 부동산 시세 청약 분석
   pipeline: rap
@@ -507,6 +544,8 @@ blogs:
     - '13:50'
     - '16:50'
     - '20:50'
+  gsc_site: https://apt.informationhot.kr/
+  ga4_property: '529715626'
 - id: rap4-hugo
   name: 전세월세 리포트
   pipeline: rap
@@ -525,6 +564,8 @@ blogs:
     - '14:50'
     - '17:50'
     - '21:50'
+  gsc_site: https://rent.informationhot.kr/
+  ga4_property: '529720369'
 - id: rap5-hugo
   name: 브랜드 아파트 백과
   pipeline: rap
@@ -543,6 +584,8 @@ blogs:
     - '15:10'
     - '18:10'
     - '22:10'
+  gsc_site: https://brand.informationhot.kr/
+  ga4_property: '529762700'
 - id: rap2-hugo
   name: 청약 알리미
   pipeline: rap
@@ -561,6 +604,8 @@ blogs:
     - '14:10'
     - '17:10'
     - '21:10'
+  gsc_site: https://apply.informationhot.kr/
+  ga4_property: '529752187'
 - id: rap3-hugo
   name: 부동산 세금 가이드
   pipeline: rap
@@ -579,8 +624,8 @@ blogs:
     - '14:30'
     - '17:30'
     - '21:30'
-
-  # ─── CUAP (상품 큐레이션) ───
+  gsc_site: https://tax.informationhot.kr/
+  ga4_property: '529742117'
 - id: laptop-hugo
   name: 노트북 추천 가이드
   pipeline: curation
@@ -599,6 +644,8 @@ blogs:
     - '13:40'
     - '16:40'
     - '20:40'
+  gsc_site: https://laptop.informationhot.kr/
+  ga4_property: '531078092'
 - id: appliance-hugo
   name: 가전제품 추천 가이드
   pipeline: curation
@@ -617,6 +664,8 @@ blogs:
     - '13:42'
     - '16:42'
     - '20:42'
+  gsc_site: https://appliance.informationhot.kr/
+  ga4_property: '531043585'
 - id: interior-hugo
   name: 가구 인테리어 추천 가이드
   pipeline: curation
@@ -635,6 +684,8 @@ blogs:
     - '13:44'
     - '16:44'
     - '20:44'
+  gsc_site: https://interior.informationhot.kr/
+  ga4_property: '531043225'
 - id: baby-hugo
   name: 유아용품 추천 가이드
   pipeline: curation
@@ -653,6 +704,8 @@ blogs:
     - '13:46'
     - '16:46'
     - '20:46'
+  gsc_site: https://baby.informationhot.kr/
+  ga4_property: '531079405'
 - id: fitness-hugo
   name: 운동용품 추천 가이드
   pipeline: curation
@@ -671,6 +724,8 @@ blogs:
     - '13:48'
     - '16:48'
     - '20:48'
+  gsc_site: https://fitness.informationhot.kr/
+  ga4_property: '531079305'
 - cf_project: tour-hugo
   daily_quota: 5
   domain: tour.techpawz.com
@@ -681,7 +736,7 @@ blogs:
   repo: tour-hugo
   schedule:
     times:
-    - '07:30'
+    - 07:30
     - '10:30'
     - '13:30'
     - '16:30'
@@ -691,3 +746,173 @@ blogs:
   theme: blowfish
   language: en
   blog_type: destination
+  gsc_site: https://tour.techpawz.com/
+  ga4_property: '531055776'
+- id: airlines-hugo
+  name: Airlines Reviews
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: airlines.techpawz.com
+  cf_project: airlines-hugo
+  repo: airlines-hugo
+  site_path: /Users/twinssn/Projects/ETAP/airlines-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://airlines.techpawz.com/
+  ga4_property: '531035921'
+  schedule:
+    times:
+    - 07:31
+    - '10:31'
+    - '13:31'
+    - '16:31'
+    - '20:31'
+- id: airports-hugo
+  name: Airports Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: airports.techpawz.com
+  cf_project: airports-hugo
+  repo: airports-hugo
+  site_path: /Users/twinssn/Projects/ETAP/airports-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://airports.techpawz.com/
+  ga4_property: '531044776'
+  schedule:
+    times:
+    - 07:33
+    - '10:33'
+    - '13:33'
+    - '16:33'
+    - '20:33'
+- id: esim-hugo
+  name: eSIM Plans
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: esim.techpawz.com
+  cf_project: esim-hugo
+  repo: esim-hugo
+  site_path: /Users/twinssn/Projects/ETAP/esim-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://esim.techpawz.com/
+  ga4_property: '531068317'
+  schedule:
+    times:
+    - 07:35
+    - '10:35'
+    - '13:35'
+    - '16:35'
+    - '20:35'
+- id: flights-hugo
+  name: Flights Deals
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: flights.techpawz.com
+  cf_project: flights-hugo
+  repo: flights-hugo
+  site_path: /Users/twinssn/Projects/ETAP/flights-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://flights.techpawz.com/
+  ga4_property: '531065272'
+  schedule:
+    times:
+    - 07:37
+    - '10:37'
+    - '13:37'
+    - '16:37'
+    - '20:37'
+- id: michelin-hugo
+  name: Michelin Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: michelin.techpawz.com
+  cf_project: michelin-hugo
+  repo: michelin-hugo
+  site_path: /Users/twinssn/Projects/ETAP/michelin-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://michelin.techpawz.com/
+  ga4_property: '531066288'
+  schedule:
+    times:
+    - 07:39
+    - '10:39'
+    - '13:39'
+    - '16:39'
+    - '20:39'
+- id: tours-hugo
+  name: Tours Activities
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: tours.techpawz.com
+  cf_project: tours-hugo
+  repo: tours-hugo
+  site_path: /Users/twinssn/Projects/ETAP/tours-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://tours.techpawz.com/
+  ga4_property: '531081222'
+  schedule:
+    times:
+    - 07:41
+    - '10:41'
+    - '13:41'
+    - '16:41'
+    - '20:41'
+- id: trains-hugo
+  name: Trains Bus Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: trains.techpawz.com
+  cf_project: trains-hugo
+  repo: trains-hugo
+  site_path: /Users/twinssn/Projects/ETAP/trains-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://trains.techpawz.com/
+  ga4_property: '531082945'
+  schedule:
+    times:
+    - 07:43
+    - '10:43'
+    - '13:43'
+    - '16:43'
+    - '20:43'
+- id: visa-hugo
+  name: Visa Requirements
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: visa.techpawz.com
+  cf_project: visa-hugo
+  repo: visa-hugo
+  site_path: /Users/twinssn/Projects/ETAP/visa-hugo
+  theme: blowfish
+  language: en
+  gsc_site: https://visa.techpawz.com/
+  ga4_property: '531039430'
+  schedule:
+    times:
+    - 07:45
+    - '10:45'
+    - '13:45'
+    - '16:45'
+    - '20:45'

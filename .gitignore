@@ -32,3 +32,15 @@ michelin-hugo/public/
 tours-hugo/public/
 trains-hugo/public/
 visa-hugo/public/
+
+# Analytics
+data/analytics.db
+data/google_token.pickle
+data/google_token.pickle.*
+data/indexnow_key.txt
+data/content.db
+.scheduler.pid
+.wrangler/
+nohup.out
+config/blogs.yaml.bak_*
+pipelines/rap/*.bak2

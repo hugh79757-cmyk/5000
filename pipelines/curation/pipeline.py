@@ -74,6 +74,99 @@ def _upload_thumbnail(image_url):
     return ""
 
 
+
+# ── 카테고리별 허용/차단 키워드 (상품 필터) ──
+CATEGORY_FILTERS = {
+    "laptop-hugo": {
+        "allowed": ["노트북", "laptop", "랩탑", "맥북", "macbook", "그램", "gram",
+                     "갤럭시북", "thinkpad", "씽크패드", "victus", "오멘", "vivobook",
+                     "비보북", "zenbook", "젠북", "ideapad", "아이디어패드",
+                     "크롬북", "chromebook", "울트라북", "서피스"],
+        "blocked": ["도서", "책", "교재", "필기", "실기", "기능사", "자격증",
+                     "스티커", "마우스패드", "장패드", "키보드", "마우스",
+                     "가방", "파우치", "거치대", "받침대", "쿨링패드",
+                     "모니터", "데스크탑", "태블릿", "아이패드", "헤드셋",
+                     "웹캠", "책상", "의자"],
+    },
+    "appliance-hugo": {
+        "allowed": ["청소기", "에어프라이어", "공기청정기", "제습기", "가습기",
+                     "냉장고", "세탁기", "건조기", "식기세척기", "전자레인지",
+                     "오븐", "밥솥", "정수기", "선풍기", "히터", "난방기",
+                     "로봇청소기", "스팀청소기", "물걸레", "다리미"],
+        "blocked": ["도서", "책", "교재", "스티커", "인형", "장난감",
+                     "의류", "패션", "화장품"],
+    },
+    "interior-hugo": {
+        "allowed": ["의자", "책상", "소파", "매트리스", "침대", "선반", "수납",
+                     "커튼", "블라인드", "조명", "램프", "러그", "카페트",
+                     "테이블", "화장대", "옷장", "행거", "거울"],
+        "blocked": ["도서", "책", "교재", "식품", "화장품", "의류", "패션",
+                     "장난감", "완구"],
+    },
+    "baby-hugo": {
+        "allowed": ["카시트", "유모차", "아기띠", "바운서", "젖병", "분유",
+                     "기저귀", "보행기", "범퍼침대", "아기침대", "수유",
+                     "이유식", "체온계", "멸균기", "신생아", "유아"],
+        "blocked": ["강아지", "반려견", "반려동물", "펫", "개모차",
+                     "도서", "책", "교재", "성인용"],
+    },
+    "fitness-hugo": {
+        "allowed": ["덤벨", "아령", "바벨", "케틀벨", "런닝머신", "러닝머신",
+                     "트레드밀", "워킹머신", "워킹패드", "실내자전거", "스핀바이크",
+                     "풀업바", "철봉", "푸쉬업바", "요가매트", "폼롤러",
+                     "헬스", "운동", "피트니스", "스텝퍼", "로잉머신",
+                     "근력", "스트레칭", "밴드"],
+        "blocked": ["도서", "책", "교재", "의류", "신발", "보호대",
+                     "영양제", "프로틴", "식품"],
+    },
+}
+
+
+def _filter_irrelevant_products(blog_id, keyword, products):
+    """카테고리와 무관한 상품 제거 (코드 레벨 필터)"""
+    filters = CATEGORY_FILTERS.get(blog_id)
+    if not filters:
+        return products
+
+    allowed = filters["allowed"]
+    blocked = filters["blocked"]
+    keyword_lower = keyword.lower()
+
+    filtered = []
+    for p in products:
+        name = p.get("product_name", "").lower()
+        cat = p.get("category_name", "").lower()
+        combined = name + " " + cat
+
+        # 차단 키워드 포함 시 제외
+        is_blocked = False
+        for bw in blocked:
+            if bw in combined:
+                logger.info(f"[필터] 차단: '{p.get('product_name', '')[:40]}' (차단어: {bw})")
+                is_blocked = True
+                break
+        if is_blocked:
+            continue
+
+        # 허용 키워드 중 하나라도 포함되어야 통과
+        has_allowed = False
+        for aw in allowed:
+            if aw in combined or aw in keyword_lower:
+                has_allowed = True
+                break
+        if not has_allowed:
+            logger.info(f"[필터] 미허용: '{p.get('product_name', '')[:40]}' (허용어 미포함)")
+            continue
+
+        filtered.append(p)
+
+    if len(filtered) < 3:
+        logger.warning(f"[{blog_id}] 필터 후 상품 부족 ({len(filtered)}개), 원본 유지")
+        return products[:5]
+
+    return filtered
+
+
 def _filter_used_products(blog_id, products):
     """30일 내 동일 blog_id에서 발행된 상품 제외"""
     if not products:
@@ -152,6 +245,12 @@ def run(cfg):
     if len(products) < 3:
         logger.error(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개)")
         return {"success": False, "reason": "insufficient_products"}
+
+    # 카테고리 무관 상품 필터링 (코드 레벨)
+    products = _filter_irrelevant_products(blog_id, keyword, products)
+    if len(products) < 3:
+        logger.error(f"[{blog_id}] 필터 후 상품 부족: {keyword} ({len(products)}개)")
+        return {"success": False, "reason": "irrelevant_products"}
 
     # 상품 데이터 인리치 (스펙 파싱 + 네이버 brand)
     products = enrich_products(products, blog_id)
