@@ -15,6 +15,44 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# ── 중복 실행 방지 (PID lock) ──
+import atexit
+import signal
+
+_PIDFILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".scheduler.pid")
+
+def _acquire_pidlock():
+    if os.path.exists(_PIDFILE):
+        try:
+            old_pid = int(open(_PIDFILE).read().strip())
+            os.kill(old_pid, 0)  # 프로세스 존재 확인
+            print(f"[FATAL] scheduler already running (PID {old_pid}). Exiting.")
+            sys.exit(1)
+        except (ProcessLookupError, ValueError):
+            pass  # 이전 프로세스 이미 죽음 — lock file 무효
+        except PermissionError:
+            print(f"[FATAL] scheduler already running (PID {old_pid}, permission denied). Exiting.")
+            sys.exit(1)
+    with open(_PIDFILE, 'w') as f:
+        f.write(str(os.getpid()))
+
+def _release_pidlock():
+    try:
+        if os.path.exists(_PIDFILE) and int(open(_PIDFILE).read().strip()) == os.getpid():
+            os.remove(_PIDFILE)
+    except Exception:
+        pass
+
+def _signal_handler(signum, frame):
+    _release_pidlock()
+    sys.exit(0)
+
+_acquire_pidlock()
+atexit.register(_release_pidlock)
+signal.signal(signal.SIGTERM, _signal_handler)
+signal.signal(signal.SIGINT, _signal_handler)
+
+
 from dotenv import load_dotenv
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 

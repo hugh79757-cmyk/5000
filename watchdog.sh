@@ -28,10 +28,15 @@ if [ "$age" -gt "$MAX_AGE" ]; then
     curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
         -d "chat_id=${TELEGRAM_CHAT_ID}&text=${MSG}&parse_mode=HTML" > /dev/null 2>&1
     
-    # 스케줄러 재시작
-    launchctl unload ~/Library/LaunchAgents/${PLIST}.plist 2>/dev/null
+    # 스케줄러 재시작 (중복 방지: 이미 실행 중이면 스킵)
+    if pgrep -f "5000/scheduler.py" > /dev/null 2>&1; then
+        log "WARN: 스케줄러 프로세스 존재하나 heartbeat 갱신 안 됨 — 강제 재시작"
+        pkill -f "5000/scheduler.py" 2>/dev/null
+        sleep 3
+    fi
+    launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/${PLIST}.plist 2>/dev/null
     sleep 2
-    launchctl load ~/Library/LaunchAgents/${PLIST}.plist
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/${PLIST}.plist
     log "INFO: 스케줄러 재시작 완료"
 else
     log "OK: heartbeat ${age}초 전 — 정상"
