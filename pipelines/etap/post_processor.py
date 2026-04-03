@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def insert_product_cards(content: str, products: list, max_cards: int = 10) -> str:
+def insert_product_cards(content: str, products: list, max_cards: int = 5) -> str:
     """본문 하단(마지막 H2 앞 또는 끝)에 Viator 상품 카드 HTML 삽입.
 
     Args:
@@ -25,6 +25,9 @@ def insert_product_cards(content: str, products: list, max_cards: int = 10) -> s
 
     for p in cards:
         name = p.get("name", "")
+        # "Save XX%! " 접두사 제거
+        import re as _re
+        name = _re.sub(r"^Save [\d.]+%!\s*", "", name)
         price = p.get("price", "")
         currency = p.get("currency", "USD")
         discount = p.get("discount", "")
@@ -140,3 +143,40 @@ def insert_cross_sell_block(content: str, cross_html: str, position: str = "top"
             return block + content
     else:
         return content + block
+
+
+# ── AdSense 본문 광고 삽입 ──
+ADSENSE_BLOCK = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463"
+     crossorigin="anonymous"></script>
+<!-- ETAP -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-8772455780561463"
+     data-ad-slot="4276065235"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>"""
+
+def insert_adsense(content: str) -> str:
+    """첫 번째 단락 하단과 두 번째 H2 아래에 AdSense 광고 블록을 삽입합니다."""
+    import re as _re
+    if "<!-- ETAP -->" in content:
+        return content
+
+    # 광고 위치 1: 첫 번째 빈 줄(단락 구분) 뒤
+    first_para = _re.search(r"\n\n", content)
+    if first_para:
+        pos1 = first_para.end()
+        content = content[:pos1] + "\n" + ADSENSE_BLOCK + "\n\n" + content[pos1:]
+
+    # 광고 위치 2: 두 번째 H2 아래
+    h2_list = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
+    if len(h2_list) >= 2:
+        h2_start = h2_list[1]
+        h2_end = content.index("\n", h2_start)
+        pos2 = h2_end + 1
+        content = content[:pos2] + "\n" + ADSENSE_BLOCK + "\n\n" + content[pos2:]
+
+    return content

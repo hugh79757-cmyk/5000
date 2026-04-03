@@ -540,9 +540,18 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
         "아직 확정되지",
         "발표되지 않았",
         "정해지지 않았",
+        "데이터 없음",
+        "정보 없음",
+        "정보가 없습니다",
+        "데이터가 부족",
+        "확인할 수 없습니다",
     ]
     missing_count = sum(1 for s in missing_signals if s in body)
-    if missing_count >= 3:
+    # "데이터 없음"은 테이블에서 반복되므로 횟수도 체크
+    data_none_count = body.count("데이터 없음")
+    if data_none_count >= 3:
+        issues.append(f"[CRITICAL] 빈 테이블 감지 ('데이터 없음' {data_none_count}회 반복)")
+    elif missing_count >= 3:
         issues.append(f"[CRITICAL] 핵심 데이터 부재 ({missing_count}개 미공개 표현 감지)")
 
     title_placeholders = re.findall(r"\*\*\d+[억만%원주]", title)

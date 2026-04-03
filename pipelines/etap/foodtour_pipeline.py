@@ -1,3 +1,4 @@
+"""foodtour_pipeline.py - Food Tours blog pipeline"""
 import os, sys, sqlite3, logging, time, subprocess, re
 from datetime import datetime, timezone, timedelta
 
@@ -14,12 +15,12 @@ KST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
-from pipelines.etap.esim_writer import generate_esim_guide
+from pipelines.etap.foodtour_writer import generate_foodtour_guide
 
-BLOG_ID = "esim-hugo"
-SITE_PATH = "/Users/twinssn/Projects/ETAP/esim-hugo"
-TOPIC_TABLE = "esim_topics"
-CATEGORY = "eSIM Guide"
+BLOG_ID = "foodtour-hugo"
+SITE_PATH = "/Users/twinssn/Projects/ETAP/foodtour-hugo"
+TOPIC_TABLE = "foodtour_topics"
+CATEGORY = "Food Tours"
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -110,58 +111,78 @@ def _safe_price(val):
 def pick_topic():
     conn = _get_db()
     row = conn.execute(
-        "SELECT * FROM esim_topics WHERE exhausted = 0 "
-        "AND slug NOT IN (SELECT slug FROM publish_log WHERE blog_id = 'esim-hugo') "
+        f"SELECT * FROM {TOPIC_TABLE} WHERE exhausted = 0 "
+        f"AND slug NOT IN (SELECT slug FROM publish_log WHERE blog_id = '{BLOG_ID}') "
         "ORDER BY priority DESC, id ASC LIMIT 1"
     ).fetchone()
     conn.close()
     return dict(row) if row else None
 
 def _add_product_cards(article):
-    plans = article.get("plans", [])
-    if not plans:
+    tours = article.get("tours", [])
+    if not tours:
         return article
+    with_img = [t for t in tours if t.get("image_url")]
+    pool = with_img if with_img else tours
+    budget = [t for t in pool if 0 < _safe_price(t.get("price")) < 50][:3]
+    mid = [t for t in pool if 50 <= _safe_price(t.get("price")) <= 200][:3]
+    deals = sorted(
+        [t for t in pool if t.get("discount") and str(t["discount"]) not in ("0","","0.0")],
+        key=lambda x: _safe_price(str(x.get("discount","0")).replace("%","")),
+        reverse=True
+    )[:4]
     selected = []
-    for p in plans[:8]:
-        price_val = str(p.get("sale_price") or p.get("price","")).replace("$","")
-        original = str(p.get("price","")).replace("$","")
-        discount = ""
-        try:
-            pf = float(price_val)
-            of = float(original)
-            if pf < of:
-                discount = str(int(round((1 - pf/of) * 100)))
-        except:
-            pass
+    seen = set()
+    for t in budget + mid + deals:
+        nm = t.get("product_name", "")
+        import re as _re
+        nm = _re.sub(r"^Save [\d.]+%!\s*", "", nm)
+        if nm in seen:
+            continue
+        seen.add(nm)
         selected.append(dict(
-            name=p.get("title",""), price=price_val, currency="$",
-            discount=discount, image_url=p.get("image_link",""),
-            link=p.get("link",""), category="eSIM Plan",
+            name=nm, price=t.get("price",""), currency=t.get("currency","USD"),
+            discount=str(t.get("discount","")).replace("%",""),
+            image_url=t.get("image_url",""), link=t.get("deep_link",""),
+            category=t.get("category",""),
         ))
     if selected:
-        article["content"] = insert_product_cards(article["content"], selected, max_cards=8)
+        article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
+    # 카드에 이미 포함된 투어는 비교 테이블에서 제외
+    card_names = seen.copy()
+    comp_tours = [t for t in sorted(tours, key=lambda x: _safe_price(x.get("price",0))) if t.get("product_name","") not in card_names][:5]
+    comp = [dict(name=__import__("re").sub(r"^Save [\d.]+%!\s*", "", t["product_name"]), price=t.get("price",""), currency=t.get("currency","USD"),
+                 discount=str(t.get("discount","")).replace("%",""), link=t.get("deep_link",""))
+            for t in comp_tours if t.get("deep_link")]
+    if comp:
+        article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
 def run():
     topic = pick_topic()
     if not topic:
-        logger.info("[esim-hugo] No topics")
+        logger.info(f"[{BLOG_ID}] No topics")
         return False
-    logger.info(f"[esim-hugo] {topic.get('country','')} generating")
-    article = generate_esim_guide(topic)
+    logger.info(f"[{BLOG_ID}] {topic.get('city','')} generating")
+    article = generate_foodtour_guide(topic)
     if not article:
         return False
     article = _add_product_cards(article)
+    city = article.get("city", "")
     country = article.get("country", "")
-    cover = fetch_city_image(country, "", article["slug"]) if country else None
-    body = fetch_body_images(country, "", article["slug"], count=2) if country else []
+    cover = fetch_city_image(city + " food tour", country, article["slug"]) if city else None
+    body = fetch_body_images(city + " food tour", country, article["slug"], count=3) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE)
+    if city:
+        register_entity("city", city, BLOG_ID, article["slug"],
+                        "food tours in " + city, 65, 1)
     if country:
-        register_entity("country", country, BLOG_ID, article["slug"], country + " eSIM plans", 70, 1)
+        register_entity("country", country, BLOG_ID, article["slug"],
+                        "foodtour in " + country, 40, 1)
     return True
 
-def run_batch(count=3):
+def run_batch(count=1):
     ok = 0
     for _ in range(count):
         if run():
@@ -169,5 +190,5 @@ def run_batch(count=3):
         time.sleep(5)
     if ok > 0:
         _build_and_deploy(SITE_PATH, BLOG_ID)
-    logger.info(f"[esim-hugo] Batch {ok}/{count}")
+    logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")
     return ok

@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block
+from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
 
 logger = logging.getLogger(__name__)
@@ -54,6 +54,8 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     fm += "---\n"
     content = article["content"]
     content = inject_internal_links(content, current_blog=blog_id, max_links=5)
+
+    content = insert_adsense(content)
     if body_images:
         h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
         for idx in range(min(len(body_images), max(0, len(h2_positions) - 1))):

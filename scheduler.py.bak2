@@ -356,28 +356,6 @@ def _run_gap_keyword_sync():
         logger.error(f"GAP keyword sync failed: {e}")
 
 
-def _run_stap_collect():
-    """매일 06:00 — STAP 데이터 수집 (data_collector)"""
-    stap_root = os.getenv("STAP_ROOT", "/Users/twinssn/Projects/STAP")
-    stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
-    if not os.path.exists(stap_python):
-        stap_python = sys.executable
-    try:
-        result = subprocess.run(
-            [stap_python, "-m", "pipelines.data_collector"],
-            cwd=stap_root, capture_output=True, text=True, timeout=300,
-            env={**os.environ, "PYTHONPATH": stap_root}
-        )
-        if result.returncode == 0:
-            logger.info("STAP data_collector completed")
-        else:
-            logger.error(f"STAP data_collector failed: {result.stderr[-200:]}")
-    except subprocess.TimeoutExpired:
-        logger.error("STAP data_collector timeout (300s)")
-    except Exception as e:
-        logger.error(f"STAP data_collector error: {e}")
-
-
 def _run_car_refresh():
     subprocess.run([sys.executable, "pipelines/car/daily_refresh.py"],
                    cwd=os.path.dirname(os.path.abspath(__file__)))
@@ -556,51 +534,6 @@ def _run_etap_visa():
     except Exception as e:
         logger.error(f"[ETAP] visa-hugo 실패: {e}")
 
-
-def _run_etap_daytrips():
-    try:
-        from pipelines.etap.daytrips_pipeline import run_batch
-        run_batch(count=1)
-        logger.info("[ETAP] daytrips-hugo 완료")
-    except Exception as e:
-        logger.error(f"[ETAP] daytrips-hugo 실패: {e}")
-
-
-def _run_etap_walking():
-    try:
-        from pipelines.etap.walking_pipeline import run_batch
-        run_batch(count=1)
-        logger.info("[ETAP] walking-hugo 완료")
-    except Exception as e:
-        logger.error(f"[ETAP] walking-hugo 실패: {e}")
-
-
-def _run_etap_foodtour():
-    try:
-        from pipelines.etap.foodtour_pipeline import run_batch
-        run_batch(count=1)
-        logger.info("[ETAP] foodtour-hugo 완료")
-    except Exception as e:
-        logger.error(f"[ETAP] foodtour-hugo 실패: {e}")
-
-
-def _run_etap_adventure():
-    try:
-        from pipelines.etap.adventure_pipeline import run_batch
-        run_batch(count=1)
-        logger.info("[ETAP] adventure-hugo 완료")
-    except Exception as e:
-        logger.error(f"[ETAP] adventure-hugo 실패: {e}")
-
-
-def _run_etap_watersports():
-    try:
-        from pipelines.etap.watersports_pipeline import run_batch
-        run_batch(count=1)
-        logger.info("[ETAP] watersports-hugo 완료")
-    except Exception as e:
-        logger.error(f"[ETAP] watersports-hugo 실패: {e}")
-
 def register_schedules():
     config = load_config()
     blogs = config.get("blogs", [])
@@ -624,9 +557,6 @@ def register_schedules():
 
     schedule.every().day.at("06:00").do(_run_festival_refresh)
     logger.info("Festival refresh scheduled at 06:00")
-
-    schedule.every().day.at("06:00").do(_run_stap_collect)
-    logger.info("STAP data_collector scheduled at 06:00")
 
     schedule.every().day.at("06:30").do(_run_car_refresh)
     logger.info("CAR daily_refresh scheduled at 06:30")
@@ -683,27 +613,7 @@ def register_schedules():
         schedule.every().day.at(t).do(_run_etap_visa)
         job_count += 1
 
-    for t in ["08:20", "11:20", "14:20", "17:20", "21:20"]:
-        schedule.every().day.at(t).do(_run_etap_daytrips)
-        job_count += 1
-
-    for t in ["08:25", "11:25", "14:25", "17:25", "21:25"]:
-        schedule.every().day.at(t).do(_run_etap_walking)
-        job_count += 1
-
-    for t in ["08:30", "11:30", "14:30", "17:30", "21:30"]:
-        schedule.every().day.at(t).do(_run_etap_foodtour)
-        job_count += 1
-
-    for t in ["08:35", "11:35", "14:35", "17:35", "21:35"]:
-        schedule.every().day.at(t).do(_run_etap_adventure)
-        job_count += 1
-
-    for t in ["08:40", "11:40", "14:40", "17:40", "21:40"]:
-        schedule.every().day.at(t).do(_run_etap_watersports)
-        job_count += 1
-
-    logger.info("ETAP 14 EN blogs scheduled 5x daily each (70 posts/day total)")
+    logger.info("ETAP 9 EN blogs scheduled 5x daily each (45 posts/day total)")
 
     return job_count
 

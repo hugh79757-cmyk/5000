@@ -1,3 +1,4 @@
+from pipelines.etap.post_processor import insert_adsense
 """
 항공권 딜 글 발행 파이프라인
 """
