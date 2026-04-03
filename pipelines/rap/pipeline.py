@@ -14,7 +14,6 @@ except ImportError:
     tg_error = lambda *a, **k: None
 
 RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
-GAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "gap.db")
 
 # 부동산 무관 키워드 제외 패턴
 
@@ -87,48 +86,36 @@ WP_CATEGORY_MAP = {
 
 def _pick_keyword(blog_id):
     """RAP DB에서 키워드 선택 — 오염 필터 + 중복 발행 방지"""
-    # RAP DB 우선, 없으면 GAP DB 폴백
-    db_path = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-    conn = sqlite3.connect(db_path, timeout=10)
+    # RAP DB만 사용 (gap.db 폴백 제거 — 오염 키워드 유입 방지)
+    if not os.path.exists(RAP_DB_PATH):
+        logger.error(f"{blog_id}: rap.db 없음")
+        return None, None
+    conn = sqlite3.connect(RAP_DB_PATH, timeout=10)
     try:
         patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
 
-        if db_path == RAP_DB_PATH:
-            # RAP DB: blog_target 필터 우선
-            rows = conn.execute(
-                "SELECT keyword, category FROM keywords "
-                "WHERE status='active' "
-                "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
-                "LIMIT 200"
-            ).fetchall()
-        else:
-            # GAP DB 폴백
-            rows = conn.execute(
-                "SELECT keyword, category FROM keywords "
-                "WHERE category='금융/부동산' AND status='active' "
-                "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
-                "LIMIT 200"
-            ).fetchall()
+        rows = conn.execute(
+            "SELECT keyword, category FROM keywords "
+            "WHERE status='active' "
+            "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
+            "LIMIT 200"
+        ).fetchall()
 
         # 1단계: 오염 키워드 제거
         rows = [(kw, cat) for kw, cat in rows
                 if not any(ex in kw for ex in RAP_EXCLUDE)]
 
-        # 2단계: blog_id별 패턴 필터
+        # 2단계: blog_id별 패턴 필터 (매칭 실패 시 빈 결과 — 부적합 키워드 차단)
         if patterns:
-            filtered = [(kw, cat) for kw, cat in rows if any(p in kw for p in patterns)]
-            if filtered:
-                rows = filtered
+            rows = [(kw, cat) for kw, cat in rows if any(p in kw for p in patterns)]
 
         # 3단계: 이미 발행된 키워드 제외 (최근 7일)
         try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=10) if db_path != RAP_DB_PATH else conn
+            rap_conn = conn
             published = {r[0] for r in rap_conn.execute(
                 "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
                 (blog_id,)
             ).fetchall()}
-            if db_path != RAP_DB_PATH:
-                rap_conn.close()
             rows = [(kw, cat) for kw, cat in rows if kw not in published]
         except Exception:
             pass  # publish_log 테이블 없으면 스킵
@@ -484,7 +471,7 @@ def run(blog_cfg):
             if not trades:
                 tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
                 try:
-                    db = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
+                    db = RAP_DB_PATH
                     _gc = sqlite3.connect(db, timeout=10)
                     _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                     _gc.commit()
