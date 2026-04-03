@@ -575,7 +575,7 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
             if age > 7:
                 issues.append(f"[WARNING] 주가 데이터 {age}일 경과 ({latest.strftime('%Y-%m-%d')})")
 
-    skip_fin_check = any(k in ctx.get("data_source", "") for k in ("finance", "etf"))
+    skip_fin_check = any(k in ctx.get("data_source", "") for k in ("finance", "etf", "ipo", "sector", "dividend"))
     if not skip_fin_check:
         fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
         has_fin = sum(1 for k in fin_keywords if k in body)
