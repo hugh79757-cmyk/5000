@@ -18,15 +18,15 @@ RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 # 부동산 무관 키워드 제외 패턴
 
 def _dedup_read_together(article) -> str:
-    """'## 함께 읽어보기' 섹션이 2개 이상이면 첫 번째만 유지"""
+    """내부링크 섹션 중복 제거 — 첫 번째만 유지"""
     if not isinstance(article, str):
         return article if isinstance(article, str) else str(article) if article else ""
     import re
-    pattern = r'(## 함께 읽어보기.*?)(?=\n## |\Z)'
+    # "함께 읽어보기", "함께 읽으면 좋은 글" 등 모든 내부링크 섹션 매칭
+    pattern = r'(## 함께 읽(?:어보기|으면 좋은 글).*?)(?=\n## |\Z)'
     matches = list(re.finditer(pattern, article, re.DOTALL))
     if len(matches) <= 1:
         return article
-    # 첫 번째만 유지, 나머지 제거
     for m in reversed(matches[1:]):
         article = article[:m.start()] + article[m.end():]
     return article.strip()
@@ -166,12 +166,70 @@ def _pick_strategy(keyword, blog_id=None):
 
 
 def _post_process(body_md, blog_id, keyword):
-    # 금지어 자동 치환
+    """발행 전 후처리: 금지표현 제거 + 데이터 정제 + 면책조항 + 쿠팡 + 내부링크"""
+    import re as _re
+
+    # ── 0. 마크다운 표 깨짐 수정 ──
+    # GPT가 "|—-||—-||" 형태로 구분선을 생성하는 버그 수정
+    body_md = _re.sub(
+        r'\|[-—]+(?:\|[-—]*)+\|*',
+        lambda m: '| ' + ' | '.join(['---'] * (m.group().count('|') - 1)) + ' |' if m.group().count('|') > 2
+        else m.group(),
+        body_md
+    )
+    # 표 헤더 뒤에 구분선이 없는 경우 추가
+    lines = body_md.split('\n')
+    fixed_lines = []
+    for i, line in enumerate(lines):
+        fixed_lines.append(line)
+        if line.strip().startswith('|') and line.strip().endswith('|'):
+            col_count = line.count('|') - 1
+            if col_count >= 2:
+                # 다음 줄이 구분선인지 확인
+                next_line = lines[i+1].strip() if i+1 < len(lines) else ''
+                if next_line.startswith('|') and '---' not in next_line and '—' not in next_line:
+                    # 이전 줄이 구분선이 아니고, 현재가 첫 번째 |행이면 구분선 삽입
+                    prev_line = lines[i-1].strip() if i > 0 else ''
+                    if not prev_line.startswith('|'):
+                        sep = '| ' + ' | '.join(['---'] * col_count) + ' |'
+                        fixed_lines.append(sep)
+    body_md = '\n'.join(fixed_lines)
+
+    # ── 1. 억 환산 오류 자동 수정 ──
+    # "2억 4,600만원(24.6억)" → "2억 4,600만원(24,600만원)" 패턴 수정
+    def _fix_eok_mismatch(m):
+        full = m.group(0)
+        eok_str = m.group(1)  # "2"
+        man_str = m.group(2)  # "4,600"
+        paren_val = m.group(3)  # "24.6억" or "24.6"
+        # 실제 만원 값 계산
+        eok = int(eok_str.replace(',', ''))
+        man = int(man_str.replace(',', ''))
+        total_man = eok * 10000 + man
+        # 괄호 안의 값이 "X.X억" 형태면 검증
+        if '억' in paren_val:
+            paren_num = float(paren_val.replace('억', '').replace(',', ''))
+            correct_eok = total_man / 10000
+            if abs(paren_num - correct_eok) > 0.05:
+                # 오류 → 올바른 만원 표기로 교체
+                return f"{eok}억 {man:,}만원({total_man:,}만원)"
+        return full
+
+    body_md = _re.sub(
+        r'(\d{1,3})억\s*(\d{1,4}(?:,\d{3})?)만원\s*\((\d+\.?\d*억?)\)',
+        _fix_eok_mismatch,
+        body_md
+    )
+    # "1억 2,500만원(1.25억)" 패턴도 수정
+    body_md = _re.sub(
+        r'(\d{1,3})억\s*(?:(\d{1,4}(?:,\d{3})?)만원\s*)?\((\d+\.?\d*)억\)',
+        _fix_eok_mismatch,
+        body_md
+    )
+
+    # ── 2. 금지어 자동 치환 ──
     body_md = body_md.replace("특히 ", "").replace("특히, ", "")
     body_md = body_md.replace("특히,", "").replace("  ", " ")
-
-    """발행 전 후처리: 금지표현 제거 + 면책조항 + 쿠팡 + 내부링크"""
-    import re as _re
 
     # 1. 금지 표현 제거
     BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요"]
@@ -538,8 +596,50 @@ def run(blog_cfg):
     # 후처리 (면책조항 + 쿠팡 + 내부링크)
     article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
-    # ── 발행 전 검증 ──
+    # ── 발행 전 검증: 할루시네이션 감지 ──
+    import re as _val_re
     _is_draft = False
+    _hal_issues = []
+
+    _body = article.get("body_md", "")
+
+    # (1) 지역 특성 할루시네이션 — 참고자료에 없는 교통/학군/편의시설 멘션
+    _hal_patterns = [
+        (r"지하철역[과과]?\s*주요\s*도로\s*접근성", "지하철역 접근성 할루시네이션"),
+        (r"학군\s*(?:또한|이|도)\s*우수", "학군 우수 할루시네이션"),
+        (r"교육기관이?\s*밀집", "교육기관 밀집 할루시네이션"),
+        (r"생활\s*인프라가?\s*(?:잘\s*)?갖춰", "생활인프라 할루시네이션"),
+        (r"대형\s*마트와?\s*병원", "대형마트/병원 할루시네이션"),
+        (r"교통[이이]?\s*(?:편리|용이|좋)", "교통 편리 할루시네이션"),
+    ]
+    for _pat, _desc in _hal_patterns:
+        if _val_re.search(_pat, _body):
+            _hal_issues.append(f"[WARNING] {_desc}")
+
+    # (2) 깨진 링크 감지
+    if "example.com" in _body:
+        _hal_issues.append("[WARNING] example.com 더미 링크 발견")
+        _body = _body.replace("https://www.example.com/", "")
+        _body = _body.replace("[상세보기 →]()", "")
+        article["body_md"] = _body
+
+    # (3) 양도세 매입가 날조 감지 — "매입가:" 패턴이 있으면 데이터에 없는 값
+    if _val_re.search(r"매입가\s*[:：]\s*\d", _body):
+        _hal_issues.append("[WARNING] 양도세 매입가 날조 의심 (참고자료에 매입가 없음)")
+
+    # (4) 억 환산 잔존 오류 — "X억(Y.Z억)" 괄호 안에 억 단위가 여전히 있으면 경고
+    _eok_in_paren = _val_re.findall(r'\d+억\s*\d*,?\d*만원\s*\(\d+\.?\d*억\)', _body)
+    if _eok_in_paren:
+        _hal_issues.append(f"[WARNING] 억 환산 오류 잔존: {_eok_in_paren[:3]}")
+
+    if _hal_issues:
+        logger.warning(f"[HAL-CHECK] {blog_id}: {_hal_issues}")
+        # WARNING은 로그만, CRITICAL이면 draft
+        _critical_hal = [h for h in _hal_issues if "[CRITICAL]" in h]
+        if _critical_hal:
+            _is_draft = True
+
+    # ── 기존 validators 검증 ──
     try:
         from shared.validators import validate_post as _validate
         _val_ctx = {
