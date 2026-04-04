@@ -259,6 +259,11 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         "soak in": "take in",
         "immerse yourself": "explore",
         "treasure trove": "great destination",
+        "unexpected treasures": "interesting finds",
+        "incredible city": "remarkable city",
+        "rich history": "long history",
+        "A Comprehensive": "A Practical",
+        "a comprehensive": "a practical",
         "In conclusion,": "",
         "In conclusion": "",
         "whisk you away": "take you",
@@ -367,6 +372,9 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
                 if tpf >= 5 and not any(abs(tpf - dp) < 2.0 for dp in data_prices):
                     hallucinated_prices.append(tp)
                     issues.append(f"Hallucinated price ${tp} not in source data")
+                    # Remove sentence containing the hallucinated price
+                    escaped = re.escape(f"${tp}")
+                    content = re.sub(r'[^.!?]*' + escaped + r'[^.!?]*[.!?]', '', content, count=1)
             except ValueError:
                 pass
     if len(hallucinated_prices) >= 3:
@@ -380,6 +388,20 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         if not any(d in url for d in allowed_domains):
             issues.append(f"Unauthorized URL found: {url[:60]}")
             content = content.replace(url, "")
+
+        # Remove duplicate CTA phrases (keep only the first occurrence)
+    cta_patterns = [
+        "These tours fill up fast during peak season",
+        "check availability and lock in today",
+        "before it changes",
+        "before prices change",
+    ]
+    for cta in cta_patterns:
+        count = content.count(cta)
+        if count > 1:
+            first_pos = content.index(cta) + len(cta)
+            content = content[:first_pos] + content[first_pos:].replace(cta, "")
+            issues.append(f"Duplicate CTA removed: '{cta[:40]}...' ({count-1} removed)")
 
     # Remove empty H2 sections (GPT writes "Currently there are no..." filler)
     empty_patterns = [

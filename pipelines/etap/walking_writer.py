@@ -109,19 +109,19 @@ RULES:
 - Title must include "{city}" and be SEO-friendly
 - Required H2 sections:
   ## Why {city} is Best Explored on Foot
-  ## Budget Walking Tours Under $30
-  ## Guided Walking Experiences ($30-$100)
-  ## Premium Private Walking Tours
+  ## Top Walking Tours in {city} (feature 3-5 best tours from the data, grouped naturally by theme or price)
   ## Types of Walking Tours in {city}
-  ## Current Deals on Walking Tours
+  ## Prices and Deals
   ## Tips for Walking Tours in {city}
 - For each tour mentioned, include exact name and price from the data
-- If a section has no data, OMIT that H2 section entirely. Do NOT write filler content
+- ONLY mention tours and prices that appear in the DATA above. Do NOT estimate, round, or invent ANY price
+- If a tour costs $8, write $8. If it costs $32, write $32. NEVER write a price not in the data
+- If a section has fewer than 2 tours in the data, OMIT that H2 section entirely. Do NOT write filler content
 - Write naturally with engaging prose, not a list dump
 - Include practical tips (best time, what to wear, booking advice)
 - End with a brief practical summary
 - Remove "Save XX%!" prefixes from tour names when mentioning them
-- After mentioning 2-3 tours in each section, add a natural CTA like "These tours fill up fast during peak season — check availability and lock in today's price before it changes."
+- Add ONE natural CTA near the end of the article (not in every section). Example: "Peak season fills up fast — check availability before prices change."
 - Do NOT use numbered lists for tours. Weave them into flowing paragraphs
 - Include a "Quick Comparison" sentence at the end of each price section (e.g., "At $15, the catamaran tour offers the best value per hour compared to the $50 private option.")
 - Make the summary actionable: mention the best overall value pick and the best splurge pick by name and price
@@ -131,7 +131,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role":"system","content":"You are a travel blogger who walks cities for a living. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0 ($8 not $8.0). 3) Never invent data. 4) Every section must include one practical tip (comfortable shoes, best start time, neighborhoods to avoid, water stops). 5) Open with a concrete hook."},
+            {"role":"system","content":"You are a travel blogger who walks cities for a living. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0 ($8 not $8.0). 3) NEVER invent data. If a price is not in the provided DATA, do NOT mention it. Do NOT estimate prices. 4) Every section must include one practical tip (comfortable shoes, best start time, neighborhoods to avoid, water stops). 5) Open with a concrete hook."},
             {"role":"user","content": prompt}
         ]
     )

@@ -108,7 +108,7 @@ RULES:
   ## Why {city} is Perfect for Water Activities
   ## Sailing and Boat Tours
   ## Snorkeling and Diving Experiences
-  ## Budget Water Activities Under $50
+  ## Top Water Activities in {city} (feature 3-5 best, grouped by type)
   ## Best Deals on Water Sports
   ## What to Know Before Booking Water Activities in {city}
 - For each tour mentioned, include exact name and price from the data
@@ -117,7 +117,7 @@ RULES:
 - Include practical tips (best time, what to wear, booking advice)
 - End with a brief practical summary
 - Remove "Save XX%!" prefixes from tour names when mentioning them
-- After mentioning 2-3 tours in each section, add a natural CTA like "These tours fill up fast during peak season — check availability and lock in today's price before it changes."
+- Add ONE natural CTA near the end of the article (not in every section). Example: "Peak season fills up fast — check availability before prices change."
 - Do NOT use numbered lists for tours. Weave them into flowing paragraphs
 - Include a "Quick Comparison" sentence at the end of each price section (e.g., "At $15, the catamaran tour offers the best value per hour compared to the $50 private option.")
 - Make the summary actionable: mention the best overall value pick and the best splurge pick by name and price
@@ -127,7 +127,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role":"system","content":"You are a water sports travel blogger. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, crystal-clear, crystal-clear waters, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (water temperature, what to bring, seasickness warning, best time of day for calm water). 5) Open with a sensory detail about the water or coastline."},
+            {"role":"system","content":"You are a water sports travel blogger. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, crystal-clear, crystal-clear waters, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) NEVER invent data. If a price is not in the provided DATA, do NOT mention it. Do NOT estimate prices. 4) Every section must include one practical tip (water temperature, what to bring, seasickness warning, best time of day for calm water). 5) Open with a sensory detail about the water or coastline."},
             {"role":"user","content": prompt}
         ]
     )

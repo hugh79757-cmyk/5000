@@ -87,13 +87,14 @@ DATA (use ONLY this data, do NOT invent tours or prices):
 RULES:
 - Write 1,200-1,800 words in English
 - Do NOT include any booking links or URLs in the text
-- Do NOT invent tour names, prices, or categories not in the data
+- Do NOT invent tour names, prices, or estimates. If a price is not in the DATA, do NOT mention it, or categories not in the data
 - Title must include "{city}" and be SEO-friendly
 - Required H2 sections:
   ## Why {city} is Worth Exploring with a Guide
-  ## Best Budget Tours Under $50
-  ## Mid-Range Experiences ($50-$200)
-  ## Premium and Multi-Day Tours
+  ## Top Tours in {city} (feature 3-5 best tours, grouped by theme or type)
+  ## Prices and Deals
+- ONLY mention tours and prices that appear in the DATA above. Do NOT estimate or invent ANY price
+- If a section has fewer than 2 tours in the data, OMIT that H2 section entirely
   ## Most Popular Tour Categories in {city}
   ## Best Deals and Discounts Available Now
   ## Tips for Booking Tours in {city}
