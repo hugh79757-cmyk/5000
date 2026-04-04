@@ -2,6 +2,7 @@
 import os, sqlite3, logging, re
 from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
+from pipelines.etap.tour_utils import fetch_city_meta, deduplicate_tours, build_city_context, build_picks_summary
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -38,7 +39,7 @@ def fetch_tours(city, country=None):
     conn.close()
     return [dict(r) for r in rows]
 
-def _build_summary(tours, city):
+def _build_summary(tours, city, city_meta=None):
     total = len(tours)
     if total == 0:
         return None
