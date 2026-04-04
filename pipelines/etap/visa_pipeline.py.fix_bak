@@ -150,7 +150,7 @@ def _add_product_cards(article):
         ))
     conn.close()
     if cross:
-        article["content"] = insert_product_cards(article["content"], cross, max_cards=4)
+        article["content"] = insert_product_cards(article["content"], cross, max_cards=4, position="after_h2")
     return article
 
 def run():

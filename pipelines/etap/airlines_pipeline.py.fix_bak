@@ -16,12 +16,12 @@ KST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
-from pipelines.etap.visa_writer import generate_visa_guide
+from pipelines.etap.airlines_writer import generate_airline_review
 
-BLOG_ID = "visa-hugo"
-SITE_PATH = "/Users/twinssn/Projects/ETAP/visa-hugo"
-TOPIC_TABLE = "visa_topics"
-CATEGORY = "Visa Guide"
+BLOG_ID = "airlines-hugo"
+SITE_PATH = "/Users/twinssn/Projects/ETAP/airlines-hugo"
+TOPIC_TABLE = "airlines_topics"
+CATEGORY = "Airline Review"
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -73,7 +73,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     city = article.get("city", "")
     cross_html = build_cross_sell_html(country=country, city=city, exclude_blog=blog_id, max_items=3)
     if cross_html:
-        content = insert_cross_sell_block(content, cross_html, position="top")
+        content = insert_cross_sell_block(content, cross_html)
     if cover_image and cover_image.get("credit"):
         content = cover_image["credit"] + "\n\n" + content
     with open(os.path.join(post_dir, "index.md"), "w") as f:
@@ -118,48 +118,42 @@ def pick_topic():
     return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
 
 def _add_product_cards(article):
-    country = article.get("country", "")
-    if not country:
+    iata = article.get("iata", "")
+    if not iata:
         return article
     conn = _get_db()
     cross = []
-    esim = conn.execute(
-        "SELECT title, link, price, sale_price, image_link FROM airalo_esim "
-        "WHERE title LIKE ? ORDER BY CAST(REPLACE(COALESCE(sale_price,price),'$','') AS REAL) ASC LIMIT 1",
-        ("%" + country + "%",)
-    ).fetchone()
-    if esim:
-        p = esim["sale_price"] or esim["price"]
-        cross.append(dict(
-            name=country + " eSIM - " + (esim["title"] or ""),
-            price=str(p).replace("$",""), currency="$",
-            discount="", image_url=esim["image_link"] or "",
-            link=esim["link"], category="eSIM",
-        ))
-    tour = conn.execute(
-        "SELECT product_name, price, currency, deep_link, image_url, category FROM viator_tours "
-        "WHERE country = ? AND deep_link != '' ORDER BY CAST(price AS REAL) ASC LIMIT 1",
-        (country,)
-    ).fetchone()
-    if tour:
-        cross.append(dict(
-            name=tour["product_name"], price=tour["price"],
-            currency=tour.get("currency","USD"), discount="",
-            image_url=tour.get("image_url",""), link=tour["deep_link"],
-            category=tour.get("category","Tour"),
-        ))
+    dest_cities = conn.execute(
+        "SELECT DISTINCT destination FROM airline_routes WHERE airline = ? LIMIT 3",
+        (iata,)
+    ).fetchall()
+    for dc in dest_cities:
+        code = dc[0]
+        tour = conn.execute(
+            "SELECT product_name, price, currency, deep_link, image_url, category FROM viator_tours "
+            "WHERE deep_link != '' AND (city LIKE ? OR country LIKE ?) "
+            "ORDER BY CAST(price AS REAL) ASC LIMIT 1",
+            ("%" + code + "%", "%" + code + "%")
+        ).fetchone()
+        if tour:
+            cross.append(dict(
+                name=tour["product_name"], price=tour["price"],
+                currency=tour.get("currency","USD"), discount="",
+                image_url=tour.get("image_url",""), link=tour["deep_link"],
+                category=tour.get("category",""),
+            ))
     conn.close()
     if cross:
-        article["content"] = insert_product_cards(article["content"], cross, max_cards=4)
+        article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
     return article
 
 def run():
     topic = pick_topic()
     if not topic:
-        logger.info("[visa-hugo] No topics")
+        logger.info("[airlines-hugo] No topics")
         return False
-    logger.info(f"[visa-hugo] {topic.get('passport','')} generating")
-    article = generate_visa_guide(topic)
+    logger.info(f"[airlines-hugo] {topic.get('airline_name','')} generating")
+    article = generate_airline_review(topic)
     if not article:
         return False
 
@@ -174,15 +168,14 @@ def run():
     elif _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
-    country = article.get("country", "")
-    cover = fetch_city_image(country, "", article["slug"]) if country else None
-    body = fetch_body_images(country, "", article["slug"], count=2) if country else []
+    airline_name = article.get("airline_name", "")
+    cover = fetch_city_image(airline_name + " airline", "", article["slug"]) if airline_name else None
+    body = fetch_body_images(airline_name + " airplane", "", article["slug"], count=2) if airline_name else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
-    if country:
-        is_dest = article.get("is_destination", False)
-        label = country + " visa policy" if is_dest else country + " visa requirements"
-        register_entity("country", country, BLOG_ID, article["slug"], label, 80, 1)
+    if airline_name:
+        register_entity("airline", airline_name, BLOG_ID, article["slug"],
+                        airline_name + " airline review", 50, 1)
     return True
 
 def run_batch(count=3):
@@ -193,5 +186,5 @@ def run_batch(count=3):
         time.sleep(5)
     if ok > 0:
         _build_and_deploy(SITE_PATH, BLOG_ID)
-    logger.info(f"[visa-hugo] Batch {ok}/{count}")
+    logger.info(f"[airlines-hugo] Batch {ok}/{count}")
     return ok

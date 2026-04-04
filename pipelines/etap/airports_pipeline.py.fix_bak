@@ -16,12 +16,12 @@ KST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
-from pipelines.etap.visa_writer import generate_visa_guide
+from pipelines.etap.airports_writer import generate_airport_guide
 
-BLOG_ID = "visa-hugo"
-SITE_PATH = "/Users/twinssn/Projects/ETAP/visa-hugo"
-TOPIC_TABLE = "visa_topics"
-CATEGORY = "Visa Guide"
+BLOG_ID = "airports-hugo"
+SITE_PATH = "/Users/twinssn/Projects/ETAP/airports-hugo"
+TOPIC_TABLE = "airports_topics"
+CATEGORY = "Airport Guide"
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -118,8 +118,9 @@ def pick_topic():
     return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
 
 def _add_product_cards(article):
+    city = article.get("city", "")
     country = article.get("country", "")
-    if not country:
+    if not city and not country:
         return article
     conn = _get_db()
     cross = []
@@ -131,35 +132,34 @@ def _add_product_cards(article):
     if esim:
         p = esim["sale_price"] or esim["price"]
         cross.append(dict(
-            name=country + " eSIM - " + (esim["title"] or ""),
-            price=str(p).replace("$",""), currency="$",
-            discount="", image_url=esim["image_link"] or "",
+            name=country + " eSIM", price=str(p).replace("$",""),
+            currency="$", discount="", image_url=esim.get("image_link","") or "",
             link=esim["link"], category="eSIM",
         ))
     tour = conn.execute(
         "SELECT product_name, price, currency, deep_link, image_url, category FROM viator_tours "
-        "WHERE country = ? AND deep_link != '' ORDER BY CAST(price AS REAL) ASC LIMIT 1",
-        (country,)
+        "WHERE city = ? AND deep_link != '' ORDER BY CAST(price AS REAL) ASC LIMIT 1",
+        (city,)
     ).fetchone()
     if tour:
         cross.append(dict(
             name=tour["product_name"], price=tour["price"],
             currency=tour.get("currency","USD"), discount="",
             image_url=tour.get("image_url",""), link=tour["deep_link"],
-            category=tour.get("category","Tour"),
+            category=tour.get("category",""),
         ))
     conn.close()
     if cross:
-        article["content"] = insert_product_cards(article["content"], cross, max_cards=4)
+        article["content"] = insert_product_cards(article["content"], cross, max_cards=3, position="bottom")
     return article
 
 def run():
     topic = pick_topic()
     if not topic:
-        logger.info("[visa-hugo] No topics")
+        logger.info("[airports-hugo] No topics")
         return False
-    logger.info(f"[visa-hugo] {topic.get('passport','')} generating")
-    article = generate_visa_guide(topic)
+    logger.info(f"[airports-hugo] {topic.get('iata_code','')} generating")
+    article = generate_airport_guide(topic)
     if not article:
         return False
 
@@ -174,15 +174,17 @@ def run():
     elif _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
+    city = article.get("city", "")
     country = article.get("country", "")
-    cover = fetch_city_image(country, "", article["slug"]) if country else None
-    body = fetch_body_images(country, "", article["slug"], count=2) if country else []
+    iata = article.get("iata", "")
+    cover = fetch_city_image(city or iata, country, article["slug"]) if city else None
+    body = fetch_body_images(city or iata, country, article["slug"], count=2) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
+    if city:
+        register_entity("city", city, BLOG_ID, article["slug"], "airport in " + city, 60, 1)
     if country:
-        is_dest = article.get("is_destination", False)
-        label = country + " visa policy" if is_dest else country + " visa requirements"
-        register_entity("country", country, BLOG_ID, article["slug"], label, 80, 1)
+        register_entity("country", country, BLOG_ID, article["slug"], "airports in " + country, 35, 1)
     return True
 
 def run_batch(count=3):
@@ -193,5 +195,5 @@ def run_batch(count=3):
         time.sleep(5)
     if ok > 0:
         _build_and_deploy(SITE_PATH, BLOG_ID)
-    logger.info(f"[visa-hugo] Batch {ok}/{count}")
+    logger.info(f"[airports-hugo] Batch {ok}/{count}")
     return ok

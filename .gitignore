@@ -1,3 +1,6 @@
+data/*.db
+pipelines/etap/*.bak*
+pipelines/etap/*_bak
 # 환경/인증
 .env
 config/api_keys.yaml
@@ -45,3 +48,6 @@ nohup.out
 config/blogs.yaml.bak_*
 pipelines/rap/*.bak2
 pipelines/etap/*.bak*
+data/*.db
+pipelines/etap/*.bak*
+pipelines/etap/*_bak
