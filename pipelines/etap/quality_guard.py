@@ -217,6 +217,20 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         is_draft = True
         return content, issues, is_draft
 
+    # Extract tour/product names to protect them from replacement
+    import re as _re2
+    _protected_names = set()
+    for pattern_pn in [r'\*\*\[([^\]]+)\]', r'\[([^\]]+)\]\(https://www\.viator\.com']:
+        for m in _re2.finditer(pattern_pn, content):
+            _protected_names.add(m.group(1))
+
+    # Replace protected names with placeholders
+    _name_map = {}
+    for i, name in enumerate(_protected_names):
+        placeholder = f"__PROTECTED_NAME_{i}__"
+        _name_map[placeholder] = name
+        content = content.replace(name, placeholder)
+
     # Check and replace banned phrases
     REPLACEMENTS = {
         "plethora of": "range of",
@@ -251,6 +265,10 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         if pattern.search(content):
             content = pattern.sub(replacement, content)
             issues.append(f"Auto-replaced: '{phrase}' -> '{replacement}'")
+
+    # Fix article mismatches from replacements (an -> a before consonant)
+    content = re.sub(r'\ban (standout|busy|lively|lesser-known|mix|long|start)\b', r'a \1', content)
+    content = re.sub(r'\bAn (standout|busy|lively|lesser-known|mix|long|start)\b', r'A \1', content)
 
     # Fix $X.0 formatting -> $X
     content = re.sub(r'\$(\d+)\.0\b', r'$\1', content)

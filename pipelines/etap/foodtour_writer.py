@@ -69,6 +69,16 @@ def _build_summary(tours, city):
     summary += f"Cooking classes: {len(cooking)}\n"
     summary += f"Dining experiences: {len(dining)}\n\n"
 
+    # --- Include actual tour names + prices in summary for GPT ---
+    for section_key, section_tours in picks.items():
+        if section_tours:
+            summary += f"\n[{section_key.upper()} PICKS]\n"
+            for t in section_tours:
+                name = t.get("product_name", "Unknown")
+                price = t.get("price", "N/A")
+                cat = t.get("category", "")
+                summary += f"  - {name} | ${price} | {cat}\n"
+
     return summary, picks
 
 def generate_foodtour_guide(topic):
