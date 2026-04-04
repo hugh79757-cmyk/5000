@@ -175,7 +175,7 @@ def inject_internal_links(content, current_blog, max_links=5):
         """, (current_blog,)).fetchall()
     except Exception as e:
         logger.error(f"inject_internal_links DB error: {e}")
-        return content
+    
     finally:
         conn.close()
 
@@ -249,6 +249,19 @@ def inject_internal_links(content, current_blog, max_links=5):
                     safe_line = safe_line.replace(f"__LINK_PH_{j}__", ph)
 
     result = "\n".join(lines)
+
+    # Remove entity links injected into product card URLs
+    _cards_start = result.find('<div class="etap-product-cards">')
+    if _cards_start > 0:
+        _before = result[:_cards_start]
+        _after = result[_cards_start:]
+        _after = re.sub(
+            r'\[([^\]]+)\]\(https://(?:tours|michelin|adventure|daytrips|watersports|walking|foodtour|culture|airlines|airports|bus|ferry|flights|transfers|trains|visa|esim|multiday|dining)\.techpawz\.com/[^)]+\)',
+            r'\1',
+            _after
+        )
+        result = _before + _after
+
     if total_links_added:
         logger.info(f"내부링크 {total_links_added}개 삽입 (대상: {list(linked_names)})")
     return result
