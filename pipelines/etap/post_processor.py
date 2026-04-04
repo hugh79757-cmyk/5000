@@ -37,7 +37,11 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
 
         discount_badge = ""
         if discount and str(discount) not in ("0", ""):
-            discount_badge = f' <span class="badge">-{discount}%</span>'
+            try:
+                disc_val = abs(float(str(discount).replace("%","").replace("-","")))
+                discount_badge = f' <span class="badge">-{int(round(disc_val))}%</span>'
+            except (ValueError, TypeError):
+                discount_badge = f' <span class="badge">-{discount}%</span>'
 
         img_tag = ""
         if image_url:
@@ -47,7 +51,12 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
         if category:
             lines.append(f'_{category}_\n\n')
         if price:
-            lines.append(f'From **{currency} {price}**\n\n')
+            try:
+                pv = float(str(price).replace("$","").replace(",",""))
+                ps = f"${int(pv)}" if pv == int(pv) else f"${pv:.2f}"
+            except (ValueError, TypeError):
+                ps = f"{currency} {price}"
+            lines.append(f'From **{ps}**\n\n')
         lines.append(f'[Book Now]({link})\n\n---\n\n')
 
     lines.append('</div>\n')
@@ -86,8 +95,20 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
         discount = p.get("discount", "")
         link = p.get("link", "#")
 
-        discount_str = f"-{discount}%" if discount and str(discount) not in ("0", "") else "-"
-        table_lines.append(f"| [{name}]({link}) | {currency} {price} | {discount_str} | [Book]({link}) |\n")
+        if discount and str(discount) not in ("0", ""):
+            try:
+                disc_val = abs(float(str(discount).replace("%","").replace("-","")))
+                discount_str = f"-{int(round(disc_val))}%"
+            except (ValueError, TypeError):
+                discount_str = f"-{discount}%"
+        else:
+            discount_str = "-"
+        try:
+            pv = float(str(price).replace("$","").replace(",",""))
+            ps = f"${int(pv)}" if pv == int(pv) else f"${pv:.2f}"
+        except (ValueError, TypeError):
+            ps = f"{currency} {price}"
+        table_lines.append(f"| [{name}]({link}) | {ps} | {discount_str} | [Book]({link}) |\n")
 
     table_lines.append("\n")
     table_block = "".join(table_lines)

@@ -112,13 +112,16 @@ RULES:
   ## Best Deals on Adventure Activities
   ## Safety Tips and What to Bring
 - For each tour mentioned, include exact name and price from the data
-- If a section has no data, skip it gracefully
+- If a section has 0 tours in the data, OMIT that H2 section entirely. Do NOT write it with filler content
+- NEVER use these in the title: "Awaits", "Ultimate Guide", "Your Guide To", "Everything You Need"
+- Title format: "{city} Adventure Guide: [specific activity] with Prices and Tips"
 - Write naturally with engaging prose, not a list dump
 - Include practical tips (best time, what to wear, booking advice)
 - End with a brief practical summary
 - Remove "Save XX%!" prefixes from tour names when mentioning them
-- After mentioning 2-3 tours in each section, add a natural CTA like "These tours fill up fast during peak season — check availability and lock in today's price before it changes."
+- Add ONE natural CTA near the end of the article (not in every section). Example: "Peak season fills up fast — check availability before prices change."
 - Do NOT use numbered lists for tours. Weave them into flowing paragraphs
+- If a section has fewer than 2 tours, merge it into the nearest relevant section rather than padding with unrelated content
 - Include a "Quick Comparison" sentence at the end of each price section (e.g., "At $15, the catamaran tour offers the best value per hour compared to the $50 private option.")
 - Make the summary actionable: mention the best overall value pick and the best splurge pick by name and price
 
@@ -127,7 +130,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role":"system","content":"You are an adventure travel blogger who has done these activities. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, adrenaline junkie, crystal-clear, soak in, immerse yourself. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (fitness level needed, what to bring, safety considerations, best season). 5) Open with an action scene or physical sensation."},
+            {"role":"system","content":"You are an adventure travel blogger who has done these activities. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, adrenaline junkie, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (fitness level needed, what to bring, safety considerations, best season). 5) Open with an action scene or physical sensation."},
             {"role":"user","content": prompt}
         ]
     )

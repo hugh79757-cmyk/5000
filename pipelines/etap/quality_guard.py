@@ -258,6 +258,38 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         "rich history and culture": "long history",
         "soak in": "take in",
         "immerse yourself": "explore",
+        "treasure trove": "great destination",
+        "soaking up": "enjoying",
+        "unmatched": "impressive",
+        "of a lifetime": "",
+        "second to none": "excellent",
+        "a must-visit": "worth visiting",
+        "must-visit": "worth visiting",
+        "paradise for": "great for",
+        "world-class": "top-quality",
+        "world class": "top-quality",
+        "like no other": "distinctive",
+        "one-of-a-kind": "distinctive",
+        "bucket list": "travel wish list",
+        "not disappoint": "deliver",
+        "won't disappoint": "delivers",
+        "leave you breathless": "impress you",
+        "feast for the eyes": "beautiful sight",
+        "a true": "a solid",
+        "look no further": "",
+        "haven for": "great for",
+        "left me in awe": "impressed me",
+        "in awe of": "impressed by",
+        "adventure awaits": "",
+        "awaits you": "is available",
+        "your ultimate guide": "a practical guide",
+        "palpable": "real",
+        "escapades": "activities",
+        "a playground for": "popular with",
+        "thrill-seekers": "adventure travelers",
+        "adrenaline-fueled": "exciting",
+        "action-packed": "full of activities",
+        "standout encounter": "great experience",
     }
     import re as _re
     for phrase, replacement in REPLACEMENTS.items():
@@ -270,9 +302,14 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     content = re.sub(r'\ban (standout|busy|lively|lesser-known|mix|long|start)\b', r'a \1', content)
     content = re.sub(r'\bAn (standout|busy|lively|lesser-known|mix|long|start)\b', r'A \1', content)
 
-    # Fix $X.0 formatting -> $X
+    # Fix price formatting: $X.0 -> $X, $X.Y0 -> $X (round)
     content = re.sub(r'\$(\d+)\.0\b', r'$\1', content)
     content = re.sub(r'\$(\d+)\.00\b', r'$\1', content)
+    # Round prices with single decimal: $31.5 -> $32, $159.2 -> $159
+    def _round_price(m):
+        val = float(m.group(1) + '.' + m.group(2))
+        return f'${int(round(val))}'
+    content = re.sub(r'\$(\d+)\.(\d)\b(?!\d)', _round_price, content)
 
     # Check for suspicious prices in text ($0, $0.X, $1, $2, $3, $4)
     suspicious_prices = re.findall(r'\$([0-4](?:\.\d+)?)\b', content)

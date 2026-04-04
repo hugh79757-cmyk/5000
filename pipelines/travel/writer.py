@@ -471,6 +471,9 @@ def _enrich_with_nearby_restaurants_only(data, html):
     restaurants = nearby_data.get("restaurants", [])
     if not restaurants:
         return html
+    # 맛집 블로그에서는 근처 맛집 위젯 제거
+    if "travel" in blog_id or "tour" in blog_id:
+        return html
 
     nearby_html = "\n\n## 근처 맛집\n\n"
     for r in restaurants[:5]:
@@ -683,7 +686,10 @@ def _post_process(content):
             if _prev_non_empty and not _prev_non_empty.startswith("## "):
                 _insert_idx = _i
     if _insert_idx is not None and getattr(_post_process, '_current_blog_id', '') == 'travel3-hugo':
-        _lines.insert(_insert_idx, "## 식당별 상세 정보\n")
+        # 이미 "식당별 상세 정보" H2가 있으면 삽입 안함
+        if not any("식당별 상세 정보" in l for l in _lines):
+            if not any("식당별 상세 정보" in l for l in _lines):
+                _lines.insert(_insert_idx, "## 식당별 상세 정보\n")
         content = "\n".join(_lines)
 
     # [PATCH] GPT가 만든 "함께 읽어보기" 섹션 통째로 제거

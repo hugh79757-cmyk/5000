@@ -121,7 +121,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role": "system", "content": "You are a culture and art travel blogger. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, rich cultural heritage, crystal-clear, soak in, immerse yourself. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (skip-the-line strategy, best day of week, free admission hours, which floor to start on). 5) Open with a specific artwork, building detail, or historical moment."},
+            {"role": "system", "content": "You are a culture and art travel blogger. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, rich cultural heritage, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (skip-the-line strategy, best day of week, free admission hours, which floor to start on). 5) Open with a specific artwork, building detail, or historical moment."},
             {"role": "user", "content": prompt}
         ]
     )

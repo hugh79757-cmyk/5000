@@ -90,7 +90,7 @@ Return ONLY the article in markdown starting with # title"""
 
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=3500,
-        messages=[{"role":"system","content":"You are a European travel writer specializing in transportation. Use only provided data. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0."},
+        messages=[{"role":"system","content":"You are a European travel writer specializing in transportation. Use only provided data. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0."},
                   {"role":"user","content": prompt}]
     )
     content = resp.choices[0].message.content.strip()

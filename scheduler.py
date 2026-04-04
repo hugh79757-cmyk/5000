@@ -91,7 +91,7 @@ CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
 PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
 LEDGER_DB = os.path.join(PROJECT_DIR, "data", "content.db")
 
-MAX_CATCHUP_PER_BLOG = 3
+MAX_CATCHUP_PER_BLOG = 0
 PUBLISH_DELAY = 180  # 블로그 간 딜레이(초)
 
 
