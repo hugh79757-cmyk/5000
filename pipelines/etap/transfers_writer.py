@@ -33,7 +33,7 @@ def fetch_tours(city, country=None):
         FROM viator_tours
         WHERE city = ? AND category IN (
             'Airport & Hotel Transfers', 'Port Transfers',
-            'Private Transfers', 'Water Transfers'
+            'Private Transfers', 'Water Transfers', 'Private Drivers', 'Bus Services'
         )
         AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC

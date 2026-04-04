@@ -31,7 +31,7 @@ def fetch_tours(city, country=None):
         SELECT product_name, description, category, price, currency,
                discount_percent as discount, image_url, deep_link, city, country
         FROM viator_tours
-        WHERE city = ? AND category IN ('Extreme Sports', 'Hiking Tours', 'Mountain Bike Tours', 'Climbing Tours')
+        WHERE city = ? AND category IN ('Extreme Sports', 'Hiking Tours', 'Mountain Bike Tours', 'Climbing Tours', 'Nature and Wildlife Tours', '4WD Tours', 'Rafting', 'White Water Rafting', 'Paragliding', 'Ziplining')
           AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
     """, (city,)).fetchall()

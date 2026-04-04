@@ -31,7 +31,7 @@ def fetch_tours(city, country=None):
         SELECT product_name, description, category, price, currency,
                discount_percent as discount, image_url, deep_link, city, country
         FROM viator_tours
-        WHERE city = ? AND category IN ('Multi-day Tours', 'Multi-day Cruises', 'Honeymoon Packages')
+        WHERE city = ? AND category IN ('Multi-day Tours', 'Multi-day Cruises', 'Honeymoon Packages', 'Overnight Tours', 'Rail Tours')
           AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
     """, (city,)).fetchall()

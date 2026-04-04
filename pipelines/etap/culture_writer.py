@@ -34,7 +34,7 @@ def fetch_tours(city, country=None):
         WHERE city = ? AND category IN (
             'Attractions & Museums', 'Art Tours', 'Art Classes',
             'Historical Tours', 'Museum Tickets & Passes',
-            'Archaeology Tours'
+            'Archaeology Tours', 'Cultural Tours', 'Architecture Tours'
         )
         AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
