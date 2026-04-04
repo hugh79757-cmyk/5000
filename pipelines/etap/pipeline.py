@@ -1,4 +1,5 @@
 """ETAP pipeline — 영문 travel 블로그 자동 발행."""
+import logging
 import os
 import sys
 from pathlib import Path
@@ -14,7 +15,6 @@ from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env")
 
 from pipelines.etap.topic_manager import pick_topic, mark_published
-import logging
 from pipelines.etap.writer import generate_city_guide
 from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
@@ -134,6 +134,9 @@ def run(cfg: dict) -> dict:
     image = fetch_city_image(topic["city"], topic["country"], article["slug"])
     if image:
         article["image"] = image
+    body_imgs = fetch_body_images(topic.get("city", ""), topic.get("country", ""), article["slug"], count=3)
+    if body_imgs:
+        article["body_images"] = body_imgs
     filepath = _write_hugo_post(cfg, article)
     print(f"[ETAP] 파일 생성: {filepath}")
 
