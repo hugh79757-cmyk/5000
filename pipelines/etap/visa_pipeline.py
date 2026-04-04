@@ -7,6 +7,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
 
 logger = logging.getLogger(__name__)
@@ -162,6 +163,17 @@ def run():
     article = generate_visa_guide(topic)
     if not article:
         return False
+
+    # Quality guard
+    article["content"], _qg_issues, _qg_draft = postprocess_content(
+        article["content"], data_prices=None,
+        blog_id=BLOG_ID, slug=article["slug"])
+    if _qg_draft:
+        logger.warning("[%s] DRAFT: %s - %s", BLOG_ID, article["slug"], _qg_issues)
+        send_alert(BLOG_ID, article["slug"], _qg_issues)
+        article["_draft"] = True
+    elif _qg_issues:
+        logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
     country = article.get("country", "")
     cover = fetch_city_image(country, "", article["slug"]) if country else None

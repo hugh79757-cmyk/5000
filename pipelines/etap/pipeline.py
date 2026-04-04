@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
+logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -13,7 +14,9 @@ from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env")
 
 from pipelines.etap.topic_manager import pick_topic, mark_published
+import logging
 from pipelines.etap.writer import generate_city_guide
+from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 
 
@@ -58,6 +61,7 @@ def _write_hugo_post(cfg: dict, article: dict) -> str:
         if article["image"].get("credit"):
             credit_line = article["image"]["credit"] + "\n\n"
 
+    draft_line = "draft: true\n" if article.get("_draft") else ""
     frontmatter = f"""---
 title: "{article['title']}"
 date: {datetime.now().astimezone().isoformat(timespec='seconds')}
@@ -67,7 +71,7 @@ description: "{article['description']}"
 categories:
   - "Travel Guide"
 showTableOfContents: true
----
+{draft_line}---
 
 {credit_line}"""
     filepath = post_dir / "index.md"
@@ -116,6 +120,17 @@ def run(cfg: dict) -> dict:
     print(f"[ETAP] {blog_id}: {topic['city']}, {topic['country']} 글 생성 시작")
 
     article = generate_city_guide(topic)
+
+    # Quality guard
+    article["content"], post_issues, is_draft = postprocess_content(
+        article["content"], data_prices=None, blog_id=blog_id, slug=article["slug"])
+    if is_draft:
+        logger.warning(f"[ETAP] {blog_id} DRAFT: {article['slug']} - {post_issues}")
+        send_alert(blog_id, article["slug"], post_issues)
+        article["_draft"] = True
+    elif post_issues:
+        logger.info(f"[ETAP] {blog_id} quality: {post_issues}")
+
     image = fetch_city_image(topic["city"], topic["country"], article["slug"])
     if image:
         article["image"] = image
@@ -156,6 +171,17 @@ def run_batch(cfg: dict, count: int = 3) -> list:
         print(f"[ETAP] {blog_id}: [{i+1}/{count}] {topic['city']}, {topic['country']}")
 
         article = generate_city_guide(topic)
+
+        # Quality guard
+        article["content"], post_issues, is_draft = postprocess_content(
+            article["content"], data_prices=None, blog_id=blog_id, slug=article["slug"])
+        if is_draft:
+            logger.warning(f"[ETAP] {blog_id} DRAFT: {article['slug']} - {post_issues}")
+            send_alert(blog_id, article["slug"], post_issues)
+            article["_draft"] = True
+        elif post_issues:
+            logger.info(f"[ETAP] {blog_id} quality: {post_issues}")
+
         image = fetch_city_image(topic["city"], topic["country"], article["slug"])
         if image:
             article["image"] = image

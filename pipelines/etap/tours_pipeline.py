@@ -7,6 +7,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
 
 logger = logging.getLogger(__name__)
@@ -156,6 +157,25 @@ def run():
     article = generate_tours_guide(topic)
     if not article:
         return False
+
+    # Quality guard
+    _data_prices = []
+    for _t in article.get("tours", []):
+        try:
+            _p = float(str(_t.get("price", 0)).replace("$","").replace(",",""))
+            if _p > 0:
+                _data_prices.append(_p)
+        except Exception:
+            pass
+    article["content"], _qg_issues, _qg_draft = postprocess_content(
+        article["content"], data_prices=_data_prices if _data_prices else None,
+        blog_id=BLOG_ID, slug=article["slug"])
+    if _qg_draft:
+        logger.warning("[%s] DRAFT: %s - %s", BLOG_ID, article["slug"], _qg_issues)
+        send_alert(BLOG_ID, article["slug"], _qg_issues)
+        article["_draft"] = True
+    elif _qg_issues:
+        logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
     city = article.get("city", "")
     country = article.get("country", "")

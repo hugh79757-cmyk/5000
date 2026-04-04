@@ -1,4 +1,5 @@
 from pipelines.etap.post_processor import insert_adsense
+from pipelines.etap.quality_guard import postprocess_content, send_alert
 """
 항공권 딜 글 발행 파이프라인
 """

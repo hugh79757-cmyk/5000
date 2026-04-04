@@ -68,10 +68,10 @@ The guide is about {city}, {country} and targets American travelers.
 (3~4 neighborhood recommendations with budget/mid-range/luxury tiers, do NOT mention specific hotel names)
 
 ## Top Things to Do in {city}
-(8~10 activities/attractions with brief descriptions, mix of famous landmarks and local hidden gems)
+(8~10 activities/attractions woven into flowing paragraphs, NOT a numbered list. Bold the attraction names. Mix famous landmarks and lesser-known spots)
 
 ## Food and Dining Guide
-(local cuisine highlights, 4~5 must-try dishes, street food vs restaurant recommendations)
+(local cuisine highlights woven into paragraphs, 4~5 must-try dishes with bold names, street food vs restaurant recommendations. NOT a numbered list)
 
 ## Getting Around {city}
 (public transit, taxis, walking, rental car advice)
@@ -80,7 +80,7 @@ The guide is about {city}, {country} and targets American travelers.
 (daily budget estimates for budget/mid-range/luxury travelers in USD, covering accommodation, food, transport, activities)
 
 ## Travel Tips for {city}
-(5~7 practical tips: safety, tipping, language, SIM cards, scams to avoid, etc.)
+(5~7 practical tips written as prose paragraphs, NOT a numbered list. Bold the topic of each tip)
 {link_instruction}
 ## Important Rules:
 - Do NOT invent specific prices or statistics. Use ranges like "budget hotels typically start around $30-50/night"
@@ -96,7 +96,7 @@ The guide is about {city}, {country} and targets American travelers.
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "You are an experienced travel writer who creates practical, SEO-friendly destination guides for American travelers."},
+            {"role": "system", "content": "You are an experienced travel writer who creates practical, SEO-friendly destination guides for American travelers. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, let\'s dive in, without further ado, crystal-clear, culinary delights, gastronomic, rich cultural heritage, soak in, immerse yourself, adrenaline junkie. 2) Do NOT use numbered lists for attractions or tips. Write in flowing paragraphs with bold names. 3) Every section must read as prose, not a listicle. 4) Open with a concrete sensory detail, not a generic statement."},
             {"role": "user", "content": prompt},
         ],
         temperature=0.6,
