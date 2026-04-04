@@ -270,10 +270,13 @@ def publish_status():
         results.append(row)
 
     results.sort(key=lambda x: x["month"], reverse=True)
+    for r in results:
+        r["total"] = r["today"] + r["week"] + r["month"]
     totals = {
         "today": sum(r["today"] for r in results),
         "week": sum(r["week"] for r in results),
         "month": sum(r["month"] for r in results),
+        "total": sum(r["total"] for r in results),
         "blogs": len([r for r in results if r["month"] > 0])
     }
     return render_template("publish.html", sites=results, groups=groups, now=today, totals=totals)
