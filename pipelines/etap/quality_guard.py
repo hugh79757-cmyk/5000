@@ -32,9 +32,9 @@ def send_alert(blog_id, slug, issues):
 # ============================================================
 # PRE-PROCESSING: Tour Data Validation
 # ============================================================
-MIN_PRICE_USD = 5.0
+MIN_PRICE_USD = 8.0
 MAX_PRICE_USD = 50000.0
-MAX_DISCOUNT_PCT = 70.0
+MAX_DISCOUNT_PCT = 60.0
 
 def clean_tour_name(name):
     """Remove 'Save XX%!' prefix and clean whitespace."""
@@ -77,7 +77,7 @@ def validate_tour(tour):
         discount_val = 0
 
     if discount_val > MAX_DISCOUNT_PCT:
-        issues.append(f"Suspicious discount: {discount_val}% for '{tour['product_name'][:50]}'")
+        return None, [f"Excluded: discount {discount_val}% exceeds {MAX_DISCOUNT_PCT}% for '{tour['product_name'][:50]}'"]
 
     # Deep link validation
     link = tour.get("deep_link", "")
