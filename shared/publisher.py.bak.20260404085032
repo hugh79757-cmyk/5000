@@ -321,26 +321,6 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
 
     slug = slugify(title)
 
-    # ── 중복 발행 방지 (source_id + slug 기반) ──
-    from shared.content_store import source_exists, title_similar_exists
-    if source_id and source_exists(blog_id, data_source, source_id):
-        return {"success": False, "reason": "duplicate_source_id",
-                "blog_id": blog_id, "source_id": source_id}
-    # slug 기반 중복 체크 (같은 블로그에 동일 slug 존재 시 차단)
-    from shared.content_store import get_conn
-    _conn = get_conn()
-    _dup = _conn.execute(
-        "SELECT id, published_url FROM articles WHERE blog_id=? AND slug=? AND status='published' LIMIT 1",
-        (blog_id, slug),
-    ).fetchone()
-    _conn.close()
-    if _dup:
-        existing_url = _dup[1] if _dup[1] and not _dup[1].startswith("pending://") else ""
-        if existing_url:
-            return {"success": False, "reason": "duplicate_slug",
-                    "blog_id": blog_id, "slug": slug, "existing_url": existing_url}
-    # ── 중복 방지 끝 ──
-
     article = {
         "blog_id": blog_id,
         "title": title,

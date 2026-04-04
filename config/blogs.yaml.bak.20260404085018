@@ -489,8 +489,6 @@ blogs:
   status: active
   gsc_site: https://finance.techpawz.com/
   ga4_property: '529142332'
-  site_path: /Users/twinssn/Projects/STAP/finance-hugo
-  theme: blowfish
 - cf_project: senior-hugo
   daily_quota: 5
   domain: senior.informationhot.kr

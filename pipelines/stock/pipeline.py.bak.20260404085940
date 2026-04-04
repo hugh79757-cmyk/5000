@@ -240,9 +240,6 @@ def run(blog_cfg):
             _month2 = _dt2.now().strftime("%Y년 %m월")
             _eg_desc = f"{article['title']} - {_month2} 기준 {article.get('category', '시장분석')}."
             _body_eg = article["body_md"]
-            # ── source_id 고유 생성 (기업코드 조합 + 날짜) ──
-            _corp_codes = sorted([c.get("stock_code","") or c.get("corp_code","") for c in (enriched or sample)])
-            _source_id = f"{topic_type}_{'_'.join(_corp_codes[:5])}_{datetime.now().strftime('%Y%m%d')}"
             result = publish(
                 blog_id=blog_id,
                 title=article["title"],
@@ -250,7 +247,7 @@ def run(blog_cfg):
                 category=article.get("category", "시장분석"),
                 tags=article.get("tags", ""),
                 data_source=f"evergreen_{topic_type}",
-                source_id=_source_id,
+                source_id="",
                 model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
                 thumbnail_url=thumb_url,
             )
