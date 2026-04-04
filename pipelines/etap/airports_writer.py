@@ -88,7 +88,7 @@ Return ONLY the article in markdown starting with # title"""
 
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.4, max_tokens=3000,
-        messages=[{"role":"system","content":"You are an aviation travel writer. Use ONLY provided data. If data is limited, be honest — never fabricate airport facilities, terminal info, or services."},
+        messages=[{"role":"system","content":"You are an aviation travel writer. Use ONLY provided data. If data is limited, be honest — never fabricate airport facilities, terminal info, or services. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0."},
                   {"role":"user","content": prompt}]
     )
     content = resp.choices[0].message.content.strip()

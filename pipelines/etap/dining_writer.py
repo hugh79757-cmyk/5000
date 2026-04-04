@@ -137,7 +137,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role": "system", "content": "You are a food and travel blogger who dines at Michelin restaurants worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, culinary journey, gastronomic. 2) Never invent data. 3) Every section must include one practical tip (reservation lead time, dress code reality, lunch vs dinner value, which tasting menu to pick). 4) Open with a specific dish, restaurant detail, or dining scene."},
+            {"role": "system", "content": "You are a food and travel blogger who dines at Michelin restaurants worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, culinary journey, gastronomic, crystal-clear, soak in, immerse yourself. 2) Never invent data. 3) Every section must include one practical tip (reservation lead time, dress code reality, lunch vs dinner value, which tasting menu to pick). 4) Open with a specific dish, restaurant detail, or dining scene."},
             {"role": "user", "content": prompt}
         ]
     )

@@ -10,6 +10,7 @@ from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
 from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
+from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id, check_exhaustion
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -95,25 +96,22 @@ def _build_and_deploy(site_path, blog_id):
         logger.error(f"Deploy failed: {e}")
         return False
 
-def _mark_published(article, blog_id, topic_table):
-    conn = _get_db()
-    conn.execute("INSERT INTO publish_log (blog_id, slug, title, published_at) VALUES (?,?,?,?)",
-                 (blog_id, article["slug"], article["title"], datetime.now(KST).isoformat()))
-    conn.execute(f"UPDATE {topic_table} SET exhausted = 1 WHERE slug = ?", (article["slug"],))
-    conn.commit()
-    conn.close()
+def _mark_published(article, blog_id, topic_table, topic_id):
+    """topic_manager 통합 — PK 기준 발행 기록"""
+    from shared.entity_linker import mark_entity_published
+    mark_published_by_id(
+        topic_id=topic_id,
+        topic_table=topic_table,
+        blog_id=blog_id,
+        title=article["title"],
+        slug=article["slug"],
+        url=""
+    )
     mark_entity_published(blog_id, article["slug"])
 
 def pick_topic():
-    conn = _get_db()
-    row = conn.execute(
-        f"SELECT * FROM {TOPIC_TABLE} WHERE exhausted = 0 "
-        f"AND slug NOT IN (SELECT slug FROM publish_log WHERE blog_id = '{BLOG_ID}') "
-        "AND city IS NOT NULL AND city != '' "
-        "ORDER BY priority DESC, id ASC LIMIT 1"
-    ).fetchone()
-    conn.close()
-    return dict(row) if row else None
+    """topic_manager 통합 — PK 기준 중복 방지 + 고갈 체크"""
+    return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
 
 def _add_product_cards(article):
     restaurants = article.get("restaurants", [])
@@ -158,7 +156,7 @@ def run():
     cover = fetch_city_image(city + " restaurant dining", country, article["slug"]) if city else None
     body = fetch_body_images(city + " food cuisine", country, article["slug"], count=3) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
-    _mark_published(article, BLOG_ID, TOPIC_TABLE)
+    _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"], "dining in " + city, 60, 1)
     if country:

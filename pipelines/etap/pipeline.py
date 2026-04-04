@@ -14,7 +14,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from dotenv import load_dotenv
 load_dotenv(PROJECT_ROOT / ".env")
 
-from pipelines.etap.topic_manager import pick_topic, mark_published
+from pipelines.etap.topic_manager import pick_topic, mark_published, check_exhaustion, send_telegram
 from pipelines.etap.writer import generate_city_guide
 from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
@@ -111,6 +111,12 @@ def _build_and_deploy(cfg: dict) -> bool:
 def run(cfg: dict) -> dict:
     """dispatcher에서 호출하는 메인 함수."""
     blog_id = cfg["id"]
+
+
+    # 고갈 체크
+    can_pub, remaining = check_exhaustion("topics", blog_id)
+    if not can_pub:
+        return {"status": "exhausted", "remaining": 0}
 
     topic = pick_topic(blog_id)
     if not topic:

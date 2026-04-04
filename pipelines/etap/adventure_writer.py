@@ -127,7 +127,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role":"system","content":"You are an adventure travel blogger who has done these activities. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, adrenaline junkie. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (fitness level needed, what to bring, safety considerations, best season). 5) Open with an action scene or physical sensation."},
+            {"role":"system","content":"You are an adventure travel blogger who has done these activities. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, adrenaline junkie, crystal-clear, soak in, immerse yourself. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (fitness level needed, what to bring, safety considerations, best season). 5) Open with an action scene or physical sensation."},
             {"role":"user","content": prompt}
         ]
     )

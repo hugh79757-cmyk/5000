@@ -112,7 +112,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=3500,
         messages=[
-            {"role": "system", "content": "You are a practical travel blogger who has landed at airports worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, seamless. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (where the driver meets you, luggage limits, late flight contingency, tipping customs). 5) Open with the specific airport arrival experience."},
+            {"role": "system", "content": "You are a practical travel blogger who has landed at airports worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, seamless, crystal-clear, soak in, immerse yourself. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (where the driver meets you, luggage limits, late flight contingency, tipping customs). 5) Open with the specific airport arrival experience."},
             {"role": "user", "content": prompt}
         ]
     )
