@@ -56,6 +56,12 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
                 ps = f"${int(pv)}" if pv == int(pv) else f"${pv:.2f}"
             except (ValueError, TypeError):
                 ps = f"{currency} {price}"
+            # Normalize to $integer
+            try:
+                _pv = float(str(ps).replace("$","").replace(",","").replace("USD","").replace("GBP","").replace("EUR","").strip())
+                ps = f"${int(round(_pv))}"
+            except (ValueError, TypeError):
+                pass
             lines.append(f'From **{ps}**\n\n')
         lines.append(f'[Book Now]({link})\n\n---\n\n')
 
@@ -63,6 +69,11 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
     card_block = "".join(lines)
 
     # 삽입 위치: 마지막 H2 "Travel Tips" 앞, 없으면 본문 끝
+    # First try: insert before product cards div
+    cards_pos = content.find('<div class="etap-product-cards">')
+    if cards_pos > 0:
+        return content[:cards_pos] + table_block + "\n\n" + content[cards_pos:]
+
     tips_match = re.search(r'^## (?:Travel Tips|Budget Breakdown|Getting Around)', content, re.MULTILINE)
     if tips_match:
         pos = tips_match.start()
@@ -108,6 +119,11 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
             ps = f"${int(pv)}" if pv == int(pv) else f"${pv:.2f}"
         except (ValueError, TypeError):
             ps = f"{currency} {price}"
+            try:
+                _pv2 = float(str(ps).replace("$","").replace(",","").replace("USD","").replace("GBP","").replace("EUR","").strip())
+                ps = f"${int(round(_pv2))}"
+            except (ValueError, TypeError):
+                pass
         table_lines.append(f"| [{name}]({link}) | {ps} | {discount_str} | [Book]({link}) |\n")
 
     table_lines.append("\n")

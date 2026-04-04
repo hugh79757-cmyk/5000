@@ -101,8 +101,8 @@ RULES:
 - Title must include "{origin}", "{destination}" and "Ferry"
 - Do NOT include any URLs or booking links in the text
 - Do NOT invent any data not provided above
-- If a transport mode has no data above, do NOT write about it
-- Required H2 sections (skip sections for modes without data):
+- If a transport mode has no data above, OMIT that H2 section entirely. Do NOT write filler content
+- Required H2 sections (OMIT H2 sections entirely for modes without data. Do NOT write filler content):
 {sections}
 - Use exact prices and durations from the data
 - Write as a seasoned ferry traveler giving practical advice

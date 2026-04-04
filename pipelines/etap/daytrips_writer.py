@@ -195,6 +195,7 @@ def generate_daytrips_guide(topic):
 ARTICLE REQUIREMENTS:
 - 1,000-1,500 words in English
 - All prices in {currency} (the local currency shown in data)
+- If a price section has 0 tours in the data, OMIT that H2 section entirely. Do NOT write filler content.
 - Use ONLY the tour names and prices from the data above
 - Do NOT invent any tour names, prices, or statistics
 

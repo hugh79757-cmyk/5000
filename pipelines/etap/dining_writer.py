@@ -124,7 +124,7 @@ RULES:
 - Do NOT invent restaurant names, awards, cuisines, or prices not in the data
 - If price is "Price N/A", do not mention a price for that restaurant
 - Title must include "{city}" and relate to dining/eating
-- Required H2 sections (skip if no data for that tier):
+- Required H2 sections (OMIT that H2 section entirely if no data exists. Do NOT write filler content):
 {sections}
 - Mention restaurants by exact name and award from the data
 - For each tier, highlight 2-3 standout picks and explain WHY they stand out (based on cuisine style or description)

@@ -71,6 +71,7 @@ RULES:
 - If it is a low-cost carrier, explain what that generally means
 - If it is a full-service carrier, explain what that generally means
 - Do NOT make up specific baggage weights, meal options, or lounge info
+- If a section has 0 relevant data, OMIT that H2 section entirely. Do NOT write filler content.
 - Required H2 sections:
   ## {name} ({iata}) Overview
   ## Route Network (only if route data exists)

@@ -71,6 +71,7 @@ DATA (use ONLY this data):
 RULES:
 - Write 1,000-1,500 words in English
 - Title must include "{origin}" and "{destination}"
+- - If a section has 0 matching data items, OMIT that H2 section entirely. Do NOT write filler content.
 - Do NOT include any URLs or links
 - Do NOT invent prices or durations not in the data
 - If a transport mode has no data, do NOT write a section about it

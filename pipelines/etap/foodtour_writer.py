@@ -112,7 +112,7 @@ RULES:
   ## Best Deals on Food Tours
   ## Tips for Food Tours in {city}
 - For each tour mentioned, include exact name and price from the data
-- If a section has no data, skip it gracefully
+- If a section has no data, OMIT that H2 section entirely. Do NOT write filler content
 - Write naturally with engaging prose, not a list dump
 - Include practical tips (best time, what to wear, booking advice)
 - End with a brief practical summary

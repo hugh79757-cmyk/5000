@@ -107,7 +107,7 @@ RULES:
   ## How to Choose the Right Multi-Day Tour
 - For each tour mentioned, include exact name and price from the data
 - Remove "Save XX%!" prefixes from tour names
-- If a section has no matching data, skip it gracefully
+- If a section has no matching data, OMIT that H2 section entirely. Do NOT write filler content
 - Write as an experienced traveler who has done multi-day tours and knows what matters
 - Weave tours into flowing paragraphs, not numbered lists
 - Include practical tips: packing, group size expectations, solo vs couple, tipping guides

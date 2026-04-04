@@ -259,6 +259,21 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         "soak in": "take in",
         "immerse yourself": "explore",
         "treasure trove": "great destination",
+        "In conclusion,": "",
+        "In conclusion": "",
+        "whisk you away": "take you",
+        "living history book": "city full of history",
+        "like flipping through the pages": "a walk through",
+        "Your Ultimate": "A Practical",
+        "your ultimate": "a practical",
+        "must-try": "worth trying",
+        "a must for": "ideal for",
+        "spirit soaring": "",
+        "synonymous with": "known for",
+        "Greek adventure": "trip in Greece",
+        "paradise for": "popular with",
+        "bucket list": "travel wishlist",
+        "playground for": "popular with",
         "soaking up": "enjoying",
         "unmatched": "impressive",
         "of a lifetime": "",
@@ -302,14 +317,33 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     content = re.sub(r'\ban (standout|busy|lively|lesser-known|mix|long|start)\b', r'a \1', content)
     content = re.sub(r'\bAn (standout|busy|lively|lesser-known|mix|long|start)\b', r'A \1', content)
 
-    # Fix price formatting: $X.0 -> $X, $X.Y0 -> $X (round)
+    # Fix price formatting: $X.0 -> $X, $X.00 -> $X
     content = re.sub(r'\$(\d+)\.0\b', r'$\1', content)
     content = re.sub(r'\$(\d+)\.00\b', r'$\1', content)
+
+    # Normalize currency: "USD 31.50" -> "$32", "GBP 10.31" -> "$10", "EUR 25.00" -> "$25"
+    def _normalize_currency(m):
+        cur = m.group(1)
+        val = float(m.group(2))
+        return f'${int(round(val))}'
+    content = re.sub(r'\b(USD|GBP|EUR)\s+(\d+(?:\.\d+)?)', _normalize_currency, content)
+
+    # Also fix "From **USD X**" patterns in product cards
+    content = re.sub(r'From \*\*(USD|GBP|EUR)\s+(\d+(?:\.\d+)?)\*\*',
+                     lambda m: f'From **${int(round(float(m.group(2))))}**', content)
     # Round prices with single decimal: $31.5 -> $32, $159.2 -> $159
     def _round_price(m):
         val = float(m.group(1) + '.' + m.group(2))
         return f'${int(round(val))}'
     content = re.sub(r'\$(\d+)\.(\d)\b(?!\d)', _round_price, content)
+
+    # Fix discount percentages in text: -20.01% -> -20%, -35.0% -> -35%, -0.0% -> remove
+    def _fix_discount_text(m):
+        val = abs(float(m.group(1)))
+        if val < 0.5:
+            return ""
+        return f'-{int(round(val))}%'
+    content = re.sub(r'-(\d+\.?\d*)%', _fix_discount_text, content)
 
     # Check for suspicious prices in text ($0, $0.X, $1, $2, $3, $4)
     suspicious_prices = re.findall(r'\$([0-4](?:\.\d+)?)\b', content)
@@ -347,7 +381,14 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
             issues.append(f"Unauthorized URL found: {url[:60]}")
             content = content.replace(url, "")
 
-    # Check for fabricated relative links (GPT invents /posts/slug/ links)
+    # Remove empty H2 sections (GPT writes "Currently there are no..." filler)
+    empty_patterns = [
+        r'## [^\n]+\n+(?:Currently,? there are no|No specific|There are no specific|No data available|This section)[^\n]*(?:\n(?!## |<div|<script)[^\n]*)*',
+    ]
+    for ep in empty_patterns:
+        content = re.sub(ep, '', content, flags=re.IGNORECASE)
+
+        # Check for fabricated relative links (GPT invents /posts/slug/ links)
     fake_link_pattern = re.findall(r'\[([^\]]+)\]\(/posts/([^)]+)/\)', content)
     if fake_link_pattern:
         import sqlite3 as _sql

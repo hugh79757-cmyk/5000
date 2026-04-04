@@ -76,6 +76,7 @@ DATA (use ONLY this data):
 RULES:
 - Write 1,000-1,500 words in English
 - Title must include "{country}" and "eSIM"
+- - If a section has 0 matching data items, OMIT that H2 section entirely. Do NOT write filler content.
 - Do NOT include any URLs or links
 - Do NOT invent plans not in the data
 - Required H2 sections:

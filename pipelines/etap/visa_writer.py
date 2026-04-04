@@ -90,6 +90,7 @@ RULES:
 - Write 1,200-1,800 words in English
 - Title must include "{passport}" and "visa"
 - This is about who needs a visa to ENTER {passport}
+- If a section has 0 relevant data, OMIT that H2 section entirely. Do NOT write filler content.
 - Required H2 sections:
   ## {passport} Visa Policy Overview
   ## Visa-Free and Visa-on-Arrival Access

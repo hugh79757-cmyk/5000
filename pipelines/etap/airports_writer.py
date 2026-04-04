@@ -75,6 +75,7 @@ RULES:
 - Do NOT invent terminal names, lounge names, restaurant names, or services
 - ONLY write about what the data confirms
 - If airline/route data is limited, say so honestly
+- If a section has 0 relevant data, OMIT that H2 section entirely. Do NOT write filler content.
 - Required H2 sections:
   ## {name} ({iata}) Overview
   ## Airlines Operating at {iata} (only if airline data exists)

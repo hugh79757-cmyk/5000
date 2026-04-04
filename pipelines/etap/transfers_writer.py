@@ -101,7 +101,7 @@ RULES:
   ## Booking Tips and What to Know Before You Land
 - For each transfer mentioned, include exact name and price from the data
 - Remove "Save XX%!" prefixes from transfer names
-- If a section has no matching data, skip it gracefully
+- If a section has no matching data, OMIT that H2 section entirely. Do NOT write filler content
 - Write as a frequent traveler who knows the hassle of airport arrivals
 - Compare shared vs private options with specific price differences
 - Include practical tips: meeting points, luggage, late flights, tipping

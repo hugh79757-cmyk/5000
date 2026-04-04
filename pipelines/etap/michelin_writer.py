@@ -80,7 +80,7 @@ RULES:
 - Do NOT invent restaurant names, awards, or prices not in the data
 - If price is "Price N/A", do not mention a price for that restaurant
 - Title must include "{city}" and "Michelin"
-- Required H2 sections (skip if no data for that tier):
+- Required H2 sections (OMIT that H2 section entirely if no data exists. Do NOT write filler content):
   ## Michelin Dining in {city}: An Overview
   ## Three-Star and Two-Star Excellence (only if 3-star or 2-star exist)
   ## One-Star Gems

@@ -133,6 +133,7 @@ REQUIRED H2 SECTIONS:
 
 RULES:
 - Do NOT invent prices. Only use prices from the data provided.
+- If a section has 0 relevant data, OMIT that H2 section entirely. Do NOT write filler content.
 - Do NOT include any internal links, URLs, or markdown links in the text
 - If no price data, use phrases like "prices typically range from..."
 - No affiliate links or URLs, no markdown beyond H2, write in paragraphs not bullet lists

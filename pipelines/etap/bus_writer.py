@@ -103,7 +103,7 @@ RULES:
 - Title must include "{origin}", "{destination}" and "Bus"
 - Do NOT include any URLs or booking links in the text
 - Do NOT invent any data not provided above
-- If a transport mode has no data above, do NOT write about it
+- If a transport mode has no data above, do NOT write about it. OMIT that H2 section entirely — do NOT write filler content
 - Required H2 sections (skip sections for modes without data):
 {sections}
 - Use exact prices and durations from the data

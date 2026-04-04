@@ -98,7 +98,7 @@ RULES:
   ## Best Deals and Discounts Available Now
   ## Tips for Booking Tours in {city}
 - For each tour mentioned, include exact name and price from the data
-- If a price bucket is empty, skip that section
+- If a price bucket is empty, OMIT that H2 section entirely. Do NOT write filler content
 - Write naturally, not as a list dump
 - End with a brief practical summary, no links
 
