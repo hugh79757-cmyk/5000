@@ -133,6 +133,7 @@ REQUIRED H2 SECTIONS:
 
 RULES:
 - Do NOT invent prices. Only use prices from the data provided.
+- Do NOT include any internal links, URLs, or markdown links in the text
 - If no price data, use phrases like "prices typically range from..."
 - No affiliate links or URLs, no markdown beyond H2, write in paragraphs not bullet lists
 - Include a brief intro before the first H2

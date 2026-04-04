@@ -66,6 +66,7 @@ RULES:
 - Write 800-1,200 words in English
 - Title must include "{name}"
 - Do NOT invent routes, fleet info, baggage policies, or in-flight services
+- Do NOT include any internal links, URLs, or markdown links in the text
 - Be HONEST about what data is available. If route data is limited, say so.
 - If it is a low-cost carrier, explain what that generally means
 - If it is a full-service carrier, explain what that generally means

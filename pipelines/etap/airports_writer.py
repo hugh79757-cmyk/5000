@@ -83,6 +83,7 @@ RULES:
   ## Practical Tips for Travelers
 - For "Getting To and From" — write general advice only, do not invent specific bus lines or taxi prices
 - Be honest about what information is available vs not
+- Do NOT include any internal links, URLs, or markdown links in the text. No [text](url) patterns.
 
 Return ONLY the article in markdown starting with # title"""
 

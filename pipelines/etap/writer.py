@@ -7,7 +7,7 @@ import openai
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "travel-en.db"
 
 
-def _get_internal_links(current_dest_id: int, region: str, limit: int = 3) -> list[dict]:
+def _get_internal_links(current_dest_id: int, region: str, blog_id: str = "", limit: int = 3) -> list[dict]:
     """같은 region의 발행 완료된 글 중 내부링크 후보 반환."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -16,10 +16,10 @@ def _get_internal_links(current_dest_id: int, region: str, limit: int = 3) -> li
         FROM publish_log pl
         JOIN topics t ON pl.topic_id = t.topic_id
         JOIN destinations d ON t.dest_id = d.dest_id
-        WHERE d.region = ? AND t.dest_id != ?
+        WHERE d.region = ? AND t.dest_id != ? AND pl.blog_id = ?
         ORDER BY pl.published_at DESC
         LIMIT ?
-    """, (region, current_dest_id, limit)).fetchall()
+    """, (region, current_dest_id, blog_id, limit)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
@@ -32,7 +32,7 @@ def generate_city_guide(topic: dict) -> dict:
     title = topic["title"]
     slug = topic["slug"]
 
-    internal_links = _get_internal_links(topic["dest_id"], region)
+    internal_links = _get_internal_links(topic["dest_id"], region, blog_id=topic.get("blog_id", ""))
 
     link_instruction = ""
     if internal_links:
@@ -86,6 +86,7 @@ The guide is about {city}, {country} and targets American travelers.
 - Do NOT invent specific prices or statistics. Use ranges like "budget hotels typically start around $30-50/night"
 - Do NOT mention specific hotel or airline brand names
 - Do NOT include any external links (only internal links listed above are allowed)
+- Do NOT invent any internal links. Use ONLY the exact links provided in the "Internal Links" section above. If no internal links are provided, do not add any.
 - Write in pure markdown with H2 headers only (no H3)
 - No meta-commentary like "In this guide..." or "Let's dive in"
 - Start directly with the first H2 section

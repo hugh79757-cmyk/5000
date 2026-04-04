@@ -310,6 +310,20 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
             issues.append(f"Unauthorized URL found: {url[:60]}")
             content = content.replace(url, "")
 
+    # Check for fabricated relative links (GPT invents /posts/slug/ links)
+    fake_link_pattern = re.findall(r'\[([^\]]+)\]\(/posts/([^)]+)/\)', content)
+    if fake_link_pattern:
+        import sqlite3 as _sql
+        _db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "travel-en.db")
+        _conn = _sql.connect(_db)
+        _published_slugs = set(r[0] for r in _conn.execute("SELECT DISTINCT post_slug FROM entity_links WHERE published = 1").fetchall())
+        _conn.close()
+        for label, slug in fake_link_pattern:
+            if slug.rstrip("/") not in _published_slugs:
+                fake_md = f"[{label}](/posts/{slug}/)"
+                content = content.replace(fake_md, label)
+                issues.append(f"Removed fabricated link: {fake_md[:80]}")
+
     # Check minimum H2 sections
     h2_count = len(re.findall(r'^## ', content, re.MULTILINE))
     if h2_count < 3:
