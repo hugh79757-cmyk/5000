@@ -1,3 +1,4 @@
+"""dining_pipeline.py - Michelin dining blog pipeline"""
 import os, sys, sqlite3, logging, time, subprocess, re
 from datetime import datetime, timezone, timedelta
 
@@ -7,6 +8,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
 
 logger = logging.getLogger(__name__)
@@ -14,12 +16,12 @@ KST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
-from pipelines.etap.trains_writer import generate_route_guide
+from pipelines.etap.dining_writer import generate_dining_guide
 
-BLOG_ID = "trains-hugo"
-SITE_PATH = "/Users/twinssn/Projects/ETAP/trains-hugo"
-TOPIC_TABLE = "trains_topics"
-CATEGORY = "Route Guide"
+BLOG_ID = "dining-hugo"
+SITE_PATH = "/Users/twinssn/Projects/ETAP/dining-hugo"
+TOPIC_TABLE = "dining_topics"
+CATEGORY = "Dining Guide"
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -51,10 +53,11 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     fm += "tags:\n" + tags_str + "\n"
     fm += f'categories:\n  - "{category}"\n'
     fm += "showTableOfContents: true\n"
+    if article.get("_draft"):
+        fm += "draft: true\n"
     fm += "---\n"
     content = article["content"]
     content = inject_internal_links(content, current_blog=blog_id, max_links=5)
-
     content = insert_adsense(content)
     if body_images:
         h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
@@ -101,73 +104,65 @@ def _mark_published(article, blog_id, topic_table):
     conn.close()
     mark_entity_published(blog_id, article["slug"])
 
-def _safe_price(val):
-    try:
-        return float(str(val).replace("$","").replace(",","").strip())
-    except:
-        return 0
-
 def pick_topic():
     conn = _get_db()
     row = conn.execute(
-        "SELECT * FROM trains_topics WHERE exhausted = 0 "
-        "AND slug NOT IN (SELECT slug FROM publish_log WHERE blog_id = 'trains-hugo') "
+        f"SELECT * FROM {TOPIC_TABLE} WHERE exhausted = 0 "
+        f"AND slug NOT IN (SELECT slug FROM publish_log WHERE blog_id = '{BLOG_ID}') "
+        "AND city IS NOT NULL AND city != '' "
         "ORDER BY priority DESC, id ASC LIMIT 1"
     ).fetchone()
     conn.close()
     return dict(row) if row else None
 
 def _add_product_cards(article):
-    routes = article.get("routes", [])
-    if not routes:
+    restaurants = article.get("restaurants", [])
+    if not restaurants:
         return article
-    r = routes[0]
-    currency = r.get("currency", "USD")
-    comp = []
-    if r.get("train_min_price"):
-        comp.append(dict(name="Train", price=str(r["train_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
-    if r.get("bus_min_price"):
-        comp.append(dict(name="Bus", price=str(r["bus_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
-    if r.get("flight_min_price"):
-        comp.append(dict(name="Flight", price=str(r["flight_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
-    if r.get("ferry_min_price"):
-        comp.append(dict(name="Ferry", price=str(r["ferry_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
-    if comp:
-        article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
-    link_url = r.get("link_url", "")
-    if link_url:
-        origin = article.get("origin", "")
-        dest = article.get("destination", "")
-        cards = [dict(
-            name="Compare and book " + origin + " to " + dest,
-            price="", currency="", discount="",
-            image_url=r.get("image_url",""),
-            link=link_url, category="Train / Bus / Flight",
-        )]
-        article["content"] = insert_product_cards(article["content"], cards, max_cards=1)
+    selected = []
+    for r in restaurants[:8]:
+        if not r.get("name"):
+            continue
+        award = r.get("award", "Selected")
+        cuisine = r.get("cuisine", "")
+        desc = award + (" / " + cuisine if cuisine else "")
+        selected.append(dict(
+            name=r["name"], price=r.get("price", ""), currency="",
+            discount="", image_url="",
+            link=r.get("url", "#"),
+            category=desc,
+        ))
+    if selected:
+        article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
     return article
 
 def run():
     topic = pick_topic()
     if not topic:
-        logger.info("[trains-hugo] No topics")
+        logger.info(f"[{BLOG_ID}] No topics")
         return False
-    origin = topic.get("origin", "")
-    dest = topic.get("destination", "")
-    logger.info(f"[trains-hugo] {origin} to {dest} generating")
-    article = generate_route_guide(topic)
+    city = topic.get("city", "")
+    country = topic.get("country", "")
+    logger.info(f"[{BLOG_ID}] {city} generating")
+    article = generate_dining_guide(topic)
     if not article:
         return False
+    article["content"], post_issues, is_draft = postprocess_content(article["content"], blog_id=BLOG_ID, slug=article["slug"])
+    if is_draft:
+        logger.warning(f"[{BLOG_ID}] DRAFT: {article['slug']} - {post_issues}")
+        send_alert(BLOG_ID, article["slug"], post_issues)
+        article["_draft"] = True
+    elif post_issues:
+        logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
-    search_term = origin or dest
-    cover = fetch_city_image(search_term, "", article["slug"]) if search_term else None
-    body = fetch_body_images(search_term, "", article["slug"], count=3) if search_term else []
+    cover = fetch_city_image(city + " restaurant dining", country, article["slug"]) if city else None
+    body = fetch_body_images(city + " food cuisine", country, article["slug"], count=3) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE)
-    if origin:
-        register_entity("city", origin, BLOG_ID, article["slug"], "train routes from " + origin, 55, 1)
-    if dest:
-        register_entity("city", dest, BLOG_ID, article["slug"], "how to get to " + dest, 55, 1)
+    if city:
+        register_entity("city", city, BLOG_ID, article["slug"], "dining in " + city, 60, 1)
+    if country:
+        register_entity("country", country, BLOG_ID, article["slug"], "restaurants in " + country, 40, 1)
     return True
 
 def run_batch(count=3):
@@ -178,5 +173,5 @@ def run_batch(count=3):
         time.sleep(5)
     if ok > 0:
         _build_and_deploy(SITE_PATH, BLOG_ID)
-    logger.info(f"[trains-hugo] Batch {ok}/{count}")
+    logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")
     return ok

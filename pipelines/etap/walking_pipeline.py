@@ -8,6 +8,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,8 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     fm += "tags:\n" + tags_str + "\n"
     fm += f'categories:\n  - "{category}"\n'
     fm += "showTableOfContents: true\n"
+    if article.get("_draft"):
+        fm += "draft: true\n"
     fm += "---\n"
     content = article["content"]
     content = inject_internal_links(content, current_blog=blog_id, max_links=5)
@@ -167,6 +170,15 @@ def run():
     article = generate_walking_guide(topic)
     if not article:
         return False
+    # Post-process quality check
+    data_prices = [float(str(t.get("price",0)).replace("$","").replace(",","")) for t in article.get("tours", article.get("routes", article.get("restaurants", []))) if t.get("price")]
+    article["content"], post_issues, is_draft = postprocess_content(article["content"], data_prices=data_prices, blog_id=BLOG_ID, slug=article["slug"])
+    if is_draft:
+        logger.warning(f"[{BLOG_ID}] DRAFT: {article['slug']} - {post_issues}")
+        send_alert(BLOG_ID, article["slug"], post_issues)
+        article["_draft"] = True
+    elif post_issues:
+        logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
     city = article.get("city", "")
     country = article.get("country", "")

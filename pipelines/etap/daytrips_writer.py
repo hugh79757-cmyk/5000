@@ -1,6 +1,7 @@
 """daytrips_writer.py - Day Trips guide generator"""
 import os, sqlite3, logging, re
 from openai import OpenAI
+from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -77,6 +78,7 @@ def generate_daytrips_guide(topic):
     city = topic["city"]
     country = topic.get("country", "")
     tours = fetch_tours(city, country)
+    tours, _pre_issues, _excluded = preprocess_tours(tours, city=city)
     if not tours:
         logger.warning(f"No tours for {city}")
         return None
@@ -85,41 +87,43 @@ def generate_daytrips_guide(topic):
         return None
     summary, picks = result
 
-    prompt = f"""Write a comprehensive day trips guide for {city}, {country}.
+    prompt = f"""Write a day trips guide for {city}, {country}.
 
 DATA (use ONLY this data, do NOT invent tours or prices):
 {summary}
 
-RULES:
-- Write 1,200-1,800 words in English
-- Do NOT include any booking links or URLs in the text
-- Do NOT invent tour names, prices, or categories not in the data
-- Title must include "{city}" and be SEO-friendly
-- Required H2 sections:
-  ## Why {city} is a Perfect Base for Day Trips
-  ## Budget-Friendly Day Trips Under $50
+FORMAT RULES:
+- 1,200-1,800 words in English
+- No booking links or URLs in text
+- No invented tour names, prices, or categories
+- Format prices as whole numbers when .0 ($8 not $8.0, $50 not $50.0)
+- Title: include "{city}", make it specific and clickable (not generic)
+- Remove "Save XX%!" prefixes from tour names
+
+STRUCTURE (H2 sections — skip any with no data):
+  ## [Open with a specific hook about {city} — distance/time to key sites, a surprising fact, or a concrete scene]
+  ## Budget Day Trips Under $50
   ## Mid-Range Excursions ($50-$200)
   ## Premium Full-Day Experiences
-  ## Most Popular Day Trip Types From {city}
-  ## Best Deals and Discounts on Day Trips
-  ## Tips for Planning Day Trips From {city}
-- For each tour mentioned, include exact name and price from the data
-- If a section has no data, skip it gracefully
-- Write naturally with engaging prose, not a list dump
-- Include practical tips (best time, what to wear, booking advice)
-- End with a brief practical summary
-- Remove "Save XX%!" prefixes from tour names when mentioning them
-- After mentioning 2-3 tours in each section, add a natural CTA like "These tours fill up fast during peak season — check availability and lock in today's price before it changes."
-- Do NOT use numbered lists for tours. Weave them into flowing paragraphs
-- Include a "Quick Comparison" sentence at the end of each price section (e.g., "At $15, the catamaran tour offers the best value per hour compared to the $50 private option.")
-- Make the summary actionable: mention the best overall value pick and the best splurge pick by name and price
+  ## Best Deals and Current Discounts
+  ## Planning Tips: Timing, Transport, and What to Pack
+
+WRITING STYLE:
+- Open the article with a concrete, specific first sentence (e.g., "A 20-minute taxi from downtown {city} puts you at the foot of 4,500-year-old pyramids" NOT "City X is a vibrant destination with much to offer")
+- Write as a knowledgeable local friend giving advice, not a catalog
+- For each section, pick 2-3 BEST tours and explain WHY they stand out — don't just list names and prices
+- Include at least one practical tip per section (best time of day, what to wear, how to get there, what most tourists get wrong)
+- Compare tours against each other: "For $12 more you get a private guide and skip the 45-minute ticket line — worth it if you're short on time"
+- Use flowing paragraphs, NOT numbered lists
+- End with a quick "If you only have one day" recommendation with specific tour name and price
+- NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, "let's dive in", "without further ado", "hidden gem", "rich history and culture"
 
 Return ONLY the article in markdown starting with # title"""
 
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role":"system","content":"You are a travel content writer specializing in day trips. Use only provided data. Never fabricate information. Write engaging, helpful content that makes readers want to book. Use a conversational but authoritative tone. Avoid generic filler. Every paragraph should either inform or persuade. Naturally weave in reasons to book now (limited spots, seasonal pricing, popular tours selling out)."},
+            {"role":"system","content":"You are a travel blogger who has actually visited these destinations. Write in first-person-informed tone (not literally 'I did X' but 'the 20-minute taxi ride from downtown drops you right at the entrance'). STRICT RULES: 1) Never use these words/phrases: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark. 2) Format prices as whole numbers when .0 (write $8 not $8.0, write $12 not $12.0). 3) Never invent data. 4) Every section must include at least one practical tip (best time of day, what to wear, how to get there, what to skip). 5) Open with a specific, concrete hook - a scene, a number, a surprising fact - not a generic overview sentence."},
             {"role":"user","content": prompt}
         ]
     )

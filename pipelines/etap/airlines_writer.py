@@ -25,8 +25,8 @@ def fetch_airline_data(iata_code):
         FROM ref_airlines WHERE iata = ?
     """, (iata_code,)).fetchone()
     routes = conn.execute("""
-        SELECT origin_iata, destination_iata
-        FROM airline_routes WHERE airline_iata = ?
+        SELECT origin, destination
+        FROM airline_routes WHERE airline = ?
     """, (iata_code,)).fetchall()
     # 운항 공항 수
     airports = set()
@@ -56,7 +56,7 @@ def generate_airline_review(topic):
     summary += f"Known routes: {len(routes)}\n"
     summary += f"Airports served: {airport_count}\n"
     if routes:
-        summary += "Sample routes: " + ", ".join(f"{r['origin_iata']}→{r['destination_iata']}" for r in routes[:15]) + "\n"
+        summary += "Sample routes: " + ", ".join(f"{r['origin']}→{r['destination']}" for r in routes[:15]) + "\n"
     prompt = f"""Write an airline overview for {name} ({iata}).
 
 DATA (use ONLY this data):

@@ -601,6 +601,61 @@ def _run_etap_watersports():
     except Exception as e:
         logger.error(f"[ETAP] watersports-hugo 실패: {e}")
 
+
+
+def _run_etap_bus():
+    try:
+        from pipelines.etap.bus_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] bus-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] bus-hugo 실패: {e}")
+
+
+def _run_etap_ferry():
+    try:
+        from pipelines.etap.ferry_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] ferry-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] ferry-hugo 실패: {e}")
+
+
+def _run_etap_dining():
+    try:
+        from pipelines.etap.dining_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] dining-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] dining-hugo 실패: {e}")
+
+
+def _run_etap_culture():
+    try:
+        from pipelines.etap.culture_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] culture-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] culture-hugo 실패: {e}")
+
+
+def _run_etap_transfers():
+    try:
+        from pipelines.etap.transfers_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] transfers-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] transfers-hugo 실패: {e}")
+
+
+def _run_etap_multiday():
+    try:
+        from pipelines.etap.multiday_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] multiday-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] multiday-hugo 실패: {e}")
+
 def register_schedules():
     config = load_config()
     blogs = config.get("blogs", [])
@@ -703,7 +758,32 @@ def register_schedules():
         schedule.every().day.at(t).do(_run_etap_watersports)
         job_count += 1
 
-    logger.info("ETAP 14 EN blogs scheduled 5x daily each (70 posts/day total)")
+    # ── ETAP Batch 2: bus, ferry, dining, culture, transfers, multiday ──
+    for t in ["08:45", "11:45", "14:45", "17:45", "21:45"]:
+        schedule.every().day.at(t).do(_run_etap_bus)
+        job_count += 1
+
+    for t in ["08:50", "11:50", "14:50", "17:50", "21:50"]:
+        schedule.every().day.at(t).do(_run_etap_ferry)
+        job_count += 1
+
+    for t in ["08:55", "11:55", "14:55", "17:55", "21:55"]:
+        schedule.every().day.at(t).do(_run_etap_dining)
+        job_count += 1
+
+    for t in ["09:00", "12:00", "15:00", "18:00", "22:00"]:
+        schedule.every().day.at(t).do(_run_etap_culture)
+        job_count += 1
+
+    for t in ["09:05", "12:05", "15:05", "18:05", "22:05"]:
+        schedule.every().day.at(t).do(_run_etap_transfers)
+        job_count += 1
+
+    for t in ["09:10", "12:10", "15:10", "18:10", "22:10"]:
+        schedule.every().day.at(t).do(_run_etap_multiday)
+        job_count += 1
+
+    logger.info("ETAP 20 EN blogs scheduled 5x daily each (100 posts/day total)")
 
     return job_count
 

@@ -126,8 +126,8 @@ def _add_product_cards(article):
     budget = [t for t in pool if 0 < _safe_price(t.get("price")) < 50][:3]
     mid = [t for t in pool if 50 <= _safe_price(t.get("price")) <= 200][:3]
     deals = sorted(
-        [t for t in pool if t.get("discount") and str(t["discount"]) not in ("0","","0.00%")],
-        key=lambda x: _safe_price(str(x.get("discount","0")).replace("%","")),
+        [t for t in pool if t.get("discount_percent") and str(t.get("discount_percent","")) not in ("0","","0.00%")],
+        key=lambda x: _safe_price(str(x.get("discount_percent","0")).replace("%","")),
         reverse=True
     )[:4]
     selected = []
@@ -139,7 +139,7 @@ def _add_product_cards(article):
         seen.add(nm)
         selected.append(dict(
             name=nm, price=t.get("price",""), currency=t.get("currency","USD"),
-            discount=str(t.get("discount","")).replace("%",""),
+            discount=str(t.get("discount_percent","")).replace("%",""),
             image_url=t.get("image_url",""), link=t.get("deep_link",""),
             category=t.get("category",""),
         ))

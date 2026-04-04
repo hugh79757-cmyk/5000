@@ -21,21 +21,21 @@ def _get_db():
 def fetch_airport_data(iata_code):
     conn = _get_db()
     airport = conn.execute("""
-        SELECT code, name, country_code, lat, lng, timezone
-        FROM ref_airports WHERE code = ?
+        SELECT iata, name, country_code, lat, lng, timezone
+        FROM ref_airports WHERE iata = ?
     """, (iata_code,)).fetchone()
     # 이 공항을 사용하는 항공사 + 노선
     airlines = conn.execute("""
         SELECT DISTINCT a.iata, a.name, a.is_lowcost
         FROM airline_routes ar
-        JOIN ref_airlines a ON ar.airline_iata = a.iata
-        WHERE ar.origin_iata = ? OR ar.destination_iata = ?
+        JOIN ref_airlines a ON ar.airline = a.iata
+        WHERE ar.origin = ? OR ar.destination = ?
         ORDER BY a.name
     """, (iata_code, iata_code)).fetchall()
     # 연결 도시
     destinations = conn.execute("""
-        SELECT DISTINCT destination_iata FROM airline_routes
-        WHERE origin_iata = ? LIMIT 30
+        SELECT DISTINCT destination FROM airline_routes
+        WHERE origin = ? LIMIT 30
     """, (iata_code,)).fetchall()
     conn.close()
     return (

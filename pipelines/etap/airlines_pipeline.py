@@ -71,7 +71,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     city = article.get("city", "")
     cross_html = build_cross_sell_html(country=country, city=city, exclude_blog=blog_id, max_items=3)
     if cross_html:
-        content = insert_cross_sell_block(content, cross_html, position="top")
+        content = insert_cross_sell_block(content, cross_html)
     if cover_image and cover_image.get("credit"):
         content = cover_image["credit"] + "\n\n" + content
     with open(os.path.join(post_dir, "index.md"), "w") as f:
@@ -124,7 +124,7 @@ def _add_product_cards(article):
     conn = _get_db()
     cross = []
     dest_cities = conn.execute(
-        "SELECT DISTINCT destination_iata FROM airline_routes WHERE airline_iata = ? LIMIT 3",
+        "SELECT DISTINCT destination FROM airline_routes WHERE airline = ? LIMIT 3",
         (iata,)
     ).fetchall()
     for dc in dest_cities:
@@ -144,7 +144,7 @@ def _add_product_cards(article):
             ))
     conn.close()
     if cross:
-        article["content"] = insert_product_cards(article["content"], cross, max_cards=3, position="bottom")
+        article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
     return article
 
 def run():

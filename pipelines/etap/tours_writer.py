@@ -22,7 +22,7 @@ def fetch_tours(city, country=None):
     conn = _get_db()
     rows = conn.execute("""
         SELECT product_name, description, category, price, currency,
-               discount, image_url, deep_link, city, country
+               discount_percent, image_url, deep_link, city, country
         FROM viator_tours
         WHERE city = ? AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
@@ -46,7 +46,7 @@ def _build_tour_summary(tours, city):
         if p > 0 and p < 50: price_buckets["under_50"].append(t)
         elif p >= 50 and p <= 200: price_buckets["50_200"].append(t)
         elif p > 200: price_buckets["over_200"].append(t)
-        disc = t.get("discount") or ""
+        disc = t.get("discount_percent") or ""
         if disc and disc != "0":
             discounted.append(t)
     # 각 버킷에서 대표 5개
@@ -54,7 +54,7 @@ def _build_tour_summary(tours, city):
         "budget": price_buckets["under_50"][:5],
         "mid": price_buckets["50_200"][:5],
         "premium": price_buckets["over_200"][:5],
-        "deals": sorted(discounted, key=lambda x: x.get("discount","0"), reverse=True)[:5],
+        "deals": sorted(discounted, key=lambda x: x.get("discount_percent","0"), reverse=True)[:5],
     }
     top_cats = sorted(categories.items(), key=lambda x: -x[1])[:10]
     summary = f"City: {city}\nTotal tours: {total}\n"

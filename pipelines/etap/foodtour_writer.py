@@ -1,6 +1,7 @@
 """foodtour_writer.py - Food Tours guide generator"""
 import os, sqlite3, logging, re
 from openai import OpenAI
+from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -74,6 +75,7 @@ def generate_foodtour_guide(topic):
     city = topic["city"]
     country = topic.get("country", "")
     tours = fetch_tours(city, country)
+    tours, _pre_issues, _excluded = preprocess_tours(tours, city=city)
     if not tours:
         logger.warning(f"No tours for {city}")
         return None
@@ -115,7 +117,7 @@ Return ONLY the article in markdown starting with # title"""
     resp = _get_client().chat.completions.create(
         model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role":"system","content":"You are a travel content writer specializing in food tours. Use only provided data. Never fabricate information. Write engaging, helpful content that makes readers want to book. Use a conversational but authoritative tone. Avoid generic filler. Every paragraph should either inform or persuade. Naturally weave in reasons to book now (limited spots, seasonal pricing, popular tours selling out)."},
+            {"role":"system","content":"You are a food-obsessed travel blogger. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, culinary delights. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (eat before noon to avoid crowds, ask for the local menu, skip the tourist-trap restaurants near X). 5) Open with a concrete food scene or smell."},
             {"role":"user","content": prompt}
         ]
     )

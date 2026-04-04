@@ -160,8 +160,10 @@ def _run_stap(stap_name, cfg):
         )
         os.unlink(runner_path)
 
+        if proc.stderr and proc.stderr.strip():
+            logger.warning(f"STAP {stap_name} stderr: {proc.stderr[-500:]}")
         if proc.returncode != 0:
-            logger.error(f"STAP subprocess failed: {proc.stderr[-300:]}")
+            logger.error(f"STAP subprocess failed (rc={proc.returncode}): {proc.stderr[-300:]}")
             return {"success": False, "reason": "stap_subprocess_error"}
 
         for line in reversed(proc.stdout.strip().split("\n")):
