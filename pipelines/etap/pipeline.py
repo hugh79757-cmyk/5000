@@ -1,6 +1,7 @@
 """ETAP pipeline — 영문 travel 블로그 자동 발행."""
 import logging
 import os
+import logging
 import sys
 from pathlib import Path
 from datetime import datetime, timezone, timedelta
