@@ -19,8 +19,8 @@ from pipelines.etap.topic_manager import pick_topic, mark_published, check_exhau
 from pipelines.etap.writer import generate_city_guide
 from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_adsense
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published
+from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
+from pipelines.etap.post_processor import insert_adsense, insert_cross_sell_block
 
 
 
@@ -209,6 +209,12 @@ def run_batch(cfg: dict, count: int = 3) -> list:
         if body_imgs:
             article["body_images"] = body_imgs
         article["content"] = insert_adsense(article["content"])
+        cross_html = build_cross_sell_html(
+            country=topic.get("country", ""),
+            city=topic.get("city", ""),
+            exclude_blog=blog_id, max_items=3)
+        if cross_html:
+            article["content"] = insert_cross_sell_block(article["content"], cross_html, position="top")
         article["content"] = inject_internal_links(article["content"], current_blog=blog_id, max_links=5)
         register_entity("city", topic["city"], blog_id, article["slug"],
                         f'https://{cfg["domain"]}/posts/{article["slug"]}/',
