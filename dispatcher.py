@@ -229,7 +229,18 @@ def _run_pipeline(cfg):
         _tg_error(blog_id, "pipeline", f"run() 없음: {module_path}")
         return {"success": False, "reason": "pipeline_no_run"}
 
-    return module.run(cfg)
+    try:
+        return module.run(cfg)
+    except Exception as e:
+        logger.error(f"Pipeline {blog_id} crashed: {e}")
+        import traceback
+        tb = traceback.format_exc()
+        logger.error(tb[-500:])
+        try:
+            _tg_error(blog_id, "pipeline_crash", f"{e}\n{tb[-300:]}")
+        except Exception:
+            pass
+        return {"success": False, "reason": f"pipeline_crash: {e}"}
 
 
 # ─── 메인 디스패치 ───

@@ -629,7 +629,14 @@ def run(blog_cfg):
             logger.warning(f"내부링크 삽입 실패: {e}")
 
     # 후처리 (면책조항 + 쿠팡 + 내부링크)
-    article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
+    try:
+        article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
+    except Exception as _pp_err:
+        logger.error(f"[POST-PROCESS] {blog_id} 후처리 실패: {_pp_err}")
+        try:
+            tg_error(blog_id, "post_process", f"후처리 에러: {_pp_err}")
+        except Exception:
+            pass
 
     # ── 발행 전 품질 가드 (Quality Gate) ──
     import re as _val_re
