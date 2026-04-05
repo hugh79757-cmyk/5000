@@ -105,9 +105,10 @@ def _pick_keyword(blog_id):
 
         rows = conn.execute(
             "SELECT keyword, category FROM keywords "
-            "WHERE status='active' "
+            "WHERE status='active' AND blog_target=? "
             "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
-            "LIMIT 200"
+            "LIMIT 200",
+            (blog_id,)
         ).fetchall()
 
         # 1단계: 오염 키워드 제거
