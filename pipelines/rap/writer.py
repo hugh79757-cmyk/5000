@@ -510,6 +510,20 @@ def generate_trade_article(keyword, trades, region_info=None, blog_id=None):
 
     system_prompt = _build_trade_system_prompt(keyword, month, blog_id)
 
+
+    # 제목 패턴 강제 로테이션 (날짜+시간 기반 — GPT가 매번 다른 패턴 선택)
+    _pattern_map = {
+        "rap-hugo":  ["A) 단지명+가격형", "B) 변동형", "C) 질문형", "D) 순위형"],
+        "rap3-hugo": ["A) 단지명+가격형", "B) 경고형", "C) 비교형", "D) 숫자형"],
+        "rap4-hugo": ["A) 단지명+가격형", "B) 질문형", "C) 경고형", "D) 비교형"],
+        "rap5-hugo": ["A) 단지명+가격형", "B) 비교형", "C) 순위형", "D) 질문형"],
+    }
+    import hashlib as _hs
+    _seed = _hs.md5(f"{keyword}{datetime.now().strftime('%Y%m%d%H')}".encode()).hexdigest()
+    _patterns = _pattern_map.get(blog_id, _pattern_map["rap-hugo"])
+    _forced_pattern = _patterns[int(_seed, 16) % len(_patterns)]
+    system_prompt += f"\n[제목 패턴 강제 지정] 반드시 {_forced_pattern} 패턴으로 제목을 작성하세요. 다른 패턴 사용 금지.\n"
+
     # 상세보기 링크 삽입 규칙
     system_prompt += """
 [추가 규칙]
@@ -614,6 +628,14 @@ description: "120자 이내 설명"
 - 참고자료에 '상세보기' URL이 있으면 해당 공고 설명 끝에 반드시 '[상세보기 →](URL)' 형태로 링크를 삽입하세요
 - 참고자료에 없는 URL을 절대 지어내지 마세요
 - '미상', '미정'만 있는 공고는 언급하지 마세요"""
+
+    # 청약 제목 패턴 강제 로테이션
+    _sub_patterns = ["A) 일정형", "B) 질문형", "C) 숫자형", "D) 혜택형"]
+    import hashlib as _hs2
+    _seed2 = _hs2.md5(f"{keyword}{datetime.now().strftime('%Y%m%d%H')}".encode()).hexdigest()
+    _forced_sub = _sub_patterns[int(_seed2, 16) % len(_sub_patterns)]
+    system_prompt += f"\n[제목 패턴 강제 지정] 반드시 {_forced_sub} 패턴으로 제목을 작성하세요. 다른 패턴 사용 금지.\n"
+
     user_prompt = f"키워드: {keyword}\n\n참고자료:\n{reference}"
     result = ai_generate(system_prompt, user_prompt)
     if not result or not result.get("content"):
