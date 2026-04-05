@@ -19,6 +19,8 @@ from pipelines.etap.topic_manager import pick_topic, mark_published, check_exhau
 from pipelines.etap.writer import generate_city_guide
 from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
+from pipelines.etap.post_processor import insert_adsense
+from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published
 
 
 
@@ -206,6 +208,11 @@ def run_batch(cfg: dict, count: int = 3) -> list:
         body_imgs = fetch_body_images(topic.get("city", ""), topic.get("country", ""), article["slug"], count=3)
         if body_imgs:
             article["body_images"] = body_imgs
+        article["content"] = insert_adsense(article["content"])
+        article["content"] = inject_internal_links(article["content"], current_blog=blog_id, max_links=5)
+        register_entity("city", topic["city"], blog_id, article["slug"],
+                        f'https://{cfg["domain"]}/posts/{article["slug"]}/',
+                        topic["city"], priority=70)
         _write_hugo_post(cfg, article)
 
         mark_published(
@@ -215,6 +222,7 @@ def run_batch(cfg: dict, count: int = 3) -> list:
             slug=article["slug"],
             url=""
         )
+        mark_entity_published(blog_id, article["slug"])
         results.append({"title": article["title"], "city": article["city"]})
 
         if i < count - 1:
