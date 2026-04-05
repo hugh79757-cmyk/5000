@@ -656,6 +656,60 @@ def _run_etap_multiday():
     except Exception as e:
         logger.error(f"[ETAP] multiday-hugo 실패: {e}")
 
+
+def _run_etap_nature():
+    try:
+        from pipelines.etap.nature_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] nature-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] nature-hugo 실패: {e}")
+
+
+def _run_etap_visafree():
+    try:
+        from pipelines.etap.visafree_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] visafree-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] visafree-hugo 실패: {e}")
+
+
+def _run_etap_deals():
+    try:
+        from pipelines.etap.deals_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] deals-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] deals-hugo 실패: {e}")
+
+
+def _run_etap_eurail():
+    try:
+        from pipelines.etap.eurail_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] eurail-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] eurail-hugo 실패: {e}")
+
+
+def _run_etap_cruise():
+    try:
+        from pipelines.etap.cruise_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] cruise-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] cruise-hugo 실패: {e}")
+
+
+def _run_etap_phototour():
+    try:
+        from pipelines.etap.phototour_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] phototour-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] phototour-hugo 실패: {e}")
+
 def register_schedules():
     config = load_config()
     blogs = config.get("blogs", [])
@@ -783,7 +837,32 @@ def register_schedules():
         schedule.every().day.at(t).do(_run_etap_multiday)
         job_count += 1
 
-    logger.info("ETAP 20 EN blogs scheduled 5x daily each (100 posts/day total)")
+    # ── ETAP Batch 3: nature, visafree, deals, eurail, cruise, phototour ──
+    for t in ["09:15", "12:15", "15:15", "18:15", "22:15"]:
+        schedule.every().day.at(t).do(_run_etap_nature)
+        job_count += 1
+
+    for t in ["09:20", "12:20", "15:20", "18:20", "22:20"]:
+        schedule.every().day.at(t).do(_run_etap_visafree)
+        job_count += 1
+
+    for t in ["09:25", "12:25", "15:25", "18:25", "22:25"]:
+        schedule.every().day.at(t).do(_run_etap_deals)
+        job_count += 1
+
+    for t in ["09:30", "12:30", "15:30", "18:30", "22:30"]:
+        schedule.every().day.at(t).do(_run_etap_eurail)
+        job_count += 1
+
+    for t in ["09:35", "12:35", "15:35", "18:35", "22:35"]:
+        schedule.every().day.at(t).do(_run_etap_cruise)
+        job_count += 1
+
+    for t in ["09:40", "12:40", "15:40", "18:40", "22:40"]:
+        schedule.every().day.at(t).do(_run_etap_phototour)
+        job_count += 1
+
+    logger.info("ETAP 26 EN blogs scheduled (20 original + 6 batch3 = 130 posts/day total)")
 
     return job_count
 
