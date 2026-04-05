@@ -555,11 +555,26 @@ def run(blog_cfg):
                 logger.warning(f"{blog_id}: 법정동코드 미매칭, 키워드 스킵: {keyword}")
                 continue
 
-            trades = fetch_apt_trade(lawd_cd, rows=30)
-            if not trades:
-                from dateutil.relativedelta import relativedelta
-                prev_ym = (datetime.now() - relativedelta(months=1)).strftime("%Y%m")
-                trades = fetch_apt_trade(lawd_cd, deal_ymd=prev_ym, rows=30)
+            from pipelines.rap.fetcher import filter_trades_by_keyword
+            from dateutil.relativedelta import relativedelta
+
+            # 최대 3개월치 조회 - 단지 매칭될 때까지
+            trades = []
+            matched_trades = []
+            now = datetime.now()
+            for _mi in range(3):
+                _ym = (now - relativedelta(months=_mi)).strftime("%Y%m")
+                _fetched = fetch_apt_trade(lawd_cd, deal_ymd=_ym, rows=100)
+                if not _fetched:
+                    continue
+                _matched, _others = filter_trades_by_keyword(_fetched, keyword)
+                if _matched:
+                    trades = _fetched
+                    matched_trades = _matched
+                    logger.info(f"{blog_id}: {_ym} 단지 매칭 {len(_matched)}건")
+                    break
+                elif not trades:
+                    trades = _fetched
 
             if not trades:
                 tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
@@ -572,6 +587,10 @@ def run(blog_cfg):
                     logger.warning(f"키워드 자동 비활성화: {keyword} (실거래가 0건)")
                 except Exception as _dbe:
                     logger.warning(f"키워드 비활성화 실패: {_dbe}")
+                continue
+
+            if not matched_trades:
+                logger.warning(f"{blog_id}: 단지 매칭 0건 -> 키워드 스킵: {keyword}")
                 continue
 
             article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
