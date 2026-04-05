@@ -432,7 +432,7 @@ def _inject_images(items, content, blog_id=None):
     return "\n".join(result)
 
 
-def _enrich_with_nearby_restaurants_only(data, html):
+def _enrich_with_nearby_restaurants_only(data, html, blog_id=""):
     """travel4-hugo 전용: nearby 맛집 카드만 삽입 (가볼만한곳 제외)"""
     import urllib.parse
     try:
@@ -956,7 +956,7 @@ def generate_content(data, blog_id="travel-hugo"):
     content = _post_process(content)
     # travel4-hugo(여행코스)는 맛집 카드만 삽입 (가볼만한곳은 코스 장소와 중복 가능)
     if blog_id == "travel4-hugo":
-        content = _enrich_with_nearby_restaurants_only(data, content)
+        content = _enrich_with_nearby_restaurants_only(data, content, blog_id=blog_id)
     else:
         content = _enrich_with_nearby(data, content)
     # [PATCH] _enrich_with_nearby 후 GPT "함께 읽어보기" 최종 제거 + 동적 내부링크

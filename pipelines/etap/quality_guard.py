@@ -4,30 +4,55 @@ Pre-processing: validates and cleans tour/route data before sending to GPT.
 Post-processing: validates generated content for suspicious numbers, formatting issues.
 If quality check fails, marks post as draft and sends Telegram alert.
 """
-import os, re, logging, requests
+import os, re, logging
 
 logger = logging.getLogger(__name__)
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+# ── 텔레그램 알림은 shared/telegram_notifier 경유 ──
+def _tg_warning(title, detail=""):
+    try:
+        from shared.telegram_notifier import send_warning
+        send_warning(title, detail)
+    except Exception as _e:
+        logger.error(f"[QualityGuard] 텔레그램 전송 실패: {_e}")
+
+def _tg_critical(title, detail=""):
+    try:
+        from shared.telegram_notifier import send_critical
+        send_critical(title, detail)
+    except Exception as _e:
+        logger.error(f"[QualityGuard] 텔레그램 전송 실패: {_e}")
+
 
 # ============================================================
 # TELEGRAM ALERT
 # ============================================================
 def send_alert(blog_id, slug, issues):
-    """Send Telegram alert for quality issues."""
-    msg = f"⚠️ ETAP Quality Alert\n\nBlog: {blog_id}\nSlug: {slug}\nIssues:\n"
-    for issue in issues:
-        msg += f"  - {issue}\n"
-    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        try:
-            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-            requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": msg}, timeout=10)
-            logger.info(f"[QualityGuard] Telegram alert sent for {blog_id}/{slug}")
-        except Exception as e:
-            logger.error(f"[QualityGuard] Telegram failed: {e}")
+    """품질 이슈 알림 — CRITICAL/WARNING 자동 분리."""
+    if not issues:
+        return
+
+    critical_issues = [i for i in issues if "[CRITICAL]" in i]
+    warning_issues  = [i for i in issues if "[WARNING]" in i or "[CRITICAL]" not in i]
+
+    # Auto-replace는 WARNING으로도 보내지 않음 (INFO 레벨 — 로그만)
+    auto_replaced  = [i for i in issues if i.startswith("Auto-replaced:")]
+    real_warnings  = [i for i in warning_issues if i not in auto_replaced]
+
+    detail_lines = [f"Blog: {blog_id}", f"Slug: {slug}", "Issues:"]
+    for issue in issues[:10]:  # 최대 10개
+        detail_lines.append(f"  - {issue}")
+    detail = "\n".join(detail_lines)
+
+    if critical_issues:
+        _tg_critical(f"ETAP 품질 CRITICAL — {blog_id}", detail)
+        logger.error(f"[QualityGuard] CRITICAL {blog_id}/{slug}: {critical_issues}")
+    elif real_warnings:
+        _tg_warning(f"ETAP 품질 이슈 — {blog_id}", detail)
+        logger.warning(f"[QualityGuard] WARNING {blog_id}/{slug}: {real_warnings}")
     else:
-        logger.warning(f"[QualityGuard] No Telegram config. Issues: {issues}")
+        # auto-replace만 있으면 로그만
+        logger.info(f"[QualityGuard] auto-replace only {blog_id}/{slug}: {auto_replaced[:3]}")
 
 # ============================================================
 # PRE-PROCESSING: Tour Data Validation

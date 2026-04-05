@@ -24,6 +24,15 @@ SITE_PATH = "/Users/twinssn/Projects/ETAP/phototour-hugo"
 TOPIC_TABLE = "phototour_topics"
 CATEGORY = "Photography Tours"
 
+
+# === ETAP v2 Postprocessing ===
+try:
+    from pipelines.etap.post_processor import fix_encoding, clean_tags, calculate_quality_metrics
+    HAS_PP = True
+except ImportError:
+    HAS_PP = False
+# === END ===
+
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row

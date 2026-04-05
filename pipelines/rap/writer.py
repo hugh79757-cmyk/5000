@@ -22,49 +22,83 @@ logger = logging.getLogger(__name__)
 
 
 def _build_trade_reference(keyword, trades, region_info=None):
-    """실거래가 데이터를 참고자료 블록으로 변환"""
+    """실거래가 데이터를 참고자료 블록으로 변환 — 단지 매칭 분리"""
+    from pipelines.rap.fetcher import filter_trades_by_keyword
+
     lines = []
     month = datetime.now().strftime("%Y년 %m월")
     city = region_info.get("city", "") if region_info else ""
     district = region_info.get("district", "") if region_info else ""
+
+    # 단지명 필터링
+    matched, others = filter_trades_by_keyword(trades, keyword)
+
     lines.append(f"## 키워드: {keyword}")
     lines.append(f"지역: {city} {district}")
     lines.append(f"기준: {month}")
-    lines.append(f"총 거래건수: {len(trades)}건\n")
+    lines.append(f"총 거래건수: {len(trades)}건 (키워드 매칭: {len(matched)}건, 지역 기타: {len(others)}건)")
+    lines.append("")
 
-    # 통계 계산
-    prices = [t.get("dealAmountInt", 0) for t in trades if t.get("dealAmountInt")]
-    if prices:
-        lines.append("### 시세 요약")
-        lines.append(f"- 최고가: {_format_price_eok(max(prices))}")
-        lines.append(f"- 최저가: {_format_price_eok(min(prices))}")
-        lines.append(f"- 평균: {_format_price_eok(sum(prices)//len(prices))}")
+    # ── 해당 단지 거래 (핵심 데이터) ──
+    if matched:
+        prices_m = [t.get("dealAmountInt", 0) for t in matched if t.get("dealAmountInt")]
+        lines.append("### ★ 해당 단지 거래 내역 (글의 핵심 — 이 데이터를 중심으로 작성)")
+        if prices_m:
+            lines.append(f"- 해당 단지 최고가: {_format_price_eok(max(prices_m))}")
+            lines.append(f"- 해당 단지 최저가: {_format_price_eok(min(prices_m))}")
+            lines.append(f"- 해당 단지 평균: {_format_price_eok(sum(prices_m)//len(prices_m))}")
+            lines.append("")
+        for t in matched[:15]:
+            lines.append(_format_trade_line(t))
+        lines.append("")
+    else:
+        lines.append("### ★ 해당 단지 거래: 없음 (지역 전체 데이터만 참고)")
+        lines.append("- 키워드에 해당하는 단지의 직접 거래 사례가 없습니다")
+        lines.append("- 아래 지역 거래 데이터를 참고하여 해당 지역 시장 동향 중심으로 작성하세요")
         lines.append("")
 
-    lines.append("### 최근 거래 내역")
-    for t in trades[:15]:
-        apt = t.get("aptNm", "")
-        amount = t.get("dealAmount", "").strip()
-        area = t.get("excluUseAr", "")
-        floor = t.get("floor", "")
-        dong = t.get("umdNm", "")
-        year = t.get("buildYear", "")
-        deal_date = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
-        # 취득세 구간 자동 계산
-        price_int = t.get("dealAmountInt", 0)
-        if price_int > 0:
-            if price_int <= 60000:
-                tax_info = f"취득세구간: 6억이하 1.1%→{_format_price_eok(int(price_int*0.011))}"
-            elif price_int <= 90000:
-                rate = 0.01 + (price_int - 60000) / 30000 * 0.02
-                tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{_format_price_eok(int(price_int*rate))}"
-            else:
-                tax_info = f"취득세구간: 9억초과 3.3%→{_format_price_eok(int(price_int*0.033))}"
-        else:
-            tax_info = ""
-        lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {_format_price_eok(price_int) if price_int > 0 else amount + "만원"} ({deal_date}) [{tax_info}]")
+    # ── 지역 전체 통계 ──
+    all_prices = [t.get("dealAmountInt", 0) for t in trades if t.get("dealAmountInt")]
+    if all_prices:
+        lines.append(f"### 지역 전체 시세 요약 ({city} {district})")
+        lines.append(f"- 지역 최고가: {_format_price_eok(max(all_prices))}")
+        lines.append(f"- 지역 최저가: {_format_price_eok(min(all_prices))}")
+        lines.append(f"- 지역 평균: {_format_price_eok(sum(all_prices)//len(all_prices))}")
+        lines.append("")
+
+    # ── 지역 비교 데이터 (브랜드 프리미엄 비교용) ──
+    if others:
+        lines.append("### 같은 지역 기타 단지 거래 (비교 참고용)")
+        for t in others[:10]:
+            lines.append(_format_trade_line(t))
+        lines.append("")
 
     return "\n".join(lines)
+
+
+def _format_trade_line(t):
+    """개별 거래 내역을 한 줄 문자열로 포맷"""
+    apt = t.get("aptNm", "")
+    area = t.get("excluUseAr", "")
+    floor = t.get("floor", "")
+    dong = t.get("umdNm", "")
+    year = t.get("buildYear", "")
+    deal_date = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+    price_int = t.get("dealAmountInt", 0)
+
+    # 취득세 구간 자동 계산
+    tax_info = ""
+    if price_int > 0:
+        if price_int <= 60000:
+            tax_info = f"취득세구간: 6억이하 1.1%→{_format_price_eok(int(price_int*0.011))}"
+        elif price_int <= 90000:
+            rate = 0.01 + (price_int - 60000) / 30000 * 0.02
+            tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{_format_price_eok(int(price_int*rate))}"
+        else:
+            tax_info = f"취득세구간: 9억초과 3.3%→{_format_price_eok(int(price_int*0.033))}"
+
+    amount_str = _format_price_eok(price_int) if price_int > 0 else t.get("dealAmount", "").strip() + "만원"
+    return f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {amount_str} ({deal_date}) [{tax_info}]"
 
 
 def _build_subscription_reference(keyword, subscriptions):
@@ -121,7 +155,7 @@ def _base_trade_rules():
 4. 참고자료 원문을 그대로 복사하지 말고 자연스럽게 재구성
 5. 같은 내용을 반복하지 마세요
 6. "특히", "또한", "그리고" 로 문장을 시작하지 마세요. "특히"는 본문 어디에도 사용 금지
-7. 반드시 3,000자 이상 작성하세요. 2,500자 미만은 불합격입니다. 각 H2 섹션마다 최소 4~6문장, 한 문장은 40자 이상으로 작성하세요. 짧은 글은 절대 불가합니다
+7. 반드시 3,500자 이상 작성하세요. 3,000자 미만이면 절대 불합격입니다. 각 H2 섹션을 5~8문장으로 작성하고, 면적별·층별 가격 비교, 브랜드 프리미엄 수치 분석, 매수 체크리스트 각 항목을 2~3문장으로 상세하게 서술하세요. 절대 짧게 쓰지 마세요 각 H2 섹션마다 최소 4~6문장, 한 문장은 40자 이상으로 작성하세요. 짧은 글은 절대 불가합니다
 8. 전월 데이터가 참고자료에 없으면 '전월 대비' 비교를 절대 하지 마세요. 데이터 없이 추측 금지
 9. '상승세', '하락세' 등 시장 전망은 참고자료 수치 근거가 있을 때만 사용하세요
 10. 거래 건수가 10건 미만이면 '거래 사례가 제한적이므로 참고용'이라고 반드시 명시하세요
@@ -221,7 +255,7 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - "{month}" 또는 연도 포함
 
 [본문 형식]
-- 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
+- 마크다운 형식, 반드시 3,000자~4,500자 (3,000자 미만 불합격)
 - H2(##) 소제목 4~6개로 구조화
 - H3(###)을 활용하여 세부 항목 정리
 - 자연스러운 구어체, 한 단락 3~5문장
@@ -235,7 +269,8 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 [최종 확인 — 반드시 지키세요]
 - 제목: 32자 이내
 - 본문: 3,000자 이상 (부족하면 각 섹션에 구체적 사례와 계산 과정을 추가하세요)
-- "특히" 단어 사용 금지
+- "특히" 단어 사용 절대 금지 (1회라도 사용 시 불합격)
+- LaTeX 수식(\frac, \times, $...$) 사용 금지 — 일반 텍스트로 작성
 
 """ + _base_output_format().replace("{category}", "부동산세금")
 
@@ -302,7 +337,7 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - "{month}" 또는 연도 포함
 
 [본문 형식]
-- 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
+- 마크다운 형식, 반드시 3,000자~4,500자 (3,000자 미만 불합격)
 - H2(##) 소제목 4~6개로 구조화
 - H3(###)을 활용하여 세부 항목 정리
 - 자연스러운 구어체, 한 단락 3~5문장
@@ -316,7 +351,8 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 [최종 확인 — 반드시 지키세요]
 - 제목: 32자 이내
 - 본문: 3,000자 이상 (부족하면 단지별 분석과 월세 환산 예시를 추가하세요)
-- "특히" 단어 사용 금지
+- "특히" 단어 사용 절대 금지 (1회라도 사용 시 불합격)
+- LaTeX 수식(\frac, \times, $...$) 사용 금지 — 일반 텍스트로 작성
 - 월세 단위: 반드시 "만원/월"
 
 """ + _base_output_format().replace("{category}", "전월세")
@@ -382,7 +418,7 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - "{month}" 또는 연도 포함
 
 [본문 형식]
-- 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
+- 마크다운 형식, 반드시 3,000자~4,500자 (3,000자 미만 불합격)
 - H2(##) 소제목 4~6개로 구조화
 - H3(###)을 활용하여 세부 항목 정리
 - 자연스러운 구어체, 한 단락 3~5문장
@@ -396,7 +432,8 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 [최종 확인 — 반드시 지키세요]
 - 제목: 32자 이내
 - 본문: 3,000자 이상 (부족하면 브랜드 비교와 시세 분석을 추가하세요)
-- "특히" 단어 사용 금지
+- "특히" 단어 사용 절대 금지 (1회라도 사용 시 불합격)
+- LaTeX 수식(\frac, \times, $...$) 사용 금지 — 일반 텍스트로 작성
 
 """ + _base_output_format().replace("{category}", "브랜드아파트")
 
@@ -420,7 +457,7 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - "{month}" 또는 연도 포함
 
 [본문 형식]
-- 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
+- 마크다운 형식, 반드시 3,000자~4,500자 (3,000자 미만 불합격)
 - H2(##) 소제목 4~6개로 구조화
 - H3(###)을 활용하여 세부 항목 정리
 - 자연스러운 구어체, 한 단락 3~5문장
@@ -458,7 +495,8 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 [최종 확인 — 반드시 지키세요]
 - 제목: 32자 이내
 - 본문: 3,000자 이상 (부족하면 단지별 상세 분석을 추가하세요)
-- "특히" 단어 사용 금지
+- "특히" 단어 사용 절대 금지 (1회라도 사용 시 불합격)
+- LaTeX 수식(\frac, \times, $...$) 사용 금지 — 일반 텍스트로 작성
 
 """ + _base_output_format().replace("{category}", "부동산")
 
@@ -585,14 +623,41 @@ description: "120자 이내 설명"
 
 
 def _parse_article(response, keyword):
-    """GAP과 동일한 frontmatter(---) 방식 파싱"""
-    fm_match = re.search(r"---\s*\n(.+?)\n---", response, re.DOTALL)
-    if not fm_match:
-        logger.warning(f"frontmatter 파싱 실패: {keyword}")
-        return None
+    """GAP과 동일한 frontmatter(---) 방식 파싱 — 표/수평선 안전 처리"""
+    text = response.strip()
 
-    fm_text = fm_match.group(1)
-    body_md = response[fm_match.end():].strip()
+    # front-matter: 문서 시작의 --- ... --- 블록만 인식
+    # 본문 중 표 구분선(|---|)이나 수평선(---)과 혼동 방지
+    if text.startswith("---"):
+        lines = text.split("\n")
+        fm_start = None
+        fm_end = None
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            # 단독 --- 줄만 인식 (|---| 같은 표 구분선은 무시)
+            if stripped == "---":
+                if fm_start is None:
+                    fm_start = i
+                elif fm_end is None:
+                    fm_end = i
+                    break
+
+        if fm_start is not None and fm_end is not None:
+            fm_lines = lines[fm_start + 1 : fm_end]
+            body_lines = lines[fm_end + 1 :]
+        else:
+            logger.warning(f"frontmatter 구분자 불완전: {keyword}")
+            return None
+    else:
+        fm_match = re.search(r"---\s*\n(.+?)\n---", text, re.DOTALL)
+        if not fm_match:
+            logger.warning(f"frontmatter 파싱 실패: {keyword}")
+            return None
+        fm_lines = fm_match.group(1).split("\n")
+        body_lines = text[fm_match.end():].split("\n")
+
+    fm_text = "\n".join(fm_lines)
+    body_md = "\n".join(body_lines).strip()
 
     title = ""
     category = "부동산"
@@ -610,8 +675,12 @@ def _parse_article(response, keyword):
         elif line.startswith("description:"):
             description = line.split(":", 1)[1].strip().strip('"').strip("'")
 
-    if not title or not body_md:
-        logger.warning(f"제목 또는 본문 없음: {keyword}")
+    if not title:
+        logger.warning(f"제목 없음: {keyword}")
+        return None
+
+    if not body_md:
+        logger.warning(f"본문 비어있음 (front-matter 파싱 후): {keyword}")
         return None
 
     return {
@@ -622,3 +691,4 @@ def _parse_article(response, keyword):
         "description": description,
         "keyword": keyword,
     }
+

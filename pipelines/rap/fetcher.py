@@ -1,6 +1,7 @@
 """RAP fetcher — 부동산 공공데이터 API 수집"""
 import os
 import logging
+import re
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -65,6 +66,64 @@ def fetch_apt_trade(lawd_cd, deal_ymd=None, rows=30):
     except Exception as e:
         logger.error(f"실거래가 API 실패: {e}")
         return []
+
+
+
+
+def filter_trades_by_keyword(trades, keyword):
+    """키워드에서 단지명을 추출하여 해당 단지 거래만 필터링.
+    
+    매칭 전략 (엄격 → 완화 순):
+      1) aptNm == keyword (완전 일치)
+      2) aptNm이 keyword에 포함 (예: "청담자이" in "청담자이 전세")
+      3) keyword가 aptNm에 포함 (예: "삼성래미안1" in "삼성래미안1차")
+    
+    "래미안"처럼 여러 단지에 공통인 짧은 브랜드명은 매칭하지 않는다.
+    Returns:
+        (matched, others)
+    """
+    if not trades or not keyword:
+        return trades, []
+
+    kw = keyword.strip()
+    # 키워드에서 공백/조사 제거한 핵심어 추출
+    # "강남자곡 힐스테이트 매매" → ["강남자곡", "힐스테이트"]
+    # 하지만 단지명 자체가 공백 포함일 수 있으므로 키워드 전체도 후보
+    
+    matched = []
+    others = []
+    
+    for t in trades:
+        apt = (t.get("aptNm") or "").strip()
+        if not apt:
+            others.append(t)
+            continue
+        
+        is_match = False
+        
+        # 1) 완전 일치
+        if apt == kw:
+            is_match = True
+        
+        # 2) aptNm 전체가 keyword 안에 포함
+        #    "청담자이" in "청담자이 전세" → OK
+        #    "래미안강남힐즈" in "래미안강남힐즈 강남구 실거래가" → OK
+        elif apt in kw:
+            is_match = True
+        
+        # 3) keyword 전체(또는 공백 전 첫 토큰이 아닌 전체)가 aptNm 안에 포함
+        #    "삼성래미안1" in "삼성래미안1차아파트" → OK
+        #    하지만 "래미안" in "삼성래미안1" → 이건 부분 매칭이므로 차단
+        #    키워드가 최소 aptNm 길이의 60% 이상이어야 허용
+        elif kw in apt and len(kw) >= max(len(apt) * 0.6, 4):
+            is_match = True
+        
+        if is_match:
+            matched.append(t)
+        else:
+            others.append(t)
+    
+    return matched, others
 
 
 def fetch_apt_trade_multi(lawd_cd, months=3, rows=50):
@@ -385,3 +444,4 @@ def fetch_subscription_from_db(blog_id, keyword=None, region_nm=None, limit=10):
 
     finally:
         conn.close()
+

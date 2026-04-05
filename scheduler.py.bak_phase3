@@ -81,11 +81,7 @@ def _check_dependencies():
 
 _check_dependencies()
 
-from shared.telegram_notifier import (
-    send_error as _tg_error,
-    send_critical as _tg_critical,
-    send_warning as _tg_warning,
-)
+from shared.telegram_notifier import send_error as _tg_error
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -478,62 +474,241 @@ def _run_aviasales_collection():
         except:
             pass
 
-# ─── ETAP 통합 실행 함수 ───────────────────────────────────────────────────
-# 파이프라인 이름 → 모듈명 매핑
-_ETAP_PIPELINE_MAP = {
-    "tour":        ("pipelines.etap.pipeline",           "run_batch", {"cfg": {
-                       "id": "tour-hugo",
-                       "domain": "tour.techpawz.com",
-                       "site_path": "/Users/twinssn/Projects/ETAP/tour-hugo",
-                       "cf_project": "tour-hugo",
-                   }}),
-    "airlines":    ("pipelines.etap.airlines_pipeline",  "run_batch", {}),
-    "airports":    ("pipelines.etap.airports_pipeline",  "run_batch", {}),
-    "esim":        ("pipelines.etap.esim_pipeline",      "run_batch", {}),
-    "michelin":    ("pipelines.etap.michelin_pipeline",  "run_batch", {}),
-    "tours":       ("pipelines.etap.tours_pipeline",     "run_batch", {}),
-    "trains":      ("pipelines.etap.trains_pipeline",    "run_batch", {}),
-    "visa":        ("pipelines.etap.visa_pipeline",      "run_batch", {}),
-    "daytrips":    ("pipelines.etap.daytrips_pipeline",  "run_batch", {}),
-    "walking":     ("pipelines.etap.walking_pipeline",   "run_batch", {}),
-    "foodtour":    ("pipelines.etap.foodtour_pipeline",  "run_batch", {}),
-    "adventure":   ("pipelines.etap.adventure_pipeline", "run_batch", {}),
-    "watersports": ("pipelines.etap.watersports_pipeline","run_batch", {}),
-    "bus":         ("pipelines.etap.bus_pipeline",       "run_batch", {}),
-    "ferry":       ("pipelines.etap.ferry_pipeline",     "run_batch", {}),
-    "dining":      ("pipelines.etap.dining_pipeline",    "run_batch", {}),
-    "culture":     ("pipelines.etap.culture_pipeline",   "run_batch", {}),
-    "transfers":   ("pipelines.etap.transfers_pipeline", "run_batch", {}),
-    "multiday":    ("pipelines.etap.multiday_pipeline",  "run_batch", {}),
-    "nature":      ("pipelines.etap.nature_pipeline",    "run_batch", {}),
-    "visafree":    ("pipelines.etap.visafree_pipeline",  "run_batch", {}),
-    "deals":       ("pipelines.etap.deals_pipeline",     "run_batch", {}),
-    "eurail":      ("pipelines.etap.eurail_pipeline",    "run_batch", {}),
-    "cruise":      ("pipelines.etap.cruise_pipeline",    "run_batch", {}),
-    "phototour":   ("pipelines.etap.phototour_pipeline", "run_batch", {}),
-}
-
-def _run_etap(name: str):
-    """ETAP 파이프라인 통합 실행 — 이름만 받아 동적 import + 에러 시 텔레그램 CRITICAL."""
-    blog_id = name if name == "tour" else f"{name}-hugo"
-    entry = _ETAP_PIPELINE_MAP.get(name)
-    if not entry:
-        logger.error(f"[ETAP] 알 수 없는 파이프라인: {name}")
-        return
-    module_path, func_name, extra = entry
+def _run_etap_batch():
+    """ETAP tour-hugo 배치 — 1건 생성 + 빌드/배포."""
     try:
-        import importlib
-        mod = importlib.import_module(module_path)
-        fn = getattr(mod, func_name)
-        if extra.get("cfg"):
-            result = fn(extra["cfg"], count=1)
-        else:
-            result = fn(count=1)
-        logger.info(f"[ETAP] {blog_id} 완료: {result if result is not None else 'ok'}")
+        from pipelines.etap.pipeline import run_batch
+        cfg = {
+            "id": "tour-hugo",
+            "domain": "tour.techpawz.com",
+            "site_path": "/Users/twinssn/Projects/ETAP/tour-hugo",
+            "cf_project": "tour-hugo",
+        }
+        results = run_batch(cfg, count=1)
+        logger.info(f"[ETAP] tour-hugo 완료: {len(results)}건")
     except Exception as e:
-        logger.error(f"[ETAP] {blog_id} 실패: {e}")
-        _tg_critical(f"ETAP 파이프라인 실패 — {blog_id}", str(e), exc=e)
+        logger.error(f"[ETAP] tour-hugo 실패: {e}")
+        try:
+            _tg_error(f"[ETAP] tour-hugo 실패: {e}")
+        except Exception:
+            pass
 
+
+def _run_etap_airlines():
+    try:
+        from pipelines.etap.airlines_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] airlines-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] airlines-hugo 실패: {e}")
+
+
+def _run_etap_airports():
+    try:
+        from pipelines.etap.airports_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] airports-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] airports-hugo 실패: {e}")
+
+
+def _run_etap_esim():
+    try:
+        from pipelines.etap.esim_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] esim-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] esim-hugo 실패: {e}")
+
+
+def _run_etap_michelin():
+    try:
+        from pipelines.etap.michelin_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] michelin-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] michelin-hugo 실패: {e}")
+
+
+def _run_etap_tours():
+    try:
+        from pipelines.etap.tours_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] tours-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] tours-hugo 실패: {e}")
+
+
+def _run_etap_trains():
+    try:
+        from pipelines.etap.trains_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] trains-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] trains-hugo 실패: {e}")
+
+
+def _run_etap_visa():
+    try:
+        from pipelines.etap.visa_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] visa-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] visa-hugo 실패: {e}")
+
+
+def _run_etap_daytrips():
+    try:
+        from pipelines.etap.daytrips_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] daytrips-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] daytrips-hugo 실패: {e}")
+
+
+def _run_etap_walking():
+    try:
+        from pipelines.etap.walking_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] walking-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] walking-hugo 실패: {e}")
+
+
+def _run_etap_foodtour():
+    try:
+        from pipelines.etap.foodtour_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] foodtour-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] foodtour-hugo 실패: {e}")
+
+
+def _run_etap_adventure():
+    try:
+        from pipelines.etap.adventure_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] adventure-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] adventure-hugo 실패: {e}")
+
+
+def _run_etap_watersports():
+    try:
+        from pipelines.etap.watersports_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] watersports-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] watersports-hugo 실패: {e}")
+
+
+
+def _run_etap_bus():
+    try:
+        from pipelines.etap.bus_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] bus-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] bus-hugo 실패: {e}")
+
+
+def _run_etap_ferry():
+    try:
+        from pipelines.etap.ferry_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] ferry-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] ferry-hugo 실패: {e}")
+
+
+def _run_etap_dining():
+    try:
+        from pipelines.etap.dining_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] dining-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] dining-hugo 실패: {e}")
+
+
+def _run_etap_culture():
+    try:
+        from pipelines.etap.culture_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] culture-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] culture-hugo 실패: {e}")
+
+
+def _run_etap_transfers():
+    try:
+        from pipelines.etap.transfers_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] transfers-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] transfers-hugo 실패: {e}")
+
+
+def _run_etap_multiday():
+    try:
+        from pipelines.etap.multiday_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] multiday-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] multiday-hugo 실패: {e}")
+
+
+def _run_etap_nature():
+    try:
+        from pipelines.etap.nature_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] nature-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] nature-hugo 실패: {e}")
+
+
+def _run_etap_visafree():
+    try:
+        from pipelines.etap.visafree_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] visafree-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] visafree-hugo 실패: {e}")
+
+
+def _run_etap_deals():
+    try:
+        from pipelines.etap.deals_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] deals-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] deals-hugo 실패: {e}")
+
+
+def _run_etap_eurail():
+    try:
+        from pipelines.etap.eurail_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] eurail-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] eurail-hugo 실패: {e}")
+
+
+def _run_etap_cruise():
+    try:
+        from pipelines.etap.cruise_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] cruise-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] cruise-hugo 실패: {e}")
+
+
+def _run_etap_phototour():
+    try:
+        from pipelines.etap.phototour_pipeline import run_batch
+        run_batch(count=1)
+        logger.info("[ETAP] phototour-hugo 완료")
+    except Exception as e:
+        logger.error(f"[ETAP] phototour-hugo 실패: {e}")
 
 def register_schedules():
     config = load_config()
@@ -585,40 +760,109 @@ def register_schedules():
         schedule.every().day.at(t).do(_run_flight_publish)
         job_count += 1
 
-    # ── ETAP 26개 영문 블로그 — 루프 기반 등록 ──────────────────────────────
-    # (pipeline_name, times_list) 테이블로 관리 — 함수 추가 없이 여기만 수정
-    _ETAP_SCHEDULE = [
-        ("tour",        ["07:30", "10:30", "13:30", "16:30", "20:30"]),
-        ("airlines",    ["07:35", "10:35", "13:35", "16:35", "20:35"]),
-        ("airports",    ["07:40", "10:40", "13:40", "16:40", "20:40"]),
-        ("esim",        ["07:45", "10:45", "13:45", "16:45", "20:45"]),
-        ("michelin",    ["07:50", "10:50", "13:50", "16:50", "20:50"]),
-        ("tours",       ["07:55", "10:55", "13:55", "16:55", "20:55"]),
-        ("trains",      ["08:05", "11:05", "14:05", "17:05", "21:05"]),
-        ("visa",        ["08:15", "11:15", "14:15", "17:15", "21:15"]),
-        ("daytrips",    ["08:20", "11:20", "14:20", "17:20", "21:20"]),
-        ("walking",     ["08:25", "11:25", "14:25", "17:25", "21:25"]),
-        ("foodtour",    ["08:30", "11:30", "14:30", "17:30", "21:30"]),
-        ("adventure",   ["08:35", "11:35", "14:35", "17:35", "21:35"]),
-        ("watersports", ["08:40", "11:40", "14:40", "17:40", "21:40"]),
-        ("bus",         ["08:45", "11:45", "14:45", "17:45", "21:45"]),
-        ("ferry",       ["08:50", "11:50", "14:50", "17:50", "21:50"]),
-        ("dining",      ["08:55", "11:55", "14:55", "17:55", "21:55"]),
-        ("culture",     ["09:00", "12:00", "15:00", "18:00", "22:00"]),
-        ("transfers",   ["09:05", "12:05", "15:05", "18:05", "22:05"]),
-        ("multiday",    ["09:10", "12:10", "15:10", "18:10", "22:10"]),
-        ("nature",      ["09:15", "12:15", "15:15", "18:15", "22:15"]),
-        ("visafree",    ["09:20", "12:20", "15:20", "18:20", "22:20"]),
-        ("deals",       ["09:25", "12:25", "15:25", "18:25", "22:25"]),
-        ("eurail",      ["09:30", "12:30", "15:30", "18:30", "22:30"]),
-        ("cruise",      ["09:35", "12:35", "15:35", "18:35", "22:35"]),
-        ("phototour",   ["09:40", "12:40", "15:40", "18:40", "22:40"]),
-    ]
-    for _pipeline_name, _times in _ETAP_SCHEDULE:
-        for _t in _times:
-            schedule.every().day.at(_t).do(_run_etap, _pipeline_name)
-            job_count += 1
-    logger.info(f"ETAP {len(_ETAP_SCHEDULE)}개 파이프라인 등록 완료 ({len(_ETAP_SCHEDULE)*5}건/일)")
+    for t in ["07:30", "10:30", "13:30", "16:30", "20:30"]:
+        schedule.every().day.at(t).do(_run_etap_batch)
+        job_count += 1
+
+    for t in ["07:35", "10:35", "13:35", "16:35", "20:35"]:
+        schedule.every().day.at(t).do(_run_etap_airlines)
+        job_count += 1
+
+    for t in ["07:40", "10:40", "13:40", "16:40", "20:40"]:
+        schedule.every().day.at(t).do(_run_etap_airports)
+        job_count += 1
+
+    for t in ["07:45", "10:45", "13:45", "16:45", "20:45"]:
+        schedule.every().day.at(t).do(_run_etap_esim)
+        job_count += 1
+
+    for t in ["07:50", "10:50", "13:50", "16:50", "20:50"]:
+        schedule.every().day.at(t).do(_run_etap_michelin)
+        job_count += 1
+
+    for t in ["07:55", "10:55", "13:55", "16:55", "20:55"]:
+        schedule.every().day.at(t).do(_run_etap_tours)
+        job_count += 1
+
+    for t in ["08:05", "11:05", "14:05", "17:05", "21:05"]:
+        schedule.every().day.at(t).do(_run_etap_trains)
+        job_count += 1
+
+    for t in ["08:15", "11:15", "14:15", "17:15", "21:15"]:
+        schedule.every().day.at(t).do(_run_etap_visa)
+        job_count += 1
+
+    for t in ["08:20", "11:20", "14:20", "17:20", "21:20"]:
+        schedule.every().day.at(t).do(_run_etap_daytrips)
+        job_count += 1
+
+    for t in ["08:25", "11:25", "14:25", "17:25", "21:25"]:
+        schedule.every().day.at(t).do(_run_etap_walking)
+        job_count += 1
+
+    for t in ["08:30", "11:30", "14:30", "17:30", "21:30"]:
+        schedule.every().day.at(t).do(_run_etap_foodtour)
+        job_count += 1
+
+    for t in ["08:35", "11:35", "14:35", "17:35", "21:35"]:
+        schedule.every().day.at(t).do(_run_etap_adventure)
+        job_count += 1
+
+    for t in ["08:40", "11:40", "14:40", "17:40", "21:40"]:
+        schedule.every().day.at(t).do(_run_etap_watersports)
+        job_count += 1
+
+    # ── ETAP Batch 2: bus, ferry, dining, culture, transfers, multiday ──
+    for t in ["08:45", "11:45", "14:45", "17:45", "21:45"]:
+        schedule.every().day.at(t).do(_run_etap_bus)
+        job_count += 1
+
+    for t in ["08:50", "11:50", "14:50", "17:50", "21:50"]:
+        schedule.every().day.at(t).do(_run_etap_ferry)
+        job_count += 1
+
+    for t in ["08:55", "11:55", "14:55", "17:55", "21:55"]:
+        schedule.every().day.at(t).do(_run_etap_dining)
+        job_count += 1
+
+    for t in ["09:00", "12:00", "15:00", "18:00", "22:00"]:
+        schedule.every().day.at(t).do(_run_etap_culture)
+        job_count += 1
+
+    for t in ["09:05", "12:05", "15:05", "18:05", "22:05"]:
+        schedule.every().day.at(t).do(_run_etap_transfers)
+        job_count += 1
+
+    for t in ["09:10", "12:10", "15:10", "18:10", "22:10"]:
+        schedule.every().day.at(t).do(_run_etap_multiday)
+        job_count += 1
+
+    # ── ETAP Batch 3: nature, visafree, deals, eurail, cruise, phototour ──
+    for t in ["09:15", "12:15", "15:15", "18:15", "22:15"]:
+        schedule.every().day.at(t).do(_run_etap_nature)
+        job_count += 1
+
+    for t in ["09:20", "12:20", "15:20", "18:20", "22:20"]:
+        schedule.every().day.at(t).do(_run_etap_visafree)
+        job_count += 1
+
+    for t in ["09:25", "12:25", "15:25", "18:25", "22:25"]:
+        schedule.every().day.at(t).do(_run_etap_deals)
+        job_count += 1
+
+    for t in ["09:30", "12:30", "15:30", "18:30", "22:30"]:
+        schedule.every().day.at(t).do(_run_etap_eurail)
+        job_count += 1
+
+    for t in ["09:35", "12:35", "15:35", "18:35", "22:35"]:
+        schedule.every().day.at(t).do(_run_etap_cruise)
+        job_count += 1
+
+    for t in ["09:40", "12:40", "15:40", "18:40", "22:40"]:
+        schedule.every().day.at(t).do(_run_etap_phototour)
+        job_count += 1
+
+    logger.info("ETAP 26 EN blogs scheduled (20 original + 6 batch3 = 130 posts/day total)")
 
     return job_count
 

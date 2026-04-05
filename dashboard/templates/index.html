@@ -142,7 +142,7 @@
             <tbody>
             {% for b in blog_stats %}
             <tr>
-                <td><a href="/blog/{{ b['blog_id'] }}">{{ b['blog_id'] }}</a></td>
+                <td><a href="https://{{ site_map[b['blog_id']].get('domain', b['blog_id']) }}" target="_blank">{{ b['blog_id'] }}</a></td>
                 <td>
                     {% if b['blog_id'] in site_map %}
                     {% set grp = site_map[b['blog_id']].get('group', '') %}
@@ -194,7 +194,7 @@
             <tbody>
             {% for k in keywords %}
             <tr>
-                <td><a href="/blog/{{ k['blog_id'] }}">{{ k['blog_id'] }}</a></td>
+                <td><a href="https://{{ site_map[k['blog_id']].get('domain', k['blog_id']) }}" target="_blank">{{ k['blog_id'] }}</a></td>
                 <td>{{ k['query'] }}</td>
                 <td>{% if k['clicks'] %}{{ k['clicks'] }}{% else %}<span class="zero">0</span>{% endif %}</td>
                 <td>{{ k['impressions'] }}</td>
@@ -214,7 +214,7 @@
             <tbody>
             {% for r in recycle %}
             <tr>
-                <td><a href="/blog/{{ r['blog_id'] }}">{{ r['blog_id'] }}</a></td>
+                <td><a href="https://{{ site_map[r['blog_id']].get('domain', r['blog_id']) }}" target="_blank">{{ r['blog_id'] }}</a></td>
                 <td>{{ r['query'] }}</td>
                 <td>{{ r['impressions'] }}</td>
                 <td class="pos">{{ r['pos'] }}</td>

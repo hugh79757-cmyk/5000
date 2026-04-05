@@ -1,4 +1,4 @@
-"""deals_writer.py - Flight deals by origin city guide generator"""
+"""deals_writer.py - Flight deals guide (v4: all 35 routes fully utilized)"""
 import os, sqlite3, logging, re
 from datetime import datetime
 from openai import OpenAI
@@ -8,110 +8,222 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 _client = None
 
+try:
+    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    HAS_PP = True
+except ImportError:
+    HAS_PP = False
+
+
 def _get_client():
     global _client
     if not _client:
         _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     return _client
 
+
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-def _fetch_deals_from_origin(origin_code):
+
+def _load_airport_cities():
+    conn = _get_db()
+    try:
+        rows = conn.execute("""
+            SELECT a.iata, c.name
+            FROM ref_airports a
+            JOIN ref_cities c ON a.city_code = c.code
+        """).fetchall()
+        result = {r["iata"]: r["name"] for r in rows}
+    except Exception:
+        result = {}
+    conn.close()
+    return result
+
+def _fetch_deals(origin_code):
+    """루트별 최저가 + 최고가 + 판매처 수"""
     conn = _get_db()
     rows = conn.execute("""
-        SELECT fp.destination, fp.price, fp.airline, fp.stops,
-               fp.departure_date, fp.return_date,
-               ft.dest_city
-        FROM flight_prices fp
-        LEFT JOIN flight_topics ft ON fp.origin = ft.origin AND fp.destination = ft.destination
-        WHERE fp.origin = ?
-        ORDER BY fp.price ASC
-        LIMIT 30
+        SELECT destination,
+               MIN(price) as min_price,
+               MAX(price) as max_price,
+               GROUP_CONCAT(DISTINCT airline) as sellers,
+               MIN(stops) as min_stops,
+               COUNT(*) as offer_count,
+               MIN(departure_date) as earliest_date,
+               MAX(departure_date) as latest_date
+        FROM flight_prices
+        WHERE origin = ? AND price > 0
+        GROUP BY destination
+        ORDER BY min_price ASC
     """, (origin_code,)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
-def _fetch_airline_names(codes):
-    if not codes:
-        return {}
-    conn = _get_db()
-    ph = ",".join(["?"] * len(codes))
-    rows = conn.execute(f"SELECT iata, name FROM ref_airlines WHERE iata IN ({ph})", list(codes)).fetchall()
-    conn.close()
-    return {r["iata"]: r["name"] for r in rows}
 
-def _build_deals_summary(deals, origin_city, airline_names):
-    if not deals:
-        return "No deals available."
-    lines = [f"Flight deals from {origin_city}:"]
-    for d in deals:
-        dest = d.get("dest_city") or d.get("destination", "")
-        aname = airline_names.get(d.get("airline",""), d.get("airline",""))
-        lines.append(f"  {dest} ({d['destination']}): ${d['price']} via {aname}, {d['stops']} stop(s), depart {d.get('departure_date','N/A')}")
-    return "\n".join(lines)
+
+
+def _fetch_popular_directions(origin_code):
+    """popular_directions: 실제 항공사, 직항 정보 포함"""
+    conn = _get_db()
+    rows = conn.execute("""
+        SELECT destination, price, airline, stops, departure_date, return_date
+        FROM popular_directions
+        WHERE origin = ? AND price > 0
+        ORDER BY price ASC
+    """, (origin_code,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def _fetch_calendar(origin_code):
+    """flight_calendar: 날짜별 최저가"""
+    conn = _get_db()
+    rows = conn.execute("""
+        SELECT destination, date, price, airline, stops
+        FROM flight_calendar
+        WHERE origin = ? AND price > 0
+        ORDER BY date ASC
+    """, (origin_code,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
 
 def generate_deals_guide(topic):
     origin_code = topic["origin"]
     origin_city = topic.get("origin_city", origin_code)
-    
-    deals = _fetch_deals_from_origin(origin_code)
+
+    deals = _fetch_deals(origin_code)
+
+    # 추가 데이터 소스 로드
+    popular_dirs = _fetch_popular_directions(origin_code)
+    calendar_data = _fetch_calendar(origin_code)
     if not deals:
         logger.warning(f"No deals for {origin_city} ({origin_code})")
         return None
-    
-    airline_codes = set(d.get("airline","") for d in deals if d.get("airline"))
-    airline_names = _fetch_airline_names(airline_codes)
-    summary = _build_deals_summary(deals, origin_city, airline_names)
+
+    airport_cities = _load_airport_cities()
+    for d in deals:
+        d["dest_city"] = airport_cities.get(d["destination"], d["destination"])
+
+    budget = [d for d in deals if d["min_price"] < 200]
+    mid = [d for d in deals if 200 <= d["min_price"] <= 500]
+    premium = [d for d in deals if d["min_price"] > 500]
+
     today = datetime.now().strftime("%B %Y")
-    
-    prompt = f"""Write a flight deals guide for travelers departing from {origin_city}.
+    cheapest = deals[0]
 
-CURRENT DATE: {today}
+    # 풍부한 요약: 모든 루트의 min/max/sellers 포함
+    lines = []
+    lines.append(f"FLIGHT DEALS FROM {origin_city} ({origin_code}) — {today}")
+    lines.append(f"Total unique destinations: {len(deals)}")
+    lines.append(f"Overall price range: ${cheapest['min_price']:.0f} - ${deals[-1]['max_price']:.0f}")
+    lines.append(f"Cheapest deal: {origin_city} to {cheapest['dest_city']} from ${cheapest['min_price']:.0f}")
 
-REAL PRICE DATA FROM OUR DATABASE:
+    for label, group in [("UNDER $200", budget), ("$200-$500", mid), ("OVER $500", premium)]:
+        if group:
+            lines.append(f"")
+            lines.append(f"[{label}] — {len(group)} destinations:")
+            for d in group:
+                sellers = d.get("sellers", "")
+                seller_count = len(sellers.split(",")) if sellers else 0
+                price_range = f"${d['min_price']:.0f}"
+                if d["max_price"] > d["min_price"] * 1.1:
+                    price_range += f"-${d['max_price']:.0f}"
+                stops = "direct" if d["min_stops"] == 0 else f"{d['min_stops']} stop(s)"
+                dates = f"{(d.get('earliest_date') or '')[:10]}"
+                if d.get("latest_date") and d["latest_date"] != d.get("earliest_date"):
+                    dates += f" to {d['latest_date'][:10]}"
+                lines.append(f"  {d['dest_city']} ({d['destination']}): {price_range} | {stops} | {d['offer_count']} offers from {seller_count} seller(s) | dates: {dates}")
+
+
+    # Popular directions: 실제 항공사 + 직항 데이터
+    if popular_dirs:
+        lines.append(f"\nDIRECT FLIGHTS (verified airline data, {len(popular_dirs)} routes):")
+        airport_cities = _load_airport_cities()
+        for pd in popular_dirs[:30]:
+            dest_city = airport_cities.get(pd["destination"], pd["destination"])
+            stops_str = "DIRECT (non-stop)" if pd["stops"] == 0 else f"{pd['stops']} stop(s)"
+            dep = (pd.get("departure_date") or "")[:10]
+            lines.append(f"  {origin_city} → {dest_city} ({pd['destination']}): ${pd['price']:.0f} on {pd['airline']} | {stops_str} | departs {dep}")
+
+    # Calendar: 날짜별 최저가
+    if calendar_data:
+        # 목적지별 최저가 날짜
+        from collections import defaultdict
+        cal_by_dest = defaultdict(list)
+        for c in calendar_data:
+            cal_by_dest[c["destination"]].append(c)
+        lines.append(f"\nPRICE CALENDAR ({len(calendar_data)} date-price points across {len(cal_by_dest)} destinations):")
+        for dest, entries in sorted(cal_by_dest.items(), key=lambda x: min(e["price"] for e in x[1]))[:10]:
+            cheapest = min(entries, key=lambda x: x["price"])
+            dest_city = airport_cities.get(dest, dest)
+            lines.append(f"  {dest_city} ({dest}): cheapest ${cheapest['price']:.0f} on {cheapest['date']} ({len(entries)} dates tracked)")
+
+    summary = "\n".join(lines)
+
+    # 동적 섹션
+    sections = [f"## Best Deals from {origin_city} Right Now"]
+    if budget:
+        sections.append(f"## Budget Flights Under $200 ({len(budget)} destinations)")
+    if mid:
+        sections.append(f"## Mid-Range Getaways $200-$500 ({len(mid)} destinations)")
+    if premium:
+        sections.append(f"## Long-Haul Deals Over $500 ({len(premium)} destinations)")
+    if popular_dirs:
+        direct_count = sum(1 for p in popular_dirs if p["stops"] == 0)
+        if direct_count > 0:
+            sections.append(f"## Direct Flight Options from {origin_city} ({direct_count} non-stop routes)")
+    if calendar_data:
+        sections.append(f"## When to Fly: Price Calendar Insights")
+    sections.append(f"## How to Get the Best Price from {origin_city}")
+    section_text = "\n".join(sections)
+
+    prompt = f"""Write a flight deals guide for travelers from {origin_city}.
+
 {summary}
 
-ARTICLE REQUIREMENTS:
-- 1,200-1,600 words, American English, friendly practical tone
-- Use the EXACT prices from the data above
-- Group destinations by price range or region
-
-REQUIRED H2 SECTIONS:
-## Cheapest Flights From {origin_city} Right Now
-## Best Budget Destinations Under $200
-## Mid-Range Getaways ($200-$500)
-## Premium Long-Haul Deals
-## Money-Saving Tips for {origin_city} Travelers
-## Best Time to Book From {origin_city}
+STRUCTURE:
+{section_text}
 
 RULES:
-- ONLY use prices from the data provided
-- If a section has 0 relevant destinations, OMIT that H2 section entirely
-- Do NOT include any URLs or links
-- Do NOT invent prices or destinations not in the data
-- Write in flowing paragraphs, NEVER use numbered lists
-- If a price is not in the provided DATA, do NOT mention it
+- Use ONLY destinations and prices from the data. Do NOT invent destinations.
+- START with the single best deal: "{origin_city} to {cheapest['dest_city']} for ${cheapest['min_price']:.0f}."
+- For EACH destination mention: price, whether direct, travel dates available, and one sentence about why the destination is worth visiting.
+- When price ranges are wide (e.g. $84-$150), explain why: different sellers, dates, or stops.
+- Group destinations geographically within each price tier when possible (e.g. "Florida destinations", "Caribbean", "Europe").
+- In the booking tips section, name the specific sellers from the data (e.g. Farera, Kiwi.com) and compare them.
+- Flowing paragraphs only. NO bullet points or numbered lists.
+- NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, treasure trove, must-visit, paradise, bucket list, adventure awaits
 
 Return ONLY the article in markdown starting with # title"""
 
     resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini", temperature=0.5, max_tokens=3500,
+        model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
         messages=[
-            {"role": "system", "content": "You are a travel journalist writing data-driven flight deal articles. Use real price data when provided. STRICT RULES: 1) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, crystal-clear, soak in, immerse yourself, treasure trove, must-visit, paradise for, world-class, bucket list, look no further, haven for, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers."},
+            {"role": "system", "content": "You are a travel journalist writing data-driven flight deal articles. Use ONLY provided price data. Write flowing paragraphs, no lists. Prices as whole numbers. Start with the cheapest deal."},
             {"role": "user", "content": prompt}
         ]
     )
+
     content = resp.choices[0].message.content.strip()
+    if HAS_PP:
+        content = fix_encoding(content)
+        content = clean_prompt_leaks(content)
+
     title_match = re.match(r"^#\s+(.+)", content)
-    title = title_match.group(1).strip() if title_match else topic.get("title", f"Flight Deals From {origin_city}")
+    title = title_match.group(1).strip() if title_match else f"Flight Deals From {origin_city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
-    
+
+    tags = [origin_city, "Flight Deals", "Cheap Flights", "Travel Deals"]
+    if HAS_PP:
+        tags = clean_tags(tags)
+
     return {
         "title": title, "slug": topic["slug"], "content": content,
-        "description": f"Find the cheapest flights from {origin_city}. Real prices, best destinations, and money-saving tips.",
-        "tags": [origin_city, "Flight Deals", "Cheap Flights", "Travel Deals"],
+        "description": f"Best flight deals from {origin_city}: {len(deals)} destinations, fares from ${cheapest['min_price']:.0f}. Updated {today}.",
+        "tags": [t for t in tags if t],
         "origin": origin_city, "deals": deals,
     }

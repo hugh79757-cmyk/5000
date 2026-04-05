@@ -10,6 +10,17 @@ DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 _client = None
 
 
+
+# === ETAP v2 Enrichment ===
+try:
+    from pipelines.etap.data_enricher import get_city_context, format_context_for_prompt, get_airline_context, get_route_context
+    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks, calculate_quality_metrics
+    from pipelines.etap.prompt_angles import pick_city_angle, pick_flight_angle, pick_route_angle
+    HAS_ENRICHMENT = True
+except ImportError:
+    HAS_ENRICHMENT = False
+# === END ETAP v2 ===
+
 def _get_client():
     global _client
     if not _client:

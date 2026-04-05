@@ -217,3 +217,69 @@ def insert_adsense(content: str) -> str:
         content = content[:pos2] + "\n" + ADSENSE_BLOCK + "\n\n" + content[pos2:]
 
     return content
+
+
+
+# === ETAP v2 후처리 함수 ===
+
+def fix_encoding(text: str) -> str:
+    """GPT 출력의 인코딩 문제 수정"""
+    if not text:
+        return text
+    import re as _re
+    text = text.replace("‘", "'").replace("’", "'")
+    text = text.replace("“", '"').replace("”", '"')
+    text = text.replace("–", "–").replace("—", "—")
+    text = text.replace("…", "...").replace(" ", " ")
+    contractions = {
+        "youre": "you're", "youll": "you'll", "youve": "you've", "youd": "you'd",
+        "theyre": "they're", "theyll": "they'll", "theyve": "they've", "theyd": "they'd",
+        "weve": "we've", "wed": "we'd",
+        "isnt": "isn't", "arent": "aren't", "wasnt": "wasn't", "werent": "weren't",
+        "dont": "don't", "doesnt": "doesn't", "didnt": "didn't",
+        "cant": "can't", "couldnt": "couldn't", "wouldnt": "wouldn't",
+        "shouldnt": "shouldn't", "wont": "won't",
+        "hasnt": "hasn't", "havent": "haven't", "hadnt": "hadn't",
+        "thats": "that's", "whats": "what's", "heres": "here's",
+        "theres": "there's", "lets": "let's",
+        "hes": "he's", "shes": "she's", "whos": "who's",
+    }
+    for wrong, right in contractions.items():
+        text = _re.sub(r'\b' + wrong + r'\b', right, text, flags=_re.IGNORECASE)
+    text = _re.sub(
+        r"\bits (a |an |the |not |also |worth|important|essential|advisable|best|easy|hard|possible|clear|no )",
+        r"it's \1", text, flags=_re.IGNORECASE
+    )
+    return text
+
+
+def clean_tags(tags: list) -> list:
+    """태그에서 마크다운/프롬프트 잔재 제거"""
+    if not tags:
+        return tags
+    import re as _re
+    bad = [r'^H[1-6]$', r'^##', r'^\*\*', r'^Title:', r'^Slug:', r'^Tags:', r'^Category:']
+    cleaned = []
+    for tag in tags:
+        tag = str(tag).strip().replace('#', '').replace('*', '').strip()
+        if not tag or len(tag) < 2:
+            continue
+        if any(_re.match(p, tag, _re.IGNORECASE) for p in bad):
+            continue
+        cleaned.append(tag)
+    return cleaned
+
+
+def clean_prompt_leaks(content: str) -> str:
+    """GPT 출력에서 프롬프트 지시문 잔재 제거"""
+    if not content:
+        return content
+    import re as _re
+    patterns = [
+        r'\[Note:.*?\]',
+        r'\[Instructions?:.*?\]',
+        r'\(Note to (?:self|AI|assistant):.*?\)',
+    ]
+    for p in patterns:
+        content = _re.sub(p, '', content, flags=_re.IGNORECASE)
+    return content.strip()

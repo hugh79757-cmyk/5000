@@ -7,6 +7,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 _client = None
 
+try:
+    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    HAS_PP = True
+except ImportError:
+    HAS_PP = False
+
 def _get_client():
     global _client
     if not _client:

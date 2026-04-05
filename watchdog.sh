@@ -4,11 +4,16 @@
 
 HB_FILE="/Users/twinssn/Projects/5000/logs/heartbeat"
 LOG_FILE="/Users/twinssn/Projects/5000/logs/watchdog.log"
+ENV_FILE="/Users/twinssn/Projects/5000/.env"
 PLIST="com.5000.scheduler"
 MAX_AGE=900  # 15분 (초)
 
 now=$(date +%s)
 log() { echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> "$LOG_FILE"; }
+
+# .env에서 안전하게 변수 추출 (source 대신 grep)
+TELEGRAM_BOT_TOKEN=$(grep '^TELEGRAM_BOT_TOKEN=' "$ENV_FILE" | head -1 | cut -d'=' -f2-)
+TELEGRAM_CHAT_ID=$(grep '^TELEGRAM_CHAT_ID=' "$ENV_FILE" | head -1 | cut -d'=' -f2-)
 
 # heartbeat 파일 존재 확인
 if [ ! -f "$HB_FILE" ]; then
@@ -23,12 +28,15 @@ if [ "$age" -gt "$MAX_AGE" ]; then
     log "ALERT: heartbeat ${age}초 전 — 스케줄러 중단 감지"
     
     # 텔레그램 알림
-    source /Users/twinssn/Projects/5000/.env
     MSG="🚨 스케줄러 중단 감지%0Aheartbeat: ${age}초 전%0A재시작 시도 중..."
-    curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-        -d "chat_id=${TELEGRAM_CHAT_ID}&text=${MSG}&parse_mode=HTML" > /dev/null 2>&1
+    if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+        curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}&text=${MSG}&parse_mode=HTML" > /dev/null 2>&1
+    else
+        log "WARN: 텔레그램 변수 없음 — 알림 스킵"
+    fi
     
-    # 스케줄러 재시작 (중복 방지: 이미 실행 중이면 스킵)
+    # 스케줄러 재시작
     if pgrep -f "5000/scheduler.py" > /dev/null 2>&1; then
         log "WARN: 스케줄러 프로세스 존재하나 heartbeat 갱신 안 됨 — 강제 재시작"
         pkill -f "5000/scheduler.py" 2>/dev/null

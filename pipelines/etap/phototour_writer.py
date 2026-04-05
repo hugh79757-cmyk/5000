@@ -10,6 +10,17 @@ DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 _client = None
 
 
+
+# === ETAP v2 Enrichment ===
+try:
+    from pipelines.etap.data_enricher import get_city_context, format_context_for_prompt, get_airline_context, get_route_context
+    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks, calculate_quality_metrics
+    from pipelines.etap.prompt_angles import pick_city_angle, pick_flight_angle, pick_route_angle
+    HAS_ENRICHMENT = True
+except ImportError:
+    HAS_ENRICHMENT = False
+# === END ETAP v2 ===
+
 def _get_client():
     global _client
     if not _client:
@@ -231,6 +242,11 @@ WRITING RULES:
 
     content = resp.choices[0].message.content.strip()
 
+    # v2 후처리
+    if HAS_ENRICHMENT:
+        content = fix_encoding(content)
+        content = clean_prompt_leaks(content)
+
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"Best Photography Tours from {city}")
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
@@ -243,7 +259,7 @@ WRITING RULES:
         "slug": slug,
         "content": content,
         "description": f"Best photography tours in {city}: photo walks, workshops, and guided shoots with real prices and practical tips.",
-        "tags": [t for t in tags if t],
+        "tags": clean_tags([t for t in tags if t]) if HAS_ENRICHMENT else [t for t in tags if t],
         "city": city,
         "country": country,
         "tours": tours,

@@ -18,17 +18,26 @@ RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 # 부동산 무관 키워드 제외 패턴
 
 def _dedup_read_together(article) -> str:
-    """내부링크 섹션 중복 제거 — 첫 번째만 유지"""
+    """내부링크 섹션 중복 제거 — 첫 번째만 유지.
+    면책문구가 두 섹션 사이에 끼어 있어도 감지한다."""
     if not isinstance(article, str):
         return article if isinstance(article, str) else str(article) if article else ""
-    import re
-    # "함께 읽어보기", "함께 읽으면 좋은 글" 등 모든 내부링크 섹션 매칭
-    pattern = r'(## 함께 읽(?:어보기|으면 좋은 글).*?)(?=\n## |\Z)'
-    matches = list(re.finditer(pattern, article, re.DOTALL))
+    import re as _dre
+    # 모든 "함께 읽*" 섹션 헤더 위치를 찾는다
+    pattern = _dre.compile(r'^## 함께 읽(?:어보기|으면 좋은 글)', _dre.MULTILINE)
+    matches = list(pattern.finditer(article))
     if len(matches) <= 1:
         return article
+    # 첫 번째만 남기고 나머지 섹션을 뒤에서부터 제거
     for m in reversed(matches[1:]):
-        article = article[:m.start()] + article[m.end():]
+        sec_start = m.start()
+        # 다음 H2 또는 문서 끝까지가 섹션 범위
+        next_h2 = _dre.search(r'^## (?!함께 읽)', article[sec_start + 3:], _dre.MULTILINE)
+        if next_h2:
+            sec_end = sec_start + 3 + next_h2.start()
+        else:
+            sec_end = len(article)
+        article = article[:sec_start] + article[sec_end:]
     return article.strip()
 
 RAP_EXCLUDE = [
@@ -167,7 +176,18 @@ def _pick_strategy(keyword, blog_id=None):
 
 def _post_process(body_md, blog_id, keyword):
     """발행 전 후처리: 금지표현 제거 + 데이터 정제 + 면책조항 + 쿠팡 + 내부링크"""
+
     import re as _re
+
+    # ── '특히' 자동 치환 ──
+    body_md = body_md.replace("특히, ", "").replace("특히 ", "")
+    body_md = _re.sub(r"특히", "", body_md)
+
+    # ── LaTeX 잔존 제거 ──
+    body_md = _re.sub(r"\\frac\{[^}]*\}\{[^}]*\}", "", body_md)
+    body_md = _re.sub(r"\\times", "×", body_md)
+    body_md = _re.sub(r"\\\((.+?)\\\)", r"\1", body_md)
+    body_md = _re.sub(r"\$\$?(.+?)\$\$?", r"\1", body_md)
 
     # ── 0. 마크다운 표 깨짐 수정 ──
     # GPT가 "|—-||—-||" 형태로 구분선을 생성하는 버그 수정
@@ -226,6 +246,21 @@ def _post_process(body_md, blog_id, keyword):
         _fix_eok_mismatch,
         body_md
     )
+
+    # ── 1.5. GPT 생성 상세보기 더미 링크 사전 제거 ──
+    # 화이트리스트에 없는 상세보기 링크를 모두 제거
+    _SAFE_DOMAINS = [
+        "informationhot.kr", "rt.molit.go.kr", "applyhome.co.kr",
+        "lh.or.kr", "myhome.go.kr", "link.coupang.com", "map.naver.com",
+    ]
+    def _is_safe_link(url):
+        return any(d in url for d in _SAFE_DOMAINS)
+    # [상세보기 →](URL) 패턴에서 안전하지 않은 것 제거
+    for _m in list(_re.finditer(r'\[상세보기[^\]]*\]\((https?://[^)]+)\)', body_md)):
+        if not _is_safe_link(_m.group(1)):
+            body_md = body_md.replace(_m.group(0), "")
+    # [... →](자기자신/URL) 패턴 제거
+    body_md = _re.sub(r'\[[^\]]*→[^\]]*\]\([^)]*?/URL\)', '', body_md)
 
     # ── 2. 금지어 자동 치환 ──
     body_md = body_md.replace("특히 ", "").replace("특히, ", "")
@@ -596,48 +631,124 @@ def run(blog_cfg):
     # 후처리 (면책조항 + 쿠팡 + 내부링크)
     article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
-    # ── 발행 전 검증: 할루시네이션 감지 ──
+    # ── 발행 전 품질 가드 (Quality Gate) ──
     import re as _val_re
     _is_draft = False
     _hal_issues = []
+    _quality_score = 100  # 100점에서 감점
 
     _body = article.get("body_md", "")
+    _title = article.get("title", "")
 
-    # (1) 지역 특성 할루시네이션 — 참고자료에 없는 교통/학군/편의시설 멘션
+    # (1) 지역 특성 할루시네이션
     _hal_patterns = [
-        (r"지하철역[과과]?\s*주요\s*도로\s*접근성", "지하철역 접근성 할루시네이션"),
-        (r"학군\s*(?:또한|이|도)\s*우수", "학군 우수 할루시네이션"),
-        (r"교육기관이?\s*밀집", "교육기관 밀집 할루시네이션"),
-        (r"생활\s*인프라가?\s*(?:잘\s*)?갖춰", "생활인프라 할루시네이션"),
-        (r"대형\s*마트와?\s*병원", "대형마트/병원 할루시네이션"),
-        (r"교통[이이]?\s*(?:편리|용이|좋)", "교통 편리 할루시네이션"),
+        (r"지하철역[과과]?\s*주요\s*도로\s*접근성", "지하철역 접근성 할루시네이션", 5),
+        (r"학군\s*(?:또한|이|도)\s*우수", "학군 우수 할루시네이션", 5),
+        (r"교육기관이?\s*밀집", "교육기관 밀집 할루시네이션", 5),
+        (r"생활\s*인프라가?\s*(?:잘\s*)?갖춰", "생활인프라 할루시네이션", 5),
+        (r"대형\s*마트와?\s*병원", "대형마트/병원 할루시네이션", 3),
+        (r"교통[이이]?\s*(?:편리|용이|좋)", "교통 편리 할루시네이션", 3),
     ]
-    for _pat, _desc in _hal_patterns:
+    for _pat, _desc, _penalty in _hal_patterns:
         if _val_re.search(_pat, _body):
-            _hal_issues.append(f"[WARNING] {_desc}")
+            _hal_issues.append(f"[HAL] {_desc} (-{_penalty})")
+            _quality_score -= _penalty
 
-    # (2) 깨진 링크 감지
-    if "example.com" in _body:
-        _hal_issues.append("[WARNING] example.com 더미 링크 발견")
-        _body = _body.replace("https://www.example.com/", "")
-        _body = _body.replace("[상세보기 →]()", "")
-        article["body_md"] = _body
+    # (2) 더미 링크 감지 — 화이트리스트 방식
+    _LINK_WHITELIST = [
+        "informationhot.kr", "rt.molit.go.kr", "applyhome.co.kr",
+        "link.coupang.com", "map.naver.com", "apis.data.go.kr",
+        "lh.or.kr", "myhome.go.kr", "khug.or.kr",
+    ]
+    _all_links = _val_re.findall(r'\[([^\]]*?)\]\((https?://[^)]+)\)', _body)
+    for _link_text, _link_url in _all_links:
+        _is_whitelisted = any(wl in _link_url for wl in _LINK_WHITELIST)
+        if not _is_whitelisted and "상세보기" in _link_text:
+            _hal_issues.append(f"[DUMMY] 더미 상세보기 링크: {_link_url[:60]} (-15)")
+            _quality_score -= 15
+            # 더미 링크 자동 제거
+            _body = _body.replace(f"[{_link_text}]({_link_url})", "")
 
-    # (3) 양도세 매입가 날조 감지 — "매입가:" 패턴이 있으면 데이터에 없는 값
+    # 자기 자신 URL + "/URL" 패턴 제거
+    _self_url_pat = _val_re.findall(r'\[([^\]]*?)\]\(([^)]*?/URL)\)', _body)
+    for _link_text, _link_url in _self_url_pat:
+        _hal_issues.append(f"[DUMMY] /URL 접미 링크: {_link_url[:60]} (-15)")
+        _quality_score -= 15
+        _body = _body.replace(f"[{_link_text}]({_link_url})", "")
+
+    article["body_md"] = _body
+
+    # (3) 양도세 매입가 날조 감지
     if _val_re.search(r"매입가\s*[:：]\s*\d", _body):
-        _hal_issues.append("[WARNING] 양도세 매입가 날조 의심 (참고자료에 매입가 없음)")
+        _hal_issues.append("[HAL] 양도세 매입가 날조 의심 (-5)")
+        _quality_score -= 5
 
-    # (4) 억 환산 잔존 오류 — "X억(Y.Z억)" 괄호 안에 억 단위가 여전히 있으면 경고
+    # (4) 억 환산 잔존 오류
     _eok_in_paren = _val_re.findall(r'\d+억\s*\d*,?\d*만원\s*\(\d+\.?\d*억\)', _body)
     if _eok_in_paren:
-        _hal_issues.append(f"[WARNING] 억 환산 오류 잔존: {_eok_in_paren[:3]}")
+        _hal_issues.append(f"[HAL] 억 환산 오류 잔존: {_eok_in_paren[:2]} (-10)")
+        _quality_score -= 10
 
+    # (5) 본문 길이 검증
+    _body_len = len(_body.replace(" ", "").replace("\n", ""))
+    if _body_len < 1500:
+        _hal_issues.append(f"[LEN] 본문 {_body_len}자 — 최소 기준 미달 (-30)")
+        _quality_score -= 30
+    elif _body_len < 2200:
+        _hal_issues.append(f"[LEN] 본문 {_body_len}자 — 권장 미달 (-10)")
+        _quality_score -= 10
+
+    # (6) 제목 길이 검증
+    if len(_title) > 40:
+        _hal_issues.append(f"[TITLE] 제목 {len(_title)}자 — 40자 초과 (-5)")
+        _quality_score -= 5
+
+    # (7) 표 깨짐 잔존 검증
+    _broken_tables = _val_re.findall(r'\|[-—]+(?:\|[-—]*){2,}\|*', _body)
+    # 정상 표 구분선이 아닌 것만 필터
+    for _bt in _broken_tables:
+        if '---' not in _bt:
+            _hal_issues.append(f"[TABLE] 표 구분선 깨짐 잔존 (-5)")
+            _quality_score -= 5
+            break
+
+    # (8) 데이터-제목 불일치 (단지명이 본문에 없는 경우)
+    _kw_tokens = _val_re.findall(r'[가-힣]{2,}', keyword) if keyword else []
+    _kw_in_body = sum(1 for tok in _kw_tokens if tok in _body) if _kw_tokens else 0
+    if _kw_tokens and _kw_in_body == 0:
+        _hal_issues.append(f"[MISMATCH] 키워드 토큰이 본문에 없음 (-20)")
+        _quality_score -= 20
+
+    # (9) 함께읽기 중복 잔존 검증
+    _read_headers = _val_re.findall(r'^## 함께 읽', _body, _val_re.MULTILINE)
+    if len(_read_headers) > 1:
+        _hal_issues.append(f"[DUP] 함께읽기 섹션 {len(_read_headers)}개 중복 (-5)")
+        _quality_score -= 5
+
+    # (10) LaTeX 수식 잔존
+    if '\\[' in _body or '\\text{' in _body or '\\frac{' in _body:
+        _hal_issues.append("[LATEX] LaTeX 수식이 렌더링되지 않음 — 텍스트로 대체 필요 (-5)")
+        _quality_score -= 5
+
+    _quality_score = max(0, _quality_score)
+
+    # ── 품질 판정 ──
     if _hal_issues:
-        logger.warning(f"[HAL-CHECK] {blog_id}: {_hal_issues}")
-        # WARNING은 로그만, CRITICAL이면 draft
-        _critical_hal = [h for h in _hal_issues if "[CRITICAL]" in h]
-        if _critical_hal:
-            _is_draft = True
+        logger.warning(f"[QUALITY] {blog_id} score={_quality_score}/100: {_hal_issues}")
+
+    if _quality_score < 60:
+        _is_draft = True
+        logger.error(f"[QUALITY-GATE] {blog_id} score={_quality_score} → DRAFT 전환 (60점 미만)")
+        try:
+            tg_error(blog_id, "quality_gate", f"품질 {_quality_score}점 → 발행 차단\n키워드: {keyword}\n사유: {_hal_issues}")
+        except Exception:
+            pass
+    elif _quality_score < 80:
+        logger.warning(f"[QUALITY-WARN] {blog_id} score={_quality_score} — 주의 필요")
+        try:
+            tg_error(blog_id, "quality_warn", f"품질 {_quality_score}점 — 주의\n키워드: {keyword}\n사유: {_hal_issues}")
+        except Exception:
+            pass
 
     # ── 기존 validators 검증 ──
     try:
@@ -654,6 +765,7 @@ def run(blog_cfg):
     except Exception as _ve:
         logger.warning(f"[Validate] Error (non-fatal): {_ve}")
     article["is_draft"] = _is_draft
+    article["quality_score"] = _quality_score
 
     # 발행
     result = publish(
