@@ -1,4 +1,5 @@
 from pipelines.etap.post_processor import insert_adsense
+from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published
 from pipelines.etap.quality_guard import postprocess_content, send_alert
 """
 항공권 딜 글 발행 파이프라인
@@ -164,8 +165,16 @@ def run(cfg):
     body_imgs = fetch_body_images(topic["dest_city"], "", topic["slug"], count=3)
     if body_imgs:
         article["body_images"] = body_imgs
+    blog_id = cfg.get("id", "flights-hugo")
+    article["content"] = insert_adsense(article["content"])
+    article["content"], _, _ = postprocess_content(article["content"], topic.get("dest_city",""), blog_id)
+    article["content"] = inject_internal_links(article["content"], current_blog=blog_id, max_links=5)
+    register_entity("destination", topic["dest_city"], blog_id, article["slug"],
+                    f'https://flights.techpawz.com/posts/{article["slug"]}/',
+                    topic["dest_city"], priority=70)
     _write_hugo_post(cfg, article)
     mark_published(topic["id"], cfg.get("id", "flights-hugo"), article["title"], article["slug"])
+    mark_entity_published(blog_id, article["slug"])
     return {"status": "ok", "title": article["title"], "slug": article["slug"]}
 
 
