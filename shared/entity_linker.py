@@ -175,7 +175,7 @@ def inject_internal_links(content, current_blog, max_links=5):
         """, (current_blog,)).fetchall()
     except Exception as e:
         logger.error(f"inject_internal_links DB error: {e}")
-    
+        entities = []
     finally:
         conn.close()
 
