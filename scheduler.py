@@ -532,6 +532,15 @@ def _run_etap(name: str):
         _tg_critical(f"ETAP 파이프라인 실패 — {blog_id}", str(e), exc=e)
 
 
+def _run_ledger_sync():
+    try:
+        from shared.ledger_sync import run_sync
+        result = run_sync()
+        logger.info(f"[ledger_sync] {result}")
+    except Exception as e:
+        logger.error(f"[ledger_sync] 실패: {e}")
+
+
 def register_schedules():
     config = load_config()
     blogs = config.get("blogs", [])
@@ -563,6 +572,7 @@ def register_schedules():
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
 
+    schedule.every().hour.do(_run_ledger_sync)
     schedule.every().day.at("05:30").do(_run_analytics_sync)
     schedule.every().day.at("23:00").do(_run_daily_indexing)
     schedule.every().day.at("23:40").do(_run_analytics_report)
