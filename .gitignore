@@ -51,3 +51,4 @@ pipelines/etap/*.bak*
 data/*.db
 pipelines/etap/*.bak*
 pipelines/etap/*_bak
+*.bak*
