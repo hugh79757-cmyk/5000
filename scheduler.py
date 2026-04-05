@@ -205,7 +205,13 @@ def _get_ledger_count(blog_id, date_str):
 
 
 def catchup_missed():
-    """놓친 스케줄 보충 발행 — 5분마다 체크"""
+    """놓친 스케줄 보충 발행 — 5분마다 체크
+    ⚠️ 2026-04-05 비활성화: _get_ledger_count가 publish_ledger(content.db)만 조회하여
+    ETAP publish_log(travel-en.db) 기록을 감지 못함 → actual=0 → 무한 반복 버그.
+    daily_quota는 pipeline.py wrapper의 check_daily_quota로 강제됨.
+    """
+    return  # DISABLED — ledger/log DB 불일치 해결 전까지 비활성화
+
     global _catchup_attempts, _catchup_date
 
     config = load_config()

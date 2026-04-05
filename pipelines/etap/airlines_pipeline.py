@@ -179,6 +179,13 @@ def run():
     return True
 
 def run_batch(count=3):
+    from pipelines.etap.topic_manager import check_daily_quota
+    can_pub, today_count = check_daily_quota("airlines-hugo", max_per_day=5)
+    if not can_pub:
+        import logging
+        logging.getLogger(__name__).info(f"[airlines-hugo] daily quota reached ({today_count}/5)")
+        return 0
+    count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
         if run():

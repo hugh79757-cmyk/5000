@@ -255,3 +255,20 @@ def mark_published(topic_id, blog_id, title, slug, url=""):
         return False
     finally:
         conn.close()
+
+
+def check_daily_quota(blog_id, max_per_day=5):
+    """일일 발행 quota 체크. 초과 시 False 반환."""
+    import sqlite3
+    db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__)))), "data", "travel-en.db")
+    conn = sqlite3.connect(db_path)
+    today_count = conn.execute(
+        "SELECT COUNT(*) FROM publish_log WHERE blog_id=? AND DATE(published_at)=DATE('now','localtime')",
+        (blog_id,)
+    ).fetchone()[0]
+    conn.close()
+    if today_count >= max_per_day:
+        logger.info(f"[{blog_id}] Daily quota reached: {today_count}/{max_per_day}")
+        return False, today_count
+    return True, today_count

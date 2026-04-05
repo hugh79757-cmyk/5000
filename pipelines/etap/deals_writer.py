@@ -143,7 +143,7 @@ def generate_deals_guide(topic):
     if popular_dirs:
         lines.append(f"\nDIRECT FLIGHTS (verified airline data, {len(popular_dirs)} routes):")
         airport_cities = _load_airport_cities()
-        for pd in popular_dirs[:30]:
+        for pd in popular_dirs:
             dest_city = airport_cities.get(pd["destination"], pd["destination"])
             stops_str = "DIRECT (non-stop)" if pd["stops"] == 0 else f"{pd['stops']} stop(s)"
             dep = (pd.get("departure_date") or "")[:10]

@@ -119,68 +119,93 @@ def sync_subscriptions(conn):
     return added
 
 
-def sync_keywords_from_gap():
-    """gap.db에서 부동산 키워드를 rap.db로 마이그레이션 (1회)"""
-    gap_db = os.path.join(os.path.dirname(RAP_DB_PATH), "gap.db")
-    if not os.path.exists(gap_db):
-        return 0
+def sync_keywords_from_trades(conn):
+    """실거래가 DB의 단지명으로 키워드 자동 생성 — gap.db 완전 분리"""
 
-    gap_conn = sqlite3.connect(gap_db)
-    rap_conn = sqlite3.connect(RAP_DB_PATH)
-    added = 0
-
-    # 부동산 무관 키워드 제외
-    EXCLUDE = [
-        "기능사", "요리", "조리", "흑백", "레시피", "양식조리", "제과", "봉제",
-        "롤러운전", "콘크리트", "전자기능", "주조", "인베디드", "견적서",
-        "운세", "로또", "날씨", "웹툰", "게임", "파전", "킷트", "래시피",
-        "키친보스", "오스틴강", "이탈리안", "이탈리아", "명태살", "1분링",
-    ]
-
-    # blog_target 자동 분류
-    BLOG_PATTERNS = {
-        "rap-hugo": ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라",
-                     "오피스텔", "은마", "재건축", "재개발", "부동산", "단지"],
-        "rap2-hugo": ["청약", "분양", "LH", "행복주택", "임대주택", "청년주택",
-                      "청년안심", "국민임대", "영구임대", "매입임대", "신혼희망"],
+    # blog_id별 키워드 패턴 매핑
+    BLOG_TARGETS = {
+        "rap-hugo":  ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라", "오피스텔",
+                      "재건축", "재개발", "부동산", "단지", "주공", "드림타운", "레지던스"],
         "rap3-hugo": ["양도", "취득세", "상속세", "증여세", "세금", "과세", "공시지가",
-                      "재산세", "종부세", "종합부동산세", "절세", "세율", "면제"],
-        "rap4-hugo": ["전세", "월세", "임대", "보증금", "임대차", "전월세", "반전세",
-                      "보증보험", "전세사기", "확정일자", "임차인", "계약갱신"],
-        "rap5-hugo": ["헬리오시티", "힐스테이트", "래미안", "자이", "푸르지오", "아크로",
-                      "파크리오", "더샵", "르엘", "롯데캐슬", "아이파크", "브랜드", "풍림"],
+                      "재산세", "종부세", "절세", "세율"],
+        "rap4-hugo": ["전세", "월세", "보증금", "전월세", "반전세", "전세사기",
+                      "확정일자", "임차인", "계약갱신", "보증보험"],
+        "rap5-hugo": ["힐스테이트", "래미안", "자이", "푸르지오", "아크로", "파크리오",
+                      "더샵", "르엘", "롯데캐슬", "아이파크", "e편한세상", "디에이치",
+                      "트리우스", "풍림", "드파인", "라브르", "원펜타스"],
     }
 
-    rows = gap_conn.execute(
-        "SELECT keyword, category, priority, use_count, last_used_at, status "
-        "FROM keywords WHERE category='금융/부동산'"
-    ).fetchall()
+    # trades 테이블에서 단지명 추출
+    try:
+        rows = conn.execute(
+            "SELECT DISTINCT city, district, apt_name FROM trades WHERE apt_name != '' ORDER BY deal_amount DESC"
+        ).fetchall()
+    except Exception as e:
+        logger.warning(f"trades 조회 실패: {e}")
+        return 0
 
-    for kw, cat, pri, uc, lua, st in rows:
-        if any(ex in kw for ex in EXCLUDE):
+    added = 0
+    for city, district, apt_name in rows:
+        if not apt_name or len(apt_name) < 2:
             continue
 
-        # blog_target 결정
-        target = None
-        for blog_id, patterns in BLOG_PATTERNS.items():
-            if any(p in kw for p in patterns):
-                target = blog_id
+        # 키워드 = "단지명 지역 실거래가" 형식
+        keywords_to_add = []
+
+        # rap-hugo: 지역 시세 키워드
+        kw_trade = f"{apt_name} {district} 실거래가"
+        keywords_to_add.append((kw_trade, "rap-hugo"))
+
+        # rap3-hugo: 세금 키워드
+        kw_tax = f"{apt_name} {district} 세금"
+        keywords_to_add.append((kw_tax, "rap3-hugo"))
+
+        # rap4-hugo: 전세 키워드
+        kw_rent = f"{apt_name} {district} 전세"
+        keywords_to_add.append((kw_rent, "rap4-hugo"))
+
+        # rap5-hugo: 브랜드 단지만
+        for brand in BLOG_TARGETS["rap5-hugo"]:
+            if brand in apt_name:
+                kw_brand = f"{apt_name} {district} 브랜드"
+                keywords_to_add.append((kw_brand, "rap5-hugo"))
                 break
 
-        try:
-            rap_conn.execute("""
-                INSERT OR IGNORE INTO keywords
-                (keyword, category, blog_target, priority, use_count, last_used_at, status)
-                VALUES (?,?,?,?,?,?,?)
-            """, (kw, cat, target, pri, uc, lua, st))
-            added += 1
-        except Exception:
-            pass
+        for kw, target in keywords_to_add:
+            try:
+                conn.execute("""
+                    INSERT OR IGNORE INTO keywords
+                    (keyword, category, blog_target, priority, use_count, status)
+                    VALUES (?, '금융/부동산', ?, 50, 0, 'active')
+                """, (kw, target))
+                if conn.execute("SELECT changes()").fetchone()[0] > 0:
+                    added += 1
+            except Exception:
+                pass
 
-    rap_conn.commit()
-    rap_conn.close()
-    gap_conn.close()
-    logger.info(f"gap.db → rap.db 키워드 마이그레이션: {added}건")
+    # 청약 공고에서 rap2-hugo 키워드 추출
+    try:
+        subs = conn.execute(
+            "SELECT DISTINCT region_nm, pan_type FROM subscriptions WHERE pan_status IN ('공고중','접수중')"
+        ).fetchall()
+        for region_nm, pan_type in subs:
+            if not region_nm:
+                continue
+            kw_sub = f"{region_nm} {pan_type or '청약'} 정보"
+            try:
+                conn.execute("""
+                    INSERT OR IGNORE INTO keywords
+                    (keyword, category, blog_target, priority, use_count, status)
+                    VALUES (?, '금융/부동산', 'rap2-hugo', 50, 0, 'active')
+                """, (kw_sub,))
+                if conn.execute("SELECT changes()").fetchone()[0] > 0:
+                    added += 1
+            except Exception:
+                pass
+    except Exception as e:
+        logger.warning(f"청약 키워드 추출 실패: {e}")
+
+    logger.info(f"공공데이터 기반 키워드 {added}개 신규 추가")
     return added
 
 
@@ -214,7 +239,6 @@ def daily_refresh():
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     daily_refresh()
-    sync_keywords_from_gap()
 
     # 결과 확인
     conn = sqlite3.connect(RAP_DB_PATH)

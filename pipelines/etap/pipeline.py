@@ -167,6 +167,13 @@ def run(cfg: dict) -> dict:
 
 
 def run_batch(cfg: dict, count: int = 3) -> list:
+    from pipelines.etap.topic_manager import check_daily_quota
+    blog_id = cfg["id"]
+    can_pub, today_count = check_daily_quota(blog_id, max_per_day=cfg.get("daily_quota", 5))
+    if not can_pub:
+        print(f"[ETAP] {blog_id}: daily quota reached ({today_count})")
+        return []
+    count = min(count, cfg.get("daily_quota", 5) - today_count)
     """count건 연속 발행 후 마지막에 1회 빌드+배포."""
     import time
     blog_id = cfg["id"]
@@ -263,10 +270,53 @@ _BLOG_PIPELINE_MAP = {
     "watersports-hugo": ("pipelines.etap.watersports_pipeline","run_batch"),
 }
 
+
+# ─── 블로그별 콘텐츠 검증 가드 ───
+# 발행 전 slug/title/category가 블로그 성격에 맞는지 검증
+_BLOG_CONTENT_RULES = {
+    "esim-hugo":      {"slug_must": [], "title_keywords": ["esim", "sim", "data plan", "mobile", "connected"], "category": "eSIM Guide", "min_keyword_hits": 1},
+    "airlines-hugo":  {"slug_must": [], "title_keywords": ["airline", "airways", "air line", "review"], "category": "Airline Review", "min_keyword_hits": 1},
+    "airports-hugo":  {"slug_must": [], "title_keywords": ["airport", "terminal", "lounge"], "category": "Airport Guide", "min_keyword_hits": 1},
+    "flights-hugo":   {"slug_must": [], "title_keywords": ["flight", "fly", "route", "cheap flight", "fare"], "category": "Flight Guide", "min_keyword_hits": 1},
+    "michelin-hugo":  {"slug_must": [], "title_keywords": ["michelin", "restaurant", "dining", "food", "star"], "category": "Michelin Guide", "min_keyword_hits": 1},
+    "visa-hugo":      {"slug_must": [], "title_keywords": ["visa", "entry", "requirement", "passport", "immigration"], "category": "Visa Guide", "min_keyword_hits": 1},
+    "trains-hugo":    {"slug_must": [], "title_keywords": ["train", "rail", "railway", "station"], "category": "Train Guide", "min_keyword_hits": 1},
+    "tours-hugo":     {"slug_must": [], "title_keywords": ["tour", "guided", "excursion", "activity"], "category": "Tour Guide", "min_keyword_hits": 1},
+    "deals-hugo":     {"slug_must": [], "title_keywords": ["deal", "cheap", "budget", "price", "fare"], "category": "Flight Deals", "min_keyword_hits": 1},
+    "cruise-hugo":    {"slug_must": [], "title_keywords": ["cruise", "ship", "sailing", "port", "cabin"], "category": "Cruise Guide", "min_keyword_hits": 1},
+    "bus-hugo":       {"slug_must": [], "title_keywords": ["bus", "coach", "intercity"], "category": "Bus Guide", "min_keyword_hits": 1},
+    "ferry-hugo":     {"slug_must": [], "title_keywords": ["ferry", "boat", "crossing", "port"], "category": "Ferry Guide", "min_keyword_hits": 1},
+    "eurail-hugo":    {"slug_must": [], "title_keywords": ["eurail", "rail pass", "train pass", "europe train"], "category": "Eurail Guide", "min_keyword_hits": 1},
+    "dining-hugo":    {"slug_must": [], "title_keywords": ["restaurant", "food", "dining", "eat", "cuisine", "dish"], "category": "Dining Guide", "min_keyword_hits": 1},
+    "adventure-hugo": {"slug_must": [], "title_keywords": ["adventure", "hiking", "trek", "outdoor", "climb"], "category": "Adventure Guide", "min_keyword_hits": 1},
+    "walking-hugo":   {"slug_must": [], "title_keywords": ["walking", "walk", "stroll", "foot", "pedestrian"], "category": "Walking Guide", "min_keyword_hits": 1},
+    "foodtour-hugo":  {"slug_must": [], "title_keywords": ["food tour", "food walk", "street food", "tasting", "culinary tour"], "category": "Food Tour Guide", "min_keyword_hits": 1},
+    "watersports-hugo": {"slug_must": [], "title_keywords": ["surf", "dive", "snorkel", "kayak", "water sport", "beach"], "category": "Water Sports Guide", "min_keyword_hits": 1},
+    "phototour-hugo": {"slug_must": [], "title_keywords": ["photo", "photography", "camera", "instagram", "scenic"], "category": "Photo Tour Guide", "min_keyword_hits": 1},
+    "daytrips-hugo":  {"slug_must": [], "title_keywords": ["day trip", "daytrip", "excursion", "half day", "nearby"], "category": "Day Trip Guide", "min_keyword_hits": 1},
+    "multiday-hugo":  {"slug_must": [], "title_keywords": ["multi-day", "multiday", "itinerary", "multi day", "package tour"], "category": "Multi-Day Guide", "min_keyword_hits": 1},
+    "nature-hugo":    {"slug_must": [], "title_keywords": ["nature", "park", "wildlife", "landscape", "forest", "mountain"], "category": "Nature Guide", "min_keyword_hits": 1},
+    "culture-hugo":   {"slug_must": [], "title_keywords": ["culture", "museum", "heritage", "art", "history", "tradition"], "category": "Culture Guide", "min_keyword_hits": 1},
+    "transfers-hugo": {"slug_must": [], "title_keywords": ["transfer", "shuttle", "airport transfer", "taxi", "transport"], "category": "Transfer Guide", "min_keyword_hits": 1},
+    "visafree-hugo":  {"slug_must": [], "title_keywords": ["visa-free", "visa free", "no visa", "exempt", "waiver"], "category": "Visa-Free Guide", "min_keyword_hits": 1},
+    "tour-hugo":      {"slug_must": [], "title_keywords": [], "category": "Travel Guide", "min_keyword_hits": 0},
+}
 def run(cfg: dict) -> dict:
     import importlib
+    from pipelines.etap.topic_manager import check_daily_quota
     blog_id = cfg.get("id", "")
-    count   = cfg.get("count", 1)
+    max_daily = cfg.get("daily_quota", 5)
+
+    # 일일 quota 강제
+    can_pub, today_count = check_daily_quota(blog_id, max_per_day=max_daily)
+    if not can_pub:
+        logger.info(f"[ETAP] {blog_id}: daily quota reached ({today_count}/{max_daily})")
+        return {"success": False, "reason": "daily_quota_reached", "today": today_count}
+
+    remaining = max_daily - today_count
+    count = min(cfg.get("count", 1), remaining)
+    if count <= 0:
+        return {"success": False, "reason": "daily_quota_reached"}
 
     entry = _BLOG_PIPELINE_MAP.get(blog_id)
     if not entry:

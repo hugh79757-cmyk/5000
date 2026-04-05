@@ -170,6 +170,14 @@ def run(cfg):
 
 
 def run_batch(cfg, count=2):
+    from pipelines.etap.topic_manager import check_daily_quota
+    blog_id = cfg.get("id", "flights-hugo")
+    can_pub, today_count = check_daily_quota(blog_id, max_per_day=5)
+    if not can_pub:
+        import logging
+        logging.getLogger(__name__).info(f"[{blog_id}] daily quota reached ({today_count}/5)")
+        return []
+    count = min(count, 5 - today_count)
     results = []
     for i in range(count):
         result = run(cfg)

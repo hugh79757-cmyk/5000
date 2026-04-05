@@ -206,7 +206,7 @@ def generate_airline_review(topic):
                 route_months[key] = []
             route_months[key].append(m)
 
-        for key, months in list(route_months.items())[:5]:
+        for key, months in list(route_months.items())[:10]:
             o, d = key.split("-")
             o_city = _airport_name(o)
             d_city = _airport_name(d)
@@ -217,7 +217,7 @@ def generate_airline_review(topic):
     # Market prices (flight_prices via airline_routes)
     if route_prices:
         lines.append(f"\nMARKET PRICES ({len(route_prices)} routes with comparison pricing):")
-        for rp in route_prices[:15]:
+        for rp in route_prices[:40]:
             o_city = _airport_name(rp["origin"])
             d_city = _airport_name(rp["destination"])
             if rp["min_price"] == rp["max_price"]:
@@ -229,7 +229,7 @@ def generate_airline_review(topic):
     # Popular directions for this airline
     if popular:
         lines.append(f"\nPOPULAR ROUTES ({len(popular)} trending directions):")
-        for p in popular[:15]:
+        for p in popular[:30]:
             o_city = _airport_name(p["origin"])
             d_city = _airport_name(p["destination"])
             stops_str = "non-stop" if p.get("stops", 0) == 0 else f"{p['stops']} stop(s)"
@@ -244,7 +244,7 @@ def generate_airline_review(topic):
         for c in calendar:
             cal_by_dest[c["destination"]].append(c)
         lines.append(f"\nPRICE CALENDAR ({len(calendar)} price points across {len(cal_by_dest)} destinations):")
-        for dest, entries in sorted(cal_by_dest.items(), key=lambda x: min(e["price"] for e in x[1]))[:10]:
+        for dest, entries in sorted(cal_by_dest.items(), key=lambda x: min(e["price"] for e in x[1]))[:20]:
             cheapest = min(entries, key=lambda x: x["price"])
             d_city = _airport_name(dest)
             lines.append(f"  {d_city} ({dest}): cheapest ${cheapest['price']:.0f} on {cheapest['date']} ({len(entries)} dates)")
