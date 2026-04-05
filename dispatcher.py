@@ -101,6 +101,20 @@ def _record_ledger(blog_id):
             if row:
                 title, url, source_id = row[0], row[1], row[2] or ""
             conn_src.close()
+        elif blog_id.endswith("-hugo") and blog_id not in STAP_PIPELINE_MAP:
+            # ETAP 블로그 — travel-en.db.publish_log에서 조회
+            etap_db = str(Path(__file__).parent / "data" / "travel-en.db")
+            try:
+                conn_src = sqlite3.connect(etap_db)
+                row = conn_src.execute(
+                    "SELECT title, url FROM publish_log WHERE blog_id=? ORDER BY rowid DESC LIMIT 1",
+                    (blog_id,)
+                ).fetchone()
+                if row:
+                    title, url = row[0], row[1] or ""
+                conn_src.close()
+            except Exception as _e:
+                logger.warning(f"ETAP publish_log 조회 실패: {_e}")
         else:
             # 5000 content.db에서 조회
             conn_src = sqlite3.connect(str(LEDGER_DB))

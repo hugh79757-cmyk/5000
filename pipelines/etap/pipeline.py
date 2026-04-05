@@ -231,3 +231,58 @@ if __name__ == "__main__":
     }
     result = run(test_cfg)
     print(result)
+
+
+# ─── dispatcher 경유 진입점 ───────────────────────────────────────────────────
+_BLOG_PIPELINE_MAP = {
+    "tour-hugo":        ("pipelines.etap.pipeline",            "run_batch"),
+    "airlines-hugo":    ("pipelines.etap.airlines_pipeline",   "run_batch"),
+    "airports-hugo":    ("pipelines.etap.airports_pipeline",   "run_batch"),
+    "esim-hugo":        ("pipelines.etap.esim_pipeline",       "run_batch"),
+    "flights-hugo":     ("pipelines.etap.flight_pipeline",     "run_batch"),
+    "michelin-hugo":    ("pipelines.etap.michelin_pipeline",   "run_batch"),
+    "tours-hugo":       ("pipelines.etap.tours_pipeline",      "run_batch"),
+    "trains-hugo":      ("pipelines.etap.trains_pipeline",     "run_batch"),
+    "visa-hugo":        ("pipelines.etap.visa_pipeline",       "run_batch"),
+    "bus-hugo":         ("pipelines.etap.bus_pipeline",        "run_batch"),
+    "ferry-hugo":       ("pipelines.etap.ferry_pipeline",      "run_batch"),
+    "dining-hugo":      ("pipelines.etap.dining_pipeline",     "run_batch"),
+    "culture-hugo":     ("pipelines.etap.culture_pipeline",    "run_batch"),
+    "transfers-hugo":   ("pipelines.etap.transfers_pipeline",  "run_batch"),
+    "multiday-hugo":    ("pipelines.etap.multiday_pipeline",   "run_batch"),
+    "nature-hugo":      ("pipelines.etap.nature_pipeline",     "run_batch"),
+    "visafree-hugo":    ("pipelines.etap.visafree_pipeline",   "run_batch"),
+    "deals-hugo":       ("pipelines.etap.deals_pipeline",      "run_batch"),
+    "eurail-hugo":      ("pipelines.etap.eurail_pipeline",     "run_batch"),
+    "cruise-hugo":      ("pipelines.etap.cruise_pipeline",     "run_batch"),
+    "phototour-hugo":   ("pipelines.etap.phototour_pipeline",  "run_batch"),
+    "daytrips-hugo":    ("pipelines.etap.daytrips_pipeline",   "run_batch"),
+    "walking-hugo":     ("pipelines.etap.walking_pipeline",    "run_batch"),
+    "foodtour-hugo":    ("pipelines.etap.foodtour_pipeline",   "run_batch"),
+    "adventure-hugo":   ("pipelines.etap.adventure_pipeline",  "run_batch"),
+    "watersports-hugo": ("pipelines.etap.watersports_pipeline","run_batch"),
+}
+
+def run(cfg: dict) -> dict:
+    import importlib
+    blog_id = cfg.get("id", "")
+    count   = cfg.get("count", 1)
+
+    entry = _BLOG_PIPELINE_MAP.get(blog_id)
+    if not entry:
+        logger.error(f"[ETAP] 알 수 없는 blog_id: {blog_id}")
+        return {"success": False, "reason": "unknown_blog_id"}
+
+    module_path, func_name = entry
+    try:
+        mod = importlib.import_module(module_path)
+        fn  = getattr(mod, func_name)
+        if blog_id == "tour-hugo":
+            result = fn(cfg, count=count)
+        else:
+            result = fn(count=count)
+        ok = result if isinstance(result, int) else (1 if result else 0)
+        return {"success": ok > 0, "published": ok}
+    except Exception as e:
+        logger.error(f"[ETAP] {blog_id} 실패: {e}")
+        return {"success": False, "reason": str(e)}

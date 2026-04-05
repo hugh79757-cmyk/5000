@@ -514,22 +514,19 @@ _ETAP_PIPELINE_MAP = {
 }
 
 def _run_etap(name: str):
-    """ETAP 파이프라인 통합 실행 — 이름만 받아 동적 import + 에러 시 텔레그램 CRITICAL."""
-    blog_id = name if name == "tour" else f"{name}-hugo"
-    entry = _ETAP_PIPELINE_MAP.get(name)
-    if not entry:
-        logger.error(f"[ETAP] 알 수 없는 파이프라인: {name}")
-        return
-    module_path, func_name, extra = entry
+    """ETAP 파이프라인 — dispatcher 경유 실행 + publish_ledger 자동 기록."""
+    blog_id = "tour-hugo" if name == "tour" else f"{name}-hugo"
     try:
-        import importlib
-        mod = importlib.import_module(module_path)
-        fn = getattr(mod, func_name)
-        if extra.get("cfg"):
-            result = fn(extra["cfg"], count=1)
+        import subprocess, sys
+        proc = subprocess.run(
+            [sys.executable, "dispatcher.py", blog_id],
+            capture_output=True, text=True, timeout=600
+        )
+        if proc.returncode != 0:
+            logger.error(f"[ETAP] {blog_id} dispatcher 실패: {proc.stderr[-300:]}")
+            _tg_critical(f"ETAP dispatcher 실패 — {blog_id}", proc.stderr[-300:])
         else:
-            result = fn(count=1)
-        logger.info(f"[ETAP] {blog_id} 완료: {result if result is not None else 'ok'}")
+            logger.info(f"[ETAP] {blog_id} 완료")
     except Exception as e:
         logger.error(f"[ETAP] {blog_id} 실패: {e}")
         _tg_critical(f"ETAP 파이프라인 실패 — {blog_id}", str(e), exc=e)
