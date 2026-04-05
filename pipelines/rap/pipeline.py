@@ -614,8 +614,8 @@ def run(blog_cfg):
                 continue
 
             # 상세보기 URL이 있는 항목 우선 정렬
-                subs = sorted(subs, key=lambda x: (0 if x.get('detail_url') else 1))
-                article = generate_subscription_article(keyword, subs)
+            subs = sorted(subs, key=lambda x: (0 if x.get('detail_url') else 1))
+            article = generate_subscription_article(keyword, subs)
             if isinstance(article, dict) and "body_md" in article:
                 article["body_md"] = _dedup_read_together(article["body_md"])
             data_source = "applyhome_db"
