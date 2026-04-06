@@ -417,7 +417,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     products = enrich_products(products, blog_id)
 
     # AI 글 생성
-    article = generate_curation_article(keyword, products)
+    article = generate_curation_article(keyword, products, blog_id=blog_id)
     if not article:
         return {"success": False, "reason": "write_error"}
 
