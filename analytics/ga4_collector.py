@@ -4,10 +4,11 @@
 import sqlite3
 import time
 import yaml
-import os
+import os, sys
 from datetime import datetime, timedelta
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
 
 
 def load_active_blogs():
