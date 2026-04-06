@@ -306,8 +306,8 @@ def main():
 
     if cmd == "report":
         try:
-            from shared.monitor import send_daily_report
-            send_daily_report()
+            from shared.daily_report import send_report
+            send_report()
         except Exception as e:
             print(f"Report failed: {e}")
         return

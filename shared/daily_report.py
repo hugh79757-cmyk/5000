@@ -84,7 +84,7 @@ def generate_report(target_date=None):
     for blog in blogs:
         bid = blog["id"]
         rows = conn.execute(
-            "SELECT title, status, created_at FROM articles WHERE blog_id = ? AND date(created_at) = ? ORDER BY created_at ASC",
+            "SELECT title, status, created_at FROM publish_ledger WHERE blog_id = ? AND date(created_at) = ? ORDER BY created_at ASC",
             (bid, target_date)
         ).fetchall()
 
