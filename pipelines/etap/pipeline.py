@@ -159,6 +159,38 @@ def _build_and_deploy(cfg: dict) -> bool:
     return True
 
 
+def _get_esim_product(country: str) -> dict:
+    """airalo_esim 테이블에서 해당 국가 eSIM 상품 조회."""
+    import sqlite3
+    from pathlib import Path
+    if not country:
+        return {}
+    db_path = Path(__file__).parent.parent.parent / "data" / "travel-en.db"
+    try:
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+        row = conn.execute(
+            "SELECT title, link, price, sale_price, image_link FROM airalo_esim "
+            "WHERE title LIKE ? ORDER BY CAST(REPLACE(COALESCE(sale_price,price),'$','') AS REAL) ASC LIMIT 1",
+            ("%" + country + "%",)
+        ).fetchone()
+        conn.close()
+        if not row:
+            return {}
+        p = row["sale_price"] or row["price"]
+        return {
+            "name": country + " eSIM - " + (row["title"] or ""),
+            "price": str(p).replace("$", ""),
+            "currency": "$",
+            "discount": "",
+            "image_url": row["image_link"] or "",
+            "link": row["link"],
+            "category": "eSIM",
+        }
+    except Exception:
+        return {}
+
+
 def run(cfg: dict) -> dict:
     """dispatcher에서 호출하는 메인 함수."""
     blog_id = cfg["id"]
@@ -178,6 +210,10 @@ def run(cfg: dict) -> dict:
 
     article = generate_city_guide(topic)
     article["viator_products"] = _get_viator_products(topic.get("city", ""))
+    # eSIM 카드 추가
+    esim = _get_esim_product(topic.get("country", ""))
+    if esim:
+        article["viator_products"].append(esim)
 
     # Quality guard
     article["content"], post_issues, is_draft = postprocess_content(
