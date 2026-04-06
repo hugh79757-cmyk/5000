@@ -343,7 +343,13 @@ def run(cfg):
         return {"success": False, "reason": "already_running"}
 
     try:
-        return _run_inner(cfg, blog_id, daily_quota)
+        result = _run_inner(cfg, blog_id, daily_quota)
+        if not result.get("success"):
+            reason = result.get("reason", "unknown")
+            # 조용한 실패(할당량/중복)는 알림 제외, 나머지는 텔레그램 전송
+            if reason not in ("quota_met", "already_running", "similar_title"):
+                _tg_error(blog_id, reason, f"[curation] 발행 실패: {reason}")
+        return result
     finally:
         _release_lock(lock_file)
 
