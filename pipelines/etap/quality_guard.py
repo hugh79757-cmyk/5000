@@ -376,7 +376,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     content = re.sub(r'-(\d+\.?\d*)%', _fix_discount_text, content)
 
     # Check for suspicious prices in text ($0, $0.X, $1 — $2~$4 is valid for rail/tour data)
-    suspicious_prices = re.findall(r'\$([0-1](?:\.\d+)?)\b', content)
+    suspicious_prices = re.findall(r'\$([0](?:\.\d+)?)\b', content)
     if suspicious_prices:
         issues.append(f"Suspicious low prices in text: ${', $'.join(suspicious_prices)}")
         is_draft = True
@@ -462,6 +462,21 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         is_draft = True
     elif word_count < 500:
         issues.append(f"Word count low: {word_count} - will be supplemented with cards, images, and cross-links")
+
+    # Append disclaimer card if not already present
+    disclaimer = """
+<div class="etap-disclaimer-card">
+
+> **📌 정보 안내 (Information Notice)**
+>
+> 이 페이지의 가격, 일정, 투어 내용, 항공 노선, 비자 요건 및 기타 모든 정보는 **작성 시점**의 데이터를 기반으로 합니다. 실제 이용 시점에 따라 요금, 운항 여부, 정책 등이 변경될 수 있습니다. 예약 전 반드시 공식 사이트에서 최신 정보를 확인하시기 바랍니다.
+>
+> Prices, schedules, tour details, flight routes, visa requirements, and all other information on this page are based on data **at the time of writing**. Fares, availability, and policies may change. Please verify current details on the official website before booking.
+
+</div>
+"""
+    if 'etap-disclaimer-card' not in content:
+        content = content + disclaimer
 
     return content, issues, is_draft
 
