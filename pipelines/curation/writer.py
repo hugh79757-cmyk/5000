@@ -16,6 +16,24 @@ from shared.ai_writer import generate as ai_generate
 logger = logging.getLogger(__name__)
 
 # -- 금지어 목록 및 검증 --
+
+BLOG_EXTRA_RULES = {
+    "laptop-hugo": """
+[laptop-hugo 전용 규칙]
+- 반드시 노트북 본체 상품만 소개할 것. 마우스, 웹캠, 헤드셋, 키보드, 태블릿, 캡쳐보드 등 주변기기는 절대 포함 금지.
+- 스펙 표기 순서: CPU → RAM → SSD → 화면크기 → 무게 순으로 작성.
+- 가격대별 분류: 50만원 미만(보급형) / 50~100만원(중급형) / 100만원 이상(고급형).
+- 각 상품당 주요 스펙 수치를 반드시 명시할 것 (예: RAM 16GB, SSD 512GB).
+""",
+    "baby-hugo": """
+[baby-hugo 전용 규칙]
+- 반려동물(강아지, 고양이, 개모차 등) 관련 상품은 절대 포함 금지.
+- 안전인증(KC인증, 친환경 소재 등) 정보를 반드시 언급할 것.
+- 사용 연령대(신생아/0~6개월/6~12개월/12개월 이상 등)를 명시할 것.
+- 부모 관점에서 실용성과 안전성을 중심으로 작성.
+""",
+}
+
 BANNED_PHRASES = [
     "알아보겠습니다", "소개합니다", "소개해 드리겠습니다", "소개해드리겠습니다",
     "드립니다", "놓치지 마세요", "이번 포스팅에서는", "이번 글에서는",
@@ -89,9 +107,12 @@ def _build_product_block(products):
     return "\n".join(lines)
 
 
-def _build_system_prompt(keyword):
+def _build_system_prompt(keyword, blog_id=None):
     year = datetime.now().year
     month = datetime.now().month
+    extra = BLOG_EXTRA_RULES.get(blog_id or "", "")
+    extra_block = f"\n\n{extra}" if extra else ""
+
     return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다.
 {year}년 {month}월 기준 "{keyword}" 관련 추천 상품 글을 작성합니다.
 
@@ -162,7 +183,7 @@ def _build_system_prompt(keyword):
 - 총 2000~3000자 (한글 기준). 이 범위 미만이면 불합격입니다.
 - 각 상품 소개는 최소 150자 이상 서술하세요.
 - 선택 가이드는 최소 300자 이상 서술하세요.
-- 전체 글이 2000자 미만이면 절대 안 됩니다. 반드시 2000자를 넘기세요."""
+- 전체 글이 2000자 미만이면 절대 안 됩니다. 반드시 2000자를 넘기세요.{extra_block}"""
 
 
 def _build_user_prompt(keyword, product_block):
@@ -189,14 +210,14 @@ def _build_user_prompt(keyword, product_block):
 {product_block}"""
 
 
-def generate_curation_article(keyword, products):
+def generate_curation_article(keyword, products, blog_id=None):
     """키워드 + 상품 5개 → 큐레이션 글 생성, dict 반환"""
     if not products or len(products) < 3:
         logger.warning(f"상품 부족: {keyword} ({len(products) if products else 0}개)")
         return None
 
     product_block = _build_product_block(products[:5])
-    system_prompt = _build_system_prompt(keyword)
+    system_prompt = _build_system_prompt(keyword, blog_id=blog_id)
     user_prompt = _build_user_prompt(keyword, product_block)
 
     # 글자수 미달 시 최대 2회 시도

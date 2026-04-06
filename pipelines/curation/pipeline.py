@@ -256,7 +256,7 @@ def _filter_used_products(blog_id, products):
         return products
     conn = sqlite3.connect(str(DB_PATH))
     used = conn.execute(
-        "SELECT product_id FROM published_products WHERE blog_id=?",
+        "SELECT product_id FROM published_products WHERE blog_id=? AND published_at > datetime('now', '-90 days')",
         (blog_id,)
     ).fetchall()
     conn.close()
@@ -267,7 +267,7 @@ def _filter_used_products(blog_id, products):
     overlap = current_ids & used_ids
     overlap_ratio = len(overlap) / len(current_ids) if current_ids else 0
 
-    if overlap_ratio >= 0.5:
+    if overlap_ratio >= 0.8:
         logger.info(f"[{blog_id}] 상품 겹침 {overlap_ratio:.0%} ({len(overlap)}/{len(current_ids)}) — 발행 차단")
         return []  # insufficient_products로 처리
 
@@ -404,8 +404,36 @@ def _run_inner(cfg, blog_id, daily_quota):
     products = get_products(keyword, limit=10)
     products = _filter_used_products(blog_id, products)
     if len(products) < 3:
-        logger.error(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개)")
-        return {"success": False, "reason": "insufficient_products"}
+        logger.warning(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개) — 다음 키워드 시도")
+        # 해당 키워드 캐시 삭제 후 다음 키워드로 재시도
+        try:
+            conn = sqlite3.connect(str(DB_PATH))
+            conn.execute("DELETE FROM products WHERE keyword=?", (keyword,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+        # 다음 키워드 선택 (현재 키워드 제외)
+        all_kws = get_keywords(blog_id)
+        used_conn = sqlite3.connect(str(DB_PATH))
+        used = used_conn.execute(
+            """SELECT keyword FROM publish_log
+               WHERE blog_id=? AND published_at > datetime('now', '-7 days')""",
+            (blog_id,)
+        ).fetchall()
+        used_conn.close()
+        used_set = {r[0] for r in used} | {keyword}
+        fallback_kws = [k for k in all_kws if k not in used_set]
+        if not fallback_kws:
+            return {"success": False, "reason": "insufficient_products"}
+        keyword = fallback_kws[0]
+        logger.info(f"[{blog_id}] 대체 키워드 사용: {keyword}")
+        collect_keyword(keyword)
+        products = get_products(keyword, limit=10)
+        products = _filter_used_products(blog_id, products)
+        if len(products) < 3:
+            logger.error(f"[{blog_id}] 대체 키워드도 상품 부족: {keyword} ({len(products)}개)")
+            return {"success": False, "reason": "insufficient_products"}
 
     # 카테고리 무관 상품 필터링 (코드 레벨)
     products = _filter_irrelevant_products(blog_id, keyword, products)
