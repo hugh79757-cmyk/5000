@@ -732,6 +732,7 @@ blogs:
   daily_quota: 5
   domain: tour.techpawz.com
   id: tour-hugo
+  daily_quota: 5
   name: Travel Guide (EN)
   pipeline: etap
   platform: hugo

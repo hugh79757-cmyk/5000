@@ -113,11 +113,11 @@ def pick_topic_by_id(topic_table, blog_id):
         row = conn.execute(f"""
             SELECT * FROM {topic_table}
             WHERE exhausted = 0
-              AND id NOT IN (
+              AND topic_id NOT IN (
                   SELECT topic_id FROM publish_log
                   WHERE blog_id = ? AND topic_id IS NOT NULL
               )
-            ORDER BY priority DESC, id ASC
+            ORDER BY priority DESC, topic_id ASC
             LIMIT 1
         """, (blog_id,)).fetchone()
 
@@ -135,7 +135,7 @@ def pick_topic_by_id(topic_table, blog_id):
                 )
                 conn.execute(f"""
                     UPDATE {topic_table} SET exhausted = 1
-                    WHERE exhausted = 0 AND id IN (
+                    WHERE exhausted = 0 AND topic_id IN (
                         SELECT topic_id FROM publish_log
                         WHERE blog_id = ? AND topic_id IS NOT NULL
                     )
@@ -145,7 +145,7 @@ def pick_topic_by_id(topic_table, blog_id):
 
         topic = dict(row)
         logger.info(
-            f"[{blog_id}] Picked topic id={topic['id']}, "
+            f"[{blog_id}] Picked topic id={topic['topic_id']}, "
             f"city={topic.get('city','')}, slug={topic.get('slug','')}, "
             f"remaining={remaining - 1}"
         )
@@ -189,7 +189,7 @@ def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url=""):
 
         # topics 테이블 exhausted 마킹 (PK 기준)
         conn.execute(
-            f"UPDATE {topic_table} SET exhausted = 1 WHERE id = ?",
+            f"UPDATE {topic_table} SET exhausted = 1 WHERE topic_id = ?",
             (topic_id,)
         )
 
