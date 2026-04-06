@@ -167,10 +167,9 @@ def run(cfg):
         article["body_images"] = body_imgs
     blog_id = cfg.get("id", "flights-hugo")
     article["content"] = insert_adsense(article["content"])
-    article["content"], _, _ = postprocess_content(article["content"], topic.get("dest_city",""), blog_id)
+    article["content"], _, _ = postprocess_content(article["content"], None, blog_id)
     article["content"] = inject_internal_links(article["content"], current_blog=blog_id, max_links=5)
     register_entity("destination", topic["dest_city"], blog_id, article["slug"],
-                    f'https://flights.techpawz.com/posts/{article["slug"]}/',
                     topic["dest_city"], priority=70)
     _write_hugo_post(cfg, article)
     mark_published(topic["id"], cfg.get("id", "flights-hugo"), article["title"], article["slug"])
