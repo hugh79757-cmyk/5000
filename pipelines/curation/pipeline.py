@@ -366,7 +366,6 @@ def _run_inner(cfg, blog_id, daily_quota):
     keyword = _select_keyword(blog_id)
     if not keyword:
         logger.error(f"[{blog_id}] 사용 가능한 키워드 없음")
-        _tg_error(blog_id, "keyword", "키워드 풀 비어있음")
         return {"success": False, "reason": "no_keyword"}
 
     # 상품 수집 (캐시 또는 API)
