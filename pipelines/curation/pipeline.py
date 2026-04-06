@@ -234,19 +234,29 @@ def _filter_irrelevant_products(blog_id, keyword, products):
 
 
 def _filter_used_products(blog_id, products):
-    """30일 내 동일 blog_id에서 발행된 상품 제외"""
+    """발행된 적 있는 상품 제외 (blog_id 기준 전체 기간)"""
     if not products:
         return products
     conn = sqlite3.connect(str(DB_PATH))
     used = conn.execute(
-        """SELECT product_id FROM published_products
-           WHERE blog_id=? AND published_at > datetime('now', '-30 days')""",
+        "SELECT product_id FROM published_products WHERE blog_id=?",
         (blog_id,)
     ).fetchall()
     conn.close()
-    used_ids = {r[0] for r in used}
-    filtered = [p for p in products if p["product_id"] not in used_ids]
+    used_ids = {str(r[0]) for r in used}
+
+    # 현재 상품 product_id를 str로 통일
+    current_ids = {str(p["product_id"]) for p in products}
+    overlap = current_ids & used_ids
+    overlap_ratio = len(overlap) / len(current_ids) if current_ids else 0
+
+    if overlap_ratio >= 0.5:
+        logger.info(f"[{blog_id}] 상품 겹침 {overlap_ratio:.0%} ({len(overlap)}/{len(current_ids)}) — 발행 차단")
+        return []  # insufficient_products로 처리
+
+    filtered = [p for p in products if str(p["product_id"]) not in used_ids]
     if len(filtered) < 3:
+        logger.warning(f"[{blog_id}] 미사용 상품 부족 ({len(filtered)}개), 원본 유지")
         return products[:5]
     return filtered[:5]
 
@@ -257,7 +267,7 @@ def _record_products(blog_id, keyword, products):
     now = datetime.now().isoformat()
     for p in products:
         conn.execute(
-            "INSERT INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
+            "INSERT OR IGNORE INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
             (blog_id, p["product_id"], keyword, now)
         )
     conn.commit()
