@@ -20,8 +20,54 @@ from pipelines.etap.writer import generate_city_guide
 from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.post_processor import insert_adsense, insert_cross_sell_block
+from pipelines.etap.post_processor import insert_adsense, insert_product_cards, insert_cross_sell_block
 
+
+
+import re as re  # viator
+def _get_viator_products(city: str, limit: int = 5) -> list:
+    """viator_tours 테이블에서 해당 도시 투어 상품 조회 + 어필리에이트 파라미터 추가."""
+    import sqlite3, os, re
+    from pathlib import Path
+    db_path = Path(__file__).parent.parent.parent / "data" / "travel-en.db"
+    pid  = os.getenv("VIATOR_PID", "")
+    mcid = os.getenv("VIATOR_MCID", "42383")   # Viator 기본 MCID
+    try:
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            """SELECT product_name, price, currency, discount_percent,
+                      image_url, deep_link, category
+               FROM viator_tours
+               WHERE lower(city) = lower(?)
+                 AND deep_link IS NOT NULL
+               ORDER BY discount_percent DESC, price ASC
+               LIMIT ?""",
+            (city, limit)
+        ).fetchall()
+        conn.close()
+    except Exception:
+        return []
+
+    products = []
+    for r in rows:
+        link = r["deep_link"] or ""
+        # 어필리에이트 파라미터 추가
+        if pid and "pid=" not in link:
+            sep = "&" if "?" in link else "?"
+            link = f"{link}{sep}pid={pid}&mcid={mcid}&medium=link"
+        # "Save XX%! " 접두사 제거
+        name = re.sub(r"^Save [\d.]+%!\s*", "", r["product_name"] or "")
+        products.append({
+            "name":     name,
+            "price":    r["price"],
+            "currency": r["currency"] or "USD",
+            "discount": r["discount_percent"],
+            "image_url": r["image_url"] or "",
+            "link":     link,
+            "category": r["category"] or "",
+        })
+    return products
 
 
 def _insert_body_images(content, images):
@@ -60,9 +106,11 @@ def _write_hugo_post(cfg: dict, article: dict) -> str:
     credit_line = ""
     if article.get("image"):
         img_url = article["image"]["url"]
-        image_block = f'\nfeatureimage: "{img_url}"\n'
-        if article["image"].get("credit"):
-            credit_line = article["image"]["credit"] + "\n\n"
+        credit = article["image"].get("credit", "")
+        if credit:
+            image_block = f'\nfeatureimage: "{img_url}"\nfeatureimagecaption: "{credit}"\n'
+        else:
+            image_block = f'\nfeatureimage: "{img_url}"\n'
 
     draft_line = "draft: true\n" if article.get("_draft") else ""
     frontmatter = f"""---
@@ -129,6 +177,7 @@ def run(cfg: dict) -> dict:
     print(f"[ETAP] {blog_id}: {topic['city']}, {topic['country']} 글 생성 시작")
 
     article = generate_city_guide(topic)
+    article["viator_products"] = _get_viator_products(topic.get("city", ""))
 
     # Quality guard
     article["content"], post_issues, is_draft = postprocess_content(
@@ -209,6 +258,10 @@ def run_batch(cfg: dict, count: int = 3) -> list:
         if body_imgs:
             article["body_images"] = body_imgs
         article["content"] = insert_adsense(article["content"])
+        # Viator 상품 카드 삽입
+        viator_products = article.get("viator_products", [])
+        if viator_products:
+            article["content"] = insert_product_cards(article["content"], viator_products)
         cross_html = build_cross_sell_html(
             country=topic.get("country", ""),
             city=topic.get("city", ""),
