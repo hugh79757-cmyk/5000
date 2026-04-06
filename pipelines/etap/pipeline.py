@@ -25,7 +25,7 @@ from pipelines.etap.post_processor import insert_adsense, insert_product_cards, 
 
 
 import re as re  # viator
-def _get_viator_products(city: str, limit: int = 5) -> list:
+def _get_viator_products(city: str, limit: int = 5, blog_id: str = "") -> list:
     """viator_tours 테이블에서 해당 도시 투어 상품 조회 + 어필리에이트 파라미터 추가."""
     import sqlite3, os, re
     from pathlib import Path
@@ -55,7 +55,7 @@ def _get_viator_products(city: str, limit: int = 5) -> list:
         # 어필리에이트 파라미터 추가
         if pid and "pid=" not in link:
             sep = "&" if "?" in link else "?"
-            link = f"{link}{sep}pid={pid}&mcid={mcid}&medium=link"
+            link = f"{link}{sep}pid={pid}&mcid={mcid}&medium=link&campaign={blog_id}"
         # "Save XX%! " 접두사 제거
         name = re.sub(r"^Save [\d.]+%!\s*", "", r["product_name"] or "")
         products.append({
@@ -209,7 +209,7 @@ def run(cfg: dict) -> dict:
     print(f"[ETAP] {blog_id}: {topic['city']}, {topic['country']} 글 생성 시작")
 
     article = generate_city_guide(topic)
-    article["viator_products"] = _get_viator_products(topic.get("city", ""))
+    article["viator_products"] = _get_viator_products(topic.get("city", ""), blog_id=blog_id)
     # eSIM 카드 추가
     esim = _get_esim_product(topic.get("country", ""))
     if esim:
