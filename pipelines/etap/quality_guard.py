@@ -376,9 +376,9 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     content = re.sub(r'-(\d+\.?\d*)%', _fix_discount_text, content)
 
     # Check for suspicious prices in text ($0, $0.X, $1 — $2~$4 is valid for rail/tour data)
-    suspicious_prices = re.findall(r'\$([0](?:\.\d+)?)\b', content)
+    suspicious_prices = re.findall(r'\$0(?!\.\d)\b', content)
     if suspicious_prices:
-        issues.append(f"Suspicious low prices in text: ${', $'.join(suspicious_prices)}")
+        issues.append(f"Suspicious low prices in text: $0 found")
         is_draft = True
 
     # Check for very high prices (possible hallucination)
