@@ -87,9 +87,9 @@
             <div class="value">{{ ga4['pv'] or 0 }}</div>
         </div>
         <div class="card">
-            <div class="label">AdSense 수익</div>
-            <div class="value">${{ "%.2f"|format(ga4['revenue'] or 0) }}</div>
-            <div class="sub">참여율 {{ "%.1f"|format((ga4['engage'] or 0) * 100) }}%</div>
+            <div class="label">AdSense 수익 (7일)</div>
+            <div class="value">${{ "%.2f"|format(adsense['revenue'] if adsense else 0) }}</div>
+            <div class="sub">클릭 {{ adsense['clicks'] if adsense else 0 }}회 / PV {{ "{:,}".format(adsense['page_views'] if adsense else 0) }}</div>
         </div>
     </div>
 

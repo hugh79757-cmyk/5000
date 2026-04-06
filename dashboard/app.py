@@ -129,6 +129,28 @@ def index():
         GROUP BY date ORDER BY date
     """, (d30,)).fetchall()
 
+    # Bing 7-day summary
+    bing = conn.execute("""
+        SELECT COALESCE(SUM(clicks),0) clicks, COALESCE(SUM(impressions),0) impressions,
+               COUNT(DISTINCT blog_id) blogs
+        FROM bing_daily_summary WHERE date > ?
+    """, (d7,)).fetchone()
+
+    # AdSense 7-day summary
+    adsense = conn.execute("""
+        SELECT COALESCE(SUM(estimated_earnings),0) revenue,
+               COALESCE(SUM(page_views),0) page_views,
+               COALESCE(SUM(clicks),0) clicks
+        FROM adsense_daily WHERE date > ?
+    """, (d7,)).fetchone()
+
+    # AdSense 30-day trend (daily total)
+    revenue_trend = conn.execute("""
+        SELECT date, ROUND(SUM(estimated_earnings),2) revenue, SUM(page_views) pv
+        FROM adsense_daily WHERE date > ?
+        GROUP BY date ORDER BY date
+    """, (d30,)).fetchall()
+
     conn.close()
 
     site_map = {s['blog_id']: s for s in sites}
@@ -137,7 +159,8 @@ def index():
         latest=latest, now=now, summary=summary, ga4=ga4,
         blog_stats=blog_stats, keywords=keywords, recycle=recycle,
         danger=danger, unlinked=unlinked, trend=trend,
-        site_map=site_map, groups=groups, total_blogs=len(all_blogs))
+        site_map=site_map, groups=groups, total_blogs=len(all_blogs),
+        bing=bing, adsense=adsense, revenue_trend=revenue_trend)
 
 # ===== BLOG DETAIL =====
 @app.route('/blog/<blog_id>')
