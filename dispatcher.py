@@ -272,8 +272,16 @@ def dispatch(blog_id):
         result = {"success": result}
 
     # 성공 시 중앙 ledger에 기록
+    # ETAP 블로그는 ledger_sync.py가 새벽 배치로 동기화하므로 스킵 (중복 방지)
+    ETAP_BLOGS = {"esim-hugo","michelin-hugo","tours-hugo","trains-hugo","airports-hugo",
+                  "airlines-hugo","watersports-hugo","walking-hugo","visafree-hugo",
+                  "transfers-hugo","multiday-hugo","foodtour-hugo","ferry-hugo",
+                  "eurail-hugo","dining-hugo","daytrips-hugo","culture-hugo",
+                  "bus-hugo","adventure-hugo","tour-hugo","flights-hugo","visa-hugo"}
     if result.get("success"):
-        if _is_duplicate(blog_id):
+        if blog_id in ETAP_BLOGS:
+            logger.debug(f"[ledger] {blog_id} ETAP — ledger_sync에서 처리")
+        elif _is_duplicate(blog_id):
             logger.warning(f"[DEDUP] {blog_id} 동일 제목 중복 발행 차단")
         else:
             _record_ledger(blog_id)
