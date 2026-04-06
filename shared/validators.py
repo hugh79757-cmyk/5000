@@ -515,7 +515,6 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
     combined = title + " " + body
     zero_patterns = [
         (r"(?<![.\d])0억\s*원?", "0억 원"),
-        (r"(?<![.\d])0%", "0%"),
         (r"희석률\s*0%", "희석률 0%"),
         (r"공모가\s*0원", "공모가 0원"),
         (r"(?<![.\d])0만\s*주", "0만 주"),

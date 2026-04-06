@@ -55,21 +55,32 @@ def _select_car_image(conn, car_id, slug):
     if not candidates:
         logger.warning("Image: no candidates for " + car_id)
         return "", ""
-    MAX_IMG_RETRY = 3
+    MAX_IMG_RETRY = min(len(candidates), 8)
     for attempt in range(MAX_IMG_RETRY):
-        selected_url = candidates[attempt % len(candidates)]
+        selected_url = candidates[attempt]
         try:
             req = urllib.request.Request(selected_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=20) as resp:
+            with urllib.request.urlopen(req, timeout=10) as resp:
                 image_data = resp.read()
             r2_url = process_and_upload(image_data)
             return r2_url, selected_url
         except Exception as e:
-            logger.warning("Image attempt " + str(attempt+1) + "/" + str(MAX_IMG_RETRY) + " failed for " + car_id + ": " + str(e))
+            err_msg = str(e)
+            logger.warning("Image attempt " + str(attempt+1) + "/" + str(MAX_IMG_RETRY) + " failed for " + car_id + ": " + err_msg)
+            # 타임아웃/접근불가 URL은 blocked_images에 등록
+            if "timed out" in err_msg or "403" in err_msg or "404" in err_msg:
+                try:
+                    _db_conn = sqlite3.connect(str(CAR_DB_PATH))
+                    _db_conn.execute("INSERT OR IGNORE INTO blocked_images (image_url) VALUES (?)", (selected_url,))
+                    _db_conn.commit()
+                    _db_conn.close()
+                    logger.info("Image blocked: " + selected_url)
+                except Exception:
+                    pass
             if attempt < MAX_IMG_RETRY - 1:
-                _time.sleep(2)
+                _time.sleep(1)
     logger.error("Image: all " + str(MAX_IMG_RETRY) + " attempts failed for " + car_id)
-    _tg_error(car_id, "image_upload", "이미지 3회 재시도 모두 실패")
+    _tg_error(car_id, "image_upload", "이미지 " + str(MAX_IMG_RETRY) + "회 재시도 모두 실패")
     return "", ""
 
 
