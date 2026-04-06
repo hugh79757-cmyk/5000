@@ -137,7 +137,7 @@ def _build_and_deploy(cfg: dict) -> bool:
     """Hugo 빌드 + Wrangler 배포."""
     import subprocess
     site_path = cfg["site_path"]
-    cf_project = cfg["cf_project"]
+    cf_project = cfg.get("cf_project") or cfg.get("repo") or cfg["id"]
 
     build = subprocess.run(
         ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
@@ -271,7 +271,7 @@ def run_batch(cfg: dict, count: int = 3) -> list:
         article["content"] = inject_internal_links(article["content"], current_blog=blog_id, max_links=5)
         register_entity("city", topic["city"], blog_id, article["slug"],
                         f'https://{cfg["domain"]}/posts/{article["slug"]}/',
-                        topic["city"], priority=70)
+                        topic["city"], 70)
         _write_hugo_post(cfg, article)
 
         mark_published(

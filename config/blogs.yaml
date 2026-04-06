@@ -736,6 +736,7 @@ blogs:
   pipeline: etap
   platform: hugo
   repo: tour-hugo
+  cf_project: tour-hugo
   schedule:
     times:
     - 07:30
