@@ -55,6 +55,47 @@ def _release_lock(lock_file):
 PROJECT_DIR = Path(__file__).parent.parent.parent
 DB_PATH = PROJECT_DIR / "data" / "curation.db"
 
+def _init_db():
+    """DB 테이블이 없으면 자동 생성 (DB 초기화 복구용)"""
+    conn = sqlite3.connect(str(DB_PATH))
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS publish_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            blog_id TEXT NOT NULL,
+            keyword TEXT NOT NULL,
+            title TEXT,
+            slug TEXT,
+            published_at TEXT NOT NULL
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_publog_blog_keyword
+        ON publish_log(blog_id, keyword, published_at)
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS published_products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            blog_id TEXT NOT NULL,
+            product_id INTEGER NOT NULL,
+            keyword TEXT NOT NULL,
+            published_at TEXT NOT NULL
+        )
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_pub_products_blog
+        ON published_products(blog_id, product_id)
+    """)
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_pub_products_date
+        ON published_products(blog_id, published_at)
+    """)
+    conn.commit()
+    conn.close()
+
+_init_db()
+
+
+
 
 def _select_keyword(blog_id):
     """7일 내 미사용 키워드 중 하나 선택"""

@@ -25,6 +25,32 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 BASE_URL = "https://api-gateway.coupang.com"
 CACHE_DAYS = 3
 
+def _init_db():
+    """DB 테이블이 없으면 자동 생성 (DB 초기화 복구용)"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS products (
+            keyword TEXT NOT NULL,
+            product_id TEXT NOT NULL,
+            product_name TEXT,
+            product_price INTEGER,
+            product_image TEXT,
+            product_url TEXT,
+            category_name TEXT,
+            rank INTEGER,
+            is_rocket BOOLEAN,
+            is_free_shipping BOOLEAN,
+            collected_at TEXT,
+            PRIMARY KEY (keyword, product_id)
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+_init_db()
+
+
+
 # -- 키워드 변형으로 상품 풀 확대 --
 KEYWORD_VARIANTS = {
     "노트북": ["노트북", "랩탑", "laptop"],

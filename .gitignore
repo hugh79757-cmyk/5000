@@ -47,9 +47,5 @@ data/content.db
 nohup.out
 config/blogs.yaml.bak_*
 pipelines/rap/*.bak2
-pipelines/etap/*.bak*
-data/*.db
-pipelines/etap/*.bak*
-pipelines/etap/*_bak
 *.bak*
 data/backups/
