@@ -471,10 +471,6 @@ def _enrich_with_nearby_restaurants_only(data, html, blog_id=""):
     restaurants = nearby_data.get("restaurants", [])
     if not restaurants:
         return html
-    # 맛집 블로그에서는 근처 맛집 위젯 제거
-    if "travel" in blog_id or "tour" in blog_id:
-        return html
-
     nearby_html = "\n\n## 근처 맛집\n\n"
     for r in restaurants[:5]:
         name = r.get("title", "")
