@@ -129,6 +129,7 @@ def _add_product_cards(article):
         "WHERE title LIKE ? ORDER BY CAST(REPLACE(COALESCE(sale_price,price),'$','') AS REAL) ASC LIMIT 1",
         ("%" + country + "%",)
     ).fetchone()
+    if esim: esim = dict(esim)
     if esim:
         p = esim["sale_price"] or esim["price"]
         cross.append(dict(
@@ -141,6 +142,7 @@ def _add_product_cards(article):
         "WHERE city = ? AND deep_link != '' ORDER BY CAST(price AS REAL) ASC LIMIT 1",
         (city,)
     ).fetchone()
+    if tour: tour = dict(tour)
     if tour:
         cross.append(dict(
             name=tour["product_name"], price=tour["price"],
@@ -150,7 +152,7 @@ def _add_product_cards(article):
         ))
     conn.close()
     if cross:
-        article["content"] = insert_product_cards(article["content"], cross, max_cards=3, position="bottom")
+        article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
     return article
 
 def run():
