@@ -282,7 +282,8 @@ RULES:
 - For monthly trends: identify cheapest and most expensive months.
 - Be honest: if data is limited, say "based on {len(directs)} direct flights and {len(monthly)} monthly data points in our database."
 - Give a clear verdict: who should fly this airline.
-- Flowing paragraphs only, NO bullet points or numbered lists.
+- Use the STRUCTURE sections above as H2 headings (## Section Name). Each section MUST start with ## heading.
+- Flowing paragraphs only within each section, NO bullet points or numbered lists.
 - NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, treasure trove, must-visit, paradise, bucket list, adventure awaits
 
 Return ONLY the article in markdown starting with # title"""
