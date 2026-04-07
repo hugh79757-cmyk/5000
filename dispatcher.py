@@ -320,7 +320,19 @@ def main():
             print(f"Report failed: {e}")
         return
 
-    dispatch(cmd)
+    result = dispatch(cmd)
+    if result:
+        import json as _json
+        success = result.get("success", False)
+        reason = result.get("reason", "")
+        title = result.get("title", "")
+        if success:
+            msg = f"[OK] {cmd}"
+            if title:
+                msg += f": {title[:50]}"
+        else:
+            msg = f"[FAIL] {cmd}: {reason}"
+        print(msg)
 
 
 if __name__ == "__main__":
