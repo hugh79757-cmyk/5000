@@ -129,7 +129,7 @@ def _add_product_cards(article):
         cuisine = r.get("cuisine", "")
         desc = award + (" / " + cuisine if cuisine else "")
         selected.append(dict(
-            name=r["name"], price=r.get("price", ""), currency="",
+            name=r["name"], price="", currency="",
             discount="", image_url="",
             link=r.get("url", "#"),
             category=desc,
