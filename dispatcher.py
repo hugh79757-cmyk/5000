@@ -230,6 +230,19 @@ def _run_pipeline(cfg):
         return {"success": False, "reason": "pipeline_no_run"}
 
     try:
+        # ETAP 파이프라인은 run() 인자 없음
+        import inspect as _inspect
+        sig = _inspect.signature(module.run)
+        if len(sig.parameters) == 0:
+            raw = module.run()
+            # bool/int/None → dict 정규화
+            if isinstance(raw, bool):
+                return {"success": raw}
+            elif isinstance(raw, int):
+                return {"success": raw > 0, "published": raw}
+            elif raw is None:
+                return {"success": False, "reason": "no_result"}
+            return raw
         return module.run(cfg)
     except Exception as e:
         logger.error(f"Pipeline {blog_id} crashed: {e}")

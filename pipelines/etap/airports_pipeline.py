@@ -163,6 +163,10 @@ def run():
     logger.info(f"[airports-hugo] {topic.get('iata_code','')} generating")
     article = generate_airport_guide(topic)
     if not article:
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('airline_name','')}")
         return False
 
     # Quality guard

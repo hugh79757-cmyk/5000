@@ -144,6 +144,10 @@ def run():
     logger.info(f"[{BLOG_ID}] {city} generating")
     article = generate_dining_guide(topic)
     if not article:
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('city','')}")
         return False
     article["content"], post_issues, is_draft = postprocess_content(article["content"], blog_id=BLOG_ID, slug=article["slug"])
     if is_draft:

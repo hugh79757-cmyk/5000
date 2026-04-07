@@ -176,6 +176,10 @@ def run():
     logger.info(f"[{BLOG_ID}] {topic.get('city','')} generating")
     article = generate_cruise_guide(topic)
     if not article:
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('city','')}")
         return False
     # Post-process quality check
     data_prices = [float(str(t.get("price",0)).replace("$","").replace(",","")) for t in article.get("tours", article.get("routes", article.get("restaurants", []))) if t.get("price")]

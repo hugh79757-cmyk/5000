@@ -155,6 +155,10 @@ def run():
     logger.info(f"[{BLOG_ID}] {origin} to {dest} generating")
     article = generate_bus_guide(topic)
     if not article:
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('airline_name','')}")
         return False
     data_prices = [float(str(r.get(k,0))) for r in article.get("routes",[]) for k in ["bus_min_price","train_min_price","flight_min_price","ferry_min_price"] if r.get(k)]
     article["content"], post_issues, is_draft = postprocess_content(article["content"], data_prices=data_prices, blog_id=BLOG_ID, slug=article["slug"])

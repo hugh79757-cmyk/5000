@@ -172,6 +172,10 @@ def run():
     logger.info(f"[visafree-hugo] {topic.get('passport','')} generating")
     article = generate_visafree_guide(topic)
     if not article:
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('city','')}")
         return False
 
     # Quality guard
