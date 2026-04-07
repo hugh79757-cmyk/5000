@@ -271,6 +271,139 @@ def api_trend(blog_id):
     return jsonify([dict(r) for r in rows])
 
 
+
+
+# ===== BLOG STATUS TAB =====
+@app.route('/status')
+@requires_auth
+def blog_status():
+    import yaml, sqlite3 as _sq
+
+    # blogs.yaml
+    blogs_cfg = yaml.safe_load(open(os.path.join(BASE, "config/blogs.yaml")))["blogs"]
+    blog_map = {b["id"]: b for b in blogs_cfg}
+
+    # sites.yaml
+    sites, _ = load_sites()
+    site_map = {s["blog_id"]: s for s in sites}
+
+    # analytics.db — GSC 7일 + efficiency
+    conn = get_db(ANALYTICS_DB)
+    latest = get_latest_date(conn)
+    d7 = (datetime.strptime(latest, "%Y-%m-%d") - timedelta(days=7)).strftime("%Y-%m-%d") if latest else "2000-01-01"
+
+    gsc_rows = conn.execute("""
+        SELECT g.blog_id,
+               COALESCE(SUM(g.total_clicks),0) clicks,
+               COALESCE(SUM(g.total_impressions),0) impressions,
+               e.grade, e.efficiency_score
+        FROM gsc_daily_summary g
+        LEFT JOIN blog_efficiency e ON g.blog_id=e.blog_id AND e.date=?
+        WHERE g.date > ?
+        GROUP BY g.blog_id
+    """, (latest, d7)).fetchall()
+    gsc_map = {r["blog_id"]: dict(r) for r in gsc_rows}
+    conn.close()
+
+    # content.db — 발행 수
+    pub_map = {}
+    try:
+        c = _sq.connect(os.path.join(BASE, "data/content.db"))
+        c.row_factory = _sq.Row
+        rows = c.execute("""
+            SELECT blog_id,
+                   COUNT(*) total,
+                   SUM(CASE WHEN date(created_at)=date('now','localtime') THEN 1 ELSE 0 END) today
+            FROM articles GROUP BY blog_id
+        """).fetchall()
+        for r in rows:
+            pub_map[r["blog_id"]] = {"total": r["total"], "today": r["today"]}
+        c.close()
+    except Exception:
+        pass
+
+    # travel-en.db — ETAP 발행 수
+    try:
+        c = _sq.connect(os.path.join(BASE, "data/travel-en.db"))
+        c.row_factory = _sq.Row
+        rows = c.execute("""
+            SELECT blog_id,
+                   COUNT(*) total,
+                   SUM(CASE WHEN date(published_at)=date('now','localtime') THEN 1 ELSE 0 END) today
+            FROM publish_log GROUP BY blog_id
+        """).fetchall()
+        for r in rows:
+            pub_map[r["blog_id"]] = {"total": r["total"], "today": r["today"]}
+        c.close()
+    except Exception:
+        pass
+
+    # STAP publish_log
+    try:
+        c = _sq.connect("/Users/twinssn/Projects/STAP/data/stap.db")
+        c.row_factory = _sq.Row
+        rows = c.execute("""
+            SELECT blog_id,
+                   COUNT(*) total,
+                   SUM(CASE WHEN date(published_at)=date('now','localtime')) as today
+            FROM publish_log GROUP BY blog_id
+        """).fetchall()
+        for r in rows:
+            pub_map[r["blog_id"]] = {"total": r["total"], "today": r["today"]}
+        c.close()
+    except Exception:
+        pass
+
+    # scheduler.log — 오늘 OK/FAIL
+    import re
+    from collections import defaultdict
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    ok_map = defaultdict(int)
+    fail_map = defaultdict(int)
+    try:
+        log_path = os.path.join(BASE, "logs", "scheduler.log")
+        for line in open(str(log_path)):
+            if not line.startswith(today_str):
+                continue
+            m = re.search(r"\[OK\] ([\w-]+)", line)
+            if m:
+                ok_map[m.group(1)] += 1
+                continue
+            m = re.search(r"\[FAIL\] ([\w-]+)", line)
+            if m:
+                fail_map[m.group(1)] += 1
+    except Exception:
+        pass
+
+    # 통합 데이터 조립
+    rows_out = []
+    for b in blogs_cfg:
+        bid = b["id"]
+        pub = pub_map.get(bid, {"total": 0, "today": 0})
+        gsc = gsc_map.get(bid, {"clicks": 0, "impressions": 0, "grade": "-", "efficiency_score": 0})
+        rows_out.append({
+            "blog_id": bid,
+            "name": b.get("name", bid),
+            "pipeline": b.get("pipeline", ""),
+            "status": b.get("status", ""),
+            "daily_quota": b.get("daily_quota", 5),
+            "domain": site_map.get(bid, {}).get("domain", ""),
+            "group": site_map.get(bid, {}).get("group", ""),
+            "total_posts": pub["total"],
+            "today_posts": pub["today"],
+            "clicks_7d": gsc["clicks"],
+            "impressions_7d": gsc["impressions"],
+            "grade": gsc.get("grade") or "-",
+            "ok_today": ok_map.get(bid, 0),
+            "fail_today": fail_map.get(bid, 0),
+        })
+
+    # 그룹 목록
+    groups = sorted(set(r["group"] for r in rows_out if r["group"]))
+
+    now = datetime.now().strftime("%Y-%m-%d %H:%M")
+    return render_template("status.html",
+        rows=rows_out, groups=groups, now=now, today=today_str)
 @app.route('/publish')
 @requires_auth
 def publish_status():
