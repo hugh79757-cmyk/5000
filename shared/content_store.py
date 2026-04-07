@@ -216,6 +216,12 @@ def source_exists(blog_id, data_source, source_id):
 
 def title_similar_exists(blog_id, title):
     import re
+    # 실시간 데이터 기반 블로그는 날짜 포함 시 중복 허용
+    REALTIME_BLOGS = {"sector-hugo", "stock-hugo", "dividend-hugo", "etf-hugo", "ipo-hugo", "finance-hugo"}
+    if blog_id in REALTIME_BLOGS:
+        date_pattern = re.search(r"\d{1,2}월\s*\d{1,2}일|\d{4}년\s*\d{1,2}월", title)
+        if date_pattern:
+            return False
     conn = get_conn()
     # 숫자·조사 제거 후 핵심 키워드로 비교 (20자)
     _normalized = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", title).strip()
