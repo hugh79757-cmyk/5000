@@ -98,7 +98,7 @@ _init_db()
 
 
 def _select_keyword(blog_id):
-    """7일 내 미사용 키워드 중 하나 선택"""
+    """7일 내 미사용 키워드 중 상품 3개 이상인 것 우선 선택"""
     keywords = get_keywords(blog_id)
     if not keywords:
         return None
@@ -122,8 +122,18 @@ def _select_keyword(blog_id):
             (blog_id,)
         ).fetchone()
         conn.close()
-        return oldest[0] if oldest else keywords[0]
+        available = [oldest[0]] if oldest else [keywords[0]]
 
+    # 상품 3개 이상인 키워드 우선 선택
+    conn = sqlite3.connect(str(DB_PATH))
+    for kw in available:
+        cnt = conn.execute(
+            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
+        ).fetchone()[0]
+        if cnt >= 3:
+            conn.close()
+            return kw
+    conn.close()
     return available[0]
 
 
