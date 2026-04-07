@@ -180,6 +180,10 @@ def _post_process(body_md, blog_id, keyword):
 
     import re as _re
 
+    # ── None 가드 ──
+    if body_md is None:
+        return ""
+
     # ── '특히' 자동 치환 ──
     body_md = body_md.replace("특히, ", "").replace("특히 ", "")
     body_md = _re.sub(r"특히", "", body_md)
@@ -649,6 +653,13 @@ def run(blog_cfg):
             logger.warning(f"내부링크 삽입 실패: {e}")
 
     # 후처리 (면책조항 + 쿠팡 + 내부링크)
+    if not article.get("body_md"):
+        logger.error(f"[POST-PROCESS] {blog_id} body_md 없음 — 발행 중단")
+        try:
+            tg_error(blog_id, "post_process", "후처리 에러: body_md가 None — writer 생성 실패")
+        except Exception:
+            pass
+        return {"success": False, "reason": "empty_body_md"}
     try:
         article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
     except Exception as _pp_err:
