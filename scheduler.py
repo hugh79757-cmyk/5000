@@ -528,6 +528,10 @@ def _run_etap(name: str):
             [sys.executable, "dispatcher.py", blog_id],
             capture_output=True, text=True, timeout=600
         )
+        if proc.stdout:
+            for line in proc.stdout.strip().split("\n")[-3:]:
+                if line.strip():
+                    logger.info("  " + line.strip())
         if proc.returncode != 0:
             logger.error(f"[ETAP] {blog_id} dispatcher 실패: {proc.stderr[-300:]}")
             _tg_critical(f"ETAP dispatcher 실패 — {blog_id}", proc.stderr[-300:])

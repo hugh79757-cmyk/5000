@@ -239,7 +239,7 @@ def _run_pipeline(cfg):
             if isinstance(raw, bool):
                 return {"success": raw}
             elif isinstance(raw, int):
-                return {"success": raw > 0, "published": raw}
+                return {"success": raw > 0, "published": raw, "reason": "" if raw > 0 else "published=0 (데이터 부족 또는 quota 초과)"}
             elif raw is None:
                 return {"success": False, "reason": "no_result"}
             return raw
