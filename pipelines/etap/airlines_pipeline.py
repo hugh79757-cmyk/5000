@@ -155,6 +155,11 @@ def run():
     logger.info(f"[airlines-hugo] {topic.get('airline_name','')} generating")
     article = generate_airline_review(topic)
     if not article:
+        # 데이터 부족 토픽 exhausted 처리 (무한 반복 방지)
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[airlines-hugo] 데이터 부족 토픽 exhausted 처리: {topic.get('airline_name','')}")
         return False
 
     # Quality guard

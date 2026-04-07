@@ -28,6 +28,15 @@ def _get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+def _get_pk_col(conn, topic_table):
+    """테이블의 PK 컬럼명 자동 감지"""
+    rows = conn.execute(f"PRAGMA table_info({topic_table})").fetchall()
+    for row in rows:
+        if row["pk"] == 1:
+            return row["name"]
+    return "id"
+
+
 
 def send_telegram(message):
     """텔레그램 메시지 전송"""
@@ -110,14 +119,15 @@ def pick_topic_by_id(topic_table, blog_id):
 
     conn = _get_db()
     try:
+        pk = _get_pk_col(conn, topic_table)
         row = conn.execute(f"""
             SELECT * FROM {topic_table}
             WHERE exhausted = 0
-              AND topic_id NOT IN (
+              AND {pk} NOT IN (
                   SELECT topic_id FROM publish_log
                   WHERE blog_id = ? AND topic_id IS NOT NULL
               )
-            ORDER BY priority DESC, topic_id ASC
+            ORDER BY priority DESC, {pk} ASC
             LIMIT 1
         """, (blog_id,)).fetchone()
 
@@ -135,7 +145,7 @@ def pick_topic_by_id(topic_table, blog_id):
                 )
                 conn.execute(f"""
                     UPDATE {topic_table} SET exhausted = 1
-                    WHERE exhausted = 0 AND topic_id IN (
+                    WHERE exhausted = 0 AND {pk} IN (
                         SELECT topic_id FROM publish_log
                         WHERE blog_id = ? AND topic_id IS NOT NULL
                     )
@@ -145,7 +155,7 @@ def pick_topic_by_id(topic_table, blog_id):
 
         topic = dict(row)
         logger.info(
-            f"[{blog_id}] Picked topic id={topic['topic_id']}, "
+            f"[{blog_id}] Picked topic id={topic[pk]}, "
             f"city={topic.get('city','')}, slug={topic.get('slug','')}, "
             f"remaining={remaining - 1}"
         )
@@ -188,8 +198,9 @@ def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url=""):
         )
 
         # topics 테이블 exhausted 마킹 (PK 기준)
+        pk2 = _get_pk_col(conn, topic_table)
         conn.execute(
-            f"UPDATE {topic_table} SET exhausted = 1 WHERE topic_id = ?",
+            f"UPDATE {topic_table} SET exhausted = 1 WHERE {pk2} = ?",
             (topic_id,)
         )
 
