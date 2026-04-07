@@ -6,6 +6,8 @@ import sqlite3
 import logging
 from datetime import datetime
 from openai import OpenAI
+from dotenv import load_dotenv
+load_dotenv('/Users/twinssn/Projects/5000/.env')
 
 logger = logging.getLogger(__name__)
 
