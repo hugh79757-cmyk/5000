@@ -267,6 +267,13 @@ def run(blog_cfg):
     )
 
     c = conn.cursor()
+    if result and result.get("reason") == "duplicate_source_id":
+        c.execute("UPDATE topics SET status='published', published_at=? WHERE id=?",
+                  (datetime.now().isoformat(), topic['id']))
+        conn.commit()
+        conn.close()
+        logger.warning(blog_id + " duplicate_source_id → topics published 처리: " + str(topic['car_id']))
+        return result
     c.execute(
         "INSERT INTO publish_log (topic_id, site, title, slug, published_at, image_url, r2_url) VALUES (?,?,?,?,?,?,?)",
         (topic['id'], car_site_id, title, slug, datetime.now().isoformat(), origin_url or "", r2_url or "")

@@ -158,9 +158,9 @@ def generate_deals_guide(topic):
             cal_by_dest[c["destination"]].append(c)
         lines.append(f"\nPRICE CALENDAR ({len(calendar_data)} date-price points across {len(cal_by_dest)} destinations):")
         for dest, entries in sorted(cal_by_dest.items(), key=lambda x: min(e["price"] for e in x[1]))[:10]:
-            cheapest = min(entries, key=lambda x: x["price"])
+            cheapest_cal = min(entries, key=lambda x: x["price"])
             dest_city = airport_cities.get(dest, dest)
-            lines.append(f"  {dest_city} ({dest}): cheapest ${cheapest['price']:.0f} on {cheapest['date']} ({len(entries)} dates tracked)")
+            lines.append(f"  {dest_city} ({dest}): cheapest ${cheapest_cal['price']:.0f} on {cheapest_cal['date']} ({len(entries)} dates tracked)")
 
     summary = "\n".join(lines)
 

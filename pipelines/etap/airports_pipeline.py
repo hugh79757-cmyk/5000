@@ -28,7 +28,7 @@ def _get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, site_path=None, category=None):
+def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, site_path=None, category=None, is_draft=False):
     slug = article["slug"]
     post_dir = os.path.join(site_path, "content", "posts", slug)
     os.makedirs(post_dir, exist_ok=True)
@@ -53,6 +53,8 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     fm += "tags:\n" + tags_str + "\n"
     fm += f'categories:\n  - "{category}"\n'
     fm += "showTableOfContents: true\n"
+    if is_draft:
+        fm += "draft: true\n"
     fm += "---\n"
     content = article["content"]
     content = inject_internal_links(content, current_blog=blog_id, max_links=5)
@@ -185,7 +187,7 @@ def run():
     iata = article.get("iata", "")
     cover = fetch_city_image(city or iata, country, article["slug"]) if city else None
     body = fetch_body_images(city or iata, country, article["slug"], count=2) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY, is_draft=article.get('_draft', False))
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"], "airport in " + city, 60, 1)
