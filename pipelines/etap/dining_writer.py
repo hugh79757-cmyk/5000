@@ -3,6 +3,25 @@ import os, sqlite3, logging, re
 from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_restaurants, postprocess_content
 
+PRICE_LABEL = {
+    "$":    "Budget (under $30)",
+    "$$":   "Moderate ($30-$70)",
+    "$$$":  "Expensive ($70-$150)",
+    "$$$$": "Very Expensive (over $150)",
+    "€":    "Budget (under €30)",
+    "€€":   "Moderate (€30-€70)",
+    "€€€":  "Expensive (€70-€150)",
+    "€€€€": "Very Expensive (over €150)",
+    "¥":    "Budget (under ¥3,000)",
+    "¥¥":   "Moderate (¥3,000-¥8,000)",
+    "¥¥¥":  "Expensive (¥8,000-¥20,000)",
+    "¥¥¥¥": "Very Expensive (over ¥20,000)",
+    "£":    "Budget (under £30)",
+    "££":   "Moderate (£30-£70)",
+    "£££":  "Expensive (£70-£150)",
+    "££££": "Very Expensive (over £150)",
+}
+
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
@@ -73,7 +92,7 @@ def _build_summary(restaurants, city):
         if tier_list:
             summary += f"[{tier.upper()}]\n"
             for r in tier_list[:8]:
-                price_str = r["price"] if r["price"] else "Price N/A"
+                price_str = PRICE_LABEL.get(r["price"], r["price"]) if r["price"] else "Price N/A"
                 desc = (r["description"] or "")[:120]
                 summary += f"- {r['name']} | {r['cuisine']} | {price_str} | {desc}\n"
             summary += "\n"
@@ -82,7 +101,7 @@ def _build_summary(restaurants, city):
     if selected:
         summary += "[MICHELIN SELECTED]\n"
         for r in selected[:5]:
-            price_str = r["price"] if r["price"] else "Price N/A"
+            price_str = PRICE_LABEL.get(r["price"], r["price"]) if r["price"] else "Price N/A"
             summary += f"- {r['name']} | {r['cuisine']} | {price_str}\n"
         summary += "\n"
 

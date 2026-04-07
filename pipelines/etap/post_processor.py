@@ -21,7 +21,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
 
     cards = products[:max_cards]
     lines = ['\n\n<div class="etap-product-cards">\n']
-    lines.append("## Top Tours & Activities\n\n")
+    lines.append('<h2 class="etap-card-title">Top Tours &amp; Activities</h2>\n\n')
 
     for p in cards:
         name = p.get("name", "")
@@ -69,10 +69,10 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
     card_block = "".join(lines)
 
     # 삽입 위치: 마지막 H2 "Travel Tips" 앞, 없으면 본문 끝
-    # First try: insert before product cards div
+    # 이미 카드 블록이 있으면 중복 삽입 방지
     cards_pos = content.find('<div class="etap-product-cards">')
     if cards_pos > 0:
-        return content[:cards_pos] + table_block + "\n\n" + content[cards_pos:]
+        return content
 
     tips_match = re.search(r'^## (?:Travel Tips|Budget Breakdown|Getting Around)', content, re.MULTILINE)
     if tips_match:
