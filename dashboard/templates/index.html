@@ -44,6 +44,12 @@
             .charts-grid { grid-template-columns: 1fr; }
             .cards { grid-template-columns: repeat(2, 1fr); }
         }
+
+        th.sortable { cursor: pointer; user-select: none; position: relative; }
+        th.sortable:hover { color: #fff; }
+        th.sortable::after { content: '⇅'; margin-left: 4px; font-size: 10px; color: #555; }
+        th.sortable.asc::after { content: '▲'; color: #22c55e; }
+        th.sortable.desc::after { content: '▼'; color: #22c55e; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
@@ -108,7 +114,7 @@
     <div class="section">
         <h2>트래픽 소스 (7일)</h2>
         <table>
-            <thead><tr><th>채널</th><th>세션</th><th>PV</th><th>사용자</th><th>비율</th></tr></thead>
+            <thead><tr><th class="sortable" data-col="0" data-type="text">채널</th><th class="sortable" data-col="1" data-type="num">세션</th><th class="sortable" data-col="2" data-type="num">PV</th><th class="sortable" data-col="3" data-type="num">사용자</th><th>비율</th></tr></thead>
             <tbody>
             {% set total_sessions = traffic|map(attribute='sessions')|sum %}
             {% for t in traffic %}
@@ -137,7 +143,7 @@
         <h2>블로그별 성과 (7일)</h2>
         <table>
             <thead>
-                <tr><th>블로그</th><th>그룹</th><th>등급</th><th>클릭</th><th>노출</th><th>평균순위</th><th>점수</th></tr>
+                <tr><th class="sortable" data-col="0" data-type="text">블로그</th><th class="sortable" data-col="1" data-type="text">그룹</th><th class="sortable" data-col="2" data-type="text">등급</th><th class="sortable" data-col="3" data-type="num">클릭</th><th class="sortable" data-col="4" data-type="num">노출</th><th class="sortable" data-col="5" data-type="num">평균순위</th><th class="sortable" data-col="6" data-type="num">점수</th></tr>
             </thead>
             <tbody>
             {% for b in blog_stats %}
@@ -190,7 +196,7 @@
     <div class="section">
         <h2>상위 키워드 (7일)</h2>
         <table>
-            <thead><tr><th>블로그</th><th>키워드</th><th>클릭</th><th>노출</th><th>순위</th></tr></thead>
+            <thead><tr><th class="sortable" data-col="0" data-type="text">블로그</th><th class="sortable" data-col="1" data-type="text">키워드</th><th class="sortable" data-col="2" data-type="num">클릭</th><th class="sortable" data-col="3" data-type="num">노출</th><th class="sortable" data-col="4" data-type="num">순위</th></tr></thead>
             <tbody>
             {% for k in keywords %}
             <tr>
@@ -210,7 +216,7 @@
     <div class="section">
         <h2>♻️ 리사이클 키워드 (노출 O, 클릭 X)</h2>
         <table>
-            <thead><tr><th>블로그</th><th>키워드</th><th>노출</th><th>순위</th></tr></thead>
+            <thead><tr><th class="sortable" data-col="0" data-type="text">블로그</th><th class="sortable" data-col="1" data-type="text">키워드</th><th class="sortable" data-col="2" data-type="num">노출</th><th class="sortable" data-col="3" data-type="num">순위</th></tr></thead>
             <tbody>
             {% for r in recycle %}
             <tr>
@@ -275,6 +281,34 @@
         }
     });
     {% endif %}
+    </script>
+
+    <script>
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', function() {
+            const table = this.closest('table');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const col = parseInt(this.dataset.col);
+            const type = this.dataset.type;
+            const isAsc = this.classList.contains('asc');
+
+            table.querySelectorAll('th.sortable').forEach(h => h.classList.remove('asc','desc'));
+            this.classList.add(isAsc ? 'desc' : 'asc');
+
+            rows.sort((a, b) => {
+                let va = a.cells[col]?.textContent.trim() || '';
+                let vb = b.cells[col]?.textContent.trim() || '';
+                if (type === 'num') {
+                    va = parseFloat(va.replace(/[,$%]/g, '')) || 0;
+                    vb = parseFloat(vb.replace(/[,$%]/g, '')) || 0;
+                    return isAsc ? vb - va : va - vb;
+                }
+                return isAsc ? vb.localeCompare(va, 'ko') : va.localeCompare(vb, 'ko');
+            });
+            rows.forEach(r => tbody.appendChild(r));
+        });
+    });
     </script>
 </body>
 </html>

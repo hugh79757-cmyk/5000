@@ -215,9 +215,6 @@ sites:
 - domain: keyword.aikorea24.kr
   blog_id: keyword-hugo
   group: main
-- domain: keywords.rotcha.kr
-  blog_id: keywords-hugo
-  group: car
 - domain: kuta.informationhot.kr
   blog_id: kuta-hugo
   group: gap
