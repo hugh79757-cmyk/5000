@@ -207,7 +207,15 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], top_n: int = 50):
         return 0
 
     start = idx + len(target)
-    end   = content.find("]", start)
+    # 중첩 대괄호를 고려해 올바른 닫는 ] 위치 탐색
+    depth, pos = 1, start
+    while pos < len(content) and depth > 0:
+        if content[pos] == "[":
+            depth += 1
+        elif content[pos] == "]":
+            depth -= 1
+        pos += 1
+    end = pos - 1  # 실제 닫는 ] 위치
     existing_block = content[start:end]
     existing = {
         k.strip().strip('"\'')
