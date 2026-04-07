@@ -142,8 +142,14 @@ def is_cache_valid(keyword):
     row = conn.execute(
         "SELECT MAX(collected_at) FROM products WHERE keyword=?", (keyword,)
     ).fetchone()
+    # 상품 수 체크 — 3개 미만이면 캐시 무효
+    cnt = conn.execute(
+        "SELECT COUNT(*) FROM products WHERE keyword=?", (keyword,)
+    ).fetchone()[0]
     conn.close()
     if not row or not row[0]:
+        return False
+    if cnt < 3:
         return False
     last = datetime.fromisoformat(row[0])
     return datetime.now() - last < timedelta(days=CACHE_DAYS)
