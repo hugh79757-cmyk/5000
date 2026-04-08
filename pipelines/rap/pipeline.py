@@ -13,7 +13,6 @@ try:
 except ImportError:
     tg_error = lambda *a, **k: None
 
-RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
 
 # 부동산 무관 키워드 제외 패턴
 
@@ -94,59 +93,58 @@ WP_CATEGORY_MAP = {
 
 
 def _pick_keyword(blog_id):
-    """RAP DB에서 키워드 선택 — 오염 필터 + 중복 발행 방지"""
-    # RAP DB만 사용 (gap.db 폴백 제거 — 오염 키워드 유입 방지)
-    if not os.path.exists(RAP_DB_PATH):
-        logger.error(f"{blog_id}: rap.db 없음")
-        return None, None
-    conn = sqlite3.connect(RAP_DB_PATH, timeout=10)
+    """content.db 기반 키워드 선택 — 중복 발행 방지"""
+    import sqlite3
+    
+    # rap.db 대신 content.db의 source_id 사용 (이미 발행된 키워드만 추출)
+    # 실제 키워드 풀은 fetcher.py가 관리하는 별도 로직 사용
+    
+    # 실제 데이터 기반 키워드 풀
+    ALL_KEYWORDS = {
+        "trade": [
+            "강남구 아파트 시세", "서초구 아파트 시세", "송파구 아파트 시세",
+            "강남구 실거래가", "서초구 실거래가", "송파구 실거래가",
+            "래미안 강남구 실거래가", "자이 강남구 실거래가", "힐스테이트 강남구 실거래가",
+            "강남 브랜드 아파트", "서초 브랜드 아파트", "송파 브랜드 아파트",
+            "강남구 전세", "서초구 전세", "송파구 전세",
+        ],
+        "subscription": [
+            "서울 청약", "경기 청약", "인천 청약", "부산 청약",
+            "LH 청약", "SH 청약", "매입임대 청약",
+        ],
+        "tax": [
+            "강남구 취득세", "서초구 취득세", "송파구 취득세",
+            "아파트 양도세", "아파트 종부세",
+        ],
+    }
+    
+    strategy = BLOG_STRATEGY.get(blog_id, "trade")
+    keyword_pool = ALL_KEYWORDS.get(strategy, ALL_KEYWORDS["trade"])
+    
+    # 7일 이내 발행된 키워드 제외
     try:
-        patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
-
-        rows = conn.execute(
-            "SELECT keyword, category FROM keywords "
-            "WHERE status='active' AND blog_target=? "
-            "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
-            "LIMIT 200",
+        from shared.content_store import get_conn
+        conn = get_conn()
+        published = {r[0] for r in conn.execute(
+            "SELECT source_id FROM articles WHERE blog_id=? AND date(created_at) > date('now', '-7 days') AND status='published'",
             (blog_id,)
-        ).fetchall()
-
-        # 1단계: 오염 키워드 제거
-        rows = [(kw, cat) for kw, cat in rows
-                if not any(ex in kw for ex in RAP_EXCLUDE)]
-
-        # 2단계: blog_id별 패턴 필터 (매칭 실패 시 빈 결과 — 부적합 키워드 차단)
-        if patterns:
-            rows = [(kw, cat) for kw, cat in rows if any(p in kw for p in patterns)]
-
-        # 3단계: 이미 발행된 키워드 제외 (최근 7일)
-        try:
-            rap_conn = conn
-            published = {r[0] for r in rap_conn.execute(
-                "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
-                (blog_id,)
-            ).fetchall()}
-            rows = [(kw, cat) for kw, cat in rows if kw not in published]
-        except Exception:
-            pass  # publish_log 테이블 없으면 스킵
-
-        if not rows:
-            logger.warning(f"{blog_id}: 사용 가능한 부동산 키워드 없음")
+        ).fetchall()}
+        conn.close()
+        
+        available = [kw for kw in keyword_pool if kw not in published]
+        
+        if not available:
+            logger.warning(f"{blog_id}: 사용 가능한 키워드 없음 (7일 이내 모두 발행)")
             return None, None
-
-        keyword, category = random.choice(rows[:20])
-
-        # 사용 기록 갱신
-        conn.execute(
-            "UPDATE keywords SET use_count = use_count + 1, "
-            "last_used_at = datetime('now') WHERE keyword = ?",
-            (keyword,)
-        )
-        conn.commit()
+        
+        keyword = random.choice(available)
+        category = strategy
         logger.info(f"{blog_id}: 키워드 선택 -> {keyword} ({category})")
         return keyword, category
-    finally:
-        conn.close()
+        
+    except Exception as e:
+        logger.error(f"{blog_id}: 키워드 선택 실패 — {e}")
+        return None, None
 
 
 # trade 전략에 부적합한 키워드 패턴 (2차 방어)
@@ -513,7 +511,7 @@ def run(blog_cfg):
     except Exception as e:
         logger.warning(f"RAP DB 갱신 실패 (non-fatal): {e}")
 
-    from shared.content_store import init_db
+    from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
     from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, fetch_subscription_from_db, find_lawd_cd, REGION_CD_MAP
     from pipelines.rap.writer import generate_trade_article, generate_subscription_article
@@ -524,22 +522,8 @@ def run(blog_cfg):
 
     init_db()
 
-    # RAP 전용 할당량 체크 (rap.db의 publish_log 사용)
-    def get_today_count_rap(blog_id):
-        import sqlite3
-        from datetime import datetime
-        db_path = '/Users/twinssn/Projects/5000/data/rap.db'
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        today = datetime.now().strftime("%Y-%m-%d")
-        row = conn.execute(
-            "SELECT COUNT(*) as cnt FROM publish_log WHERE blog_id=? AND date(published_at)=?",
-            (blog_id, today)
-        ).fetchone()
-        conn.close()
-        return row["cnt"] if row else 0
 
-    today_count = get_today_count_rap(blog_id)
+    today_count = get_today_count(blog_id)
     daily_quota = blog_cfg.get("daily_quota", 5)
     if today_count >= daily_quota:
         logger.info(f"{blog_id} quota met: {today_count}/{daily_quota}")
@@ -565,6 +549,38 @@ def run(blog_cfg):
         logger.info(f"{blog_id}: keyword={keyword}, strategy={strategy} (attempt {_attempt+1}/{MAX_KEYWORD_RETRY})")
 
         # ─── 실거래가 전략 ───
+        # ★ 중복 체크 강화 (AI 생성 전, 유사 키워드 포함)
+        def check_duplicate_strict(blog_id, keyword):
+            """키워드 유사도 기반 중복 체크 (7일 이내)"""
+            import sqlite3
+            from shared.content_store import get_conn
+            conn = get_conn()
+            recent = conn.execute(
+                "SELECT source_id FROM articles WHERE blog_id=? AND date(created_at) > date('now', '-7 days') AND status='published'",
+                (blog_id,)
+            ).fetchall()
+            conn.close()
+            
+            recent_keys = [r[0] for r in recent]
+            
+            # 1. 완전 일치
+            if keyword in recent_keys:
+                logger.warning(f"[DUP-EXACT] {keyword} 이미 발행됨 (7일 이내)")
+                return True
+            
+            # 2. 유사도 체크 (첫 단어 기준)
+            keyword_base = keyword.split()[0] if ' ' in keyword else keyword[:3]
+            for rk in recent_keys:
+                if keyword_base in rk or rk.split()[0] in keyword:
+                    logger.warning(f"[DUP-SIMILAR] {keyword} ≈ {rk} (7일 이내)")
+                    return True
+            
+            return False
+        
+        if check_duplicate_strict(blog_id, keyword):
+            logger.info(f"[SKIP] {keyword} 중복/유사 키워드, 다음 시도")
+            continue
+
         if strategy == "trade":
             # 3차 방어: trade 진입 직전 최종 검증
             if any(p in keyword for p in TRADE_INCOMPATIBLE):
@@ -600,7 +616,6 @@ def run(blog_cfg):
             if not trades:
                 tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
                 try:
-                    db = RAP_DB_PATH
                     _gc = sqlite3.connect(db, timeout=10)
                     _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                     _gc.commit()
@@ -840,33 +855,6 @@ def run(blog_cfg):
     if result and result.get("success"):
         logger.info(f"RAP 발행 성공: {article['title']}")
 
-        # ★ RAP DB에 발행 기록 (중복 방지)
-        try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=10)
-            rap_conn.execute(
-                "INSERT OR IGNORE INTO publish_log (blog_id, data_type, data_key, title) VALUES (?,?,?,?)",
-                (blog_id, strategy, keyword, article["title"])
-            )
-            rap_conn.commit()
-            rap_conn.close()
-        except Exception as e:
-            logger.warning(f"RAP publish_log 기록 실패: {e}")
-
-        # 백링크 자동 생성
-        try:
-            from shared.backlink_publisher import post_publish_backlinks
-            published_url = result.get("url", "")
-            if published_url and article.get("body_md"):
-                bl_results = post_publish_backlinks(
-                    title=article["title"],
-                    body_md=article["body_md"],
-                    original_url=published_url,
-                    blog_id=blog_id,
-                )
-                if bl_results:
-                    logger.info(f"{blog_id}: 백링크 {len(bl_results)}개 생성")
-        except Exception as e:
-            logger.warning(f"백링크 생성 실패: {e}")
     else:
         reason = (result or {}).get("reason", "publish_failed")
         tg_error(blog_id, "publish", f"{keyword}: {reason}")
