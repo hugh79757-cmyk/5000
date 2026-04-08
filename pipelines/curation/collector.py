@@ -119,9 +119,22 @@ def _generate_signature(method, url_path, query_string=""):
 
 
 def _check_rate_limit():
-    """시간당 8회 제한 (안전 마진 2회)"""
+    """시간당 8회 제한 + 쿠팡 서버 차단 시간 체크"""
     try:
         conn = sqlite3.connect(DB_PATH)
+        conn.execute("CREATE TABLE IF NOT EXISTS api_call_log (id INTEGER PRIMARY KEY AUTOINCREMENT, called_at TEXT DEFAULT (datetime('now')))")
+        conn.execute("CREATE TABLE IF NOT EXISTS api_block_log (id INTEGER PRIMARY KEY, blocked_until TEXT)")
+        blocked = conn.execute("SELECT blocked_until FROM api_block_log WHERE id=1").fetchone()
+        if blocked:
+            from datetime import datetime as _dt
+            try:
+                block_time = _dt.fromisoformat(blocked[0].replace("Z",""))
+                if _dt.now() < block_time:
+                    logger.warning(f"쿠팡 API 서버 차단 중 — {blocked[0]} 까지 대기")
+                    conn.close()
+                    return False
+            except Exception:
+                pass
         count = conn.execute(
             "SELECT COUNT(*) FROM api_call_log WHERE called_at > datetime('now', '-1 hour')"
         ).fetchone()[0]
@@ -158,7 +171,20 @@ def _search_api(keyword, limit=10):
         if resp.status_code == 200:
             data = resp.json()
             if data.get("rCode") == "403":
-                logger.warning(f"쿠팡 API 한도 초과 응답: {data.get('rMessage','')[:80]}")
+                msg = data.get("rMessage", "")
+                logger.warning(f"쿠팡 API 한도 초과 응답: {msg[:80]}")
+                import re as _re
+                m = _re.search(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", msg)
+                if m:
+                    try:
+                        _bc = sqlite3.connect(DB_PATH)
+                        _bc.execute("CREATE TABLE IF NOT EXISTS api_block_log (id INTEGER PRIMARY KEY, blocked_until TEXT)")
+                        _bc.execute("INSERT OR REPLACE INTO api_block_log (id, blocked_until) VALUES (1, ?)", (m.group(1),))
+                        _bc.commit()
+                        _bc.close()
+                        logger.warning(f"쿠팡 API 차단 시간 저장: {m.group(1)}")
+                    except Exception:
+                        pass
                 return []
             return data.get("data", {}).get("productData", [])
         logger.error(f"Search API {resp.status_code}: {keyword}")
