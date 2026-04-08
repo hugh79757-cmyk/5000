@@ -513,6 +513,7 @@ _ETAP_PIPELINE_MAP = {
     "multiday":    ("pipelines.etap.multiday_pipeline",  "run_batch", {}),
     "nature":      ("pipelines.etap.nature_pipeline",    "run_batch", {}),
     "visafree":    ("pipelines.etap.visafree_pipeline",  "run_batch", {}),
+    "flights":     ("pipelines.etap.flight_pipeline",    "run_batch", {}),
     "deals":       ("pipelines.etap.deals_pipeline",     "run_batch", {}),
     "eurail":      ("pipelines.etap.eurail_pipeline",    "run_batch", {}),
     "cruise":      ("pipelines.etap.cruise_pipeline",    "run_batch", {}),

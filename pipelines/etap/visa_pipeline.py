@@ -142,6 +142,7 @@ def _add_product_cards(article):
         (country,)
     ).fetchone()
     if tour:
+        tour = dict(tour)
         cross.append(dict(
             name=tour["product_name"], price=tour["price"],
             currency=tour.get("currency","USD"), discount="",
