@@ -134,6 +134,10 @@ def run_publish(blog_id):
         if result.stdout:
             for line in result.stdout.strip().split("\n")[-3:]:
                 logger.info("  " + line)
+                # rate_limited는 일시적 차단이므로 CRITICAL 알림 제외
+                if "[FAIL]" in line and "rate_limited" in line:
+                    logger.warning(f"  {blog_id} rate_limited — 텔레그램 알림 생략")
+                    return False
         if result.returncode != 0 and result.stderr:
             logger.error("  ERR: " + result.stderr[-200:])
             _tg_error(blog_id, "scheduler", result.stderr[-300:])
