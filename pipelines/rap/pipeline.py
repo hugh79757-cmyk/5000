@@ -513,7 +513,7 @@ def run(blog_cfg):
     except Exception as e:
         logger.warning(f"RAP DB 갱신 실패 (non-fatal): {e}")
 
-    from shared.content_store import init_db, get_today_count
+    from shared.content_store import init_db
     from shared.publisher import publish
     from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, fetch_subscription_from_db, find_lawd_cd, REGION_CD_MAP
     from pipelines.rap.writer import generate_trade_article, generate_subscription_article
@@ -523,7 +523,23 @@ def run(blog_cfg):
     logger.info(f"RAP pipeline: {blog_id}")
 
     init_db()
-    today_count = get_today_count(blog_id)
+
+    # RAP 전용 할당량 체크 (rap.db의 publish_log 사용)
+    def get_today_count_rap(blog_id):
+        import sqlite3
+        from datetime import datetime
+        db_path = '/Users/twinssn/Projects/5000/data/rap.db'
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        today = datetime.now().strftime("%Y-%m-%d")
+        row = conn.execute(
+            "SELECT COUNT(*) as cnt FROM publish_log WHERE blog_id=? AND date(published_at)=?",
+            (blog_id, today)
+        ).fetchone()
+        conn.close()
+        return row["cnt"] if row else 0
+
+    today_count = get_today_count_rap(blog_id)
     daily_quota = blog_cfg.get("daily_quota", 5)
     if today_count >= daily_quota:
         logger.info(f"{blog_id} quota met: {today_count}/{daily_quota}")
@@ -774,9 +790,9 @@ def run(blog_cfg):
     if _hal_issues:
         logger.warning(f"[QUALITY] {blog_id} score={_quality_score}/100: {_hal_issues}")
 
-    if _quality_score < 60:
+    if _quality_score < 70:
         _is_draft = True
-        logger.error(f"[QUALITY-GATE] {blog_id} score={_quality_score} → DRAFT 전환 (60점 미만)")
+        logger.error(f"[QUALITY-GATE] {blog_id} score={_quality_score} → DRAFT 전환 (70점 미만)")
         try:
             tg_error(blog_id, "quality_gate", f"품질 {_quality_score}점 → 발행 차단\n키워드: {keyword}\n사유: {_hal_issues}")
         except Exception:
