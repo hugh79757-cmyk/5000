@@ -93,49 +93,63 @@ WP_CATEGORY_MAP = {
 
 
 def _pick_keyword(blog_id):
-    """content.db 기반 키워드 선택 — 중복 발행 방지"""
+    """rap.db keywords 테이블에서 키워드 선택 (기존 로직 복원)"""
     import sqlite3
     
-    # rap.db 대신 content.db의 source_id 사용 (이미 발행된 키워드만 추출)
-    # 실제 키워드 풀은 fetcher.py가 관리하는 별도 로직 사용
+    rap_db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
     
-    # 실제 데이터 기반 키워드 풀
-    ALL_KEYWORDS = {
-        "trade": [
-            "강남구 아파트 시세", "서초구 아파트 시세", "송파구 아파트 시세",
-            "강남구 실거래가", "서초구 실거래가", "송파구 실거래가",
-            "래미안 강남구 실거래가", "자이 강남구 실거래가", "힐스테이트 강남구 실거래가",
-            "강남 브랜드 아파트", "서초 브랜드 아파트", "송파 브랜드 아파트",
-            "강남구 전세", "서초구 전세", "송파구 전세",
-        ],
-        "subscription": [
-            "서울 청약", "경기 청약", "인천 청약", "부산 청약",
-            "LH 청약", "SH 청약", "매입임대 청약",
-        ],
-        "tax": [
-            "강남구 취득세", "서초구 취득세", "송파구 취득세",
-            "아파트 양도세", "아파트 종부세",
-        ],
-    }
-    
-    strategy = BLOG_STRATEGY.get(blog_id, "trade")
-    keyword_pool = ALL_KEYWORDS.get(strategy, ALL_KEYWORDS["trade"])
-    
-    # 7일 이내 발행된 키워드 제외
     try:
+        conn = sqlite3.connect(rap_db_path, timeout=10)
+        conn.row_factory = sqlite3.Row
+        
+        # rap.db에서 blog_target에 맞는 키워드 조회
+        rows = conn.execute(
+            "SELECT keyword, category FROM keywords "
+            "WHERE status='active' AND blog_target=? "
+            "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
+            "LIMIT 200",
+            (blog_id,)
+        ).fetchall()
+        
+        if not rows:
+            logger.warning(f"{blog_id}: keywords 테이블에 해당 블로그 키워드 없음")
+            conn.close()
+            return None, None
+        
+        # 7일 이내 발행된 키워드 제외 (content.db 기반)
         from shared.content_store import get_conn
-        conn = get_conn()
-        published = {r[0] for r in conn.execute(
+        content_conn = get_conn()
+        published = {r[0] for r in content_conn.execute(
             "SELECT source_id FROM articles WHERE blog_id=? AND date(created_at) > date('now', '-7 days') AND status='published'",
             (blog_id,)
         ).fetchall()}
-        conn.close()
+        content_conn.close()
         
-        available = [kw for kw in keyword_pool if kw not in published]
+        available = [(kw, cat) for kw, cat in rows if kw not in published]
         
         if not available:
             logger.warning(f"{blog_id}: 사용 가능한 키워드 없음 (7일 이내 모두 발행)")
+            conn.close()
             return None, None
+        
+        # 랜덤 선택
+        import random
+        keyword, category = random.choice(available[:20])
+        
+        # 사용 기록 갱신
+        conn.execute(
+            "UPDATE keywords SET use_count = use_count + 1, last_used_at = datetime('now') WHERE keyword = ?",
+            (keyword,)
+        )
+        conn.commit()
+        conn.close()
+        
+        logger.info(f"{blog_id}: 키워드 선택 -> {keyword} ({category})")
+        return keyword, category
+        
+    except Exception as e:
+        logger.error(f"{blog_id}: 키워드 선택 실패 — {e}")
+        return None, None
         
         keyword = random.choice(available)
         category = strategy
