@@ -408,6 +408,10 @@ def _run_inner(cfg, blog_id, daily_quota):
     # 상품 수집 (캐시 또는 API)
     collected = collect_keyword(keyword)
     if not collected:
+        from pipelines.curation.collector import _check_rate_limit
+        if not _check_rate_limit():
+            logger.warning(f"[{blog_id}] 쿠팡 API 차단 중 — 다음 실행 시 재시도")
+            return {"success": False, "reason": "rate_limited"}
         logger.error(f"[{blog_id}] 상품 수집 실패: {keyword}")
         return {"success": False, "reason": "collect_error"}
 
