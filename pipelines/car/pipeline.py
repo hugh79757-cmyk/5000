@@ -36,7 +36,7 @@ def _select_car_image(conn, car_id, slug):
     ).fetchall()
     used_urls = {r['image_url'] for r in used} if used else set()
     images = c.execute(
-        "SELECT image_url, source FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
+        "SELECT image_url, source FROM car_images WHERE car_id = ? AND verified = 1 ORDER BY RANDOM()",
         (car_id,)
     ).fetchall()
     candidates = [img['image_url'] for img in images if img['image_url'] not in used_urls]
@@ -46,7 +46,7 @@ def _select_car_image(conn, car_id, slug):
         base_id = re.sub(r'_(hev|phev|ev|25|35|lpg)(?=_)', '', car_id)
         if base_id != car_id:
             fallback_imgs = c.execute(
-                "SELECT image_url FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
+                "SELECT image_url FROM car_images WHERE car_id = ? AND verified = 1 ORDER BY RANDOM()",
                 (base_id,)
             ).fetchall()
             candidates = [img['image_url'] for img in fallback_imgs if img['image_url'] not in used_urls]
