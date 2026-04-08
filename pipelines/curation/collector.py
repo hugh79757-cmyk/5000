@@ -118,7 +118,33 @@ def _generate_signature(method, url_path, query_string=""):
     return {"Authorization": authorization, "Content-Type": "application/json"}
 
 
+def _check_rate_limit():
+    """시간당 8회 제한 (안전 마진 2회)"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        count = conn.execute(
+            "SELECT COUNT(*) FROM api_call_log WHERE called_at > datetime('now', '-1 hour')"
+        ).fetchone()[0]
+        conn.close()
+        return count < 8
+    except Exception:
+        return True
+
+def _log_api_call():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute("CREATE TABLE IF NOT EXISTS api_call_log (id INTEGER PRIMARY KEY AUTOINCREMENT, called_at TEXT DEFAULT (datetime('now')))")
+        conn.execute("INSERT INTO api_call_log (called_at) VALUES (datetime('now'))")
+        conn.execute("DELETE FROM api_call_log WHERE called_at < datetime('now', '-2 hours')")
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
 def _search_api(keyword, limit=10):
+    if not _check_rate_limit():
+        logger.warning(f"쿠팡 API 시간당 한도 초과 — 스킵: {keyword}")
+        return []
     url_path = "/v2/providers/affiliate_open_api/apis/openapi/products/search"
     params = {"keyword": keyword, "limit": limit}
     query_string = urlencode(params)
@@ -128,8 +154,13 @@ def _search_api(keyword, limit=10):
         return []
     try:
         resp = requests.get(f"{BASE_URL}{url_path}?{query_string}", headers=headers, timeout=10)
+        _log_api_call()
         if resp.status_code == 200:
-            return resp.json().get("data", {}).get("productData", [])
+            data = resp.json()
+            if data.get("rCode") == "403":
+                logger.warning(f"쿠팡 API 한도 초과 응답: {data.get('rMessage','')[:80]}")
+                return []
+            return data.get("data", {}).get("productData", [])
         logger.error(f"Search API {resp.status_code}: {keyword}")
         return []
     except Exception as e:
