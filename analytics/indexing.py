@@ -1,148 +1,347 @@
-"""색인 제출 모듈 — Google Indexing API + IndexNow (Bing/Yandex/Naver)"""
-import os
-import sys
-import json
-import sqlite3
-import time
-import hashlib
-import requests
-import yaml
+"""색인 제출 모듈 — Google Indexing API (200/일) + IndexNow (무제한)
+- Google: 오전/오후 100개씩, 사이트 로테이션, 중복 제출 방지
+- IndexNow: 하루 2회, 전체 사이트 미제출 URL만
+- sites.yaml 기반 동적 사이트 목록
+- 최근 7일 이내 lastmod + 제출 이력 DB로 필터
+"""
+import os, sys, json, time, hashlib, sqlite3, requests, yaml
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
+from collections import defaultdict
+from urllib.parse import urlparse
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
+DB_PATH = os.path.join(DATA_DIR, "analytics.db")
+STATE_FILE = os.path.join(DATA_DIR, "indexing_state.json")
+INDEXNOW_KEY_PATH = os.path.join(DATA_DIR, "indexnow_key.txt")
+GOOGLE_PER_RUN = 100
+MAX_URLS_PER_SITE = 5
+RECENT_DAYS = 7
+
+SKIP_PATTERNS = ["/categories", "/tags", "/en/", "/page/", "/search/",
+                 "/archive", "/about", "/contact", "/privacy"]
+
+DOMAIN_ACCOUNT = {
+    "rotcha.kr": "twinssn",
+    "techpawz.com": "twinssn",
+    "informationhot.kr": "informationhot",
+    "aikorea24.kr": "aikorea24",
+    "tistory.com": "twinssn",
+    "farmsolutionint.com": "twinssn",
+}
+
+os.makedirs(LOG_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
 
 
-def load_blogs_map():
-    """blog_id → domain 매핑"""
-    path = os.path.join(PROJECT_ROOT, "config", "blogs.yaml")
-    with open(path, "r") as f:
-        config = yaml.safe_load(f)
-    return {
-        b["id"]: b for b in config.get("blogs", [])
-        if b.get("status") == "active"
-    }
+# ─── DB: 제출 이력 ───
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""CREATE TABLE IF NOT EXISTS indexing_log (
+        url TEXT NOT NULL,
+        engine TEXT NOT NULL,
+        submitted_at TEXT NOT NULL,
+        status TEXT,
+        PRIMARY KEY (url, engine)
+    )""")
+    conn.commit()
+    return conn
 
 
-def get_today_urls(date_str=None):
-    """content.db publish_ledger에서 특정 날짜에 발행된 URL 목록 반환"""
-    db_path = os.path.join(PROJECT_ROOT, "data", "content.db")
-    conn = sqlite3.connect(db_path)
-    c = conn.cursor()
+def is_already_submitted(conn, url, engine):
+    row = conn.execute(
+        "SELECT 1 FROM indexing_log WHERE url=? AND engine=?", (url, engine)
+    ).fetchone()
+    return row is not None
 
-    if date_str is None:
-        date_str = datetime.now().strftime("%Y-%m-%d")
 
-    try:
-        c.execute("""
-            SELECT blog_id, published_url, created_at
-            FROM publish_ledger
-            WHERE date(created_at) = ?
-              AND published_url NOT LIKE 'pending://%'
-              AND status = 'published'
-            ORDER BY created_at
-        """, (date_str,))
-        rows = c.fetchall()
-    except Exception as e:
-        print(f"[ERR] publish_ledger 조회 실패: {e}")
-        conn.close()
-        return []
+def mark_submitted(conn, url, engine, status="ok"):
+    conn.execute(
+        "INSERT OR REPLACE INTO indexing_log (url, engine, submitted_at, status) VALUES (?,?,?,?)",
+        (url, engine, datetime.now().isoformat(), status)
+    )
+    conn.commit()
 
-    conn.close()
 
-    blogs = load_blogs_map()
-    urls = []
-    for blog_id, published_url, created_at in rows:
-        blog = blogs.get(blog_id)
-        if not blog:
+# ─── 사이트 목록 ───
+
+def load_sites():
+    path = os.path.join(PROJECT_ROOT, "dashboard", "sites.yaml")
+    with open(path) as f:
+        data = yaml.safe_load(f)
+    sites = []
+    for s in data.get("sites", []):
+        domain = s.get("domain", "").strip()
+        if domain:
+            sites.append(domain)
+    return sorted(sites)
+
+
+def get_root_domain(domain):
+    parts = domain.split(".")
+    return ".".join(parts[-2:])
+
+
+def get_account_for_domain(domain):
+    root = get_root_domain(domain)
+    return DOMAIN_ACCOUNT.get(root, "twinssn")
+
+
+# ─── 로테이션 상태 ───
+
+def load_state():
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE) as f:
+            return json.load(f)
+    return {"last_date": "", "last_offset": 0, "run_count": 0}
+
+
+def save_state(state):
+    with open(STATE_FILE, "w") as f:
+        json.dump(state, f, indent=2)
+
+
+# ─── 사이트맵 파싱 (최근 7일 + 미제출만) ───
+
+def fetch_new_urls(domain, conn, engine, max_urls=5):
+    """사이트맵 또는 Atom 피드에서 최근 7일 이내 & 미제출 URL만 반환"""
+    cutoff = (datetime.now() - timedelta(days=RECENT_DAYS)).strftime("%Y-%m-%d")
+    entries = _fetch_from_sitemap(domain, cutoff)
+    if not entries:
+        entries = _fetch_from_atom(domain, cutoff)
+
+    result = []
+    for u, mod in entries:
+        if is_already_submitted(conn, u, engine):
             continue
-        domain = blog.get("domain", "")
-        urls.append({
-            "url": published_url,
-            "blog_id": blog_id,
-            "domain": domain,
-            "published_at": created_at,
-            "language": blog.get("language", "ko"),
-        })
+        result.append(u)
+        if len(result) >= max_urls:
+            break
+    return result
 
-    return urls
+
+def _fetch_from_sitemap(domain, cutoff):
+    """sitemap.xml에서 최근 URL 추출"""
+    site_url = f"https://{domain}"
+    candidates = [f"{site_url}/sitemap.xml", f"{site_url}/sitemap-index.xml"]
+
+    for sitemap_url in candidates:
+        try:
+            resp = requests.get(sitemap_url, timeout=10)
+            if resp.status_code != 200:
+                continue
+
+            root = ET.fromstring(resp.content)
+            ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
+
+            sitemaps = root.findall("s:sitemap/s:loc", ns)
+            if sitemaps:
+                sub_url = None
+                for sm in sitemaps:
+                    if "/en/" in sm.text:
+                        continue
+                    sub_url = sm.text
+                    break
+                if not sub_url:
+                    sub_url = sitemaps[0].text
+                try:
+                    sub_resp = requests.get(sub_url, timeout=10)
+                    if sub_resp.status_code == 200:
+                        root = ET.fromstring(sub_resp.content)
+                except Exception:
+                    continue
+
+            entries = []
+            has_lastmod = False
+            for url_elem in root.findall("s:url", ns):
+                loc = url_elem.find("s:loc", ns)
+                lastmod = url_elem.find("s:lastmod", ns)
+                if loc is None or not loc.text:
+                    continue
+                u = loc.text
+                mod = lastmod.text[:10] if lastmod is not None and lastmod.text else None
+
+                if mod:
+                    has_lastmod = True
+                if not mod or mod < cutoff:
+                    continue
+                upath = urlparse(u).path.rstrip("/")
+                if not upath:
+                    continue
+                if any(p in u for p in SKIP_PATTERNS):
+                    continue
+                entries.append((u, mod))
+
+            if has_lastmod and entries:
+                entries.sort(key=lambda x: x[1], reverse=True)
+                return entries
+            # lastmod 없는 사이트맵 → Atom 폴백
+            if not has_lastmod:
+                return []
+            return entries
+        except Exception:
+            continue
+    return []
+
+
+def _fetch_from_atom(domain, cutoff):
+    """Blogger/Tistory Atom 피드에서 최근 URL 추출"""
+    feed_urls = [
+        f"https://{domain}/atom.xml?redirect=false&max-results=20",
+        f"https://{domain}/feeds/posts/default?alt=atom&max-results=20",
+        f"https://{domain}/rss",
+    ]
+
+    for feed_url in feed_urls:
+        try:
+            resp = requests.get(feed_url, timeout=10)
+            if resp.status_code != 200:
+                continue
+
+            root = ET.fromstring(resp.content)
+            ns_atom = {"a": "http://www.w3.org/2005/Atom"}
+
+            entries = []
+
+            # Atom 형식
+            for entry in root.findall("a:entry", ns_atom):
+                published = entry.find("a:published", ns_atom)
+                updated = entry.find("a:updated", ns_atom)
+                date_text = (updated.text if updated is not None else
+                             published.text if published is not None else None)
+                if not date_text:
+                    continue
+                mod = date_text[:10]
+                if mod < cutoff:
+                    continue
+
+                # 링크 찾기 (rel=alternate)
+                link = None
+                for l in entry.findall("a:link", ns_atom):
+                    if l.get("rel") == "alternate":
+                        link = l.get("href")
+                        break
+                if not link:
+                    continue
+                if any(p in link for p in SKIP_PATTERNS):
+                    continue
+                entries.append((link, mod))
+
+            if entries:
+                entries.sort(key=lambda x: x[1], reverse=True)
+                return entries
+        except Exception:
+            continue
+    return []
 
 
 # ─── Google Indexing API ───
 
-def submit_google_indexing(urls, verbose=True):
-    """Google Indexing API로 URL 제출"""
+def submit_google(sites, max_total, conn, verbose=True):
     from analytics.auth import get_credentials
-    from googleapiclient.discovery import build
+    from google.auth.transport.requests import Request as AuthRequest
 
-    creds = get_credentials()
-    service = build("indexing", "v3", credentials=creds)
+    account_domains = defaultdict(list)
+    for d in sites:
+        acc = get_account_for_domain(d)
+        account_domains[acc].append(d)
 
-    results = {"success": 0, "fail": 0, "errors": []}
+    total = 0
+    results = {"success": 0, "fail": 0, "skip": 0, "quota_hit": False}
 
-    for item in urls:
-        url = item["url"]
+    for account, doms in account_domains.items():
         try:
-            body = {
-                "url": url,
-                "type": "URL_UPDATED",
-            }
-            resp = service.urlNotifications().publish(body=body).execute()
-            if verbose:
-                print(f"  [Google OK] {url}")
-            results["success"] += 1
+            creds = get_credentials(account)
+            creds.refresh(AuthRequest())
         except Exception as e:
-            err_msg = str(e)
             if verbose:
-                print(f"  [Google FAIL] {url} — {err_msg[:80]}")
-            results["fail"] += 1
-            results["errors"].append({"url": url, "error": err_msg[:200]})
-        time.sleep(0.2)
+                print(f"  [AUTH FAIL] {account}: {e}")
+            continue
+
+        headers = {
+            "Authorization": f"Bearer {creds.token}",
+            "Content-Type": "application/json",
+        }
+
+        for domain in doms:
+            if total >= max_total:
+                results["quota_hit"] = True
+                break
+
+            urls = fetch_new_urls(domain, conn, "google", max_urls=MAX_URLS_PER_SITE)
+            if not urls:
+                results["skip"] += 1
+                continue
+
+            remaining = max_total - total
+            urls = urls[:remaining]
+
+            if verbose:
+                print(f"  {domain}: {len(urls)}개")
+
+            for url in urls:
+                try:
+                    resp = requests.post(
+                        "https://indexing.googleapis.com/v3/urlNotifications:publish",
+                        headers=headers,
+                        json={"url": url, "type": "URL_UPDATED"},
+                        timeout=10,
+                    )
+                    if resp.status_code == 200:
+                        if verbose:
+                            print(f"    [G OK] {url}")
+                        mark_submitted(conn, url, "google", "ok")
+                        results["success"] += 1
+                    elif resp.status_code == 429:
+                        if verbose:
+                            print(f"    [G QUOTA] 쿼터 초과")
+                        results["quota_hit"] = True
+                        return results
+                    else:
+                        if verbose:
+                            print(f"    [G {resp.status_code}] {url}")
+                        results["fail"] += 1
+                except Exception as e:
+                    if verbose:
+                        print(f"    [G ERR] {url} — {e}")
+                    results["fail"] += 1
+                total += 1
+                time.sleep(0.2)
 
     return results
 
 
-# ─── IndexNow (Bing, Yandex, Naver, Seznam, Yep) ───
+# ─── IndexNow ───
 
-INDEXNOW_KEY_PATH = os.path.join(PROJECT_ROOT, "data", "indexnow_key.txt")
-
-
-def get_or_create_indexnow_key():
-    """IndexNow API key 가져오기/생성"""
+def get_indexnow_key():
     if os.path.exists(INDEXNOW_KEY_PATH):
-        with open(INDEXNOW_KEY_PATH, "r") as f:
+        with open(INDEXNOW_KEY_PATH) as f:
             return f.read().strip()
-
-    # 새 키 생성 (32자 hex)
-    key = hashlib.md5(f"5000-indexnow-{datetime.now().isoformat()}".encode()).hexdigest()
+    key = hashlib.md5(f"blogdex-indexnow-{datetime.now().isoformat()}".encode()).hexdigest()
     with open(INDEXNOW_KEY_PATH, "w") as f:
         f.write(key)
-    print(f"[IndexNow] 새 키 생성: {key}")
     return key
 
 
-def submit_indexnow(urls, verbose=True):
-    """
-    IndexNow API로 URL 일괄 제출.
-    한 번 제출하면 Bing, Yandex, Naver, Seznam, Yep에 전파.
-    도메인별로 그룹핑하여 제출.
-    """
-    key = get_or_create_indexnow_key()
+def submit_indexnow(sites, conn, verbose=True):
+    key = get_indexnow_key()
     endpoint = "https://api.indexnow.org/indexnow"
+    results = {"success": 0, "fail": 0, "skip": 0}
 
-    # 도메인별 그룹핑
-    from collections import defaultdict
-    domain_urls = defaultdict(list)
-    for item in urls:
-        domain_urls[item["domain"]].append(item["url"])
+    for domain in sites:
+        urls = fetch_new_urls(domain, conn, "indexnow", max_urls=MAX_URLS_PER_SITE)
+        if not urls:
+            results["skip"] += 1
+            continue
 
-    results = {"success": 0, "fail": 0, "errors": []}
-
-    for domain, url_list in domain_urls.items():
         payload = {
             "host": domain,
             "key": key,
             "keyLocation": f"https://{domain}/{key}.txt",
-            "urlList": url_list,
+            "urlList": urls,
         }
 
         try:
@@ -154,76 +353,73 @@ def submit_indexnow(urls, verbose=True):
             )
             if resp.status_code in (200, 202):
                 if verbose:
-                    print(f"  [IndexNow OK] {domain} — {len(url_list)}개 URL")
-                results["success"] += len(url_list)
+                    print(f"  [IN OK] {domain} — {len(urls)}개")
+                for u in urls:
+                    mark_submitted(conn, u, "indexnow", "ok")
+                results["success"] += len(urls)
             else:
                 if verbose:
-                    print(f"  [IndexNow {resp.status_code}] {domain} — {resp.text[:100]}")
-                results["fail"] += len(url_list)
-                results["errors"].append({
-                    "domain": domain,
-                    "status": resp.status_code,
-                    "body": resp.text[:200],
-                })
+                    print(f"  [IN {resp.status_code}] {domain}")
+                results["fail"] += len(urls)
         except Exception as e:
             if verbose:
-                print(f"  [IndexNow ERR] {domain} — {e}")
-            results["fail"] += len(url_list)
-            results["errors"].append({"domain": domain, "error": str(e)[:200]})
-
-        time.sleep(0.3)
+                print(f"  [IN ERR] {domain} — {e}")
+            results["fail"] += len(urls)
+        time.sleep(0.1)
 
     return results
 
 
-# ─── 메인: 하루 한번 실행 ───
+# ─── 메인 ───
 
-def daily_index_submit(date_str=None, verbose=True):
-    """
-    하루에 한 번 실행: 당일 발행된 모든 URL을 Google + IndexNow로 제출.
-    """
-    if date_str is None:
-        date_str = datetime.now().strftime("%Y-%m-%d")
+def run(verbose=True):
+    sites = load_sites()
+    state = load_state()
+    today = datetime.now().strftime("%Y-%m-%d")
+    conn = get_db()
 
-    urls = get_today_urls(date_str)
+    if state["last_date"] != today:
+        state["last_date"] = today
+        state["last_offset"] = 0
+        state["run_count"] = 0
 
-    if not urls:
-        if verbose:
-            print(f"[{date_str}] 발행된 URL 없음. 스킵.")
-        return {"google": None, "indexnow": None, "total_urls": 0}
+    run_num = state["run_count"] + 1
 
     if verbose:
-        print(f"\n=== 색인 제출 ({date_str}) — {len(urls)}개 URL ===\n")
+        now = datetime.now().strftime("%H:%M:%S")
+        print(f"\n{'='*50}")
+        print(f"색인 제출 #{run_num} ({today} {now})")
+        print(f"전체 사이트: {len(sites)}개")
+        print(f"{'='*50}")
 
-    # 1. Google Indexing API
+    # 1. Google
     if verbose:
-        print("[1/2] Google Indexing API")
-    google_result = submit_google_indexing(urls, verbose=verbose)
+        print(f"\n[Google Indexing] 최대 {GOOGLE_PER_RUN}개")
+    g_result = submit_google(sites, GOOGLE_PER_RUN, conn, verbose=verbose)
 
     # 2. IndexNow
     if verbose:
-        print(f"\n[2/2] IndexNow (Bing/Yandex/Naver)")
-    indexnow_result = submit_indexnow(urls, verbose=verbose)
+        print(f"\n[IndexNow] 전체 사이트")
+    in_result = submit_indexnow(sites, conn, verbose=verbose)
+
+    state["run_count"] = run_num
+    save_state(state)
+
+    log_line = (f"[{datetime.now().isoformat()}] run={run_num} "
+                f"google={g_result['success']}/{g_result['fail']}(skip:{g_result['skip']}) "
+                f"indexnow={in_result['success']}/{in_result['fail']}(skip:{in_result['skip']})\n")
+    log_path = os.path.join(LOG_DIR, "indexing.log")
+    with open(log_path, "a") as f:
+        f.write(log_line)
 
     if verbose:
-        print(f"\n=== 색인 제출 완료 ===")
-        print(f"Google:   {google_result['success']} OK / {google_result['fail']} FAIL")
-        print(f"IndexNow: {indexnow_result['success']} OK / {indexnow_result['fail']} FAIL")
+        print(f"\n=== 결과 ===")
+        print(f"Google:   {g_result['success']} OK / {g_result['fail']} FAIL / {g_result['skip']} skip")
+        print(f"IndexNow: {in_result['success']} OK / {in_result['fail']} FAIL / {in_result['skip']} skip")
 
-    # 제출 기록 저장
-    log_path = os.path.join(PROJECT_ROOT, "logs", "indexing.log")
-    with open(log_path, "a") as f:
-        f.write(f"[{datetime.now().isoformat()}] date={date_str} urls={len(urls)} "
-                f"google={google_result['success']}/{google_result['fail']} "
-                f"indexnow={indexnow_result['success']}/{indexnow_result['fail']}\n")
-
-    return {
-        "google": google_result,
-        "indexnow": indexnow_result,
-        "total_urls": len(urls),
-    }
+    conn.close()
+    return {"google": g_result, "indexnow": in_result}
 
 
 if __name__ == "__main__":
-    date_arg = sys.argv[1] if len(sys.argv) > 1 else None
-    daily_index_submit(date_str=date_arg)
+    run()
