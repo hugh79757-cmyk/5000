@@ -240,7 +240,7 @@ def _fetch_from_atom(domain, cutoff):
 
 # ─── Google Indexing API ───
 
-def submit_google(sites, max_total, conn, verbose=True):
+def submit_google(sites, max_total, conn, verbose=True, urls_per_site=2):
     from analytics.auth import get_credentials
     from google.auth.transport.requests import Request as AuthRequest
 
@@ -271,7 +271,7 @@ def submit_google(sites, max_total, conn, verbose=True):
                 results["quota_hit"] = True
                 break
 
-            urls = fetch_new_urls(domain, conn, "google", max_urls=MAX_URLS_PER_SITE)
+            urls = fetch_new_urls(domain, conn, "google", max_urls=urls_per_site)
             if not urls:
                 results["skip"] += 1
                 continue
@@ -372,6 +372,19 @@ def submit_indexnow(sites, conn, verbose=True):
 
 # ─── 메인 ───
 
+def select_rotation_sites(sites, state, count):
+    """블로그 단위 로테이션: offset부터 count개 블로그 선택"""
+    n = len(sites)
+    if n == 0:
+        return []
+    offset = state.get("last_offset", 0) % n
+    selected = []
+    for i in range(count):
+        idx = (offset + i) % n
+        selected.append(sites[idx])
+    return selected
+
+
 def run(verbose=True):
     sites = load_sites()
     state = load_state()
@@ -384,28 +397,45 @@ def run(verbose=True):
         state["run_count"] = 0
 
     run_num = state["run_count"] + 1
+    n = len(sites)
+
+    # 블로그 수에 따라 사이트당 URL 수 자동 계산
+    # 절반의 블로그를 한 번에 처리, 사이트당 균등 분배
+    blogs_per_run = max(1, n // 2)
+    if blogs_per_run > n:
+        blogs_per_run = n
+    urls_per_site = max(1, GOOGLE_PER_RUN // blogs_per_run)
+    urls_per_site = min(urls_per_site, MAX_URLS_PER_SITE)
+
+    # 로테이션으로 이번 실행 대상 블로그 선택
+    google_sites = select_rotation_sites(sites, state, blogs_per_run)
 
     if verbose:
         now = datetime.now().strftime("%H:%M:%S")
         print(f"\n{'='*50}")
         print(f"색인 제출 #{run_num} ({today} {now})")
-        print(f"전체 사이트: {len(sites)}개")
+        print(f"전체: {n}개 | 이번 대상: {blogs_per_run}개 | 사이트당: {urls_per_site}개")
+        print(f"오프셋: {state.get('last_offset', 0)}")
         print(f"{'='*50}")
 
-    # 1. Google
+    # 1. Google — 로테이션된 블로그만
     if verbose:
         print(f"\n[Google Indexing] 최대 {GOOGLE_PER_RUN}개")
-    g_result = submit_google(sites, GOOGLE_PER_RUN, conn, verbose=verbose)
+    g_result = submit_google(google_sites, GOOGLE_PER_RUN, conn, verbose=verbose,
+                             urls_per_site=urls_per_site)
 
-    # 2. IndexNow
+    # 2. IndexNow — 전체 사이트 (제한 없으므로)
     if verbose:
-        print(f"\n[IndexNow] 전체 사이트")
+        print(f"\n[IndexNow] 전체 {n}개 사이트")
     in_result = submit_indexnow(sites, conn, verbose=verbose)
 
+    # 다음 실행시 후반 블로그부터
+    state["last_offset"] = (state.get("last_offset", 0) + blogs_per_run) % n
     state["run_count"] = run_num
     save_state(state)
 
     log_line = (f"[{datetime.now().isoformat()}] run={run_num} "
+                f"sites={blogs_per_run}/{n} per_site={urls_per_site} "
                 f"google={g_result['success']}/{g_result['fail']}(skip:{g_result['skip']}) "
                 f"indexnow={in_result['success']}/{in_result['fail']}(skip:{in_result['skip']})\n")
     log_path = os.path.join(LOG_DIR, "indexing.log")
@@ -416,6 +446,7 @@ def run(verbose=True):
         print(f"\n=== 결과 ===")
         print(f"Google:   {g_result['success']} OK / {g_result['fail']} FAIL / {g_result['skip']} skip")
         print(f"IndexNow: {in_result['success']} OK / {in_result['fail']} FAIL / {in_result['skip']} skip")
+        print(f"다음 오프셋: {state['last_offset']}")
 
     conn.close()
     return {"google": g_result, "indexnow": in_result}
