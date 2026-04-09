@@ -62,14 +62,12 @@ def _parse_bing_date(date_str):
 
 
 def load_active_blogs():
-    """sites.yaml 기준으로 전체 블로그 로드 (81개)"""
-    path = os.path.join(PROJECT_ROOT, "dashboard", "sites.yaml")
+    path = os.path.join(PROJECT_ROOT, "config", "blogs.yaml")
     with open(path, "r") as f:
-        data = yaml.safe_load(f)
+        config = yaml.safe_load(f)
     return [
-        {"id": s["blog_id"], "domain": s["domain"]}
-        for s in data.get("sites", [])
-        if s.get("domain") and s.get("blog_id")
+        b for b in config.get("blogs", [])
+        if b.get("status") == "active"
     ]
 
 

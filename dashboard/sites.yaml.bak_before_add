@@ -50,10 +50,10 @@ sites:
 - domain: rent.informationhot.kr
   blog_id: rap4-hugo
   group: rap
-- domain: tax.informationhot.kr
+- domain: 5.informationhot.kr
   blog_id: rap3-hugo
   group: rap
-- domain: brand.informationhot.kr
+- domain: 6.informationhot.kr
   blog_id: rap5-hugo
   group: rap
 - domain: senior.informationhot.kr
@@ -83,6 +83,12 @@ sites:
 - domain: brand.informationhot.kr
   blog_id: brand-hugo
   group: curation
+- domain: 7.informationhot.kr
+  blog_id: gap-hugo
+  group: gap
+- domain: 8.informationhot.kr
+  blog_id: gap-kuta
+  group: gap
 - domain: kboplayer.informationhot.kr
   blog_id: kboplayer-hugo
   group: sports
@@ -203,39 +209,6 @@ sites:
 - domain: heritage.aikorea24.kr
   blog_id: heritage-hugo
   group: travel
-- domain: tax.informationhot.kr
-  blog_id: rap3-hugo
-  group: rap
-- domain: keyword.aikorea24.kr
-  blog_id: keyword-hugo
-  group: main
-- domain: kuta.informationhot.kr
-  blog_id: kuta-hugo
-  group: gap
-- domain: ud.informationhot.kr
-  blog_id: ud-hugo
-  group: etc
-- domain: cert.aikorea24.kr
-  blog_id: cert-hugo
-  group: main
-- domain: betguide.informationhot.kr
-  blog_id: betguide-hugo
-  group: sports
-- domain: proto.informationhot.kr
-  blog_id: proto-hugo
-  group: sports
-- domain: protostats.informationhot.kr
-  blog_id: protostats-hugo
-  group: sports
-- domain: fsched.informationhot.kr
-  blog_id: fsched-hugo
-  group: sports
-- domain: fstats.informationhot.kr
-  blog_id: fstats-hugo
-  group: sports
-- domain: achaanstree.tistory.com
-  blog_id: achaanstree
-  group: etc
 groups:
   car:
     name: 자동차

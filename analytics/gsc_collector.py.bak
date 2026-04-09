@@ -38,7 +38,8 @@ def get_db():
 
 def collect_all(days_back=7, verbose=True):
     """sc-domain에서 서브도메인별로 분리하여 gsc_daily_summary에 저장"""
-    from analytics.auth import get_gsc_service_for_domain
+    from analytics.auth import get_gsc_service
+    service = get_gsc_service()
 
     domain_to_blog = load_sites_yaml()
     conn = get_db()
@@ -57,8 +58,6 @@ def collect_all(days_back=7, verbose=True):
     for sc_domain in SC_DOMAINS:
         if verbose:
             print(f"[{sc_domain}]")
-
-        service = get_gsc_service_for_domain(sc_domain)
 
         # 1. Daily summary per subdomain
         try:
@@ -126,7 +125,8 @@ def collect_all(days_back=7, verbose=True):
 
 def collect_keywords(days_back=7, verbose=True):
     """sc-domain에서 키워드별 상세 수집"""
-    from analytics.auth import get_gsc_service_for_domain
+    from analytics.auth import get_gsc_service
+    service = get_gsc_service()
 
     domain_to_blog = load_sites_yaml()
     conn = get_db()
@@ -144,8 +144,6 @@ def collect_keywords(days_back=7, verbose=True):
     for sc_domain in SC_DOMAINS:
         if verbose:
             print(f"[{sc_domain}]", end=" ")
-
-        service = get_gsc_service_for_domain(sc_domain)
 
         # Keywords: date, query, page, device, country
         kw_count = 0

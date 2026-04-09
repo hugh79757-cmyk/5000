@@ -50,10 +50,10 @@ sites:
 - domain: rent.informationhot.kr
   blog_id: rap4-hugo
   group: rap
-- domain: tax.informationhot.kr
+- domain: 5.informationhot.kr
   blog_id: rap3-hugo
   group: rap
-- domain: brand.informationhot.kr
+- domain: 6.informationhot.kr
   blog_id: rap5-hugo
   group: rap
 - domain: senior.informationhot.kr
@@ -83,6 +83,12 @@ sites:
 - domain: brand.informationhot.kr
   blog_id: brand-hugo
   group: curation
+- domain: 7.informationhot.kr
+  blog_id: gap-hugo
+  group: gap
+- domain: 8.informationhot.kr
+  blog_id: gap-kuta
+  group: gap
 - domain: kboplayer.informationhot.kr
   blog_id: kboplayer-hugo
   group: sports
@@ -209,6 +215,9 @@ sites:
 - domain: keyword.aikorea24.kr
   blog_id: keyword-hugo
   group: main
+- domain: keywords.rotcha.kr
+  blog_id: keywords-hugo
+  group: car
 - domain: kuta.informationhot.kr
   blog_id: kuta-hugo
   group: gap

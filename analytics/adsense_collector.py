@@ -7,15 +7,15 @@ DB_PATH = '/Users/twinssn/Projects/5000/data/analytics.db'
 ACCOUNTS = [
     {
         "name": "twinssn",
-        "token_path": "/Users/twinssn/Projects/blogdex/credentials/adsense_token_1_twinssn.pickle",
+        "token_path": "/Users/twinssn/Projects/blogdex/credentials/token_1_twinssn.pickle",
     },
     {
         "name": "informationhot",
-        "token_path": "/Users/twinssn/Projects/blogdex/credentials/adsense_token_2_informationhot.pickle",
+        "token_path": "/Users/twinssn/Projects/blogdex/credentials/token_2_informationhot.pickle",
     },
     {
         "name": "aikorea24",
-        "token_path": "/Users/twinssn/Projects/blogdex/credentials/adsense_token_3_aikorea24.pickle",
+        "token_path": "/Users/twinssn/Projects/blogdex/credentials/token_3_aikorea24.pickle",
     },
 ]
 
