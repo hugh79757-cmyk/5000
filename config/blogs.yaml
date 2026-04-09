@@ -361,6 +361,7 @@ blogs:
   pipeline: stock
   platform: hugo
   repo: stock-blog
+  cf_project: stock-informationhot
   schedule:
     times:
     - 07:22
