@@ -49,3 +49,6 @@ config/blogs.yaml.bak_*
 pipelines/rap/*.bak2
 *.bak*
 data/backups/
+
+# 로그 파일 제외
+logs/*.log

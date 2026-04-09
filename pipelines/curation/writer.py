@@ -13,6 +13,20 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from shared.ai_writer import generate as ai_generate
 
+
+ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
+     crossorigin="anonymous"></script>
+<!-- CUAP -->
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="ca-pub-6677996696534146"
+     data-ad-slot="2195212287"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>"""
+
 logger = logging.getLogger(__name__)
 
 # -- 금지어 목록 및 검증 --
@@ -210,6 +224,31 @@ def _build_user_prompt(keyword, product_block):
 {product_block}"""
 
 
+
+def _insert_adsense(body):
+    """본문에 애드센스 광고 2개 삽입: 첫 문단 직후 + 첫 H2 아래"""
+    lines = body.split("\n")
+    result = []
+    ad_inserted = {"top": False, "h2": False}
+    
+    for i, line in enumerate(lines):
+        result.append(line)
+        
+        # 첫 번째 광고: 첫 문단(비어있지 않은 줄) 직후
+        if not ad_inserted["top"] and line.strip() and not line.startswith("#"):
+            # 다음 줄이 비어있거나 제목이면 광고 삽입
+            if i + 1 < len(lines) and (not lines[i + 1].strip() or lines[i + 1].startswith("#")):
+                result.append("\n" + ADSENSE_AD.strip() + "\n")
+                ad_inserted["top"] = True
+        
+        # 두 번째 광고: 첫 H2 제목 아래
+        if not ad_inserted["h2"] and line.startswith("## "):
+            result.append("\n" + ADSENSE_AD.strip() + "\n")
+            ad_inserted["h2"] = True
+    
+    return "\n".join(result)
+
+
 def generate_curation_article(keyword, products, blog_id=None):
     """키워드 + 상품 5개 → 큐레이션 글 생성, dict 반환"""
     if not products or len(products) < 3:
@@ -258,6 +297,9 @@ def generate_curation_article(keyword, products, blog_id=None):
     disclosure = "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
     if disclosure not in body:
         body = body.rstrip() + f"\n\n---\n\n*{disclosure}*\n"
+
+    # 애드센스 광고 삽입
+    body = _insert_adsense(body)
 
     # description: 본문 첫 2문장 추출
     desc_lines = []
