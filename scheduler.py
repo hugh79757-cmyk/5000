@@ -87,11 +87,20 @@ from shared.telegram_notifier import (
     send_warning as _tg_warning,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger(__name__)
-
+# PROJECT_DIR는 라인 93에 정의되어 있으므로, 로깅 설정을 뒤로 이동
 PROJECT_DIR = "/Users/twinssn/Projects/5000"
 CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
+PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(os.path.join(PROJECT_DIR, "logs", "scheduler.log")),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
 LEDGER_DB = os.path.join(PROJECT_DIR, "data", "content.db")
 

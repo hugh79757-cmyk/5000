@@ -21,11 +21,20 @@ load_dotenv("/Users/twinssn/Projects/5000/.env")
 from shared.telegram_notifier import send_error as _tg_error
 from shared.validators import sanitize_title
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-logger = logging.getLogger(__name__)
-
+# PROJECT_DIR는 라인 27에 정의되어 있으므로, 로깅 설정을 뒤로 이동
 PROJECT_DIR = Path(__file__).parent
 CONFIG_DIR = PROJECT_DIR / "config"
+LEDGER_DB = PROJECT_DIR / "data" / "content.db"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler(PROJECT_DIR / "logs" / "scheduler.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 LEDGER_DB = PROJECT_DIR / "data" / "content.db"
 
 # --- STAP 파이프라인 매핑 (확장 시 여기만 추가) ---
