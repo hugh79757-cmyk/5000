@@ -226,26 +226,34 @@ def _build_user_prompt(keyword, product_block):
 
 
 def _insert_adsense(body):
-    """본문에 애드센스 광고 2개 삽입: 첫 문단 직후 + 첫 H2 아래"""
+    """본문에 애드센스 광고 2개 삽입: 첫 문단 직후 + 두 번째 H2 아래
+    
+    구조: 도입문단 → [광고1] → ## 구매포인트(내용) → ## 첫상품 → [광고2] → 나머지
+    두 광고 사이에 반드시 H2 섹션 내용이 들어가도록 분리.
+    """
     lines = body.split("\n")
     result = []
     ad_inserted = {"top": False, "h2": False}
-    
+    h2_count = 0
+
     for i, line in enumerate(lines):
         result.append(line)
-        
+
         # 첫 번째 광고: 첫 문단(비어있지 않은 줄) 직후
         if not ad_inserted["top"] and line.strip() and not line.startswith("#"):
-            # 다음 줄이 비어있거나 제목이면 광고 삽입
             if i + 1 < len(lines) and (not lines[i + 1].strip() or lines[i + 1].startswith("#")):
                 result.append("\n" + ADSENSE_AD.strip() + "\n")
                 ad_inserted["top"] = True
-        
-        # 두 번째 광고: 첫 H2 제목 아래
-        if not ad_inserted["h2"] and line.startswith("## "):
+
+        # H2 카운트
+        if line.startswith("## "):
+            h2_count += 1
+
+        # 두 번째 광고: 두 번째 H2 아래 (첫 상품 섹션 직후 한 단락 삽입)
+        if not ad_inserted["h2"] and h2_count == 2 and line.startswith("## "):
             result.append("\n" + ADSENSE_AD.strip() + "\n")
             ad_inserted["h2"] = True
-    
+
     return "\n".join(result)
 
 
