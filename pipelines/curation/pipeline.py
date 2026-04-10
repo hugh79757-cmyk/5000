@@ -97,36 +97,53 @@ _init_db()
 
 
 
+def _extract_category(keyword):
+    """키워드 첫 토큰을 카테고리로 사용 (동적 추출, keywords.py 수정 불필요)"""
+    tokens = keyword.split()
+    return tokens[0] if tokens else keyword
+
+
 def _select_keyword(blog_id):
-    """7일 내 미사용 키워드 중 상품 3개 이상인 것 우선 선택"""
+    """키워드 선택 - 30일 TTL + 카테고리 14일 중복 억제"""
     keywords = get_keywords(blog_id)
     if not keywords:
         return None
 
-    conn = sqlite3.connect(str(DB_PATH))
-    used = conn.execute(
-        """SELECT keyword FROM publish_log
-           WHERE blog_id=? AND published_at > datetime('now', '-7 days')""",
+    import sqlite3 as _sq
+    conn = _sq.connect(str(DB_PATH))
+
+    used_rows = conn.execute(
+        "SELECT keyword FROM publish_log"
+        " WHERE blog_id=? AND published_at > datetime('now', '-30 days')",
+        (blog_id,)
+    ).fetchall()
+
+    recent_rows = conn.execute(
+        "SELECT keyword FROM publish_log"
+        " WHERE blog_id=? AND published_at > datetime('now', '-14 days')",
         (blog_id,)
     ).fetchall()
     conn.close()
 
-    used_set = {r[0] for r in used}
-    available = [k for k in keywords if k not in used_set]
+    used_set = {r[0] for r in used_rows}
+    recent_cats = {_extract_category(r[0]) for r in recent_rows}
 
-    if not available:
-        conn = sqlite3.connect(str(DB_PATH))
+    available = [k for k in keywords if k not in used_set]
+    cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
+    candidates = cat_filtered if cat_filtered else available
+
+    if not candidates:
+        conn = _sq.connect(str(DB_PATH))
         oldest = conn.execute(
-            """SELECT keyword FROM publish_log
-               WHERE blog_id=? ORDER BY published_at ASC LIMIT 1""",
+            "SELECT keyword FROM publish_log"
+            " WHERE blog_id=? ORDER BY published_at ASC LIMIT 1",
             (blog_id,)
         ).fetchone()
         conn.close()
-        available = [oldest[0]] if oldest else [keywords[0]]
+        candidates = [oldest[0]] if oldest else [keywords[0]]
 
-    # 상품 3개 이상인 키워드 우선 선택
-    conn = sqlite3.connect(str(DB_PATH))
-    for kw in available:
+    conn = _sq.connect(str(DB_PATH))
+    for kw in candidates:
         cnt = conn.execute(
             "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
         ).fetchone()[0]
@@ -134,7 +151,7 @@ def _select_keyword(blog_id):
             conn.close()
             return kw
     conn.close()
-    return available[0]
+    return candidates[0]
 
 
 def _upload_thumbnail(image_url):
