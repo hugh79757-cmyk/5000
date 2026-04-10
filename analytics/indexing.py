@@ -33,6 +33,28 @@ DOMAIN_ACCOUNT = {
 }
 
 os.makedirs(LOG_DIR, exist_ok=True)
+
+# ─── 텔레그램 알림 ───
+
+def send_telegram(message):
+    """텔레그램 알림 발송"""
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        return
+    try:
+        requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"},
+            timeout=10,
+        )
+    except Exception:
+        pass
+
+
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
@@ -250,7 +272,7 @@ def submit_google(sites, max_total, conn, verbose=True, urls_per_site=2):
         account_domains[acc].append(d)
 
     total = 0
-    results = {"success": 0, "fail": 0, "skip": 0, "quota_hit": False}
+    results = {"success": 0, "fail": 0, "skip": 0, "quota_hit": False, "submitted_domains": {}}
 
     for account, doms in account_domains.items():
         try:
@@ -295,6 +317,7 @@ def submit_google(sites, max_total, conn, verbose=True, urls_per_site=2):
                             print(f"    [G OK] {url}")
                         mark_submitted(conn, url, "google", "ok")
                         results["success"] += 1
+                        results["submitted_domains"][domain] = results["submitted_domains"].get(domain, 0) + 1
                     elif resp.status_code == 429:
                         if verbose:
                             print(f"    [G QUOTA] 쿼터 초과")
@@ -433,6 +456,18 @@ def run(verbose=True):
     state["last_offset"] = (state.get("last_offset", 0) + blogs_per_run) % n
     state["run_count"] = run_num
     save_state(state)
+
+    # 텔레그램 알림
+    if g_result["success"] > 0 or g_result["fail"] > 0:
+        msg_lines = [f"<b>색인 제출 #{run_num}</b> ({today})"]
+        msg_lines.append(f"Google: {g_result['success']} OK / {g_result['fail']} FAIL")
+        msg_lines.append(f"IndexNow: {in_result['success']} OK / {in_result['fail']} FAIL")
+        if g_result.get("submitted_domains"):
+            msg_lines.append("")
+            msg_lines.append(f"<b>Google 색인 요청 블로그 ({len(g_result['submitted_domains'])}개):</b>")
+            for d, cnt in sorted(g_result["submitted_domains"].items()):
+                msg_lines.append(f"  {d}: {cnt}건")
+        send_telegram("\n".join(msg_lines))
 
     log_line = (f"[{datetime.now().isoformat()}] run={run_num} "
                 f"sites={blogs_per_run}/{n} per_site={urls_per_site} "
