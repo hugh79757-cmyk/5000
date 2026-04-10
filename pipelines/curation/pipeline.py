@@ -308,7 +308,7 @@ def _filter_used_products(blog_id, products):
 def _record_products(blog_id, keyword, products):
     """발행에 사용된 상품 ID 기록"""
     conn = sqlite3.connect(str(DB_PATH))
-    now = datetime.now().isoformat()
+    now = datetime.utcnow().isoformat()
     for p in products:
         conn.execute(
             "INSERT OR IGNORE INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
@@ -379,7 +379,7 @@ def _record_publish(blog_id, keyword, title, slug):
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute(
         "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at) VALUES (?,?,?,?,?)",
-        (blog_id, keyword, title, slug, datetime.now().isoformat())
+        (blog_id, keyword, title, slug, datetime.utcnow().isoformat())
     )
     conn.commit()
     conn.close()
