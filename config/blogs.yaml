@@ -662,11 +662,11 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 07:42
-    - '10:42'
-    - '13:42'
-    - '16:42'
-    - '20:42'
+    - 07:50
+    - '10:50'
+    - '13:50'
+    - '16:50'
+    - '20:50'
   gsc_site: https://appliance.informationhot.kr/
   ga4_property: '531043585'
 - id: interior-hugo
@@ -682,11 +682,11 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 07:44
-    - '10:44'
-    - '13:44'
-    - '16:44'
-    - '20:44'
+    - 08:00
+    - '11:00'
+    - '14:00'
+    - '17:00'
+    - '21:00'
   gsc_site: https://interior.informationhot.kr/
   ga4_property: '531043225'
 - id: baby-hugo
@@ -702,11 +702,11 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 07:46
-    - '10:46'
-    - '13:46'
-    - '16:46'
-    - '20:46'
+    - 08:10
+    - '11:10'
+    - '14:10'
+    - '17:10'
+    - '21:10'
   gsc_site: https://baby.informationhot.kr/
   ga4_property: '531079405'
 - id: fitness-hugo
@@ -722,23 +722,21 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 07:48
-    - '10:48'
-    - '13:48'
-    - '16:48'
-    - '20:48'
+    - 08:20
+    - '11:20'
+    - '14:20'
+    - '17:20'
+    - '21:20'
   gsc_site: https://fitness.informationhot.kr/
   ga4_property: '531079305'
 - cf_project: tour-hugo
   daily_quota: 5
   domain: tour.techpawz.com
   id: tour-hugo
-  daily_quota: 5
   name: Travel Guide (EN)
   pipeline: etap
   platform: hugo
   repo: tour-hugo
-  cf_project: tour-hugo
   schedule:
     times:
     - 07:30

@@ -139,7 +139,7 @@ def _check_rate_limit():
             "SELECT COUNT(*) FROM api_call_log WHERE called_at > datetime('now', '-1 hour')"
         ).fetchone()[0]
         conn.close()
-        return count < 8
+        return count < 6
     except Exception:
         return True
 
@@ -173,6 +173,7 @@ def _search_api(keyword, limit=10):
             if data.get("rCode") == "403":
                 msg = data.get("rMessage", "")
                 logger.warning(f"쿠팡 API 한도 초과 응답: {msg[:80]}")
+                _log_api_call()  # 서버 카운트 소진됐으므로 로컬도 기록
                 import re as _re
                 m = _re.search(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", msg)
                 if m:
