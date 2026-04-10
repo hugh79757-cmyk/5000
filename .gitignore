@@ -11,3 +11,10 @@ logs/*.log
 public/
 resources/
 *.bak
+
+# DB 파일 — git 추적 제외 (용량 크고 머신별 독립 운영)
+data/*.db
+data/*.db-shm
+data/*.db-wal
+data/backups/
+*.db.broken
