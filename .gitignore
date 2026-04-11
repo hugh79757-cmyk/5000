@@ -8,3 +8,7 @@ __pycache__/
 node_modules
 *.bak
 .aider*
+credentials.json
+blogger_token.pickle
+*.pickle
+*.db
