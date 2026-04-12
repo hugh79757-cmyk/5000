@@ -272,7 +272,7 @@ def run(blog_cfg):
         # publish_log에도 기록하여 중복 선택 방지
         c.execute(
             "INSERT INTO publish_log (topic_id, site, title, slug, published_at) VALUES (?,?,?,?,?)",
-            (topic['id'], site_id, f"[DUPLICATE] {topic['car_id']}", "", datetime.now().isoformat())
+            (topic['id'], car_site_id, f"[DUPLICATE] {topic['car_id']}", "", datetime.now().isoformat())
         )
         c.execute("UPDATE topics SET status='published', published_at=? WHERE id=?",
                   (datetime.now().isoformat(), topic['id']))

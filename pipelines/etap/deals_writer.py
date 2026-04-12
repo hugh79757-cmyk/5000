@@ -185,8 +185,11 @@ def generate_deals_guide(topic):
 
 {summary}
 
-STRUCTURE:
+STRUCTURE (use these EXACT H2 headings in your article):
 {section_text}
+
+- You MUST use the H2 headings above as markdown ## headings in your output
+- Each H2 section must have at least 2 paragraphs
 
 RULES:
 - Use ONLY destinations and prices from the data. Do NOT invent destinations.
