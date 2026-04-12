@@ -8,3 +8,18 @@
 2026-04-12 21:30:42,720 [INFO] ETAP 25개 파이프라인 등록 완료 (125건/일)
 2026-04-12 21:30:42,720 [INFO] Registered 412 jobs
 2026-04-12 21:30:42,720 [INFO] Next run: 2026-04-12 21:35:00
+2026-04-12 21:35:13,777 [INFO] Queue executing: adventure-hugo (remaining: 0)
+2026-04-12 21:35:13,855 [INFO] Publishing: adventure-hugo
+2026-04-12 21:36:02,965 [INFO]   [OK] adventure-hugo
+2026-04-12 21:36:02,975 [INFO]   [OK] adventure-hugo
+2026-04-12 21:36:02,975 [INFO] [ETAP] adventure-hugo 완료
+2026-04-12 21:40:03,905 [INFO] Queue executing: watersports-hugo (remaining: 0)
+2026-04-12 21:40:03,987 [INFO] Publishing: watersports-hugo
+2026-04-12 21:40:58,606 [INFO]   [OK] watersports-hugo
+2026-04-12 21:40:58,606 [INFO] [ETAP] watersports-hugo 완료
+2026-04-12 21:40:59,917 [INFO]   [OK] watersports-hugo
+2026-04-12 21:45:29,770 [INFO] Queue executing: bus-hugo (remaining: 0)
+2026-04-12 21:45:29,853 [INFO] Publishing: bus-hugo
+2026-04-12 21:46:15,670 [INFO]   [OK] bus-hugo
+2026-04-12 21:46:16,386 [INFO]   [OK] bus-hugo
+2026-04-12 21:46:16,386 [INFO] [ETAP] bus-hugo 완료
