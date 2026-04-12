@@ -524,7 +524,9 @@ def replenish_topics(conn, min_pending=50):
                 if created >= need:
                     break
                 exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                    """SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=?
+                       AND (status IN ('pending','skip_no_data')
+                            OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                     (car_a, car_b, post_type, site_id)
                 ).fetchone()
                 if not exists:
@@ -542,7 +544,9 @@ def replenish_topics(conn, min_pending=50):
                     if unpop_created >= need_unpopular or created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        """SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=?
+                           AND (status IN ('pending','skip_no_data')
+                                OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                         (car_a, car_b, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -559,7 +563,9 @@ def replenish_topics(conn, min_pending=50):
                 if created >= need:
                     break
                 exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                    """SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=?
+                       AND (status IN ('pending','skip_no_data')
+                            OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                     (car_id, post_type, site_id)
                 ).fetchone()
                 if not exists:
@@ -574,7 +580,9 @@ def replenish_topics(conn, min_pending=50):
                     if created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        """SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=?
+                           AND (status IN ('pending','skip_no_data')
+                                OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                         (a, b, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -591,7 +599,9 @@ def replenish_topics(conn, min_pending=50):
                     if created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        """SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=?
+                           AND (status IN ('pending','skip_no_data')
+                                OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                         (car_id, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -608,7 +618,9 @@ def replenish_topics(conn, min_pending=50):
                 if created >= need_popular:
                     break
                 exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                    """SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=?
+                       AND (status IN ('pending','skip_no_data')
+                            OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                     (car_id, post_type, site_id)
                 ).fetchone()
                 if not exists:
@@ -623,7 +635,9 @@ def replenish_topics(conn, min_pending=50):
                 if unpop_created >= need_unpopular:
                     break
                 exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                    """SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=?
+                       AND (status IN ('pending','skip_no_data')
+                            OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                     (car["car_id"], post_type, site_id)
                 ).fetchone()
                 if not exists:
@@ -640,7 +654,9 @@ def replenish_topics(conn, min_pending=50):
                     if created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        """SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=?
+                           AND (status IN ('pending','skip_no_data')
+                                OR (status='published' AND datetime(published_at) > datetime('now','-14 days')))""",
                         (car["car_id"], post_type, site_id)
                     ).fetchone()
                     if not exists:
