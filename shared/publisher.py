@@ -208,7 +208,7 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
         fm += "tags: " + str(tag_list) + "\n"
     if category:
         fm += "categories: ['" + category + "']\n"
-    if thumbnail_url:
+    if thumbnail_url and thumbnail_url.strip():
         if "tong.visitkorea.or.kr" in thumbnail_url and thumbnail_url.startswith("http://"):
             thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
         fm += 'featureimage: "' + thumbnail_url + '"\n'
@@ -248,13 +248,13 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         site_path = os.path.join("/Users/twinssn/Projects", blog_cfg.get("repo", ""))
     description = _extract_description(body_md)
 
-    if not thumbnail_url:
-         thumbnail_url = _extract_first_image(body_md)
-    if not thumbnail_url:
+    if not thumbnail_url or not thumbnail_url.strip():
+        thumbnail_url = _extract_first_image(body_md)
+    if not thumbnail_url or not thumbnail_url.strip():
         _blog_id = blog_cfg.get("id", "")
         _bid2 = _blog_id.replace("-hugo", "")
         if "stock" in _blog_id or "dividend" in _blog_id or "etf" in _blog_id or "sector" in _blog_id or "ipo" in _blog_id or "finance" in _blog_id:
-         thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
+            thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
         elif _bid2 in ("hotissue", "tco", "deal", "compare", "guide", "ev"):
             thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/car-default-thumbnail.webp"
         

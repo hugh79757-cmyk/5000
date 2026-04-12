@@ -45,6 +45,15 @@ def process_and_upload(image_data, bucket=None, key_prefix="car-images"):
     key = f"{key_prefix}/{now.strftime('%Y/%m/%d')}/{file_hash}.webp"
 
     client = get_r2_client()
+
+    existing_key = f"{key_prefix}/common/{file_hash}.webp"
+    try:
+        client.head_object(Bucket=bucket, Key=existing_key)
+        public_url = f"{os.getenv('R2_PUBLIC_URL')}/{existing_key}"
+        return public_url
+    except Exception:
+        pass
+
     client.put_object(
         Bucket=bucket,
         Key=key,

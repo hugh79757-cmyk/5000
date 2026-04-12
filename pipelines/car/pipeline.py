@@ -35,11 +35,29 @@ def _select_car_image(conn, car_id, slug):
         "SELECT image_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND image_url IS NOT NULL AND image_url != ''"
     ).fetchall()
     used_urls = {r['image_url'] for r in used} if used else set()
+
+    used_hashes = set()
+    for url in used_urls:
+        m = re.search(r'/([0-9a-f]{8})\.webp', url)
+        if m:
+            used_hashes.add(m.group(1))
+
     images = c.execute(
         "SELECT image_url, source FROM car_images WHERE car_id = ? AND verified = 1 ORDER BY RANDOM()",
         (car_id,)
     ).fetchall()
-    candidates = [img['image_url'] for img in images if img['image_url'] not in used_urls]
+
+    def _hash_of(url):
+        m = re.search(r'/([0-9a-f]{8})\.webp', url)
+        return m.group(1) if m else None
+
+    candidates = [
+        img['image_url'] for img in images
+        if img['image_url'] not in used_urls
+        and _hash_of(img['image_url']) not in used_hashes
+    ]
+    if not candidates:
+        candidates = [img['image_url'] for img in images if img['image_url'] not in used_urls]
     if not candidates:
         candidates = [img['image_url'] for img in images]
     if not candidates:
