@@ -667,9 +667,14 @@ def validate_post_extended(
         import re as _re
 
         # 1. 연비 비정상값 (내연기관 5 미만, 전기차 2 미만)
-        _fuel_matches = _re.findall(r'(\d+\.?\d*)\s*km/[Llℓ]', html_content)
-        for _fm in _fuel_matches:
-            _fv = float(_fm)
+        # 차이값 문맥("0.2 km/l 더/차이/낮/높") 제외
+        _fuel_raw = list(_re.finditer(r'(\d+\.?\d*)\s*km/[Llℓ]', html_content))
+        for _match in _fuel_raw:
+            _fv = float(_match.group(1))
+            _ctx_after = html_content[_match.end():_match.end()+10]
+            _is_diff = bool(_re.search(r'(더|차이|낮|높|우수|적|많)', _ctx_after))
+            if _is_diff:
+                continue
             if 0 < _fv < 4.0:
                 issues.append(f"[CRITICAL] 본문 연비 비정상: {_fv} km/L (배기량 혼입 의심)")
             elif 4.0 <= _fv < 5.0:
