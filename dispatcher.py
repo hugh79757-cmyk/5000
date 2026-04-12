@@ -146,6 +146,38 @@ def _record_ledger(blog_id):
         logger.error(f"ledger 기록 실패: {e}")
 
 
+def _run_tap_blogger(cfg):
+    """TAP 프로젝트(travel.rotcha.kr Blogger)를 subprocess로 실행"""
+    import subprocess
+    tap_root = "/Users/twinssn/Projects/TAP"
+    tap_python = os.path.join(tap_root, "venv", "bin", "python3")
+    blog_id = cfg["id"]
+    try:
+        proc = subprocess.run(
+            [tap_python, "app.py", "run"],
+            cwd=tap_root, capture_output=True, text=True, timeout=300,
+            env={**os.environ, "PYTHONPATH": tap_root}
+        )
+        if proc.returncode == 0:
+            # 발행 성공 여부 확인
+            if "발행 완료" in proc.stdout or "Blogger 발행 완료" in proc.stderr:
+                logger.info(f"[TAP] {blog_id} 발행 성공")
+                return {"success": True, "reason": "tap_published"}
+            else:
+                logger.info(f"[TAP] {blog_id} 실행 완료 (발행 없음)")
+                return {"success": False, "reason": "no_publish"}
+        else:
+            stderr = (proc.stderr or "")[-300:]
+            logger.warning(f"[TAP] {blog_id} stderr: {stderr}")
+            return {"success": False, "reason": f"tap_error: {stderr[:100]}"}
+    except subprocess.TimeoutExpired:
+        logger.error(f"[TAP] {blog_id} timeout (300s)")
+        return {"success": False, "reason": "timeout"}
+    except Exception as e:
+        logger.error(f"[TAP] {blog_id} error: {e}")
+        return {"success": False, "reason": str(e)[:100]}
+
+
 # ─── STAP 모듈 격리 ───
 
 def _run_stap(stap_name, cfg):
@@ -214,6 +246,10 @@ def _run_pipeline(cfg):
     """pipeline 종류에 따라 해당 모듈의 run(cfg)를 동적 로딩하여 호출"""
     pipeline = cfg.get("pipeline", "")
     blog_id = cfg["id"]
+
+    # TAP (travel.rotcha.kr Blogger) → 독립 프로젝트 subprocess 실행
+    if pipeline == "tap":
+        return _run_tap_blogger(cfg)
 
     # stock → STAP subprocess 격리 실행 (자체 코드베이스)
     if pipeline == "stock":
