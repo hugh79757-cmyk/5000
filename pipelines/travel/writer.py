@@ -351,7 +351,7 @@ def _inject_naver_map(body_md, items, is_festival=False):
 def _fallback_image_from_korservice(items, theme):
     """이미지 없는 아이템에 한국관광공사 키워드 검색으로 대체 이미지 확보"""
     import requests
-    api_key = os.environ.get("TOUR_API_KEY", "") or os.environ.get("TOURAPI_KEY", "") or os.environ.get("DATA_GO_KR_API_KEY", "")
+    api_key = os.environ.get("DATA_GO_KR_API_KEY", "")
     if not api_key:
         return items
     for item in items:

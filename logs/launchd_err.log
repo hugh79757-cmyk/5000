@@ -1,0 +1,10 @@
+2026-04-12 21:30:42,583 [INFO] === 5000 Scheduler Starting ===
+2026-04-12 21:30:42,667 [INFO] Network ready
+2026-04-12 21:30:42,719 [INFO] GAP keyword sync scheduled at 05:00
+2026-04-12 21:30:42,719 [INFO] Festival refresh scheduled at 06:00
+2026-04-12 21:30:42,719 [INFO] STAP data_collector scheduled at 06:00
+2026-04-12 21:30:42,719 [INFO] CAR daily_refresh scheduled at 06:30
+2026-04-12 21:30:42,719 [INFO] ETAP collections scheduled: aviasales 06:00, viator/airalo/omio 06:30
+2026-04-12 21:30:42,720 [INFO] ETAP 25개 파이프라인 등록 완료 (125건/일)
+2026-04-12 21:30:42,720 [INFO] Registered 412 jobs
+2026-04-12 21:30:42,720 [INFO] Next run: 2026-04-12 21:35:00

@@ -165,7 +165,7 @@ blogs:
     - '13:00'
     - '16:00'
     - '20:00'
-  site_path: /Users/twinssn/Projects/TAP/travel-hugo
+  site_path: /Users/twinssn/Projects/travel-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour1.rotcha.kr/
@@ -191,7 +191,7 @@ blogs:
     - '13:02'
     - '16:02'
     - '20:02'
-  site_path: /Users/twinssn/Projects/TAP/travel1-hugo
+  site_path: /Users/twinssn/Projects/travel1-hugo
   status: active
   theme: Blowfish
   gsc_site: https://travel1.rotcha.kr/
@@ -217,7 +217,7 @@ blogs:
     - '13:04'
     - '16:04'
     - '20:04'
-  site_path: /Users/twinssn/Projects/TAP/travel2-hugo
+  site_path: /Users/twinssn/Projects/travel2-hugo
   status: active
   theme: Blowfish
   gsc_site: https://travel2.rotcha.kr/
@@ -243,7 +243,7 @@ blogs:
     - '13:06'
     - '16:06'
     - '20:06'
-  site_path: /Users/twinssn/Projects/TAP/travel3-hugo
+  site_path: /Users/twinssn/Projects/travel3-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour2.rotcha.kr/
@@ -269,11 +269,90 @@ blogs:
     - '13:08'
     - '16:08'
     - '20:08'
-  site_path: /Users/twinssn/Projects/TAP/travel4-hugo
+  site_path: /Users/twinssn/Projects/travel4-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour3.rotcha.kr/
   ga4_property: '529368606'
+- blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
+  daily_quota: 5
+  domain: tv-show.informationhot.kr
+  fetch_sources:
+  - type: food
+    weight: 0.7
+  - type: course
+    weight: 0.3
+  id: tvshow-blogger
+  name: tv-show 맛집블로그
+  pipeline: travel
+  platform: blogger
+  schedule:
+    times:
+    - 07:36
+    - '10:36'
+    - '13:36'
+    - '16:36'
+    - '20:36'
+  status: inactive
+- blog_id_env: BLOGGER_RECIPE_BLOG_ID
+  daily_quota: 5
+  domain: ud.informationhot.kr
+  fetch_sources:
+  - type: food
+    weight: 0.7
+  - type: course
+    weight: 0.3
+  id: ud-blogger
+  name: ud 레시피블로그
+  pipeline: travel
+  platform: blogger
+  schedule:
+    times:
+    - 07:38
+    - '10:38'
+    - '13:38'
+    - '16:38'
+    - '20:38'
+  status: inactive
+- daily_quota: 5
+  domain: kuta.informationhot.kr
+  fetch_sources:
+  - type: food
+    weight: 0.7
+  - type: course
+    weight: 0.3
+  id: kuta-wordpress
+  name: kuta 워드프레스
+  pipeline: travel
+  platform: wordpress
+  schedule:
+    times:
+    - 07:40
+    - '10:40'
+    - '13:40'
+    - '16:40'
+    - '20:40'
+  status: inactive
+  wp_pass_env: WP_KUTA_PASS
+  wp_url_env: WP_KUTA_URL
+  wp_user_env: WP_KUTA_USER
+- daily_quota: 5
+  domain: kuta.informationhot.kr
+  id: gap-kuta
+  name: 쿠따 생활정보 (GAP)
+  pipeline: gap
+  platform: wordpress
+  schedule:
+    times:
+    - 07:42
+    - '10:42'
+    - '13:42'
+    - '16:42'
+    - '20:42'
+  status: inactive
+  wp_pass_env: WP_KUTA_PASS
+  wp_url_env: WP_KUTA_URL
+  wp_user_env: WP_KUTA_USER
 - cf_project: stock-informationhot
   daily_quota: 5
   domain: stock.informationhot.kr
@@ -294,6 +373,24 @@ blogs:
   theme: congo
   gsc_site: https://stock.informationhot.kr/
   ga4_property: '518365064'
+- cf_project: gap-hugo
+  daily_quota: 5
+  domain: life.informationhot.kr
+  id: gap-hugo
+  name: 생활정보 GAP
+  pipeline: gap
+  platform: hugo
+  repo: gap-hugo
+  schedule:
+    times:
+    - 07:15
+    - 09:15
+    - '11:15'
+    - '14:15'
+    - '17:15'
+  site_path: /Users/twinssn/Projects/GAP/gap-hugo
+  status: inactive
+  theme: congo
 - cf_project: dividend-hugo
   daily_quota: 5
   domain: dividend.techpawz.com
@@ -392,8 +489,6 @@ blogs:
   status: active
   gsc_site: https://finance.techpawz.com/
   ga4_property: '529142332'
-  site_path: /Users/twinssn/Projects/STAP/finance-hugo
-  theme: blowfish
 - cf_project: senior-hugo
   daily_quota: 5
   domain: senior.informationhot.kr
@@ -413,7 +508,6 @@ blogs:
   status: active
   theme: blowfish
   gsc_site: https://senior.informationhot.kr/
-  ga4_property: '531055912'
 - blogger_blog_id: '5484205249958557854'
   daily_quota: 5
   domain: 2.techpawz.com
@@ -550,7 +644,6 @@ blogs:
     - '16:40'
     - '20:40'
   gsc_site: https://laptop.informationhot.kr/
-  ga4_property: '531078092'
 - id: appliance-hugo
   name: 가전제품 추천 가이드
   pipeline: curation
@@ -564,13 +657,12 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 07:50
-    - '10:50'
-    - '13:50'
-    - '16:50'
-    - '20:50'
+    - 07:42
+    - '10:42'
+    - '13:42'
+    - '16:42'
+    - '20:42'
   gsc_site: https://appliance.informationhot.kr/
-  ga4_property: '531043585'
 - id: interior-hugo
   name: 가구 인테리어 추천 가이드
   pipeline: curation
@@ -584,13 +676,12 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 08:00
-    - '11:00'
-    - '14:00'
-    - '17:00'
-    - '21:00'
+    - 07:44
+    - '10:44'
+    - '13:44'
+    - '16:44'
+    - '20:44'
   gsc_site: https://interior.informationhot.kr/
-  ga4_property: '531043225'
 - id: baby-hugo
   name: 유아용품 추천 가이드
   pipeline: curation
@@ -604,13 +695,12 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 08:10
-    - '11:10'
-    - '14:10'
-    - '17:10'
-    - '21:10'
+    - 07:46
+    - '10:46'
+    - '13:46'
+    - '16:46'
+    - '20:46'
   gsc_site: https://baby.informationhot.kr/
-  ga4_property: '531079405'
 - id: fitness-hugo
   name: 운동용품 추천 가이드
   pipeline: curation
@@ -624,13 +714,12 @@ blogs:
   theme: blowfish
   schedule:
     times:
-    - 08:20
-    - '11:20'
-    - '14:20'
-    - '17:20'
-    - '21:20'
+    - 07:48
+    - '10:48'
+    - '13:48'
+    - '16:48'
+    - '20:48'
   gsc_site: https://fitness.informationhot.kr/
-  ga4_property: '531079305'
 - cf_project: tour-hugo
   daily_quota: 5
   domain: tour.techpawz.com
@@ -652,495 +741,3 @@ blogs:
   language: en
   blog_type: destination
   gsc_site: https://tour.techpawz.com/
-  ga4_property: '531055776'
-- id: airlines-hugo
-  name: Airlines Reviews
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: airlines.techpawz.com
-  cf_project: airlines-hugo
-  repo: airlines-hugo
-  site_path: /Users/twinssn/Projects/ETAP/airlines-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://airlines.techpawz.com/
-  ga4_property: '531035921'
-  schedule:
-    times:
-    - 07:31
-    - '10:31'
-    - '13:31'
-    - '16:31'
-    - '20:31'
-- id: airports-hugo
-  name: Airports Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: airports.techpawz.com
-  cf_project: airports-hugo
-  repo: airports-hugo
-  site_path: /Users/twinssn/Projects/ETAP/airports-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://airports.techpawz.com/
-  ga4_property: '531044776'
-  schedule:
-    times:
-    - 07:33
-    - '10:33'
-    - '13:33'
-    - '16:33'
-    - '20:33'
-- id: esim-hugo
-  name: eSIM Plans
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: esim.techpawz.com
-  cf_project: esim-hugo
-  repo: esim-hugo
-  site_path: /Users/twinssn/Projects/ETAP/esim-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://esim.techpawz.com/
-  ga4_property: '531068317'
-  schedule:
-    times:
-    - 07:35
-    - '10:35'
-    - '13:35'
-    - '16:35'
-    - '20:35'
-- id: flights-hugo
-  name: Flights Deals
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: flights.techpawz.com
-  cf_project: flights-hugo
-  repo: flights-hugo
-  site_path: /Users/twinssn/Projects/ETAP/flights-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://flights.techpawz.com/
-  ga4_property: '531065272'
-  schedule:
-    times:
-    - 07:37
-    - '10:37'
-    - '13:37'
-    - '16:37'
-    - '20:37'
-- id: michelin-hugo
-  name: Michelin Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: michelin.techpawz.com
-  cf_project: michelin-hugo
-  repo: michelin-hugo
-  site_path: /Users/twinssn/Projects/ETAP/michelin-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://michelin.techpawz.com/
-  ga4_property: '531066288'
-  schedule:
-    times:
-    - 07:39
-    - '10:39'
-    - '13:39'
-    - '16:39'
-    - '20:39'
-- id: tours-hugo
-  name: Tours Activities
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: tours.techpawz.com
-  cf_project: tours-hugo
-  repo: tours-hugo
-  site_path: /Users/twinssn/Projects/ETAP/tours-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://tours.techpawz.com/
-  ga4_property: '531081222'
-  schedule:
-    times:
-    - 07:41
-    - '10:41'
-    - '13:41'
-    - '16:41'
-    - '20:41'
-- id: trains-hugo
-  name: Trains Bus Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: trains.techpawz.com
-  cf_project: trains-hugo
-  repo: trains-hugo
-  site_path: /Users/twinssn/Projects/ETAP/trains-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://trains.techpawz.com/
-  ga4_property: '531082945'
-  schedule:
-    times:
-    - 07:43
-    - '10:43'
-    - '13:43'
-    - '16:43'
-    - '20:43'
-- id: visa-hugo
-  name: Visa Requirements
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: visa.techpawz.com
-  cf_project: visa-hugo
-  repo: visa-hugo
-  site_path: /Users/twinssn/Projects/ETAP/visa-hugo
-  theme: blowfish
-  language: en
-  gsc_site: https://visa.techpawz.com/
-  ga4_property: '531039430'
-  schedule:
-    times:
-    - 07:45
-    - '10:45'
-    - '13:45'
-    - '16:45'
-    - '20:45'
-- id: bus-hugo
-  name: Bus Routes Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: bus.techpawz.com
-  cf_project: bus-hugo
-  repo: bus-hugo
-  site_path: /Users/twinssn/Projects/ETAP/bus-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:45
-    - '11:45'
-    - '14:45'
-    - '17:45'
-    - '21:45'
-- id: ferry-hugo
-  name: Ferry Routes Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: ferry.techpawz.com
-  cf_project: ferry-hugo
-  repo: ferry-hugo
-  site_path: /Users/twinssn/Projects/ETAP/ferry-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:50
-    - '11:50'
-    - '14:50'
-    - '17:50'
-    - '21:50'
-- id: dining-hugo
-  name: Dining Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: dining.techpawz.com
-  cf_project: dining-hugo
-  repo: dining-hugo
-  site_path: /Users/twinssn/Projects/ETAP/dining-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:55
-    - '11:55'
-    - '14:55'
-    - '17:55'
-    - '21:55'
-- id: culture-hugo
-  name: Culture & Arts Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: culture.techpawz.com
-  cf_project: culture-hugo
-  repo: culture-hugo
-  site_path: /Users/twinssn/Projects/ETAP/culture-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:00
-    - '12:00'
-    - '15:00'
-    - '18:00'
-    - '22:00'
-- id: transfers-hugo
-  name: Airport Transfers Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: transfers.techpawz.com
-  cf_project: transfers-hugo
-  repo: transfers-hugo
-  site_path: /Users/twinssn/Projects/ETAP/transfers-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:05
-    - '12:05'
-    - '15:05'
-    - '18:05'
-    - '22:05'
-- id: multiday-hugo
-  name: Multi-Day Tours Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: multiday.techpawz.com
-  cf_project: multiday-hugo
-  repo: multiday-hugo
-  site_path: /Users/twinssn/Projects/ETAP/multiday-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:10
-    - '12:10'
-    - '15:10'
-    - '18:10'
-    - '22:10'
-- id: nature-hugo
-  name: Nature & Adventure Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: nature.techpawz.com
-  cf_project: nature-hugo
-  repo: nature-hugo
-  site_path: /Users/twinssn/Projects/ETAP/nature-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:15
-    - '12:15'
-    - '15:15'
-    - '18:15'
-    - '22:15'
-- id: visafree-hugo
-  name: Visa-Free Travel Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: visafree.techpawz.com
-  cf_project: visafree-hugo
-  repo: visafree-hugo
-  site_path: /Users/twinssn/Projects/ETAP/visafree-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:20
-    - '12:20'
-    - '15:20'
-    - '18:20'
-    - '22:20'
-- id: deals-hugo
-  name: Travel Deals Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: deals.techpawz.com
-  cf_project: deals-hugo
-  repo: deals-hugo
-  site_path: /Users/twinssn/Projects/ETAP/deals-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:25
-    - '12:25'
-    - '15:25'
-    - '18:25'
-    - '22:25'
-- id: eurail-hugo
-  name: Eurail Pass Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: eurail.techpawz.com
-  cf_project: eurail-hugo
-  repo: eurail-hugo
-  site_path: /Users/twinssn/Projects/ETAP/eurail-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:30
-    - '12:30'
-    - '15:30'
-    - '18:30'
-    - '22:30'
-- id: cruise-hugo
-  name: Cruise Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: cruise.techpawz.com
-  cf_project: cruise-hugo
-  repo: cruise-hugo
-  site_path: /Users/twinssn/Projects/ETAP/cruise-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:35
-    - '12:35'
-    - '15:35'
-    - '18:35'
-    - '22:35'
-- id: phototour-hugo
-  name: Photo Tour Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: phototour.techpawz.com
-  cf_project: phototour-hugo
-  repo: phototour-hugo
-  site_path: /Users/twinssn/Projects/ETAP/phototour-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 09:40
-    - '12:40'
-    - '15:40'
-    - '18:40'
-    - '22:40'
-- id: daytrips-hugo
-  name: Day Trips Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: daytrips.techpawz.com
-  cf_project: daytrips-hugo
-  repo: daytrips-hugo
-  site_path: /Users/twinssn/Projects/ETAP/daytrips-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:20
-    - '11:20'
-    - '14:20'
-    - '17:20'
-    - '21:20'
-- id: walking-hugo
-  name: Walking Tours Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: walking.techpawz.com
-  cf_project: walking-hugo
-  repo: walking-hugo
-  site_path: /Users/twinssn/Projects/ETAP/walking-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:25
-    - '11:25'
-    - '14:25'
-    - '17:25'
-    - '21:25'
-- id: foodtour-hugo
-  name: Food Tours Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: foodtour.techpawz.com
-  cf_project: foodtour-hugo
-  repo: foodtour-hugo
-  site_path: /Users/twinssn/Projects/ETAP/foodtour-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:30
-    - '11:30'
-    - '14:30'
-    - '17:30'
-    - '21:30'
-- id: adventure-hugo
-  name: Adventure Travel Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: adventure.techpawz.com
-  cf_project: adventure-hugo
-  repo: adventure-hugo
-  site_path: /Users/twinssn/Projects/ETAP/adventure-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:35
-    - '11:35'
-    - '14:35'
-    - '17:35'
-    - '21:35'
-- id: watersports-hugo
-  name: Water Sports Guide
-  pipeline: etap
-  platform: hugo
-  status: active
-  daily_quota: 5
-  domain: watersports.techpawz.com
-  cf_project: watersports-hugo
-  repo: watersports-hugo
-  site_path: /Users/twinssn/Projects/ETAP/watersports-hugo
-  theme: blowfish
-  language: en
-  schedule:
-    times:
-    - 08:40
-    - '11:40'
-    - '14:40'
-    - '17:40'
-    - '21:40'

@@ -165,7 +165,7 @@ blogs:
     - '13:00'
     - '16:00'
     - '20:00'
-  site_path: /Users/twinssn/Projects/TAP/travel-hugo
+  site_path: /Users/twinssn/Projects/travel-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour1.rotcha.kr/
@@ -191,7 +191,7 @@ blogs:
     - '13:02'
     - '16:02'
     - '20:02'
-  site_path: /Users/twinssn/Projects/TAP/travel1-hugo
+  site_path: /Users/twinssn/Projects/travel1-hugo
   status: active
   theme: Blowfish
   gsc_site: https://travel1.rotcha.kr/
@@ -217,7 +217,7 @@ blogs:
     - '13:04'
     - '16:04'
     - '20:04'
-  site_path: /Users/twinssn/Projects/TAP/travel2-hugo
+  site_path: /Users/twinssn/Projects/travel2-hugo
   status: active
   theme: Blowfish
   gsc_site: https://travel2.rotcha.kr/
@@ -243,7 +243,7 @@ blogs:
     - '13:06'
     - '16:06'
     - '20:06'
-  site_path: /Users/twinssn/Projects/TAP/travel3-hugo
+  site_path: /Users/twinssn/Projects/travel3-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour2.rotcha.kr/
@@ -269,11 +269,90 @@ blogs:
     - '13:08'
     - '16:08'
     - '20:08'
-  site_path: /Users/twinssn/Projects/TAP/travel4-hugo
+  site_path: /Users/twinssn/Projects/travel4-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour3.rotcha.kr/
   ga4_property: '529368606'
+- blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
+  daily_quota: 5
+  domain: tv-show.informationhot.kr
+  fetch_sources:
+  - type: food
+    weight: 0.7
+  - type: course
+    weight: 0.3
+  id: tvshow-blogger
+  name: tv-show 맛집블로그
+  pipeline: travel
+  platform: blogger
+  schedule:
+    times:
+    - 07:36
+    - '10:36'
+    - '13:36'
+    - '16:36'
+    - '20:36'
+  status: inactive
+- blog_id_env: BLOGGER_RECIPE_BLOG_ID
+  daily_quota: 5
+  domain: ud.informationhot.kr
+  fetch_sources:
+  - type: food
+    weight: 0.7
+  - type: course
+    weight: 0.3
+  id: ud-blogger
+  name: ud 레시피블로그
+  pipeline: travel
+  platform: blogger
+  schedule:
+    times:
+    - 07:38
+    - '10:38'
+    - '13:38'
+    - '16:38'
+    - '20:38'
+  status: inactive
+- daily_quota: 5
+  domain: kuta.informationhot.kr
+  fetch_sources:
+  - type: food
+    weight: 0.7
+  - type: course
+    weight: 0.3
+  id: kuta-wordpress
+  name: kuta 워드프레스
+  pipeline: travel
+  platform: wordpress
+  schedule:
+    times:
+    - 07:40
+    - '10:40'
+    - '13:40'
+    - '16:40'
+    - '20:40'
+  status: inactive
+  wp_pass_env: WP_KUTA_PASS
+  wp_url_env: WP_KUTA_URL
+  wp_user_env: WP_KUTA_USER
+- daily_quota: 5
+  domain: kuta.informationhot.kr
+  id: gap-kuta
+  name: 쿠따 생활정보 (GAP)
+  pipeline: gap
+  platform: wordpress
+  schedule:
+    times:
+    - 07:42
+    - '10:42'
+    - '13:42'
+    - '16:42'
+    - '20:42'
+  status: inactive
+  wp_pass_env: WP_KUTA_PASS
+  wp_url_env: WP_KUTA_URL
+  wp_user_env: WP_KUTA_USER
 - cf_project: stock-informationhot
   daily_quota: 5
   domain: stock.informationhot.kr
@@ -282,6 +361,7 @@ blogs:
   pipeline: stock
   platform: hugo
   repo: stock-blog
+  cf_project: stock-informationhot
   schedule:
     times:
     - 07:22
@@ -294,6 +374,24 @@ blogs:
   theme: congo
   gsc_site: https://stock.informationhot.kr/
   ga4_property: '518365064'
+- cf_project: gap-hugo
+  daily_quota: 5
+  domain: life.informationhot.kr
+  id: gap-hugo
+  name: 생활정보 GAP
+  pipeline: gap
+  platform: hugo
+  repo: gap-hugo
+  schedule:
+    times:
+    - 07:15
+    - 09:15
+    - '11:15'
+    - '14:15'
+    - '17:15'
+  site_path: /Users/twinssn/Projects/GAP/gap-hugo
+  status: inactive
+  theme: congo
 - cf_project: dividend-hugo
   daily_quota: 5
   domain: dividend.techpawz.com

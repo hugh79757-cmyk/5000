@@ -4,14 +4,13 @@ import os, sys, sqlite3, time, logging, requests
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 logger = logging.getLogger("festival_refresh")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(message)s")
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "festival.db")
-KEY = os.getenv("TOUR_API_KEY", "")
+KEY = os.getenv("DATA_GO_KR_API_KEY", "")
 
 SIDO_ALIAS = {
     "서울특별시": ("1", "서울"), "부산광역시": ("6", "부산"), "대구광역시": ("4", "대구"),

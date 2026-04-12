@@ -382,7 +382,7 @@ def fetch_food():
     area_code = AREA_CODES[region_name]
     keywords = ["맛집"]  # 테마를 맛집으로 고정 (TourAPI가 세부 카테고리 필터링 불가)
     keyword = random.choice(keywords)
-    key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
+    key = os.getenv("DATA_GO_KR_API_KEY", "")
     try:
         resp = req.get(
             "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
@@ -476,7 +476,7 @@ def fetch_course():
     }
     region_name = random.choice(list(AREA_CODES.keys()))
     area_code = AREA_CODES[region_name]
-    key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
+    key = os.getenv("DATA_GO_KR_API_KEY", "")
     try:
         # 1단계: 여행코스 목록 조회 (contentTypeId=25)
         resp = req.get(
@@ -741,7 +741,7 @@ def fetch_course():
 def fetch_wellness():
     """웰니스관광정보 API (WellnessTursmService) - http, langDivCd=KOR 필수"""
     import requests
-    api_key = os.environ.get("TOUR_API_KEY", "") or os.environ.get("DATA_GO_KR_API_KEY", "")
+    api_key = os.environ.get("DATA_GO_KR_API_KEY", "")
     if not api_key:
         logger.warning("wellness: API key not found")
         return None
