@@ -276,7 +276,7 @@ def run(blog_cfg):
         tags=tags_str,
         thumbnail_url=r2_url,
         data_source="car_db",
-        source_id=str(topic['car_id']),
+        source_id=str(topic['car_id']) + "_" + str(topic['post_type']),
         prompt_id=topic["post_type"] if topic else blog_cfg.get("post_type", ""),
         model="gpt-4o-mini",
         segment=data.get("segment", ""),
