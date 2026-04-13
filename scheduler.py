@@ -117,8 +117,29 @@ def load_config():
 
 # ─── 발행 실행 ───
 
+def _ensure_all_db():
+    """매 발행 전 핵심 DB 테이블 존재 여부 보장"""
+    try:
+        from shared.content_store import init_db
+        init_db()
+    except Exception as e:
+        logger.warning(f"[DB init] content.db 초기화 실패: {e}")
+    try:
+        from pipelines.curation.pipeline import _init_db as _curation_init
+        _curation_init()
+    except Exception as e:
+        logger.warning(f"[DB init] curation.db 초기화 실패: {e}")
+    try:
+        from pipelines.curation.collector import _init_db as _collector_init
+        _collector_init()
+    except Exception as e:
+        logger.warning(f"[DB init] collector.db 초기화 실패: {e}")
+
+
 def run_publish(blog_id):
     """dispatcher를 subprocess로 실행 (quota 게이트 포함)"""
+    # 매 발행 전 DB 자동 초기화
+    _ensure_all_db()
     # 중앙 quota 체크: ledger 기준으로 초과 시 skip
     try:
         config = load_config()
