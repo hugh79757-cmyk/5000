@@ -83,7 +83,7 @@ def _format_trade_line(t):
     floor = t.get("floor", "")
     dong = t.get("umdNm", "")
     year = t.get("buildYear", "")
-    deal_date = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+    deal_date = f"{t.get('dealYear','')}.{str(t.get('dealMonth','')).zfill(2)}.{str(t.get('dealDay','')).zfill(2)}"
     price_int = t.get("dealAmountInt", 0)
 
     # 취득세 구간 자동 계산
