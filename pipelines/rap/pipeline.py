@@ -610,7 +610,7 @@ def run(blog_cfg):
             trades = []
             matched_trades = []
             try:
-                _db_conn = sqlite3.connect(db, timeout=10)
+                _db_conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db"), timeout=10)
                 _db_rows = _db_conn.execute(
                     """SELECT apt_name, dong_name, exclu_use_ar, floor, build_year,
                            deal_amount, deal_year, deal_month, deal_day
@@ -635,7 +635,7 @@ def run(blog_cfg):
             if not trades:
                 tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
                 try:
-                    _gc = sqlite3.connect(db, timeout=10)
+                    _gc = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db"), timeout=10)
                     _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                     _gc.commit()
                     _gc.close()
