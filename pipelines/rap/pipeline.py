@@ -527,7 +527,7 @@ def run(blog_cfg):
 
     from shared.content_store import init_db, get_today_count
     from shared.publisher import publish
-    from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, fetch_subscription_from_db, find_lawd_cd, REGION_CD_MAP
+    from pipelines.rap.fetcher import fetch_subscription_info, fetch_subscription_from_db, find_lawd_cd, REGION_CD_MAP
     from pipelines.rap.writer import generate_trade_article, generate_subscription_article
     from pipelines.rap.thumbnail import upload_thumbnail
 
@@ -605,27 +605,32 @@ def run(blog_cfg):
             if not lawd_cd:
                 logger.warning(f"{blog_id}: 법정동코드 미매칭, 키워드 스킵: {keyword}")
                 continue
-
             from pipelines.rap.fetcher import filter_trades_by_keyword
-            from dateutil.relativedelta import relativedelta
-
-            # 최대 3개월치 조회 - 단지 매칭될 때까지
+            # DB에서 실거래가 조회 (rap_data_sync가 수집한 데이터 사용)
             trades = []
             matched_trades = []
-            now = datetime.now()
-            for _mi in range(3):
-                _ym = (now - relativedelta(months=_mi)).strftime("%Y%m")
-                _fetched = fetch_apt_trade(lawd_cd, deal_ymd=_ym, rows=100)
-                if not _fetched:
-                    continue
-                _matched, _others = filter_trades_by_keyword(_fetched, keyword)
-                if _matched:
-                    trades = _fetched
-                    matched_trades = _matched
-                    logger.info(f"{blog_id}: {_ym} 단지 매칭 {len(_matched)}건")
-                    break
-                elif not trades:
-                    trades = _fetched
+            try:
+                _db_conn = sqlite3.connect(db, timeout=10)
+                _db_rows = _db_conn.execute(
+                    """SELECT apt_name, dong_name, exclu_use_ar, floor, build_year,
+                           deal_amount, deal_year, deal_month, deal_day
+                    FROM trades WHERE lawd_cd=? ORDER BY deal_year DESC, deal_month DESC, deal_day DESC LIMIT 100""",
+                    (lawd_cd,)
+                ).fetchall()
+                _db_conn.close()
+                trades = [
+                    {"aptNm": r[0], "umdNm": r[1], "excluUseAr": r[2], "floor": r[3],
+                     "buildYear": r[4], "dealAmountInt": r[5], "dealAmount": f"{r[5]:,}",
+                     "dealYear": r[6], "dealMonth": r[7], "dealDay": r[8]}
+                    for r in _db_rows
+                ]
+                if trades:
+                    _matched, _others = filter_trades_by_keyword(trades, keyword)
+                    if _matched:
+                        matched_trades = _matched
+                        logger.info(f"{blog_id}: DB 단지 매칭 {len(_matched)}건")
+            except Exception as _db_err:
+                logger.error(f"{blog_id}: trades DB 조회 실패: {_db_err}")
 
             if not trades:
                 tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
@@ -668,6 +673,7 @@ def run(blog_cfg):
             if isinstance(article, dict) and "body_md" in article:
                 article["body_md"] = _dedup_read_together(article["body_md"])
             data_source = "applyhome_db"
+
 
         if article:
             break

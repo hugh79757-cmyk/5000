@@ -6,6 +6,10 @@ import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
+
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
+
 logger = logging.getLogger(__name__)
 
 API_KEY = None
@@ -300,6 +304,12 @@ BRAND_LAWD_MAP = {
     "힐스테이트광교": ("41117", "경기", "수원시 영통구"),
     "힐스테이트더운정": ("41480", "경기", "파주시"),
     "힐스테이트삼송": ("10390", "경기", "고양시 덕양구"),
+
+    "라클라체자이드파인": ("11710", "서울", "송파구"),
+    "수지자이에디시온": ("41465", "경기", "용인시 수지구"),
+    "아크로드서초": ("11650", "서울", "서초구"),
+    "포항자이애서턴": ("47111", "경북", "포항시 남구"),
+    "평촌자이퍼스니티": ("41173", "경기", "안양시 동안구"),
     "힐스테이트범어": ("27200", "대구", "수성구"),
     # ─── 푸르지오 (대우건설) ───
     "푸르지오": ("11590", "서울", "동작구"),
@@ -359,15 +369,28 @@ BRAND_LAWD_MAP = {
 
 def find_lawd_cd(keyword):
     """키워드에서 법정동코드 추출 — 브랜드명 우선, 지역명 차순"""
-    # 1) 브랜드/단지명 매칭 (정확도 높음)
+    keyword_nospace = keyword.replace(" ", "")
+    # 1) 브랜드/단지명 매칭 (정확도 높음) — 공백 제거 후에도 매칭
     for brand, (code, city, district) in BRAND_LAWD_MAP.items():
-        if brand in keyword:
+        if brand in keyword or brand in keyword_nospace:
             return code, city, district
-    # 2) 지역명 매칭
+    # 2) 지역명 매칭 — 긴 이름 우선 (남동구 vs 동구 오매칭 방지)
+    best_match = None
+    best_len = 0
     for city, districts in LAWD_MAP.items():
         for district, code in districts.items():
-            if district in keyword or city in keyword:
-                return code, city, district
+            # city+district 조합 매칭 (가장 정확)
+            if city in keyword and district in keyword:
+                match_len = len(city) + len(district)
+                if match_len > best_len:
+                    best_match = (code, city, district)
+                    best_len = match_len
+            # district 단독 매칭 (긴 이름 우선)
+            elif district in keyword and len(district) > best_len:
+                best_match = (code, city, district)
+                best_len = len(district)
+    if best_match:
+        return best_match
     return None, None, None
 
 
