@@ -294,3 +294,6 @@ def filter_unused_places(place_names, blog_id):
     conn.close()
     return unused
 
+
+# 모듈 import 시 자동 초기화
+init_db()
