@@ -207,6 +207,10 @@ def run(blog_cfg):
                     except (ValueError, TypeError, AttributeError):
                         pass
                     fin_data[acct] = {"당기": thstrm, "전기": frmtrm, "YoY": yoy}
+                # 재무 핵심 항목(매출액/영업이익/당기순이익) 없으면 스킵
+                if not fin_data:
+                    logger.info(f"재무 데이터 없음, 스킵: {corp.get('corp_name', '')} ({corp_code})")
+                    continue
                 corp_enriched = {
                     "corp_name": corp.get("corp_name", ""),
                     "stock_code": corp.get("stock_code", ""),
