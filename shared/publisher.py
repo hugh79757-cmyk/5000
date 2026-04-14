@@ -291,6 +291,11 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
 
 def deploy_site(site_path, cf_project):
+    # M4 배포 차단 가드
+    import socket
+    if "MacBookAir-9" in socket.gethostname():
+        print("[차단] M4에서는 배포할 수 없습니다. M1에서 실행하세요.")
+        return False
     site = Path(site_path)
     result = subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=str(site), capture_output=True, text=True)
     if result.returncode != 0:
