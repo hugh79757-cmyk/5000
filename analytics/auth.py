@@ -44,6 +44,26 @@ def get_gsc_service_for_domain(sc_domain):
     return get_gsc_service(account)
 
 
+DOMAIN_ACCOUNT = {
+    "rotcha.kr": "twinssn",
+    "techpawz.com": "twinssn",
+    "informationhot.kr": "informationhot",
+    "aikorea24.kr": "aikorea24",
+}
+
+def get_account_for_domain(domain):
+    """도메인에서 루트 도메인 추출 후 계정 반환"""
+    parts = domain.split(".")
+    if len(parts) >= 2:
+        root = ".".join(parts[-2:])
+        return DOMAIN_ACCOUNT.get(root, "twinssn")
+    return "twinssn"
+
 def get_ga4_service(account="twinssn"):
     """GA4 Data API 서비스 객체"""
     return build("analyticsdata", "v1beta", credentials=get_credentials(account))
+
+def get_ga4_service_for_domain(domain):
+    """도메인에 맞는 계정으로 GA4 서비스 반환"""
+    account = get_account_for_domain(domain)
+    return get_ga4_service(account)

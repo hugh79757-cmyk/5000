@@ -413,7 +413,7 @@ blogs:
   status: active
   theme: blowfish
   gsc_site: https://senior.informationhot.kr/
-  ga4_property: '531055912'
+  ga4_property: '532443661'
 - blogger_blog_id: '5484205249958557854'
   daily_quota: 5
   domain: 2.techpawz.com
@@ -432,6 +432,7 @@ blogs:
   gsc_site: https://2.techpawz.com/
   ga4_property: '502880375'
 - id: rap-hugo
+  ga4_property: '532442451'
   name: 부동산 시세 청약 분석
   pipeline: rap
   platform: hugo
@@ -450,8 +451,8 @@ blogs:
     - '16:50'
     - '20:50'
   gsc_site: https://apt.informationhot.kr/
-  ga4_property: '529715626'
 - id: rap4-hugo
+  ga4_property: '532430252'
   name: 전세월세 리포트
   pipeline: rap
   platform: hugo
@@ -470,7 +471,6 @@ blogs:
     - '17:50'
     - '21:50'
   gsc_site: https://rent.informationhot.kr/
-  ga4_property: '529720369'
 - id: rap5-hugo
   name: 브랜드 아파트 백과
   pipeline: rap
@@ -490,8 +490,9 @@ blogs:
     - '18:10'
     - '22:10'
   gsc_site: https://brand.informationhot.kr/
-  ga4_property: '529762700'
+  ga4_property: '532440044'
 - id: rap2-hugo
+  ga4_property: '532468577'
   name: 청약 알리미
   pipeline: rap
   platform: hugo
@@ -510,8 +511,8 @@ blogs:
     - '17:10'
     - '21:10'
   gsc_site: https://apply.informationhot.kr/
-  ga4_property: '529752187'
 - id: rap3-hugo
+  ga4_property: '532414996'
   name: 부동산 세금 가이드
   pipeline: rap
   platform: hugo
@@ -530,7 +531,6 @@ blogs:
     - '17:30'
     - '21:30'
   gsc_site: https://tax.informationhot.kr/
-  ga4_property: '529742117'
 - id: laptop-hugo
   name: 노트북 추천 가이드
   pipeline: curation
@@ -550,7 +550,7 @@ blogs:
     - '16:40'
     - '20:40'
   gsc_site: https://laptop.informationhot.kr/
-  ga4_property: '531078092'
+  ga4_property: '532425912'
 - id: appliance-hugo
   name: 가전제품 추천 가이드
   pipeline: curation
@@ -570,7 +570,7 @@ blogs:
     - '16:50'
     - '20:50'
   gsc_site: https://appliance.informationhot.kr/
-  ga4_property: '531043585'
+  ga4_property: '532414941'
 - id: interior-hugo
   name: 가구 인테리어 추천 가이드
   pipeline: curation
@@ -590,7 +590,7 @@ blogs:
     - '17:00'
     - '21:00'
   gsc_site: https://interior.informationhot.kr/
-  ga4_property: '531043225'
+  ga4_property: '532439844'
 - id: baby-hugo
   name: 유아용품 추천 가이드
   pipeline: curation
@@ -610,7 +610,7 @@ blogs:
     - '17:10'
     - '21:10'
   gsc_site: https://baby.informationhot.kr/
-  ga4_property: '531079405'
+  ga4_property: '532411814'
 - id: fitness-hugo
   name: 운동용품 추천 가이드
   pipeline: curation
@@ -630,7 +630,7 @@ blogs:
     - '17:20'
     - '21:20'
   gsc_site: https://fitness.informationhot.kr/
-  ga4_property: '531079305'
+  ga4_property: '532414997'
 - cf_project: tour-hugo
   daily_quota: 5
   domain: tour.techpawz.com
@@ -822,6 +822,7 @@ blogs:
     - '16:45'
     - '20:45'
 - id: bus-hugo
+  ga4_property: '531065834'
   name: Bus Routes Guide
   pipeline: etap
   platform: hugo
@@ -841,6 +842,7 @@ blogs:
     - '17:45'
     - '21:45'
 - id: ferry-hugo
+  ga4_property: '531123458'
   name: Ferry Routes Guide
   pipeline: etap
   platform: hugo
@@ -860,6 +862,7 @@ blogs:
     - '17:50'
     - '21:50'
 - id: dining-hugo
+  ga4_property: '531047182'
   name: Dining Guide
   pipeline: etap
   platform: hugo
@@ -879,6 +882,7 @@ blogs:
     - '17:55'
     - '21:55'
 - id: culture-hugo
+  ga4_property: '531065835'
   name: Culture & Arts Guide
   pipeline: etap
   platform: hugo
@@ -898,6 +902,7 @@ blogs:
     - '18:00'
     - '22:00'
 - id: transfers-hugo
+  ga4_property: '531012256'
   name: Airport Transfers Guide
   pipeline: etap
   platform: hugo
@@ -917,6 +922,7 @@ blogs:
     - '18:05'
     - '22:05'
 - id: multiday-hugo
+  ga4_property: '531139671'
   name: Multi-Day Tours Guide
   pipeline: etap
   platform: hugo
@@ -936,6 +942,7 @@ blogs:
     - '18:10'
     - '22:10'
 - id: nature-hugo
+  ga4_property: '531055811'
   name: Nature & Adventure Guide
   pipeline: etap
   platform: hugo
@@ -955,6 +962,7 @@ blogs:
     - '18:15'
     - '22:15'
 - id: visafree-hugo
+  ga4_property: '531135786'
   name: Visa-Free Travel Guide
   pipeline: etap
   platform: hugo
@@ -974,6 +982,7 @@ blogs:
     - '18:20'
     - '22:20'
 - id: deals-hugo
+  ga4_property: '531065294'
   name: Travel Deals Guide
   pipeline: etap
   platform: hugo
@@ -993,6 +1002,7 @@ blogs:
     - '18:25'
     - '22:25'
 - id: eurail-hugo
+  ga4_property: '531024940'
   name: Eurail Pass Guide
   pipeline: etap
   platform: hugo
@@ -1012,6 +1022,7 @@ blogs:
     - '18:30'
     - '22:30'
 - id: cruise-hugo
+  ga4_property: '531006370'
   name: Cruise Guide
   pipeline: etap
   platform: hugo
@@ -1031,6 +1042,7 @@ blogs:
     - '18:35'
     - '22:35'
 - id: phototour-hugo
+  ga4_property: '531036743'
   name: Photo Tour Guide
   pipeline: etap
   platform: hugo
@@ -1050,6 +1062,7 @@ blogs:
     - '18:40'
     - '22:40'
 - id: daytrips-hugo
+  ga4_property: '531054102'
   name: Day Trips Guide
   pipeline: etap
   platform: hugo
@@ -1069,6 +1082,7 @@ blogs:
     - '17:20'
     - '21:20'
 - id: walking-hugo
+  ga4_property: '531135787'
   name: Walking Tours Guide
   pipeline: etap
   platform: hugo
@@ -1088,6 +1102,7 @@ blogs:
     - '17:25'
     - '21:25'
 - id: foodtour-hugo
+  ga4_property: '531167909'
   name: Food Tours Guide
   pipeline: etap
   platform: hugo
@@ -1107,6 +1122,7 @@ blogs:
     - '17:30'
     - '21:30'
 - id: adventure-hugo
+  ga4_property: '531123457'
   name: Adventure Travel Guide
   pipeline: etap
   platform: hugo
@@ -1126,6 +1142,7 @@ blogs:
     - '17:35'
     - '21:35'
 - id: watersports-hugo
+  ga4_property: '531139672'
   name: Water Sports Guide
   pipeline: etap
   platform: hugo
@@ -1156,3 +1173,276 @@ blogs:
     - '14:00'
     - '20:00'
   status: active
+- id: achaanstree
+  ga4_property: '532438526'
+  domain: achaanstree.tistory.com
+  name: Achaanstree
+  platform: blogger
+  status: active
+  pipeline: etc
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: aikorea24
+  ga4_property: '524509961'
+  domain: aikorea24.kr
+  name: Aikorea24
+  platform: blogger
+  status: active
+  pipeline: main
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: betguide-hugo
+  ga4_property: '531081565'
+  domain: betguide.informationhot.kr
+  name: Betguide
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: brand-hugo
+  ga4_property: '532435289'
+  domain: brand.informationhot.kr
+  name: Brand
+  platform: hugo
+  status: active
+  pipeline: curation
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: cert-hugo
+  ga4_property: '524828505'
+  domain: cert.aikorea24.kr
+  name: Cert
+  platform: hugo
+  status: active
+  pipeline: main
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: fsched-hugo
+  ga4_property: '531076492'
+  domain: fsched.informationhot.kr
+  name: Fsched
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: fstats-hugo
+  ga4_property: '531068628'
+  domain: fstats.informationhot.kr
+  name: Fstats
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: heritage-hugo
+  ga4_property: '531138757'
+  domain: heritage.aikorea24.kr
+  name: Heritage
+  platform: hugo
+  status: active
+  pipeline: travel
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: info-hugo
+  ga4_property: '502581984'
+  domain: info.techpawz.com
+  name: Info
+  platform: hugo
+  status: active
+  pipeline: etc
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: issue-hugo
+  ga4_property: '532383394'
+  domain: issue.techpawz.com
+  name: Issue
+  platform: hugo
+  status: active
+  pipeline: etc
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: kbo-hugo
+  ga4_property: '531050852'
+  domain: kbo.rotcha.kr
+  name: Kbo
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: kboplayer-hugo
+  ga4_property: '531090148'
+  domain: kboplayer.informationhot.kr
+  name: Kboplayer
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: kboschedule-hugo
+  ga4_property: '531090946'
+  domain: kboschedule.informationhot.kr
+  name: Kboschedule
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: kboteam-hugo
+  ga4_property: '531013822'
+  domain: kboteam.informationhot.kr
+  name: Kboteam
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: keyword-hugo
+  ga4_property: '531129334'
+  domain: keyword.aikorea24.kr
+  name: Keyword
+  platform: hugo
+  status: active
+  pipeline: main
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: kuta-hugo
+  ga4_property: '469316517'
+  domain: kuta.informationhot.kr
+  name: Kuta
+  platform: hugo
+  status: active
+  pipeline: gap
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: proto-hugo
+  ga4_property: '531068343'
+  domain: proto.informationhot.kr
+  name: Proto
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: protostats-hugo
+  ga4_property: '531013823'
+  domain: protostats.informationhot.kr
+  name: Protostats
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: sports-hugo
+  ga4_property: '531059838'
+  domain: sports.rotcha.kr
+  name: Sports
+  platform: hugo
+  status: active
+  pipeline: sports
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: ud-hugo
+  ga4_property: '532440329'
+  domain: ud.informationhot.kr
+  name: Ud
+  platform: hugo
+  status: active
+  pipeline: etc
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'
+- id: zodiac-hugo
+  ga4_property: '532434710'
+  domain: zodiac.techpawz.com
+  name: Zodiac
+  platform: hugo
+  status: active
+  pipeline: etc
+  daily_quota: 3
+  schedule:
+    times:
+    - 09:00
+    - '15:00'
+    - '21:00'

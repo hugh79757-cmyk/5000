@@ -30,9 +30,8 @@ def get_db():
 
 def collect_all(days_back=7, verbose=True):
     """전체 활성 블로그 GA4 데이터 수집"""
-    from analytics.auth import get_ga4_service
+    from analytics.auth import get_ga4_service_for_domain
 
-    service = get_ga4_service()
     blogs = load_active_blogs()
     conn = get_db()
     c = conn.cursor()
@@ -50,10 +49,12 @@ def collect_all(days_back=7, verbose=True):
 
     for blog in blogs:
         bid = blog["id"]
+        domain = blog.get("domain", "")
+        service = get_ga4_service_for_domain(domain)
         prop = f"properties/{blog['ga4_property']}"
 
         if verbose:
-            print(f"[{bid}] {prop}")
+            print(f"[{bid}] {domain} -> {prop}")
 
         daily_count = 0
         page_count = 0
