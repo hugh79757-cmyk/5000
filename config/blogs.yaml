@@ -165,7 +165,7 @@ blogs:
     - '13:00'
     - '16:00'
     - '20:00'
-  site_path: /Users/twinssn/Projects/travel-hugo
+  site_path: /Users/twinssn/Projects/TAP/travel-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour1.rotcha.kr/
@@ -191,7 +191,7 @@ blogs:
     - '13:02'
     - '16:02'
     - '20:02'
-  site_path: /Users/twinssn/Projects/travel1-hugo
+  site_path: /Users/twinssn/Projects/TAP/travel1-hugo
   status: active
   theme: Blowfish
   gsc_site: https://travel1.rotcha.kr/
@@ -217,7 +217,7 @@ blogs:
     - '13:04'
     - '16:04'
     - '20:04'
-  site_path: /Users/twinssn/Projects/travel2-hugo
+  site_path: /Users/twinssn/Projects/TAP/travel2-hugo
   status: active
   theme: Blowfish
   gsc_site: https://travel2.rotcha.kr/
@@ -243,7 +243,7 @@ blogs:
     - '13:06'
     - '16:06'
     - '20:06'
-  site_path: /Users/twinssn/Projects/travel3-hugo
+  site_path: /Users/twinssn/Projects/TAP/travel3-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour2.rotcha.kr/
@@ -269,7 +269,7 @@ blogs:
     - '13:08'
     - '16:08'
     - '20:08'
-  site_path: /Users/twinssn/Projects/travel4-hugo
+  site_path: /Users/twinssn/Projects/TAP/travel4-hugo
   status: active
   theme: Blowfish
   gsc_site: https://tour3.rotcha.kr/
