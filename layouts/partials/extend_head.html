@@ -1,0 +1,57 @@
+{{- /* v1.64 최적화 */ -}}
+<meta name="google-adsense-account" content="ca-pub-8772455780561463">
+<meta name="naver-site-verification" content="050645d130f492d522009ec5d98c4866c3008520">
+<meta name="yandex-verification" content="a093ecbeea7a8440">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="x-dns-prefetch-control" content="on">
+
+<!-- Critical CSS 인라인 -->
+<style>
+:root{--gap:24px;--content-gap:20px;--nav-width:1024px;--main-width:720px;--header-height:60px;--footer-height:60px;--radius:8px;--theme:#fff;--entry:#fff;--primary:#1e1e1e;--secondary:#6c6c6c;--tertiary:#d6d6d6;--content:#1f1f1f;--code-bg:#f5f5f5;--border:#eee}
+:root[data-theme="dark"]{--theme:#1d1e20;--entry:#2e2e33;--primary:#dadada;--secondary:#9b9c9d;--tertiary:#414244;--content:#c4c4c5;--code-bg:#373840;--border:#333}
+*,::after,::before{box-sizing:border-box}
+body{margin:0;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;font-size:18px;line-height:1.6;background:var(--theme);color:var(--primary)}
+.header{background:var(--theme)}
+.nav{display:flex;flex-wrap:wrap;justify-content:space-between;max-width:calc(var(--nav-width) + var(--gap)*2);margin:auto;line-height:var(--header-height)}
+.main{max-width:calc(var(--main-width) + var(--gap)*2);margin:auto;padding:var(--gap)}
+.entry-cover img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:var(--radius)}
+.ad-slot{min-height:250px}
+@media(max-width:768px){.ad-slot{min-height:200px};:root{--gap:14px}}
+</style>
+
+<!-- Preconnect -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
+<link rel="preconnect" href="https://pub-f13899253b8f4ee58b588f86589bf042.r2.dev" crossorigin>
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+<!-- Pretendard Subset 폰트 -->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2-subset/Pretendard-Regular.subset.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:'Pretendard';font-weight:400;font-display:swap;src:local('Pretendard Regular'),url('https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2-subset/Pretendard-Regular.subset.woff2') format('woff2')}
+@font-face{font-family:'Pretendard';font-weight:700;font-display:swap;src:local('Pretendard Bold'),url('https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/static/woff2-subset/Pretendard-Bold.subset.woff2') format('woff2')}
+</style>
+
+<!-- LCP 이미지 Preload -->
+{{- if .IsHome }}
+  {{- $pages := where .Site.RegularPages "Type" "posts" }}
+  {{- range first 1 $pages }}
+    {{- with .Params.cover.image }}
+<link rel="preload" href="{{ . | absURL }}" as="image" fetchpriority="high">
+    {{- end }}
+  {{- end }}
+{{- else if .IsPage }}
+  {{- with .Params.cover.image }}
+<link rel="preload" href="{{ . | absURL }}" as="image" fetchpriority="high">
+  {{- end }}
+{{- end }}
+
+<!-- GA (7초 지연) -->
+<script>
+setTimeout(function(){var s=document.createElement('script');s.src='https://www.googletagmanager.com/gtag/js?id=G-L3D3EGH8YN';s.async=1;document.head.appendChild(s);s.onload=function(){window.dataLayer=window.dataLayer||[];function g(){dataLayer.push(arguments);}g('js',new Date());g('config','G-L3D3EGH8YN');}},7000);
+</script>
+
+<!-- AdSense (인터랙션/7초) -->
+<script>
+var _ad=0;function _ld(){if(_ad)return;_ad=1;var s=document.createElement("script");s.src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463";s.async=1;s.crossOrigin="anonymous";document.head.appendChild(s);}["scroll","click","touchstart","keydown"].forEach(function(e){window.addEventListener(e,_ld,{once:1,passive:1});});setTimeout(_ld,7000);
+</script>

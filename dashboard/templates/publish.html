@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발행현황 - Blogdex-Lite</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; padding: 20px; }
+        h1 { color: #fff; margin-bottom: 5px; }
+        .subtitle { color: #888; margin-bottom: 10px; font-size: 14px; }
+        nav { margin-bottom: 20px; display: flex; gap: 10px; }
+        nav a { color: #6c9fff; text-decoration: none; padding: 6px 14px; border-radius: 6px; background: #1a1d27; border: 1px solid #2a2d37; font-size: 13px; }
+        nav a:hover, nav a.active { background: #2a2d37; color: #fff; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 25px; }
+        .card { background: #1a1d27; border-radius: 12px; padding: 18px; border: 1px solid #2a2d37; }
+        .card .label { color: #888; font-size: 11px; text-transform: uppercase; }
+        .card .value { font-size: 28px; font-weight: 700; color: #fff; margin-top: 4px; }
+        .card .sub { color: #666; font-size: 11px; margin-top: 3px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+        th { background: #1a1d27; color: #888; text-align: left; padding: 8px 10px; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid #2a2d37; position: sticky; top: 0; }
+        td { padding: 8px 10px; border-bottom: 1px solid #1a1d27; font-size: 13px; }
+        tr:hover { background: #1a1d27; }
+        a { color: #6c9fff; text-decoration: none; }
+        .group-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; margin-left: 4px; }
+        .zero { color: #444; }
+        .highlight { color: #22c55e; font-weight: 600; }
+        .source-tag { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; }
+        .source-5000 { background: #3b82f622; color: #3b82f6; }
+        .source-ETAP { background: #8b5cf622; color: #8b5cf6; }
+        .source-STAP { background: #ef444422; color: #ef4444; }
+        .bar { height: 6px; border-radius: 3px; background: #2a2d37; min-width: 60px; display: inline-block; vertical-align: middle; margin-left: 6px; }
+        .bar-fill { height: 100%; border-radius: 3px; background: #22c55e; }
+    </style>
+</head>
+<body>
+    <h1>발행현황</h1>
+    <p class="subtitle">{{ today_str }} 기준</p>
+
+    <nav>
+        <a href="/">대시보드</a>
+        <a href="/keywords">키워드</a>
+        <a href="/publish" class="active">발행현황</a>
+    </nav>
+
+    <div class="cards">
+        <div class="card">
+            <div class="label">오늘 발행</div>
+            <div class="value">{{ totals['today'] }}</div>
+        </div>
+        <div class="card">
+            <div class="label">7일 발행</div>
+            <div class="value">{{ totals['week'] }}</div>
+        </div>
+        <div class="card">
+            <div class="label">30일 발행</div>
+            <div class="value">{{ totals['month'] }}</div>
+        </div>
+        <div class="card">
+            <div class="label">누적 발행</div>
+            <div class="value">{{ "{:,}".format(totals['total']) }}</div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>블로그</th>
+                <th>그룹</th>
+                <th>소스</th>
+                <th>오늘</th>
+                <th>7일</th>
+                <th>30일</th>
+                <th>누적</th>
+                <th>비율</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in results %}
+        <tr>
+            <td><a href="/blog/{{ r['blog_id'] }}">{{ r['blog_id'] }}</a></td>
+            <td>
+                {% if r['blog_id'] in site_map %}
+                {% set grp = site_map[r['blog_id']].get('group', '') %}
+                {% if grp in groups %}
+                <span class="group-tag" style="background:{{ groups[grp]['color'] }}22; color:{{ groups[grp]['color'] }};">{{ groups[grp]['name'] }}</span>
+                {% endif %}
+                {% endif %}
+            </td>
+            <td><span class="source-tag source-{{ r['source'] }}">{{ r['source'] }}</span></td>
+            <td>{% if r['today'] > 0 %}<span class="highlight">{{ r['today'] }}</span>{% else %}<span class="zero">0</span>{% endif %}</td>
+            <td>{{ r['week'] }}</td>
+            <td>{{ r['month'] }}</td>
+            <td>{{ r['total'] }}</td>
+            <td>
+                {% if totals['total'] > 0 %}
+                <div class="bar"><div class="bar-fill" style="width:{{ (r['total']/totals['total']*100)|int }}%;"></div></div>
+                {{ "%.1f"|format(r['total']/totals['total']*100) }}%
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
