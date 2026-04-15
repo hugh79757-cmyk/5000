@@ -273,7 +273,14 @@ def check_daily_quota(blog_id, max_per_day=5):
     import sqlite3
     db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
         os.path.abspath(__file__)))), "data", "travel-en.db")
+    logger.info(f"[{blog_id}] check_daily_quota DB: {db_path} exists={os.path.exists(db_path)} size={os.path.getsize(db_path) if os.path.exists(db_path) else 0}")
     conn = sqlite3.connect(db_path)
+    # 테이블 존재 확인
+    _tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+    if 'publish_log' not in _tables:
+        logger.error(f"[{blog_id}] publish_log NOT FOUND in {db_path}! tables={_tables[:10]}")
+        conn.close()
+        return True, 0
     today_count = conn.execute(
         "SELECT COUNT(*) FROM publish_log WHERE blog_id=? AND DATE(published_at)=DATE('now','localtime')",
         (blog_id,)

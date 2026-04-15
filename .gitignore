@@ -18,3 +18,5 @@ data/*.db-shm
 data/*.db-wal
 data/backups/
 *.db.broken
+rankingoneto*/
+.aider*
