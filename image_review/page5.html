@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CAP 이미지 검수 5/13</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, sans-serif; background: #111; color: #eee; padding: 20px; }
+h1 { font-size: 18px; margin-bottom: 8px; color: #fff; }
+.summary { font-size: 12px; color: #aaa; margin-bottom: 12px; }
+.nav { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.nav a { color: #4af; text-decoration: none; padding: 4px 10px; border: 1px solid #4af; border-radius: 4px; font-size: 12px; }
+.nav a:hover { background: #4af; color: #000; }
+.nav .cur { color: #fff; background: #555; padding: 4px 10px; border-radius: 4px; font-size: 12px; border: 1px solid #555; }
+.car-block { margin-bottom: 36px; }
+.car-title { font-size: 14px; font-weight: bold; padding: 8px 12px; background: #1e1e1e; border-left: 4px solid #4af; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.car-title .car-info { flex: 1; }
+.car-title .car-actions { display: flex; gap: 6px; }
+.img-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.img-card { background: #1e1e1e; border-radius: 8px; overflow: hidden; border: 2px solid #333; transition: all 0.15s; }
+.img-card.passed { border-color: #2a2; background: #0f1f0f; }
+.img-card.failed { border-color: #a22; background: #1f0f0f; opacity: 0.5; }
+.img-card.loading { border-color: #fa0; }
+.img-thumb { width: 100%; height: 130px; object-fit: cover; display: block; background: #333; cursor: pointer; }
+.img-info { padding: 6px 8px; font-size: 11px; }
+.img-info .img-id { font-weight: bold; color: #ccc; }
+.img-info .img-status { margin-top: 2px; font-size: 11px; }
+.status-v1 { color: #4f4; }
+.status-v0 { color: #fa0; }
+.status-vm1 { color: #f55; }
+.img-btns { display: flex; gap: 4px; padding: 4px 8px 8px; }
+.btn { padding: 4px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; transition: opacity 0.1s; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-pass { background: #2a2; color: #fff; }
+.btn-pass:hover:not(:disabled) { background: #3c3; }
+.btn-fail { background: #a22; color: #fff; }
+.btn-fail:hover:not(:disabled) { background: #c33; }
+.global-status { position: fixed; top: 12px; right: 20px; background: #222; border: 1px solid #444; border-radius: 8px; padding: 8px 14px; font-size: 12px; z-index: 200; }
+.global-status .s1 { color: #4f4; }
+.global-status .s0 { color: #fa0; }
+.global-status .sm1 { color: #f55; }
+.toast { position: fixed; bottom: 30px; right: 20px; background: #333; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px; z-index: 300; display: none; }
+.badge { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 11px; font-weight: bold; margin-left: 4px; }
+.badge-v1 { background: #1a3a1a; color: #4f4; }
+.badge-v0 { background: #3a2a00; color: #fa0; }
+.badge-vm1 { background: #3a1a1a; color: #f55; }
+</style>
+</head>
+<body>
+<div class="global-status">
+  <span class="s1" id="gs-v1">✓ -</span> &nbsp;
+  <span class="s0" id="gs-v0">? -</span> &nbsp;
+  <span class="sm1" id="gs-vm1">✗ -</span>
+</div>
+<div id="toast" class="toast"></div>
+<h1>CAP 이미지 검수 — 5/13 페이지</h1>
+<div class="summary">✓통과: R2 업로드 후 verified=1 저장 &nbsp;|&nbsp; ✗불량: blocked 등록 + verified=-1</div>
+<div class="nav"><a href="index.html">☰ 목록</a><a href="page4.html">◀ 이전</a><a href="page1.html">1</a><a href="page2.html">2</a><a href="page3.html">3</a><a href="page4.html">4</a><span class="cur">5</span><a href="page6.html">6</a><a href="page7.html">7</a><a href="page8.html">8</a><a href="page9.html">9</a><a href="page10.html">10</a><a href="page11.html">11</a><a href="page12.html">12</a><a href="page13.html">13</a><a href="page6.html">다음 ▶</a></div>
+<div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 K8 하이브리드 2026 <span style="color:#888;font-size:12px">(가솔린/하이브리드) — k8_hev_2026</span> <span class="badge badge-v0">?10</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('k8_hev_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('k8_hev_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="15" data-car="k8_hev_2026">
+  <img class="img-thumb" src="https://file.carisyou.com/upload/2024/08/09/FILE_202408090315023910.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:15">
+  <div class="img-info">
+    <div class="img-id">ID: 15</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(15,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(15,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="16" data-car="k8_hev_2026">
+  <img class="img-thumb" src="https://file.carisyou.com/upload/2024/08/09/FILE_202408090315026701.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:16">
+  <div class="img-info">
+    <div class="img-id">ID: 16</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(16,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(16,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="17" data-car="k8_hev_2026">
+  <img class="img-thumb" src="https://file.carisyou.com/upload/2024/08/09/FILE_202408090315028992.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:17">
+  <div class="img-info">
+    <div class="img-id">ID: 17</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(17,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(17,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="18" data-car="k8_hev_2026">
+  <img class="img-thumb" src="https://file.carisyou.com/upload/2024/08/09/FILE_202408090315057420.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:18">
+  <div class="img-info">
+    <div class="img-id">ID: 18</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(18,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(18,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="19" data-car="k8_hev_2026">
+  <img class="img-thumb" src="https://file.carisyou.com/upload/2024/08/09/FILE_202408090315061001.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:19">
+  <div class="img-info">
+    <div class="img-id">ID: 19</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(19,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(19,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="1295" data-car="k8_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/08/09/FILE_202408090315023910.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:1295">
+  <div class="img-info">
+    <div class="img-id">ID: 1295</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(1295,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(1295,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="1296" data-car="k8_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/08/09/FILE_202408090315026701.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:1296">
+  <div class="img-info">
+    <div class="img-id">ID: 1296</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(1296,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(1296,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="1297" data-car="k8_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/08/09/FILE_202408090315028992.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:1297">
+  <div class="img-info">
+    <div class="img-id">ID: 1297</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(1297,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(1297,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="1298" data-car="k8_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/08/09/FILE_202408090315057420.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:1298">
+  <div class="img-info">
+    <div class="img-id">ID: 1298</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(1298,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(1298,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="1299" data-car="k8_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/08/09/FILE_202408090315061001.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:1299">
+  <div class="img-info">
+    <div class="img-id">ID: 1299</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(1299,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(1299,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 K9 2025 <span style="color:#888;font-size:12px">(가솔린) — k9_2025</span> <span class="badge badge-v0">?6</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('k9_2025')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('k9_2025')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="215" data-car="k9_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218440580.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:215">
+  <div class="img-info">
+    <div class="img-id">ID: 215</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(215,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(215,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="216" data-car="k9_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218450321.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:216">
+  <div class="img-info">
+    <div class="img-id">ID: 216</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(216,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(216,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="217" data-car="k9_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218454402.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:217">
+  <div class="img-info">
+    <div class="img-id">ID: 217</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(217,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(217,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="218" data-car="k9_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218458163.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:218">
+  <div class="img-info">
+    <div class="img-id">ID: 218</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(218,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(218,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="219" data-car="k9_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218465004.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:219">
+  <div class="img-info">
+    <div class="img-id">ID: 219</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(219,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(219,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="220" data-car="k9_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218470165.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:220">
+  <div class="img-info">
+    <div class="img-id">ID: 220</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(220,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(220,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 K9 2026 <span style="color:#888;font-size:12px">(가솔린) — k9_2026</span> <span class="badge badge-v0">?6</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('k9_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('k9_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="3774" data-car="k9_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218440580.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:3774">
+  <div class="img-info">
+    <div class="img-id">ID: 3774</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(3774,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(3774,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="3775" data-car="k9_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218450321.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:3775">
+  <div class="img-info">
+    <div class="img-id">ID: 3775</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(3775,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(3775,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="3776" data-car="k9_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218454402.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:3776">
+  <div class="img-info">
+    <div class="img-id">ID: 3776</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(3776,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(3776,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="3777" data-car="k9_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218458163.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:3777">
+  <div class="img-info">
+    <div class="img-id">ID: 3777</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(3777,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(3777,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="3778" data-car="k9_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218465004.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:3778">
+  <div class="img-info">
+    <div class="img-id">ID: 3778</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(3778,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(3778,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="3779" data-car="k9_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/06/17/FILE_202106171218470165.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:3779">
+  <div class="img-info">
+    <div class="img-id">ID: 3779</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(3779,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(3779,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 레이 2026 <span style="color:#888;font-size:12px">(가솔린) — ray_2026</span> <span class="badge badge-v0">?4</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('ray_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('ray_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="376" data-car="ray_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2022/09/01/FILE_202209011009112001.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:376">
+  <div class="img-info">
+    <div class="img-id">ID: 376</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(376,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(376,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="377" data-car="ray_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2022/09/01/FILE_202209011009116762.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:377">
+  <div class="img-info">
+    <div class="img-id">ID: 377</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(377,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(377,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="378" data-car="ray_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2022/09/01/FILE_202209011009123234.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:378">
+  <div class="img-info">
+    <div class="img-id">ID: 378</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(378,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(378,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="381" data-car="ray_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2022/09/01/FILE_202209011009120013.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:381">
+  <div class="img-info">
+    <div class="img-id">ID: 381</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(381,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(381,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 레이 EV 2026 <span style="color:#888;font-size:12px">(전기) — ray_ev_2026</span> <span class="badge badge-v0">?3</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('ray_ev_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('ray_ev_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="386" data-car="ray_ev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/09/05/FILE_202309050405403230.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:386">
+  <div class="img-info">
+    <div class="img-id">ID: 386</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(386,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(386,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="387" data-car="ray_ev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/09/21/FILE_202309210945465900.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:387">
+  <div class="img-info">
+    <div class="img-id">ID: 387</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(387,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(387,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="388" data-car="ray_ev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/09/05/FILE_202309050405422230.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:388">
+  <div class="img-info">
+    <div class="img-id">ID: 388</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(388,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(388,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 모닝 2025 <span style="color:#888;font-size:12px">(가솔린) — morning_2025</span> <span class="badge badge-v0">?2</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('morning_2025')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('morning_2025')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="236" data-car="morning_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/07/06/FILE_202307060946016511.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:236">
+  <div class="img-info">
+    <div class="img-id">ID: 236</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(236,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(236,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="240" data-car="morning_2025">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/07/06/FILE_202307060946027014.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:240">
+  <div class="img-info">
+    <div class="img-id">ID: 240</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(240,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(240,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 봉고3 EV 2026 <span style="color:#888;font-size:12px">(전기) — 3_ev_2026</span> <span class="badge badge-v0">?1</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('3_ev_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('3_ev_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="1126" data-car="3_ev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2021/02/09/FILE_202102090126265640.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:1126">
+  <div class="img-info">
+    <div class="img-id">ID: 1126</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(1126,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(1126,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 스포티지 하이브리드 2026 <span style="color:#888;font-size:12px">(가솔린/하이브리드) — sportage_hev_2026</span> <span class="badge badge-v0">?6</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('sportage_hev_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('sportage_hev_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="297" data-car="sportage_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/11/29/FILE_202411290522318340.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:297">
+  <div class="img-info">
+    <div class="img-id">ID: 297</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(297,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(297,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="298" data-car="sportage_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/11/29/FILE_202411290522356557.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:298">
+  <div class="img-info">
+    <div class="img-id">ID: 298</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(298,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(298,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="299" data-car="sportage_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/11/29/FILE_202411290522350946.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:299">
+  <div class="img-info">
+    <div class="img-id">ID: 299</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(299,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(299,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="300" data-car="sportage_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/11/29/FILE_202411290522345605.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:300">
+  <div class="img-info">
+    <div class="img-id">ID: 300</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(300,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(300,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="301" data-car="sportage_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/11/29/FILE_202411290522324381.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:301">
+  <div class="img-info">
+    <div class="img-id">ID: 301</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(301,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(301,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="302" data-car="sportage_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2024/11/29/FILE_202411290522340354.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:302">
+  <div class="img-info">
+    <div class="img-id">ID: 302</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(302,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(302,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 쏘렌토 2026 <span style="color:#888;font-size:12px">(가솔린) — sorento_2026</span> <span class="badge badge-v0">?6</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('sorento_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('sorento_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="245" data-car="sorento_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250295070.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:245">
+  <div class="img-info">
+    <div class="img-id">ID: 245</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(245,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(245,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="246" data-car="sorento_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250298871.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:246">
+  <div class="img-info">
+    <div class="img-id">ID: 246</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(246,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(246,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="247" data-car="sorento_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250302372.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:247">
+  <div class="img-info">
+    <div class="img-id">ID: 247</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(247,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(247,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="248" data-car="sorento_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250304663.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:248">
+  <div class="img-info">
+    <div class="img-id">ID: 248</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(248,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(248,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="249" data-car="sorento_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250346580.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:249">
+  <div class="img-info">
+    <div class="img-id">ID: 249</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(249,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(249,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="250" data-car="sorento_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250350111.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:250">
+  <div class="img-info">
+    <div class="img-id">ID: 250</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(250,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(250,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div><div class="car-block">
+  <div class="car-title">
+    <div class="car-info">기아 쏘렌토 하이브리드 2026 <span style="color:#888;font-size:12px">(가솔린/하이브리드) — sorento_hev_2026</span> <span class="badge badge-v0">?7</span></div>
+    <div class="car-actions">
+      <button class="btn btn-pass" onclick="passAllCar('sorento_hev_2026')">전체 통과</button>
+      <button class="btn btn-fail" onclick="failAllCar('sorento_hev_2026')">전체 불량</button>
+    </div>
+  </div>
+  <div class="img-grid"><div class="img-card " data-id="116" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250518930.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:116">
+  <div class="img-info">
+    <div class="img-id">ID: 116</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(116,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(116,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="117" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250522631.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:117">
+  <div class="img-info">
+    <div class="img-id">ID: 117</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(117,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(117,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="118" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250526262.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:118">
+  <div class="img-info">
+    <div class="img-id">ID: 118</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(118,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(118,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="119" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250528553.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:119">
+  <div class="img-info">
+    <div class="img-id">ID: 119</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(119,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(119,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="120" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250564890.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:120">
+  <div class="img-info">
+    <div class="img-id">ID: 120</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(120,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(120,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="121" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2023/08/18/FILE_202308181250568411.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:121">
+  <div class="img-info">
+    <div class="img-id">ID: 121</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(121,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(121,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div><div class="img-card " data-id="9627" data-car="sorento_hev_2026">
+  <img class="img-thumb" src="http://file.carisyou.com/upload/2026/03/26/EDITOR_202603260228529400.jpg" loading="lazy" onerror="this.style.background='#c33'" title="ID:9627">
+  <div class="img-info">
+    <div class="img-id">ID: 9627</div>
+    <span class="img-status status-v0">미검수</span>
+  </div>
+  <div class="img-btns">
+    <button class="btn btn-pass"  onclick="verifyImage(9627,'pass',this.closest('.img-card'))">✓ 통과</button>
+    <button class="btn btn-fail"  onclick="verifyImage(9627,'fail',this.closest('.img-card'))">✗ 불량</button>
+  </div>
+</div></div>
+</div>
+<div class="nav"><a href="index.html">☰ 목록</a><a href="page4.html">◀ 이전</a><a href="page1.html">1</a><a href="page2.html">2</a><a href="page3.html">3</a><a href="page4.html">4</a><span class="cur">5</span><a href="page6.html">6</a><a href="page7.html">7</a><a href="page8.html">8</a><a href="page9.html">9</a><a href="page10.html">10</a><a href="page11.html">11</a><a href="page12.html">12</a><a href="page13.html">13</a><a href="page6.html">다음 ▶</a></div>
+<script>
+const API = 'http://localhost:5051';
+
+function showToast(msg, color) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.borderLeft = '4px solid ' + (color||'#4af');
+    t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 2000);
+}
+
+function setCardState(card, state, r2url) {
+    card.classList.remove('passed','failed','loading');
+    card.classList.add(state);
+    var statusEl = card.querySelector('.img-status');
+    var passBtn = card.querySelector('.btn-pass');
+    var failBtn = card.querySelector('.btn-fail');
+    if (state === 'passed') {
+        statusEl.className = 'img-status status-v1';
+        statusEl.textContent = '검수완료 ✓';
+        if (r2url) statusEl.title = r2url;
+        passBtn.disabled = true;
+        failBtn.disabled = false;
+    } else if (state === 'failed') {
+        statusEl.className = 'img-status status-vm1';
+        statusEl.textContent = '불량 ✗';
+        passBtn.disabled = false;
+        failBtn.disabled = true;
+    } else if (state === 'loading') {
+        statusEl.textContent = '처리중...';
+    }
+}
+
+async function verifyImage(imgId, action, card) {
+    setCardState(card, 'loading');
+    var passBtn = card.querySelector('.btn-pass');
+    var failBtn = card.querySelector('.btn-fail');
+    passBtn.disabled = true;
+    failBtn.disabled = true;
+    try {
+        var resp = await fetch(API + '/api/verify', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({id: imgId, action: action})
+        });
+        var data = await resp.json();
+        if (data.ok) {
+            setCardState(card, action === 'pass' ? 'passed' : 'failed', data.r2_url);
+            showToast((action==='pass'?'✓ 통과':'✗ 불량') + ' ID:' + imgId, action==='pass'?'#4f4':'#f55');
+            updateGlobalStatus();
+        } else {
+            if (data.auto_failed) {
+                setCardState(card, 'failed');
+                showToast('⚠ 접근불가 → 자동불량 처리', '#f55');
+            } else {
+                setCardState(card, 'v0');
+                showToast('오류: ' + data.error, '#f55');
+                passBtn.disabled = false;
+                failBtn.disabled = false;
+            }
+            updateGlobalStatus();
+        }
+    } catch(e) {
+        showToast('API 연결 실패: ' + e.message, '#f55');
+        passBtn.disabled = false;
+        failBtn.disabled = false;
+        card.classList.remove('loading');
+    }
+}
+
+async function passAllCar(carId) {
+    var cards = document.querySelectorAll('[data-car="' + carId + '"]');
+    for (var card of cards) {
+        if (!card.classList.contains('passed') && !card.classList.contains('failed')) {
+            var imgId = card.dataset.id;
+            await verifyImage(parseInt(imgId), 'pass', card);
+        }
+    }
+}
+
+async function failAllCar(carId) {
+    var cards = document.querySelectorAll('[data-car="' + carId + '"]');
+    for (var card of cards) {
+        if (!card.classList.contains('failed')) {
+            var imgId = card.dataset.id;
+            await verifyImage(parseInt(imgId), 'fail', card);
+        }
+    }
+}
+
+async function updateGlobalStatus() {
+    try {
+        var resp = await fetch(API + '/api/status');
+        var data = await resp.json();
+        document.getElementById('gs-v1').textContent = '✓ ' + (data['1']||0);
+        document.getElementById('gs-v0').textContent = '? ' + (data['0']||0);
+        document.getElementById('gs-vm1').textContent = '✗ ' + (data['-1']||0);
+    } catch(e) {}
+}
+
+window.onload = function() { updateGlobalStatus(); };
+</script>
+</body>
+</html>
