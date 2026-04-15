@@ -236,6 +236,11 @@ def dispatch(blog_id):
     if cfg.get("status") != "active":
         logger.info(f"{blog_id} is not active")
         return None
+    # 발행 전 중복 체크
+    if _is_duplicate(blog_id):
+        logger.info(f"[DEDUP] {blog_id} 동일 제목 중복 — 발행 건너뜀")
+        _record_ledger(blog_id)  # catchup 재시도 방지
+        return {"success": True, "reason": "duplicate_title"}
 
     result = _run_pipeline(cfg)
 
@@ -251,11 +256,8 @@ def dispatch(blog_id):
             result = {"success": True, "reason": result}
     elif isinstance(result, bool):
         result = {"success": result}
-
     # 성공 시 중앙 ledger에 기록
     if result.get("success"):
-        if _is_duplicate(blog_id):
-            logger.warning(f"[DEDUP] {blog_id} 동일 제목 중복 발행 차단")
         _record_ledger(blog_id)
     return result
 
