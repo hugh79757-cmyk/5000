@@ -14,3 +14,6 @@ blogger_token.pickle
 *.db
 public/
 static/images/
+logs/
+rankingoneto-1-1/
+*.deprecated
