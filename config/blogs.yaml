@@ -1373,7 +1373,7 @@ blogs:
   domain: kuta.informationhot.kr
   name: Kuta
   platform: hugo
-  status: active
+  status: inactive
   pipeline: gap
   daily_quota: 3
   schedule:
