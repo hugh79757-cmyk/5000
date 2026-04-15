@@ -256,9 +256,7 @@ def dispatch(blog_id):
     if result.get("success"):
         if _is_duplicate(blog_id):
             logger.warning(f"[DEDUP] {blog_id} 동일 제목 중복 발행 차단")
-        else:
-            _record_ledger(blog_id)
-
+        _record_ledger(blog_id)
     return result
 
 
