@@ -1178,7 +1178,7 @@ blogs:
   domain: achaanstree.tistory.com
   name: Achaanstree
   platform: blogger
-  status: active
+  status: inactive
   pipeline: etc
   daily_quota: 3
   schedule:
@@ -1191,7 +1191,7 @@ blogs:
   domain: aikorea24.kr
   name: Aikorea24
   platform: blogger
-  status: active
+  status: inactive
   pipeline: main
   daily_quota: 3
   schedule:
@@ -1204,7 +1204,7 @@ blogs:
   domain: betguide.informationhot.kr
   name: Betguide
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1217,7 +1217,7 @@ blogs:
   domain: brand.informationhot.kr
   name: Brand
   platform: hugo
-  status: active
+  status: inactive
   pipeline: curation
   daily_quota: 3
   schedule:
@@ -1230,7 +1230,7 @@ blogs:
   domain: cert.aikorea24.kr
   name: Cert
   platform: hugo
-  status: active
+  status: inactive
   pipeline: main
   daily_quota: 3
   schedule:
@@ -1243,7 +1243,7 @@ blogs:
   domain: fsched.informationhot.kr
   name: Fsched
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1256,7 +1256,7 @@ blogs:
   domain: fstats.informationhot.kr
   name: Fstats
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1282,7 +1282,7 @@ blogs:
   domain: info.techpawz.com
   name: Info
   platform: hugo
-  status: active
+  status: inactive
   pipeline: etc
   daily_quota: 3
   schedule:
@@ -1295,7 +1295,7 @@ blogs:
   domain: issue.techpawz.com
   name: Issue
   platform: hugo
-  status: active
+  status: inactive
   pipeline: etc
   daily_quota: 3
   schedule:
@@ -1308,7 +1308,7 @@ blogs:
   domain: kbo.rotcha.kr
   name: Kbo
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1321,7 +1321,7 @@ blogs:
   domain: kboplayer.informationhot.kr
   name: Kboplayer
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1334,7 +1334,7 @@ blogs:
   domain: kboschedule.informationhot.kr
   name: Kboschedule
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1347,7 +1347,7 @@ blogs:
   domain: kboteam.informationhot.kr
   name: Kboteam
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1360,7 +1360,7 @@ blogs:
   domain: keyword.aikorea24.kr
   name: Keyword
   platform: hugo
-  status: active
+  status: inactive
   pipeline: main
   daily_quota: 3
   schedule:
@@ -1386,7 +1386,7 @@ blogs:
   domain: proto.informationhot.kr
   name: Proto
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1399,7 +1399,7 @@ blogs:
   domain: protostats.informationhot.kr
   name: Protostats
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1412,7 +1412,7 @@ blogs:
   domain: sports.rotcha.kr
   name: Sports
   platform: hugo
-  status: active
+  status: inactive
   pipeline: sports
   daily_quota: 3
   schedule:
@@ -1425,7 +1425,7 @@ blogs:
   domain: ud.informationhot.kr
   name: Ud
   platform: hugo
-  status: active
+  status: inactive
   pipeline: etc
   daily_quota: 3
   schedule:
@@ -1438,7 +1438,7 @@ blogs:
   domain: zodiac.techpawz.com
   name: Zodiac
   platform: hugo
-  status: active
+  status: inactive
   pipeline: etc
   daily_quota: 3
   schedule:
