@@ -102,6 +102,16 @@ def _git_push(blog_id):
         logger.error(blog_id + " git push failed: " + str(e))
 
 
+def _extract_thumbnail(data):
+    """data의 첫 번째 아이템에서 썸네일 URL 추출"""
+    for item in data.get("items", []):
+        img = (item.get("firstimage") or item.get("firstImageUrl") 
+               or item.get("image") or item.get("firstimage2") or "")
+        if img and img.strip():
+            return img.strip()
+    return ""
+
+
 def _run_single(target_blog_id, blog_cfg=None):
     init_db()
     if blog_cfg is None:
@@ -176,7 +186,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         body_html=body_html,
         category=result.get("category", ""),
         tags=",".join(result.get("labels", [])),
-        thumbnail_url="",
+        thumbnail_url=_extract_thumbnail(data),
         data_source=result.get("source_type", ""),
         source_id=",".join(data.get("content_ids", [])),
         prompt_id=result.get("prompt_id", ""),
