@@ -53,6 +53,17 @@ CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
 PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
 LEDGER_DB = os.path.join(PROJECT_DIR, "data", "content.db")
 
+
+# ─── Heartbeat ───
+HB_FILE = os.path.join(PROJECT_DIR, "logs", "heartbeat")
+
+def _update_heartbeat():
+    try:
+        with open(HB_FILE, "w") as f:
+            f.write(str(int(time.time())))
+    except Exception:
+        pass
+
 MAX_CATCHUP_PER_BLOG = 3
 PUBLISH_DELAY = 180  # 블로그 간 딜레이(초)
 
@@ -356,8 +367,10 @@ def main():
     logger.info(f"Registered {job_count} jobs")
     logger.info(f"Next run: {schedule.next_run()}")
 
+    _update_heartbeat()  # 시작 즉시 heartbeat
     last_catchup = 0
     while True:
+        _update_heartbeat()
         schedule.run_pending()
         now_ts = time.time()
         if now_ts - last_catchup >= 300:  # 5분마다
