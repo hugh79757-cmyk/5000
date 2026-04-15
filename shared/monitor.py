@@ -1,22 +1,25 @@
-import os
-import requests
+"""모니터링 — telegram_notifier 경유 (하위 호환 래퍼)
+직접 API 호출 제거.
+"""
+import logging
 from datetime import datetime
-from dotenv import load_dotenv
+from shared.telegram_notifier import send, send_info
 from shared.content_store import get_conn
 
-load_dotenv()
+logger = logging.getLogger(__name__)
 
 
-def send_telegram(message):
-    token = os.getenv("TELEGRAM_BOT_TOKEN", "")
-    chat_id = os.getenv("TELEGRAM_CHAT_ID", "")
-    if not token or not chat_id:
-        return
-    url = "https://api.telegram.org/bot" + token + "/sendMessage"
-    requests.post(url, json={"chat_id": chat_id, "text": message, "parse_mode": "HTML"})
+def send_telegram(message: str) -> bool:
+    """하위 호환 — 직접 send() 경유."""
+    return send(message)
 
 
-def daily_report():
+def send_daily_report(report_text: str) -> bool:
+    """INFO 등급으로 전송."""
+    return send(report_text)
+
+
+def daily_report() -> dict:
     conn = get_conn()
     today = datetime.utcnow().strftime("%Y-%m-%d")
     rows = conn.execute(
@@ -28,9 +31,13 @@ def daily_report():
     conn.close()
 
     total = sum(r["cnt"] for r in rows)
-    lines = ["<b>[blog-hub] " + today + " 발행 리포트</b>", "총 발행: " + str(total) + "건", ""]
+    lines = [
+        f"<b>[blog-hub] {today} 발행 리포트</b>",
+        f"총 발행: {total}건",
+        "",
+    ]
     for r in rows:
-        lines.append("  " + r["blog_id"] + ": " + str(r["cnt"]) + "건")
+        lines.append(f"  {r['blog_id']}: {r['cnt']}건")
 
-    send_telegram("\n".join(lines))
+    send("\n".join(lines))
     return {"date": today, "total": total, "details": {r["blog_id"]: r["cnt"] for r in rows}}

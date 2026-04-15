@@ -5,6 +5,18 @@ CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file
 
 
 def load_prompts():
+    """config/prompts/ 디렉토리의 모든 yaml을 합쳐 반환. 없으면 단일 파일 폴백."""
+    prompts_dir = os.path.join(CONFIG_DIR, "prompts")
+    if os.path.isdir(prompts_dir):
+        merged = {}
+        for fname in sorted(os.listdir(prompts_dir)):
+            if fname.endswith(".yaml"):
+                with open(os.path.join(prompts_dir, fname), "r", encoding="utf-8") as f:
+                    data = yaml.safe_load(f)
+                if data:
+                    merged.update(data)
+        return merged
+    # 폴백: 기존 단일 파일
     with open(os.path.join(CONFIG_DIR, "prompts.yaml"), "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 

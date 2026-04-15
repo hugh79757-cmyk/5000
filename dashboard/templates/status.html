@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 현황 — Blogdex</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+  .topbar { background: #1a1d27; border-bottom: 1px solid #2d3748; padding: 12px 24px; display: flex; align-items: center; gap: 24px; }
+  .topbar .logo { font-size: 18px; font-weight: 700; color: #7c3aed; }
+  .topbar nav a { color: #94a3b8; text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 6px; }
+  .topbar nav a:hover { background: #2d3748; color: #e2e8f0; }
+  .topbar nav a.active { background: #7c3aed22; color: #a78bfa; }
+  .topbar .meta { margin-left: auto; font-size: 12px; color: #64748b; }
+  .container { padding: 24px; max-width: 1600px; margin: 0 auto; }
+  .page-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+
+  /* 요약 카드 */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .card { background: #1a1d27; border: 1px solid #2d3748; border-radius: 10px; padding: 16px; }
+  .card .label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .card .value { font-size: 24px; font-weight: 700; color: #e2e8f0; }
+  .card .sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+
+  /* 필터 */
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+  .filters label { font-size: 12px; color: #64748b; }
+  .filter-btn { background: #1a1d27; border: 1px solid #2d3748; color: #94a3b8; padding: 5px 14px; border-radius: 20px; font-size: 13px; cursor: pointer; transition: all .15s; }
+  .filter-btn:hover, .filter-btn.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+  .search-box { margin-left: auto; background: #1a1d27; border: 1px solid #2d3748; color: #e2e8f0; padding: 5px 12px; border-radius: 6px; font-size: 13px; width: 200px; }
+  .search-box:focus { outline: none; border-color: #7c3aed; }
+
+  /* 테이블 */
+  .table-wrap { background: #1a1d27; border: 1px solid #2d3748; border-radius: 10px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { background: #12141e; padding: 10px 12px; text-align: left; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: .4px; white-space: nowrap; cursor: pointer; user-select: none; }
+  thead th:hover { color: #a78bfa; }
+  tbody tr { border-top: 1px solid #1e2330; transition: background .1s; }
+  tbody tr:hover { background: #1e2330; }
+  tbody td { padding: 9px 12px; vertical-align: middle; }
+
+  /* 배지 */
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-active { background: #064e3b; color: #34d399; }
+  .badge-inactive { background: #1e1e2e; color: #475569; }
+  .badge-pipeline { background: #1e1b4b; color: #818cf8; }
+  .grade-A { color: #34d399; font-weight: 700; }
+  .grade-B { color: #60a5fa; font-weight: 700; }
+  .grade-C { color: #fbbf24; font-weight: 700; }
+  .grade-D { color: #f87171; font-weight: 700; }
+  .grade-dash { color: #475569; }
+
+  .today-ok { color: #34d399; font-weight: 600; }
+  .today-fail { color: #f87171; font-weight: 600; }
+  .today-zero { color: #475569; }
+
+  .domain-link { color: #7c3aed; text-decoration: none; font-size: 12px; }
+  .domain-link:hover { text-decoration: underline; }
+
+  .today-bar { display: flex; gap: 6px; align-items: center; }
+  .bar-bg { background: #0f1117; border-radius: 4px; height: 6px; width: 50px; overflow: hidden; }
+  .bar-fill { background: #7c3aed; height: 100%; border-radius: 4px; transition: width .3s; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="logo">📊 Blogdex</span>
+  <nav>
+    <a href="/">대시보드</a>
+    <a href="/status" class="active">블로그 현황</a>
+    <a href="/keywords">키워드</a>
+    <a href="/publish">발행</a>
+  </nav>
+  <span class="meta">{{ now }}</span>
+</div>
+
+<div class="container">
+  <div class="page-title">블로그 현황 <span style="font-size:14px;color:#64748b;font-weight:400;">— 전체 {{ rows|length }}개</span></div>
+
+  <!-- 요약 카드 -->
+  {% set active_count = rows|selectattr('status','eq','active')|list|length %}
+  {% set today_total = rows|sum(attribute='today_posts') %}
+  {% set ok_total = rows|sum(attribute='ok_today') %}
+  {% set fail_total = rows|sum(attribute='fail_today') %}
+  {% set total_posts = rows|sum(attribute='total_posts') %}
+  <div class="summary-grid">
+    <div class="card">
+      <div class="label">전체 블로그</div>
+      <div class="value">{{ rows|length }}</div>
+      <div class="sub">활성 {{ active_count }}개</div>
+    </div>
+    <div class="card">
+      <div class="label">오늘 발행</div>
+      <div class="value" style="color:#a78bfa">{{ today_total }}</div>
+      <div class="sub">누적 {{ "{:,}".format(total_posts) }}건</div>
+    </div>
+    <div class="card">
+      <div class="label">오늘 OK</div>
+      <div class="value" style="color:#34d399">{{ ok_total }}</div>
+      <div class="sub">스케줄 성공</div>
+    </div>
+    <div class="card">
+      <div class="label">오늘 FAIL</div>
+      <div class="value" style="color:#f87171">{{ fail_total }}</div>
+      <div class="sub">스케줄 실패</div>
+    </div>
+    <div class="card">
+      <div class="label">7일 클릭</div>
+      <div class="value">{{ "{:,}".format(rows|sum(attribute='clicks_7d')) }}</div>
+      <div class="sub">GSC 기준</div>
+    </div>
+    <div class="card">
+      <div class="label">7일 노출</div>
+      <div class="value">{{ "{:,}".format(rows|sum(attribute='impressions_7d')) }}</div>
+      <div class="sub">GSC 기준</div>
+    </div>
+  </div>
+
+  <!-- 필터 -->
+  <div class="filters">
+    <span class="label">그룹:</span>
+    <button class="filter-btn active" onclick="filterGroup('all', this)">전체</button>
+    {% for g in groups %}
+    <button class="filter-btn" onclick="filterGroup('{{ g }}', this)">{{ g }}</button>
+    {% endfor %}
+    <input class="search-box" type="text" placeholder="블로그 검색..." oninput="filterSearch(this.value)">
+  </div>
+
+  <!-- 테이블 -->
+  <div class="table-wrap">
+    <table id="main-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable(0)">블로그 ID ↕</th>
+          <th onclick="sortTable(1)">도메인</th>
+          <th onclick="sortTable(2)">파이프라인 ↕</th>
+          <th onclick="sortTable(3)">상태 ↕</th>
+          <th onclick="sortTable(4)" style="text-align:right">누적 ↕</th>
+          <th onclick="sortTable(5)" style="text-align:center">오늘 발행 ↕</th>
+          <th onclick="sortTable(6)" style="text-align:center">오늘 OK ↕</th>
+          <th onclick="sortTable(7)" style="text-align:center">오늘 FAIL ↕</th>
+          <th onclick="sortTable(8)" style="text-align:right">7일 클릭 ↕</th>
+          <th onclick="sortTable(9)" style="text-align:right">7일 노출 ↕</th>
+          <th onclick="sortTable(10)" style="text-align:center">등급 ↕</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr data-group="{{ r.group }}" data-search="{{ r.blog_id }} {{ r.domain }} {{ r.pipeline }}">
+          <td><strong>{{ r.blog_id }}</strong></td>
+          <td>
+            {% if r.domain %}
+            <a class="domain-link" href="https://{{ r.domain }}" target="_blank">{{ r.domain }}</a>
+            {% else %}<span style="color:#475569">-</span>{% endif %}
+          </td>
+          <td><span class="badge badge-pipeline">{{ r.pipeline }}</span></td>
+          <td>
+            <span class="badge {{ 'badge-active' if r.status == 'active' else 'badge-inactive' }}">
+              {{ r.status }}
+            </span>
+          </td>
+          <td style="text-align:right;color:#94a3b8">{{ "{:,}".format(r.total_posts) }}</td>
+          <td style="text-align:center">
+            <div class="today-bar">
+              <span class="{{ 'today-ok' if r.today_posts > 0 else 'today-zero' }}">{{ r.today_posts }}</span>
+              <div class="bar-bg"><div class="bar-fill" style="width:{{ [r.today_posts * 100 // r.daily_quota, 100]|min }}%"></div></div>
+              <span style="font-size:11px;color:#475569">/{{ r.daily_quota }}</span>
+            </div>
+          </td>
+          <td style="text-align:center" class="{{ 'today-ok' if r.ok_today > 0 else 'today-zero' }}">{{ r.ok_today }}</td>
+          <td style="text-align:center" class="{{ 'today-fail' if r.fail_today > 0 else 'today-zero' }}">{{ r.fail_today }}</td>
+          <td style="text-align:right">{{ "{:,}".format(r.clicks_7d) }}</td>
+          <td style="text-align:right">{{ "{:,}".format(r.impressions_7d) }}</td>
+          <td style="text-align:center">
+            <span class="grade-{{ r.grade if r.grade in ['A','B','C','D'] else 'dash' }}">{{ r.grade }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let currentGroup = 'all';
+let currentSearch = '';
+
+function filterGroup(group, btn) {
+  currentGroup = group;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilter();
+}
+
+function filterSearch(val) {
+  currentSearch = val.toLowerCase();
+  applyFilter();
+}
+
+function applyFilter() {
+  document.querySelectorAll('#main-table tbody tr').forEach(tr => {
+    const groupMatch = currentGroup === 'all' || tr.dataset.group === currentGroup;
+    const searchMatch = !currentSearch || tr.dataset.search.toLowerCase().includes(currentSearch);
+    tr.classList.toggle('hidden', !(groupMatch && searchMatch));
+  });
+}
+
+let sortDir = {};
+function sortTable(col) {
+  const tbody = document.querySelector('#main-table tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const dir = (sortDir[col] = !(sortDir[col]));
+  rows.sort((a, b) => {
+    const av = a.cells[col].textContent.trim().replace(/,/g,'');
+    const bv = b.cells[col].textContent.trim().replace(/,/g,'');
+    const an = parseFloat(av), bn = parseFloat(bv);
+    if (!isNaN(an) && !isNaN(bn)) return dir ? an - bn : bn - an;
+    return dir ? av.localeCompare(bv) : bv.localeCompare(av);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+</script>
+</body>
+</html>
