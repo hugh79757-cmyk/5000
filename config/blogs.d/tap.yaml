@@ -10,7 +10,7 @@ blogs:
     - 07:00
     - '14:00'
     - '20:00'
-  status: active
+  status: inactive
 - cf_project: travel-hugo
   daily_quota: 5
   domain: tour1.rotcha.kr
