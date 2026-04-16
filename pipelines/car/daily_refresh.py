@@ -509,6 +509,65 @@ def replenish_topics(conn, min_pending=50):
                         )
                         created += 1
 
+        elif post_type == "persona_pick":
+            # persona_pick: 인기차 + 같은 세그먼트 경쟁차 쌍으로 삽입
+            import random
+            pop_with_seg = [
+                (car["car_id"], car["segment"]) for car in
+                conn.execute(
+                    "SELECT car_id, segment FROM cars WHERE is_popular=1 AND segment IS NOT NULL"
+                ).fetchall()
+            ]
+            for car_id, segment in pop_with_seg:
+                if created >= need:
+                    break
+                # 같은 세그먼트 경쟁차 랜덤 선택
+                rivals = [
+                    r["car_id"] for r in conn.execute(
+                        "SELECT car_id FROM cars WHERE segment=? AND car_id!=? AND is_popular=1",
+                        (segment, car_id)
+                    ).fetchall()
+                ]
+                competitor_id = random.choice(rivals) if rivals else None
+                exists = c.execute(
+                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                    (car_id, post_type, site_id)
+                ).fetchone()
+                if not exists:
+                    c.execute(
+                        "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,7,'pending',datetime('now'),?)",
+                        (car_id, competitor_id, post_type, site_id)
+                    )
+                    created += 1
+            # 비인기차도 추가
+            if created < need:
+                unpop_with_seg = [
+                    (car["car_id"], car["segment"]) for car in
+                    conn.execute(
+                        "SELECT car_id, segment FROM cars WHERE is_popular=0 AND segment IS NOT NULL"
+                    ).fetchall()
+                ]
+                for car_id, segment in unpop_with_seg:
+                    if created >= need:
+                        break
+                    rivals = [
+                        r["car_id"] for r in conn.execute(
+                            "SELECT car_id FROM cars WHERE segment=? AND car_id!=?",
+                            (segment, car_id)
+                        ).fetchall()
+                    ]
+                    competitor_id = random.choice(rivals) if rivals else None
+                    exists = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        (car_id, post_type, site_id)
+                    ).fetchone()
+                    if not exists:
+                        c.execute(
+                            "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,5,'pending',datetime('now'),?)",
+                            (car_id, competitor_id, post_type, site_id)
+                        )
+                        created += 1
+
         else:
             # tco_analysis, promo_deal, beginner_guide: 단독 토픽
             # 인기차 (priority 7)
