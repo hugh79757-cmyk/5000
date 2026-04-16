@@ -1,0 +1,101 @@
+blogs:
+- id: appliance-hugo
+  name: 가전제품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: appliance.informationhot.kr
+  cf_project: appliance-hugo
+  repo: appliance-hugo
+  site_path: /Users/twinssn/Projects/CUAP/appliance-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 07:50
+    - '10:50'
+    - '13:50'
+    - '16:50'
+    - '20:50'
+  gsc_site: https://appliance.informationhot.kr/
+  ga4_property: '532414941'
+- id: baby-hugo
+  name: 유아용품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: baby.informationhot.kr
+  cf_project: baby-hugo
+  repo: baby-hugo
+  site_path: /Users/twinssn/Projects/CUAP/baby-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 08:10
+    - '11:10'
+    - '14:10'
+    - '17:10'
+    - '21:10'
+  gsc_site: https://baby.informationhot.kr/
+  ga4_property: '532411814'
+- id: fitness-hugo
+  name: 운동용품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: fitness.informationhot.kr
+  cf_project: fitness-hugo
+  repo: fitness-hugo
+  site_path: /Users/twinssn/Projects/CUAP/fitness-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 08:20
+    - '11:20'
+    - '14:20'
+    - '17:20'
+    - '21:20'
+  gsc_site: https://fitness.informationhot.kr/
+  ga4_property: '532414997'
+- id: interior-hugo
+  name: 가구 인테리어 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: interior.informationhot.kr
+  cf_project: interior-hugo
+  repo: interior-hugo
+  site_path: /Users/twinssn/Projects/CUAP/interior-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 08:00
+    - '11:00'
+    - '14:00'
+    - '17:00'
+    - '21:00'
+  gsc_site: https://interior.informationhot.kr/
+  ga4_property: '532439844'
+- id: laptop-hugo
+  name: 노트북 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: laptop.informationhot.kr
+  cf_project: laptop-hugo
+  repo: laptop-hugo
+  site_path: /Users/twinssn/Projects/CUAP/laptop-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 07:40
+    - '10:40'
+    - '13:40'
+    - '16:40'
+    - '20:40'
+  gsc_site: https://laptop.informationhot.kr/
+  ga4_property: '532425912'

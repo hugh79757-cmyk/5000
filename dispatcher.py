@@ -40,9 +40,24 @@ STAP_PIPELINE_MAP = {
 
 
 def load_blogs():
-    with open(CONFIG_DIR / "blogs.yaml", "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)["blogs"]
+    return _load_all_blogs().get("blogs", [])
 
+
+
+def _load_all_blogs():
+    """blogs.yaml + blogs.d/*.yaml 통합 로드"""
+    main_path = CONFIG_DIR / "blogs.yaml"
+    with open(main_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f) or {}
+    if "blogs" not in config:
+        config["blogs"] = []
+    blogs_d = CONFIG_DIR / "blogs.d"
+    if blogs_d.is_dir():
+        for fpath in sorted(blogs_d.glob("*.yaml")):
+            with open(fpath, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            config["blogs"].extend(data.get("blogs", []))
+    return config
 
 def get_blog_config(blog_id):
     for b in load_blogs():
