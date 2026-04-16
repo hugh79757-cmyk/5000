@@ -139,7 +139,8 @@ def _check_rate_limit():
             "SELECT COUNT(*) FROM api_call_log WHERE called_at > datetime('now', '-1 hour')"
         ).fetchone()[0]
         conn.close()
-        return count < 6
+        logger.info(f"[API_RATE] 최근 1시간 호출: {count}/100")
+        return count < 100
     except Exception:
         return True
 
@@ -168,11 +169,12 @@ def _search_api(keyword, limit=10):
     try:
         resp = requests.get(f"{BASE_URL}{url_path}?{query_string}", headers=headers, timeout=10)
         _log_api_call()
+        logger.info(f"[API_CALL] keyword={keyword} status={resp.status_code}")
         if resp.status_code == 200:
             data = resp.json()
             if data.get("rCode") == "403":
                 msg = data.get("rMessage", "")
-                logger.warning(f"쿠팡 API 한도 초과 응답: {msg[:80]}")
+                logger.warning(f"[API_BLOCKED] 쿠팡 API 한도 초과 — 최근1시간 호출수 확인 필요: {msg[:120]}")
                 _log_api_call()  # 서버 카운트 소진됐으므로 로컬도 기록
                 import re as _re
                 m = _re.search(r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})", msg)
