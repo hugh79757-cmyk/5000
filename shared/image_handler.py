@@ -13,7 +13,7 @@ def get_r2_client():
         aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
     )
 
-def process_and_upload(image_data, bucket=None):
+def process_and_upload(image_data, bucket=None, key_prefix="car-images"):
     if bucket is None:
         bucket = os.getenv("R2_BUCKET", "hotissue-images")
 
@@ -42,7 +42,7 @@ def process_and_upload(image_data, bucket=None):
 
     now = datetime.now()
     file_hash = hashlib.md5(output.getvalue()).hexdigest()[:8]
-    key = f"car-images/{now.strftime('%Y/%m/%d')}/{file_hash}.webp"
+    key = f"{key_prefix}/{now.strftime('%Y/%m/%d')}/{file_hash}.webp"
 
     client = get_r2_client()
     client.put_object(
