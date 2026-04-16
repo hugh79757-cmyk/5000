@@ -1,0 +1,34 @@
+blogs:
+- blogger_blog_id: '5484205249958557854'
+  daily_quota: 5
+  domain: 2.techpawz.com
+  id: senior-blogger
+  name: 시니어 복지 혜택 정보
+  pipeline: senior
+  platform: blogger
+  schedule:
+    times:
+    - 08:10
+    - '11:10'
+    - '14:10'
+    - '17:10'
+    - '21:10'
+  status: active
+- cf_project: senior-hugo
+  daily_quota: 5
+  domain: senior.informationhot.kr
+  id: senior-hugo
+  name: 시니어 복지 혜택 가이드
+  pipeline: senior
+  platform: hugo
+  repo: senior-hugo
+  schedule:
+    times:
+    - 07:34
+    - '10:34'
+    - '13:34'
+    - '16:34'
+    - '20:34'
+  site_path: /Users/twinssn/Projects/SEAP/senior-hugo
+  status: active
+  theme: blowfish

@@ -71,8 +71,22 @@ PUBLISH_DELAY = 180  # 블로그 간 딜레이(초)
 # ─── Config ───
 
 def load_config():
-    with open(os.path.join(CONFIG_DIR, "blogs.yaml"), "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    """blogs.yaml(공통) + blogs.d/*.yaml(파이프라인별) 통합 로드"""
+    main_path = os.path.join(CONFIG_DIR, "blogs.yaml")
+    with open(main_path, "r", encoding="utf-8") as f:
+        config = yaml.safe_load(f) or {}
+    if "blogs" not in config:
+        config["blogs"] = []
+    blogs_d = os.path.join(CONFIG_DIR, "blogs.d")
+    if os.path.isdir(blogs_d):
+        for fname in sorted(os.listdir(blogs_d)):
+            if not fname.endswith(".yaml"):
+                continue
+            fpath = os.path.join(blogs_d, fname)
+            with open(fpath, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            config["blogs"].extend(data.get("blogs", []))
+    return config
 
 
 # ─── 발행 실행 ───
