@@ -499,7 +499,16 @@ def build_top5_rank_input(conn, topic, db_path):
         if not fuel_eff or fuel_eff == 0:
             fuel_eff = lookup_fuel_efficiency(conn, cand["brand"], cand["model"], cand["displacement"])
         if not fuel_eff or fuel_eff == 0:
-            continue
+            # 연비 없으면 연료 타입별 기본값 사용 (탈락 방지)
+            ft = str(cand.get("fuel_type", ""))
+            if "전기" in ft:
+                fuel_eff = 4.5
+            elif "하이브리드" in ft:
+                fuel_eff = 16.0
+            elif "디젤" in ft:
+                fuel_eff = 14.0
+            else:
+                fuel_eff = 12.0
 
         tax = calc_tax(cand["displacement"], cand["fuel_type"])
         ins = calc_insurance(trim["price"])

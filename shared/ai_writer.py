@@ -61,14 +61,20 @@ def generate_car(prompt_text, data):
     from datetime import datetime
 
     # 메인 차량 데이터
-    main_keys = ["model", "brand", "year", "trim", "base_price", "engine", "fuel_type",
-                 "fuel_efficiency", "displacement", "seats", "discount", "discount_conditions",
-                 "finance_rate", "finance_term_months", "monthly_payment_36", "monthly_payment_48",
-                 "monthly_payment_60", "annual_km", "tax_annual", "insurance_estimate",
-                 "annual_fuel_cost", "resale_1yr", "resale_2yr", "resale_3yr", "resale_rate_percent",
-                 "three_year_depreciation", "three_year_maintenance", "three_year_total_cost",
-                 "final_price", "trim_lineup", "ev_range_km", "ev_efficiency", "battery_capacity_kwh"]
-    main_data = {k: data[k] for k in main_keys if k in data and data[k] is not None}
+    post_type = data.get("type", "")
+
+    # top5_rank / persona_pick / price_trend 타입은 전체 데이터 그대로 사용
+    if post_type in ("top5_rank", "persona_pick", "price_trend"):
+        main_data = {k: v for k, v in data.items() if v is not None}
+    else:
+        main_keys = ["model", "brand", "year", "trim", "base_price", "engine", "fuel_type",
+                     "fuel_efficiency", "displacement", "seats", "discount", "discount_conditions",
+                     "finance_rate", "finance_term_months", "monthly_payment_36", "monthly_payment_48",
+                     "monthly_payment_60", "annual_km", "tax_annual", "insurance_estimate",
+                     "annual_fuel_cost", "resale_1yr", "resale_2yr", "resale_3yr", "resale_rate_percent",
+                     "three_year_depreciation", "three_year_maintenance", "three_year_total_cost",
+                     "final_price", "trim_lineup", "ev_range_km", "ev_efficiency", "battery_capacity_kwh"]
+        main_data = {k: data[k] for k in main_keys if k in data and data[k] is not None}
 
     # 경쟁 모델 데이터
     comp_data = {k: data[k] for k in data if k.startswith("competitor") and data[k] is not None}
