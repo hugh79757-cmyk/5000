@@ -205,7 +205,13 @@ def _run_pipeline(cfg):
     pipeline = cfg.get("pipeline", "")
     blog_id = cfg["id"]
 
-    if pipeline == "car":
+    if pipeline == "etap":
+        from pipelines.etap.pipeline import run
+        return run(cfg)
+    elif pipeline == "curation":
+        from pipelines.curation.pipeline import run
+        return run(cfg)
+    elif pipeline == "car":
         from pipelines.car.pipeline import run
         return run(cfg)
 
