@@ -510,7 +510,25 @@ def _run_inner(cfg, blog_id, daily_quota):
         return {"success": False, "reason": "similar_title"}
 
     # 발행
-    result = publish(blog_id, title, body_md, category="추천", tags=keyword, thumbnail_url=thumbnail_url)
+    # 태그 생성: 키워드 + 제목에서 브랜드명 추출
+    import re as _tag_re
+    tag_set = set()
+    # 키워드 자체
+    tag_set.add(keyword)
+    # 키워드 토큰 (2자 이상)
+    for tok in keyword.split():
+        if len(tok) >= 2:
+            tag_set.add(tok)
+    # 제목에서 브랜드명 추출 (영문 대문자 시작 단어 + 한글 브랜드)
+    brand_patterns = ["레노버", "삼성", "LG", "애플", "MSI", "델", "에이수스", "ASUS", "HP", "Apple",
+                       "다이슨", "샤오미", "필립스", "쿠쿠", "테팔", "일리", "네슬레",
+                       "한샘", "이케아", "퍼시스", "까사미아"]
+    for bp in brand_patterns:
+        if bp.lower() in title.lower():
+            tag_set.add(bp)
+    tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
+    
+    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")
         return {"success": False, "reason": "publish_error"}
