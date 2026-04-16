@@ -343,6 +343,8 @@ def replenish_topics(conn, min_pending=50):
     SITE_POST_TYPE = {
         "hotissue": "resale_compare",
         "tco": "tco_analysis",
+        "rank": "top5_rank",
+        "pick": "persona_pick",
         "deal": "promo_deal",
         "compare": "ranking_compare",
         "guide": "beginner_guide",
