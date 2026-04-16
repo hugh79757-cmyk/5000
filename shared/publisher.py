@@ -15,8 +15,19 @@ CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file
 
 
 def load_blogs():
-    with open(os.path.join(CONFIG_DIR, "blogs.yaml"), "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)["blogs"]
+    blogs = []
+    main_path = os.path.join(CONFIG_DIR, "blogs.yaml")
+    with open(main_path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
+    blogs.extend(data.get("blogs", []))
+    blogs_d = os.path.join(CONFIG_DIR, "blogs.d")
+    if os.path.isdir(blogs_d):
+        for fname in sorted(os.listdir(blogs_d)):
+            if fname.endswith(".yaml"):
+                with open(os.path.join(blogs_d, fname), "r", encoding="utf-8") as f:
+                    d = yaml.safe_load(f) or {}
+                blogs.extend(d.get("blogs", []))
+    return blogs
 
 
 def get_blog_config(blog_id):

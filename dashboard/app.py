@@ -280,7 +280,15 @@ def blog_status():
     import yaml, sqlite3 as _sq
 
     # blogs.yaml
-    blogs_cfg = yaml.safe_load(open(os.path.join(BASE, "config/blogs.yaml")))["blogs"]
+    # blogs.yaml + blogs.d/*.yaml 통합 로드
+    _main = yaml.safe_load(open(os.path.join(BASE, "config/blogs.yaml"))) or {}
+    blogs_cfg = list(_main.get("blogs", []))
+    _blogs_d = os.path.join(BASE, "config/blogs.d")
+    if os.path.isdir(_blogs_d):
+        for _fn in sorted(os.listdir(_blogs_d)):
+            if _fn.endswith(".yaml"):
+                _d = yaml.safe_load(open(os.path.join(_blogs_d, _fn))) or {}
+                blogs_cfg.extend(_d.get("blogs", []))
     blog_map = {b["id"]: b for b in blogs_cfg}
 
     # sites.yaml
