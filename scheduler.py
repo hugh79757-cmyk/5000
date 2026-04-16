@@ -350,6 +350,17 @@ def register_schedules():
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
 
+    # CUAP auto_collector: 매 시간 :50에 실행
+    def _run_cuap_collector():
+        try:
+            from pipelines.curation.auto_collector import run as cuap_collect
+            cuap_collect()
+        except Exception as e:
+            logger.error(f"CUAP auto_collector error: {e}")
+
+    schedule.every().hour.at(":50").do(_run_cuap_collector)
+    logger.info("CUAP auto_collector scheduled every hour at :50")
+
     schedule.every().day.at("23:50").do(daily_report)
     job_count += 1
 
