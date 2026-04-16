@@ -3,7 +3,6 @@ import sys
 import re
 import sqlite3
 import logging
-import urllib.request
 from datetime import datetime
 from pathlib import Path
 
@@ -14,7 +13,6 @@ load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 from shared.content_store import init_db, get_today_count, title_similar_exists
 from shared.publisher import publish
-from shared.image_handler import process_and_upload
 from shared.ai_writer import generate_car
 from shared.telegram_notifier import send_error as _tg_error
 from pipelines.car.topic_manager import select_topic, generate_title, make_slug, validate_body
@@ -32,40 +30,37 @@ def _select_car_image(conn, car_id, slug):
     try:
         c = conn.cursor()
         used = c.execute(
-            "SELECT image_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND image_url IS NOT NULL AND image_url != ''"
+            "SELECT r2_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND r2_url IS NOT NULL AND r2_url != ''"
         ).fetchall()
-        used_urls = {r['image_url'] for r in used} if used else set()
+        used_urls = {r['r2_url'] for r in used} if used else set()
         images = c.execute(
-            "SELECT image_url, source FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
+            "SELECT r2_url, image_url FROM car_images WHERE car_id = ? AND verified = 1 AND r2_url IS NOT NULL AND r2_url != '' ORDER BY RANDOM()",
             (car_id,)
         ).fetchall()
-        selected_url = None
+        selected = None
         for img in images:
-            if img['image_url'] not in used_urls:
-                selected_url = img['image_url']
+            if img['r2_url'] not in used_urls:
+                selected = img
                 break
-        if not selected_url and images:
-            selected_url = images[0]['image_url']
-        if not selected_url:
+        if not selected and images:
+            selected = images[0]
+        if not selected:
             base_id = re.sub(r'_(hev|phev|ev|25|35|lpg)(?=_)', '', car_id)
             if base_id != car_id:
                 fallback_imgs = c.execute(
-                    "SELECT image_url FROM car_images WHERE car_id = ? AND verified != -1 ORDER BY RANDOM()",
+                    "SELECT r2_url, image_url FROM car_images WHERE car_id = ? AND verified = 1 AND r2_url IS NOT NULL AND r2_url != '' ORDER BY RANDOM()",
                     (base_id,)
                 ).fetchall()
                 for img in fallback_imgs:
-                    if img['image_url'] not in used_urls:
-                        selected_url = img['image_url']
+                    if img['r2_url'] not in used_urls:
+                        selected = img
                         break
-                if not selected_url and fallback_imgs:
-                    selected_url = fallback_imgs[0]['image_url']
-        if not selected_url:
+                if not selected and fallback_imgs:
+                    selected = fallback_imgs[0]
+        if not selected:
+            logger.warning("No verified R2 image for: " + car_id)
             return "", ""
-        req = urllib.request.Request(selected_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            image_data = resp.read()
-        r2_url = process_and_upload(image_data)
-        return r2_url, selected_url
+        return selected['r2_url'], selected['image_url']
     except Exception as e:
         logger.warning("Image failed: " + str(e))
         return "", ""
