@@ -144,6 +144,7 @@ def run(blog_cfg):
     prompt_text = prompt_file.read_text(encoding="utf-8")
 
     # post_type별 별도 data builder 분기
+    topic = dict(topic)
     post_type = topic.get("post_type", "")
 
     if post_type == "top5_rank":
@@ -186,7 +187,10 @@ def run(blog_cfg):
     body = validate_body(body, data)
 
     MIN_CHARS = 2200
-    if len(body) < MIN_CHARS:
+    if post_type in ("top5_rank", "persona_pick", "price_trend"):
+        # 새 타입은 재생성 없이 그대로 사용 (토큰 절약)
+        pass
+    elif len(body) < MIN_CHARS:
         logger.warning(f"글자수 {len(body)}자 미달({MIN_CHARS}자) — 힌트 추가 재생성")
         length_hint = (
             "\n\n[추가 지시]\n"
