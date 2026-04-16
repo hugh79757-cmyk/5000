@@ -51,6 +51,7 @@ blogs:
     - '16:32'
     - '20:32'
   status: active
+  site_path: /Users/twinssn/Projects/STAP/finance-hugo
 - cf_project: ipo-hugo
   daily_quota: 5
   domain: ipo.techpawz.com
