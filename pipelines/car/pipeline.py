@@ -142,6 +142,40 @@ def run(blog_cfg):
         return {"success": False, "reason": "prompt_not_found"}
 
     prompt_text = prompt_file.read_text(encoding="utf-8")
+
+    # post_type별 별도 data builder 분기
+    post_type = topic.get("post_type", "")
+
+    if post_type == "top5_rank":
+        from pipelines.car.data_builder import build_top5_rank_input
+        import random as _rnd
+        topic = dict(topic)
+        topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
+        data = build_top5_rank_input(conn, topic, CAR_DB_PATH)
+        if not data:
+            logger.warning(blog_id + " top5_rank 데이터 없음: " + topic["car_id"])
+            conn.close()
+            return {"success": False, "reason": "no_top5_data"}
+
+    elif post_type == "persona_pick":
+        from pipelines.car.data_builder import build_persona_pick_input, PERSONA_CONFIGS
+        import random as _rnd
+        topic = dict(topic)
+        topic["persona_type"] = _rnd.choice(list(PERSONA_CONFIGS.keys()))
+        data = build_persona_pick_input(conn, topic, CAR_DB_PATH)
+        if not data:
+            logger.warning(blog_id + " persona_pick 데이터 없음: " + topic["car_id"])
+            conn.close()
+            return {"success": False, "reason": "no_persona_data"}
+
+    elif post_type == "price_trend":
+        from pipelines.car.data_builder import build_price_trend_input
+        data = build_price_trend_input(conn, topic["car_id"], CAR_DB_PATH)
+        if not data:
+            logger.warning(blog_id + " price_trend 데이터 없음: " + topic["car_id"])
+            conn.close()
+            return {"success": False, "reason": "no_price_trend_data"}
+
     body = generate_car(prompt_text, data)
     if not body:
         logger.error(blog_id + " content generation failed")

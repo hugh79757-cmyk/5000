@@ -131,3 +131,45 @@ blogs:
   site_path: /Users/twinssn/Projects/CAP/tco-hugo
   status: active
   theme: Blowfish
+
+- cf_project: rank-hugo
+  daily_quota: 5
+  domain: rank.informationhot.kr
+  id: rank-hugo
+  name: 자동차랭킹
+  pipeline: car
+  platform: hugo
+  post_type: top5_rank
+  prompt: rank/top5_rank.md
+  repo: rank-hugo
+  schedule:
+    times:
+    - 07:22
+    - '10:22'
+    - '13:22'
+    - '16:22'
+    - '20:22'
+  site_path: /Users/twinssn/Projects/CAP/rank-hugo
+  status: active
+  theme: Blowfish
+
+- cf_project: pick-hugo
+  daily_quota: 5
+  domain: pick.informationhot.kr
+  id: pick-hugo
+  name: 내차찾기
+  pipeline: car
+  platform: hugo
+  post_type: persona_pick
+  prompt: pick/persona_pick.md
+  repo: pick-hugo
+  schedule:
+    times:
+    - 07:24
+    - '10:24'
+    - '13:24'
+    - '16:24'
+    - '20:24'
+  site_path: /Users/twinssn/Projects/CAP/pick-hugo
+  status: active
+  theme: Blowfish

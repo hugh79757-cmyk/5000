@@ -454,3 +454,289 @@ def build_input(conn, topic, db_path):
             data["battery_capacity_kwh"] = car["battery_capacity_kwh"]
 
     return data
+
+
+def build_top5_rank_input(conn, topic, db_path):
+    """세그먼트별 TOP5 랭킹 데이터 빌드"""
+    c = conn.cursor()
+
+    # 메인 차량으로 세그먼트 확정
+    car_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (topic["car_id"],)).fetchone()
+    if not car_row:
+        return None
+    car = dict(car_row)
+    segment = car.get("segment", "")
+    if not segment:
+        return None
+
+    rank_type = topic.get("rank_type", "resale")
+
+    # 같은 세그먼트 차량 전체 조회
+    seg_cars = c.execute("""
+        SELECT c.* FROM cars c
+        WHERE c.segment = ? AND c.car_id != ?
+        ORDER BY c.is_popular DESC, RANDOM()
+        LIMIT 20
+    """, (segment, car["car_id"])).fetchall()
+    seg_cars = [dict(r) for r in seg_cars]
+
+    candidates = [car] + seg_cars
+
+    # 각 차량 대표 트림 데이터 수집
+    ranked = []
+    for cand in candidates:
+        trims_raw = c.execute(
+            "SELECT * FROM trims WHERE car_id = ? AND status = '시판' ORDER BY price",
+            (cand["car_id"],)
+        ).fetchall()
+        trims = [dict(t) for t in trims_raw if t["price"] and t["price"] >= 500]
+        if not trims:
+            continue
+        idx = select_representative_trim(trims)
+        trim = trims[idx]
+
+        fuel_eff = trim.get("fuel_efficiency")
+        if not fuel_eff or fuel_eff == 0:
+            fuel_eff = lookup_fuel_efficiency(conn, cand["brand"], cand["model"], cand["displacement"])
+        if not fuel_eff or fuel_eff == 0:
+            continue
+
+        tax = calc_tax(cand["displacement"], cand["fuel_type"])
+        ins = calc_insurance(trim["price"])
+        fuel_cost = calc_fuel_cost(ANNUAL_KM, fuel_eff, cand["fuel_type"], db_path)
+        resale = estimate_resale(trim["price"], cand["brand"], cand["fuel_type"],
+                                 cand.get("segment", ""), cand.get("model", ""))
+        dep_3yr = trim["price"] - resale["resale_3yr"]
+        maint_3yr = (tax + ins + fuel_cost) * 3
+        total_3yr = dep_3yr + maint_3yr
+        monthly = calc_monthly_payment(trim["price"], FINANCE_RATE, 48) + round((tax + ins + fuel_cost) / 12)
+
+        ranked.append({
+            "car_id": cand["car_id"],
+            "model": cand["model"],
+            "brand": cand["brand"],
+            "trim": trim["trim_name"],
+            "base_price": trim["price"],
+            "fuel_efficiency": fuel_eff,
+            "fuel_type": cand["fuel_type"],
+            "displacement": cand["displacement"],
+            "engine": build_engine_desc(cand),
+            "tax_annual": tax,
+            "insurance_estimate": ins,
+            "annual_fuel_cost": fuel_cost,
+            "resale_rate_percent": resale["resale_rate_percent"],
+            "resale_3yr": resale["resale_3yr"],
+            "three_year_depreciation": dep_3yr,
+            "three_year_maintenance": maint_3yr,
+            "three_year_total_cost": total_3yr,
+            "monthly_total": monthly,
+        })
+
+    if len(ranked) < 3:
+        return None
+
+    # 랭킹 정렬
+    if rank_type == "resale":
+        ranked.sort(key=lambda x: x["resale_rate_percent"], reverse=True)
+    elif rank_type == "maintenance":
+        ranked.sort(key=lambda x: x["tax_annual"] + x["insurance_estimate"] + x["annual_fuel_cost"])
+    elif rank_type == "monthly_cost":
+        ranked.sort(key=lambda x: x["monthly_total"])
+    else:  # value
+        ranked.sort(key=lambda x: (x["resale_rate_percent"] + x["fuel_efficiency"]) / x["base_price"], reverse=True)
+
+    top5 = ranked[:5]
+
+    return {
+        "type": "top5_rank",
+        "segment": segment,
+        "rank_type": rank_type,
+        "rank_type_label": {
+            "resale": "잔존가치",
+            "maintenance": "연간 유지비",
+            "monthly_cost": "월 총비용",
+            "value": "가성비",
+        }.get(rank_type, rank_type),
+        "model": top5[0]["model"],
+        "brand": top5[0]["brand"],
+        "base_price": top5[0]["base_price"],
+        "top5": top5,
+        "total_candidates": len(ranked),
+    }
+
+
+PERSONA_CONFIGS = {
+    "commuter": {
+        "label": "출퇴근 40km 직장인",
+        "annual_km": 18000,
+        "finance_term": 48,
+        "salary": 4000,
+        "priority": "연비·유지비 최우선",
+    },
+    "newlywed": {
+        "label": "신혼부부 첫 차",
+        "annual_km": 15000,
+        "finance_term": 48,
+        "salary": 5000,
+        "priority": "가격·잔존가치·실용성 균형",
+    },
+    "first_car": {
+        "label": "사회초년생 첫 차",
+        "annual_km": 12000,
+        "finance_term": 60,
+        "salary": 3000,
+        "priority": "저예산·보험료·유지비 최소화",
+        "insurance_surcharge": 1.4,
+    },
+    "family": {
+        "label": "자녀 있는 가족",
+        "annual_km": 20000,
+        "finance_term": 60,
+        "salary": 6000,
+        "priority": "공간·안전·유지비",
+    },
+    "premium": {
+        "label": "연봉 8,000만원+ 직장인",
+        "annual_km": 15000,
+        "finance_term": 36,
+        "salary": 8000,
+        "priority": "브랜드·잔존가치·승차감",
+    },
+}
+
+
+def build_persona_pick_input(conn, topic, db_path):
+    """페르소나 기반 차량 추천 데이터 빌드"""
+    c = conn.cursor()
+
+    car_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (topic["car_id"],)).fetchone()
+    if not car_row:
+        return None
+    car = dict(car_row)
+
+    persona_type = topic.get("persona_type", "commuter")
+    pcfg = PERSONA_CONFIGS.get(persona_type, PERSONA_CONFIGS["commuter"])
+
+    trims_raw = c.execute(
+        "SELECT * FROM trims WHERE car_id = ? AND status = '시판' ORDER BY price",
+        (car["car_id"],)
+    ).fetchall()
+    trims = [dict(t) for t in trims_raw if t["price"] and t["price"] >= 500]
+    if not trims:
+        return None
+
+    idx = select_representative_trim(trims)
+    main_trim = trims[idx]
+
+    annual_km = pcfg["annual_km"]
+    finance_term = pcfg["finance_term"]
+
+    fuel_eff = main_trim.get("fuel_efficiency")
+    if not fuel_eff or fuel_eff == 0:
+        fuel_eff = lookup_fuel_efficiency(conn, car["brand"], car["model"], car["displacement"])
+    if not fuel_eff or fuel_eff == 0:
+        return None
+
+    tax = calc_tax(car["displacement"], car["fuel_type"])
+    ins = calc_insurance(main_trim["price"])
+    # 초보 할증 적용
+    ins_surcharge = pcfg.get("insurance_surcharge", 1.0)
+    ins_actual = round(ins * ins_surcharge)
+
+    fuel_cost = calc_fuel_cost(annual_km, fuel_eff, car["fuel_type"], db_path)
+    resale = estimate_resale(main_trim["price"], car["brand"], car["fuel_type"],
+                             car.get("segment", ""), car.get("model", ""))
+    dep_3yr = main_trim["price"] - resale["resale_3yr"]
+    maint_3yr = (tax + ins_actual + fuel_cost) * 3
+    total_3yr = dep_3yr + maint_3yr
+    monthly_payment = calc_monthly_payment(main_trim["price"], FINANCE_RATE, finance_term)
+    monthly_maintain = round((tax + ins_actual + fuel_cost) / 12)
+    monthly_total = monthly_payment + monthly_maintain
+
+    # 세후 월급 계산 (연봉의 72% / 12)
+    salary = pcfg["salary"]
+    monthly_net = round(salary * 0.72 / 12)
+    monthly_ratio = round(monthly_total / monthly_net * 100, 1)
+
+    data = {
+        "type": "persona_pick",
+        "persona_type": persona_type,
+        "persona_label": pcfg["label"],
+        "persona_priority": pcfg["priority"],
+        "persona_annual_km": annual_km,
+        "persona_finance_term": finance_term,
+        "persona_salary": salary,
+        "persona_monthly_net": monthly_net,
+        "persona_monthly_ratio": monthly_ratio,
+        "model": car["model"],
+        "brand": car["brand"],
+        "year": car["year"],
+        "trim": main_trim["trim_name"],
+        "base_price": main_trim["price"],
+        "engine": build_engine_desc(car),
+        "fuel_type": car["fuel_type"],
+        "segment": car.get("segment", ""),
+        "fuel_efficiency": fuel_eff,
+        "displacement": car["displacement"],
+        "finance_rate": FINANCE_RATE,
+        "finance_term_months": finance_term,
+        "monthly_payment_main": monthly_payment,
+        "monthly_payment_36": calc_monthly_payment(main_trim["price"], FINANCE_RATE, 36),
+        "monthly_payment_48": calc_monthly_payment(main_trim["price"], FINANCE_RATE, 48),
+        "monthly_payment_60": calc_monthly_payment(main_trim["price"], FINANCE_RATE, 60),
+        "annual_km": annual_km,
+        "tax_annual": tax,
+        "insurance_estimate": ins,
+        "insurance_actual": ins_actual,
+        "annual_fuel_cost": fuel_cost,
+        "monthly_maintain": monthly_maintain,
+        "monthly_total": monthly_total,
+        **resale,
+        "three_year_depreciation": dep_3yr,
+        "three_year_maintenance": maint_3yr,
+        "three_year_total_cost": total_3yr,
+        "trim_lineup": [{"name": t["trim_name"], "price": t["price"]} for t in trims],
+    }
+
+    # 경쟁 모델
+    if topic.get("competitor_car_id"):
+        comp_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (topic["competitor_car_id"],)).fetchone()
+        comp = dict(comp_row) if comp_row else None
+        comp_trims_raw = c.execute(
+            "SELECT * FROM trims WHERE car_id = ? AND status = '시판' ORDER BY price",
+            (topic["competitor_car_id"],)
+        ).fetchall()
+        comp_trims = [dict(t) for t in comp_trims_raw if t["price"] and t["price"] >= 500]
+        if comp and comp_trims:
+            cidx = select_matching_trim(comp_trims, main_trim["price"])
+            ct = comp_trims[cidx]
+            c_eff = ct.get("fuel_efficiency")
+            if not c_eff or c_eff == 0:
+                c_eff = lookup_fuel_efficiency(conn, comp["brand"], comp["model"], comp["displacement"]) or 12.0
+            c_tax = calc_tax(comp["displacement"], comp["fuel_type"])
+            c_ins = calc_insurance(ct["price"])
+            c_fuel = calc_fuel_cost(annual_km, c_eff, comp["fuel_type"], db_path)
+            c_resale = estimate_resale(ct["price"], comp["brand"], comp["fuel_type"],
+                                       comp.get("segment", ""), comp.get("model", ""))
+            c_dep = ct["price"] - c_resale["resale_3yr"]
+            c_maint = (c_tax + c_ins + c_fuel) * 3
+            c_total = c_dep + c_maint
+            c_monthly = calc_monthly_payment(ct["price"], FINANCE_RATE, finance_term) + round((c_tax + c_ins + c_fuel) / 12)
+            data.update({
+                "competitor": comp["model"],
+                "competitor_trim": ct["trim_name"],
+                "competitor_price": ct["price"],
+                "competitor_fuel_efficiency": c_eff,
+                "competitor_tax_annual": c_tax,
+                "competitor_insurance_estimate": c_ins,
+                "competitor_annual_fuel_cost": c_fuel,
+                "competitor_resale_rate_percent": c_resale["resale_rate_percent"],
+                "competitor_three_year_depreciation": c_dep,
+                "competitor_three_year_maintenance": c_maint,
+                "competitor_three_year_total_cost": c_total,
+                "competitor_monthly_total": c_monthly,
+                "persona_saving_3yr": c_total - total_3yr,
+            })
+
+    return data
+
