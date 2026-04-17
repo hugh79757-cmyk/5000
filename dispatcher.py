@@ -208,6 +208,28 @@ def _run_pipeline(cfg):
     if pipeline == "etap":
         if blog_id == "flights-hugo":
             from pipelines.etap.flight_pipeline import run
+        elif blog_id == "cruise-hugo":
+            from pipelines.etap.cruise_pipeline import run
+        elif blog_id == "luxury-hugo":
+            from pipelines.etap.luxury_pipeline import run
+        elif blog_id == "citytours-hugo":
+            from pipelines.etap.citytours_pipeline import run
+        elif blog_id == "watertours-hugo":
+            from pipelines.etap.watertours_pipeline import run
+        elif blog_id == "hiking-hugo":
+            from pipelines.etap.hiking_pipeline import run
+        elif blog_id == "escape-hugo":
+            from pipelines.etap.escape_pipeline import run
+        elif blog_id == "extreme-hugo":
+            from pipelines.etap.extreme_pipeline import run
+        elif blog_id == "nightlife-hugo":
+            from pipelines.etap.nightlife_pipeline import run
+        elif blog_id == "ghost-hugo":
+            from pipelines.etap.ghost_pipeline import run
+        elif blog_id == "layover-hugo":
+            from pipelines.etap.layover_pipeline import run
+        elif blog_id == "nomad-hugo":
+            from pipelines.etap.nomad_pipeline import run
         else:
             from pipelines.etap.pipeline import run
         return run(cfg)

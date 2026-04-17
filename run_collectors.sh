@@ -11,4 +11,6 @@ python3 analytics/ga4_collector.py >> "$LOG" 2>&1
 python3 analytics/bing_collector.py >> "$LOG" 2>&1
 python3 analytics/efficiency_scorer.py >> "$LOG" 2>&1
 
+python3 -m pipelines.etap.collectors.viator >> "$LOG" 2>&1
+python3 -m pipelines.etap.collectors.viator_api >> "$LOG" 2>&1
 echo "=== 수집 완료: $(date) ===" >> "$LOG"

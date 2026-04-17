@@ -529,3 +529,203 @@ blogs:
     - '14:40'
     - '17:40'
     - '21:40'
+
+- id: luxury-hugo
+  name: Luxury Tours Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: luxury.techpawz.com
+  cf_project: luxury-hugo
+  repo: luxury-hugo
+  site_path: /Users/twinssn/Projects/ETAP/luxury-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:00'
+    - '10:00'
+    - '13:00'
+    - '16:00'
+    - '20:00'
+
+- id: citytours-hugo
+  name: City Tours Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: citytours.techpawz.com
+  cf_project: citytours-hugo
+  repo: citytours-hugo
+  site_path: /Users/twinssn/Projects/ETAP/citytours-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:05'
+    - '10:05'
+    - '13:05'
+    - '16:05'
+    - '20:05'
+
+- id: watertours-hugo
+  name: Water Tours Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: watertours.techpawz.com
+  cf_project: watertours-hugo
+  repo: watertours-hugo
+  site_path: /Users/twinssn/Projects/ETAP/watertours-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:10'
+    - '10:10'
+    - '13:10'
+    - '16:10'
+    - '20:10'
+
+- id: hiking-hugo
+  name: Hiking and Biking Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: hiking.techpawz.com
+  cf_project: hiking-hugo
+  repo: hiking-hugo
+  site_path: /Users/twinssn/Projects/ETAP/hiking-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:15'
+    - '10:15'
+    - '13:15'
+    - '16:15'
+    - '20:15'
+
+- id: escape-hugo
+  name: Escape Rooms Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: escape.techpawz.com
+  cf_project: escape-hugo
+  repo: escape-hugo
+  site_path: /Users/twinssn/Projects/ETAP/escape-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:20'
+    - '10:20'
+    - '13:20'
+    - '16:20'
+    - '20:20'
+
+- id: extreme-hugo
+  name: Extreme Sports Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: extreme.techpawz.com
+  cf_project: extreme-hugo
+  repo: extreme-hugo
+  site_path: /Users/twinssn/Projects/ETAP/extreme-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:25'
+    - '10:25'
+    - '13:25'
+    - '16:25'
+    - '20:25'
+
+- id: nightlife-hugo
+  name: Nightlife Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: nightlife.techpawz.com
+  cf_project: nightlife-hugo
+  repo: nightlife-hugo
+  site_path: /Users/twinssn/Projects/ETAP/nightlife-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:30'
+    - '10:30'
+    - '13:30'
+    - '16:30'
+    - '20:30'
+
+- id: ghost-hugo
+  name: Ghost Tours Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: ghost.techpawz.com
+  cf_project: ghost-hugo
+  repo: ghost-hugo
+  site_path: /Users/twinssn/Projects/ETAP/ghost-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:35'
+    - '10:35'
+    - '13:35'
+    - '16:35'
+    - '20:35'
+
+- id: layover-hugo
+  name: Layover Tours Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: layover.techpawz.com
+  cf_project: layover-hugo
+  repo: layover-hugo
+  site_path: /Users/twinssn/Projects/ETAP/layover-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:40'
+    - '10:40'
+    - '13:40'
+    - '16:40'
+    - '20:40'
+
+- id: nomad-hugo
+  name: Digital Nomad Guide
+  pipeline: etap
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: nomad.techpawz.com
+  cf_project: nomad-hugo
+  repo: nomad-hugo
+  site_path: /Users/twinssn/Projects/ETAP/nomad-hugo
+  theme: blowfish
+  language: en
+  schedule:
+    times:
+    - '07:45'
+    - '10:45'
+    - '13:45'
+    - '16:45'
+    - '20:45'

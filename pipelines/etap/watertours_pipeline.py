@@ -1,4 +1,4 @@
-"""multiday_pipeline.py - Multi-day tour blog pipeline"""
+"""watertours_pipeline.py - Water Tours And Sailing pipeline"""
 import os, sys, sqlite3, logging, time, subprocess, re
 from datetime import datetime, timezone, timedelta
 
@@ -8,26 +8,25 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 
 from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
 from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
-from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
+from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id, check_exhaustion
+from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id
+from pipelines.etap.watertours_writer import generate_watertours_guide
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
-from pipelines.etap.multiday_writer import generate_multiday_guide
+BLOG_ID = "watertours-hugo"
+SITE_PATH = "/Users/twinssn/Projects/ETAP/watertours-hugo"
+TOPIC_TABLE = "watertours_topics"
+CATEGORY = "Water Tours"
 
-BLOG_ID = "multiday-hugo"
-SITE_PATH = "/Users/twinssn/Projects/ETAP/multiday-hugo"
-TOPIC_TABLE = "multiday_topics"
-CATEGORY = "Multi-Day Tours"
-
-def _get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def _safe_price(val):
+    try:
+        return float(str(val).replace("$","").replace(",","").strip())
+    except:
+        return 0
 
 def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, site_path=None, category=None):
     slug = article["slug"]
@@ -41,8 +40,8 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
         cover_line = 'featureimage: "' + cover_image["url"] + '"'
     if cover_image and cover_image.get("credit"):
         credit_line = 'featureimagecredit: "' + cover_image.get("credit", "") + '"'
-    title_safe = article["title"].replace('"', "'")
-    desc_safe = article.get("description", "").replace('"', "'")
+    title_safe = article["title"].replace('"',"'")
+    desc_safe = article.get("description", "").replace('"',"'")
     fm = "---\n"
     fm += f'title: "{title_safe}"\n'
     fm += f"date: {now}\n"
@@ -94,28 +93,13 @@ def _build_and_deploy(site_path, blog_id):
         logger.error(f"Deploy failed: {e}")
         return False
 
-def _mark_published(article, blog_id, topic_table, topic_id):
-    """topic_manager 통합 — PK 기준 발행 기록"""
-    from shared.entity_linker import mark_entity_published
-    mark_published_by_id(
-        topic_id=topic_id,
-        topic_table=topic_table,
-        blog_id=blog_id,
-        title=article["title"],
-        slug=article["slug"],
-        url=""
-    )
-    mark_entity_published(blog_id, article["slug"])
-
-def _safe_price(val):
-    try:
-        return float(str(val).replace("$","").replace(",","").strip())
-    except:
-        return 0
-
-def pick_topic():
-    """topic_manager 통합 — PK 기준 중복 방지 + 고갈 체크"""
-    return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
+def _affiliate_link(link):
+    pid = os.getenv("VIATOR_PID", "")
+    mcid = os.getenv("VIATOR_MCID", "42383")
+    if pid and link and "pid=" not in link:
+        sep = "&" if "?" in link else "?"
+        link = f"{link}{sep}pid={pid}&mcid={mcid}&medium=link&campaign={BLOG_ID}"
+    return link
 
 def _add_product_cards(article):
     tours = article.get("tours", [])
@@ -123,52 +107,44 @@ def _add_product_cards(article):
         return article
     selected = []
     seen = set()
-    budget = [t for t in tours if 0 < _safe_price(t.get("price")) < 200][:3]
-    mid = [t for t in tours if 200 <= _safe_price(t.get("price")) <= 800][:3]
+    budget = [t for t in tours if 0 < _safe_price(t.get("price")) < 30][:3]
+    mid = [t for t in tours if 30 <= _safe_price(t.get("price")) <= 100][:3]
     deals = sorted(
         [t for t in tours if t.get("discount") and str(t["discount"]) not in ("0","","0.0")],
-        key=lambda x: _safe_price(str(x.get("discount","0")).replace("%","")),
-        reverse=True
+        key=lambda x: _safe_price(str(x.get("discount","0")).replace("%","")), reverse=True
     )[:4]
     for t in budget + mid + deals:
         nm = re.sub(r"^Save [\d.]+%!\s*", "", t.get("product_name", ""))
         if nm in seen:
             continue
         seen.add(nm)
-        selected.append(dict(
-            name=nm, price=t.get("price",""), currency=t.get("currency","USD"),
+        selected.append(dict(name=nm, price=t.get("price",""), currency=t.get("currency","USD"),
             discount=str(t.get("discount","")).replace("%",""),
-            image_url=t.get("image_url",""), link=t.get("deep_link",""),
-            category=t.get("category",""),
-        ))
+            image_url=t.get("image_url",""), link=_affiliate_link(t.get("deep_link","")), category=t.get("category","")))
     if selected:
         article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
-    card_names = seen.copy()
-    comp_tours = [t for t in sorted(tours, key=lambda x: _safe_price(x.get("price",0))) if t.get("product_name","") not in card_names][:5]
-    comp = [dict(name=re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"]), price=t.get("price",""), currency=t.get("currency","USD"),
-                 discount=str(t.get("discount","")).replace("%",""), link=t.get("deep_link",""))
-            for t in comp_tours if t.get("deep_link")]
+    comp_tours = [t for t in sorted(tours, key=lambda x: _safe_price(x.get("price",0))) if t.get("product_name","") not in seen][:5]
+    comp = [dict(name=re.sub(r"^Save [\d.]+%!\s*","",t["product_name"]), price=t.get("price",""),
+                 currency=t.get("currency","USD"), discount=str(t.get("discount","")).replace("%",""),
+                 link=t.get("deep_link","")) for t in comp_tours if t.get("deep_link")]
     if comp:
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
-def run():
-    topic = pick_topic()
+def run(cfg=None):
+    topic = pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
     if not topic:
         logger.info(f"[{BLOG_ID}] No topics")
         return False
     city = topic.get("city", "")
     country = topic.get("country", "")
     logger.info(f"[{BLOG_ID}] {city} generating")
-    article = generate_multiday_guide(topic)
+    article = generate_watertours_guide(topic)
     if not article:
-        from pipelines.etap.topic_manager import mark_published_by_id
-        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
-                             topic.get("title",""), topic.get("slug",""))
-        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('city','')}")
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID, topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 데이터 부족: {city}")
         return False
-    # Post-process quality check
-    data_prices = [float(str(t.get("price",0)).replace("$","").replace(",","")) for t in article.get("tours", article.get("routes", article.get("restaurants", []))) if t.get("price")]
+    data_prices = [float(str(t.get("price",0)).replace("$","").replace(",","")) for t in article.get("tours",[]) if t.get("price")]
     article["content"], post_issues, is_draft = postprocess_content(article["content"], data_prices=data_prices, blog_id=BLOG_ID, slug=article["slug"])
     if is_draft:
         logger.warning(f"[{BLOG_ID}] DRAFT: {article['slug']} - {post_issues}")
@@ -177,22 +153,22 @@ def run():
     elif post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
-    cover = fetch_city_image(city + " landscape travel", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " tour group travel", country, article["slug"], count=3) if city else []
+    cover = fetch_city_image(city + " water tour sailing boat", country, article["slug"]) if city else None
+    body = fetch_body_images(city + " sailing cruise water tour", country, article["slug"], count=3) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
-    _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
+    mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID, article["title"], article["slug"])
+    mark_entity_published(BLOG_ID, article["slug"])
     if city:
-        register_entity("city", city, BLOG_ID, article["slug"], "multi-day tours from " + city, 60, 1)
+        register_entity("city", city, BLOG_ID, article["slug"], "water tours and sailing in " + city, 50, 1)
     if country:
-        register_entity("country", country, BLOG_ID, article["slug"], "tour packages in " + country, 40, 1)
+        register_entity("country", country, BLOG_ID, article["slug"], "water tours and sailing in " + country, 35, 1)
     return True
 
-def run_batch(count=3):
+def run_batch(cfg=None, count=3):
     from pipelines.etap.topic_manager import check_daily_quota
-    can_pub, today_count = check_daily_quota("multiday-hugo", max_per_day=5)
+    can_pub, today_count = check_daily_quota(BLOG_ID, max_per_day=5)
     if not can_pub:
-        import logging
-        logging.getLogger(__name__).info(f"[multiday-hugo] daily quota reached ({today_count}/5)")
+        logger.info(f"[{BLOG_ID}] daily quota reached ({today_count}/5)")
         return 0
     count = min(count, 5 - today_count)
     ok = 0

@@ -77,8 +77,6 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     cross_html = build_cross_sell_html(country=country, city=city, exclude_blog=blog_id, max_items=3)
     if cross_html:
         content = insert_cross_sell_block(content, cross_html, position="bottom")
-    if cover_image and cover_image.get("credit"):
-        content = cover_image["credit"] + "\n\n" + content
     with open(os.path.join(post_dir, "index.md"), "w") as f:
         f.write(fm + "\n" + content)
     logger.info(f"Post written: {post_dir}")
