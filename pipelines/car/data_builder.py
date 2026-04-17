@@ -556,6 +556,13 @@ def build_top5_rank_input(conn, topic, db_path):
 
     top5 = ranked[:5]
 
+    # top5가 5개 미만이면 None 반환 → pipeline에서 skip
+    if len(top5) < 5:
+        logger.warning(f"top5_rank: {car['model']} 세그먼트에 후보 {len(top5)}개뿐 — skip")
+        return None
+
+    # top-level에 1위 차량 데이터 복사 (title_engine/description용)
+    top1 = top5[0]
     return {
         "type": "top5_rank",
         "segment": segment,
@@ -566,9 +573,22 @@ def build_top5_rank_input(conn, topic, db_path):
             "monthly_cost": "월 총비용",
             "value": "가성비",
         }.get(rank_type, rank_type),
-        "model": top5[0]["model"],
-        "brand": top5[0]["brand"],
-        "base_price": top5[0]["base_price"],
+        "model": top1["model"],
+        "brand": top1["brand"],
+        "base_price": top1["base_price"],
+        "trim": top1.get("trim", ""),
+        "fuel_type": top1.get("fuel_type", ""),
+        "fuel_efficiency": top1.get("fuel_efficiency", 0),
+        "displacement": top1.get("displacement", 0),
+        "tax_annual": top1.get("tax_annual", 0),
+        "insurance_estimate": top1.get("insurance_estimate", 0),
+        "annual_fuel_cost": top1.get("annual_fuel_cost", 0),
+        "resale_rate_percent": top1.get("resale_rate_percent", 0),
+        "resale_3yr": top1.get("resale_3yr", 0),
+        "three_year_depreciation": top1.get("three_year_depreciation", 0),
+        "three_year_maintenance": top1.get("three_year_maintenance", 0),
+        "three_year_total_cost": top1.get("three_year_total_cost", 0),
+        "monthly_total": top1.get("monthly_total", 0),
         "top5": top5,
         "total_candidates": len(ranked),
     }

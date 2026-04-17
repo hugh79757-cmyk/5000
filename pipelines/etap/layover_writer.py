@@ -32,7 +32,7 @@ def fetch_tours(city, country=None):
                discount_percent as discount, image_url, deep_link, city, country
         FROM viator_tours
         WHERE (city = ? OR city IN (SELECT alias FROM city_aliases WHERE canonical_name = ?))
-          AND category IN ('Layover Tours')
+          AND category IN ('Layover Tours', 'Half-day Tours', 'Full-day Tours', 'City Tours', 'Audio Guides', 'Self-guided Tours', 'Ports of Call Tours', 'Sightseeing Passes', 'Port Transfers', 'Private Drivers')
           AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
     """, (city, city)).fetchall()

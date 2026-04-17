@@ -100,6 +100,14 @@ def _is_duplicate(blog_id: str) -> bool:
     except Exception:
         return False
 
+# CAP 블로그 매핑 (car.db 사용)
+CAP_BLOGS = {
+    "rank-hugo", "pick-hugo", "compare-hugo", "deal-hugo",
+    "guide-hugo", "hotissue-hugo", "ev-hugo", "tco-hugo",
+}
+CAP_DB = PROJECT_DIR / "data" / "car.db"
+
+
 def _record_ledger(blog_id):
     """publish_ledger에 발행 사실 기록 — 각 파이프라인 DB에서 최신 건 조회"""
     try:
@@ -115,6 +123,19 @@ def _record_ledger(blog_id):
             ).fetchone()
             if row:
                 title, url, source_id = row[0], row[1], row[2] or ""
+            conn_src.close()
+        elif blog_id in CAP_BLOGS:
+            # CAP 블로그는 car.db publish_log에서 조회
+            site_key = blog_id.replace("-hugo", "")
+            conn_src = sqlite3.connect(str(CAP_DB))
+            row = conn_src.execute(
+                "SELECT title, slug FROM publish_log WHERE site=? ORDER BY id DESC LIMIT 1",
+                (site_key,)
+            ).fetchone()
+            if row:
+                title = row[0] or ""
+                url = row[1] or ""
+                source_id = site_key
             conn_src.close()
         else:
             # 5000 content.db에서 조회
