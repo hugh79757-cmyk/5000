@@ -69,7 +69,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     content = insert_adsense(content)
     if body_images:
         h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-        for idx in range(min(len(body_images), max(0, len(h2_positions) - 1))):
+        for idx in range(min(len(body_images), len(h2_positions))):
             img = body_images[idx]
             img_block = "\n\n![Photo](" + img["url"] + ")\n*" + img.get("credit", "") + "*\n"
             h2_line_end = content.index("\n", h2_positions[idx]) + 1
@@ -191,7 +191,7 @@ def run():
     article = _add_product_cards(article)
     country = article.get("country", "")
     cover = fetch_city_image(country, "", article["slug"]) if country else None
-    body = fetch_body_images(country, "", article["slug"], count=2) if country else []
+    body = fetch_body_images(country, "", article["slug"], count=8) if country else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if country:
