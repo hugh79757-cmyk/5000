@@ -551,6 +551,9 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
     from datetime import datetime
 
     combined = title + " " + body
+    data_source = ctx.get("data_source", "")
+    is_dividend = "dividend" in data_source
+
     zero_patterns = [
         (r"\b0억\s*원?", "0억 원"),
         (r"\b0%", "0%"),
@@ -558,6 +561,10 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
         (r"공모가\s*0원", "공모가 0원"),
         (r"\b0만\s*주", "0만 주"),
     ]
+    # 배당 블로그: 0% 단독 패턴 제외 (배당률 0%는 정상 문맥)
+    if is_dividend:
+        zero_patterns = [(p, l) for p, l in zero_patterns if l not in ("0%",)]
+
     zero_hits = []
     for pat, label in zero_patterns:
         if re.search(pat, combined):
