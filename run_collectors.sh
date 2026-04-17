@@ -18,3 +18,8 @@ python3 -m pipelines.etap.collectors.viator_api >> "$LOG" 2>&1
 python3 -m pipelines.etap.collectors.nomad_data >> "$LOG" 2>&1
 
 echo "=== 수집 완료: $(date) ===" >> "$LOG"
+
+# ─── 토픽 자동 확장 (매일) ───
+echo "[$(date)] 토픽 확장 시작"
+python3 -c "from pipelines.etap.collectors.topic_expander import expand_topics; r=expand_topics(); print(f'토픽 확장: {r[\"added\"]}개 추가')"
+echo "[$(date)] 토픽 확장 완료"
