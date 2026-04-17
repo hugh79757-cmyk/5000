@@ -52,6 +52,16 @@ BLOG_DOMAINS = {
     "eurail-hugo":      "https://eurail.techpawz.com",
     "cruise-hugo":      "https://cruise.techpawz.com",
     "phototour-hugo":   "https://phototour.techpawz.com",
+    "luxury-hugo":      "https://luxury.techpawz.com",
+    "citytours-hugo":   "https://citytours.techpawz.com",
+    "watertours-hugo":  "https://watertours.techpawz.com",
+    "hiking-hugo":      "https://hiking.techpawz.com",
+    "escape-hugo":      "https://escape.techpawz.com",
+    "extreme-hugo":     "https://extreme.techpawz.com",
+    "nightlife-hugo":   "https://nightlife.techpawz.com",
+    "ghost-hugo":       "https://ghost.techpawz.com",
+    "layover-hugo":     "https://layover.techpawz.com",
+    "nomad-hugo":       "https://nomad.techpawz.com",
 }
 
 
