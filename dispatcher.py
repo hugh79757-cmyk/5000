@@ -70,33 +70,26 @@ def get_blog_config(blog_id):
 
 
 def _is_duplicate(blog_id: str) -> bool:
-    """오늘 동일 blog_id + 동일 title이 이미 ledger에 있으면 True"""
+    """오늘 동일 blog_id가 이미 daily_quota만큼 ledger에 있으면 True
+    (car pipeline은 articles 테이블을 사용하지 않으므로 ledger 건수 기준으로 판단)
+    """
     try:
         import sqlite3
         from datetime import datetime
-        conn = sqlite3.connect(str(LEDGER_DB))
-        # 최신 발행 제목 가져오기
-        title = ""
-        for db_path in (PROJECT_DIR / "data").glob("*.db"):
-            try:
-                c2 = sqlite3.connect(str(db_path))
-                row = c2.execute(
-                    "SELECT title FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
-                    (blog_id,)).fetchone()
-                c2.close()
-                if row and row[0]:
-                    title = row[0]
-                    break
-            except Exception:
-                continue
-        if not title:
-            return False
+        config = load_config()
+        blog_cfg = next(
+            (b for b in config.get("blogs", []) if isinstance(b, dict) and b.get("id") == blog_id),
+            None
+        )
+        daily_quota = blog_cfg.get("daily_quota", 50) if blog_cfg else 50
         today = datetime.now().strftime("%Y-%m-%d")
-        existing = conn.execute(
-            "SELECT COUNT(*) FROM publish_ledger WHERE blog_id=? AND title=? AND DATE(created_at)=?",
-            (blog_id, title, today)).fetchone()[0]
+        conn = sqlite3.connect(str(LEDGER_DB))
+        count = conn.execute(
+            "SELECT COUNT(*) FROM publish_ledger WHERE blog_id=? AND DATE(created_at)=?",
+            (blog_id, today)
+        ).fetchone()[0]
         conn.close()
-        return existing > 0
+        return count >= daily_quota
     except Exception:
         return False
 
@@ -253,7 +246,12 @@ def _run_pipeline(cfg):
             from pipelines.etap.nomad_pipeline import run
         else:
             from pipelines.etap.pipeline import run
-        return run(cfg)
+        # run(cfg) 또는 run() 호환
+        import inspect
+        if 'cfg' in inspect.signature(run).parameters or len(inspect.signature(run).parameters) > 0:
+            return run(cfg)
+        else:
+            return run()
     elif pipeline == "curation":
         from pipelines.curation.pipeline import run
         return run(cfg)
@@ -305,9 +303,8 @@ def dispatch(blog_id):
         return None
     # 발행 전 중복 체크
     if _is_duplicate(blog_id):
-        logger.info(f"[DEDUP] {blog_id} 동일 제목 중복 — 발행 건너뜀")
-        _record_ledger(blog_id)  # catchup 재시도 방지
-        return {"success": True, "reason": "duplicate_title"}
+        logger.info(f"[DEDUP] {blog_id} 동일 제목 중복 — 발행 건너뜀 (quota 소모 안 함)")
+        return {"success": False, "reason": "duplicate_title"}
 
     result = _run_pipeline(cfg)
 
