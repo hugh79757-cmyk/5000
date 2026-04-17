@@ -315,8 +315,8 @@ def generate_curation_article(keyword, products, blog_id=None):
     if disclosure not in body:
         body = body.rstrip() + f"\n\n---\n\n*{disclosure}*\n"
 
-    # 애드센스 광고 삽입
-    body = _insert_adsense(body)
+    # 애드센스 광고 삽입 (single.html 템플릿에서 처리 — 본문 raw HTML 삽입 시 Hugo 빌드 오류)
+    # body = _insert_adsense(body)
 
     # description: 본문 첫 2문장 추출
     desc_lines = []
