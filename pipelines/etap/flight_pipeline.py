@@ -91,12 +91,7 @@ def _write_hugo_post(cfg, article):
     os.makedirs(post_dir, exist_ok=True)
     now = datetime.now(KST).isoformat(timespec="seconds")
     tags_yaml = "\n".join([f'  - "{t}"' for t in article.get("tags", [])])
-    img_block = ""
-    credit_line = ""
-    if article.get("image_url"):
-        img_block = f'featureimage: "{article["image_url"]}"'
-        if article.get("image_credit"):
-            credit_line = article["image_credit"]
+    img_block = f'featureimage: "{article.get("image_url", "")}"'
     fm = f"""---
 title: "{article['title']}"
 date: {now}
@@ -110,7 +105,6 @@ params:
   priceUpdateTime: "{datetime.now(KST).strftime('%B %d, %Y %H:%M KST')}"
 showTableOfContents: true
 ---
-{credit_line}
 
 {_insert_body_images(article['content'], article.get('body_images', []))}
 """

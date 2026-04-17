@@ -206,7 +206,10 @@ def _run_pipeline(cfg):
     blog_id = cfg["id"]
 
     if pipeline == "etap":
-        from pipelines.etap.pipeline import run
+        if blog_id == "flights-hugo":
+            from pipelines.etap.flight_pipeline import run
+        else:
+            from pipelines.etap.pipeline import run
         return run(cfg)
     elif pipeline == "curation":
         from pipelines.curation.pipeline import run
