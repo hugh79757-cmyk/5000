@@ -63,10 +63,11 @@ def fetch_tours(city, country=None):
         SELECT product_name, description, category, price, currency,
                discount_percent as discount, image_url, deep_link, city, country
         FROM viator_tours
-        WHERE city = ? AND category IN ('Shore Excursions', 'Ports of Call Tours', 'Shore Excursions', 'Half-day Tours')
+        WHERE (city = ? OR city LIKE ?)
+          AND category IN ('Shore Excursions', 'Ports of Call Tours', 'Half-day Tours', 'Day Trips', 'Cultural Tours', 'Walking Tours')
           AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
-    """, (city,)).fetchall()
+    """, (city, f"%{city}%")).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
