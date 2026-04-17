@@ -13,4 +13,8 @@ python3 analytics/efficiency_scorer.py >> "$LOG" 2>&1
 
 python3 -m pipelines.etap.collectors.viator >> "$LOG" 2>&1
 python3 -m pipelines.etap.collectors.viator_api >> "$LOG" 2>&1
+
+# Nomad 데이터 (코워킹/카페/기후) - 주 1회면 충분하지만 매일 돌려도 기존 데이터 skip
+python3 -m pipelines.etap.collectors.nomad_data >> "$LOG" 2>&1
+
 echo "=== 수집 완료: $(date) ===" >> "$LOG"
