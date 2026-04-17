@@ -156,7 +156,7 @@ def run(cfg):
     if img:
         article["image_url"] = img.get("url", "")
         article["image_credit"] = img.get("credit", "")
-    body_imgs = fetch_body_images(topic["dest_city"], "", topic["slug"], count=3)
+    body_imgs = fetch_body_images(topic["dest_city"], "", topic["slug"], count=8)
     if body_imgs:
         article["body_images"] = body_imgs
     blog_id = cfg.get("id", "flights-hugo")

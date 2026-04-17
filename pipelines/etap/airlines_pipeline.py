@@ -60,7 +60,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     content = insert_adsense(content)
     if body_images:
         h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-        for idx in range(min(len(body_images), max(0, len(h2_positions) - 1))):
+        for idx in range(min(len(body_images), len(h2_positions))):
             img = body_images[idx]
             img_block = "\n\n![Photo](" + img["url"] + ")\n*" + img.get("credit", "") + "*\n"
             h2_line_end = content.index("\n", h2_positions[idx]) + 1
@@ -176,7 +176,7 @@ def run():
     article = _add_product_cards(article)
     airline_name = article.get("airline_name", "")
     cover = fetch_city_image(airline_name + " airline", "", article["slug"]) if airline_name else None
-    body = fetch_body_images(airline_name + " airplane", "", article["slug"], count=2) if airline_name else []
+    body = fetch_body_images(airline_name + " airplane", "", article["slug"], count=8) if airline_name else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if airline_name:
