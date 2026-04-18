@@ -20,10 +20,24 @@ def get_content_db():
 
 
 def load_active_blog_ids():
-    path = os.path.join(PROJECT_ROOT, "config", "blogs.yaml")
-    with open(path, "r") as f:
-        config = yaml.safe_load(f)
-    return [b["id"] for b in config.get("blogs", []) if b.get("status") == "active"]
+    """blogs.yaml + blogs.d/*.yaml 통합 로드"""
+    import glob
+    config_dir = os.path.join(PROJECT_ROOT, "config")
+    all_blogs = []
+
+    main_path = os.path.join(config_dir, "blogs.yaml")
+    with open(main_path, "r") as f:
+        main_cfg = yaml.safe_load(f) or {}
+    all_blogs.extend(main_cfg.get("blogs", []))
+
+    blogs_d = os.path.join(config_dir, "blogs.d")
+    if os.path.isdir(blogs_d):
+        for fpath in sorted(glob.glob(os.path.join(blogs_d, "*.yaml"))):
+            with open(fpath, "r") as f:
+                sub = yaml.safe_load(f) or {}
+            all_blogs.extend(sub.get("blogs", []))
+
+    return [b["id"] for b in all_blogs if b.get("status") == "active"]
 
 
 def update_scores(verbose=True):

@@ -14,14 +14,12 @@ BASE = "https://ssl.bing.com/webmaster/api.svc/json"
 
 
 def _get_api_keys():
-    """사용 가능한 Bing API key 목록 반환"""
+    """사용 가능한 Bing API key 목록 반환 (3계정)"""
     keys = []
-    k1 = os.getenv("BING_WEBMASTER_API_KEY")
-    k2 = os.getenv("BING_WEBMASTER_API_KEY_2")
-    if k1:
-        keys.append(k1)
-    if k2:
-        keys.append(k2)
+    for suffix in ["", "_2", "_3"]:
+        k = os.getenv(f"BING_WEBMASTER_API_KEY{suffix}")
+        if k:
+            keys.append(k)
     return keys
 
 
