@@ -142,6 +142,7 @@ def _build_product_block(products):
             f"- 확인된 스펙:\n{spec_str}\n"
             f"- 링크: {p.get('product_url', '')}\n"
             f"- 이미지: {p.get('product_image', '')}\n"
+            f"- 네이버최저가: {p.get('naver_lprice', '')}원\n"
         )
     return "\n".join(lines)
 
