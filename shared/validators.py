@@ -132,7 +132,7 @@ def _get_today_count(blog_id: str) -> int:
         conn = sqlite3.connect(_DB_PATH)
         cur = conn.execute(
             "SELECT COUNT(*) FROM publish_ledger "
-            "WHERE blog_id = ? AND date(created_at) = date('now')",
+            "WHERE blog_id = ? AND date(created_at) = date('now', '+9 hours')",
             (blog_id,),
         )
         count = cur.fetchone()[0]
@@ -331,19 +331,8 @@ def validate_post(
     # ── 9. 시스템 면책 중복 검증 ──
     issues.extend(_check_disclaimer(html_content))
 
-    # ── 알림 (문제 있을 때만) ──
+    # ── 로깅만 (알림은 validate_post_extended에서 통합 발송) ──
     if issues:
-        # CRITICAL 있으면 무조건 알림
-        has_critical = any("[CRITICAL]" in i for i in issues)
-        try:
-            from shared.notify import alert
-            severity = "🚨 CRITICAL" if has_critical else "⚠️ WARNING"
-            detail = f"blog: {blog_id}\nkeyword: {keyword}\ntitle: {t[:50]}\n"
-            detail += "\n".join(f"• {i}" for i in issues)
-            alert(f"[Validate] {severity} — {len(issues)}건", detail)
-        except Exception:
-            pass
-
         logger.warning(f"[Validate] {blog_id} | {len(issues)} issues: {issues}")
 
     return issues
