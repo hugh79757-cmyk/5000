@@ -119,6 +119,8 @@ def _append_links(body_md, service, category):
                 (["임플란트", "틀니", "치과"], "치아관리용품"),
                 (["기저귀", "배변", "요실금"], "성인기저귀"),
                 (["목욕", "세신", "위생"], "목욕용품"),
+                (["교통", "버스", "지하철", "승차", "택시", "이동지원"], "교통카드"),
+                (["주거", "집수리", "주택", "난방비", "도배", "장판"], "실내용품"),
             ]
             for keywords, hint in keyword_rules:
                 if any(kw in svc_text for kw in keywords):
@@ -128,7 +130,8 @@ def _append_links(body_md, service, category):
             if keyword_hint:
                 coupang_md = coupang.get_senior_product_links(category=keyword_hint, count=2)
             else:
-                coupang_md = coupang.get_senior_product_links(category=category, count=2)
+                # 매칭 키워드 없으면 무관한 상품 노출 방지 — 쿠팡 링크 생략
+                coupang_md = None
 
             if coupang_md:
                 parts.append(coupang_md)
@@ -443,12 +446,31 @@ def _select_service(services, topic_type, published=None, published_svc_ids=None
 
 
 def _get_related_services(services, main_service, topic_type):
-    """같은 카테고리의 다른 서비스 추출"""
+    """같은 카테고리 + 같은 지역(또는 전국)의 다른 서비스 추출"""
     main_name = main_service.get("service_name", "")
-    return [
-        s for s in services
-        if s.get("category") == topic_type and s.get("service_name") != main_name
-    ][:3]
+    main_dept = main_service.get("department", "")
+
+    # 메인 서비스의 지역 토큰 추출
+    region_suffixes = ["시", "군", "구"]
+    main_tokens = [t for t in main_dept.replace("(", " ").replace(")", " ").split()
+                   if any(t.endswith(s) for s in region_suffixes)]
+
+    same_cat = [s for s in services
+                if s.get("category") == topic_type and s.get("service_name") != main_name]
+
+    if main_tokens:
+        # 지역 한정 서비스 → 같은 지역 서비스만
+        local = [s for s in same_cat
+                 if any(tok in s.get("department", "") for tok in main_tokens)]
+        if local:
+            return local[:3]
+        # 같은 지역 없으면 전국 서비스(지역 미표기)만
+        national = [s for s in same_cat
+                    if not any(m in s.get("department", "")
+                               for m in ["시 ", "군 ", "구 ", "시)", "군)", "구)"])]
+        return national[:3]
+
+    return same_cat[:3]
 
 
 def _validate_article(result, min_length=1500):
