@@ -12,11 +12,27 @@ sys.path.insert(0, PROJECT_ROOT)
 
 
 def load_active_blogs():
-    path = os.path.join(PROJECT_ROOT, "config", "blogs.yaml")
-    with open(path, "r") as f:
-        config = yaml.safe_load(f)
+    """blogs.yaml + blogs.d/*.yaml 통합 로드 (ga4_property 있는 블로그만)"""
+    import glob
+    config_dir = os.path.join(PROJECT_ROOT, "config")
+    all_blogs = []
+
+    # 1. blogs.yaml (메인)
+    main_path = os.path.join(config_dir, "blogs.yaml")
+    with open(main_path, "r") as f:
+        main_cfg = yaml.safe_load(f) or {}
+    all_blogs.extend(main_cfg.get("blogs", []))
+
+    # 2. blogs.d/*.yaml (분산)
+    blogs_d = os.path.join(config_dir, "blogs.d")
+    if os.path.isdir(blogs_d):
+        for fpath in sorted(glob.glob(os.path.join(blogs_d, "*.yaml"))):
+            with open(fpath, "r") as f:
+                sub = yaml.safe_load(f) or {}
+            all_blogs.extend(sub.get("blogs", []))
+
     return [
-        b for b in config.get("blogs", [])
+        b for b in all_blogs
         if b.get("status") == "active" and b.get("ga4_property")
     ]
 

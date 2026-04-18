@@ -20,9 +20,6 @@ sites:
 - domain: tour1.rotcha.kr
   blog_id: travel-hugo
   group: travel
-- domain: travel.rotcha.kr
-  blog_id: travel1-hugo
-  group: travel
 - domain: travel1.rotcha.kr
   blog_id: travel1-hugo
   group: travel
@@ -203,9 +200,6 @@ sites:
 - domain: heritage.aikorea24.kr
   blog_id: heritage-hugo
   group: travel
-- domain: tax.informationhot.kr
-  blog_id: rap3-hugo
-  group: rap
 - domain: keyword.aikorea24.kr
   blog_id: keyword-hugo
   group: main
@@ -236,6 +230,42 @@ sites:
 - domain: achaanstree.tistory.com
   blog_id: achaanstree
   group: etc
+- domain: rank.informationhot.kr
+  blog_id: rank-hugo
+  group: car
+- domain: pick.informationhot.kr
+  blog_id: pick-hugo
+  group: car
+- domain: luxury.techpawz.com
+  blog_id: luxury-hugo
+  group: etap
+- domain: citytours.techpawz.com
+  blog_id: citytours-hugo
+  group: etap
+- domain: watertours.techpawz.com
+  blog_id: watertours-hugo
+  group: etap
+- domain: hiking.techpawz.com
+  blog_id: hiking-hugo
+  group: etap
+- domain: escape.techpawz.com
+  blog_id: escape-hugo
+  group: etap
+- domain: extreme.techpawz.com
+  blog_id: extreme-hugo
+  group: etap
+- domain: nightlife.techpawz.com
+  blog_id: nightlife-hugo
+  group: etap
+- domain: ghost.techpawz.com
+  blog_id: ghost-hugo
+  group: etap
+- domain: layover.techpawz.com
+  blog_id: layover-hugo
+  group: etap
+- domain: nomad.techpawz.com
+  blog_id: nomad-hugo
+  group: etap
 groups:
   car:
     name: 자동차
