@@ -50,6 +50,7 @@ SPEC_PATTERNS = {
         (r'(신생아|영아|유아|아동)', 'age_group', ''),
         (r'(ISOFIX|ISO\s*FIX)', 'isofix', ''),
         (r'(\d+)\s*단계', 'stage', '단계'),
+        (r'(\d+)\s*(?:PCS|pcs|피스|P|p)\b', 'pieces', '개'),
         (r'(\d+)\s*[Ll리터]|(\d+)\s*ml|(\d+)\s*ML', 'capacity', ''),
     ],
     "fitness-hugo": [
@@ -59,6 +60,7 @@ SPEC_PATTERNS = {
         (r'(\d+(?:\.\d+)?)\s*mm', 'size_mm', 'mm'),
         (r'(접이식|폴딩)', 'foldable', ''),
         (r'(\d+)\s*단계', 'resistance', '단계'),
+        (r'(\d+)\s*(?:PCS|pcs|피스)', 'pieces', '개'),
     ],
 }
 

@@ -520,12 +520,22 @@ def _run_inner(cfg, blog_id, daily_quota):
         if len(tok) >= 2:
             tag_set.add(tok)
     # 제목에서 브랜드명 추출 (영문 대문자 시작 단어 + 한글 브랜드)
-    brand_patterns = ["레노버", "삼성", "LG", "애플", "MSI", "델", "에이수스", "ASUS", "HP", "Apple",
-                       "다이슨", "샤오미", "필립스", "쿠쿠", "테팔", "일리", "네슬레",
-                       "한샘", "이케아", "퍼시스", "까사미아"]
+    brand_patterns = [
+                     "레노버", "삼성", "LG", "애플", "MSI", "델", "에이수스", "ASUS", "HP", "Apple",
+                     "아이디어패드", "씽크패드", "갤럭시북", "그램", "맥북",
+                     "다이슨", "샤오미", "필립스", "쿠쿠", "테팔", "신일", "대웅", "미라스", "제니퍼룸",
+                     "한샘", "이케아", "퍼시스", "까사미아", "삼익가구", "베드리움", "비투스", "시디즈", "일룸",
+                     "맥킹덤", "베어블리", "코코유", "순성", "다이치", "조이", "브라이텍스", "뉴나",
+                     "숀리", "이고진", "엑사이더", "코멧"]
     for bp in brand_patterns:
         if bp.lower() in title.lower():
             tag_set.add(bp)
+    # 상품 데이터의 brand/maker 필드에서도 태그 추가
+    for p in products[:5]:
+        for field in ["brand", "maker"]:
+            bv = (p.get(field) or "").strip()
+            if bv and len(bv) >= 2:
+                tag_set.add(bv)
     tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
     
     result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
