@@ -155,6 +155,8 @@ def enrich_products(products, blog_id):
             p["brand"] = naver_info.get("brand", "")
             p["maker"] = naver_info.get("maker", "")
             p["naver_category"] = naver_info.get("category", "")
+            p["naver_lprice"] = naver_info.get("naver_lprice", "")
+            p["naver_mall"] = naver_info.get("naver_mall", "")
         else:
             if not p.get("brand"):
                 p["brand"] = ""
