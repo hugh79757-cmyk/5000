@@ -531,6 +531,7 @@ blogs:
     - '21:40'
 
 - id: luxury-hugo
+  ga4_property: '533565769'
   name: Luxury Tours Guide
   pipeline: etap
   platform: hugo
@@ -551,6 +552,7 @@ blogs:
     - '20:00'
 
 - id: citytours-hugo
+  ga4_property: '533547904'
   name: City Tours Guide
   pipeline: etap
   platform: hugo
@@ -571,6 +573,7 @@ blogs:
     - '20:05'
 
 - id: watertours-hugo
+  ga4_property: '533560944'
   name: Water Tours Guide
   pipeline: etap
   platform: hugo
@@ -591,6 +594,7 @@ blogs:
     - '20:10'
 
 - id: hiking-hugo
+  ga4_property: '533501468'
   name: Hiking and Biking Guide
   pipeline: etap
   platform: hugo
@@ -611,6 +615,7 @@ blogs:
     - '20:15'
 
 - id: escape-hugo
+  ga4_property: '533557099'
   name: Escape Rooms Guide
   pipeline: etap
   platform: hugo
@@ -631,6 +636,7 @@ blogs:
     - '20:20'
 
 - id: extreme-hugo
+  ga4_property: '533528727'
   name: Extreme Sports Guide
   pipeline: etap
   platform: hugo
@@ -651,6 +657,7 @@ blogs:
     - '20:25'
 
 - id: nightlife-hugo
+  ga4_property: '533501469'
   name: Nightlife Guide
   pipeline: etap
   platform: hugo
@@ -671,6 +678,7 @@ blogs:
     - '20:30'
 
 - id: ghost-hugo
+  ga4_property: '533502285'
   name: Ghost Tours Guide
   pipeline: etap
   platform: hugo
@@ -691,6 +699,7 @@ blogs:
     - '20:35'
 
 - id: layover-hugo
+  ga4_property: '533564578'
   name: Layover Tours Guide
   pipeline: etap
   platform: hugo
@@ -711,6 +720,7 @@ blogs:
     - '20:40'
 
 - id: nomad-hugo
+  ga4_property: '533489259'
   name: Digital Nomad Guide
   pipeline: etap
   platform: hugo
