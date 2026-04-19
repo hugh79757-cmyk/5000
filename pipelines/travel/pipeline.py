@@ -75,22 +75,6 @@ def _fetch_for_blog(blog_id):
     return fetch_random()
 
 
-def _git_push(blog_id):
-    import subprocess
-    site_dir = "/Users/twinssn/Projects/" + blog_id
-    if not os.path.isdir(site_dir):
-        return
-    try:
-        subprocess.run(["git", "add", "-A"], cwd=site_dir, capture_output=True, timeout=30)
-        result = subprocess.run(
-            ["git", "commit", "-m", "auto: " + datetime.now().strftime("%Y-%m-%d %H:%M")],
-            cwd=site_dir, capture_output=True, text=True, timeout=30
-        )
-        if "nothing to commit" not in result.stdout:
-            subprocess.run(["git", "push", "origin", "main"], cwd=site_dir, capture_output=True, timeout=60)
-            logger.info(blog_id + " git pushed")
-    except Exception as e:
-        logger.error(blog_id + " git push failed: " + str(e))
 
 
 def _run_single(target_blog_id, blog_cfg=None):
@@ -211,7 +195,6 @@ def _run_single(target_blog_id, blog_cfg=None):
                 logger.info("course_published 등록: %s", ",".join(data["content_ids"]))
             except Exception as _ec:
                 logger.warning("course_published 등록 실패: %s", _ec)
-        _git_push(target_blog_id)
 
     logger.info(target_blog_id + " result: " + str(pub_result.get("success", False)) + " " + str(pub_result.get("url", "")))
     return pub_result
