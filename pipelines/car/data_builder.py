@@ -384,7 +384,7 @@ def build_input(conn, topic, db_path):
         "monthly_payment_36": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 36),
         "monthly_payment_60": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 60),
         "annual_km": annual_km, "fuel_price_source": "opinet", "tax_annual": tax, "tax_annual_3yr": tax * 3,
-        "insurance_estimate": insurance, "fuel_price": DEFAULT_FUEL_PRICE,
+        "insurance_estimate": insurance, "fuel_price": get_live_fuel_price(car["fuel_type"], db_path),
         "annual_fuel_cost": fuel_cost,
         **resale,
         "three_year_depreciation": dep_3yr,

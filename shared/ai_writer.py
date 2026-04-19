@@ -73,7 +73,10 @@ def generate_car(prompt_text, data):
                      "monthly_payment_60", "annual_km", "tax_annual", "insurance_estimate",
                      "annual_fuel_cost", "resale_1yr", "resale_2yr", "resale_3yr", "resale_rate_percent",
                      "three_year_depreciation", "three_year_maintenance", "three_year_total_cost",
-                     "final_price", "trim_lineup", "ev_range_km", "ev_efficiency", "battery_capacity_kwh"]
+                     "final_price", "trim_lineup", "ev_range_km", "ev_efficiency", "battery_capacity_kwh",
+                     "ev_charge_monthly_home", "ev_charge_monthly_slow", "ev_charge_monthly_fast",
+                     "ev_charge_annual_home", "ev_charge_annual_slow", "ev_charge_annual_fast",
+                     "ev_monthly_kwh", "fuel_price"]
         main_data = {k: data[k] for k in main_keys if k in data and data[k] is not None}
 
     # 경쟁 모델 데이터
