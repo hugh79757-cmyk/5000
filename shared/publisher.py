@@ -103,7 +103,12 @@ def _insert_internal_links(body_md, blog_id, slug):
         
         links_md = "\n\n## 함께 읽어보기\n\n"
         for rp in related:
-            links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
+            # 파일 존재 여부 확인 후 링크 삽입
+            _rp_path = os.path.join(site_path, "content", "posts", rp["slug"])
+            if os.path.isdir(_rp_path):
+                links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
+            else:
+                logger.warning("[InternalLink] 삭제된 포스트 링크 제외: " + rp["slug"])
         
         body_md = body_md.rstrip() + links_md
         return body_md, len(related)
