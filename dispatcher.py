@@ -271,6 +271,17 @@ def _run_pipeline(cfg):
         from pipelines.gap.pipeline import run
         return run(cfg)
 
+    elif pipeline == "tap":
+        import sys, os
+        tap_root = "/Users/twinssn/Projects/TAP"
+        sys.path.insert(0, tap_root)
+        _prev_dir = os.getcwd()
+        try:
+            os.chdir(tap_root)
+            from app import run_publish
+            return run_publish()
+        finally:
+            os.chdir(_prev_dir)
     elif pipeline == "rap":
         from pipelines.rap.pipeline import run
         return run(cfg)
