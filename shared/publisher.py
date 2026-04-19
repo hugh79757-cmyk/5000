@@ -315,7 +315,7 @@ def deploy_site(site_path, cf_project):
     return True
 
 
-def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="",
+def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", blog_cfg=None,
             category="", tags="", thumbnail_url="",
             data_source="", source_id="", prompt_id="",
             model="", wp_category=None, is_draft=False):

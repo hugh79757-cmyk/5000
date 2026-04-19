@@ -97,34 +97,61 @@ _init_db()
 
 
 
+def _extract_category(keyword):
+    """키워드 첫 토큰을 카테고리로 사용 (동적 추출, keywords.py 수정 불필요)"""
+    tokens = keyword.split()
+    return tokens[0] if tokens else keyword
+
+
 def _select_keyword(blog_id):
-    """7일 내 미사용 키워드 중 하나 선택"""
+    """키워드 선택 - 30일 TTL + 카테고리 14일 중복 억제"""
     keywords = get_keywords(blog_id)
     if not keywords:
         return None
 
-    conn = sqlite3.connect(str(DB_PATH))
-    used = conn.execute(
-        """SELECT keyword FROM publish_log
-           WHERE blog_id=? AND published_at > datetime('now', '-7 days')""",
+    import sqlite3 as _sq
+    conn = _sq.connect(str(DB_PATH))
+
+    used_rows = conn.execute(
+        "SELECT keyword FROM publish_log"
+        " WHERE blog_id=? AND published_at > datetime('now', '-30 days')",
+        (blog_id,)
+    ).fetchall()
+
+    recent_rows = conn.execute(
+        "SELECT keyword FROM publish_log"
+        " WHERE blog_id=? AND published_at > datetime('now', '-14 days')",
         (blog_id,)
     ).fetchall()
     conn.close()
 
-    used_set = {r[0] for r in used}
-    available = [k for k in keywords if k not in used_set]
+    used_set = {r[0] for r in used_rows}
+    recent_cats = {_extract_category(r[0]) for r in recent_rows}
 
-    if not available:
-        conn = sqlite3.connect(str(DB_PATH))
+    available = [k for k in keywords if k not in used_set]
+    cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
+    candidates = cat_filtered if cat_filtered else available
+
+    if not candidates:
+        conn = _sq.connect(str(DB_PATH))
         oldest = conn.execute(
-            """SELECT keyword FROM publish_log
-               WHERE blog_id=? ORDER BY published_at ASC LIMIT 1""",
+            "SELECT keyword FROM publish_log"
+            " WHERE blog_id=? ORDER BY published_at ASC LIMIT 1",
             (blog_id,)
         ).fetchone()
         conn.close()
-        return oldest[0] if oldest else keywords[0]
+        candidates = [oldest[0]] if oldest else [keywords[0]]
 
-    return available[0]
+    conn = _sq.connect(str(DB_PATH))
+    for kw in candidates:
+        cnt = conn.execute(
+            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
+        ).fetchone()[0]
+        if cnt >= 3:
+            conn.close()
+            return kw
+    conn.close()
+    return candidates[0]
 
 
 def _upload_thumbnail(image_url):
@@ -150,9 +177,13 @@ CATEGORY_FILTERS = {
         "blocked": ["도서", "책", "교재", "필기", "실기", "기능사", "자격증",
                      "스티커", "마우스패드", "장패드", "키보드", "마우스",
                      "가방", "파우치", "거치대", "받침대", "쿨링패드",
-                     "모니터", "데스크탑", "태블릿", "아이패드", "헤드셋",
-                     "웹캠", "책상", "의자", "케이블", "HDMI", "USB허브",
-                     "독", "dock", "어댑터", "충전기", "보호필름", "스킨"],
+                     "모니터", "데스크탑", "태블릿", "아이패드", "갤럭시탭",
+                     "헤드셋", "이어폰", "이어버드", "스피커",
+                     "웹캠", "캡쳐보드", "캡처보드",
+                     "책상", "의자", "케이블", "HDMI", "USB허브",
+                     "독", "dock", "어댑터", "충전기", "보호필름", "스킨",
+                     "서류가방", "노트북가방", "CrowPi", "크롤파이",
+                     "중고", "트레이딩"],
     },
     "appliance-hugo": {
         "allowed": ["청소기", "에어프라이어", "공기청정기", "제습기", "가습기",
@@ -172,9 +203,15 @@ CATEGORY_FILTERS = {
     "baby-hugo": {
         "allowed": ["카시트", "유모차", "아기띠", "바운서", "젖병", "분유",
                      "기저귀", "보행기", "범퍼침대", "아기침대", "수유",
-                     "이유식", "체온계", "멸균기", "신생아", "유아"],
-        "blocked": ["강아지", "반려견", "반려동물", "펫", "개모차",
-                     "도서", "책", "교재", "성인용"],
+                     "이유식", "체온계", "멸균기", "신생아", "유아",
+                     "아기", "베이비", "유아용", "영아"],
+        "blocked": ["강아지", "반려견", "반려동물", "펫", "개모차", "pet",
+                     "고양이", "강아지용", "도그", "dog",
+                     "도서", "책", "교재", "성인용",
+                     "장난감", "완구", "블록", "보드게임", "퍼즐",
+                     "유모차 가방", "유모차 후크", "유모차 고리", "유모차 걸이",
+                     "유모차 정리함", "유모차 양산", "유모차 액세서리",
+                     "핸들장난감", "드라이빙", "모빌"],
     },
     "fitness-hugo": {
         "allowed": ["덤벨", "아령", "바벨", "케틀벨", "런닝머신", "러닝머신",
@@ -183,8 +220,20 @@ CATEGORY_FILTERS = {
                      "헬스", "운동", "피트니스", "스텝퍼", "로잉머신",
                      "근력", "스트레칭", "밴드"],
         "blocked": ["도서", "책", "교재", "의류", "신발", "보호대",
-                     "영양제", "프로틴", "식품"],
+                     "영양제", "프로틴", "식품",
+                     "무동력", "워킹패드"],
     },
+}
+
+# 제목 검증용 blocked 키워드 (AI 생성 제목에 이게 포함되면 발행 차단)
+TITLE_BLOCKED = {
+    "laptop-hugo": ["마우스", "키보드", "헤드셋", "웹캠", "캡쳐보드", "캡처보드",
+                    "태블릿", "아이패드", "갤럭시탭", "서류가방", "장패드",
+                    "CrowPi", "크롤파이", "이어폰", "스피커"],
+    "baby-hugo":   ["강아지", "반려견", "반려동물", "펫", "개모차", "고양이"],
+    "appliance-hugo": [],
+    "interior-hugo": [],
+    "fitness-hugo": [],
 }
 
 
@@ -234,19 +283,29 @@ def _filter_irrelevant_products(blog_id, keyword, products):
 
 
 def _filter_used_products(blog_id, products):
-    """30일 내 동일 blog_id에서 발행된 상품 제외"""
+    """발행된 적 있는 상품 제외 (blog_id 기준 전체 기간)"""
     if not products:
         return products
     conn = sqlite3.connect(str(DB_PATH))
     used = conn.execute(
-        """SELECT product_id FROM published_products
-           WHERE blog_id=? AND published_at > datetime('now', '-30 days')""",
+        "SELECT product_id FROM published_products WHERE blog_id=? AND published_at > datetime('now', '-90 days')",
         (blog_id,)
     ).fetchall()
     conn.close()
-    used_ids = {r[0] for r in used}
-    filtered = [p for p in products if p["product_id"] not in used_ids]
+    used_ids = {str(r[0]) for r in used}
+
+    # 현재 상품 product_id를 str로 통일
+    current_ids = {str(p["product_id"]) for p in products}
+    overlap = current_ids & used_ids
+    overlap_ratio = len(overlap) / len(current_ids) if current_ids else 0
+
+    if overlap_ratio >= 0.8:
+        logger.info(f"[{blog_id}] 상품 겹침 {overlap_ratio:.0%} ({len(overlap)}/{len(current_ids)}) — 발행 차단")
+        return []  # insufficient_products로 처리
+
+    filtered = [p for p in products if str(p["product_id"]) not in used_ids]
     if len(filtered) < 3:
+        logger.warning(f"[{blog_id}] 미사용 상품 부족 ({len(filtered)}개), 원본 유지")
         return products[:5]
     return filtered[:5]
 
@@ -254,10 +313,10 @@ def _filter_used_products(blog_id, products):
 def _record_products(blog_id, keyword, products):
     """발행에 사용된 상품 ID 기록"""
     conn = sqlite3.connect(str(DB_PATH))
-    now = datetime.now().isoformat()
+    now = datetime.utcnow().isoformat()
     for p in products:
         conn.execute(
-            "INSERT INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
+            "INSERT OR IGNORE INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
             (blog_id, p["product_id"], keyword, now)
         )
     conn.commit()
@@ -325,7 +384,7 @@ def _record_publish(blog_id, keyword, title, slug):
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute(
         "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at) VALUES (?,?,?,?,?)",
-        (blog_id, keyword, title, slug, datetime.now().isoformat())
+        (blog_id, keyword, title, slug, datetime.utcnow().isoformat())
     )
     conn.commit()
     conn.close()
@@ -343,7 +402,13 @@ def run(cfg):
         return {"success": False, "reason": "already_running"}
 
     try:
-        return _run_inner(cfg, blog_id, daily_quota)
+        result = _run_inner(cfg, blog_id, daily_quota)
+        if not result.get("success"):
+            reason = result.get("reason", "unknown")
+            # 조용한 실패(할당량/중복)는 알림 제외, 나머지는 텔레그램 전송
+            if reason not in ("quota_met", "already_running", "similar_title"):
+                _tg_error(blog_id, reason, f"[curation] 발행 실패: {reason}")
+        return result
     finally:
         _release_lock(lock_file)
 
@@ -360,20 +425,51 @@ def _run_inner(cfg, blog_id, daily_quota):
     keyword = _select_keyword(blog_id)
     if not keyword:
         logger.error(f"[{blog_id}] 사용 가능한 키워드 없음")
-        _tg_error(blog_id, "keyword", "키워드 풀 비어있음")
         return {"success": False, "reason": "no_keyword"}
 
     # 상품 수집 (캐시 또는 API)
     collected = collect_keyword(keyword)
     if not collected:
+        from pipelines.curation.collector import _check_rate_limit
+        if not _check_rate_limit():
+            logger.warning(f"[{blog_id}] 쿠팡 API 차단 중 — 다음 실행 시 재시도")
+            return {"success": False, "reason": "rate_limited"}
         logger.error(f"[{blog_id}] 상품 수집 실패: {keyword}")
         return {"success": False, "reason": "collect_error"}
 
     products = get_products(keyword, limit=10)
     products = _filter_used_products(blog_id, products)
     if len(products) < 3:
-        logger.error(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개)")
-        return {"success": False, "reason": "insufficient_products"}
+        logger.warning(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개) — 다음 키워드 시도")
+        # 해당 키워드 캐시 삭제 후 다음 키워드로 재시도
+        try:
+            conn = sqlite3.connect(str(DB_PATH))
+            conn.execute("DELETE FROM products WHERE keyword=?", (keyword,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+        # 다음 키워드 선택 (현재 키워드 제외)
+        all_kws = get_keywords(blog_id)
+        used_conn = sqlite3.connect(str(DB_PATH))
+        used = used_conn.execute(
+            """SELECT keyword FROM publish_log
+               WHERE blog_id=? AND published_at > datetime('now', '-7 days')""",
+            (blog_id,)
+        ).fetchall()
+        used_conn.close()
+        used_set = {r[0] for r in used} | {keyword}
+        fallback_kws = [k for k in all_kws if k not in used_set]
+        if not fallback_kws:
+            return {"success": False, "reason": "insufficient_products"}
+        keyword = fallback_kws[0]
+        logger.info(f"[{blog_id}] 대체 키워드 사용: {keyword}")
+        collect_keyword(keyword)
+        products = get_products(keyword, limit=10)
+        products = _filter_used_products(blog_id, products)
+        if len(products) < 3:
+            logger.error(f"[{blog_id}] 대체 키워드도 상품 부족: {keyword} ({len(products)}개)")
+            return {"success": False, "reason": "insufficient_products"}
 
     # 카테고리 무관 상품 필터링 (코드 레벨)
     products = _filter_irrelevant_products(blog_id, keyword, products)
@@ -385,7 +481,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     products = enrich_products(products, blog_id)
 
     # AI 글 생성
-    article = generate_curation_article(keyword, products)
+    article = generate_curation_article(keyword, products, blog_id=blog_id)
     if not article:
         return {"success": False, "reason": "write_error"}
 
@@ -395,6 +491,13 @@ def _run_inner(cfg, blog_id, daily_quota):
     if description:
         body_md = f"<!-- DESC: {description} -->\n\n{body_md}"
     slug = _make_slug(keyword)
+
+    # 제목 품질 검증 — blocked 키워드가 제목에 있으면 발행 차단
+    title_blocked = TITLE_BLOCKED.get(blog_id, [])
+    for bw in title_blocked:
+        if bw.lower() in title.lower():
+            logger.warning(f"[{blog_id}] 제목에 blocked 키워드 감지: '{bw}' in '{title}'")
+            return {"success": False, "reason": "title_blocked"}
 
     # 썸네일: 첫 번째 상품 이미지를 R2에 업로드
     thumbnail_url = ""
@@ -407,7 +510,25 @@ def _run_inner(cfg, blog_id, daily_quota):
         return {"success": False, "reason": "similar_title"}
 
     # 발행
-    result = publish(blog_id, title, body_md, category="추천", tags=keyword, thumbnail_url=thumbnail_url)
+    # 태그 생성: 키워드 + 제목에서 브랜드명 추출
+    import re as _tag_re
+    tag_set = set()
+    # 키워드 자체
+    tag_set.add(keyword)
+    # 키워드 토큰 (2자 이상)
+    for tok in keyword.split():
+        if len(tok) >= 2:
+            tag_set.add(tok)
+    # 제목에서 브랜드명 추출 (영문 대문자 시작 단어 + 한글 브랜드)
+    brand_patterns = ["레노버", "삼성", "LG", "애플", "MSI", "델", "에이수스", "ASUS", "HP", "Apple",
+                       "다이슨", "샤오미", "필립스", "쿠쿠", "테팔", "일리", "네슬레",
+                       "한샘", "이케아", "퍼시스", "까사미아"]
+    for bp in brand_patterns:
+        if bp.lower() in title.lower():
+            tag_set.add(bp)
+    tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
+    
+    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")
         return {"success": False, "reason": "publish_error"}

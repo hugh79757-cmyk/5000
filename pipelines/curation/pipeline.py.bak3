@@ -207,7 +207,11 @@ CATEGORY_FILTERS = {
                      "아기", "베이비", "유아용", "영아"],
         "blocked": ["강아지", "반려견", "반려동물", "펫", "개모차", "pet",
                      "고양이", "강아지용", "도그", "dog",
-                     "도서", "책", "교재", "성인용"],
+                     "도서", "책", "교재", "성인용",
+                     "장난감", "완구", "블록", "보드게임", "퍼즐",
+                     "유모차 가방", "유모차 후크", "유모차 고리", "유모차 걸이",
+                     "유모차 정리함", "유모차 양산", "유모차 액세서리",
+                     "핸들장난감", "드라이빙", "모빌"],
     },
     "fitness-hugo": {
         "allowed": ["덤벨", "아령", "바벨", "케틀벨", "런닝머신", "러닝머신",
@@ -216,7 +220,8 @@ CATEGORY_FILTERS = {
                      "헬스", "운동", "피트니스", "스텝퍼", "로잉머신",
                      "근력", "스트레칭", "밴드"],
         "blocked": ["도서", "책", "교재", "의류", "신발", "보호대",
-                     "영양제", "프로틴", "식품"],
+                     "영양제", "프로틴", "식품",
+                     "무동력", "워킹패드"],
     },
 }
 
@@ -308,7 +313,7 @@ def _filter_used_products(blog_id, products):
 def _record_products(blog_id, keyword, products):
     """발행에 사용된 상품 ID 기록"""
     conn = sqlite3.connect(str(DB_PATH))
-    now = datetime.now().isoformat()
+    now = datetime.utcnow().isoformat()
     for p in products:
         conn.execute(
             "INSERT OR IGNORE INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
@@ -379,7 +384,7 @@ def _record_publish(blog_id, keyword, title, slug):
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute(
         "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at) VALUES (?,?,?,?,?)",
-        (blog_id, keyword, title, slug, datetime.now().isoformat())
+        (blog_id, keyword, title, slug, datetime.utcnow().isoformat())
     )
     conn.commit()
     conn.close()
@@ -505,7 +510,35 @@ def _run_inner(cfg, blog_id, daily_quota):
         return {"success": False, "reason": "similar_title"}
 
     # 발행
-    result = publish(blog_id, title, body_md, category="추천", tags=keyword, thumbnail_url=thumbnail_url)
+    # 태그 생성: 키워드 + 제목에서 브랜드명 추출
+    import re as _tag_re
+    tag_set = set()
+    # 키워드 자체
+    tag_set.add(keyword)
+    # 키워드 토큰 (2자 이상)
+    for tok in keyword.split():
+        if len(tok) >= 2:
+            tag_set.add(tok)
+    # 제목에서 브랜드명 추출 (영문 대문자 시작 단어 + 한글 브랜드)
+    brand_patterns = [
+                     "레노버", "삼성", "LG", "애플", "MSI", "델", "에이수스", "ASUS", "HP", "Apple",
+                     "아이디어패드", "씽크패드", "갤럭시북", "그램", "맥북",
+                     "다이슨", "샤오미", "필립스", "쿠쿠", "테팔", "신일", "대웅", "미라스", "제니퍼룸",
+                     "한샘", "이케아", "퍼시스", "까사미아", "삼익가구", "베드리움", "비투스", "시디즈", "일룸",
+                     "맥킹덤", "베어블리", "코코유", "순성", "다이치", "조이", "브라이텍스", "뉴나",
+                     "숀리", "이고진", "엑사이더", "코멧"]
+    for bp in brand_patterns:
+        if bp.lower() in title.lower():
+            tag_set.add(bp)
+    # 상품 데이터의 brand/maker 필드에서도 태그 추가
+    for p in products[:5]:
+        for field in ["brand", "maker"]:
+            bv = (p.get(field) or "").strip()
+            if bv and len(bv) >= 2:
+                tag_set.add(bv)
+    tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
+    
+    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")
         return {"success": False, "reason": "publish_error"}
