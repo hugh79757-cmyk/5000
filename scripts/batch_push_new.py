@@ -1,5 +1,14 @@
-import yaml, subprocess, os, glob
+import yaml, subprocess, os, glob, urllib.request
 from datetime import datetime
+
+INDEXNOW_WORKER = "https://indexnow-submit.hugh79757.workers.dev/?site="
+
+def submit_indexnow(domain):
+    try:
+        urllib.request.urlopen(INDEXNOW_WORKER + domain, timeout=10)
+        print("  [IndexNow] " + domain + " 제출완료")
+    except Exception as e:
+        print("  [IndexNow] " + domain + " 실패: " + str(e))
 
 os.chdir('/Users/twinssn/Projects/5000')
 
@@ -76,7 +85,10 @@ for blog in blogs:
     else:
         output_lines = r.stdout.strip().split(chr(10))
         print('  ' + (output_lines[-1] if output_lines else 'OK'))
-        print('  [OK]')
+        print("  [OK]")
+        domain = blog.get("domain", "")
+        if domain:
+            submit_indexnow(domain)
         SUCCESS += 1
 
     subprocess.run(['rm', '-rf', './public'], capture_output=True)
