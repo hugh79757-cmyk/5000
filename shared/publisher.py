@@ -102,9 +102,10 @@ def _insert_internal_links(body_md, blog_id, slug):
             return body_md, 0
         
         links_md = "\n\n## 함께 읽어보기\n\n"
+        _site_path = os.path.join("/Users/twinssn/Projects/CAP", blog_id)
         for rp in related:
             # 파일 존재 여부 확인 후 링크 삽입
-            _rp_path = os.path.join(site_path, "content", "posts", rp["slug"])
+            _rp_path = os.path.join(_site_path, "content", "posts", rp["slug"])
             if os.path.isdir(_rp_path):
                 links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
             else:

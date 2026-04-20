@@ -756,6 +756,9 @@ def build_persona_pick_input(conn, topic, db_path):
         "three_year_maintenance": maint_3yr,
         "three_year_total_cost": total_3yr,
         "trim_lineup": [{"name": t["trim_name"], "price": t["price"]} for t in trims],
+        "total_cost_ratio": round(total_3yr / main_trim["price"] * 100, 1) if main_trim["price"] > 0 else 0,
+        "dep_ratio": round(dep_3yr / total_3yr * 100, 1) if total_3yr > 0 else 0,
+        "maint_ratio": round(maint_3yr / total_3yr * 100, 1) if total_3yr > 0 else 0,
     }
 
     # 경쟁 모델

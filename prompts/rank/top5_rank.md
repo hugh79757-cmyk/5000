@@ -86,6 +86,7 @@
 ### H2-5: 상황별 최종 추천
 반드시 아래 3줄 형식으로 작성하라. 각 항목은 DATA.top5 안의 차량만 사용하라:
 - 잔존가치 최우선이라면: [top5 중 resale_rate_percent 가장 높은 차량] — [수치 근거 1문장]
+  (주의: 배열 순서 무시. top5 전체를 순회하여 resale_rate_percent 수치를 직접 비교하라. 1위가 아닐 수 있다.)
 - 유지비 최소화가 목표라면: [top5 중 tax_annual+insurance_estimate+annual_fuel_cost 합산 가장 낮은 차량] — [수치 근거 1문장]
 - 예산이 한정됐다면: [top5 중 base_price 가장 낮은 차량] — [이유 1문장]
 
