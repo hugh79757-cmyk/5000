@@ -149,11 +149,30 @@ def run(blog_cfg):
                     topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
                     data = build_top5_rank_input(conn, topic, CAR_DB_PATH)
 
-                elif post_type == "persona_pick":
+                 elif post_type == "persona_pick":
                     from pipelines.car.data_builder import build_persona_pick_input, PERSONA_CONFIGS
                     import random as _rnd
-                    topic["persona_type"] = _rnd.choice(list(PERSONA_CONFIGS.keys()))
+                    # 차량 가격대 조회
+                    _car_price_row = conn.execute(
+                        "SELECT MIN(price) as min_price FROM trims WHERE car_id=? AND status='시판' AND price >= 500",
+                        (topic["car_id"],)
+                    ).fetchone()
+                    _price = _car_price_row["min_price"] if _car_price_row and _car_price_row["min_price"] else 5000
+                    # 가격대별 적합 페르소나 매핑
+                    if _price <= 2500:
+                        _eligible = ["first_car", "commuter"]
+                    elif _price <= 4000:
+                        _eligible = ["first_car", "commuter", "newlywed"]
+                    elif _price <= 6000:
+                        _eligible = ["commuter", "newlywed", "family"]
+                    elif _price <= 9000:
+                        _eligible = ["family", "premium"]
+                    else:
+                        _eligible = ["premium"]
+                    topic["persona_type"] = _rnd.choice(_eligible)
+                    logger.info(f"persona_pick: {topic['car_id']} 가격 {_price}만원 → {topic['persona_type']}")
                     data = build_persona_pick_input(conn, topic, CAR_DB_PATH)
+
 
                 elif post_type == "price_trend":
                     from pipelines.car.data_builder import build_price_trend_input
