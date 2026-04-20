@@ -149,7 +149,7 @@ def run(blog_cfg):
                     topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
                     data = build_top5_rank_input(conn, topic, CAR_DB_PATH)
 
-                 elif post_type == "persona_pick":
+                elif post_type == "persona_pick":
                     from pipelines.car.data_builder import build_persona_pick_input, PERSONA_CONFIGS
                     import random as _rnd
                     # 차량 가격대 조회
@@ -229,9 +229,7 @@ def run(blog_cfg):
     body = validate_body(body, data)
 
     MIN_CHARS = 2200
-    if post_type in NEW_TYPES:
-        pass  # 신규 타입 재생성 없이 그대로
-    elif len(body) < MIN_CHARS:
+    if len(body) < MIN_CHARS:
         logger.warning(f"글자수 {len(body)}자 미달({MIN_CHARS}자) — 힌트 추가 재생성")
         length_hint = (
             "\n\n[추가 지시]\n"
