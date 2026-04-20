@@ -562,7 +562,28 @@ def build_top5_rank_input(conn, topic, db_path):
         return None
 
     # top-level에 1위 차량 데이터 복사 (title_engine/description용)
+   # build_top5_rank_input() 반환부 수정
+# /Users/twinssn/Projects/5000/pipelines/car/data_builder.py
+# return { ... } 부분을 아래로 교체
+
     top1 = top5[0]
+
+    # top5 각 차량 추가 계산 데이터 보강
+    for car_data in top5:
+        p = car_data["base_price"]
+        resale = estimate_resale(p, car_data["brand"], car_data["fuel_type"],
+                                 segment, car_data["model"])
+        car_data["resale_1yr"] = resale["resale_1yr"]
+        car_data["resale_2yr"] = resale["resale_2yr"]
+        car_data["monthly_payment_48"] = calc_monthly_payment(p, FINANCE_RATE, 48)
+        car_data["monthly_maintain"] = round(
+            (car_data["tax_annual"] + car_data["insurance_estimate"] + car_data["annual_fuel_cost"]) / 12
+        )
+        total = car_data["three_year_total_cost"]
+        car_data["total_cost_ratio"] = round(total / p * 100, 1) if p > 0 else 0
+        car_data["dep_ratio"] = round(car_data["three_year_depreciation"] / total * 100, 1) if total > 0 else 0
+        car_data["maint_ratio"] = round(car_data["three_year_maintenance"] / total * 100, 1) if total > 0 else 0
+
     return {
         "type": "top5_rank",
         "segment": segment,
@@ -573,10 +594,13 @@ def build_top5_rank_input(conn, topic, db_path):
             "monthly_cost": "월 총비용",
             "value": "가성비",
         }.get(rank_type, rank_type),
+        "annual_km": ANNUAL_KM,
+        "finance_rate": FINANCE_RATE,
         "model": top1["model"],
         "brand": top1["brand"],
         "base_price": top1["base_price"],
         "trim": top1.get("trim", ""),
+        "engine": top1.get("engine", ""),
         "fuel_type": top1.get("fuel_type", ""),
         "fuel_efficiency": top1.get("fuel_efficiency", 0),
         "displacement": top1.get("displacement", 0),
@@ -584,16 +608,23 @@ def build_top5_rank_input(conn, topic, db_path):
         "insurance_estimate": top1.get("insurance_estimate", 0),
         "annual_fuel_cost": top1.get("annual_fuel_cost", 0),
         "resale_rate_percent": top1.get("resale_rate_percent", 0),
+        "resale_1yr": top1.get("resale_1yr", 0),
+        "resale_2yr": top1.get("resale_2yr", 0),
         "resale_3yr": top1.get("resale_3yr", 0),
         "three_year_depreciation": top1.get("three_year_depreciation", 0),
         "three_year_maintenance": top1.get("three_year_maintenance", 0),
         "three_year_total_cost": top1.get("three_year_total_cost", 0),
+        "total_cost_ratio": top1.get("total_cost_ratio", 0),
+        "dep_ratio": top1.get("dep_ratio", 0),
+        "maint_ratio": top1.get("maint_ratio", 0),
+        "monthly_payment_48": top1.get("monthly_payment_48", 0),
+        "monthly_maintain": top1.get("monthly_maintain", 0),
         "monthly_total": top1.get("monthly_total", 0),
         "top5": top5,
         "total_candidates": len(ranked),
     }
 
-
+   
 PERSONA_CONFIGS = {
     "commuter": {
         "label": "출퇴근 40km 직장인",
