@@ -66,6 +66,9 @@ def _select_car_image(conn, car_id, slug):
         return "", ""
 
 
+# /Users/twinssn/Projects/5000/pipelines/car/pipeline.py
+# run() 함수 내부 전체 교체
+
 def run(blog_cfg):
     blog_id = blog_cfg["id"]
     logger.info("CAP pipeline: " + blog_id)
@@ -95,9 +98,21 @@ def run(blog_cfg):
 
     car_site_id = blog_id.replace('-hugo', '')
 
+    # ── post_type 확정 ──
+    pt_cfg = blog_cfg.get('post_type')
+    if isinstance(pt_cfg, list):
+        import random as _rnd
+        _rnd.shuffle(pt_cfg)
+        resolved_post_type = pt_cfg[0]
+    else:
+        resolved_post_type = pt_cfg
+
+    NEW_TYPES = ("top5_rank", "persona_pick", "price_trend")
+
     for attempt in range(1, MAX_RETRY + 1):
         logger.info("토픽 선택 (시도 " + str(attempt) + "/" + str(MAX_RETRY) + ")")
-        pt_cfg = blog_cfg.get('post_type')
+
+        # post_type 선택 (list인 경우 순환)
         if isinstance(pt_cfg, list):
             import random as _rnd
             _rnd.shuffle(pt_cfg)
@@ -105,31 +120,73 @@ def run(blog_cfg):
             for _pt in pt_cfg:
                 topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=_pt)
                 if topic:
+                    resolved_post_type = _pt
                     break
         else:
             topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=pt_cfg)
+            resolved_post_type = pt_cfg
+
         if not topic:
             logger.info(blog_id + " no topics available")
             conn.close()
             return {"success": False, "reason": "no_topics"}
-        if topic and topic['car_id'] in today_car_ids:
+
+        topic = dict(topic)
+
+        if topic['car_id'] in today_car_ids:
             logger.info("car_id dup skip: " + str(topic['car_id']))
             skip_ids.append(topic['id'])
-            topic = None
             continue
-        data = build_input(conn, topic, CAR_DB_PATH)
-        if data:
-            data['site_id'] = blog_id
-            break
-        skip_ids.append(topic['id'])
-        conn.execute("UPDATE topics SET status='skip_no_data' WHERE id=?", (topic['id'],))
-        conn.commit()
+
+        post_type = topic.get("post_type", resolved_post_type)
+
+        # ── 신규 타입: build_input() 우회, 전용 빌더 직접 호출 ──
+        if post_type in NEW_TYPES:
+            try:
+                if post_type == "top5_rank":
+                    from pipelines.car.data_builder import build_top5_rank_input
+                    import random as _rnd
+                    topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
+                    data = build_top5_rank_input(conn, topic, CAR_DB_PATH)
+
+                elif post_type == "persona_pick":
+                    from pipelines.car.data_builder import build_persona_pick_input, PERSONA_CONFIGS
+                    import random as _rnd
+                    topic["persona_type"] = _rnd.choice(list(PERSONA_CONFIGS.keys()))
+                    data = build_persona_pick_input(conn, topic, CAR_DB_PATH)
+
+                elif post_type == "price_trend":
+                    from pipelines.car.data_builder import build_price_trend_input
+                    data = build_price_trend_input(conn, topic["car_id"], CAR_DB_PATH)
+
+            except Exception as _e:
+                logger.warning(f"[{post_type}] 빌더 예외: {_e}")
+                data = None
+
+            if data:
+                data['site_id'] = blog_id
+                break
+            else:
+                # 신규 타입 실패 → skip_no_data 아닌 pending 유지 (재시도 가능하게)
+                logger.warning(f"{blog_id} {post_type} 데이터 없음: {topic['car_id']} — skip 처리 안함")
+                skip_ids.append(topic['id'])
+                continue
+
+        # ── 기존 타입: build_input() 사용 ──
+        else:
+            data = build_input(conn, topic, CAR_DB_PATH)
+            if data:
+                data['site_id'] = blog_id
+                break
+            skip_ids.append(topic['id'])
+            conn.execute("UPDATE topics SET status='skip_no_data' WHERE id=?", (topic['id'],))
+            conn.commit()
 
     if not data:
         conn.close()
         return {"success": False, "reason": "no_data"}
 
-    logger.info(data['model'] + " " + data['trim'] + " (" + str(data['base_price']) + "만원)")
+    logger.info(data['model'] + " " + data.get('trim', '') + " (" + str(data.get('base_price', '')) + "만원)")
 
     prompt_cfg = blog_cfg.get("prompt", "")
     if isinstance(prompt_cfg, dict):
@@ -142,42 +199,8 @@ def run(blog_cfg):
         return {"success": False, "reason": "prompt_not_found"}
 
     prompt_text = prompt_file.read_text(encoding="utf-8")
-
-    # post_type별 별도 data builder 분기
-    topic = dict(topic)
-    post_type = topic.get("post_type", "")
-
-    if post_type == "top5_rank":
-        from pipelines.car.data_builder import build_top5_rank_input
-        import random as _rnd
-        topic = dict(topic)
-        topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
-        data = build_top5_rank_input(conn, topic, CAR_DB_PATH)
-        if not data:
-            logger.warning(blog_id + " top5_rank 데이터 없음: " + topic["car_id"])
-            conn.close()
-            return {"success": False, "reason": "no_top5_data"}
-
-    elif post_type == "persona_pick":
-        from pipelines.car.data_builder import build_persona_pick_input, PERSONA_CONFIGS
-        import random as _rnd
-        topic = dict(topic)
-        topic["persona_type"] = _rnd.choice(list(PERSONA_CONFIGS.keys()))
-        data = build_persona_pick_input(conn, topic, CAR_DB_PATH)
-        if not data:
-            logger.warning(blog_id + " persona_pick 데이터 없음: " + topic["car_id"])
-            conn.close()
-            return {"success": False, "reason": "no_persona_data"}
-
-    elif post_type == "price_trend":
-        from pipelines.car.data_builder import build_price_trend_input
-        data = build_price_trend_input(conn, topic["car_id"], CAR_DB_PATH)
-        if not data:
-            logger.warning(blog_id + " price_trend 데이터 없음: " + topic["car_id"])
-            conn.close()
-            return {"success": False, "reason": "no_price_trend_data"}
-
     body = generate_car(prompt_text, data)
+
     if not body:
         logger.error(blog_id + " content generation failed")
         _tg_error(blog_id, "content_generation", "AI 본문 생성 실패")
@@ -187,9 +210,8 @@ def run(blog_cfg):
     body = validate_body(body, data)
 
     MIN_CHARS = 2200
-    if post_type in ("top5_rank", "persona_pick", "price_trend"):
-        # 새 타입은 재생성 없이 그대로 사용 (토큰 절약)
-        pass
+    if post_type in NEW_TYPES:
+        pass  # 신규 타입 재생성 없이 그대로
     elif len(body) < MIN_CHARS:
         logger.warning(f"글자수 {len(body)}자 미달({MIN_CHARS}자) — 힌트 추가 재생성")
         length_hint = (
@@ -204,8 +226,6 @@ def run(blog_cfg):
             if len(body2) >= len(body):
                 body = body2
                 logger.info(f"재생성 완료: {len(body)}자")
-            else:
-                logger.warning(f"재생성도 미달: {len(body2)}자 — 긴 쪽 유지")
 
     title = None
     for _title_attempt in range(5):
@@ -216,7 +236,6 @@ def run(blog_cfg):
         logger.warning(f"제목 중복 재시도 {_title_attempt+1}/5: {candidate[:40]}")
     if title is None:
         title = generate_title(data, site_id=car_site_id)
-        logger.warning(f"5회 모두 중복 — 마지막 제목 사용: {title[:40]}")
     title = sanitize_title(title) if title else title
     slug = make_slug(title)
     logger.info("제목: " + title)
@@ -248,8 +267,6 @@ def run(blog_cfg):
         )
     body = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + body
 
-
-    # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
     _is_draft = False
     try:
         from shared.validators import validate_post_extended as _validate
@@ -274,7 +291,7 @@ def run(blog_cfg):
         thumbnail_url=r2_url,
         data_source="car_db",
         source_id=str(topic['car_id']),
-        prompt_id=topic["post_type"] if topic else blog_cfg.get("post_type", ""),
+        prompt_id=topic.get("post_type", blog_cfg.get("post_type", "")),
         model="gpt-4o-mini",
         segment=data.get("segment", ""),
         fuel_type=data.get("fuel_type", ""),
@@ -293,3 +310,4 @@ def run(blog_cfg):
 
     logger.info(blog_id + " result: " + str(result.get("success", False)))
     return result
+
