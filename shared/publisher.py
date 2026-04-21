@@ -239,7 +239,7 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
 def _get_related_posts(blog_id, current_slug, max_count=3):
     """같은 블로그의 최근 발행 글에서 관련 글 추출"""
     try:
-        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "content.db")
+        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "stap_content.db")
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
