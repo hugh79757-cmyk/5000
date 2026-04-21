@@ -610,7 +610,7 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
                 issues.append(f"[WARNING] 주가 데이터 {age}일 경과 ({latest.strftime('%Y-%m-%d')})")
 
     # 재무지표 체크: stock/dividend 블로그만 적용
-    fin_required = any(x in data_source for x in ["stock", "dividend", "disclosure"])
+    fin_required = any(x in data_source for x in ["stock_", "dividend_", "disclosure"]) and not data_source.startswith("etf_")
     if fin_required:
         fin_keywords = ["매출", "영업이익", "순이익", "PER", "PBR", "ROE", "EPS", "배당"]
         has_fin = sum(1 for k in fin_keywords if k in body)
