@@ -47,7 +47,10 @@
 ## 글 구조 (반드시 이 순서, ##로 구분)
 
 ### 1. 도입 (3~4문장)
-H2 제목에 "도입" 금지. 내용 중심 제목 사용. 예: "## 월 45만원으로 {model} 유지할 수 있을까"
+H2 제목에 "도입" 금지. 내용 중심 제목 사용.
+예: "## {model} 월 유지비 {tax_annual + insurance_estimate + annual_fuel_cost ÷ 12}만원의 현실"
+⚠️ 월 유지비 = (tax_annual + insurance_estimate + annual_fuel_cost) ÷ 12. 할부금(monthly_payment_48)이 아닙니다.
+⚠️ 도입부 H2 제목에 사용하는 금액은 반드시 위 계산값을 사용하세요. monthly_payment 계열 필드는 4번 섹션에서만 사용.
 JSON의 모델명과 가격을 명시. 월 유지비 수치로 관심을 끌며 시작. 매번 다른 도입부 필수.
 
 ### 2. 차량 기본 정보
