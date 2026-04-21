@@ -4,12 +4,19 @@ blogs:
   pipeline: tap
   platform: blogger
   domain: travel.rotcha.kr
-  daily_quota: 3
+  daily_quota: 10
   schedule:
     times:
-    - 07:00
+    - 06:00
+    - 08:00
+    - '10:00'
+    - '12:00'
     - '14:00'
+    - '16:00'
+    - '18:00'
     - '20:00'
+    - '22:00'
+    - '11:00'
   status: active
 - cf_project: travel-hugo
   daily_quota: 5
