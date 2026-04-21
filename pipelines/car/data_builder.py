@@ -202,32 +202,35 @@ def calc_insurance(price):
     if price <= 4000: return 110
     if price <= 5000: return 130
     if price <= 7000: return 160
-    return 200
+    if price <= 10000: return 220
+    if price <= 15000: return 280
+    if price <= 20000: return 360
+    return 450  # 2억원 초과 초고가차
 
 def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
     """브랜드/연료/세그먼트/모델별 3년 잔존가치 추정 (결정론적)"""
 
-    # 브랜드별 3년 잔존가치 기본율 (%, 업계 평균 기반)
+    # 브랜드별 3년 잔존가치 기본율 (%, 실거래 시장 반영 2025 기준)
     brand_rates = {
-        "현대": 55, "기아": 53, "제네시스": 61,
-        "테슬라": 52,
-        "BMW": 48, "벤츠": 50, "아우디": 46,
-        "볼보": 47, "렉서스": 55, "토요타": 57,
+        "현대": 56, "기아": 54, "제네시스": 62,
+        "테슬라": 53,
+        "BMW": 54, "벤츠": 52, "아우디": 52,
+        "볼보": 49, "렉서스": 57, "토요타": 58,
         "쉐보레": 45, "르노코리아": 43, "KGM": 44,
-        "포르쉐": 62, "랜드로버": 45,
+        "포르쉐": 63, "랜드로버": 46,
     }
-    base_rate = brand_rates.get(brand, 48)
+    base_rate = brand_rates.get(brand, 49)
 
     # 연료 타입 보정
     ft = str(fuel_type)
     if "하이브리드" in ft and "플러그인" not in ft:
-        base_rate += 5  # HEV 인기 높음
+        base_rate += 5   # HEV 수요 지속 높음
     elif "플러그인" in ft:
         base_rate += 1
     elif "전기" in ft:
-        base_rate -= 8  # EV 감가 큼
+        base_rate -= 4   # EV 감가: 배터리 성숙·수요 증가로 완화
     elif "디젤" in ft or "경유" in ft:
-        base_rate -= 4  # 디젤 수요 감소
+        base_rate -= 4   # 디젤 수요 감소
     elif "LPG" in ft or "엘피지" in ft:
         base_rate -= 6
 
@@ -240,12 +243,12 @@ def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
     elif "대형" in seg:
         base_rate += 1
 
-    # 가격대 보정 (고가차일수록 감가 큼)
-    if base_price > 8000:
-        base_rate -= 5
+    # 가격대 보정 — 단계별 소폭 조정 (중복 누적 방지)
+    if base_price > 15000:
+        base_rate -= 3   # 초고가: 수요 풀 좁아 감가 소폭 큼
+    elif base_price > 8000:
+        base_rate -= 2
     elif base_price > 6000:
-        base_rate -= 3
-    elif base_price > 4000:
         base_rate -= 1
     elif base_price < 2000:
         base_rate += 2
@@ -256,28 +259,33 @@ def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
         "싼타페 하이브리드": 4, "쏘렌토 하이브리드": 4,
         "투싼 하이브리드": 3, "스포티지 하이브리드": 3,
         "아반떼 하이브리드": 3, "K5 하이브리드": 3,
-        "아이오닉 5": 2, "아이오닉 6": 1,
+        "아이오닉 5": 2, "아이오닉 6": 2,
         "모닝": 2, "캐스퍼": 2, "레이": 2,
         "GV80": 4, "GV70": 3, "G80": 3,
-        "모델 Y": 3,
+        "모델 Y": 4, "모델 3": 3,
+        "RS e-트론 GT": 2, "S e-트론 GT": 2,
+        "e-트론 GT": 2,
     }
     base_rate += model_premium.get(model, 0)
 
     # 범위 제한
-    base_rate = max(30, min(72, base_rate))
+    base_rate = max(32, min(72, base_rate))
 
     # 연차별 감가 커브 (결정론적: 해시 기반 미세 변동)
     seed = hash(str(brand) + str(model) + str(base_price)) % 100
     micro = (seed - 50) * 0.02  # -1.0 ~ +1.0 범위
 
-    yr1_rate = round(100 - 18 + micro, 1)  # 1년 후 약 82%
-    yr2_rate = round(yr1_rate - 10 + micro * 0.5, 1)  # 2년 후 약 72%
-    yr3_rate = round(base_rate + micro, 1)  # 3년 후 = base_rate
+    # yr1/yr2 는 base_rate 에 연동 — 고가·저잔존 모델일수록 초기 감가도 큼
+    yr1_drop = 18 + max(0, (55 - base_rate) * 0.15)   # base 낮을수록 1년차 감가 ↑
+    yr2_drop = 10 + max(0, (55 - base_rate) * 0.08)   # 2년차도 동일 방향 연동
+    yr1_rate = round(100 - yr1_drop + micro, 1)
+    yr2_rate = round(yr1_rate - yr2_drop + micro * 0.5, 1)
+    yr3_rate = round(base_rate + micro, 1)
 
     # 정합성 보장
-    yr3_rate = max(30, min(72, yr3_rate))
-    yr2_rate = max(yr3_rate + 4, min(80, yr2_rate))
-    yr1_rate = max(yr2_rate + 4, min(88, yr1_rate))
+    yr3_rate = max(32, min(72, yr3_rate))
+    yr2_rate = max(yr3_rate + 4, min(82, yr2_rate))
+    yr1_rate = max(yr2_rate + 4, min(90, yr1_rate))
 
     return {
         "resale_1yr": round(base_price * yr1_rate / 100),
