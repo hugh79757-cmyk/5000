@@ -306,6 +306,18 @@ def _run_car_refresh():
     logger.info("CAR daily_refresh completed")
 
 
+def _run_stap_collector():
+    try:
+        import sys
+        if '/Users/twinssn/Projects/STAP' not in sys.path:
+            sys.path.insert(0, '/Users/twinssn/Projects/STAP')
+        from pipelines.data_collector import collect_all
+        result = collect_all()
+        logger.info(f"[STAP collector] 완료: {result}")
+    except Exception as e:
+        logger.error(f"[STAP collector] 오류: {e}")
+
+
 def _run_festival_refresh():
     try:
         subprocess.run([sys.executable, "scripts/refresh_festival.py"],
@@ -345,6 +357,8 @@ def register_schedules():
 
     schedule.every().day.at("06:00").do(_run_festival_refresh)
     logger.info("Festival refresh scheduled at 06:00")
+    schedule.every().day.at("06:10").do(_run_stap_collector)
+    logger.info("STAP data collector scheduled at 06:10")
 
     schedule.every().day.at("06:30").do(_run_car_refresh)
     logger.info("CAR daily_refresh scheduled at 06:30")
