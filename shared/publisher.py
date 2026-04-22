@@ -11,6 +11,11 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 from shared.content_store import insert_article, update_published, get_today_count
 
+
+STAP_ENTITY_DB = "/Users/twinssn/Projects/STAP/data/stap_entities.db"
+STAP_ENTITY_LINKER_PATH = "/Users/twinssn/Projects/STAP/shared"
+
+
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
 
 
@@ -87,35 +92,22 @@ def _insert_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
 
 def _insert_internal_links(body_md, blog_id, slug):
     """
-    관련 포스트 내부 링크 삽입
-    
+    StapEntityLinker inject — stock-hugo 포함 전체 블로그 적용
     Returns:
         tuple[str, int]: (수정된 body_md, 삽입된 링크 수)
     """
-    # stock-hugo 블로그는 내부 링크 생략
-    if blog_id in ("stock-hugo",):
-        return body_md, 0
-    
+    import sys
+    if STAP_ENTITY_LINKER_PATH not in sys.path:
+        sys.path.insert(0, STAP_ENTITY_LINKER_PATH)
     try:
-        related = _get_related_posts(blog_id, slug)
-        if not related:
-            return body_md, 0
-        
-        links_md = "\n\n## 함께 읽어보기\n\n"
-        _site_path = os.path.join("/Users/twinssn/Projects/CAP", blog_id)
-        for rp in related:
-            # 파일 존재 여부 확인 후 링크 삽입
-            _rp_path = os.path.join(_site_path, "content", "posts", rp["slug"])
-            if os.path.isdir(_rp_path):
-                links_md += "- [" + rp["title"] + "](/posts/" + rp["slug"] + "/)\n"
-            else:
-                logger.warning("[InternalLink] 삭제된 포스트 링크 제외: " + rp["slug"])
-        
-        body_md = body_md.rstrip() + links_md
-        return body_md, len(related)
-        
+        from stap_entity_linker import StapEntityLinker
+        linker = StapEntityLinker(db_path=STAP_ENTITY_DB)
+        new_body = linker.inject(body_md, current_blog=blog_id, current_slug=slug)
+        injected = new_body.count("](") - body_md.count("](")
+        link_count = max(0, injected)
+        return new_body, link_count
     except Exception as e:
-        logger.error(f"[INTERNAL_LINKS_ERROR] Failed to insert links: {e}")
+        logger.warning(f"[EntityLinker] inject 실패 (blog={blog_id}): {e}")
         return body_md, 0
 
 
@@ -235,7 +227,6 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     return fm, date_str
 
 
-
 def _get_related_posts(blog_id, current_slug, max_count=3):
     """같은 블로그의 최근 발행 글에서 관련 글 추출"""
     try:
@@ -250,6 +241,185 @@ def _get_related_posts(blog_id, current_slug, max_count=3):
         return [{"title": r["title"], "slug": r["slug"]} for r in rows]
     except Exception:
         return []
+
+
+def _inject_related_cards_midpoint(body_md, blog_id, slug, title, category):
+    """
+    관련 글 카드를 마지막 ## 헤딩 바로 앞에 삽입
+    마지막 ## 헤딩이 없으면 본문 말미에 삽입
+    """
+    import re as _re
+    cards_html = _inject_related_cards("", blog_id, slug, title, category)
+    if not cards_html.strip():
+        return body_md
+    matches = list(_re.finditer(r"^##\s+[^#\n]", body_md, _re.MULTILINE))
+    if len(matches) >= 2:
+        insert_pos = matches[-1].start()
+        return body_md[:insert_pos] + cards_html.lstrip("\n") + "\n\n" + body_md[insert_pos:]
+    else:
+        return body_md.rstrip() + cards_html
+
+
+def _inject_related_cards(body_md, blog_id, slug, title, category):
+    """
+    후처리: 관련 글 카드 섹션을 본문 말미에 HTML로 삽입
+    - 같은 블로그 동일 카테고리 최근 2개 (same-blog, 자기 자신 제외)
+    - cross-blog: 제목에서 한글 고유명사(3자 이상)만 추출해 타 블로그 검색 최대 2개
+    """
+    import sqlite3 as _sq
+    import re as _re
+
+    STAP_CONTENT_DB = "/Users/twinssn/Projects/STAP/data/stap_content.db"
+    BLOG_DOMAINS = {
+        "stock-hugo":    "https://stock.informationhot.kr",
+        "dividend-hugo": "https://dividend.techpawz.com",
+        "etf-hugo":      "https://etf.techpawz.com",
+        "sector-hugo":   "https://sector.techpawz.com",
+        "ipo-hugo":      "https://ipo.techpawz.com",
+        "finance-hugo":  "https://finance.techpawz.com",
+    }
+    BLOG_LABELS = {
+        "stock-hugo":    "주식분석",
+        "dividend-hugo": "배당블로그",
+        "etf-hugo":      "ETF블로그",
+        "sector-hugo":   "업종분석",
+        "ipo-hugo":      "IPO블로그",
+        "finance-hugo":  "금융블로그",
+    }
+
+    # 동사/형용사/조사 어미 패턴 (cross-blog 키워드 오염 방지)
+    _JOSA_END = _re.compile(r"[이가을를은는에서으로과와도만도의]$")
+    _VERB_END = _re.compile(r"[한된됩습니다했하며이인한]$")
+    _NUMBER_ONLY = _re.compile(r"^\d+$")
+
+    def _extract_keywords(t):
+        stop = {
+            "분석","비교","추천","전망","가이드","입문","투자","배당","실적",
+            "영업","이익","매출","증가","감소","급등","급락","순이익","손실",
+            "원가","절감","업종","업황","리스크","판단","결론","현황","정리",
+            "방법","이유","원인","효과","전략","수익","금리","예금","적금",
+            "영향","기록","개선","감소","증가","비밀","가져온","미친","지속",
+        }
+        candidates = _re.findall(r"[가-힣]{3,10}", t)
+        result = []
+        for c in candidates:
+            if c in stop:
+                continue
+            if _JOSA_END.search(c):
+                continue
+            if _VERB_END.search(c):
+                continue
+            result.append(c)
+        return result[:4]
+
+    cards = []
+
+    try:
+        conn = _sq.connect(STAP_CONTENT_DB)
+        conn.row_factory = _sq.Row
+
+        # ① 같은 블로그 동일 카테고리 최근 2개 (slug 정확 일치로 자기 자신 제외)
+        same = conn.execute(
+            "SELECT title, slug, category FROM articles "
+            "WHERE blog_id=? AND slug!=? AND status='published' "
+            "AND category=? "
+            "ORDER BY created_at DESC LIMIT 2",
+            (blog_id, slug, category)
+        ).fetchall()
+        for r in same:
+            url = "/posts/" + r["slug"] + "/"
+            cards.append({
+                "title": r["title"], "url": url,
+                "label": BLOG_LABELS.get(blog_id, "관련글"),
+                "meta": r["category"], "cross": False,
+            })
+
+        # 동일 카테고리 2개 미만이면 최근 글로 보충
+        if len(cards) < 2:
+            existing_urls = {c["url"] for c in cards}
+            recent = conn.execute(
+                "SELECT title, slug, category FROM articles "
+                "WHERE blog_id=? AND slug!=? AND status='published' "
+                "ORDER BY created_at DESC LIMIT 10",
+                (blog_id, slug)
+            ).fetchall()
+            for r in recent:
+                if len(cards) >= 2:
+                    break
+                url = "/posts/" + r["slug"] + "/"
+                if url not in existing_urls:
+                    cards.append({
+                        "title": r["title"], "url": url,
+                        "label": BLOG_LABELS.get(blog_id, "관련글"),
+                        "meta": r["category"], "cross": False,
+                    })
+
+        # ② cross-blog: 한글 고유명사(3자 이상)만 추출
+        keywords = _extract_keywords(title)
+
+        cross_blogs = [b for b in BLOG_DOMAINS if b != blog_id]
+        cross_found = []
+        for kw in keywords:
+            if len(cross_found) >= 2:
+                break
+            for cb in cross_blogs:
+                if len(cross_found) >= 2:
+                    break
+                rows = conn.execute(
+                    "SELECT title, slug, category, blog_id FROM articles "
+                    "WHERE blog_id=? AND status='published' "
+                    "AND (title LIKE ? OR tags LIKE ?) "
+                    "ORDER BY created_at DESC LIMIT 1",
+                    (cb, f"%{kw}%", f"%{kw}%")
+                ).fetchall()
+                for r in rows:
+                    domain = BLOG_DOMAINS.get(r["blog_id"], "")
+                    if not domain:
+                        continue
+                    url = domain + "/posts/" + r["slug"] + "/"
+                    if any(c["url"] == url for c in cards + cross_found):
+                        continue
+                    cross_found.append({
+                        "title": r["title"], "url": url,
+                        "label": BLOG_LABELS.get(r["blog_id"], "관련블로그"),
+                        "meta": r["category"], "cross": True,
+                    })
+        conn.close()
+        cards.extend(cross_found)
+
+    except Exception as e:
+        logger.warning(f"[RelatedCards] DB 조회 실패: {e}")
+        return body_md
+
+    if not cards:
+        return body_md
+
+    # URL 인코딩 (한글 slug 대응)
+    from urllib.parse import quote as _quote
+    def _safe_url(url):
+        if url.startswith("http"):
+            parts = url.split("/posts/", 1)
+            if len(parts) == 2:
+                return parts[0] + "/posts/" + _quote(parts[1], safe="/-_.")
+            return url
+        return "/posts/" + _quote(url.replace("/posts/", "").strip("/"), safe="/-_.") + "/"
+
+    # HTML 카드 블록 생성
+    html = '\n\n<div class="stap-related">\n'
+    html += '<h2>📌 관련 글</h2>\n'
+    html += '<div class="stap-cards">\n'
+    for c in cards:
+        badge_cls = "stap-card-badge cross" if c["cross"] else "stap-card-badge"
+        target = 'target="_blank" rel="noopener"' if c["cross"] else ""
+        safe_url = _safe_url(c["url"])
+        html += f'<a class="stap-card" href="{safe_url}" {target}>\n'
+        html += f'  <span class="{badge_cls}">{c["label"]}</span>\n'
+        html += f'  <div class="stap-card-title">{c["title"]}</div>\n'
+        html += f'  <div class="stap-card-meta">{c["meta"]}</div>\n'
+        html += '</a>\n'
+    html += '</div>\n</div>\n'
+
+    return body_md.rstrip() + html
 
 
 def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
@@ -400,9 +570,23 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
             body_md, coupang_status = _insert_coupang(body_md, segment, fuel_type, blog_cfg)
         
         body_md, link_count = _insert_internal_links(body_md, blog_id, slug)
-        
+
+        body_md = _inject_related_cards_midpoint(body_md, blog_id, slug, title, category)
+
         result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=is_draft)
-        
+
+        # 엔티티 register
+        if result.get("success"):
+            try:
+                import sys as _sys
+                if STAP_ENTITY_LINKER_PATH not in _sys.path:
+                    _sys.path.insert(0, STAP_ENTITY_LINKER_PATH)
+                from stap_entity_linker import StapEntityLinker as _SEL
+                _SEL(db_path=STAP_ENTITY_DB).register(blog_id, title, slug, tags=tags, category=category)
+                logger.info(f"[EntityLinker] registered: {blog_id}/{slug}")
+            except Exception as _e:
+                logger.warning(f"[EntityLinker] register 실패: {_e}")
+
         # 로그 추가
         logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang={coupang_status} | internal_links={link_count} | chars={len(body_md)}')
 
