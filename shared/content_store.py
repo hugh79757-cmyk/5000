@@ -42,6 +42,15 @@ def init_db():
     conn.execute("CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status)")
     conn.execute("CREATE INDEX IF NOT EXISTS idx_articles_source ON articles(data_source, source_id)")
     conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_published_url ON articles(published_url)")
+    conn.execute("""CREATE TABLE IF NOT EXISTS used_images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image_url TEXT NOT NULL,
+        article_id INTEGER,
+        blog_id TEXT,
+        created_at TEXT DEFAULT (datetime('now')),
+        UNIQUE(image_url, blog_id)
+    )""")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_used_images_blog ON used_images(blog_id)")
     conn.commit()
     conn.close()
 
