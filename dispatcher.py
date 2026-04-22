@@ -296,16 +296,44 @@ def _run_pipeline(cfg):
         return run(cfg)
 
     elif pipeline == "tap":
-        import sys, os
+        import subprocess, json, tempfile, os
         tap_root = "/Users/twinssn/Projects/TAP"
-        sys.path.insert(0, tap_root)
-        _prev_dir = os.getcwd()
+        tap_python = os.path.join(tap_root, "venv", "bin", "python3")
+        if not os.path.exists(tap_python):
+            tap_python = sys.executable
+        runner_code = (
+            "import sys, os; sys.path.insert(0, " + repr(tap_root) + "); "
+            "os.chdir(" + repr(tap_root) + "); "
+            "from dotenv import load_dotenv; "
+            "load_dotenv(os.path.join(" + repr(tap_root) + ", '.env'), override=True); "
+            "from app import run_publish; "
+            "result = run_publish(); "
+            "import json; print(json.dumps(result if isinstance(result, dict) else {'success': bool(result)}))"
+        )
+        runner_path = os.path.join(tempfile.gettempdir(), "tap_runner.py")
+        with open(runner_path, "w") as _f:
+            _f.write(runner_code)
         try:
-            os.chdir(tap_root)
-            from app import run_publish
-            return run_publish()
-        finally:
-            os.chdir(_prev_dir)
+            proc = subprocess.run(
+                [tap_python, runner_path],
+                capture_output=True, text=True, timeout=600, cwd=tap_root
+            )
+            if proc.returncode != 0:
+                logger.error(f"TAP subprocess failed: {proc.stderr[-300:]}")
+                return {"success": False, "reason": "tap_subprocess_error"}
+            out = proc.stdout.strip().split("\n")[-1]
+            if out:
+                try:
+                    return json.loads(out)
+                except Exception:
+                    pass
+            return {"success": True}
+        except subprocess.TimeoutExpired:
+            logger.error("TAP timeout (600s)")
+            return {"success": False, "reason": "tap_timeout"}
+        except Exception as e:
+            logger.error(f"TAP error: {e}")
+            return {"success": False, "reason": "tap_error"}
     elif pipeline == "rap":
         from pipelines.rap.pipeline import run
         return run(cfg)
