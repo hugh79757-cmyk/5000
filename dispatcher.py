@@ -131,15 +131,37 @@ def _record_ledger(blog_id):
                 source_id = site_key
             conn_src.close()
         else:
-            # 5000 content.db에서 조회
-            conn_src = sqlite3.connect(str(LEDGER_DB))
-            row = conn_src.execute(
-                "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
-                (blog_id,)
-            ).fetchone()
-            if row:
-                title, url, source_id = row[0], row[1], row[2] or ""
-            conn_src.close()
+            # ETAP 블로그는 Hugo content/posts 최신 파일에서 title 직접 조회
+            import glob as _glob, os as _os
+            etap_site = next(
+                (b.get("site_path","") for b in _load_all_blogs()
+                 if b.get("id") == blog_id and b.get("pipeline") == "etap"),
+                None
+            )
+            if etap_site:
+                files = sorted(
+                    _glob.glob(f"{etap_site}/content/posts/*/index.md"),
+                    key=_os.path.getmtime, reverse=True
+                )
+                if files:
+                    import re as _re
+                    _content = open(files[0], encoding="utf-8").read()
+                    _m = _re.search(r'''^\s*title:\s*["\']?(.+?)["\']?\s*$''', _content, _re.MULTILINE)
+                    title = _m.group(1).strip() if _m else ""
+                    slug = files[0].split("/")[-2]
+                    domain = blog_id.replace("-hugo", "")
+                    url = f"https://{domain}.techpawz.com/{slug}/"
+                    source_id = slug
+            else:
+                # 5000 content.db에서 조회 (non-ETAP)
+                conn_src = sqlite3.connect(str(LEDGER_DB))
+                row = conn_src.execute(
+                    "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
+                    (blog_id,)
+                ).fetchone()
+                if row:
+                    title, url, source_id = row[0], row[1], row[2] or ""
+                conn_src.close()
 
         conn = sqlite3.connect(str(LEDGER_DB))
         conn.execute(
@@ -244,6 +266,8 @@ def _run_pipeline(cfg):
             from pipelines.etap.layover_pipeline import run
         elif blog_id == "nomad-hugo":
             from pipelines.etap.nomad_pipeline import run
+        elif blog_id == "airlines-hugo":
+            from pipelines.etap.airlines_pipeline import run
         else:
             from pipelines.etap.pipeline import run
         # run(cfg) 또는 run() 호환

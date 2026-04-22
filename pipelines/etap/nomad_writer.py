@@ -430,8 +430,12 @@ CONTEXT DATA (USE THIS - these are verified facts, not suggestions):
 
 DATA USAGE RULES:
 {data_rules}
-- For any section WITHOUT data provided, write general practical advice but clearly shorter (2-3 sentences max).
+- For any section WITHOUT data provided, write general practical advice (2-3 sentences max).
 - NEVER fabricate specific business names, prices, or statistics not in the data.
+- CRITICAL: If [COST OF LIVING] data is NOT provided, do NOT write any percentage comparisons
+  like "50% cheaper than X" or "40% lower than Y". These numbers are hallucinated.
+  Instead write qualitative statements: "generally affordable", "lower than Western Europe".
+- CRITICAL: If [COWORKING SPACES] data is NOT provided, do NOT invent coworking space names.
 
 FORMAT RULES:
 - Write MINIMUM 1,500 words, target 1,800-2,200 words in English. Articles under 1,500 words are rejected
