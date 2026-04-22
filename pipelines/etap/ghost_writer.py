@@ -32,93 +32,182 @@ def fetch_tours(city, country=None):
                discount_percent as discount, image_url, deep_link, city, country
         FROM viator_tours
         WHERE (city = ? OR city IN (SELECT alias FROM city_aliases WHERE canonical_name = ?))
-          AND category IN ('Ghost Tours', 'Underground Tours', 'Archaeology Tours', 'Historical Tours', 'Cultural Tours', 'Walking Tours', 'Architecture Tours', 'Movie Tours')
+          AND category IN (
+              'Ghost Tours','Underground Tours','Archaeology Tours',
+              'Historical Tours','Cultural Tours','Walking Tours',
+              'Architecture Tours','Movie Tours'
+          )
           AND deep_link IS NOT NULL AND deep_link != ''
         ORDER BY CAST(price AS REAL) ASC
     """, (city, city)).fetchall()
     conn.close()
     return [dict(r) for r in rows]
 
-def _build_summary(tours, city):
-    total = len(tours)
-    if total == 0:
-        return None
-    categories = {}
-    discounted = []
-    for t in tours:
-        cat = t.get("category") or "Other"
-        categories[cat] = categories.get(cat, 0) + 1
+def _categorize_tours(tours):
+    """투어를 카테고리별로 분류. ghost/underground/historical 로 구분."""
+    ghost     = [t for t in tours if t.get("category") in ("Ghost Tours",)]
+    underground = [t for t in tours if t.get("category") in ("Underground Tours",)]
+    historical  = [t for t in tours if t.get("category") in (
+        "Historical Tours","Archaeology Tours","Cultural Tours",
+        "Walking Tours","Architecture Tours","Movie Tours"
+    )]
+    return ghost, underground, historical
+
+def _build_tour_block(tours, max_items=5):
+    """GPT에 전달할 투어 목록 텍스트 블록 생성."""
+    lines = []
+    for t in tours[:max_items]:
+        name = re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
+        price = int(round(_safe_price(t.get("price", 0))))
         disc = t.get("discount") or ""
-        if disc and str(disc) not in ("0", "", "0.0"):
-            discounted.append(t)
-    budget = [t for t in tours if 0 < _safe_price(t.get("price")) < 30]
-    mid = [t for t in tours if 30 <= _safe_price(t.get("price")) <= 100]
+        disc_str = f" | -{disc}% off" if disc and str(disc) not in ("0","","0.0") else ""
+        lines.append(f"- {name} | ${price}{disc_str} | {t.get('category','')}")
+    return "\n".join(lines)
+
+def _build_summary(tours, city):
+    if not tours:
+        return None, None
+    ghost, underground, historical = _categorize_tours(tours)
+    discounted = [t for t in tours if t.get("discount") and
+                  str(t["discount"]) not in ("0","","0.0")]
+    budget  = [t for t in tours if 0 < _safe_price(t.get("price")) < 30]
+    mid     = [t for t in tours if 30 <= _safe_price(t.get("price")) <= 100]
     premium = [t for t in tours if _safe_price(t.get("price")) > 100]
-    picks = {"budget": budget[:5], "mid": mid[:5], "premium": premium[:5],
-              "deals": sorted(discounted, key=lambda x: x.get("discount","0"), reverse=True)[:5]}
-    top_cats = sorted(categories.items(), key=lambda x: -x[1])[:8]
-    summary = f"City: {city}\nTotal tours: {total}\nDiscounted: {len(discounted)}\n"
-    summary += "Categories: " + ", ".join(f"{c} ({n})" for c,n in top_cats) + "\n"
-    for label, items in picks.items():
-        if items:
-            summary += f"[{label.upper()} PICKS]\n"
-            for t in items:
-                nm = re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
-                summary += f"- {nm} | ${t['price']} {t['currency']} | {t['category']}\n"
-            summary += "\n"
-    return summary, picks
+
+    # 테이블에 들어갈 투어: mid price 최대 5개 우선, 없으면 budget
+    table_tours = (mid[:5] if len(mid) >= 2 else budget[:5]) or tours[:5]
+
+    summary  = f"City: {city}\n"
+    summary += f"Total tours available: {len(tours)}\n"
+    summary += f"Ghost tours: {len(ghost)}, Underground tours: {len(underground)}, Historical tours: {len(historical)}\n\n"
+
+    summary += "[TABLE TOURS — these EXACT tours go in the product table AND body text]\n"
+    summary += _build_tour_block(table_tours, 5)
+    summary += "\n\n"
+
+    if budget:
+        summary += "[BUDGET PICKS under $30]\n"
+        summary += _build_tour_block(budget, 3)
+        summary += "\n\n"
+    if premium:
+        summary += "[PREMIUM PICKS over $100]\n"
+        summary += _build_tour_block(premium, 2)
+        summary += "\n\n"
+    if discounted:
+        deals = sorted(discounted, key=lambda x: float(str(x.get("discount","0")) or 0), reverse=True)
+        summary += "[DEALS — biggest discounts]\n"
+        summary += _build_tour_block(deals, 3)
+        summary += "\n"
+
+    return summary, table_tours
 
 def generate_ghost_guide(topic):
-    city = topic["city"]
+    city    = topic["city"]
     country = topic.get("country", "")
-    tours = fetch_tours(city, country)
+    tours   = fetch_tours(city, country)
     tours, _pre_issues, _excluded = preprocess_tours(tours, city=city)
     if not tours:
-        logger.warning(f"No tours for {city}")
+        logger.warning(f"[ghost_writer] No tours for {city}")
         return None
-    result = _build_summary(tours, city)
-    if not result:
+
+    summary, table_tours = _build_summary(tours, city)
+    if not summary:
         return None
-    summary, picks = result
-    h2s = """  ## The Dark History of {city}
-  ## Best Ghost Tours in {city}
-  ## Underground and Catacombs Tours
-  ## Prices and What to Expect
-  ## Tips for Ghost Tours in {city}"""
+
+    ghost, underground, historical = _categorize_tours(tours)
+
+    # 섹션 가용성 판단 — 데이터 없으면 섹션 제거
+    has_underground = len(underground) >= 2
+    has_ghost_tours = len(ghost) >= 2 or len(historical) >= 2
+
+    # GPT에게 전달할 섹션 목록 (데이터 기반으로 조건부 생성)
+    sections = ["## The Dark History of {city}"]
+    if has_ghost_tours:
+        sections.append("## Best Ghost Tours in {city}")
+    if has_underground:
+        sections.append("## Underground and Catacombs Tours")
+    sections.append("## Prices and What to Expect")
+    sections.append("## Tips for Ghost Tours in {city}")
+    h2s = "\n".join(f"  {s}" for s in sections)
+
+    # 테이블 투어 목록을 명시적으로 전달
+    table_tour_names = [
+        re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
+        for t in table_tours
+    ]
+    table_list_str = "\n".join(f"  {i+1}. {n}" for i, n in enumerate(table_tour_names))
+
     prompt = f"""Write a ghost tours and dark history guide for {city}, {country}.
 
-DATA (use ONLY this data, do NOT invent tours or prices):
+=== TOUR DATA (ONLY use these tours — do NOT invent any) ===
 {summary}
 
-RULES:
-- Write 1,200-1,800 words in English
-- Do NOT include any booking links or URLs in the text
-- Do NOT invent tour names, prices, or categories not in the data
-- Title must include "{city}" and relate to ghost tours and dark history
-- Required H2 sections:
-{h2s}
-- For each tour mentioned, include exact name and price from the data
-- Remove "Save XX%!" prefixes from tour names
-- If a section has fewer than 2 tours in the data, OMIT that H2 section entirely
-- Write as a paranormal investigator and dark history tour guide
-- Write in flowing paragraphs, NEVER use numbered lists
-- Add ONE natural CTA near the end of the article
-- End with best value pick and best splurge pick by name and price
+=== TABLE TOURS (CRITICAL) ===
+The pipeline will insert a product table with EXACTLY these tours:
+{table_list_str}
 
-Return ONLY the article in markdown starting with # title"""
+Your article body MUST reference these same tours by their EXACT names.
+Do NOT mention tours in the body that are not in the TABLE TOURS list above.
+Do NOT describe tours that are in budget/premium/deals sections unless they are also in TABLE TOURS.
+
+=== SECTIONS TO WRITE ===
+{h2s}
+
+SECTION RULES:
+- "The Dark History of {{city}}": Open with ONE specific historical event, date, or documented tragedy.
+  Write 2-3 paragraphs of actual history. No ghost stories here — only documented history.
+- "Best Ghost Tours in {{city}}": Describe each TABLE TOUR by name and price.
+  Explain what makes each tour distinct in 2-3 sentences. Do NOT repeat the same description.
+{"- 'Underground and Catacombs Tours': Only write this section because underground tour data exists." if has_underground else ""}
+- "Prices and What to Expect": Give a PRICE RANGE summary (cheapest to most expensive from TABLE TOURS).
+  Do NOT list tour names again — that was already done in 'Best Ghost Tours'.
+  Instead explain: how long tours run, what to wear, best time of day, booking tips.
+- "Tips for Ghost Tours in {{city}}": 4-5 practical tips specific to THIS city's geography/climate/culture.
+  Avoid generic tips like "bring a flashlight" unless relevant to this specific location.
+
+WRITING RULES:
+- 1,000-1,400 words total
+- Write as a paranormal investigator who has personally visited {city}
+- Open the article with a specific date, event, or documented haunting at a named location
+- Never write "long history" — use specific time periods (e.g., "since the 16th century")
+- Never repeat a tour name more than once across the entire article
+- One CTA near the end, naturally placed
+- End with: best value pick (name + price) and best splurge pick (name + price)
+- BANNED: vibrant, bustling, hidden gem, treasure trove, must-visit, immerse yourself,
+  embark, crystal-clear, world-class, bucket list, plethora, tapestry, myriad,
+  long history, rich history, standout experience, a practical guide
+
+Return ONLY markdown starting with # title"""
+
     resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
+        model="gpt-4o-mini",
+        temperature=0.45,
+        max_tokens=3500,
         messages=[
-            {"role": "system", "content": "You are a paranormal investigator and dark history tour guide. STRICT RULES: 1) Never use: vibrant, bustling, hidden gem, treasure trove, must-visit, immerse yourself, embark, crystal-clear, world-class, bucket list, plethora, tapestry, myriad. 2) Format prices as whole numbers. 3) Never invent data. 4) Every section must include one practical tip. 5) Open with a specific concrete scene or fact."},
+            {"role": "system", "content": (
+                "You are a paranormal investigator and historian who leads ghost tours. "
+                "ABSOLUTE RULES: "
+                "1) Only reference tours explicitly listed in TABLE TOURS. "
+                "2) Never invent prices, names, or historical events. "
+                "3) 'Prices and What to Expect' must NOT re-list tour names already in 'Best Ghost Tours'. "
+                "4) Every section must open differently — no two sections start with the same word. "
+                "5) Never use placeholder text like {city} or [city] in the output."
+            )},
             {"role": "user", "content": prompt}
         ]
     )
     content = resp.choices[0].message.content.strip()
     title_match = re.match(r"^#\s+(.+)", content)
-    title = title_match.group(1).strip() if title_match else topic.get("title", f"Ghost Tours And Dark History in {city}")
+    title = title_match.group(1).strip() if title_match else f"Ghost Tours and Dark History in {city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
-    slug = topic.get("slug", re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-") + "-ghost-tours")
+
+    slug = topic.get("slug",
+        re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-") + "-ghost-tours")
     tags = [city, country, "Ghost Tours"] if country else [city, "Ghost Tours"]
-    return {"title": title, "slug": slug, "content": content,
-             "description": f"Best ghost tours and dark history in {city}: prices, top picks, and practical tips.",
-             "tags": [t for t in tags if t], "city": city, "country": country, "tours": tours}
+    return {
+        "title": title, "slug": slug, "content": content,
+        "description": f"Ghost tours and dark history in {city}: top picks, prices, and what to expect.",
+        "tags": [t for t in tags if t],
+        "city": city, "country": country, "tours": tours,
+        "table_tours": table_tours,
+    }

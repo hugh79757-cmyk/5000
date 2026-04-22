@@ -272,6 +272,17 @@ def batch_deploy():
         logger.error("Batch deploy failed: " + str(e))
 
 
+def _run_quality_scan():
+    """발행 후 품질 스캔 + 텔레그램 리포트 (매일 23:00)"""
+    try:
+        from pipelines.etap.quality_scanner import run_scan
+        result = run_scan()
+        logger.info(f"[QualityScan] 완료: {result}")
+    except Exception as e:
+        logger.error(f"[QualityScan] 실패: {e}")
+        _tg_error("QualityScan 오류", str(e))
+
+
 def daily_report():
     logger.info("Daily report")
     try:
@@ -375,6 +386,7 @@ def register_schedules():
     schedule.every().hour.at(":50").do(_run_cuap_collector)
     logger.info("CUAP auto_collector scheduled every hour at :50")
 
+    schedule.every().day.at("23:00").do(_run_quality_scan)
     schedule.every().day.at("23:50").do(daily_report)
     job_count += 1
 
