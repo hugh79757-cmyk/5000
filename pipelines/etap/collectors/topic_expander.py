@@ -15,8 +15,8 @@ MIN_TOURS = 1        # 도시당 최소 투어 수
 # 블로그별 Viator 카테고리 매핑
 BLOG_CATEGORIES = {
     "adventure": {
-        "cats": ('Adventure Tours', 'Outdoor Activities', 'Zipline', 'Bungee Jumping',
-                 'Climbing', 'Canyoning', 'Abseiling'),
+        "cats": ('Extreme Sports', 'Hiking Tours', 'Mountain Bike Tours',
+                 'Rafting', 'White Water Rafting', 'Ziplining', 'Climbing'),
         "label": "Adventure Tours"
     },
     "airlines": {
