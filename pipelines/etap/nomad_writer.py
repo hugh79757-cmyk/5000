@@ -81,8 +81,11 @@ def _maps_button(name, address="", hours="", website="", city="", country=""):
     url = _maps_url(name, address, city, country)
     lines = []
     lines.append(
+        f'<div style="text-align:center;margin:14px 0;">' 
+    )
+    lines.append(
         f'<div style="border:1px solid #e0e0e0;border-radius:8px;padding:12px 14px;'
-        f'margin:10px 0;background:#f9f9f9;display:block;max-width:480px;">' 
+        f'background:#f9f9f9;display:inline-block;min-width:260px;max-width:480px;text-align:left;">' 
     )
     lines.append(
         f'<div style="font-weight:600;font-size:14px;margin-bottom:4px;">📍 {name}</div>'
@@ -108,7 +111,7 @@ def _maps_button(name, address="", hours="", website="", city="", country=""):
             f'color:#fff;text-decoration:none;border-radius:4px;font-size:12px;font-weight:500;">'
             f'🌐 Website</a>'
         )
-    lines.append('</div>')
+    lines.append('</div></div>')
     return "\n" + "".join(lines)
 
 
