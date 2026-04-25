@@ -158,9 +158,9 @@ def _search_with_fallback(query, per_page=15, city="", country=""):
     return _search_unsplash(query, per_page, city, country)
 
 
-def _upload_to_r2(r2_key, image_url):
+def _upload_to_r2(r2_key, image_url, force=False):
     from shared.r2_uploader import file_exists, upload_bytes
-    if file_exists(r2_key):
+    if not force and file_exists(r2_key):
         return "%s/%s" % (R2_BASE, r2_key)
     img_data = requests.get(image_url, timeout=15).content
     upload_bytes(img_data, r2_key, content_type="image/jpeg")
@@ -178,7 +178,7 @@ def _trigger_unsplash_download(photo):
             pass
 
 
-def fetch_city_image(city, country, slug):
+def fetch_city_image(city, country, slug, force=False):
     """커버 이미지 검색. 도시+국가명 관련성 필터 적용."""
     # 여러 쿼리 패턴 시도 (구체적 → 일반적)
     queries = [
@@ -192,11 +192,11 @@ def fetch_city_image(city, country, slug):
         if not results:
             continue
         for photo in results:
-            if _is_image_used(photo["url"]):
+            if not force and _is_image_used(photo["url"]):
                 continue
             r2_key = "etap/%s/cover.jpg" % slug
             try:
-                r2_url = _upload_to_r2(r2_key, photo["url"])
+                r2_url = _upload_to_r2(r2_key, photo["url"], force=force)
                 _trigger_unsplash_download(photo)
                 _mark_image_used(photo["url"], photo["photographer"], photo["source"], slug, "cover")
                 logger.info("[ETAP] cover: %s (%s)", r2_url, photo["photographer"])
@@ -214,7 +214,7 @@ def fetch_city_image(city, country, slug):
             continue
         r2_key = "etap/%s/cover.jpg" % slug
         try:
-            r2_url = _upload_to_r2(r2_key, photo["url"])
+            r2_url = _upload_to_r2(r2_key, photo["url"], force=force)
             _trigger_unsplash_download(photo)
             _mark_image_used(photo["url"], photo["photographer"], photo["source"], slug, "cover")
             return {"url": r2_url, "credit": photo["credit"]}
@@ -225,7 +225,7 @@ def fetch_city_image(city, country, slug):
     return None
 
 
-def fetch_body_images(city, country, slug, count=3):
+def fetch_body_images(city, country, slug, count=3, force=False):
     """본문 이미지. 관련성 필터 적용, 다양한 쿼리."""
     queries = [
         "%s %s skyline cityscape" % (city, country) if country else "%s skyline" % city,
@@ -243,11 +243,11 @@ def fetch_body_images(city, country, slug, count=3):
         for photo in results:
             if len(collected) >= count:
                 break
-            if _is_image_used(photo["url"]):
+            if not force and _is_image_used(photo["url"]):
                 continue
             r2_key = "etap/%s/body_%d.jpg" % (slug, len(collected) + 1)
             try:
-                r2_url = _upload_to_r2(r2_key, photo["url"])
+                r2_url = _upload_to_r2(r2_key, photo["url"], force=force)
                 _trigger_unsplash_download(photo)
                 _mark_image_used(photo["url"], photo["photographer"], photo["source"], slug, "body")
                 collected.append({"url": r2_url, "credit": photo["credit"]})
