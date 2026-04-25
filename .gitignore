@@ -22,3 +22,12 @@ data/*.db
 data/*.db.bak*
 data/*.deprecated
 static/images/posts/.wrangler/
+
+# DB backups & temp files
+data/backups/
+data/*.db-shm
+data/*.db-wal
+data/*.db-journal
+data/*.empty_*
+data/*.m4_before_*
+**/*.bak_*
