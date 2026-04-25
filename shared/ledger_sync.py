@@ -34,6 +34,24 @@ SOURCES = [
         "sql":     "SELECT blog_id, title, '', published_at FROM publish_log",
         "mapping": ("blog_id", "title", "slug", "published_at"),
     },
+    {
+        "name":    "cap",
+        "db":      DATA / "car.db",
+        "sql":     "SELECT site || '-hugo', title, slug, published_at, url FROM publish_log",
+        "mapping": ("blog_id", "title", "slug", "published_at", "url"),
+    },
+    {
+        "name":    "stap",
+        "db":      Path("/Users/twinssn/Projects/STAP/data/stap_content.db"),
+        "sql":     "SELECT blog_id, title, slug, created_at, published_url FROM articles WHERE status='published'",
+        "mapping": ("blog_id", "title", "slug", "published_at", "url"),
+    },
+    {
+        "name":    "tap",
+        "db":      Path("/Users/twinssn/Projects/TAP/tap.db"),
+        "sql":     "SELECT 'tap-hugo', post_title, '', published_at, post_url FROM publish_logs",
+        "mapping": ("blog_id", "title", "slug", "published_at", "url"),
+    },
 ]
 
 def _ensure_schema(conn):
@@ -119,7 +137,7 @@ def report(days=1):
         conn = sqlite3.connect(str(LEDGER_DB))
         _ensure_schema(conn)
         rows = conn.execute("""
-            SELECT blog_id, source, COUNT(*) as cnt
+            SELECT blog_id, COALESCE(source, 'unknown') as source, COUNT(*) as cnt
             FROM publish_ledger
             WHERE DATE(created_at) >= DATE('now', ? || ' days')
             GROUP BY blog_id, source
