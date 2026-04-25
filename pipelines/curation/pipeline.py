@@ -444,7 +444,7 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     products = get_products(keyword, limit=10)
     products = _filter_used_products(blog_id, products)
-    if len(products) < 3:
+    if len(products) < 5:
         logger.warning(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개) — 다음 키워드 시도")
         # 해당 키워드 캐시 삭제 후 다음 키워드로 재시도
         try:
@@ -472,13 +472,13 @@ def _run_inner(cfg, blog_id, daily_quota):
         collect_keyword(keyword)
         products = get_products(keyword, limit=10)
         products = _filter_used_products(blog_id, products)
-        if len(products) < 3:
+        if len(products) < 5:
             logger.error(f"[{blog_id}] 대체 키워드도 상품 부족: {keyword} ({len(products)}개)")
             return {"success": False, "reason": "insufficient_products"}
 
     # 카테고리 무관 상품 필터링 (코드 레벨)
     products = _filter_irrelevant_products(blog_id, keyword, products)
-    if len(products) < 3:
+    if len(products) < 5:
         logger.error(f"[{blog_id}] 필터 후 상품 부족: {keyword} ({len(products)}개)")
         return {"success": False, "reason": "irrelevant_products"}
 
