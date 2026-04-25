@@ -60,6 +60,7 @@ blogs:
   name: IPO·공모주 분석
   pipeline: stock
   platform: hugo
+  domain: ipo.techpawz.com
   repo: ipo-hugo
   schedule:
     times:
