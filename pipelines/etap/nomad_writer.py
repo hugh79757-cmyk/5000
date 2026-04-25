@@ -70,26 +70,71 @@ def _safe_price(val):
     except:
         return 0
 
-def _maps_url(name, address=""):
-    """Build a Google Maps search URL from name + address."""
-    query = f"{name} {address}".strip()
+def _maps_url(name, address="", city="", country=""):
+    """Build a Google Maps search URL from name + address + city + country."""
+    parts = [name, address, city, country]
+    query = " ".join(p for p in parts if p).strip()
     return f"https://www.google.com/maps/search/?api=1&query={quote_plus(query)}"
 
-def _maps_button(name, address=""):
-    """Render an inline HTML button linking to Google Maps."""
-    url = _maps_url(name, address)
-    return (f'<a href="{url}" target="_blank" rel="noopener" '
-            f'style="display:inline-block;padding:4px 10px;margin:2px 0;'
-            f'background:#4285F4;color:#fff;text-decoration:none;'
-            f'border-radius:4px;font-size:13px;font-weight:500;">'
-            f'📍 View on Google Maps</a>')
+def _maps_button(name, address="", hours="", website="", city="", country=""):
+    """Render a coworking space info card with Google Maps link."""
+    url = _maps_url(name, address, city, country)
+    lines = []
+    lines.append(
+        f'<div style="border:1px solid #e0e0e0;border-radius:8px;padding:12px 14px;'
+        f'margin:10px 0;background:#f9f9f9;display:block;max-width:480px;">' 
+    )
+    lines.append(
+        f'<div style="font-weight:600;font-size:14px;margin-bottom:4px;">📍 {name}</div>'
+    )
+    if address:
+        lines.append(
+            f'<div style="font-size:12px;color:#555;margin-bottom:2px;">🏠 {address}</div>'
+        )
+    if hours:
+        lines.append(
+            f'<div style="font-size:12px;color:#555;margin-bottom:6px;">🕐 {hours}</div>'
+        )
+    lines.append(
+        f'<a href="{url}" target="_blank" rel="noopener" '
+        f'style="display:inline-block;padding:4px 10px;background:#4285F4;'
+        f'color:#fff;text-decoration:none;border-radius:4px;font-size:12px;font-weight:500;">'
+        f'View on Google Maps →</a>'
+    )
+    if website and website.startswith("http"):
+        lines.append(
+            f' <a href="{website}" target="_blank" rel="noopener" '
+            f'style="display:inline-block;padding:4px 10px;background:#34A853;'
+            f'color:#fff;text-decoration:none;border-radius:4px;font-size:12px;font-weight:500;">'
+            f'🌐 Website</a>'
+        )
+    lines.append('</div>')
+    return "\n" + "".join(lines)
 
-def _inject_map_buttons(content, coworking):
-    """Find coworking space names in article body and append a Maps button
-    at the END of the sentence that first mentions each space."""
+
+def _clean_gpt_map_tags(content):
+    """GPT가 직접 생성한 broken/hallucinated Google Maps HTML 태그를 제거한다.
+    패턴: <a href=" target=... > ... 📍 ... </a>  (href URL 누락)
+    정상 태그는 href="https://..." 형태이므로 건드리지 않는다.
+    """
+    # broken: href=" 다음이 공백이거나 " 없이 바로 속성이 오는 경우
+    broken = re.compile(
+        r'<a\s+href="\s*(?!https?://)[^"]*"[^>]*>\s*[^<]*📍\s*View on Google Maps\s*[^<]*</a>',
+        re.IGNORECASE | re.DOTALL
+    )
+    cleaned, n = broken.subn('', content)
+    if n:
+        logger.warning(f"[nomad_writer] Removed {n} broken GPT-generated map tag(s)")
+    return cleaned
+
+def _inject_map_buttons(content, coworking, city="", country=""):
+    """Find coworking space names in article body and inject a Maps card.
+    Supports fuzzy/partial matching: if DB name contains article word or vice versa.
+    """
     if not coworking:
         return content
-    # Build lookup: name -> data (prefer the version with an address)
+
+    # Build lookup: canonical name -> data
     lookup = {}
     for c in coworking:
         name = (c.get("name") or "").strip()
@@ -98,32 +143,53 @@ def _inject_map_buttons(content, coworking):
         if name not in lookup or (c.get("address") and not lookup[name].get("address")):
             lookup[name] = c
 
-    # Sort names by length DESC so longer names match first (prevents partial match)
+    # Sort names by length DESC so longer names match first
     sorted_names = sorted(lookup.keys(), key=len, reverse=True)
-    # Track which names already got a button (to avoid duplicates across passes)
-    used = set()
+    used = set()  # canonical names already injected
 
+    def _find_match(name):
+        """Try exact match first, then partial match."""
+        # 1) Exact (case-insensitive)
+        m = re.search(re.escape(name), content, re.IGNORECASE)
+        if m:
+            return m, name
+        # 2) Partial: any word in DB name (>=4 chars) found in content
+        words = [w for w in re.split(r'[\s/,.-]+', name) if len(w) >= 4]
+        for word in sorted(words, key=len, reverse=True):
+            m = re.search(re.escape(word), content, re.IGNORECASE)
+            if m:
+                return m, name
+        return None, None
+
+    result = content
     for name in sorted_names:
         if name in used:
             continue
         info = lookup[name]
-        escaped = re.escape(name)
-        # Find first mention of this name
-        match = re.search(escaped, content, re.IGNORECASE)
+        match, matched_name = _find_match(name)
         if not match:
             continue
-        # Find the end of the sentence containing this match
-        # Sentence end = next .!? followed by space/newline/end-of-string
+        # Find end of the paragraph (double newline) or sentence
         start = match.end()
-        sentence_end_match = re.search(r'[.!?](?=\s|$)', content[start:])
-        if sentence_end_match:
-            insert_pos = start + sentence_end_match.end()
+        # Prefer paragraph end for cleaner card placement
+        para_end = re.search(r'\n\n', result[start:])
+        if para_end:
+            insert_pos = start + para_end.start()
         else:
-            insert_pos = len(content)
-        button = _maps_button(name, info.get("address", ""))
-        content = content[:insert_pos] + f" {button}" + content[insert_pos:]
+            sentence_end = re.search(r'[.!?](?=\s|$)', result[start:])
+            insert_pos = start + sentence_end.end() if sentence_end else len(result)
+        card = _maps_button(
+            name,
+            info.get("address", ""),
+            info.get("opening_hours", ""),
+            info.get("website", ""),
+            city=city,
+            country=country,
+        )
+        result = result[:insert_pos] + card + result[insert_pos:]
         used.add(name)
-    return content
+        logger.debug(f"[nomad_writer] Injected map card: {name} (matched via '{matched_name}')")
+    return result
 
 
 def _clean_hours(hours):
@@ -473,7 +539,8 @@ Return ONLY the article in markdown starting with # title"""
     title = title_match.group(1).strip() if title_match else f"Digital Nomad Guide to {city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
     # Inject Google Maps buttons next to coworking space mentions
-    content = _inject_map_buttons(content, data.get("coworking", []))
+    content = _clean_gpt_map_tags(content)  # GPT hallucinated map tags 제거
+    content = _inject_map_buttons(content, data.get("coworking", []), city=city, country=country)
     # Post-hoc quality validation (logs warnings, does not regenerate)
     _validate_content(content, data, city)
     slug = topic.get("slug", re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-") + "-digital-nomad-guide")
