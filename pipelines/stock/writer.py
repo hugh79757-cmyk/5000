@@ -159,8 +159,9 @@ BODY:
             "model": OPENAI_MODEL,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.7,
+            "max_tokens": 4000,
         },
-        timeout=60,
+        timeout=120,
     )
     resp.raise_for_status()
     content = resp.json()["choices"][0]["message"]["content"]
