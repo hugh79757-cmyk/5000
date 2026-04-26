@@ -6,7 +6,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
 
 def generate_disclosure_article(disclosure, company_info=None, financials=None, financials_prev=None, dividend=None):
@@ -23,25 +23,77 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
         context_parts.append(f"CEO: {company_info.get('ceo_nm', '')}")
         context_parts.append(f"업종: {company_info.get('induty_nm', company_info.get('induty_code', ''))}")
         context_parts.append(f"종목코드: {company_info.get('stock_code', '')}")
+    def _to_uk(val_str):
+        """원 단위 문자열 → 억 원 변환"""
+        try:
+            v = int(str(val_str).replace(",", ""))
+            uk = v / 1e8
+            return f"약 {uk:.1f}억 원"
+        except (ValueError, TypeError):
+            return str(val_str)
+
+    def _yoy(t_str, f_str):
+        """YoY 증감률 계산"""
+        try:
+            t = int(str(t_str).replace(",", ""))
+            f = int(str(f_str).replace(",", ""))
+            if f != 0:
+                return f" (YoY {(t-f)/abs(f)*100:+.1f}%)"
+        except (ValueError, TypeError):
+            pass
+        return ""
+
     if financials:
-        key_items = [f for f in financials if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
-        for f in key_items[:5]:
-            thstrm = f.get('thstrm_amount', '')
-            frmtrm = f.get('frmtrm_amount', '')
-            yoy = ""
+        _KEY_ORDER = ["수익(매출액)", "매출액", "영업수익", "매출원가", "매출총이익",
+                      "영업이익", "영업이익(손실)", "당기순이익", "당기순이익(손실)"]
+        # 중복 제거: account_nm 기준 첫 번째만 사용
+        _seen = {}
+        for f in financials:
+            nm = f.get("account_nm", "")
+            if nm in _KEY_ORDER and nm not in _seen:
+                _seen[nm] = f
+        # 순서대로 정렬
+        key_items = [_seen[k] for k in _KEY_ORDER if k in _seen]
+        revenue_t = revenue_f = op_t = op_f = None
+        for f in key_items:
+            nm = f.get("account_nm", "")
+            t_str = f.get("thstrm_amount", "")
+            f_str = f.get("frmtrm_amount", "")
+            yoy = _yoy(t_str, f_str)
+            context_parts.append(
+                f"[당기 {f.get('bsns_year', '')}] {nm}: {_to_uk(t_str)} | 전기: {_to_uk(f_str)}{yoy}"
+            )
             try:
-                t_val = int(thstrm.replace(",", ""))
-                f_val = int(frmtrm.replace(",", ""))
-                if f_val != 0:
-                    rate = (t_val - f_val) / abs(f_val) * 100
-                    yoy = f" (YoY {rate:+.1f}%)"
-            except (ValueError, TypeError, AttributeError):
+                if nm in ("수익(매출액)", "매출액", "영업수익"):
+                    revenue_t = int(str(t_str).replace(",", ""))
+                    revenue_f = int(str(f_str).replace(",", ""))
+                if nm in ("영업이익", "영업이익(손실)"):
+                    op_t = int(str(t_str).replace(",", ""))
+                    op_f = int(str(f_str).replace(",", ""))
+            except (ValueError, TypeError):
                 pass
-            context_parts.append(f"[당기 {f.get('bsns_year', '')}] {f.get('account_nm')}: {thstrm}원 | 전기: {frmtrm}원{yoy}")
+        # 영업이익률 미리 계산해서 주입
+        if revenue_t and op_t is not None and revenue_t != 0:
+            margin_t = op_t / revenue_t * 100
+            context_parts.append(f"[계산값] 당기 영업이익률: {margin_t:.1f}%")
+        if revenue_f and op_f is not None and revenue_f != 0:
+            margin_f = op_f / revenue_f * 100
+            context_parts.append(f"[계산값] 전기 영업이익률: {margin_f:.1f}%")
+
     if financials_prev:
-        key_prev = [f for f in financials_prev if any(k in f.get("account_nm", "") for k in ("수익(매출액)", "매출액", "영업이익", "당기순이익", "매출원가", "매출총이익"))][:5]
-        for f in key_prev[:3]:
-            context_parts.append(f"[전전기 {f.get('bsns_year', '')}] {f.get('account_nm')}: {f.get('thstrm_amount', '')}원 (전기: {f.get('frmtrm_amount', '')}원)")
+        _KEY_PREV = ["수익(매출액)", "매출액", "영업수익", "영업이익", "영업이익(손실)",
+                     "당기순이익", "당기순이익(손실)"]
+        _seen_prev = {}
+        for f in financials_prev:
+            nm = f.get("account_nm", "")
+            if nm in _KEY_PREV and nm not in _seen_prev:
+                _seen_prev[nm] = f
+        for k in _KEY_PREV:
+            if k in _seen_prev:
+                f = _seen_prev[k]
+                context_parts.append(
+                    f"[전전기 {f.get('bsns_year', '')}] {k}: {_to_uk(f.get('thstrm_amount',''))} (전기: {_to_uk(f.get('frmtrm_amount',''))})"
+                )
     if dividend and isinstance(dividend, dict):
         for item in dividend.get("list", [])[:3]:
             context_parts.append(f"배당: {item.get('se_nm', '')} {item.get('thstrm', '')}원")

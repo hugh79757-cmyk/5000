@@ -102,7 +102,7 @@ def _insert_internal_links(body_md, blog_id, slug):
     try:
         from stap_entity_linker import StapEntityLinker
         linker = StapEntityLinker(db_path=STAP_ENTITY_DB)
-        new_body = linker.inject(body_md, current_blog=blog_id, current_slug=slug)
+        new_body = linker.inject(body_md, current_blog=blog_id)
         injected = new_body.count("](") - body_md.count("](")
         link_count = max(0, injected)
         return new_body, link_count
@@ -319,14 +319,33 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         conn.row_factory = _sq.Row
 
         # ① 같은 블로그 동일 카테고리 최근 2개 (slug 정확 일치로 자기 자신 제외)
+        import os as _os
+        BLOG_SITE_PATHS = {
+            "stock-hugo":    "/Users/twinssn/Projects/STAP/stock-hugo",
+            "dividend-hugo": "/Users/twinssn/Projects/STAP/dividend-hugo",
+            "etf-hugo":      "/Users/twinssn/Projects/STAP/etf-hugo",
+            "sector-hugo":   "/Users/twinssn/Projects/STAP/sector-hugo",
+            "ipo-hugo":      "/Users/twinssn/Projects/STAP/ipo-hugo",
+            "finance-hugo":  "/Users/twinssn/Projects/STAP/finance-hugo",
+        }
+        def _file_exists(bid, sl):
+            site = BLOG_SITE_PATHS.get(bid, "")
+            if not site:
+                return True
+            return _os.path.exists(_os.path.join(site, "content", "posts", sl, "index.md"))
+
         same = conn.execute(
             "SELECT title, slug, category FROM articles "
             "WHERE blog_id=? AND slug!=? AND status='published' "
             "AND category=? "
-            "ORDER BY created_at DESC LIMIT 2",
+            "ORDER BY created_at DESC LIMIT 10",
             (blog_id, slug, category)
         ).fetchall()
         for r in same:
+            if len(cards) >= 2:
+                break
+            if not _file_exists(blog_id, r["slug"]):
+                continue
             url = "/posts/" + r["slug"] + "/"
             cards.append({
                 "title": r["title"], "url": url,
@@ -340,12 +359,14 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
             recent = conn.execute(
                 "SELECT title, slug, category FROM articles "
                 "WHERE blog_id=? AND slug!=? AND status='published' "
-                "ORDER BY created_at DESC LIMIT 10",
+                "ORDER BY created_at DESC LIMIT 20",
                 (blog_id, slug)
             ).fetchall()
             for r in recent:
                 if len(cards) >= 2:
                     break
+                if not _file_exists(blog_id, r["slug"]):
+                    continue
                 url = "/posts/" + r["slug"] + "/"
                 if url not in existing_urls:
                     cards.append({
@@ -582,7 +603,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
                 if STAP_ENTITY_LINKER_PATH not in _sys.path:
                     _sys.path.insert(0, STAP_ENTITY_LINKER_PATH)
                 from stap_entity_linker import StapEntityLinker as _SEL
-                _SEL(db_path=STAP_ENTITY_DB).register(blog_id, title, slug, tags=tags, category=category)
+                _SEL(db_path=STAP_ENTITY_DB).register(blog_id, title, slug, tags=tags)
                 logger.info(f"[EntityLinker] registered: {blog_id}/{slug}")
             except Exception as _e:
                 logger.warning(f"[EntityLinker] register 실패: {_e}")
