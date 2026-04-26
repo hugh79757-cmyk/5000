@@ -134,7 +134,7 @@ def _record_ledger(blog_id):
             # ETAP 블로그는 Hugo content/posts 최신 파일에서 title 직접 조회
             import glob as _glob, os as _os
             etap_site = next(
-                (b.get("site_path","") for b in _load_all_blogs()
+                (b.get("site_path","") for b in _load_all_blogs().get("blogs", [])
                  if b.get("id") == blog_id and b.get("pipeline") == "etap"),
                 None
             )
