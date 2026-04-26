@@ -61,6 +61,7 @@ blogs:
   pipeline: stock
   platform: hugo
   domain: ipo.techpawz.com
+  status: inactive
   repo: ipo-hugo
   schedule:
     times:
@@ -70,7 +71,7 @@ blogs:
     - '16:30'
     - '20:30'
   site_path: /Users/twinssn/Projects/STAP/ipo-hugo
-  status: active
+  status: inactive
   theme: blowfish
 - cf_project: sector-hugo
   daily_quota: 5
