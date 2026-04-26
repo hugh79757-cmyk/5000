@@ -31,3 +31,5 @@ data/*.db-journal
 data/*.empty_*
 data/*.m4_before_*
 **/*.bak_*
+themes/
+resources/
