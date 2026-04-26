@@ -10,3 +10,6 @@ apscheduler>=3.10.4
 python-dotenv>=1.0.1
 python-frontmatter>=1.1.0
 requests>=2.32.0
+
+Pillow
+boto3
