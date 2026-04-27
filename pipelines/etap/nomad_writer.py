@@ -94,18 +94,32 @@ def _maps_button(name, address="", hours="", website="", city="", country=""):
 
 
 def _clean_gpt_map_tags(content):
-    """GPT가 직접 생성한 broken/hallucinated Google Maps HTML 태그를 제거한다.
-    패턴: <a href=" target=... > ... 📍 ... </a>  (href URL 누락)
-    정상 태그는 href="https://..." 형태이므로 건드리지 않는다.
+    """GPT/이전 실행이 생성한 Google Maps 링크를 모두 제거한다.
+    _inject_map_buttons()가 새로 정확한 링크를 삽입하므로 기존 것은 전부 제거.
+    제거 대상:
+      1) 마크다운: [📍 View on Google Maps](...) 및 후속 · [🌐 Website](...) _meta_
+      2) HTML broken: <a href=" target=...>📍 View on Google Maps</a>
     """
-    # broken: href=" 다음이 공백이거나 " 없이 바로 속성이 오는 경우
+    # 1) 마크다운 맵 링크 + 선택적 website 링크 + 선택적 이탤릭 메타 제거
+    md_map = re.compile(
+        r'\s*\[📍 View on Google Maps\]\([^\)]*\)'   # 맵 링크
+        r'(?:\s*·\s*\[🌐 Website\]\([^\)]*\))?'    # website 링크 (선택)
+        r'(?:\s*_[^_]*_)?'                                # 이탤릭 메타 (선택)
+        , re.IGNORECASE
+    )
+    cleaned, n1 = md_map.subn('', content)
+    if n1:
+        logger.info(f"[nomad_writer] Removed {n1} existing markdown map link(s)")
+
+    # 2) HTML broken 태그 제거
     broken = re.compile(
         r'<a\s+href="\s*(?!https?://)[^"]*"[^>]*>\s*[^<]*📍\s*View on Google Maps\s*[^<]*</a>',
         re.IGNORECASE | re.DOTALL
     )
-    cleaned, n = broken.subn('', content)
-    if n:
-        logger.warning(f"[nomad_writer] Removed {n} broken GPT-generated map tag(s)")
+    cleaned, n2 = broken.subn('', cleaned)
+    if n2:
+        logger.warning(f"[nomad_writer] Removed {n2} broken HTML map tag(s)")
+
     return cleaned
 
 def _inject_map_buttons(content, coworking, city="", country=""):
