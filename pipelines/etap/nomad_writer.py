@@ -77,42 +77,20 @@ def _maps_url(name, address="", city="", country=""):
     return f"https://www.google.com/maps/search/?api=1&query={quote_plus(query)}"
 
 def _maps_button(name, address="", hours="", website="", city="", country=""):
-    """Render a coworking space info card with Google Maps link."""
+    """Render a Google Maps markdown link for a coworking space."""
     url = _maps_url(name, address, city, country)
-    lines = []
-    lines.append(
-        f'<div style="text-align:center;margin:14px 0;">' 
-    )
-    lines.append(
-        f'<div style="border:1px solid #e0e0e0;border-radius:8px;padding:12px 14px;'
-        f'background:#f9f9f9;display:inline-block;min-width:260px;max-width:480px;text-align:left;">' 
-    )
-    lines.append(
-        f'<div style="font-weight:600;font-size:14px;margin-bottom:4px;">📍 {name}</div>'
-    )
+    parts = []
     if address:
-        lines.append(
-            f'<div style="font-size:12px;color:#555;margin-bottom:2px;">🏠 {address}</div>'
-        )
+        parts.append(address)
     if hours:
-        lines.append(
-            f'<div style="font-size:12px;color:#555;margin-bottom:6px;">🕐 {hours}</div>'
-        )
-    lines.append(
-        f'<a href="{url}" target="_blank" rel="noopener" '
-        f'style="display:inline-block;padding:4px 10px;background:#4285F4;'
-        f'color:#fff;text-decoration:none;border-radius:4px;font-size:12px;font-weight:500;">'
-        f'View on Google Maps →</a>'
-    )
+        parts.append(hours)
+    meta = " · ".join(parts)
+    link = f"[📍 View on Google Maps]({url})"
     if website and website.startswith("http"):
-        lines.append(
-            f' <a href="{website}" target="_blank" rel="noopener" '
-            f'style="display:inline-block;padding:4px 10px;background:#34A853;'
-            f'color:#fff;text-decoration:none;border-radius:4px;font-size:12px;font-weight:500;">'
-            f'🌐 Website</a>'
-        )
-    lines.append('</div></div>')
-    return "\n" + "".join(lines)
+        link += f" · [🌐 Website]({website})"
+    if meta:
+        return f" {link} _{meta}_"
+    return f" {link}"
 
 
 def _clean_gpt_map_tags(content):
