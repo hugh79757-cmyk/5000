@@ -366,89 +366,84 @@ def _check_gap(title: str, body: str, ctx: dict) -> list:
     return issues
 
 
+def _load_car_names_from_db() -> list:
+    """car.db에서 brand + model을 동적으로 읽어 차량명 리스트 반환.
+    DB 접근 실패 시 하드코딩 fallback 리스트 사용."""
+    import sqlite3 as _sq
+    import os as _os
+    _DB_PATH = _os.path.join(
+        _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+        "data", "car.db"
+    )
+    _FALLBACK = [
+        "현대", "기아", "제네시스", "쉐보레", "르노", "쌍용", "KG",
+        "BMW", "벤츠", "아우디", "폭스바겐", "볼보", "렉서스", "토요타", "혼다", "테슬라", "포르쉐",
+        "그랜저", "쏘나타", "아반떼", "투싼", "싼타페", "팰리세이드", "캐스퍼", "코나", "아이오닉",
+        "K3", "K5", "K8", "K9", "셀토스", "스포티지", "쏘렌토", "카니발", "EV6", "EV9", "레이",
+        "GV60", "GV70", "GV80", "G70", "G80", "G90", "필랑트",
+        "그랑 콜레오스", "콜레오스", "QM6", "XM3", "SM6", "아르카나", "캡처",
+        "말리부", "트랙스", "트레일블레이저", "이쿼녹스",
+        "렉스턴", "토레스", "티볼리", "코란도", "액티언",
+        "모델 Y", "모델 3", "모델 S", "모델 X", "사이버트럭",
+        "골프", "티구안", "ID.4", "ID.7",
+        "캠리", "라브4", "프리우스", "시빅", "어코드",
+        "카이엔", "마칸", "파나메라", "타이칸", "911", "718",
+        "XC40", "XC60", "XC90", "EX30", "EX90",
+        "BYD", "폴스타", "링컨", "레인지로버", "디펜더", "재규어",
+    ]
+    try:
+        if not _os.path.exists(_DB_PATH):
+            return _FALLBACK
+        conn = _sq.connect(_DB_PATH)
+        rows = conn.execute(
+            "SELECT DISTINCT brand, model FROM cars WHERE brand IS NOT NULL AND model IS NOT NULL"
+        ).fetchall()
+        conn.close()
+        names = set(_FALLBACK)  # fallback을 기본으로 포함
+        for brand, model in rows:
+            if brand:
+                names.add(brand.strip())
+            if model:
+                # 모델명 공백 정규화 후 추가
+                names.add(model.strip())
+                # 복합 모델명(예: "그랑 콜레오스")은 첫 단어도 추가
+                parts = model.strip().split()
+                if len(parts) >= 2:
+                    names.add(parts[0])
+        return list(names)
+    except Exception:
+        return _FALLBACK
+
+
 def _check_car(title: str, body: str, ctx: dict) -> list:
-    """CAR 전용 검증: 차량 데이터 정확성, 제목 품질."""
+    """CAR 전용 검증: 차량 데이터 정확성, 제목 품질.
+    차량명은 car.db에서 동적 로딩 (신규 모델 자동 반영).
+    DB 접근 불가 시 fallback 하드코딩 리스트 사용.
+    """
     issues = []
-    
-    # 제목에 차량명 포함 여부 확인
     import re
-    _car_brands = ["현대", "기아", "제네시스", "쉐보레", "르노", "쌍용", "KG",
-                   "BMW", "벤츠", "아우디", "폭스바겐", "볼보", "렉서스", "토요타", "혼다", "테슬라", "포르쉐",
-                   "그랜저", "쏘나타", "아반떼", "투싼", "싼타페", "팰리세이드", "캐스퍼", "코나", "아이오닉",
-                   "K3", "K5", "K8", "K9", "셀토스", "스포티지", "쏘렌토", "카니발", "EV6", "EV9", "레이",
-                   "GV60", "GV70", "GV80", "G70", "G80", "G90",
-                   "모델 Y", "모델 3", "Model", "X5", "X3", "3시리즈", "5시리즈", "7시리즈",
-                   "E클래스", "C클래스", "S클래스", "GLC", "GLE", "A6", "A4", "Q5", "Q7", "Q8",
-                   "말리부", "트랙스", "트레일블레이저", "이쿼녹스",
-                   "렉스턴", "토레스", "티볼리", "코란도",
-                   "QM6", "XM3", "SM6", "마스터", "콜레오스", "그랑 콜레오스", "아르카나", "캡처",
-                   "1시리즈", "S8", "8시리즈", "RSQ8", "e-트론",
-                    # 현대 추가
-                    "스타리아", "넥쏘", "베뉴", "아이오닉 5", "아이오닉 6", "아이오닉 9", "아이오닉 3",
-                    # 기아 추가
-                    "EV3", "EV5", "니로", "스팅어", "모하비", "타스만", "봉고",
-                    # 제네시스 추가
-                    "GV90", "네오룬",
-                    # BMW 추가
-                    "i4", "i5", "i7", "iX", "iX1", "iX3", "XM", "2시리즈", "4시리즈", "6시리즈",
-                    "X1", "X2", "X4", "X6", "X7", "M2", "M3", "M4", "M5", "M8",
-                    # 벤츠 추가
-                    "A클래스", "B클래스", "CLA", "CLE", "EQA", "EQB", "EQE", "EQS",
-                    "GLA", "GLB", "GLS", "AMG",
-                    # 아우디 추가
-                    "A3", "A5", "A7", "A8", "Q2", "Q3", "Q4", "e-트론 GT",
-                    # 볼보
-                    "XC40", "XC60", "XC90", "C40", "S60", "S90", "EX30", "EX90",
-                    # 테슬라 추가
-                    "모델 S", "모델 X", "사이버트럭",
-                    # 폭스바겐
-                    "골프", "티구안", "투아렉", "아테온", "ID.4", "ID.7",
-                    # 토요타/렉서스
-                    "캠리", "라브4", "프리우스", "bZ4X", "GR86", "GR수프라", "수프라", "코롤라", "하이랜더",
-                    "ES", "RX", "NX", "UX", "IS", "LS", "LC", "ES300h", "RX350", "NX350h",
-                    # 혼다
-                    "시빅", "어코드", "CR-V",
-                    # 포르쉐
-                    "카이엔", "마칸", "파나메라", "타이칸", "911", "718",
-                    # BYD
-                    "BYD", "씰", "돌핀", "아토3",
-                    # KG모빌리티
-                    "액티언",
-                    # 기타
-                    "모닝", "올 뉴 모닝", "피칸토",
-                    "포터", "마이티", "엑센트",
-                    "스파크", "볼트", "콜로라도", "타호",
-                    "클리오",
-                    "폴스타",
-                    "Z4", "Z3", "Z8", "iX2", "iX4", "iX5", "iX6",
-                    # 렉서스 LM/LS/LX 등 알파벳 단독 모델명
-                    "LM", "LX", "LC", "LS", "IS", "ES", "NX", "RX", "UX", "GX",
-                    # 기타 단독 알파벳 모델명
-                    "CT", "RC", "GS",
-                    "SL", "SLC", "마이바흐",
-                    "EV4", "EV9",
-                    "링컨", "레인지로버", "디펜더", "디스커버리", "재규어",
-                    "알페온", "크루즈", "아베오"]
-    title_has_car = any(brand in title for brand in _car_brands)
+
+    _car_names = _load_car_names_from_db()
+    title_has_car = any(name in title for name in _car_names)
     if not title_has_car:
         issues.append(f"[CRITICAL] 제목에 차량명 없음: \"{title[:50]}\"")
-    
+
     # 가격 데이터 존재 확인
     price_pattern = re.compile(r"\d{1,2},?\d{3}만원|\d+억")
     if not price_pattern.search(body):
         issues.append("[WARNING] 차량 가격 정보 없음")
-    
+
     # 연식/모델 정보 확인
     year_pattern = re.compile(r"202[4-9]|203[0-9]")
     if not year_pattern.search(body):
         issues.append("[WARNING] 최신 연식 정보 없음 (2024~)")
-    
+
     # 연비/배기량 등 핵심 스펙 확인
     spec_keywords = ["연비", "배기량", "마력", "토크", "cc", "km/L", "kWh"]
     has_spec = any(k in body for k in spec_keywords)
     if not has_spec:
         issues.append("[WARNING] 차량 핵심 스펙 정보 없음 (연비/배기량/마력)")
-    
+
     return issues
 
 
@@ -554,7 +549,7 @@ def _check_stap(title: str, body: str, ctx: dict) -> list:
 
     zero_patterns = [
         (r"\b0억\s*원?", "0억 원"),
-        (r"\b0%", "0%"),
+        (r"공모가\s*0%|영업이익률\s*0%|순이익률\s*0%", "0%"),
         (r"희석률\s*0%", "희석률 0%"),
         (r"공모가\s*0원", "공모가 0원"),
         (r"\b0만\s*주", "0만 주"),

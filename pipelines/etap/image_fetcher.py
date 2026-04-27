@@ -27,9 +27,21 @@ def _init_used_images_table():
     db.close()
 
 
-def _is_image_used(image_url):
+def _is_image_used(image_url, slug=None):
+    """같은 URL이라도 다른 slug(포스트)에서는 재사용 허용.
+    단, 같은 slug 내에서는 중복 방지."""
     db = _get_db()
-    row = db.execute("SELECT 1 FROM used_images WHERE image_url = ?", (image_url,)).fetchone()
+    if slug:
+        # 동일 slug 내 중복만 차단
+        row = db.execute(
+            "SELECT 1 FROM used_images WHERE image_url = ? AND slug = ?",
+            (image_url, slug)
+        ).fetchone()
+    else:
+        # slug 없으면 전체 중복 체크 (기존 동작 유지)
+        row = db.execute(
+            "SELECT 1 FROM used_images WHERE image_url = ?", (image_url,)
+        ).fetchone()
     db.close()
     return row is not None
 
@@ -192,7 +204,7 @@ def fetch_city_image(city, country, slug, force=False):
         if not results:
             continue
         for photo in results:
-            if not force and _is_image_used(photo["url"]):
+            if not force and _is_image_used(photo["url"], slug):
                 continue
             r2_key = "etap/%s/cover.jpg" % slug
             try:
@@ -210,7 +222,7 @@ def fetch_city_image(city, country, slug, force=False):
     fallback_query = "%s travel" % city
     results = _search_with_fallback(fallback_query, per_page=5, city="", country="")
     for photo in results:
-        if _is_image_used(photo["url"]):
+        if _is_image_used(photo["url"], slug):
             continue
         r2_key = "etap/%s/cover.jpg" % slug
         try:
@@ -243,7 +255,7 @@ def fetch_body_images(city, country, slug, count=3, force=False):
         for photo in results:
             if len(collected) >= count:
                 break
-            if not force and _is_image_used(photo["url"]):
+            if not force and _is_image_used(photo["url"], slug):
                 continue
             r2_key = "etap/%s/body_%d.jpg" % (slug, len(collected) + 1)
             try:

@@ -131,8 +131,9 @@ def run():
         send_alert(BLOG_ID, article["slug"], post_issues)
         article["_draft"] = True
     origin = article.get("origin", "")
-    cover = fetch_city_image(origin + " airport", "", article["slug"]) if origin else None
-    body = fetch_body_images(origin, "", article["slug"], count=8) if origin else []
+    # country 자리에 origin 도시명을 넣어 관련성 필터 통과율 향상
+    cover = fetch_city_image(origin + " airport travel", origin, article["slug"]) if origin else None
+    body = fetch_body_images(origin + " city travel", origin, article["slug"], count=8) if origin else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if origin:

@@ -352,6 +352,56 @@ def _run_pipeline(cfg):
         return {"success": False, "reason": "unknown_pipeline"}
 
 
+
+# ─── ETAP 중앙 빌드/배포 ───────────────────────────────────
+ETAP_BASE = Path("/Users/twinssn/Projects/ETAP")
+HUGO      = "/opt/homebrew/bin/hugo"
+WRANGLER  = "/opt/homebrew/bin/wrangler"
+
+ETAP_PIPELINE_BLOGS = {
+    "adventure-hugo", "airlines-hugo", "airports-hugo", "bus-hugo",
+    "citytours-hugo", "cruise-hugo", "culture-hugo", "daytrips-hugo",
+    "deals-hugo", "dining-hugo", "escape-hugo", "esim-hugo",
+    "eurail-hugo", "extreme-hugo", "ferry-hugo", "flight-hugo",
+    "foodtour-hugo", "ghost-hugo", "hiking-hugo", "layover-hugo",
+    "luxury-hugo", "michelin-hugo", "multiday-hugo", "nature-hugo",
+    "nightlife-hugo", "nomad-hugo", "phototour-hugo", "tours-hugo",
+    "trains-hugo", "transfers-hugo", "visa-hugo", "visafree-hugo",
+    "walking-hugo", "watersports-hugo", "watertours-hugo",
+}
+
+def _build_and_deploy_central(blog_id: str) -> bool:
+    """dispatcher 중앙 빌드+배포 — ETAP 파이프라인 전용"""
+    site_path = ETAP_BASE / blog_id
+    if not site_path.exists():
+        logger.warning(f"[deploy] site_path 없음: {site_path}")
+        return False
+    try:
+        r1 = subprocess.run(
+            [HUGO, "--gc", "--minify"],
+            cwd=str(site_path),
+            capture_output=True, text=True
+        )
+        if r1.returncode != 0:
+            logger.error(f"[deploy] Hugo 빌드 실패 {blog_id}\nSTDERR: {r1.stderr[-400:]}")
+            return False
+
+        r2 = subprocess.run(
+            [WRANGLER, "pages", "deploy", "public", "--project-name", blog_id],
+            cwd=str(site_path),
+            capture_output=True, text=True,
+            env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+        )
+        if r2.returncode != 0:
+            logger.error(f"[deploy] Wrangler 배포 실패 {blog_id}\nSTDERR: {r2.stderr[-400:]}")
+            return False
+
+        logger.info(f"[deploy] OK: {blog_id}")
+        return True
+    except Exception as e:
+        logger.error(f"[deploy] 예외 {blog_id}: {e}")
+        return False
+
 # ─── 메인 디스패치 ───
 
 def dispatch(blog_id):
@@ -386,6 +436,8 @@ def dispatch(blog_id):
     # 성공 시 중앙 ledger에 기록
     if result.get("success"):
         _record_ledger(blog_id)
+        if blog_id in ETAP_PIPELINE_BLOGS:
+            _build_and_deploy_central(blog_id)
     return result
 
 
