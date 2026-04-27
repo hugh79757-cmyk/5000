@@ -97,28 +97,35 @@ def _clean_gpt_map_tags(content):
     """GPT/이전 실행이 생성한 Google Maps 링크를 모두 제거한다.
     _inject_map_buttons()가 새로 정확한 링크를 삽입하므로 기존 것은 전부 제거.
     제거 대상:
-      1) 마크다운: [📍 View on Google Maps](...) 및 후속 · [🌐 Website](...) _meta_
-      2) HTML broken: <a href=" target=...>📍 View on Google Maps</a>
+      1) 마크다운: [📍 View on Google Maps](...) 이모지 유무 무관
+      2) 일반 텍스트 줄: 📍 View on Google Maps (링크 없이 텍스트만)
+      3) HTML broken: <a href=...>📍 View on Google Maps</a>
+      4) [View on Google Maps](...) 이모지 없는 버전
     """
-    # 1) 마크다운 맵 링크 + 선택적 website 링크 + 선택적 이탤릭 메타 제거
-    md_map = re.compile(
-        r'\s*\[📍 View on Google Maps\]\([^\)]*\)'   # 맵 링크
-        r'(?:\s*·\s*\[🌐 Website\]\([^\)]*\))?'    # website 링크 (선택)
-        r'(?:\s*_[^_]*_)?'                                # 이탤릭 메타 (선택)
-        , re.IGNORECASE
-    )
-    cleaned, n1 = md_map.subn('', content)
-    if n1:
-        logger.info(f"[nomad_writer] Removed {n1} existing markdown map link(s)")
+    cleaned = content
 
-    # 2) HTML broken 태그 제거
-    broken = re.compile(
-        r'<a\s+href="\s*(?!https?://)[^"]*"[^>]*>\s*[^<]*📍\s*View on Google Maps\s*[^<]*</a>',
-        re.IGNORECASE | re.DOTALL
-    )
-    cleaned, n2 = broken.subn('', cleaned)
-    if n2:
-        logger.warning(f"[nomad_writer] Removed {n2} broken HTML map tag(s)")
+    # 1) 마크다운 링크 — 이모지 유무 무관, website/메타 후속 제거
+    patterns = [
+        # [📍 View on Google Maps](url) + 선택적 website 링크 — 문장 중간 포함
+        r'\s*\[[^\]]*?(?:📍|View on Google Maps)[^\]]*?\]\([^\)]*\)(?:\s*·\s*\[[^\]]*?(?:🌐|Website)[^\]]*?\]\([^\)]*\))?(?:\s*_[^_]*_)?',
+        # 연속 두 번째 맵 링크 (공백으로 이어진 경우)
+        r'(?<=\))\s*\[[^\]]*?(?:📍|View on Google Maps)[^\]]*?\]\([^\)]*\)',
+        # 텍스트만 있는 경우: 📍 View on Google Maps
+        r'\s*📍\s*View on Google Maps[^\n]*',
+        # HTML 링크
+        r'<a\s+href="[^"]*google\.com/maps[^"]*"[^>]*>[^<]*(?:📍|View on Google Maps)[^<]*</a>',
+        # broken HTML
+        r'<a\s+href="\s*(?!https?://)[^"]*"[^>]*>\s*[^<]*(?:📍)?\s*View on Google Maps\s*[^<]*</a>',
+    ]
+
+    total_removed = 0
+    for pat in patterns:
+        compiled = re.compile(pat, re.IGNORECASE | re.DOTALL)
+        cleaned, n = compiled.subn('', cleaned)
+        total_removed += n
+
+    if total_removed:
+        logger.info(f"[nomad_writer] Removed {total_removed} map link(s) total")
 
     return cleaned
 
