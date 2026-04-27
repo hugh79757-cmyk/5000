@@ -130,11 +130,23 @@ def _clean_gpt_map_tags(content):
     return cleaned
 
 def _inject_map_buttons(content, coworking, city="", country=""):
-    """Find coworking space names in article body and inject a Maps card.
-    Supports fuzzy/partial matching: if DB name contains article word or vice versa.
+    """Find coworking space names in article body and inject a Maps link.
+    - front matter(---) 영역은 건너뜀
+    - 본문(body)에서만 매칭
+    - 장소명이 본문에 명시적으로 언급된 경우만 삽입 (부분매칭은 **bold** 또는 문장 내 단독 등장만)
     """
     if not coworking:
         return content
+
+    # ── front matter 분리 ──────────────────────────────────────
+    fm_end = 0
+    if content.startswith("---"):
+        second = content.find("---", 3)
+        if second != -1:
+            fm_end = second + 3  # front matter 끝 위치
+
+    front_matter = content[:fm_end]
+    body = content[fm_end:]
 
     # Build lookup: canonical name -> data
     lookup = {}
@@ -147,39 +159,46 @@ def _inject_map_buttons(content, coworking, city="", country=""):
 
     # Sort names by length DESC so longer names match first
     sorted_names = sorted(lookup.keys(), key=len, reverse=True)
-    used = set()  # canonical names already injected
+    used = set()
 
-    def _find_match(name):
-        """Try exact match first, then partial match."""
-        # 1) Exact (case-insensitive)
-        m = re.search(re.escape(name), content, re.IGNORECASE)
+    def _find_match_in_body(name, body_text):
+        """본문에서만 매칭. 정확한 단어 경계 매칭 우선."""
+        # 1) 정확한 이름 매칭 (대소문자 무시)
+        m = re.search(re.escape(name), body_text, re.IGNORECASE)
         if m:
             return m, name
-        # 2) Partial: any word in DB name (>=4 chars) found in content
-        words = [w for w in re.split(r'[\s/,.-]+', name) if len(w) >= 4]
+        # 2) **bold** 형태로 부분 단어 매칭 (>=5자 단어만)
+        words = [w for w in re.split(r'[\s/,.-]+', name) if len(w) >= 5]
         for word in sorted(words, key=len, reverse=True):
-            m = re.search(re.escape(word), content, re.IGNORECASE)
+            # bold 형태(**word**) 또는 문장 시작/끝 단어 경계
+            m = re.search(
+                r'(?:\*\*[^*]*' + re.escape(word) + r'[^*]*\*\*)',
+                body_text, re.IGNORECASE
+            )
             if m:
                 return m, name
         return None, None
 
-    result = content
+    result_body = body
+    any_matched = False
     for name in sorted_names:
         if name in used:
             continue
         info = lookup[name]
-        match, matched_name = _find_match(name)
+        match, matched_name = _find_match_in_body(name, result_body)
         if not match:
             continue
-        # Find end of the paragraph (double newline) or sentence
+
         start = match.end()
-        # Prefer paragraph end for cleaner card placement
-        para_end = re.search(r'\n\n', result[start:])
-        if para_end:
-            insert_pos = start + para_end.start()
+
+        # 문장 끝(. ! ?) 다음에 삽입
+        sentence_end = re.search(r'[.!?](?=\s|\n|$)', result_body[start:])
+        if sentence_end:
+            insert_pos = start + sentence_end.end()
         else:
-            sentence_end = re.search(r'[.!?](?=\s|$)', result[start:])
-            insert_pos = start + sentence_end.end() if sentence_end else len(result)
+            para_end = re.search(r'\n\n', result_body[start:])
+            insert_pos = start + para_end.start() if para_end else len(result_body)
+
         card = _maps_button(
             name,
             info.get("address", ""),
@@ -188,10 +207,40 @@ def _inject_map_buttons(content, coworking, city="", country=""):
             city=city,
             country=country,
         )
-        result = result[:insert_pos] + card + result[insert_pos:]
+        result_body = result_body[:insert_pos] + card + result_body[insert_pos:]
         used.add(name)
-        logger.debug(f"[nomad_writer] Injected map card: {name} (matched via '{matched_name}')")
-    return result
+        any_matched = True
+        logger.debug(f"[nomad_writer] Injected map link: {name} @ pos {insert_pos}")
+
+    # ── 폴백: DB 장소명이 본문에 전혀 없으면 코워킹 섹션 첫 단락 끝에 삽입 ──
+    if not any_matched and lookup:
+        cowork_section = re.search(
+            r'(## Best Coworking[^\n]*\n)(.*?)(\n## )',
+            result_body, re.DOTALL | re.IGNORECASE
+        )
+        if cowork_section:
+            section_body = cowork_section.group(2)
+            # 첫 번째 문장 끝 위치 찾기
+            first_sentence = re.search(r'[.!?](?=\s|\n)', section_body)
+            if first_sentence:
+                offset = cowork_section.start(2) + first_sentence.end()
+                # DB 코워킹 중 상위 3개만 폴백 삽입
+                fallback_links = []
+                for name in list(lookup.keys())[:3]:
+                    info = lookup[name]
+                    fallback_links.append(_maps_button(
+                        name,
+                        info.get("address", ""),
+                        info.get("opening_hours", ""),
+                        info.get("website", ""),
+                        city=city,
+                        country=country,
+                    ))
+                insert_text = "".join(fallback_links)
+                result_body = result_body[:offset] + insert_text + result_body[offset:]
+                logger.info(f"[nomad_writer] Fallback map injection for {city}: {list(lookup.keys())[:3]}")
+
+    return front_matter + result_body
 
 
 def _clean_hours(hours):
