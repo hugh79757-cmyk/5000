@@ -212,33 +212,57 @@ def _inject_map_buttons(content, coworking, city="", country=""):
         any_matched = True
         logger.debug(f"[nomad_writer] Injected map link: {name} @ pos {insert_pos}")
 
-    # ── 폴백: DB 장소명이 본문에 전혀 없으면 코워킹 섹션 첫 단락 끝에 삽입 ──
+    # ── 폴백: DB 장소명이 본문에 전혀 없으면 코워킹 섹션 리스트 아이템 끝에 분산 삽입 ──
     if not any_matched and lookup:
-        cowork_section = re.search(
-            r'(## Best Coworking[^\n]*\n)(.*?)(\n## )',
-            result_body, re.DOTALL | re.IGNORECASE
+        db_names = list(lookup.keys())
+        # 코워킹 섹션 범위 찾기
+        cowork_start = re.search(
+            r'## Best Coworking[^\n]*\n',
+            result_body, re.IGNORECASE
         )
-        if cowork_section:
-            section_body = cowork_section.group(2)
-            # 첫 번째 문장 끝 위치 찾기
-            first_sentence = re.search(r'[.!?](?=\s|\n)', section_body)
-            if first_sentence:
-                offset = cowork_section.start(2) + first_sentence.end()
-                # DB 코워킹 중 상위 3개만 폴백 삽입
-                fallback_links = []
-                for name in list(lookup.keys())[:3]:
-                    info = lookup[name]
-                    fallback_links.append(_maps_button(
-                        name,
-                        info.get("address", ""),
-                        info.get("opening_hours", ""),
-                        info.get("website", ""),
-                        city=city,
-                        country=country,
-                    ))
-                insert_text = "".join(fallback_links)
-                result_body = result_body[:offset] + insert_text + result_body[offset:]
-                logger.info(f"[nomad_writer] Fallback map injection for {city}: {list(lookup.keys())[:3]}")
+        cowork_end = re.search(
+            r'\n## ',
+            result_body[cowork_start.end():] if cowork_start else result_body
+        )
+        if cowork_start:
+            sec_start = cowork_start.end()
+            sec_end = (sec_start + cowork_end.start()) if cowork_end else len(result_body)
+            section = result_body[sec_start:sec_end]
+
+            # 리스트 아이템(- 또는 숫자.) 끝 문장들 찾기
+            sentence_ends = [(m.end(), m) for m in re.finditer(
+                r'(?:^[\-\*]|^\d+\.)[^\n]+[.!?]', section, re.MULTILINE
+            )]
+
+            if not sentence_ends:
+                # 리스트 없으면 단락 끝 문장들
+                sentence_ends = [(m.end(), m) for m in re.finditer(
+                    r'[^\n][.!?](?=\s|\n|$)', section
+                )]
+
+            # DB 상위 N개를 분산 삽입 (최대 sentence_ends 수만큼)
+            insert_count = min(len(db_names), len(sentence_ends), 5)
+            # 뒤에서부터 삽입해야 offset 안 밀림
+            inserts = []
+            for i in range(insert_count):
+                name = db_names[i]
+                info = lookup[name]
+                pos = sec_start + sentence_ends[i][0]
+                link = _maps_button(
+                    name,
+                    info.get("address", ""),
+                    info.get("opening_hours", ""),
+                    info.get("website", ""),
+                    city=city,
+                    country=country,
+                )
+                inserts.append((pos, link))
+
+            # 뒤에서부터 삽입 (position 역순)
+            for pos, link in sorted(inserts, key=lambda x: x[0], reverse=True):
+                result_body = result_body[:pos] + link + result_body[pos:]
+
+            logger.info(f"[nomad_writer] Fallback map injection for {city}: {db_names[:insert_count]}")
 
     return front_matter + result_body
 
