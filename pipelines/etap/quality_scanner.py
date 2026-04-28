@@ -51,15 +51,15 @@ def _init_scanner_db():
 # ============================================================
 def _tg(msg: str):
     try:
-        from shared.telegram_notifier import send_message
-        send_message(msg)
+        from shared.telegram_notifier import send
+        send(msg)
     except Exception as e:
         logger.error(f"[Scanner] TG 전송 실패: {e}")
 
 def _tg_warning(title, detail=""):
     try:
-        from shared.telegram_notifier import send_warning
-        send_warning(title, detail)
+        from shared.telegram_notifier import send
+        send(f"{title} {detail}")
     except Exception as e:
         logger.error(f"[Scanner] TG warning 실패: {e}")
 
