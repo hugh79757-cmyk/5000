@@ -8,27 +8,66 @@ logger = logging.getLogger(__name__)
 
 
 def _build_trade_reference(keyword, trades, region_info=None):
-    """실거래가 데이터를 참고자료 블록으로 변환"""
+    """실거래가 데이터를 참고자료 블록으로 변환
+    trades: list (기존 호환) 또는 dict {"apt_kw","keyword_trades","other_trades"}
+    """
     lines = []
     month = datetime.now().strftime("%Y년 %m월")
     city = region_info.get("city", "") if region_info else ""
     district = region_info.get("district", "") if region_info else ""
+
+    # dict 형식 (신규) vs list 형식 (하위호환)
+    if isinstance(trades, dict):
+        apt_kw         = trades.get("apt_kw", "")
+        keyword_trades = trades.get("keyword_trades", [])
+        other_trades   = trades.get("other_trades", [])
+        all_trades     = keyword_trades + other_trades
+    else:
+        apt_kw         = ""
+        keyword_trades = []
+        other_trades   = trades
+        all_trades     = trades
+
     lines.append(f"## 키워드: {keyword}")
     lines.append(f"지역: {city} {district}")
     lines.append(f"기준: {month}")
-    lines.append(f"총 거래건수: {len(trades)}건\n")
+    lines.append("")
 
-    # 통계 계산
-    prices = [t.get("dealAmountInt", 0) for t in trades if t.get("dealAmountInt")]
-    if prices:
-        lines.append("### 시세 요약")
-        lines.append(f"- 최고가: {max(prices):,}만원")
-        lines.append(f"- 최저가: {min(prices):,}만원")
-        lines.append(f"- 평균: {sum(prices)//len(prices):,}만원")
+    # ── 키워드 단지 실거래 (최우선 섹션) ──
+    if keyword_trades:
+        kw_prices = [t.get("dealAmountInt", 0) for t in keyword_trades if t.get("dealAmountInt")]
+        lines.append(f"### ★ [{apt_kw}] 실거래가 ({len(keyword_trades)}건) ← 이 단지가 키워드 단지입니다")
+        if kw_prices:
+            lines.append(f"- 최고가: {max(kw_prices):,}만원")
+            lines.append(f"- 최저가: {min(kw_prices):,}만원")
+            if len(kw_prices) > 1:
+                lines.append(f"- 평균: {sum(kw_prices)//len(kw_prices):,}만원")
+        for t in keyword_trades:
+            amt   = t.get("dealAmount", "").strip()
+            area  = t.get("excluUseAr", "")
+            floor = t.get("floor", "")
+            dong  = t.get("umdNm", "")
+            year  = t.get("buildYear", "")
+            ddate = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+            lines.append(f"  - {dong} {apt_kw}({year}년식) {area}㎡ {floor}층: {amt}만원 ({ddate})")
+        lines.append("")
+    else:
+        lines.append(f"### ★ [{apt_kw}] 해당 기간 실거래 없음")
+        lines.append(f"- 아래 {district} 내 인근 단지 데이터를 참고하여 분석하세요.")
+        lines.append(f"- 이 단지의 매매가를 임의로 가정하거나 추측하지 마세요.")
         lines.append("")
 
-    lines.append("### 최근 거래 내역")
-    for t in trades[:15]:
+    # ── 구 내 인근 단지 참고 데이터 ──
+    if other_trades:
+        other_prices = [t.get("dealAmountInt", 0) for t in other_trades if t.get("dealAmountInt")]
+        lines.append(f"### {district} 인근 단지 참고 데이터 ({len(other_trades)}건)")
+        if other_prices:
+            lines.append(f"- (참고) 구 전체 최고가: {max(other_prices):,}만원 / 최저가: {min(other_prices):,}만원 / 평균: {sum(other_prices)//len(other_prices):,}만원")
+            lines.append(f"- ※ 위 수치는 구 전체 통계이며 키워드 단지({apt_kw}) 시세가 아닙니다.")
+        lines.append("")
+
+    lines.append("### 최근 거래 내역 (키워드 단지 우선)")
+    for t in all_trades[:15]:
         apt = t.get("aptNm", "")
         amount = t.get("dealAmount", "").strip()
         area = t.get("excluUseAr", "")
@@ -291,11 +330,12 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - 면책 문구를 본문에 넣지 마세요 (시스템이 자동 삽입합니다)
 
 [단지 데이터 사용 원칙 — 반드시 준수]
-- 표에는 참고자료에 실제로 존재하는 단지명과 거래금액만 사용하세요. 없는 단지를 생성하지 마세요.
-- 키워드 단지의 실거래가가 참고자료에 있으면 반드시 표의 첫 번째 행에 배치하세요.
-- 비교 단지는 참고자료 내 동일 구(district) 단지 중 면적이 유사한 것으로 선택하세요.
-- 구 전체 평균가를 특정 단지의 매매가로 표기하지 마세요.
-- 참고자료에 해당 단지 거래가 없으면 표 대신 "해당 기간 실거래 데이터 없음"으로 명시하세요.
+- 표에는 참고자료 "최근 거래 내역"에 실제로 존재하는 단지명과 거래금액만 사용하세요.
+- 참고자료에 없는 단지명을 임의로 만들어 표에 넣지 마세요. (예: "A아파트", "B아파트" 금지)
+- 키워드 단지명(예: 거여1단지, 만민하늘애)과 일치하는 거래가 참고자료에 있으면 반드시 표 첫 번째 행에 배치하고 해당 실거래금액을 그대로 사용하세요.
+- 키워드 단지 거래가 참고자료에 없으면: "해당 기간 [단지명] 실거래 없음. 아래는 동일 구 인근 단지 참고 데이터입니다." 라고 명시 후 표를 작성하세요.
+- 참고자료의 "시세 요약(최고가/최저가/평균)"은 구 전체 통계입니다. 이 평균값을 키워드 단지의 매매가로 절대 사용하지 마세요.
+- 비교 단지는 참고자료 "최근 거래 내역" 중 키워드 단지와 면적이 유사한 것으로 선택하세요.
 - 단지 분석 시 건축연도(구축/신축 여부), 전용면적, 층수를 함께 언급하세요.
 
 [최종 확인 — 반드시 지키세요]
