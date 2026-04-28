@@ -33,3 +33,5 @@ data/*.m4_before_*
 **/*.bak_*
 themes/
 resources/
+hugo_stats.json
+pipelines/
