@@ -148,6 +148,87 @@ def _pick_strategy(keyword, blog_id=None):
     return "trade"
 
 
+
+def _fetch_trades_from_db(lawd_cd, keyword, months=3):
+    """rap.db/trades에서 실거래가 조회 + 키워드 단지명 필터링
+    1순위: 키워드에서 추출한 단지명과 매칭되는 거래
+    2순위: 매칭 3건 미만이면 구 전체 반환 (분석용)
+    """
+    if not os.path.exists(RAP_DB_PATH):
+        logger.error(f"rap.db 없음: {RAP_DB_PATH}")
+        return []
+    try:
+        from dateutil.relativedelta import relativedelta
+        now = datetime.now()
+        ymd_list = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
+        placeholders = ",".join("?" * len(ymd_list))
+
+        conn = sqlite3.connect(RAP_DB_PATH)
+        rows = conn.execute(
+            f"SELECT apt_name, dong_name, exclu_use_ar, floor, build_year, "
+            f"deal_amount, deal_year, deal_month, deal_day "
+            f"FROM trades WHERE lawd_cd=? AND deal_ymd IN ({placeholders}) "
+            f"ORDER BY deal_ymd DESC, deal_amount DESC",
+            [lawd_cd] + ymd_list
+        ).fetchall()
+        conn.close()
+
+        if not rows:
+            return []
+
+        # dict 변환 (fetch_apt_trade 반환 형식과 동일)
+        all_trades = []
+        for r in rows:
+            amt = r[5] or 0
+            all_trades.append({
+                "aptNm":        r[0] or "",
+                "umdNm":        r[1] or "",
+                "excluUseAr":   str(r[2] or ""),
+                "floor":        str(r[3] or ""),
+                "buildYear":    str(r[4] or ""),
+                "dealAmount":   f"{amt:,}",
+                "dealAmountInt": amt,
+                "dealYear":     str(r[6] or ""),
+                "dealMonth":    str(r[7] or ""),
+                "dealDay":      str(r[8] or ""),
+            })
+
+        # 키워드에서 단지명 추출 (지역/용도 suffix 제거)
+        import re as _re2
+        apt_kw = _re2.sub(
+            r"[\s]*(실거래가|전세|월세|세금|브랜드|시세|매매|아파트|분석|가이드|"
+            r"\S+구|\S+시|\S+동|\S+군|\S+읍).*$",
+            "", keyword.strip()
+        ).strip()
+
+        def _match(apt_name):
+            n = (apt_name or "").strip()
+            if not apt_kw:
+                return False
+            if n == apt_kw:
+                return True
+            if apt_kw in n:
+                return True
+            if n in apt_kw and len(n) >= 3:
+                return True
+            return False
+
+        filtered = [t for t in all_trades if _match(t["aptNm"])]
+        others  = [t for t in all_trades if not _match(t["aptNm"])]
+
+        if len(filtered) >= 1:
+            # 키워드 단지 먼저, 나머지 구 전체로 보완 (합계 최대 30건)
+            combined = filtered + others
+            logger.info(f"단지 필터: [{apt_kw}] {len(filtered)}건 + 구내 {len(others)}건 = {len(combined)}건")
+            return combined[:30]
+        else:
+            logger.info(f"단지 미매칭 [{apt_kw}] → 구 전체 {len(all_trades)}건 반환")
+            return all_trades[:30]
+
+    except Exception as e:
+        logger.error(f"DB trades 조회 실패: {e}")
+        return []
+
 def _post_process(body_md, blog_id, keyword):
     # 금지어 자동 치환
     body_md = body_md.replace("특히 ", "").replace("특히, ", "")
@@ -444,28 +525,24 @@ def run(blog_cfg):
             lawd_cd, city, district = _rand.choice(pool)
             logger.info(f"법정동코드 미매칭, 랜덤 선택: {city} {district}")
 
-        trades = fetch_apt_trade(lawd_cd, rows=30)
-        if not trades:
-            from dateutil.relativedelta import relativedelta
-            prev_ym = (datetime.now() - relativedelta(months=1)).strftime("%Y%m")
-            trades = fetch_apt_trade(lawd_cd, deal_ymd=prev_ym, rows=30)
+        # ── rap.db에서 실거래가 조회 (API 호출 없음) ──
+        trades = _fetch_trades_from_db(lawd_cd, keyword)
 
         if not trades:
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
-            # 실거래가 0건 키워드 자동 비활성화
             try:
-                db = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-                _gc = sqlite3.connect(db)
-                _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
-                _gc.commit()
-                _gc.close()
+                if os.path.exists(RAP_DB_PATH):
+                    _gc = sqlite3.connect(RAP_DB_PATH)
+                    _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
+                    _gc.commit()
+                    _gc.close()
                 logger.warning(f"키워드 자동 비활성화: {keyword} (실거래가 0건)")
             except Exception as _dbe:
                 logger.warning(f"키워드 비활성화 실패: {_dbe}")
             return {"success": False, "reason": "no_trade_data"}
 
         article = generate_trade_article(keyword, trades, region_info={"city": city, "district": district}, blog_id=blog_id)
-        data_source = "molit_trade_api"
+        data_source = "rap_db"
 
     # ─── 청약 전략 ───
     elif strategy == "subscription":
