@@ -193,13 +193,16 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3):
                 "dealDay":      str(r[8] or ""),
             })
 
-        # 키워드에서 단지명 추출 (지역/용도 suffix 제거)
+        # 키워드에서 단지명 추출 (토큰 단위로 지역/용도 제거)
         import re as _re2
-        apt_kw = _re2.sub(
-            r"[\s]*(실거래가|전세|월세|세금|브랜드|시세|매매|아파트|분석|가이드|"
-            r"\S+구|\S+시|\S+동|\S+군|\S+읍).*$",
-            "", keyword.strip()
-        ).strip()
+        _SUFFIX_PAT = _re2.compile(
+            r"^(실거래가|전세|월세|세금|브랜드|시세|매매|아파트|분석|가이드|"
+            r"서울|경기|인천|부산|대구|대전|광주|울산|세종|"
+            r".+특별시|.+광역시|.+특별자치시|.+특별자치도|"
+            r".+구|.+시|.+군|.+동|.+읍|.+면|.+로|.+대로)$"
+        )
+        tokens = keyword.strip().split()
+        apt_kw = " ".join(t for t in tokens if not _SUFFIX_PAT.match(t)).strip()
 
         def _match(apt_name):
             n = (apt_name or "").strip()
@@ -214,16 +217,19 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3):
             return False
 
         filtered = [t for t in all_trades if _match(t["aptNm"])]
-        others  = [t for t in all_trades if not _match(t["aptNm"])]
+        others   = [t for t in all_trades if not _match(t["aptNm"])]
 
         if len(filtered) >= 1:
-            # 키워드 단지 먼저, 나머지 구 전체로 보완 (합계 최대 30건)
-            combined = filtered + others
-            logger.info(f"단지 필터: [{apt_kw}] {len(filtered)}건 + 구내 {len(others)}건 = {len(combined)}건")
-            return combined[:30]
+            logger.info(f"단지 필터: [{apt_kw}] {len(filtered)}건 + 구내 {len(others)}건")
         else:
-            logger.info(f"단지 미매칭 [{apt_kw}] → 구 전체 {len(all_trades)}건 반환")
-            return all_trades[:30]
+            logger.info(f"단지 미매칭 [{apt_kw}] → 구 전체 {len(all_trades)}건")
+
+        # keyword_trades / other_trades 분리 반환 (AI 혼동 방지)
+        return {
+            "apt_kw":         apt_kw,
+            "keyword_trades": filtered[:10],
+            "other_trades":   others[:20],
+        }
 
     except Exception as e:
         logger.error(f"DB trades 조회 실패: {e}")
