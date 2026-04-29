@@ -34,4 +34,4 @@ data/*.m4_before_*
 themes/
 resources/
 hugo_stats.json
-pipelines/
+# pipelines/ — 하위 민감파일만 개별 지정
