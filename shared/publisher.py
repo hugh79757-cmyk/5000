@@ -49,6 +49,67 @@ def slugify(text):
     return text.lower()[:80]
 
 
+# ===== 2026-05-01: front matter sanitize / 검증 헬퍼 =====
+def _sanitize_yaml_value(s, max_len=None):
+    """YAML 문자열 값을 안전하게 정리 (한글 블로그 대응)."""
+    if s is None:
+        return ""
+    s = str(s)
+    # 한글 스마트 따옴표 정규화
+    smart = {
+        "“": '"', "”": '"',
+        "‘": "'", "’": "'",
+        "«": '"', "»": '"',
+        "「": '"', "」": '"',
+        "『": '"', "』": '"',
+    }
+    for k, v in smart.items():
+        s = s.replace(k, v)
+    # 제어문자 제거 (NULL, CR, LF, TAB은 공백으로)
+    s = s.replace("\x00", "")
+    s = s.replace("\r", " ").replace("\n", " ").replace("\t", " ")
+    # 비인쇄 제어문자 제거 (스페이스 미만)
+    s = "".join(ch for ch in s if ord(ch) >= 32)
+    # 연속 공백 정리
+    s = " ".join(s.split())
+    # 큰따옴표 문자열로 감쌀 것이므로 역슬래시와 큰따옴표만 이스케이프
+    s = s.replace("\\", "\\\\").replace('"', '\\"')
+    if max_len:
+        s = s[:max_len].rstrip()
+    return s
+
+
+def _validate_frontmatter(fm_text):
+    """front matter 텍스트가 YAML 파싱 가능한지 검증."""
+    try:
+        if not fm_text.startswith("---"):
+            return False, "front matter does not start with ---"
+        end = fm_text.find("---", 3)
+        if end < 0:
+            return False, "front matter has no closing ---"
+        fm_body = fm_text[3:end].strip()
+        parsed = yaml.safe_load(fm_body)
+        if not isinstance(parsed, dict):
+            return False, "front matter is not a dict"
+        if not parsed.get("title"):
+            return False, "title is missing or empty"
+        if not parsed.get("date"):
+            return False, "date is missing"
+        try:
+            from datetime import datetime as _dt
+            d_str = str(parsed.get("date"))
+            d = _dt.fromisoformat(d_str.replace("Z", "+00:00"))
+            now = _dt.now(d.tzinfo) if d.tzinfo else _dt.now()
+            if (d - now).total_seconds() > 3600:
+                return False, "date is in the future: " + d_str
+        except Exception:
+            pass
+        return True, None
+    except Exception as e:
+        return False, "yaml.safe_load failed: " + str(e)
+
+
+
 def _clean_body(body_md):
     """AI가 생성한 가짜 내부링크 제거"""
     if not body_md:
@@ -156,11 +217,11 @@ def _extract_description(body_md):
 def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
-    fm += 'title: "' + title.replace('"', '\\"') + '"\n'
+    fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "date: " + date_str + "\n"
     fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
-        fm += 'description: "' + description[:200].replace('"', '\\"') + '"\n'
+        fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
     fm += 'slug: "' + slug + '"\n'
     if category:
         fm += 'categories: ["' + category + '"]\n'
@@ -180,12 +241,12 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
 def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description, is_draft=False):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
-    fm += 'title: "' + title.replace('"', '\\"') + '"\n'
+    fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "date: '" + date_str + "'\n"
     fm += "slug: '" + slug + "'\n"
     fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
-        fm += 'description: "' + description.replace('"', '\\"') + '"\n'
+        fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
     if tags:
         tag_list = [t.strip() for t in tags.split(",") if t.strip()]
         fm += "tags: " + str(tag_list) + "\n"
@@ -194,7 +255,7 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     if thumbnail_url:
         fm += "cover:\n"
         fm += '  image: "' + thumbnail_url + '"\n'
-        fm += '  alt: "' + title.replace('"', '\\"') + '"\n'
+        fm += '  alt: "' + _sanitize_yaml_value(title) + '"\n'
         fm += "  hidden: false\n"
     fm += "---\n\n"
     return fm, date_str
@@ -203,12 +264,12 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
 def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     fm = "---\n"
-    fm += 'title: "' + title.replace('"', '\\"') + '"\n'
+    fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "slug: '" + slug + "'\n"
     fm += "date: '" + date_str + "'\n"
     fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
-        fm += 'description: "' + description.replace('"', '\\"') + '"\n'
+        fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
     if tags:
         tag_list = [t.strip() for t in tags.split(",") if t.strip()]
         fm += "tags: " + str(tag_list) + "\n"
@@ -490,8 +551,41 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     import re as _pub_re
     body_md = _pub_re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
     content = fm + body_md
+
+    # ✅ 작성 전 front matter 검증 (2026-05-01 추가)
+    _ok, _err = _validate_frontmatter(fm)
+    if not _ok:
+        try:
+            logger.error("[PUBLISH] front matter 검증 실패, 발행 중단: blog=" + str(blog_cfg.get("id","")) + " err=" + str(_err))
+        except Exception:
+            pass
+        return {"success": False, "error": "frontmatter invalid: " + str(_err)}
+
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
+
+    # ✅ 작성 후 디스크 재검증 (2026-05-01 추가) — 인코딩 문제까지 차단
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            _disk = f.read()
+        _ok2, _err2 = _validate_frontmatter(_disk)
+        if not _ok2:
+            try:
+                os.remove(file_path)
+                if os.path.isdir(post_dir) and not os.listdir(post_dir):
+                    os.rmdir(post_dir)
+            except Exception:
+                pass
+            try:
+                logger.error("[PUBLISH] 디스크 재검증 실패, 파일 삭제: " + str(_err2))
+            except Exception:
+                pass
+            return {"success": False, "error": "frontmatter invalid on disk: " + str(_err2)}
+    except Exception as _e:
+        try:
+            logger.warning("[PUBLISH] 디스크 재검증 예외(무시): " + str(_e))
+        except Exception:
+            pass
 
     expected_url = "https://" + blog_cfg.get("domain", "") + "/posts/" + slug + "/"
     return {"success": True, "url": expected_url, "file_path": file_path}
