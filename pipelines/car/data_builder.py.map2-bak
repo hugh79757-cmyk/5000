@@ -1,0 +1,386 @@
+import sqlite3
+import json
+import random
+import re
+from pathlib import Path
+
+# 모델명 매핑 (carisyou → public_fuel_data)
+MODEL_NAME_MAP = {
+    "모델 Y": "Model Y",
+    "모델 3": "Model 3",
+    "그랑 콜레오스": "콜레오스",
+    "그랑 콜레오스 하이브리드": "콜레오스",
+    "필랑트": "ARKANA",
+    "일렉트리파이드 G80": "G80 전동화",
+    "무쏘 스포츠": "무쏘",
+    "1시리즈": "118",
+    "2시리즈 액티브 투어러": "218",
+    "2시리즈 그란 쿠페": "220",
+    "2시리즈": "220",
+    "3시리즈": "320",
+    "5시리즈": "520",
+    "7시리즈": "740",
+    "8시리즈": "840",
+    "C클래스": "C200",
+    "프리우스": "Prius",
+    "캠리": "Camry",
+    "오딧세이": "ODYSSEY",
+    "RSQ8": "Q8",
+    "마이바흐 S클래스": "Maybach S",
+    "마이바흐 GLS": "Maybach GLS",
+    "마이바흐 EQS SUV": "Maybach EQS",
+    "마이바흐 SL": "Maybach SL",
+}
+
+
+
+BRAND_URLS = {
+    "현대": "https://www.hyundai.com/kr/ko/e/vehicles",
+    "기아": "https://www.kia.com/kr/vehicles",
+    "제네시스": "https://www.genesis.com/kr/ko/models",
+    "테슬라": "https://www.tesla.com/ko_kr",
+    "BMW": "https://www.bmw.co.kr/ko/models.html",
+    "벤츠": "https://www.mercedes-benz.co.kr/passengercars.html",
+    "아우디": "https://www.audi.co.kr/kr/web/ko/models.html",
+    "볼보": "https://www.volvocars.com/kr/cars",
+    "토요타": "https://www.toyota.co.kr/vehicles",
+    "렉서스": "https://www.lexus.co.kr/models",
+    "혼다": "https://www.honda.co.kr/auto",
+    "르노코리아": "https://www.renaultkorea.com/vehicles",
+    "KGM": "https://www.kgm.com/vehicles.html",
+    "쉐보레": "https://www.chevrolet.co.kr/cars",
+}
+
+BRAND_MAP_API = {
+    "현대": ["현대자동차(주)", "현대자동차", "현대"],
+    "기아": ["기아(주)", "기아자동차(주)", "기아자동차", "기아"],
+    "제네시스": ["제네시스", "(주)제네시스"],
+    "르노코리아": ["르노코리아자동차(주)", "르노삼성자동차(주)"],
+    "KGM": ["KG모빌리티(주)", "쌍용자동차(주)"],
+    "쉐보레": ["한국지엠(주)", "쉐보레"],
+    "테슬라": ["테슬라코리아(유)"],
+    "BMW": ["비엠더블유코리아(주)"],
+    "벤츠": ["메르세데스-벤츠코리아(주)"],
+    "아우디": ["아우디폭스바겐코리아(주)"],
+    "볼보": ["볼보자동차코리아(주)"],
+    "토요타": ["한국토요타자동차(주)"],
+    "렉서스": ["한국토요타자동차(주)"],
+    "혼다": ["혼다코리아(주)"],
+}
+
+def lookup_fuel_efficiency(conn, brand, model, displacement=None):
+    c = conn.cursor()
+    model_clean = model
+    for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보", " LPi", " LPG", " 2.5", " 2.2", " 1.6"]:
+        model_clean = model_clean.replace(suffix, "")
+    # 모델명 매핑 적용
+    if model_clean in MODEL_NAME_MAP:
+        search_key = MODEL_NAME_MAP[model_clean]
+    else:
+        search_key = model_clean.split()[0] if model_clean.split() else model_clean
+    brand_names = BRAND_MAP_API.get(brand, [brand])
+    placeholders = ",".join(["?" for _ in brand_names])
+    query = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
+    params = ["%" + search_key + "%"] + brand_names
+    rows = c.execute(query, params).fetchall()
+    if not rows:
+        query2 = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
+        rows = c.execute(query2, ["%" + search_key + "%"]).fetchall()
+    if rows:
+        for r in rows:
+            eff = r["display_eff"]
+            if eff and eff != "NULL":
+                try:
+                    return float(eff)
+                except:
+                    pass
+    return None
+
+
+
+def lookup_ev_specs(conn, brand, model):
+    """public_fuel_data에서 EV 추가 스펙 조회 (주행거리, 배터리 등)"""
+    c = conn.cursor()
+    model_clean = model
+    for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보"]:
+        model_clean = model_clean.replace(suffix, "")
+    search_key = model_clean.split()[0] if model_clean.split() else model_clean
+    
+    rows = c.execute("""
+        SELECT display_eff, range_per_charge, engine_displacement, fuel_nm, model_nm
+        FROM public_fuel_data 
+        WHERE source='CAREFF' AND fuel_nm='전기' AND model_nm LIKE ?
+        ORDER BY CAST(year AS INTEGER) DESC LIMIT 1
+    """, ["%" + search_key + "%"]).fetchall()
+    
+    if rows:
+        r = rows[0]
+        return {
+            "ev_range_km": int(r["range_per_charge"]) if r["range_per_charge"] and r["range_per_charge"] != "NULL" else None,
+            "ev_efficiency": float(r["display_eff"]) if r["display_eff"] and r["display_eff"] != "NULL" else None,
+            "ev_model_match": r["model_nm"],
+        }
+    return {}
+
+def build_engine_desc(car):
+    ft = str(car["fuel_type"] or "")
+    disp = car["displacement"] or 0
+    if "전기" in ft:
+        return "전기모터"
+    desc = ""
+    if disp:
+        liter = round(disp / 1000, 1)
+        desc = str(liter) + "L"
+    if "하이브리드" in ft:
+        desc += " 하이브리드"
+    elif "디젤" in ft or "경유" in ft:
+        desc += " 디젤"
+    elif "LPG" in ft or "LPi" in ft:
+        desc += " LPG"
+    elif "터보" in ft:
+        desc += " 터보"
+    elif disp:
+        desc += " 가솔린"
+    return desc if desc else ft
+
+def calc_tax(displacement, fuel_type):
+    if not displacement:
+        return 13 if "전기" in str(fuel_type) else 0
+    if displacement > 1600:
+        base = displacement * 200
+    elif displacement > 1000:
+        base = displacement * 140
+    else:
+        base = displacement * 80
+    return round(base * 1.3 / 10000)
+
+def fuel_type_to_code(fuel_type):
+    ft = str(fuel_type)
+    if "경유" in ft or "디젤" in ft:
+        return "D047"
+    elif "LPG" in ft or "부탄" in ft or "엘피지" in ft:
+        return "K015"
+    elif "고급" in ft:
+        return "B034"
+    return "B027"
+
+def get_live_fuel_price(fuel_type, db_path):
+    code = fuel_type_to_code(fuel_type)
+    try:
+        conn_tmp = sqlite3.connect(str(db_path))
+        conn_tmp.row_factory = sqlite3.Row
+        row = conn_tmp.execute(
+            "SELECT price FROM fuel_price_cache WHERE fuel_code=? ORDER BY fetched_at DESC LIMIT 1",
+            (code,)
+        ).fetchone()
+        conn_tmp.close()
+        if row and row["price"]:
+            return float(row["price"])
+    except:
+        pass
+    defaults = {"B027": 1833, "D047": 1832, "K015": 1012, "B034": 2090}
+    return defaults.get(code, 1833)
+
+def calc_fuel_cost(annual_km, efficiency, fuel_type, db_path):
+    if not efficiency or efficiency == 0:
+        return 0
+    if "전기" in str(fuel_type):
+        kwh_price = 292
+        return round((annual_km / efficiency) * kwh_price / 10000)
+    price = get_live_fuel_price(fuel_type, db_path)
+    return round((annual_km / efficiency) * price / 10000)
+
+def calc_insurance(price):
+    if price <= 2000: return 70
+    if price <= 3000: return 90
+    if price <= 4000: return 110
+    if price <= 5000: return 130
+    if price <= 7000: return 160
+    return 200
+
+def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
+    brand_rates = {
+        "현대": 54, "기아": 52, "제네시스": 60,
+        "BMW": 48, "벤츠": 50, "아우디": 46,
+        "쉐보레": 45, "르노": 43, "KGM": 44,
+    }
+    base_rate = brand_rates.get(brand, 48)
+    ft = str(fuel_type)
+    if "하이브리드" in ft and "플러그인" not in ft:
+        base_rate += 6
+    elif "플러그인" in ft:
+        base_rate += 2
+    elif "디젤" in ft or "경유" in ft:
+        base_rate -= 3
+    elif "전기" in ft:
+        base_rate -= 10
+    elif "LPG" in ft or "엘피지" in ft:
+        base_rate -= 5
+    seg = str(segment)
+    if "SUV" in seg or "RV" in seg:
+        base_rate += 3
+    elif "경형" in seg:
+        base_rate -= 2
+    price_factor = 0
+    if base_price > 6000:
+        price_factor = -3
+    elif base_price > 4000:
+        price_factor = -1
+    elif base_price < 2000:
+        price_factor = +2
+    base_rate += price_factor
+    jitter = random.uniform(-1.5, 1.5)
+    base_rate = max(30, min(70, base_rate + jitter))
+    yr1_drop = random.uniform(15, 22)
+    yr2_drop = random.uniform(8, 13)
+    yr3_drop = random.uniform(7, 12)
+    r1 = round(100 - yr1_drop, 1)
+    r2 = round(r1 - yr2_drop, 1)
+    r3 = round(r2 - yr3_drop, 1)
+    r3 = max(r3, base_rate - 3)
+    r3 = min(r3, base_rate + 3)
+    r2 = max(r2, r3 + 5)
+    r1 = max(r1, r2 + 5)
+    r1 = min(r1, 88)
+    r2 = min(r2, r1 - 3)
+    r3 = min(r3, r2 - 3)
+    return {
+        "resale_1yr": round(base_price * r1 / 100),
+        "resale_2yr": round(base_price * r2 / 100),
+        "resale_3yr": round(base_price * r3 / 100),
+        "resale_rate_percent": round(r3),
+    }
+
+def select_representative_trim(trims):
+    if len(trims) == 1:
+        return 0
+    if len(trims) == 2:
+        return 1
+    return len(trims) // 2
+
+def select_matching_trim(comp_trims, target_price):
+    if len(comp_trims) == 1:
+        return 0
+    best_idx = 0
+    best_diff = abs(comp_trims[0]["price"] - target_price)
+    for i, t in enumerate(comp_trims):
+        diff = abs(t["price"] - target_price)
+        if diff < best_diff:
+            best_diff = diff
+            best_idx = i
+    return best_idx
+
+def build_input(conn, topic, db_path):
+    c = conn.cursor()
+    car_row = c.execute('SELECT * FROM cars WHERE car_id = ?', (topic['car_id'],)).fetchone()
+    if not car_row:
+        return None
+    car = dict(car_row)
+    trims_raw = c.execute(
+        'SELECT * FROM trims WHERE car_id = ? AND status = "시판" ORDER BY price',
+        (topic['car_id'],)
+    ).fetchall()
+    trims = [dict(t) for t in trims_raw]
+    if not trims:
+        return None
+    idx = select_representative_trim(trims)
+    main_trim = trims[idx]
+    annual_km = 15000
+    tax = calc_tax(car['displacement'], car['fuel_type'])
+    insurance = calc_insurance(main_trim['price'])
+    fuel_eff = main_trim['fuel_efficiency']
+    if not fuel_eff or fuel_eff == 0:
+        fuel_eff = lookup_fuel_efficiency(conn, car['brand'], car['model'], car['displacement'])
+    if not fuel_eff or fuel_eff == 0:
+        print("  [BLOCK] 연비 데이터 없음 - 발행 차단: " + car['model'])
+        return None
+    fuel_cost = calc_fuel_cost(annual_km, fuel_eff, car['fuel_type'], db_path)
+    resale = estimate_resale(main_trim['price'], car['brand'], car['fuel_type'], car.get('segment', ''), car.get('model', ''))
+    dep_3yr = main_trim['price'] - resale["resale_3yr"]
+    maint_3yr = (tax + insurance + fuel_cost) * 3
+    total_3yr = dep_3yr + maint_3yr
+    data = {
+        "type": topic['post_type'],
+        "model": car["model"],
+        "brand": car['brand'],
+        "year": car['year'],
+        "trim": main_trim['trim_name'],
+        "seats": "5인승",
+        "base_price": main_trim['price'],
+        "engine": build_engine_desc(car),
+        "fuel_type": car['fuel_type'],
+        "fuel_efficiency": fuel_eff,
+        "displacement": car['displacement'],
+        "discount": 0, "discount_conditions": "",
+        "finance_rate": 3.9, "finance_term_months": 48,
+        "monthly_payment_48": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**48 / ((1+3.9/100/12)**48 - 1) / 10000),
+        "monthly_payment_36": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**36 / ((1+3.9/100/12)**36 - 1) / 10000),
+        "monthly_payment_60": round(main_trim['price'] * 10000 * (3.9/100/12) * (1+3.9/100/12)**60 / ((1+3.9/100/12)**60 - 1) / 10000),
+        "annual_km": annual_km, "fuel_price_source": "opinet", "tax_annual": tax, "tax_annual_3yr": tax * 3,
+        "insurance_estimate": insurance, "fuel_price": 1650,
+        "annual_fuel_cost": fuel_cost,
+        **resale,
+        "three_year_depreciation": dep_3yr,
+        "three_year_maintenance": maint_3yr,
+        "three_year_total_cost": total_3yr,
+        "final_price": main_trim['price'],
+        "trim_lineup": [{"name": t['trim_name'], "price": t['price'], "fuel_eff": t.get('fuel_efficiency') or fuel_eff, "fuel": t.get('fuel', car['fuel_type'])} for t in trims],
+    }
+    if topic['competitor_car_id']:
+        comp_row = c.execute('SELECT * FROM cars WHERE car_id = ?', (topic['competitor_car_id'],)).fetchone()
+        comp = dict(comp_row) if comp_row else None
+        comp_trims_raw = c.execute(
+            'SELECT * FROM trims WHERE car_id = ? AND status = "시판" ORDER BY price',
+            (topic['competitor_car_id'],)
+        ).fetchall()
+        comp_trims = [dict(t) for t in comp_trims_raw]
+        if comp and comp_trims:
+            cidx = select_matching_trim(comp_trims, main_trim['price'])
+            ct = comp_trims[cidx]
+            c_tax = calc_tax(comp['displacement'], comp['fuel_type'])
+            c_ins = calc_insurance(ct['price'])
+            c_eff = ct['fuel_efficiency']
+            if not c_eff or c_eff == 0:
+                c_eff = lookup_fuel_efficiency(conn, comp['brand'], comp['model'], comp['displacement'])
+            if not c_eff or c_eff == 0:
+                c_eff = 12.0
+            c_fuel = calc_fuel_cost(annual_km, c_eff, comp['fuel_type'], db_path)
+            c_resale = estimate_resale(ct['price'], comp['brand'], comp['fuel_type'], comp.get('segment', ''), comp.get('model', ''))
+            c_dep = ct['price'] - c_resale["resale_3yr"]
+            c_maint = (c_tax + c_ins + c_fuel) * 3
+            c_total = c_dep + c_maint
+            data.update({
+                "competitor": comp["model"],
+                "competitor_trim": ct['trim_name'],
+                "competitor_price": ct['price'],
+                "competitor_engine": build_engine_desc(comp),
+                "competitor_fuel_efficiency": c_eff,
+                "competitor_displacement": comp['displacement'],
+                "competitor_resale_1yr": c_resale["resale_1yr"],
+                "competitor_resale_2yr": c_resale["resale_2yr"],
+                "competitor_resale_3yr": c_resale["resale_3yr"],
+                "competitor_resale_rate_percent": c_resale["resale_rate_percent"],
+                "competitor_tax_annual": c_tax,
+                "competitor_insurance_estimate": c_ins,
+                "competitor_annual_fuel_cost": c_fuel,
+                "competitor_three_year_depreciation": c_dep,
+                "competitor_three_year_maintenance": c_maint,
+                "competitor_three_year_total_cost": c_total,
+                "competitor_final_price": ct['price'],
+                "competitor_trim_lineup": " / ".join(f"{t['trim_name']} {t['price']:,}" for t in comp_trims),
+            })
+    data.update({
+        "notes": "",
+        "sources": [f"https://m.carisyou.com/car/{car['carisyou_id']}"],
+        "cta_links": {"kb_chacha": "https://www.kbchachacha.com", "carisyou": "https://www.carisyou.com"},
+        "thumbnail_url": "",
+    })
+    # EV 추가 데이터 보강 (배터리 주행거리 등)
+    if car["fuel_type"] == "전기":
+        ev_specs = lookup_ev_specs(conn, car["brand"], car["model"])
+        if ev_specs:
+            data["ev_range_km"] = ev_specs.get("ev_range_km")
+            data["ev_efficiency"] = ev_specs.get("ev_efficiency")
+            data["ev_model_match"] = ev_specs.get("ev_model_match")
+
+    return data

@@ -1,0 +1,111 @@
+blogs:
+- cf_project: dividend-hugo
+  daily_quota: 5
+  domain: dividend.techpawz.com
+  id: dividend-hugo
+  name: 배당주 투자 가이드
+  pipeline: stock
+  platform: hugo
+  repo: dividend-hugo
+  schedule:
+    times:
+    - 07:24
+    - '10:24'
+    - '13:24'
+    - '16:24'
+    - '20:24'
+  site_path: /Users/twinssn/Projects/STAP/dividend-hugo
+  status: active
+  theme: blowfish
+- cf_project: etf-hugo
+  daily_quota: 5
+  domain: etf.techpawz.com
+  id: etf-hugo
+  name: ETF 투자 분석
+  pipeline: stock
+  platform: hugo
+  repo: etf-hugo
+  schedule:
+    times:
+    - 07:26
+    - '10:26'
+    - '13:26'
+    - '16:26'
+    - '20:26'
+  site_path: /Users/twinssn/Projects/STAP/etf-hugo
+  status: active
+  theme: blowfish
+- cf_project: finance-hugo
+  daily_quota: 5
+  domain: finance.techpawz.com
+  id: finance-hugo
+  name: 금리·예적금 비교
+  pipeline: stock
+  platform: hugo
+  repo: finance-hugo
+  schedule:
+    times:
+    - 07:32
+    - '10:32'
+    - '13:32'
+    - '16:32'
+    - '20:32'
+  status: active
+  theme: blowfish
+  site_path: /Users/twinssn/Projects/STAP/finance-hugo
+- cf_project: ipo-hugo
+  daily_quota: 5
+  domain: ipo.techpawz.com
+  id: ipo-hugo
+  name: IPO·공모주 분석
+  pipeline: stock
+  platform: hugo
+  domain: ipo.techpawz.com
+  status: inactive
+  repo: ipo-hugo
+  schedule:
+    times:
+    - 07:30
+    - '10:30'
+    - '13:30'
+    - '16:30'
+    - '20:30'
+  site_path: /Users/twinssn/Projects/STAP/ipo-hugo
+  status: inactive
+  theme: blowfish
+- cf_project: sector-hugo
+  daily_quota: 5
+  domain: sector.techpawz.com
+  id: sector-hugo
+  name: 섹터 분석 리포트
+  pipeline: stock
+  platform: hugo
+  repo: sector-hugo
+  schedule:
+    times:
+    - 07:28
+    - '10:28'
+    - '13:28'
+    - '16:28'
+    - '20:28'
+  site_path: /Users/twinssn/Projects/STAP/sector-hugo
+  status: active
+  theme: blowfish
+- cf_project: stock-informationhot
+  daily_quota: 5
+  domain: stock.informationhot.kr
+  id: stock-hugo
+  name: 캔들트렌드 주식분석
+  pipeline: stock
+  platform: hugo
+  repo: stock-blog
+  schedule:
+    times:
+    - 07:22
+    - '10:22'
+    - '13:22'
+    - '16:22'
+    - '20:22'
+  site_path: /Users/twinssn/Projects/STAP/stock-hugo
+  status: active
+  theme: congo

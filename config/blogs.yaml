@@ -1,0 +1,8 @@
+batch_deploy:
+  schedule: '22:45'
+deploy:
+  branch: main
+  commit_dirty: true
+  method: wrangler
+git_backup:
+  schedule: sunday 03:00

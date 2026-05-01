@@ -35,3 +35,34 @@ themes/
 resources/
 hugo_stats.json
 # pipelines/ — 하위 민감파일만 개별 지정
+
+# ===== 2026-05-01 보완: 경로 무관 + 모든 bak 변형 =====
+# 비밀파일 (모든 하위 경로)
+**/client_secret*.json
+**/*token*.json
+**/*token*.pickle
+**/credentials*.json
+**/api_keys.yaml
+**/api_keys.yml
+
+# 백업파일 변형 전부
+*.bak*
+*bak2
+*bak3
+*bak4
+*bak5
+*_bak
+*.fix_bak
+*.final_bak
+*.v1_bak
+*.move
+*.new
+*.pre_*
+*.tone_bak
+*_phase*
+
+.DS_Store
+**/.DS_Store
+
+.DS_Store
+**/.DS_Store

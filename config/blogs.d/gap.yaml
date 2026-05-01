@@ -1,0 +1,36 @@
+blogs:
+- cf_project: gap-hugo
+  daily_quota: 5
+  domain: life.informationhot.kr
+  id: gap-hugo
+  name: 생활정보 GAP
+  pipeline: gap
+  platform: hugo
+  repo: gap-hugo
+  schedule:
+    times:
+    - 07:15
+    - 09:15
+    - '11:15'
+    - '14:15'
+    - '17:15'
+  site_path: /Users/twinssn/Projects/GAP/gap-hugo
+  status: inactive
+  theme: congo
+- daily_quota: 5
+  domain: kuta.informationhot.kr
+  id: gap-kuta
+  name: 쿠따 생활정보 (GAP)
+  pipeline: gap
+  platform: wordpress
+  schedule:
+    times:
+    - 07:42
+    - '10:42'
+    - '13:42'
+    - '16:42'
+    - '20:42'
+  status: inactive
+  wp_pass_env: WP_KUTA_PASS
+  wp_url_env: WP_KUTA_URL
+  wp_user_env: WP_KUTA_USER
