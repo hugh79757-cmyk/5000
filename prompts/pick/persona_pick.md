@@ -47,7 +47,7 @@
 
 ## 글 구조 (H2 5개, 반드시 이 순서)
 
-### H2-1: [DATA.persona_label 상황 설명] — 이런 사람이 읽어야 할 글
+### H2-1: [DATA.persona_label 상황 설명]
 - 첫 문장: 페르소나의 현실적 고민으로 시작.
 - 페르소나의 핵심 조건 3가지를 DATA 수치로 정의:
   연간 주행 DATA.persona_annual_km km, 할부 DATA.persona_finance_term개월, 월 예산 기준 DATA.persona_monthly_net만원.
