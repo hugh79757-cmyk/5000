@@ -39,22 +39,27 @@ def send_error(blog_id, stage, error_msg):
         logger.info(f"[Silent] {blog_id}/{stage}: {error_msg}")
         return False
 
-    # blogs.yaml에서 도메인, 레포 정보 가져오기
+    # blogs.d/*.yaml 전체에서 도메인, 레포 정보 가져오기
     domain = ""
     repo = ""
     try:
         import yaml
         from pathlib import Path
-        cfg_path = Path(__file__).parent.parent / "config" / "blogs.yaml"
-        with open(cfg_path, "r", encoding="utf-8") as yf:
-            cfg = yaml.safe_load(yf)
-        for blog in cfg.get("blogs", []):
-            if blog.get("id") == blog_id:
+        config_dir = Path(__file__).parent.parent / "config"
+        all_blogs = []
+        blogs_d = config_dir / "blogs.d"
+        if blogs_d.is_dir():
+            for fpath in sorted(blogs_d.glob("*.yaml")):
+                with open(fpath, "r", encoding="utf-8") as yf:
+                    data = yaml.safe_load(yf) or {}
+                all_blogs.extend(data.get("blogs", []))
+        for blog in all_blogs:
+            if blog and blog.get("id") == blog_id:
                 domain = blog.get("domain", "")
                 repo = blog.get("repo", "")
                 break
     except (IOError, yaml.YAMLError) as e:
-        logger.error(f"[CONFIG_ERROR] Failed to load blogs.yaml: {e}")
+        logger.error(f"[CONFIG_ERROR] Failed to load blogs.d: {e}")
 
     text = "🚨 <b>발행 오류</b>\n"
     text += "<b>블로그:</b> " + blog_id + "\n"
