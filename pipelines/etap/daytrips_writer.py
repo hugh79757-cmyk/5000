@@ -210,6 +210,13 @@ ARTICLE REQUIREMENTS:
 - Use ONLY the tour names and prices from the data above
 - Do NOT invent any tour names, prices, or statistics
 
+TITLE (REQUIRED — first line, H1 format):
+# [Write a unique, specific title for {city}. RULES:
+  - Must start with "# "
+  - NEVER use: "Hidden Gems", "Top Excursions", "Ultimate Guide", "Unforgettable"
+  - Use a specific angle: e.g. "Day Trips From {city}: Beaches, Ruins & Safari in One Day" or "Escaping {city}: The Best Day Trips by Budget" or "{city} Day Trip Guide: Castles, Coasts & Mountain Roads"
+  - Vary the structure each time — do NOT repeat the same subtitle pattern]
+
 STRUCTURE (use these H2 headings exactly):
 ## [Hook: one specific, concrete sentence about {city}]
 ## Best Budget Day Trips
