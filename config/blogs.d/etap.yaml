@@ -4,7 +4,7 @@ blogs:
   name: Adventure Travel Guide
   pipeline: etap
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: adventure.techpawz.com
   cf_project: adventure-hugo
@@ -724,7 +724,7 @@ blogs:
   name: Digital Nomad Guide
   pipeline: etap
   platform: hugo
-  status: active
+  status: disabled
   daily_quota: 5
   domain: nomad.techpawz.com
   cf_project: nomad-hugo
