@@ -1,0 +1,35 @@
+blogs:
+- domain: rotcha.kr
+  id: rotcha-blog
+  name: 로차 블로그
+  platform: hugo
+  site_path: /Users/twinssn/Projects/rotcha-blog
+  status: active
+
+- domain: informationhot.kr
+  id: informationhot-hugo
+  name: 인포메이션핫
+  platform: hugo
+  site_path: /Users/twinssn/Projects/informationhot-hugo
+  status: active
+
+- domain: techpawz.com
+  id: techpawz-hugo
+  name: 테크포즈
+  platform: hugo
+  site_path: /Users/twinssn/Projects/techpawz-hugo
+  status: active
+
+- domain: biz.techpawz.com
+  id: biz-techpawz-hugo
+  name: 테크포즈 비즈
+  platform: hugo
+  site_path: /Users/twinssn/Projects/biz.techpawz-hugo
+  status: active
+
+- domain: issue.techpawz.com
+  id: issue-techpawz-hugo
+  name: 테크포즈 이슈
+  platform: hugo
+  site_path: /Users/twinssn/Projects/issue-techpawz-hugo
+  status: active
