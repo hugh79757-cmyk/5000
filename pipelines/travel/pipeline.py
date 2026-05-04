@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-from shared.content_store import init_db, get_today_count, register_images, register_places, source_exists, title_similar_exists
+from shared.content_store import init_db, get_today_count, register_images, register_places
 from shared.publisher import publish, get_blog_config
 from pipelines.travel.fetcher import fetch_camping, fetch_korservice, fetch_korservice_heritage, fetch_wellness, fetch_heritage, fetch_festival, fetch_food, fetch_course, fetch_random
 from pipelines.travel.writer import generate_content
@@ -25,6 +25,48 @@ except ImportError:
 
 import random
 from shared.validators import sanitize_title
+
+# ── travel pipeline 전용 중복체크 (content.db/publish_ledger 기반) ──
+def _travel_source_exists(blog_id, source_id):
+    """publish_ledger에서 source_id 중복 확인 — stap_content.db 참조 방지"""
+    if not source_id:
+        return False
+    import sqlite3 as _sq
+    _db = "/Users/twinssn/Projects/5000/data/content.db"
+    try:
+        _cn = _sq.connect(_db)
+        _row = _cn.execute(
+            "SELECT 1 FROM publish_ledger WHERE blog_id=? AND source_id=?",
+            (blog_id, source_id)
+        ).fetchone()
+        _cn.close()
+        return _row is not None
+    except Exception as _e:
+        logger.warning(f"_travel_source_exists 오류: {_e}")
+        return False
+
+def _travel_title_similar_exists(blog_id, title):
+    """publish_ledger에서 유사 제목 중복 확인"""
+    if not title:
+        return False
+    import sqlite3 as _sq
+    _db = "/Users/twinssn/Projects/5000/data/content.db"
+    try:
+        _cn = _sq.connect(_db)
+        _rows = _cn.execute(
+            "SELECT title FROM publish_ledger WHERE blog_id=? ORDER BY created_at DESC LIMIT 200",
+            (blog_id,)
+        ).fetchall()
+        _cn.close()
+        title_norm = title.replace(" ", "").lower()
+        for (_t,) in _rows:
+            if _t and _t.replace(" ", "").lower() == title_norm:
+                return True
+        return False
+    except Exception as _e:
+        logger.warning(f"_travel_title_similar_exists 오류: {_e}")
+        return False
+
 
 BLOG_FETCH_MAP = {
     "travel-hugo": [
@@ -98,12 +140,12 @@ def _run_single(target_blog_id, blog_cfg=None):
     _content_ids = data.get("content_ids", [])
     if _content_ids:
         _sid = ",".join(_content_ids)
-        if source_exists(target_blog_id, data.get("source_type", ""), _sid):
+        if _travel_source_exists(target_blog_id, _sid):
             logger.warning(target_blog_id + " source_id 중복: " + _sid[:60])
             return None
         # 개별 contentid도 체크 (복합 source_id 대응)
         for _cid in _content_ids:
-            if _cid and source_exists(target_blog_id, data.get("source_type", ""), _cid):
+            if _cid and _travel_source_exists(target_blog_id, _cid):
                 logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
                 return None
 
@@ -114,7 +156,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         return None
 
     result["title"] = sanitize_title(result["title"])
-    if title_similar_exists(target_blog_id, result["title"]):
+    if _travel_title_similar_exists(target_blog_id, result["title"]):
         logger.warning(target_blog_id + " similar title exists: " + result["title"][:30])
         return None
 

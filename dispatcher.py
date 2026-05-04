@@ -130,6 +130,16 @@ def _record_ledger(blog_id):
                 url = row[1] or ""
                 source_id = site_key
             conn_src.close()
+        elif blog_id in ("travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"):
+            # travel 블로그는 stap_content.db articles에서 조회
+            conn_src = sqlite3.connect("/Users/twinssn/Projects/5000/data/stap_content.db")
+            row = conn_src.execute(
+                "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
+                (blog_id,)
+            ).fetchone()
+            if row:
+                title, url, source_id = row[0], row[1], row[2] or ""
+            conn_src.close()
         else:
             # ETAP 블로그는 Hugo content/posts 최신 파일에서 title 직접 조회
             import glob as _glob, os as _os
