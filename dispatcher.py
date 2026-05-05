@@ -278,6 +278,52 @@ def _run_pipeline(cfg):
             from pipelines.etap.nomad_pipeline import run
         elif blog_id == "airlines-hugo":
             from pipelines.etap.airlines_pipeline import run
+        elif blog_id == "adventure-hugo":
+            from pipelines.etap.adventure_pipeline import run
+        elif blog_id == "airports-hugo":
+            from pipelines.etap.airports_pipeline import run
+        elif blog_id == "bus-hugo":
+            from pipelines.etap.bus_pipeline import run
+        elif blog_id == "culture-hugo":
+            from pipelines.etap.culture_pipeline import run
+        elif blog_id == "daytrips-hugo":
+            from pipelines.etap.daytrips_pipeline import run
+        elif blog_id == "deals-hugo":
+            from pipelines.etap.deals_pipeline import run
+        elif blog_id == "dining-hugo":
+            from pipelines.etap.dining_pipeline import run
+        elif blog_id == "esim-hugo":
+            from pipelines.etap.esim_pipeline import run
+        elif blog_id == "eurail-hugo":
+            from pipelines.etap.eurail_pipeline import run
+        elif blog_id == "ferry-hugo":
+            from pipelines.etap.ferry_pipeline import run
+        elif blog_id == "foodtour-hugo":
+            from pipelines.etap.foodtour_pipeline import run
+        elif blog_id == "michelin-hugo":
+            from pipelines.etap.michelin_pipeline import run
+        elif blog_id == "multiday-hugo":
+            from pipelines.etap.multiday_pipeline import run
+        elif blog_id == "nature-hugo":
+            from pipelines.etap.nature_pipeline import run
+        elif blog_id == "phototour-hugo":
+            from pipelines.etap.phototour_pipeline import run
+        elif blog_id == "tours-hugo":
+            from pipelines.etap.tours_pipeline import run
+        elif blog_id == "trains-hugo":
+            from pipelines.etap.trains_pipeline import run
+        elif blog_id == "transfers-hugo":
+            from pipelines.etap.transfers_pipeline import run
+        elif blog_id == "visa-hugo":
+            from pipelines.etap.visa_pipeline import run
+        elif blog_id == "visafree-hugo":
+            from pipelines.etap.visafree_pipeline import run
+        elif blog_id == "walking-hugo":
+            from pipelines.etap.walking_pipeline import run
+        elif blog_id == "watersports-hugo":
+            from pipelines.etap.watersports_pipeline import run
+        elif blog_id == "watertours-hugo":
+            from pipelines.etap.watertours_pipeline import run
         else:
             from pipelines.etap.pipeline import run
         # run(cfg) 또는 run() 호환
