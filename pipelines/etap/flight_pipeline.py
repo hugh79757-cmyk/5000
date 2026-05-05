@@ -117,6 +117,12 @@ showTableOfContents: true
 
 def _build_and_deploy(cfg):
     site = cfg["site_path"]
+    # leaf bundle 방지: content/posts/index.md 존재 시 삭제
+    from pathlib import Path as _Path
+    rogue = _Path(site) / "content" / "posts" / "index.md"
+    if rogue.exists():
+        rogue.unlink()
+        logger.info(f"[guard] Removed rogue index.md from {site}")
     subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=site, capture_output=True)
     subprocess.run(["/opt/homebrew/bin/wrangler", "pages", "deploy", "public",
                     "--project-name", cfg["cf_project"]], cwd=site, capture_output=True)

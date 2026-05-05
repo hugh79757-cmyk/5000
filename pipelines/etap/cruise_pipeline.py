@@ -97,6 +97,12 @@ def _build_and_deploy(site_path, blog_id):
     hugo = "/opt/homebrew/bin/hugo"
     wrangler = "/opt/homebrew/bin/wrangler"
     try:
+        # leaf bundle 방지: content/posts/index.md 존재 시 삭제
+        from pathlib import Path as _Path
+        rogue = _Path(site_path) / "content" / "posts" / "index.md"
+        if rogue.exists():
+            rogue.unlink()
+            logger.info(f"[guard] Removed rogue index.md from {site_path}")
         subprocess.run([hugo, "--gc", "--minify"], cwd=site_path, check=True, capture_output=True)
         subprocess.run([wrangler, "pages", "deploy", "public", "--project-name", blog_id],
                       cwd=site_path, check=True, capture_output=True)

@@ -139,6 +139,12 @@ def _build_and_deploy(cfg: dict) -> bool:
     site_path = cfg["site_path"]
     cf_project = cfg.get("cf_project") or cfg.get("repo") or cfg["id"]
 
+    # leaf bundle 방지: content/posts/index.md 존재 시 삭제
+    rogue = Path(site_path) / "content" / "posts" / "index.md"
+    if rogue.exists():
+        rogue.unlink()
+        print(f"[guard] Removed rogue index.md from {site_path}")
+
     build = subprocess.run(
         ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
         cwd=site_path, capture_output=True, text=True, timeout=120

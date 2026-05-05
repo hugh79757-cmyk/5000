@@ -593,6 +593,12 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
 def deploy_site(site_path, cf_project):
     site = Path(site_path)
+    # leaf bundle 방지: content/posts/index.md 존재 시 삭제
+    rogue = site / "content" / "posts" / "index.md"
+    if rogue.exists():
+        rogue.unlink()
+        print(f"[guard] Removed rogue index.md from {site}")
+
     result = subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=str(site), capture_output=True, text=True)
     if result.returncode != 0:
         raise Exception("Hugo build failed: " + result.stderr[:500])
