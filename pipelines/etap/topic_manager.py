@@ -80,7 +80,7 @@ def get_remaining_count(topic_table, blog_id):
         return count
     except Exception as e:
         logger.error(f"get_remaining_count error: {e}")
-        return 0
+        return -1  # 예외 시 안전값 반환 (고갈 알림 방지)
     finally:
         conn.close()
 
@@ -88,6 +88,10 @@ def get_remaining_count(topic_table, blog_id):
 def check_exhaustion(topic_table, blog_id):
     """데이터 고갈 체크. 반환값: (can_publish: bool, remaining: int)"""
     remaining = get_remaining_count(topic_table, blog_id)
+
+    if remaining < 0:
+        logger.error(f"[{blog_id}] get_remaining_count 오류 — 고갈 체크 스킵")
+        return True, 0
 
     if remaining <= EXHAUSTION_STOP_THRESHOLD:
         msg = (
