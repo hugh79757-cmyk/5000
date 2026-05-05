@@ -4,7 +4,7 @@ blogs:
   name: Adventure Travel Guide
   pipeline: etap
   platform: hugo
-  status: inactive
+  status: active
   daily_quota: 5
   domain: adventure.techpawz.com
   cf_project: adventure-hugo
