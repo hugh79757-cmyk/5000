@@ -962,13 +962,13 @@ def generate_content(data, blog_id="travel-hugo"):
         import glob as _gl_final
         import random as _rand_final
         _blog_path_final = {
-            "travel-hugo":  "/Users/twinssn/Projects/travel-hugo",
-            "travel1-hugo": "/Users/twinssn/Projects/travel1-hugo",
-            "travel2-hugo": "/Users/twinssn/Projects/travel2-hugo",
-            "travel3-hugo": "/Users/twinssn/Projects/travel3-hugo",
-            "travel4-hugo": "/Users/twinssn/Projects/travel4-hugo",
+            "travel-hugo":  "/Users/twinssn/Projects/TAP/travel-hugo",
+            "travel1-hugo": "/Users/twinssn/Projects/TAP/travel1-hugo",
+            "travel2-hugo": "/Users/twinssn/Projects/TAP/travel2-hugo",
+            "travel3-hugo": "/Users/twinssn/Projects/TAP/travel3-hugo",
+            "travel4-hugo": "/Users/twinssn/Projects/TAP/travel4-hugo",
         }
-        _posts_dir_final = os.path.join(_blog_path_final.get(blog_id, "/Users/twinssn/Projects/travel-hugo"), "content", "posts")
+        _posts_dir_final = os.path.join(_blog_path_final.get(blog_id, "/Users/twinssn/Projects/TAP/travel-hugo"), "content", "posts")
         _all_posts_final = []
         for _md_f in _gl_final.glob(os.path.join(_posts_dir_final, "*/index.md")):
             with open(_md_f, encoding="utf-8") as _ff:
