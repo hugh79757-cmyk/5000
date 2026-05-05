@@ -48,6 +48,13 @@ from shared.telegram_notifier import send_error as _tg_error
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+# FileHandler: scheduler.log 직접 기록
+_log_file = "/Users/twinssn/Projects/5000/logs/scheduler.log"
+_fh = logging.FileHandler(_log_file, encoding="utf-8")
+_fh.setLevel(logging.INFO)
+_fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+logging.getLogger().addHandler(_fh)
+
 PROJECT_DIR = "/Users/twinssn/Projects/5000"
 CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
 PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
@@ -140,6 +147,20 @@ _queue_lock = threading.Lock()
 
 def queue_publish(blog_id):
     """동시간대 블로그를 큐에 넣고 순차 실행 (중복 방지)"""
+    # ── inactive 실시간 체크: YAML이 바뀌어도 즉시 반영 ──
+    try:
+        _cfg = load_config()
+        _blog_cfg = next(
+            (b for b in _cfg.get("blogs", [])
+             if isinstance(b, dict) and b.get("id") == blog_id),
+            None
+        )
+        if _blog_cfg and _blog_cfg.get("status") != "active":
+            logger.info(f"Queue skip (inactive): {blog_id}")
+            return
+    except Exception as _e:
+        logger.warning(f"queue_publish config check failed: {_e}")
+
     with _queue_lock:
         if blog_id in _publish_queue:
             logger.info(f"Queue skip (duplicate): {blog_id}")
@@ -171,6 +192,7 @@ def _drain_queue():
 
 _catchup_attempts = {}
 _catchup_date = None
+_catchup_lock = threading.Lock()  # catchup 중복 실행 방지
 
 
 def _get_ledger_count(blog_id, date_str):
@@ -188,7 +210,19 @@ def _get_ledger_count(blog_id, date_str):
 
 
 def catchup_missed():
-    """놓친 스케줄 보충 발행 — 5분마다 체크"""
+    """놓친 스케줄 보충 발행 — 5분마다 체크 (중복 실행 방지)"""
+    if not _catchup_lock.acquire(blocking=False):
+        logger.debug("Catchup already running, skipping")
+        return
+    global _catchup_attempts, _catchup_date
+    try:
+        _catchup_missed_inner()
+    finally:
+        _catchup_lock.release()
+
+
+def _catchup_missed_inner():
+    """catchup 실제 로직"""
     global _catchup_attempts, _catchup_date
 
     config = load_config()
@@ -343,6 +377,15 @@ def _send_morning_report():
                    cwd=os.path.dirname(os.path.abspath(__file__)))
 
 
+
+def _run_indexnow():
+    try:
+        subprocess.run([sys.executable, "scripts/indexnow.py"],
+                       cwd=os.path.dirname(os.path.abspath(__file__)), timeout=600)
+        logger.info("IndexNow 제출 완료")
+    except Exception as e:
+        logger.error(f"IndexNow 실패: {e}")
+
 # ─── 스케줄 등록 ───
 
 def register_schedules():
@@ -372,6 +415,10 @@ def register_schedules():
     logger.info("STAP data collector scheduled at 06:10")
 
     schedule.every().day.at("06:30").do(_run_car_refresh)
+
+    schedule.every().day.at("06:45").do(_run_indexnow)
+    logger.info("IndexNow scheduled at 06:45")
+
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
 
