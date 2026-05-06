@@ -8,6 +8,7 @@ import logging
 import importlib
 import sqlite3
 import yaml
+import uuid
 from datetime import datetime
 from pathlib import Path
 
@@ -366,7 +367,7 @@ def _run_pipeline(cfg):
             "result = run_publish(); "
             "import json; print(json.dumps(result if isinstance(result, dict) else {'success': bool(result)}))"
         )
-        runner_path = os.path.join(tempfile.gettempdir(), "tap_runner.py")
+        runner_path = os.path.join(tempfile.gettempdir(), f"tap_runner_{uuid.uuid4().hex}.py")
         with open(runner_path, "w") as _f:
             _f.write(runner_code)
         try:

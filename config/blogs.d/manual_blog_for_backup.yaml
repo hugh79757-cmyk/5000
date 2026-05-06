@@ -1,6 +1,7 @@
 blogs:
 - domain: rotcha.kr
   id: rotcha-blog
+  cf_project: rotcha-blog
   name: 로차 블로그
   platform: hugo
   site_path: /Users/twinssn/Projects/rotcha-blog
@@ -8,6 +9,7 @@ blogs:
 
 - domain: informationhot.kr
   id: informationhot-hugo
+  cf_project: informationhot-hugo
   name: 인포메이션핫
   platform: hugo
   site_path: /Users/twinssn/Projects/informationhot-hugo
@@ -15,6 +17,7 @@ blogs:
 
 - domain: techpawz.com
   id: techpawz-hugo
+  cf_project: techpawz-hugo
   name: 테크포즈
   platform: hugo
   site_path: /Users/twinssn/Projects/techpawz-hugo
@@ -22,6 +25,7 @@ blogs:
 
 - domain: biz.techpawz.com
   id: biz-techpawz-hugo
+  cf_project: biz-techpawz
   name: 테크포즈 비즈
   platform: hugo
   site_path: /Users/twinssn/Projects/biz.techpawz-hugo
@@ -29,6 +33,7 @@ blogs:
 
 - domain: issue.techpawz.com
   id: issue-techpawz-hugo
+  cf_project: issue-techpawz-hugo
   name: 테크포즈 이슈
   platform: hugo
   site_path: /Users/twinssn/Projects/issue-techpawz-hugo
