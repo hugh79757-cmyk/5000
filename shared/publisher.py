@@ -599,19 +599,25 @@ def deploy_site(site_path, cf_project):
         rogue.unlink()
         print(f"[guard] Removed rogue index.md from {site}")
 
-    result = subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=str(site), capture_output=True, text=True)
+    log_path = Path("/Users/twinssn/Projects/5000/logs/deploy.log")
+    with open(log_path, "a") as log_f:
+        result = subprocess.run(
+            ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
+            cwd=str(site), stdout=log_f, stderr=log_f
+        )
     if result.returncode != 0:
-        raise Exception("Hugo build failed: " + result.stderr[:500])
+        raise Exception("Hugo build failed: see deploy.log")
     index_file = site / "public" / "index.html"
     if not index_file.exists():
         raise Exception("Hugo build produced empty site: public/index.html not found")
-    result = subprocess.run(
-        ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-         "--project-name=" + cf_project, "--branch=main", "--commit-dirty=true"],
-        cwd=str(site), capture_output=True, text=True
-    )
+    with open(log_path, "a") as log_f:
+        result = subprocess.run(
+            ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+             "--project-name=" + cf_project, "--branch=main", "--commit-dirty=true"],
+            cwd=str(site), stdout=log_f, stderr=log_f
+        )
     if result.returncode != 0:
-        raise Exception("Wrangler deploy failed: " + result.stderr[:500])
+        raise Exception("Wrangler deploy failed: see deploy.log")
     return True
 
 
