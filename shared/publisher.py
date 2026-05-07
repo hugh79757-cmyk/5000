@@ -14,6 +14,10 @@ from shared.content_store import insert_article, update_published, get_today_cou
 
 STAP_ENTITY_DB = "/Users/twinssn/Projects/STAP/data/stap_entities.db"
 STAP_ENTITY_LINKER_PATH = "/Users/twinssn/Projects/STAP/shared"
+STAP_BLOGS = {
+    "stock-hugo", "dividend-hugo", "etf-hugo",
+    "sector-hugo", "ipo-hugo", "finance-hugo",
+}
 
 # TAP 엔티티 (6개 여행 블로그 교차 카드)
 TAP_TRAVEL_BLOGS = {
@@ -749,8 +753,8 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
 
         result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=is_draft)
 
-        # 엔티티 register
-        if result.get("success"):
+        # 엔티티 register (STAP 6개 블로그만)
+        if result.get("success") and blog_id in STAP_BLOGS:
             try:
                 import sys as _sys
                 if STAP_ENTITY_LINKER_PATH not in _sys.path:
