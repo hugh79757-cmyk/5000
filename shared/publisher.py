@@ -15,6 +15,20 @@ from shared.content_store import insert_article, update_published, get_today_cou
 STAP_ENTITY_DB = "/Users/twinssn/Projects/STAP/data/stap_entities.db"
 STAP_ENTITY_LINKER_PATH = "/Users/twinssn/Projects/STAP/shared"
 
+# TAP 엔티티 (6개 여행 블로그 교차 카드)
+TAP_TRAVEL_BLOGS = {
+    "travel-hugo", "travel1-hugo", "travel2-hugo",
+    "travel3-hugo", "travel4-hugo",
+}
+try:
+    import sys as _sys
+    _sys.path.insert(0, "/Users/twinssn/Projects/TAP/core")
+    from tap_entity_manager import inject_cards as _tap_inject_cards
+    from tap_entity_manager import register_post as _tap_register_post
+    TAP_ENTITY_AVAILABLE = True
+except Exception:
+    TAP_ENTITY_AVAILABLE = False
+
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
 
@@ -708,6 +722,31 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
 
         body_md = _inject_related_cards_midpoint(body_md, blog_id, slug, title, category)
 
+        # TAP 엔티티 카드 삽입 (travel 6개 블로그)
+        if TAP_ENTITY_AVAILABLE and blog_id in TAP_TRAVEL_BLOGS:
+            try:
+                import re as _re
+                _region = ""
+                for _tag in (tags or "").split(","):
+                    _tag = _tag.strip()
+                    for _do in ['서울','부산','대구','인천','광주','대전','울산','세종',
+                                '경기','강원','충북','충남','전북','전남','경북','경남','제주']:
+                        if _tag.startswith(_do):
+                            _region = _do
+                            break
+                    if _region:
+                        break
+                if not _region:
+                    for _do in ['서울','부산','대구','인천','광주','대전','울산','세종',
+                                '경기','강원','충북','충남','전북','전남','경북','경남','제주']:
+                        if _do in title:
+                            _region = _do
+                            break
+                body_md, _card_cnt = _tap_inject_cards(body_md, blog_id, _region)
+                logger.info(f"[TapEntity] Hugo 카드 {_card_cnt}개 삽입 (region={_region})")
+            except Exception as _te:
+                logger.warning(f"[TapEntity] Hugo 카드 삽입 실패 (무시): {_te}")
+
         result = _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=is_draft)
 
         # 엔티티 register
@@ -721,6 +760,21 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
                 logger.info(f"[EntityLinker] registered: {blog_id}/{slug}")
             except Exception as _e:
                 logger.warning(f"[EntityLinker] register 실패: {_e}")
+
+            # TAP 엔티티 DB 등록
+            if TAP_ENTITY_AVAILABLE and blog_id in TAP_TRAVEL_BLOGS:
+                try:
+                    _pub_url = result.get("url", "")
+                    _tap_register_post(
+                        blog_id=blog_id,
+                        title=title,
+                        url=_pub_url,
+                        slug=slug,
+                        category=category,
+                        region=_region if '_region' in dir() else "",
+                    )
+                except Exception as _te:
+                    logger.warning(f"[TapEntity] register 실패 (무시): {_te}")
 
         # 로그 추가
         logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang={coupang_status} | internal_links={link_count} | chars={len(body_md)}')
