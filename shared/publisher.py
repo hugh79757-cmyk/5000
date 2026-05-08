@@ -724,7 +724,9 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         
         body_md, link_count = _insert_internal_links(body_md, blog_id, slug)
 
+        if isinstance(body_md, tuple): body_md = body_md[0]
         body_md = _inject_related_cards_midpoint(body_md, blog_id, slug, title, category)
+        if isinstance(body_md, tuple): body_md = body_md[0]
 
         # TAP 엔티티 카드 삽입 (travel 6개 블로그)
         if TAP_ENTITY_AVAILABLE and blog_id in TAP_TRAVEL_BLOGS:

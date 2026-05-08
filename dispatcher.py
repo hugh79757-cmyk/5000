@@ -9,6 +9,7 @@ import importlib
 import sqlite3
 import yaml
 import uuid
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -429,7 +430,10 @@ ETAP_PIPELINE_BLOGS = {
 
 def _build_and_deploy_central(blog_id: str) -> bool:
     """dispatcher 중앙 빌드+배포 — ETAP 파이프라인 전용"""
-    site_path = ETAP_BASE / blog_id
+    _all = _load_all_blogs().get("blogs", [])
+    _cfg = next((b for b in _all if b.get("id") == blog_id), {})
+    _sp = _cfg.get("site_path", "") or str(ETAP_BASE / blog_id)
+    site_path = Path(_sp)
     if not site_path.exists():
         logger.warning(f"[deploy] site_path 없음: {site_path}")
         return False
@@ -444,7 +448,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             return False
 
         r2 = subprocess.run(
-            [WRANGLER, "pages", "deploy", "public", "--project-name", blog_id],
+            [WRANGLER, "pages", "deploy", "public", "--project-name", blog_id, "--commit-dirty=true", "--commit-message=publish"],
             cwd=str(site_path),
             capture_output=True, text=True,
             env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
