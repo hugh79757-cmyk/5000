@@ -181,7 +181,7 @@ def _insert_internal_links(body_md, blog_id, slug):
     try:
         from stap_entity_linker import StapEntityLinker
         linker = StapEntityLinker(db_path=STAP_ENTITY_DB)
-        new_body = linker.inject(body_md, current_blog=blog_id)
+        new_body, _link_cnt = linker.inject(body_md, current_blog=blog_id)
         injected = new_body.count("](") - body_md.count("](")
         link_count = max(0, injected)
         return new_body, link_count
