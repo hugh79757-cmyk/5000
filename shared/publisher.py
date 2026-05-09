@@ -631,7 +631,10 @@ def deploy_site(site_path, cf_project):
     with open(log_path, "a") as log_f:
         result = subprocess.run(
             ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-             "--project-name=" + cf_project, "--branch=main", "--commit-dirty=true"],
+             "--project-name=" + cf_project,
+             "--branch=main",
+             "--commit-dirty=true",
+             "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
             cwd=str(site), stdout=log_f, stderr=log_f
         )
     if result.returncode != 0:
@@ -722,11 +725,14 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         if data_source == "car_db":
             body_md, coupang_status = _insert_coupang(body_md, segment, fuel_type, blog_cfg)
         
-        body_md, link_count = _insert_internal_links(body_md, blog_id, slug)
-
-        if isinstance(body_md, tuple): body_md = body_md[0]
-        body_md = _inject_related_cards_midpoint(body_md, blog_id, slug, title, category)
-        if isinstance(body_md, tuple): body_md = body_md[0]
+        # STAP 블로그만 엔티티 링커 / 관련 카드 삽입
+        if blog_id in STAP_BLOGS:
+            body_md, link_count = _insert_internal_links(body_md, blog_id, slug)
+            if isinstance(body_md, tuple): body_md = body_md[0]
+            body_md = _inject_related_cards_midpoint(body_md, blog_id, slug, title, category)
+            if isinstance(body_md, tuple): body_md = body_md[0]
+        else:
+            link_count = 0
 
         # TAP 엔티티 카드 삽입 (travel 6개 블로그)
         if TAP_ENTITY_AVAILABLE and blog_id in TAP_TRAVEL_BLOGS:

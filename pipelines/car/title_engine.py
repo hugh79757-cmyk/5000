@@ -27,7 +27,7 @@ def _jeul(w):
 
 
 def _ji(w):
-    return "이" if _has_batchim(w) else ""
+    return "이" if _has_batchim(w) else "가"
 
 
 def _build_vars(data):
@@ -700,6 +700,130 @@ def _ev_solo_ext(v):
 # ════════════════════════════════════════════════════════════
 # 확장 템플릿 등록
 # ════════════════════════════════════════════════════════════
+
+# ════════════════════════════════════════════════════════════
+# rank: TOP5 랭킹 중심
+# ════════════════════════════════════════════════════════════
+def _rank_solo(v):
+    seg = v.get("segment", "이 세그먼트")
+    rank_type = v.get("rank_type", "유지비")
+    rank_label = {
+        "resale":        "잔존가치",
+        "maintenance":   "유지비",
+        "monthly_cost":  "월 비용",
+        "value":         "가성비",
+    }.get(rank_type, "유지비")
+    return [
+        f"{seg} {rank_label} TOP5 — 데이터로 가린 순위",
+        f"{seg} 차량 {rank_label} 랭킹 — 1위부터 5위까지 수치 비교",
+        f"{v['month_kr']} {seg} {rank_label} 순위 — 어떤 차가 가장 유리한가",
+        f"{seg} {rank_label} 비교 TOP5 — 지금 사기 좋은 차 순서대로",
+        f"데이터로 매긴 {seg} {rank_label} 랭킹 [{v['month_kr']}]",
+        f"{seg} 구매 전 필독 — {rank_label} 기준 TOP5 순위표",
+        f"{seg} {rank_label} 1위는 어디? 5개 차량 수치 완전 비교",
+        f"{v['yr']}년 {seg} {rank_label} TOP5 — 지금 가장 합리적인 차",
+    ]
+
+def _rank_solo_ext(v):
+    seg = v.get("segment", "이 세그먼트")
+    rank_type = v.get("rank_type", "유지비")
+    rank_label = {
+        "resale":        "잔존가치",
+        "maintenance":   "유지비",
+        "monthly_cost":  "월 비용",
+        "value":         "가성비",
+    }.get(rank_type, "유지비")
+    return [
+        f"{seg} {rank_label} TOP5 완전 분석 — 가격·연비·감가·보험 종합 순위",
+        f"{v['month_kr']} 기준 {seg} {rank_label} 랭킹 — 1위부터 5위까지 항목별 비교표",
+        f"{seg} 차량 {rank_label} 순위 — 같은 세그먼트에서 어떤 차가 가장 경제적인가",
+        f"데이터로 매긴 {seg} TOP5 {rank_label} 랭킹 — 제조사 홍보 빼고 숫자만 본다",
+        f"{seg} 구매 고민이라면 — {rank_label} 기준 TOP5로 답을 찾는다",
+        f"{v['yr']}년 {seg} {rank_label} 랭킹 — 지금 이 가격에 가장 유리한 선택",
+        f"{seg} {rank_label} 비교표 — TOP5 수치로 보는 최종 선택 가이드",
+        f"같은 세그먼트 5개 차량 {rank_label} 비교 — 1위와 5위의 차이는 얼마?",
+    ]
+
+def _rank_vs(v):
+    return _rank_solo(v)
+
+def _rank_vs_ext(v):
+    return _rank_solo_ext(v)
+
+
+# ════════════════════════════════════════════════════════════
+# pick: 페르소나 추천 중심
+# ════════════════════════════════════════════════════════════
+def _pick_solo(v):
+    persona_label = {
+        "first_car":  "사회초년생",
+        "commuter":   "출퇴근러",
+        "newlywed":   "신혼부부",
+        "family":     "패밀리",
+        "premium":    "프리미엄",
+    }.get(v.get("persona_type", ""), "이런 사람")
+    return [
+        f"{persona_label}에게 {v['m']}{v['ji']} 맞는 이유 — 실비용으로 따져봤다",
+        f"{v['m']} {v['p']:,}만원, {persona_label}이 사도 될까?",
+        f"{persona_label} 맞춤 추천 — {v['m']} 실구매 가이드",
+        f"내 상황에 {v['m']}{v['ji']} 맞는 차인지 확인하는 법",
+        f"{persona_label} 최적 차량 — {v['m']} 선택 전 알아야 할 것",
+        f"{v['m']} {v['t']}, {persona_label}에게 추천하는 이유 [{v['month_kr']}]",
+        f"월 유지비 {v['maint_m']:,}만원 {v['m']} — {persona_label}에게 부담인가 아닌가",
+        f"{persona_label}이 {v['m']}{v['eul']} 골라야 하는 3가지 이유",
+    ]
+
+def _pick_solo_ext(v):
+    persona_label = {
+        "first_car":  "사회초년생",
+        "commuter":   "출퇴근러",
+        "newlywed":   "신혼부부",
+        "family":     "패밀리",
+        "premium":    "프리미엄",
+    }.get(v.get("persona_type", ""), "이런 사람")
+    return [
+        f"{persona_label} 맞춤 차량 — {v['m']} {v['p']:,}만원 실비용 완전 분석",
+        f"{v['m']} {v['t']}, {persona_label}에게 딱 맞는가 — 유지비·잔존가치·보험 기준 검토",
+        f"월급 대비 {v['m']} 유지비 {v['maint_m']:,}만원 — {persona_label}이 감당 가능한 수준인가",
+        f"{persona_label}을 위한 {v['m']} 구매 가이드 — 장점 3가지 단점 2가지",
+        f"{v['m']} {v['p']:,}만원 — {persona_label} 입장에서 이 차가 최선인지 데이터로 판단",
+        f"{persona_label} 최적 픽 {v['m']} — {v['yr']}년 실구매 전 체크리스트",
+        f"이런 사람에게 {v['m']}{v['eul']} 추천하는 이유 — 가격·연비·잔존가치 근거 분석",
+        f"{v['m']} {v['t']} 3년 총비용 {v['total']:,}만원 — {persona_label} 예산에 맞는가",
+    ]
+
+def _pick_vs(v):
+    persona_label = {
+        "first_car":  "사회초년생",
+        "commuter":   "출퇴근러",
+        "newlywed":   "신혼부부",
+        "family":     "패밀리",
+        "premium":    "프리미엄",
+    }.get(v.get("persona_type", ""), "이런 사람")
+    return [
+        f"{persona_label}에게 {v['m']} vs {v['c']} — 어느 쪽이 더 맞는 차인가",
+        f"{persona_label} 입장에서 {v['m']}{v['wa']} {v['c']} 중 하나를 고른다면",
+        f"월 유지비 {v['maint_m']:,}만원 {v['m']} vs {v['c']} — {persona_label} 최적 픽은?",
+        f"{persona_label} 맞춤 비교 — {v['m']} {v['p']:,}만원 vs {v['c']} {v['cp']:,}만원",
+        f"{v['m']}{v['wa']} {v['c']}, {persona_label}에게 맞는 차 하나만 고른다",
+    ]
+
+def _pick_vs_ext(v):
+    persona_label = {
+        "first_car":  "사회초년생",
+        "commuter":   "출퇴근러",
+        "newlywed":   "신혼부부",
+        "family":     "패밀리",
+        "premium":    "프리미엄",
+    }.get(v.get("persona_type", ""), "이런 사람")
+    return [
+        f"{persona_label} 최적 픽 — {v['m']} vs {v['c']} 유지비·잔존가치·보험 완전 비교",
+        f"{persona_label}이라면 {v['m']}{v['wa']} {v['c']} 중 어느 쪽? — 실비용 데이터 기반 추천",
+        f"{v['m']} {v['p']:,}만원 vs {v['c']} {v['cp']:,}만원 — {persona_label} 입장에서 최선의 선택",
+        f"{persona_label} 맞춤 차량 비교 — {v['m']} vs {v['c']} 3년 총비용 차이 분석",
+        f"월급 대비 부담 비교 — {v['m']} vs {v['c']}, {persona_label}에게 더 합리적인 차",
+    ]
+
 SITE_VS_EXT = {
     "hotissue": _hotissue_vs_ext,
     "tco": _tco_vs_ext,
@@ -707,6 +831,8 @@ SITE_VS_EXT = {
     "compare": _compare_vs_ext,
     "guide": _guide_vs_ext,
     "ev": _ev_vs_ext,
+    "rank": _rank_vs_ext,
+    "pick": _pick_vs_ext,
 }
 
 SITE_SOLO_EXT = {
@@ -716,6 +842,8 @@ SITE_SOLO_EXT = {
     "compare": _compare_solo_ext,
     "guide": _guide_solo_ext,
     "ev": _ev_solo_ext,
+    "rank": _rank_solo_ext,
+    "pick": _pick_solo_ext,
 }
 
 # 메인 함수
@@ -727,6 +855,8 @@ SITE_VS = {
     "compare": _compare_vs,
     "guide": _guide_vs,
     "ev": _ev_vs,
+    "rank": _rank_vs,
+    "pick": _pick_vs,
 }
 
 SITE_SOLO = {
@@ -736,11 +866,17 @@ SITE_SOLO = {
     "compare": _compare_solo,
     "guide": _guide_solo,
     "ev": _ev_solo,
+    "rank": _rank_solo,
+    "pick": _pick_solo,
 }
 
 
 def generate_title(data, site_id="hotissue"):
     v = _build_vars(data)
+    # persona_type, rank_type, segment 전달
+    v["persona_type"] = data.get("persona_type", "")
+    v["rank_type"]    = data.get("rank_type", "")
+    v["segment"]      = data.get("segment", "")
     has_comp = bool(v["c"])
     ftype = v.get("ftype", "")
 
@@ -750,6 +886,20 @@ def generate_title(data, site_id="hotissue"):
             pool = _common_vs(v) + _common_vs_ext(v) + _ev_hev_vs(v)
         else:
             pool = _common_solo(v) + _common_solo_ext(v) + _ev_hev_solo(v)
+        return random.choice(pool)
+
+    # rank/pick: _common 풀 배제, 전용 풀만 사용
+    if site_id in ("rank", "pick"):
+        if has_comp:
+            pool = (
+                SITE_VS.get(site_id)(v)
+                + SITE_VS_EXT.get(site_id)(v)
+            )
+        else:
+            pool = (
+                SITE_SOLO.get(site_id)(v)
+                + SITE_SOLO_EXT.get(site_id)(v)
+            )
         return random.choice(pool)
 
     if has_comp:
