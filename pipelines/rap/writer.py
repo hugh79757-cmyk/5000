@@ -34,22 +34,40 @@ def _build_trade_reference(keyword, trades, region_info=None):
     lines.append("")
 
     # ── 키워드 단지 실거래 (최우선 섹션) ──
+    _is_rent_kw = isinstance(trades, dict) and trades.get("data_type") == "rent"
     if keyword_trades:
-        kw_prices = [t.get("dealAmountInt", 0) for t in keyword_trades if t.get("dealAmountInt")]
-        lines.append(f"### ★ [{apt_kw}] 실거래가 ({len(keyword_trades)}건) ← 이 단지가 키워드 단지입니다")
-        if kw_prices:
-            lines.append(f"- 최고가: {max(kw_prices):,}만원")
-            lines.append(f"- 최저가: {min(kw_prices):,}만원")
-            if len(kw_prices) > 1:
-                lines.append(f"- 평균: {sum(kw_prices)//len(kw_prices):,}만원")
-        for t in keyword_trades:
-            amt   = t.get("dealAmount", "").strip()
-            area  = t.get("excluUseAr", "")
-            floor = t.get("floor", "")
-            dong  = t.get("umdNm", "")
-            year  = t.get("buildYear", "")
-            ddate = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
-            lines.append(f"  - {dong} {apt_kw}({year}년식) {area}㎡ {floor}층: {amt}만원 ({ddate})")
+        if _is_rent_kw:
+            lines.append(f"### ★ [{apt_kw}] 전월세 거래 ({len(keyword_trades)}건) ← 이 단지가 키워드 단지입니다")
+            for t in keyword_trades:
+                area  = t.get("excluUseAr", "")
+                floor = t.get("floor", "")
+                dong  = t.get("umdNm", "")
+                year  = t.get("buildYear", "")
+                rtype = t.get("rentType", "전세")
+                dep   = t.get("depositInt", 0)
+                mr    = t.get("monthlyRentInt", 0)
+                ddate = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+                if mr and mr > 0:
+                    price_str = f"보증금 {dep:,}만원 / 월세 {mr:,}만원"
+                else:
+                    price_str = f"전세 {dep:,}만원"
+                lines.append(f"  - {dong} {apt_kw}({year}년식) {area}㎡ {floor}층: [{rtype}] {price_str} ({ddate})")
+        else:
+            kw_prices = [t.get("dealAmountInt", 0) for t in keyword_trades if t.get("dealAmountInt")]
+            lines.append(f"### ★ [{apt_kw}] 실거래가 ({len(keyword_trades)}건) ← 이 단지가 키워드 단지입니다")
+            if kw_prices:
+                lines.append(f"- 최고가: {max(kw_prices):,}만원")
+                lines.append(f"- 최저가: {min(kw_prices):,}만원")
+                if len(kw_prices) > 1:
+                    lines.append(f"- 평균: {sum(kw_prices)//len(kw_prices):,}만원")
+            for t in keyword_trades:
+                amt   = t.get("dealAmount", "").strip()
+                area  = t.get("excluUseAr", "")
+                floor = t.get("floor", "")
+                dong  = t.get("umdNm", "")
+                year  = t.get("buildYear", "")
+                ddate = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+                lines.append(f"  - {dong} {apt_kw}({year}년식) {area}㎡ {floor}층: {amt}만원 ({ddate})")
         lines.append("")
     else:
         lines.append(f"### ★ [{apt_kw}] 해당 기간 실거래 없음")
@@ -58,36 +76,62 @@ def _build_trade_reference(keyword, trades, region_info=None):
         lines.append("")
 
     # ── 구 내 인근 단지 참고 데이터 ──
+    _is_rent_other = isinstance(trades, dict) and trades.get("data_type") == "rent"
     if other_trades:
-        other_prices = [t.get("dealAmountInt", 0) for t in other_trades if t.get("dealAmountInt")]
         lines.append(f"### {district} 인근 단지 참고 데이터 ({len(other_trades)}건)")
-        if other_prices:
-            lines.append(f"- (참고) 구 전체 최고가: {max(other_prices):,}만원 / 최저가: {min(other_prices):,}만원 / 평균: {sum(other_prices)//len(other_prices):,}만원")
-            lines.append(f"- ※ 위 수치는 구 전체 통계이며 키워드 단지({apt_kw}) 시세가 아닙니다.")
+        if _is_rent_other:
+            dep_prices = [t.get("depositInt", 0) for t in other_trades if t.get("depositInt")]
+            if dep_prices:
+                lines.append(f"- (참고) 보증금 최고: {max(dep_prices):,}만원 / 최저: {min(dep_prices):,}만원 / 평균: {sum(dep_prices)//len(dep_prices):,}만원")
+                lines.append(f"- ※ 위 수치는 구 전체 전월세 통계이며 키워드 단지({apt_kw}) 시세가 아닙니다.")
+        else:
+            other_prices = [t.get("dealAmountInt", 0) for t in other_trades if t.get("dealAmountInt")]
+            if other_prices:
+                lines.append(f"- (참고) 구 전체 최고가: {max(other_prices):,}만원 / 최저가: {min(other_prices):,}만원 / 평균: {sum(other_prices)//len(other_prices):,}만원")
+                lines.append(f"- ※ 위 수치는 구 전체 통계이며 키워드 단지({apt_kw}) 시세가 아닙니다.")
         lines.append("")
 
-    lines.append("### 최근 거래 내역 (키워드 단지 우선)")
-    for t in all_trades[:15]:
-        apt = t.get("aptNm", "")
-        amount = t.get("dealAmount", "").strip()
-        area = t.get("excluUseAr", "")
-        floor = t.get("floor", "")
-        dong = t.get("umdNm", "")
-        year = t.get("buildYear", "")
-        deal_date = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
-        # 취득세 구간 자동 계산
-        price_int = t.get("dealAmountInt", 0)
-        if price_int > 0:
-            if price_int <= 60000:
-                tax_info = f"취득세구간: 6억이하 1.1%→{int(price_int*0.011):,}만원"
-            elif price_int <= 90000:
-                rate = 0.01 + (price_int - 60000) / 30000 * 0.02
-                tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{int(price_int*rate):,}만원"
+    # ── rent 데이터 전용 거래 내역 출력 ──
+    is_rent = isinstance(trades, dict) and trades.get("data_type") == "rent"
+    if is_rent:
+        lines.append("### 최근 전월세 거래 내역 (키워드 단지 우선)")
+        for t in all_trades[:15]:
+            apt       = t.get("aptNm", "")
+            area      = t.get("excluUseAr", "")
+            floor     = t.get("floor", "")
+            dong      = t.get("umdNm", "")
+            year      = t.get("buildYear", "")
+            rtype     = t.get("rentType", "전세")
+            deposit   = t.get("depositInt", 0)
+            mrent     = t.get("monthlyRentInt", 0)
+            deal_date = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+            if mrent and mrent > 0:
+                price_str = f"보증금 {deposit:,}만원 / 월세 {mrent:,}만원"
             else:
-                tax_info = f"취득세구간: 9억초과 3.3%→{int(price_int*0.033):,}만원"
-        else:
-            tax_info = ""
-        lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {amount}만원 ({deal_date}) [{tax_info}]")
+                price_str = f"전세 {deposit:,}만원"
+            lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: [{rtype}] {price_str} ({deal_date})")
+    else:
+        lines.append("### 최근 거래 내역 (키워드 단지 우선)")
+        for t in all_trades[:15]:
+            apt = t.get("aptNm", "")
+            amount = t.get("dealAmount", "").strip()
+            area = t.get("excluUseAr", "")
+            floor = t.get("floor", "")
+            dong = t.get("umdNm", "")
+            year = t.get("buildYear", "")
+            deal_date = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+            price_int = t.get("dealAmountInt", 0)
+            if price_int > 0:
+                if price_int <= 60000:
+                    tax_info = f"취득세구간: 6억이하 1.1%→{int(price_int*0.011):,}만원"
+                elif price_int <= 90000:
+                    rate = 0.01 + (price_int - 60000) / 30000 * 0.02
+                    tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{int(price_int*rate):,}만원"
+                else:
+                    tax_info = f"취득세구간: 9억초과 3.3%→{int(price_int*0.033):,}만원"
+            else:
+                tax_info = ""
+            lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {amount}만원 ({deal_date}) [{tax_info}]")
 
     return "\n".join(lines)
 
@@ -265,11 +309,11 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
     # ─── rap4-hugo: 전월세 가이드 중심 ───
     if blog_id == "rap4-hugo":
         return f"""당신은 전세·월세 전문 블로그 작가입니다.
-아래 국토교통부 실거래가(매매) 데이터를 참고하여 해당 지역의 전월세 시장 분석 글을 작성하세요.
+아래 국토교통부 실거래(전월세) 데이터를 참고하여 해당 지역의 전월세 시장 분석 글을 작성하세요.
 
 {rules}
-7. 매매가 데이터를 활용하되, 전세가율(일반적으로 매매가의 55~70%)을 적용하여 전세 시세를 추정하세요
-8. 추정치임을 반드시 명시하세요
+7. 참고자료의 실제 전월세 거래 데이터(보증금, 월세)를 그대로 활용하세요. 매매가 기반 추정값 사용 금지.
+8. 참고자료에 실제 거래가 있으면 반드시 해당 수치를 표에 사용하고, 없을 때만 추정치임을 명시하세요
 
 [전월세 분석 지침]
 - 본문 서두에 반드시 다음 문구 삽입: "본 분석은 매매 실거래가 기반 추정치이며, 실제 전월세 시세와 차이가 있을 수 있습니다."
@@ -282,19 +326,19 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
   지방 광역시: 65~75%
   ※ 신축(5년 이내)은 위 비율에서 -3~5%p, 구축(20년 이상)은 +3~5%p 조정
 
-[월세 환산 공식 — 반드시 이 공식대로 계산]
-- 기준 보증금: 5,000만원 (고정)
-- 전환이율: 연 4.0~5.0% (중간값 4.5% 사용)
-- 월세 = (추정전세가 - 보증금) × 전환이율 ÷ 12
-- 예시) 매매가 80,000만원(8억), 전세가율 60%
-  → 추정전세가 = 80,000 × 0.60 = 48,000만원(4억 8천)
-  → 월세 = (48,000 - 5,000) × 0.045 ÷ 12 = 161만원/월
-- 예시) 매매가 50,000만원(5억), 전세가율 60%
-  → 추정전세가 = 50,000 × 0.60 = 30,000만원(3억)
-  → 월세 = (30,000 - 5,000) × 0.045 ÷ 12 = 94만원/월
+[전월세 데이터 활용 원칙]
+- 참고자료에 전세 거래가 있으면: 보증금 수치를 그대로 표에 기재하세요
+- 참고자료에 월세 거래가 있으면: 보증금 + 월세 수치를 그대로 표에 기재하세요
+- 참고자료에 거래가 전혀 없을 때만: 아래 전환이율 공식으로 추정
+  * 전환이율 참고: 연 4.0~5.0% (중간값 4.5% 사용)
+  * 월세 = (전세보증금 - 기준보증금5000만원) × 0.045 ÷ 12
+- 실제 거래 수치와 추정값을 절대 혼용하지 마세요
 
 [중요] 월세 단위는 반드시 '만원/월'로 표기. 연 단위 금액을 월세로 쓰지 마세요.
-[중요] 표 컬럼: 단지명 | 면적(㎡) | 매매가(만원) | 추정전세가(만원) | 월세환산(만원/월)
+[중요] 표 컬럼(전세): 단지명 | 면적(㎡) | 건축연도 | 층 | 전세보증금(만원)
+[중요] 표 컬럼(월세): 단지명 | 면적(㎡) | 건축연도 | 층 | 보증금(만원) | 월세(만원/월)
+[중요] 전세와 월세 거래를 분리하여 각각 별도 표로 작성하세요. 전세 표와 월세 표의 컬럼 수를 반드시 일치시키세요.
+[중요] 참고자료의 실제 보증금·월세 수치를 그대로 사용하세요. 매매가 기반 추정값 사용 금지.
 
 - 전세 안전 체크리스트 (반드시 본문에 포함할 것):
   1. 등기부등본 확인: 근저당/가압류/소유권 이전 여부
@@ -322,9 +366,13 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - H2(##) 소제목 4~6개로 구조화
 - H3(###)을 활용하여 세부 항목 정리
 - 자연스러운 구어체, 한 단락 3~5문장
-- 매매가 → 추정 전세가 → 월세 환산을 마크다운 표(table)로 정리
+- 실제 전월세 거래 데이터를 마크다운 표(table)로 정리 (전세/월세 분리)
+- 전세 표 헤더 고정: | 단지명 | 면적(㎡) | 건축연도 | 층 | 전세보증금(만원) |
+                     |--------|----------|----------|----|--------------------|
+- 월세 표 헤더 고정: | 단지명 | 면적(㎡) | 건축연도 | 층 | 보증금(만원) | 월세(만원/월) |
+                     |--------|----------|----------|----|--------------|--------------------|
 - 도입부: 해당 지역 전월세 시장 동향
-- 중반: 주요 단지별 전세 추정가 분석 + 월세 환산 비교
+- 중반: 주요 단지별 실거래 전세/월세 분석
 - 후반: 전세 계약 시 필수 체크리스트 5항목
 - 마지막: 핵심 요약 3줄
 - 면책 문구를 본문에 넣지 마세요 (시스템이 자동 삽입합니다)
@@ -343,7 +391,8 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 - 본문: 3,000자 이상 (부족하면 단지별 분석과 월세 환산 예시를 추가하세요)
 - "특히" 단어 사용 금지
 - 월세 단위: 반드시 "만원/월"
-- 표의 매매가는 반드시 참고자료의 실제 거래금액 사용 (평균값 대입 금지)"
+- 표의 보증금·월세는 반드시 참고자료의 실제 전월세 거래금액 사용 (추정값·평균값 대입 금지)
+- 거래 데이터가 없는 단지는 표에 포함하지 마세요"
 
 """ + _base_output_format().replace("{category}", "전월세")
 
