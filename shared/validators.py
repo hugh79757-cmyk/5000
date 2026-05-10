@@ -424,9 +424,13 @@ def _check_car(title: str, body: str, ctx: dict) -> list:
     import re
 
     _car_names = _load_car_names_from_db()
-    title_has_car = any(name in title for name in _car_names)
-    if not title_has_car:
-        issues.append(f"[CRITICAL] 제목에 차량명 없음: \"{title[:50]}\"")
+    # top5_rank / persona_pick 은 세그먼트형 제목 — 차량명 검증 면제
+    _post_type = ctx.get("post_type", "")
+    _exempt_types = ("top5_rank", "persona_pick", "price_trend")
+    if _post_type not in _exempt_types:
+        title_has_car = any(name in title for name in _car_names)
+        if not title_has_car:
+            issues.append(f"[CRITICAL] 제목에 차량명 없음: \"{title[:50]}\"")
 
     # 가격 데이터 존재 확인
     price_pattern = re.compile(r"\d{1,2},?\d{3}만원|\d+억")

@@ -291,6 +291,7 @@ def run(blog_cfg):
             "keyword": data.get("model_name", ""),
             "event_date": "",
             "daily_quota": blog_cfg.get("daily_quota", 5),
+            "post_type": post_type,
         }
         _issues = _validate(blog_id, title, body, _val_ctx, pipeline="car")
         if _issues:
