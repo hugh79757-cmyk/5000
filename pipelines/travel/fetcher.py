@@ -378,91 +378,114 @@ def fetch_food():
         "충북": 33, "충남": 34, "경북": 35, "경남": 36,
         "전북": 37, "전남": 38, "제주": 39,
     }
-    region_name = random.choice(list(AREA_CODES.keys()))
-    area_code = AREA_CODES[region_name]
-    keywords = ["맛집"]  # 테마를 맛집으로 고정 (TourAPI가 세부 카테고리 필터링 불가)
+    keywords = ["맛집"]
     keyword = random.choice(keywords)
     key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
+
+    # 중복 제외 후 pool 부족 시 지역 재시도 (전체 지역 순회)
+    _all_regions = list(AREA_CODES.keys())
+    random.shuffle(_all_regions)
+
+    # 기존 발행 contentid 사전 로드 (루프 밖에서 1회만)
+    _published_cids = set()
     try:
-        resp = req.get(
-            "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
-            params={
-                "serviceKey": key,
-                "MobileOS": "ETC",
-                "MobileApp": "TAP",
-                "_type": "json",
-                "numOfRows": 50,
-                "pageNo": 1,
-                "contentTypeId": 39,
-                "areaCode": area_code,
-                "arrange": "C",
-            },
-            timeout=15,
-        )
-        data = resp.json()
-        header = data.get("response", {}).get("header", {})
-        if header.get("resultCode") != "0000":
-            logger.warning("food API error: " + str(header))
-            return None
-        items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items_raw, dict):
-            items_raw = [items_raw]
-        if not items_raw:
-            logger.warning("food: no data for " + region_name)
-            return None
-        # [FIX] 음식점 + 카페 혼합 — 카페만으로 구성되지 않도록 보장
-        _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
-        def _is_cafe(item):
-            return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
-        _restaurants = [i for i in items_raw if not _is_cafe(i)]
-        _cafes = [i for i in items_raw if _is_cafe(i)]
-        if len(_restaurants) >= 2 and _cafes:
-            _mixed = _restaurants + _cafes[:1]
-        elif len(_restaurants) >= 3:
-            _mixed = _restaurants
-        else:
-            _mixed = items_raw
-        with_img = [i for i in _mixed if i.get('firstimage')]
-        pool = with_img if len(with_img) >= 3 else _mixed
-        # ── 기존 발행 contentid 제외 (중복 방지) ──
-        _published_cids = set()
+        import sqlite3 as _sql
+        _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+        for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel3-hugo' AND source_id != ''"):
+            for _cid in row[0].split(","):
+                if _cid.strip():
+                    _published_cids.add(_cid.strip())
+        for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel3-hugo' AND source_id != ''"):
+            for _cid in row[0].split(","):
+                if _cid.strip():
+                    _published_cids.add(_cid.strip())
+        _db.close()
+    except Exception as _e:
+        logger.warning(f"food dup-check DB error: {_e}")
+
+    for _retry_idx, region_name in enumerate(_all_regions):
+        area_code = AREA_CODES[region_name]
+        if _retry_idx > 0:
+            logger.info(f"food: pool 부족 → 지역 재시도 ({_retry_idx+1}/{len(_all_regions)}): {region_name}")
         try:
-            import sqlite3 as _sql
-            _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
-            for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel3-hugo' AND source_id != ''"):
-                for _cid in row[0].split(","):
-                    if _cid.strip():
-                        _published_cids.add(_cid.strip())
-            for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel3-hugo' AND source_id != ''"):
-                for _cid in row[0].split(","):
-                    if _cid.strip():
-                        _published_cids.add(_cid.strip())
-            _db.close()
-        except Exception as _e:
-            logger.warning(f"food dup-check DB error: {_e}")
-        pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
-        if len(pool) < 3:
-            logger.warning(f"food: 중복 제외 후 아이템 부족 ({len(pool)}개)")
-            return None
-        selected, _sg = _select_same_sigungu(pool, 3)
-        adapted = _adapt_korservice_items(selected)
-        sigungu_name = _sg if _sg else region_name
-        display = f"{region_name} {sigungu_name}".strip() if sigungu_name and sigungu_name != region_name else region_name
-        content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
-        return {
-            "items": adapted,
-            "display_region": display,
-            "sigungu": sigungu_name,
-            "do_name": region_name,
-            "theme": keyword,
-            "category": "맛집",
-            "angle": display + " " + keyword,
-            "source_type": "korservice",
-            "content_ids": content_ids,
-        }
-    except Exception as e:
-        logger.warning("food fetch failed: " + str(e))
-        return None
+            resp = req.get(
+                "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
+                params={
+                    "serviceKey": key,
+                    "MobileOS": "ETC",
+                    "MobileApp": "TAP",
+                    "_type": "json",
+                    "numOfRows": 50,
+                    "pageNo": 1,
+                    "contentTypeId": 39,
+                    "areaCode": area_code,
+                    "arrange": "C",
+                },
+                timeout=15,
+            )
+            data = resp.json()
+            header = data.get("response", {}).get("header", {})
+            if header.get("resultCode") != "0000":
+                logger.warning("food API error: " + str(header))
+                continue
+            items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(items_raw, dict):
+                items_raw = [items_raw]
+            if not items_raw:
+                logger.warning("food: no data for " + region_name)
+                continue
+            # [FIX] 음식점 + 카페 혼합 — 카페만으로 구성되지 않도록 보장
+            _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
+            def _is_cafe(item):
+                return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
+            _restaurants = [i for i in items_raw if not _is_cafe(i)]
+            _cafes = [i for i in items_raw if _is_cafe(i)]
+            if len(_restaurants) >= 2 and _cafes:
+                _mixed = _restaurants + _cafes[:1]
+            elif len(_restaurants) >= 3:
+                _mixed = _restaurants
+            else:
+                _mixed = items_raw
+            with_img = [i for i in _mixed if i.get("firstimage")]
+            pool = with_img if len(with_img) >= 3 else _mixed
+            pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+            if len(pool) < 3:
+                logger.warning(f"food: {region_name} 중복 제외 후 {len(pool)}건 → 다음 지역")
+                continue
+            selected, _sg = _select_same_sigungu(pool, 3)
+            # 같은 시군구 3개 못 찾으면 시군구 조건 없이 pool에서 랜덤 3개
+            if len(selected) < 3:
+                import random as _rr
+                with_img_pool = [i for i in pool if i.get("firstimage")]
+                _fallback_pool = with_img_pool if len(with_img_pool) >= 3 else pool
+                if len(_fallback_pool) >= 3:
+                    selected = _rr.sample(_fallback_pool, 3)
+                    _sg = ""
+                    logger.info(f"food: 시군구 조건 완화 → {region_name}에서 랜덤 3건 선택")
+                else:
+                    logger.warning(f"food: {region_name} 최종 pool {len(_fallback_pool)}건 부족 → 다음 지역")
+                    continue
+            adapted = _adapt_korservice_items(selected)
+            sigungu_name = _sg if _sg else region_name
+            display = f"{region_name} {sigungu_name}".strip() if sigungu_name and sigungu_name != region_name else region_name
+            content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+            return {
+                "items": adapted,
+                "display_region": display,
+                "sigungu": sigungu_name,
+                "do_name": region_name,
+                "theme": keyword,
+                "category": "맛집",
+                "angle": display + " " + keyword,
+                "source_type": "korservice",
+                "content_ids": content_ids,
+            }
+        except Exception as e:
+            logger.warning(f"food fetch failed ({region_name}): " + str(e))
+            continue
+
+    logger.warning("food: 전체 지역 순회 후 발행 가능 아이템 없음")
+    return None
 
 
 def fetch_course():
@@ -560,12 +583,40 @@ def fetch_course():
             _db.close()
         except Exception as _e:
             logger.warning("course dup-check DB error: %s", _e)
-        pool = [item for item in pool
+        # 1차: contentid + title 둘 다 체크
+        pool_strict = [item for item in pool
                 if str(item.get("contentid", "")) not in _published_cids
                 and item.get("title", "").strip() not in _published_titles]
-        if not pool:
-            logger.warning("course: 중복 제외 후 아이템 0건")
-            return None
+        # 2차: contentid만 체크 (title 차단 누적 시 폴백)
+        pool_relaxed = [item for item in pool
+                if str(item.get("contentid", "")) not in _published_cids]
+        if pool_strict:
+            pool = pool_strict
+            logger.info(f"course: strict 필터 후 {len(pool)}건")
+        elif pool_relaxed:
+            pool = pool_relaxed
+            logger.warning(f"course: title 차단 완화 (relaxed) 후 {len(pool)}건")
+        else:
+            logger.warning("course: 중복 제외 후 아이템 0건 → 다른 지역으로 재시도")
+            # 지역 재시도를 위해 다른 areaCode 랜덤 선택 후 재귀 1회
+            import random as _rr
+            _fallback_codes = [c for c in [1,2,3,4,5,6,7,8,31,32,33,34,35,36,37,38,39] if c != area_code]
+            area_code = _rr.choice(_fallback_codes)
+            _resp_fb = req.get(
+                "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
+                params={"serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
+                        "_type": "json", "numOfRows": 30, "pageNo": 1,
+                        "contentTypeId": 25, "areaCode": area_code, "arrange": "C"},
+                timeout=15,
+            )
+            _fb_items = _resp_fb.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(_fb_items, dict):
+                _fb_items = [_fb_items]
+            pool = [i for i in _fb_items if str(i.get("contentid", "")) not in _published_cids]
+            if not pool:
+                logger.warning("course: 폴백 지역도 0건")
+                return None
+            logger.info(f"course: 폴백 지역 areaCode={area_code} → {len(pool)}건")
 
         # 랜덤 1개 코스 선택
         course_item = random.choice(pool)
