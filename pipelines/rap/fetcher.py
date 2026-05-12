@@ -85,7 +85,7 @@ def fetch_apt_trade_multi(lawd_cd, months=3, rows=50):
 
 
 def fetch_apt_rent(lawd_cd: str, deal_ymd: str, rows: int = 30) -> list:
-    """아파트 전월세 실거래 데이터 조회"""
+    """아파트 전월세 실거래 데이터 조회 (ElementTree 방식 — lxml 의존성 없음)"""
     url = "https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent"
     params = {
         "serviceKey": _get_key(),
@@ -100,15 +100,21 @@ def fetch_apt_rent(lawd_cd: str, deal_ymd: str, rows: int = 30) -> list:
             logger.warning(f"전월세 API 403 (미승인 또는 반영대기): {lawd_cd}/{deal_ymd}")
             return []
         resp.raise_for_status()
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(resp.text, "xml")
-        items = soup.select("item")
+
+        root = ET.fromstring(resp.text)
+        result_code = root.findtext(".//resultCode", "")
+        if result_code != "000":
+            logger.error(f"전월세 API 오류: {root.findtext('.//resultMsg', '')}")
+            return []
+
         results = []
-        for it in items:
-            deposit = it.select_one("deposit")
-            monthly = it.select_one("monthlyRent")
-            deposit_val = deposit.text.strip().replace(",", "") if deposit else "0"
-            monthly_val = monthly.text.strip().replace(",", "") if monthly else "0"
+        for item in root.findall(".//item"):
+            def _txt(tag):
+                el = item.find(tag)
+                return (el.text or "").strip() if el is not None else ""
+
+            deposit_val = _txt("deposit").replace(",", "") or "0"
+            monthly_val = _txt("monthlyRent").replace(",", "") or "0"
             try:
                 deposit_int = int(deposit_val)
             except ValueError:
@@ -117,24 +123,27 @@ def fetch_apt_rent(lawd_cd: str, deal_ymd: str, rows: int = 30) -> list:
                 monthly_int = int(monthly_val)
             except ValueError:
                 monthly_int = 0
+
             rent_type = "월세" if monthly_int > 0 else "전세"
-            entry = {
-                "aptNm": it.select_one("aptNm").text.strip() if it.select_one("aptNm") else "",
-                "excluUseAr": it.select_one("excluUseAr").text.strip() if it.select_one("excluUseAr") else "",
-                "floor": it.select_one("floor").text.strip() if it.select_one("floor") else "",
-                "buildYear": it.select_one("buildYear").text.strip() if it.select_one("buildYear") else "",
-                "umdNm": it.select_one("umdNm").text.strip() if it.select_one("umdNm") else "",
-                "dealYear": it.select_one("dealYear").text.strip() if it.select_one("dealYear") else "",
-                "dealMonth": it.select_one("dealMonth").text.strip() if it.select_one("dealMonth") else "",
-                "dealDay": it.select_one("dealDay").text.strip() if it.select_one("dealDay") else "",
-                "deposit": deposit_val,
-                "depositInt": deposit_int,
-                "monthlyRent": monthly_val,
+            results.append({
+                "aptNm":          _txt("aptNm"),
+                "excluUseAr":     _txt("excluUseAr"),
+                "floor":          _txt("floor"),
+                "buildYear":      _txt("buildYear"),
+                "umdNm":          _txt("umdNm"),
+                "dealYear":       _txt("dealYear"),
+                "dealMonth":      _txt("dealMonth"),
+                "dealDay":        _txt("dealDay"),
+                "deposit":        deposit_val,
+                "depositInt":     deposit_int,
+                "monthlyRent":    monthly_val,
                 "monthlyRentInt": monthly_int,
-                "rentType": rent_type,
-            }
-            results.append(entry)
-        logger.info(f"전월세 조회: {lawd_cd}/{deal_ymd} → {len(results)}건 (전세 {sum(1 for r in results if r['rentType']=='전세')}, 월세 {sum(1 for r in results if r['rentType']=='월세')})")
+                "rentType":       rent_type,
+            })
+
+        jeonse  = sum(1 for r in results if r["rentType"] == "전세")
+        monthly = sum(1 for r in results if r["rentType"] == "월세")
+        logger.info(f"전월세 조회: {lawd_cd}/{deal_ymd} → {len(results)}건 (전세 {jeonse}, 월세 {monthly})")
         return results
     except Exception as e:
         logger.error(f"전월세 API 실패: {e}")
@@ -284,7 +293,6 @@ BRAND_LAWD_MAP = {
     # ─── 수도권 주요 단지 ───
     "동탄": ("41590", "경기", "화성시"),
     "매교역": ("41113", "경기", "수원시 권선구"),
-    "수원": ("41117", "경기", "수원시 영통구"),
     "판교": ("41135", "경기", "성남시 분당구"),
     "위례": ("41135", "경기", "성남시 분당구"),
     "과천": ("41290", "경기", "과천시"),
@@ -295,7 +303,6 @@ BRAND_LAWD_MAP = {
     "드파인광안": ("26410", "부산", "수영구"),
     "진천풍림": ("43750", "충북", "진천군"),
     "해운대엘시티": ("26440", "부산", "해운대구"),
-    "세종": ("36110", "세종", "세종시"),
 }
 
 def find_lawd_cd(keyword):
@@ -304,9 +311,24 @@ def find_lawd_cd(keyword):
     for brand, (code, city, district) in BRAND_LAWD_MAP.items():
         if brand in keyword:
             return code, city, district
-    # 2) 지역명 매칭
+    # 2) district 완전매칭 우선 (city 매칭보다 반드시 먼저)
     for city, districts in LAWD_MAP.items():
         for district, code in districts.items():
-            if district in keyword or city in keyword:
+            if district in keyword:
                 return code, city, district
+    # 3) city 매칭 시 해당 city 내 district를 keyword 토큰과 직접 비교
+    for city, districts in LAWD_MAP.items():
+        if city in keyword:
+            # keyword를 공백 분리 후 각 토큰이 district와 일치하는지 확인
+            tokens = keyword.replace("(", " ").replace(")", " ").split()
+            for token in tokens:
+                for district, code in districts.items():
+                    if token == district:
+                        return code, city, district
+            # 토큰 완전일치 없으면 district가 keyword에 포함되는지 재확인
+            for district, code in districts.items():
+                if district in keyword:
+                    return code, city, district
+            # 그래도 없으면 city만 매칭 — 폴백 없이 None 반환 (오매칭 방지)
+            return None, None, None
     return None, None, None
