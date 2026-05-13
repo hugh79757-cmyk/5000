@@ -1,4 +1,4 @@
-"""RAP DB 일일 갱신 — 실거래가 + 청약 API 수집"""
+"""RAP DB 일일 갱신 — 매매 실거래가 + 전월세 + 청약 API 수집"""
 import os
 import sys
 import time
@@ -11,13 +11,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, LAWD_MAP, REGION_CD_MAP
+from pipelines.rap.fetcher import fetch_apt_trade, fetch_apt_rent, fetch_subscription_info, LAWD_MAP, REGION_CD_MAP
 
 logger = logging.getLogger(__name__)
 
 RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
 
-# 수집 대상 지역 (주요 거래 활발 지역)
 SYNC_REGIONS = [
     # 서울
     ("11680", "서울", "강남구"), ("11650", "서울", "서초구"),
@@ -31,13 +30,67 @@ SYNC_REGIONS = [
     ("11380", "서울", "은평구"), ("11110", "서울", "종로구"),
     # 수도권
     ("41135", "경기", "성남시분당구"), ("41465", "경기", "용인시수지구"),
-    ("41590", "경기", "화성시"), ("41117", "경기", "수원시영통구"),
+    ("41590", "경기", "화성시"),      ("41117", "경기", "수원시영통구"),
     ("41281", "경기", "고양시덕양구"), ("41570", "경기", "김포시"),
-    ("41450", "경기", "하남시"), ("41210", "경기", "광명시"),
+    ("41450", "경기", "하남시"),      ("41210", "경기", "광명시"),
     # 광역시
     ("26350", "부산", "해운대구"), ("26290", "부산", "남구"),
-    ("27260", "대구", "수성구"), ("28185", "인천", "연수구"),
+    ("27260", "대구", "수성구"),   ("28185", "인천", "연수구"),
+    # 경기 추가
+    ("41220", "경기", "평택시"),
+    ("41171", "경기", "안양시만안구"), ("41173", "경기", "안양시동안구"),
+    ("41271", "경기", "안산시상록구"), ("41273", "경기", "안산시단원구"),
+    ("41390", "경기", "시흥시"),
+    # 강원
+    ("42110", "강원", "춘천시"), ("42130", "강원", "원주시"), ("42150", "강원", "강릉시"),
+    # 충북
+    ("43111", "충북", "청주시상당구"), ("43112", "충북", "청주시서원구"),
+    ("43113", "충북", "청주시흥덕구"), ("43114", "충북", "청주시청원구"),
+    ("43130", "충북", "충주시"),
+    # 충남
+    ("44131", "충남", "천안시동남구"), ("44133", "충남", "천안시서북구"),
+    # 전북
+    ("45111", "전북", "전주시완산구"), ("45113", "전북", "전주시덕진구"),
+    # 전남
+    ("46150", "전남", "순천시"),
+    # 경북
+    ("47111", "경북", "포항시남구"), ("47113", "경북", "포항시북구"),
+    ("47190", "경북", "구미시"),
+    # 경남
+    ("48121", "경남", "창원시의창구"), ("48123", "경남", "창원시성산구"),
+    ("48125", "경남", "창원시마산합포구"), ("48127", "경남", "창원시마산회원구"),
+    ("48129", "경남", "창원시진해구"),
+    ("48310", "경남", "거제시"),
 ]
+
+
+def _ensure_rents_table(conn):
+    """rents 테이블 없으면 생성"""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS rents (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lawd_cd TEXT NOT NULL,
+            city TEXT NOT NULL,
+            district TEXT NOT NULL,
+            deal_ymd TEXT NOT NULL,
+            apt_name TEXT NOT NULL,
+            dong_name TEXT,
+            exclu_use_ar REAL,
+            floor INTEGER,
+            build_year INTEGER,
+            deposit INTEGER,
+            monthly_rent INTEGER,
+            rent_type TEXT,
+            deal_year INTEGER,
+            deal_month INTEGER,
+            deal_day INTEGER,
+            fetched_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(lawd_cd, deal_ymd, apt_name, exclu_use_ar, floor, deal_day, deposit, monthly_rent)
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rents_lawd ON rents(lawd_cd, deal_ymd)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rents_apt  ON rents(apt_name)")
+    conn.commit()
 
 
 def is_today_refreshed():
@@ -50,12 +103,11 @@ def is_today_refreshed():
 
 
 def sync_trades(conn):
-    """실거래가 수집 → rap.db 저장"""
+    """매매 실거래가 수집 → trades 테이블 저장"""
     deal_ymd = datetime.now().strftime("%Y%m")
     added = 0
-
     for lawd_cd, city, district in SYNC_REGIONS:
-        trades = fetch_apt_trade(lawd_cd, deal_ymd=deal_ymd, rows=50)
+        trades = fetch_apt_trade(lawd_cd, deal_ymd=deal_ymd, rows=100)
         for t in trades:
             try:
                 conn.execute("""
@@ -78,16 +130,51 @@ def sync_trades(conn):
                 ))
                 added += 1
             except Exception as e:
-                logger.warning(f"거래 저장 실패: {e}")
+                logger.warning(f"매매 저장 실패: {e}")
+    logger.info(f"매매 실거래가 수집 완료: {added}건 추가")
+    return added
 
-    logger.info(f"실거래가 수집 완료: {added}건 추가")
+
+def sync_rents(conn):
+    """전월세 실거래가 수집 → rents 테이블 저장 (rap4-hugo 전용 데이터)"""
+    _ensure_rents_table(conn)
+    deal_ymd = datetime.now().strftime("%Y%m")
+    added = 0
+    for lawd_cd, city, district in SYNC_REGIONS:
+        rents = fetch_apt_rent(lawd_cd, deal_ymd=deal_ymd, rows=100)
+        for r in rents:
+            try:
+                conn.execute("""
+                    INSERT OR IGNORE INTO rents
+                    (lawd_cd, city, district, deal_ymd, apt_name, dong_name,
+                     exclu_use_ar, floor, build_year, deposit, monthly_rent,
+                     rent_type, deal_year, deal_month, deal_day)
+                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                """, (
+                    lawd_cd, city, district, deal_ymd,
+                    r.get("aptNm", "").strip(),
+                    r.get("umdNm", "").strip(),
+                    float(r.get("excluUseAr", 0) or 0),
+                    int(r.get("floor", 0) or 0),
+                    int(r.get("buildYear", 0) or 0),
+                    r.get("depositInt", 0),
+                    r.get("monthlyRentInt", 0),
+                    r.get("rentType", "전세"),
+                    int(r.get("dealYear", 0) or 0),
+                    int(r.get("dealMonth", 0) or 0),
+                    int(r.get("dealDay", 0) or 0),
+                ))
+                added += 1
+            except Exception as e:
+                logger.warning(f"전월세 저장 실패: {e}")
+        time.sleep(0.1)
+    logger.info(f"전월세 실거래가 수집 완료: {added}건 추가")
     return added
 
 
 def sync_subscriptions(conn):
-    """청약 공고 수집 → rap.db 저장"""
+    """청약 공고 수집 → subscriptions 테이블 저장"""
     added = 0
-
     for region, code in REGION_CD_MAP.items():
         subs = fetch_subscription_info(region_cd=code, page_size=20)
         for s in subs:
@@ -114,7 +201,6 @@ def sync_subscriptions(conn):
                 added += 1
             except Exception as e:
                 logger.warning(f"청약 저장 실패: {e}")
-
     logger.info(f"청약 공고 수집 완료: {added}건 추가")
     return added
 
@@ -129,18 +215,15 @@ def sync_keywords_from_gap():
     rap_conn = sqlite3.connect(RAP_DB_PATH)
     added = 0
 
-    # 부동산 무관 키워드 제외
     EXCLUDE = [
         "기능사", "요리", "조리", "흑백", "레시피", "양식조리", "제과", "봉제",
         "롤러운전", "콘크리트", "전자기능", "주조", "인베디드", "견적서",
         "운세", "로또", "날씨", "웹툰", "게임", "파전", "킷트", "래시피",
         "키친보스", "오스틴강", "이탈리안", "이탈리아", "명태살", "1분링",
     ]
-
-    # blog_target 자동 분류
     BLOG_PATTERNS = {
-        "rap-hugo": ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라",
-                     "오피스텔", "은마", "재건축", "재개발", "부동산", "단지"],
+        "rap-hugo":  ["아파트", "매매", "시세", "실거래", "집값", "공시지가", "빌라",
+                      "오피스텔", "은마", "재건축", "재개발", "부동산", "단지"],
         "rap2-hugo": ["청약", "분양", "LH", "행복주택", "임대주택", "청년주택",
                       "청년안심", "국민임대", "영구임대", "매입임대", "신혼희망"],
         "rap3-hugo": ["양도", "취득세", "상속세", "증여세", "세금", "과세", "공시지가",
@@ -159,14 +242,11 @@ def sync_keywords_from_gap():
     for kw, cat, pri, uc, lua, st in rows:
         if any(ex in kw for ex in EXCLUDE):
             continue
-
-        # blog_target 결정
         target = None
         for blog_id, patterns in BLOG_PATTERNS.items():
             if any(p in kw for p in patterns):
                 target = blog_id
                 break
-
         try:
             rap_conn.execute("""
                 INSERT OR IGNORE INTO keywords
@@ -194,32 +274,38 @@ def daily_refresh():
     start = time.time()
 
     conn = sqlite3.connect(RAP_DB_PATH)
+    _ensure_rents_table(conn)
+
     trades_added = sync_trades(conn)
-    subs_added = sync_subscriptions(conn)
+    rents_added  = sync_rents(conn)
+    subs_added   = sync_subscriptions(conn)
     conn.commit()
 
     duration = time.time() - start
     today = datetime.now().strftime("%Y-%m-%d")
     conn.execute(
-        "INSERT OR IGNORE INTO refresh_log (refresh_date, trades_added, subs_added, duration_sec) VALUES (?,?,?,?)",
-        (today, trades_added, subs_added, round(duration, 1))
+        "INSERT OR IGNORE INTO refresh_log "
+        "(refresh_date, trades_added, subs_added, duration_sec) VALUES (?,?,?,?)",
+        (today, trades_added + rents_added, subs_added, round(duration, 1))
     )
     conn.commit()
     conn.close()
 
-    logger.info(f"=== RAP DB 갱신 완료: 거래 {trades_added}건, 청약 {subs_added}건, {duration:.1f}초 ===")
+    logger.info(
+        f"=== RAP DB 갱신 완료: 매매 {trades_added}건, "
+        f"전월세 {rents_added}건, 청약 {subs_added}건, {duration:.1f}초 ==="
+    )
     return True
 
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     daily_refresh()
-    sync_keywords_from_gap()
 
-    # 결과 확인
     conn = sqlite3.connect(RAP_DB_PATH)
     t = conn.execute("SELECT COUNT(*) FROM trades").fetchone()[0]
+    r = conn.execute("SELECT COUNT(*) FROM rents").fetchone()[0]
     s = conn.execute("SELECT COUNT(*) FROM subscriptions").fetchone()[0]
     k = conn.execute("SELECT COUNT(*) FROM keywords WHERE status='active'").fetchone()[0]
     conn.close()
-    print(f"\nRAP DB 현황: 거래 {t}건, 청약 {s}건, 키워드 {k}개")
+    print(f"\nRAP DB 현황: 매매 {t}건, 전월세 {r}건, 청약 {s}건, 키워드 {k}개")

@@ -150,7 +150,134 @@ def _pick_strategy(keyword, blog_id=None):
 
 
 
-def _fetch_trades_from_db(lawd_cd, keyword, months=3):
+def _fetch_rents_from_db(lawd_cd, keyword, months=3):
+    """rap4-hugo 전용 — rents 테이블에서 전월세 데이터 조회"""
+    if not os.path.exists(RAP_DB_PATH):
+        logger.error(f"rap.db 없음: {RAP_DB_PATH}")
+        return []
+    try:
+        from dateutil.relativedelta import relativedelta
+        now = datetime.now()
+        ymd_list = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
+        placeholders = ",".join("?" * len(ymd_list))
+
+        conn = sqlite3.connect(RAP_DB_PATH)
+
+        # rents 테이블 존재 여부 확인
+        tbl = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name='rents'"
+        ).fetchone()
+        if not tbl:
+            logger.warning("rents 테이블 없음 — sync_rents() 미실행 상태")
+            conn.close()
+            return []
+
+        rows = conn.execute(
+            f"SELECT apt_name, dong_name, exclu_use_ar, floor, build_year, "
+            f"deposit, monthly_rent, rent_type, deal_year, deal_month, deal_day "
+            f"FROM rents WHERE lawd_cd=? AND deal_ymd IN ({placeholders}) "
+            f"ORDER BY deal_ymd DESC, deposit DESC",
+            [lawd_cd] + ymd_list
+        ).fetchall()
+        conn.close()
+
+        if not rows:
+            return []
+
+        all_rents = []
+        for r in rows:
+            all_rents.append({
+                "aptNm":          r[0] or "",
+                "umdNm":          r[1] or "",
+                "excluUseAr":     str(r[2] or ""),
+                "floor":          str(r[3] or ""),
+                "buildYear":      str(r[4] or ""),
+                "deposit":        str(r[5] or 0),
+                "depositInt":     r[5] or 0,
+                "monthlyRent":    str(r[6] or 0),
+                "monthlyRentInt": r[6] or 0,
+                "rentType":       r[7] or "전세",
+                "dealYear":       str(r[8] or ""),
+                "dealMonth":      str(r[9] or ""),
+                "dealDay":        str(r[10] or ""),
+            })
+
+        # 키워드 단지명 필터 (trades와 동일 로직)
+        import re as _re2
+        _SUFFIX_PAT = _re2.compile(
+            r"^(실거래가|전세|월세|세금|브랜드|시세|매매|아파트|분석|가이드|"
+            r"서울|경기|인천|부산|대구|대전|광주|울산|세종|"
+            r".+특별시|.+광역시|.+특별자치시|.+특별자치도|"
+            r".+구|.+시|.+군|.+동|.+읍|.+면|.+로|.+대로)$"
+        )
+        tokens = keyword.strip().split()
+        apt_kw = " ".join(t for t in tokens if not _SUFFIX_PAT.match(t)).strip()
+
+        # 아파트명이 추출되지 않은 비아파트 키워드 → 구 전체 데이터 반환
+        NON_APT_KEYWORDS = ["체크리스트", "예방", "가이드", "방법", "절차", "주의사항"]
+        is_non_apt = not apt_kw or any(k in apt_kw for k in NON_APT_KEYWORDS)
+        if is_non_apt:
+            logger.info(f"비아파트 키워드 [{keyword}] → 구 전체 {len(all_rents)}건 반환")
+            return {
+                "apt_kw":         keyword,
+                "keyword_trades": [],
+                "other_trades":   all_rents[:20],
+                "data_type":      "rent",
+            }
+
+        def _match(apt_name):
+            n = (apt_name or "").strip()
+            if not apt_kw:
+                return False
+            # 완전일치 우선
+            if n == apt_kw:
+                return True
+            # apt_kw가 n에 포함 — 최소 3자 이상만 부분매칭 허용
+            # (예: "청담자이" in "청담자이104동", "삼호3" in "삼호3차아파트")
+            if len(apt_kw) >= 3 and apt_kw in n:
+                idx = n.index(apt_kw)
+                before_ok = (idx == 0 or not n[idx-1].isalnum())
+                after_idx = idx + len(apt_kw)
+                after_char = n[after_idx] if after_idx < len(n) else ""
+                last_kw_char = apt_kw[-1] if apt_kw else ""
+                after_ok = (
+                    not after_char
+                    or not after_char.isalnum()
+                    or (last_kw_char.isdigit()
+                        and '가' <= after_char <= '힣')
+                )
+                if before_ok and after_ok:
+                    return True
+            # 역방향 매칭 제거 — "대치팰리스" in "래미안대치팰리스" 오매칭 방지
+            return False
+        filtered = [r for r in all_rents if _match(r["aptNm"])]
+        others   = [r for r in all_rents if not _match(r["aptNm"])]
+
+        if filtered:
+            logger.info(f"전월세 단지 필터: [{apt_kw}] {len(filtered)}건 + 구내 {len(others)}건")
+        else:
+            logger.info(f"전월세 단지 미매칭 [{apt_kw}] → 구 전체 {len(all_rents)}건")
+
+        return {
+            "apt_kw":         apt_kw,
+            "keyword_trades": filtered[:10],
+            "other_trades":   others[:20],
+            "data_type":      "rent",
+        }
+
+    except Exception as e:
+        logger.error(f"DB rents 조회 실패: {e}")
+        return []
+
+
+def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
+    # ── rap4-hugo: rents 테이블 조회 분기 ──
+    if blog_id == "rap4-hugo":
+        result = _fetch_rents_from_db(lawd_cd, keyword, months)
+        if result:
+            return result
+        logger.warning("rents 0건 → trades 폴백 (rap4-hugo)")
+
     """rap.db/trades에서 실거래가 조회 + 키워드 단지명 필터링
     1순위: 키워드에서 추출한 단지명과 매칭되는 거래
     2순위: 매칭 3건 미만이면 구 전체 반환 (분석용)
@@ -209,14 +336,27 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3):
             n = (apt_name or "").strip()
             if not apt_kw:
                 return False
+            # 완전일치 우선
             if n == apt_kw:
                 return True
-            if apt_kw in n:
-                return True
-            if n in apt_kw and len(n) >= 3:
-                return True
+            # apt_kw가 n에 포함 — 최소 3자 이상만 부분매칭 허용
+            # (예: "청담자이" in "청담자이104동", "삼호3" in "삼호3차아파트")
+            if len(apt_kw) >= 3 and apt_kw in n:
+                idx = n.index(apt_kw)
+                before_ok = (idx == 0 or not n[idx-1].isalnum())
+                after_idx = idx + len(apt_kw)
+                after_char = n[after_idx] if after_idx < len(n) else ""
+                last_kw_char = apt_kw[-1] if apt_kw else ""
+                after_ok = (
+                    not after_char
+                    or not after_char.isalnum()
+                    or (last_kw_char.isdigit()
+                        and '가' <= after_char <= '힣')
+                )
+                if before_ok and after_ok:
+                    return True
+            # 역방향 매칭 제거 — "대치팰리스" in "래미안대치팰리스" 오매칭 방지
             return False
-
         filtered = [t for t in all_trades if _match(t["aptNm"])]
         others   = [t for t in all_trades if not _match(t["aptNm"])]
 
@@ -243,6 +383,36 @@ def _post_process(body_md, blog_id, keyword):
 
     """발행 전 후처리: 금지표현 제거 + 면책조항 + 쿠팡 + 내부링크"""
     import re as _re
+    import glob as _gl2
+    import random as _rand2
+
+    # 0. 내부링크 상단 삽입
+    try:
+        blog_cfg_map = {
+            "rap-hugo":  "/Users/twinssn/Projects/RAP/rap-hugo",
+            "rap2-hugo": "/Users/twinssn/Projects/RAP/rap2-hugo",
+            "rap3-hugo": "/Users/twinssn/Projects/RAP/rap3-hugo",
+            "rap4-hugo": "/Users/twinssn/Projects/RAP/rap4-hugo",
+            "rap5-hugo": "/Users/twinssn/Projects/RAP/rap5-hugo",
+        }
+        posts_dir = os.path.join(blog_cfg_map.get(blog_id, ""), "content", "posts")
+        _top_posts = []
+        for md in _gl2.glob(os.path.join(posts_dir, "*/index.md")):
+            with open(md, encoding="utf-8") as f:
+                head = f.read(500)
+            tm = _re.search(r'^title:\s*["\'](.*?)["\']', head, _re.MULTILINE)
+            sm = _re.search(r'^slug:\s*["\'](.*?)["\']', head, _re.MULTILINE)
+            if tm and sm:
+                _top_posts.append({"title": tm.group(1), "slug": sm.group(1)})
+        if len(_top_posts) >= 2:
+            _top_picks = _rand2.sample(_top_posts, min(2, len(_top_posts)))
+            _top_links = "**함께 읽으면 좋은 글**\n"
+            for p in _top_picks:
+                _top_links += f'- [{p["title"]}](/posts/{p["slug"]}/)\n'
+            body_md = _top_links + "\n---\n\n" + body_md
+            logger.info("내부링크 상단 삽입 완료")
+    except Exception as e:
+        logger.warning(f"내부링크 상단 삽입 실패: {e}")
 
     # 1. 금지 표현 제거
     BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요"]
@@ -533,7 +703,7 @@ def run(blog_cfg):
             logger.info(f"법정동코드 미매칭, 랜덤 선택: {city} {district}")
 
         # ── rap.db에서 실거래가 조회 (API 호출 없음) ──
-        trades = _fetch_trades_from_db(lawd_cd, keyword)
+        trades = _fetch_trades_from_db(lawd_cd, keyword, blog_id=blog_id)
 
         if not trades:
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
