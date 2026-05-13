@@ -630,7 +630,7 @@ def _post_process(body_md, blog_id, keyword):
         "rap-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
         "rap2-hugo": "이 글은 한국부동산원 청약홈 공공데이터를 기반으로 작성되었습니다. 정확한 청약 일정과 자격은 [청약홈](https://www.applyhome.co.kr)에서 확인하세요.",
         "rap3-hugo": "이 글은 국토교통부 실거래가 데이터를 기반으로 작성되었으며, 세금 계산은 참고용입니다. 정확한 세금 상담은 세무사에게 문의하세요.",
-        "rap4-hugo": "이 글은 국토교통부 매매 실거래가 데이터를 기반으로 전세가를 추정한 것입니다. 실제 전월세 시세는 다를 수 있으니 반드시 현장 확인 후 계약하세요.",
+        "rap4-hugo": "이 글은 국토교통부 전월세 실거래가 공공데이터를 기반으로 작성되었습니다. 실제 계약 전 반드시 현장 확인 및 등기부등본을 확인하세요.",
         "rap5-hugo": "이 글은 국토교통부 실거래가 공공데이터를 기반으로 작성되었습니다. 투자 판단의 책임은 본인에게 있으며, 최신 정보는 [국토교통부 실거래가 공개시스템](https://rt.molit.go.kr)에서 확인하세요.",
     }
     disc = disclaimer_map.get(blog_id, disclaimer_map["rap-hugo"])
@@ -705,6 +705,13 @@ def run(blog_cfg):
         # ── rap.db에서 실거래가 조회 (API 호출 없음) ──
         trades = _fetch_trades_from_db(lawd_cd, keyword, blog_id=blog_id)
 
+
+        # ── 제목-데이터 불일치 방지: 실거래 없는 단지명은 제목에서 제거 ──
+        if isinstance(trades, dict) and not trades.get("keyword_trades") \
+                and trades.get("apt_kw") and district:
+            _title_keyword = f"{district} 실거래가 종합"
+            logger.info(f"단지 실거래 없음 → 제목 키워드 교체: [{keyword}] → [{_title_keyword}]")
+            keyword = _title_keyword
         if not trades:
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
             try:
