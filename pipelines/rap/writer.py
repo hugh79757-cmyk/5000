@@ -35,8 +35,28 @@ def _build_trade_reference(keyword, trades, region_info=None):
 
     # ── 키워드 단지 실거래 (최우선 섹션) ──
     _is_rent_kw = isinstance(trades, dict) and trades.get("data_type") == "rent"
+    _is_brand_kw = isinstance(trades, dict) and trades.get("data_type") == "brand"
     if keyword_trades:
-        if _is_rent_kw:
+        if _is_brand_kw:
+            brand_kw = trades.get("brand_kw", apt_kw)
+            kw_prices = [t.get("dealAmountInt", 0) for t in keyword_trades if t.get("dealAmountInt")]
+            lines.append(f"### ★ [{apt_kw}] 실거래가 ({len(keyword_trades)}건) ← 키워드 단지 (브랜드: {brand_kw})")
+            if kw_prices:
+                lines.append(f"- 최고가: {max(kw_prices):,}만원")
+                lines.append(f"- 최저가: {min(kw_prices):,}만원")
+                if len(kw_prices) > 1:
+                    lines.append(f"- 평균: {sum(kw_prices)//len(kw_prices):,}만원")
+            for t in keyword_trades:
+                amt   = t.get("dealAmount", "").strip()
+                area  = t.get("excluUseAr", "")
+                floor = t.get("floor", "")
+                city  = t.get("city", "")
+                dist  = t.get("district", "")
+                year  = t.get("buildYear", "")
+                ddate = f"{t.get('dealYear','')}.{t.get('dealMonth','').zfill(2)}.{t.get('dealDay','').zfill(2)}"
+                lines.append(f"  - [{city} {dist}] {apt_kw}({year}년식) {area}㎡ {floor}층: {amt}만원 ({ddate})")
+            lines.append("")
+        elif _is_rent_kw:
             lines.append(f"### ★ [{apt_kw}] 전월세 거래 ({len(keyword_trades)}건) ← 이 단지가 키워드 단지입니다")
             for t in keyword_trades:
                 area  = t.get("excluUseAr", "")
@@ -70,15 +90,26 @@ def _build_trade_reference(keyword, trades, region_info=None):
                 lines.append(f"  - {dong} {apt_kw}({year}년식) {area}㎡ {floor}층: {amt}만원 ({ddate})")
         lines.append("")
     else:
-        lines.append(f"### ★ [{apt_kw}] 해당 기간 실거래 없음")
-        lines.append(f"- 아래 {district} 내 인근 단지 데이터를 참고하여 분석하세요.")
-        lines.append(f"- 이 단지의 매매가를 임의로 가정하거나 추측하지 마세요.")
+        if _is_brand_kw:
+            brand_kw = trades.get("brand_kw", apt_kw)
+            lines.append(f"### ★ [{apt_kw}] 해당 기간 직접 거래 없음 — 전국 {brand_kw} 브랜드 데이터로 분석")
+            lines.append(f"- 아래 전국 {brand_kw} 브랜드 거래 데이터를 참고하여 브랜드 시세를 분석하세요.")
+            lines.append(f"- {apt_kw} 단지의 매매가를 임의로 가정하거나 추측하지 마세요.")
+        else:
+            lines.append(f"### ★ [{apt_kw}] 해당 기간 실거래 없음")
+            lines.append(f"- 아래 {district} 내 인근 단지 데이터를 참고하여 분석하세요.")
+            lines.append(f"- 이 단지의 매매가를 임의로 가정하거나 추측하지 마세요.")
         lines.append("")
 
     # ── 구 내 인근 단지 참고 데이터 ──
     _is_rent_other = isinstance(trades, dict) and trades.get("data_type") == "rent"
+    _is_brand_other = isinstance(trades, dict) and trades.get("data_type") == "brand"
     if other_trades:
-        lines.append(f"### {district} 인근 단지 참고 데이터 ({len(other_trades)}건)")
+        if _is_brand_other:
+            brand_kw = trades.get("brand_kw", apt_kw)
+            lines.append(f"### 전국 {brand_kw} 브랜드 거래 참고 데이터 ({len(other_trades)}건)")
+        else:
+            lines.append(f"### {district} 인근 단지 참고 데이터 ({len(other_trades)}건)")
         if _is_rent_other:
             dep_prices = [t.get("depositInt", 0) for t in other_trades if t.get("depositInt")]
             if dep_prices:

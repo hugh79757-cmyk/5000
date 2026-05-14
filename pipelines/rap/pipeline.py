@@ -270,6 +270,117 @@ def _fetch_rents_from_db(lawd_cd, keyword, months=3):
         return []
 
 
+
+
+BRAND_KEYWORDS = [
+    "래미안", "자이", "힐스테이트", "푸르지오", "아이파크", "롯데캐슬",
+    "더샵", "e편한세상", "아크로", "디에이치", "헬리오시티", "파크리오",
+    "SK뷰", "위브", "센트럴", "풍림아이원", "트리우스", "드파인",
+]
+
+def _fetch_brand_trades_from_db(keyword, months=3):
+    """rap5-hugo 전용 — 키워드에서 브랜드명 추출 후 전국 LIKE 검색"""
+    import re as _re
+    from dateutil.relativedelta import relativedelta
+
+    if not os.path.exists(RAP_DB_PATH):
+        logger.error(f"rap.db 없음: {RAP_DB_PATH}")
+        return None
+
+    # 키워드에서 브랜드명 추출
+    brand_kw = None
+    for brand in BRAND_KEYWORDS:
+        if brand in keyword:
+            brand_kw = brand
+            break
+
+    # 브랜드 미매칭 시 apt_kw 전체를 단지명으로 사용
+    if not brand_kw:
+        _SUFFIX_PAT = _re.compile(
+            r"^(실거래가|전세|월세|세금|브랜드|시세|매매|아파트|분석|가이드|"
+            r"서울|경기|인천|부산|대구|대전|광주|울산|세종|"
+            r".+특별시|.+광역시|.+특별자치시|.+특별자치도|"
+            r".+구|.+시|.+군|.+동|.+읍|.+면|.+로|.+대로)$"
+        )
+        tokens = keyword.strip().split()
+        apt_kw = " ".join(t for t in tokens if not _SUFFIX_PAT.match(t)).strip()
+        brand_kw = apt_kw if apt_kw else None
+
+    if not brand_kw:
+        logger.warning(f"rap5 브랜드 추출 실패: {keyword}")
+        return None
+
+    try:
+        now = datetime.now()
+        ymd_list = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
+        placeholders = ",".join("?" * len(ymd_list))
+
+        conn = sqlite3.connect(RAP_DB_PATH, timeout=30)
+        rows = conn.execute(
+            f"SELECT apt_name, dong_name, exclu_use_ar, floor, build_year, "
+            f"deal_amount, deal_year, deal_month, deal_day, city, district "
+            f"FROM trades WHERE apt_name LIKE ? AND deal_ymd IN ({placeholders}) "
+            f"ORDER BY deal_ymd DESC, deal_amount DESC",
+            [f"%{brand_kw}%"] + ymd_list
+        ).fetchall()
+        conn.close()
+
+        if not rows:
+            logger.warning(f"rap5 브랜드 [{brand_kw}] 전국 거래 0건")
+            return None
+
+        all_trades = []
+        for r in rows:
+            amt = r[5] or 0
+            all_trades.append({
+                "aptNm":         r[0] or "",
+                "umdNm":         r[1] or "",
+                "excluUseAr":    str(r[2] or ""),
+                "floor":         str(r[3] or ""),
+                "buildYear":     str(r[4] or ""),
+                "dealAmount":    f"{amt:,}",
+                "dealAmountInt": amt,
+                "dealYear":      str(r[6] or ""),
+                "dealMonth":     str(r[7] or ""),
+                "dealDay":       str(r[8] or ""),
+                "city":          r[9] or "",
+                "district":      r[10] or "",
+            })
+
+        # 키워드 단지명과 정확히 매칭되는 거래 우선 분리
+        _SUFFIX_PAT2 = _re.compile(
+            r"^(실거래가|전세|월세|세금|브랜드|시세|매매|아파트|분석|가이드|"
+            r"서울|경기|인천|부산|대구|대전|광주|울산|세종|"
+            r".+특별시|.+광역시|.+특별자치시|.+특별자치도|"
+            r".+구|.+시|.+군|.+동|.+읍|.+면|.+로|.+대로)$"
+        )
+        tokens2 = keyword.strip().split()
+        apt_kw2 = " ".join(t for t in tokens2 if not _SUFFIX_PAT2.match(t)).strip()
+
+        if apt_kw2 and len(apt_kw2) >= 3:
+            keyword_trades = [t for t in all_trades if apt_kw2 in t["aptNm"]]
+            other_trades   = [t for t in all_trades if apt_kw2 not in t["aptNm"]]
+        else:
+            keyword_trades = []
+            other_trades   = all_trades
+
+        logger.info(
+            f"rap5 브랜드 [{brand_kw}] 전국 {len(all_trades)}건 "
+            f"(단지매칭 {len(keyword_trades)}건 + 동일브랜드 {len(other_trades)}건)"
+        )
+
+        return {
+            "apt_kw":         apt_kw2 or brand_kw,
+            "brand_kw":       brand_kw,
+            "keyword_trades": keyword_trades[:10],
+            "other_trades":   other_trades[:20],
+            "data_type":      "brand",
+        }
+
+    except Exception as e:
+        logger.error(f"rap5 브랜드 DB 조회 실패: {e}")
+        return None
+
 def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
     # ── rap4-hugo: rents 테이블 조회 분기 ──
     if blog_id == "rap4-hugo":
@@ -277,6 +388,14 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
         if result:
             return result
         logger.warning("rents 0건 → trades 폴백 (rap4-hugo)")
+
+
+    # ── rap5-hugo: 전국 브랜드명 LIKE 검색 분기 ──
+    if blog_id == "rap5-hugo":
+        result = _fetch_brand_trades_from_db(keyword, months)
+        if result:
+            return result
+        logger.warning("브랜드 trades 0건 → 지역 폴백 (rap5-hugo)")
 
     """rap.db/trades에서 실거래가 조회 + 키워드 단지명 필터링
     1순위: 키워드에서 추출한 단지명과 매칭되는 거래
@@ -707,7 +826,7 @@ def run(blog_cfg):
 
 
         # ── 제목-데이터 불일치 방지: 실거래 없는 단지명은 제목에서 제거 ──
-        if isinstance(trades, dict) and not trades.get("keyword_trades") \
+        if blog_id != "rap5-hugo" and isinstance(trades, dict) and not trades.get("keyword_trades") \
                 and trades.get("apt_kw") and district:
             _title_keyword = f"{district} 실거래가 종합"
             logger.info(f"단지 실거래 없음 → 제목 키워드 교체: [{keyword}] → [{_title_keyword}]")
