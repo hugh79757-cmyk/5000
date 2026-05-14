@@ -72,7 +72,7 @@ def _pick_keyword(blog_id):
     """RAP DB에서 키워드 선택 — 오염 필터 + 중복 발행 방지"""
     # RAP DB 우선, 없으면 GAP DB 폴백
     db_path = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=30)
     try:
         patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
 
@@ -106,7 +106,7 @@ def _pick_keyword(blog_id):
 
         # 3단계: 이미 발행된 키워드 제외 (최근 7일)
         try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH) if db_path != RAP_DB_PATH else conn
+            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=30) if db_path != RAP_DB_PATH else conn
             published = {r[0] for r in rap_conn.execute(
                 "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
                 (blog_id,)
@@ -161,7 +161,7 @@ def _fetch_rents_from_db(lawd_cd, keyword, months=3):
         ymd_list = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
         placeholders = ",".join("?" * len(ymd_list))
 
-        conn = sqlite3.connect(RAP_DB_PATH)
+        conn = sqlite3.connect(RAP_DB_PATH, timeout=30)
 
         # rents 테이블 존재 여부 확인
         tbl = conn.execute(
@@ -291,7 +291,7 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
         ymd_list = [(now - relativedelta(months=i)).strftime("%Y%m") for i in range(months)]
         placeholders = ",".join("?" * len(ymd_list))
 
-        conn = sqlite3.connect(RAP_DB_PATH)
+        conn = sqlite3.connect(RAP_DB_PATH, timeout=30)
         rows = conn.execute(
             f"SELECT apt_name, dong_name, exclu_use_ar, floor, build_year, "
             f"deal_amount, deal_year, deal_month, deal_day "
@@ -716,7 +716,7 @@ def run(blog_cfg):
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
             try:
                 if os.path.exists(RAP_DB_PATH):
-                    _gc = sqlite3.connect(RAP_DB_PATH)
+                    _gc = sqlite3.connect(RAP_DB_PATH, timeout=30)
                     _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                     _gc.commit()
                     _gc.close()
@@ -734,7 +734,7 @@ def run(blog_cfg):
         subs = []
         if os.path.exists(RAP_DB_PATH):
             try:
-                _sc = sqlite3.connect(RAP_DB_PATH)
+                _sc = sqlite3.connect(RAP_DB_PATH, timeout=30)
                 # 키워드에서 지역명 추출해 DB 매칭
                 _region_tokens = [r for r in REGION_CD_MAP.keys() if r in keyword]
                 if _region_tokens:
@@ -782,7 +782,7 @@ def run(blog_cfg):
             tg_error(blog_id, "fetcher", f"청약 공고 매칭 0건: {keyword}")
             # 매칭 불가 키워드 비활성화
             try:
-                _kc = sqlite3.connect(RAP_DB_PATH)
+                _kc = sqlite3.connect(RAP_DB_PATH, timeout=30)
                 _kc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
                 _kc.commit()
                 _kc.close()
@@ -856,7 +856,7 @@ def run(blog_cfg):
 
         # ★ RAP DB에 발행 기록 (중복 방지)
         try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH)
+            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=30)
             rap_conn.execute(
                 "INSERT OR IGNORE INTO publish_log (blog_id, data_type, data_key, title) VALUES (?,?,?,?)",
                 (blog_id, strategy, keyword, article["title"])
