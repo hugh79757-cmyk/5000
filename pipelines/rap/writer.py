@@ -33,6 +33,34 @@ def _build_trade_reference(keyword, trades, region_info=None):
     lines.append(f"기준: {month}")
     lines.append("")
 
+    # ── 공시가격 추정치 조회 (gongsijiga 테이블) ──
+    try:
+        import sqlite3 as _sq3, os as _os3
+        _RAP_DB = _os3.path.join(
+            _os3.path.dirname(_os3.path.dirname(_os3.path.dirname(_os3.path.abspath(__file__)))),
+            "data", "rap.db"
+        )
+        if apt_kw and _os3.path.exists(_RAP_DB):
+            _gc = _sq3.connect(_RAP_DB, timeout=10)
+            _grow = _gc.execute(
+                "SELECT avg_deal_amount, estimated_price, deal_year FROM gongsijiga "
+                "WHERE apt_name LIKE ? ORDER BY deal_year DESC LIMIT 1",
+                (f"%{apt_kw}%",)
+            ).fetchone()
+            _gc.close()
+            if _grow:
+                _avg_deal, _est_price, _gyear = _grow
+                _gongsi_rate = round(_est_price / _avg_deal * 100, 1) if _avg_deal else 0
+                lines.append(f"### 공시가격 추정 ({_gyear}년 기준, 공시가율 69% 적용)")
+                lines.append(f"- 평균 실거래가: {_avg_deal:,}만원 ({_avg_deal/10000:.1f}억)")
+                lines.append(f"- 추정 공시가격: {_est_price:,}만원 ({_est_price/10000:.1f}억)")
+                lines.append(f"- 공시가율: 약 {_gongsi_rate}% (국토부 평균 적용)")
+                lines.append(f"- ※ 실제 공시가격은 국토부 부동산공시가격알리미에서 확인하세요")
+                lines.append("")
+    except Exception as _ge:
+        pass  # 공시가 조회 실패 시 무시
+
+
     # ── 키워드 단지 실거래 (최우선 섹션) ──
     _is_rent_kw = isinstance(trades, dict) and trades.get("data_type") == "rent"
     _is_brand_kw = isinstance(trades, dict) and trades.get("data_type") == "brand"

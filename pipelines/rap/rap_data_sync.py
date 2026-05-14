@@ -264,6 +264,77 @@ def sync_keywords_from_gap():
     return added
 
 
+
+
+def _ensure_gongsijiga_table(conn):
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS gongsijiga (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lawd_cd TEXT,
+            apt_name TEXT,
+            deal_year INTEGER,
+            avg_deal_amount INTEGER,
+            estimated_price INTEGER,
+            actual_price INTEGER,
+            source TEXT DEFAULT 'estimated',
+            fetched_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(lawd_cd, apt_name, deal_year)
+        )
+    """)
+    conn.commit()
+
+
+def sync_gongsijiga(conn):
+    """trades 테이블 기반 공시가격 추정치 계산 (실거래가 × 0.69)
+    단지별 연도별 평균 실거래가를 기준으로 추정 공시가격 생성
+    """
+    _ensure_gongsijiga_table(conn)
+
+    rows = conn.execute("""
+        SELECT lawd_cd, apt_name, deal_year,
+               CAST(AVG(deal_amount) AS INTEGER) as avg_amt,
+               COUNT(*) as cnt
+        FROM trades
+        GROUP BY lawd_cd, apt_name, deal_year
+        HAVING cnt >= 1
+        ORDER BY lawd_cd, apt_name, deal_year
+    """).fetchall()
+
+    inserted = 0
+    updated  = 0
+    for lawd_cd, apt_name, deal_year, avg_amt, cnt in rows:
+        if not avg_amt or avg_amt <= 0:
+            continue
+        estimated = int(avg_amt * 0.69)
+        cur = conn.execute(
+            "SELECT id, estimated_price FROM gongsijiga "
+            "WHERE lawd_cd=? AND apt_name=? AND deal_year=?",
+            (lawd_cd, apt_name, deal_year)
+        ).fetchone()
+        if cur is None:
+            conn.execute(
+                "INSERT INTO gongsijiga "
+                "(lawd_cd, apt_name, deal_year, avg_deal_amount, estimated_price, source) "
+                "VALUES (?, ?, ?, ?, ?, 'estimated')",
+                (lawd_cd, apt_name, deal_year, avg_amt, estimated)
+            )
+            inserted += 1
+        elif cur[1] != estimated:
+            conn.execute(
+                "UPDATE gongsijiga SET avg_deal_amount=?, estimated_price=?, "
+                "fetched_at=datetime('now') "
+                "WHERE lawd_cd=? AND apt_name=? AND deal_year=?",
+                (avg_amt, estimated, lawd_cd, apt_name, deal_year)
+            )
+            updated += 1
+    conn.commit()
+
+    import logging
+    logging.getLogger(__name__).info(
+        f"gongsijiga 동기화 완료: 신규 {inserted}건, 갱신 {updated}건"
+    )
+    return inserted, updated
+
 def daily_refresh():
     """일일 갱신 메인 — 첫 발행 시 호출"""
     if is_today_refreshed():
