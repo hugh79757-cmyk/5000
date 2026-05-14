@@ -156,13 +156,55 @@ def _build_trade_reference(keyword, trades, region_info=None):
                 if price_int <= 60000:
                     tax_info = f"취득세구간: 6억이하 1.1%→{int(price_int*0.011):,}만원"
                 elif price_int <= 90000:
-                    rate = 0.01 + (price_int - 60000) / 30000 * 0.02
-                    tax_info = f"취득세구간: 6억~9억 {rate*100:.1f}%→{int(price_int*rate):,}만원"
+                    # 국토부 공식: 세율(%) = (취득가액억 × 2/3 - 3) / 100
+                    _bil = price_int / 10000  # 만원→억 환산
+                    rate = (_bil * 2 / 3 - 3) / 100
+                    rate = max(0.01, min(rate, 0.03))  # 1%~3% 범위 클램프
+                    tax_total = int(price_int * (rate + 0.001))  # 지방교육세 0.1% 포함
+                    tax_info = f"취득세구간: 6억~9억 {rate*100:.2f}%→{tax_total:,}만원(지방교육세포함)"
                 else:
                     tax_info = f"취득세구간: 9억초과 3.3%→{int(price_int*0.033):,}만원"
             else:
                 tax_info = ""
             lines.append(f"- {dong} {apt}({year}년식) {area}㎡ {floor}층: {amount}만원 ({deal_date}) [{tax_info}]")
+
+    # ── rap3-hugo 전용: 양도세 시뮬레이션용 가격 쌍 자동 생성 ──
+    _all_prices = sorted(
+        [t.get("dealAmountInt", 0) for t in all_trades if t.get("dealAmountInt", 0) > 0]
+    )
+    if len(_all_prices) >= 2:
+        _buy_price  = _all_prices[0]   # 최저가 → 매입가 시뮬레이션
+        _sell_price = _all_prices[-1]  # 최고가 → 매도가 시뮬레이션
+        _gain       = _sell_price - _buy_price
+        if _gain > 0:
+            lines.append("")
+            lines.append("### [rap3 전용] 양도세 시뮬레이션 기준값 (실거래가 기반)")
+            lines.append(f"- 매입가(최저 실거래가): {_buy_price:,}만원 ({_buy_price/10000:.1f}억)")
+            lines.append(f"- 매도가(최고 실거래가): {_sell_price:,}만원 ({_sell_price/10000:.1f}억)")
+            lines.append(f"- 양도차익(매도-매입): {_gain:,}만원 ({_gain/10000:.1f}억)")
+            # 필요경비 추정 (취득세+중개보수+수리비 등 통상 1~2%)
+            _expense = int(_buy_price * 0.015)
+            _taxable = max(0, _gain - _expense)
+            lines.append(f"- 필요경비 추정(취득가×1.5%): {_expense:,}만원")
+            lines.append(f"- 과세표준(양도차익-필요경비): {_taxable:,}만원 ({_taxable/10000:.1f}억)")
+            # 양도세 누진세율 계산
+            _TAX_BRACKETS = [
+                (1400,   0.06,      0),
+                (5000,   0.15,    126),
+                (8800,   0.24,    576),
+                (15000,  0.35,   1544),
+                (30000,  0.38,   1994),
+                (50000,  0.40,   2594),
+                (100000, 0.42,   3594),
+                (float("inf"), 0.45, 6594),
+            ]
+            _tax = 0
+            for _limit, _rate, _deduct in _TAX_BRACKETS:
+                if _taxable <= _limit:
+                    _tax = int(_taxable * _rate - _deduct)
+                    lines.append(f"- 양도세 추정(1주택 기본세율): {_tax:,}만원 (세율 {_rate*100:.0f}%, 누진공제 {_deduct:,}만원)")
+                    break
+            lines.append("- ※ 위 수치는 실거래가 기반 참고값입니다. 보유기간/거주요건에 따라 달라집니다.")
 
     return "\n".join(lines)
 
