@@ -154,7 +154,7 @@ def calc_tax(displacement, fuel_type):
     if displacement > 1600:
         base = displacement * 200
     elif displacement > 1000:
-        base = displacement * 140
+        base = displacement * 182
     else:
         base = displacement * 80
     return round(base * 1.3 / 10000)
@@ -446,6 +446,12 @@ def build_input(conn, topic, db_path):
                 "competitor_trim_lineup": " / ".join(f"{t['trim_name']} {t['price']:,}" for t in comp_trims),
             })
     data.update({
+        # guide/beginner_guide 전용: 월급 300만원 기준 맥락화
+        "salary": 3000,
+        "salary_label": "월급 300만원",
+        "monthly_net": round(3000 * 0.72 / 12),  # 세후 월급 약 180만원
+        "insurance_surcharge": 1.4,
+        "insurance_actual": round(insurance * 1.4),  # 초보 할증 40% 적용
         "notes": "",
         "sources": [f"https://m.carisyou.com/car/{car['carisyou_id']}"],
         "cta_links": {"kb_chacha": "https://www.kbchachacha.com", "carisyou": "https://www.carisyou.com"},

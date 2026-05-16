@@ -466,10 +466,16 @@ def replenish_topics(conn, min_pending=50):
             for car_id in ev_cars:
                 if created >= need:
                     break
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
-                    (car_id, post_type, site_id)
-                ).fetchone()
+                exists = c.execute("""
+                    SELECT 1 FROM topics t
+                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
+                    AND (
+                        t.status = 'pending'
+                        OR (t.status = 'published' AND (
+                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
+                        ) > datetime('now', '-30 days'))
+                    )
+                """, (car_id, post_type, site_id)).fetchone()
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,7,'pending',datetime('now'),?)",
@@ -529,10 +535,16 @@ def replenish_topics(conn, min_pending=50):
                     ).fetchall()
                 ]
                 competitor_id = random.choice(rivals) if rivals else None
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
-                    (car_id, post_type, site_id)
-                ).fetchone()
+                exists = c.execute("""
+                    SELECT 1 FROM topics t
+                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
+                    AND (
+                        t.status = 'pending'
+                        OR (t.status = 'published' AND (
+                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
+                        ) > datetime('now', '-30 days'))
+                    )
+                """, (car_id, post_type, site_id)).fetchone()
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,7,'pending',datetime('now'),?)",
@@ -574,10 +586,16 @@ def replenish_topics(conn, min_pending=50):
             for car_id in solos:
                 if created >= need_popular:
                     break
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
-                    (car_id, post_type, site_id)
-                ).fetchone()
+                exists = c.execute("""
+                    SELECT 1 FROM topics t
+                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
+                    AND (
+                        t.status = 'pending'
+                        OR (t.status = 'published' AND (
+                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
+                        ) > datetime('now', '-30 days'))
+                    )
+                """, (car_id, post_type, site_id)).fetchone()
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,7,'pending',datetime('now'),?)",
@@ -589,10 +607,16 @@ def replenish_topics(conn, min_pending=50):
             for car in unpopular:
                 if unpop_created >= need_unpopular:
                     break
-                exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
-                    (car["car_id"], post_type, site_id)
-                ).fetchone()
+                exists = c.execute("""
+                    SELECT 1 FROM topics t
+                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
+                    AND (
+                        t.status = 'pending'
+                        OR (t.status = 'published' AND (
+                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
+                        ) > datetime('now', '-30 days'))
+                    )
+                """, (car["car_id"], post_type, site_id)).fetchone()
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,5,'pending',datetime('now'),?)",
