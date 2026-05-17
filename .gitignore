@@ -78,3 +78,5 @@ hugo_stats.json
 *.map-bak
 *.map[0-9]-bak
 .wrangler/
+.DS_Store
+content/.DS_Store
