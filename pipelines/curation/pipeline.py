@@ -288,29 +288,50 @@ def _filter_irrelevant_products(blog_id, keyword, products):
 
 
 def _filter_used_products(blog_id, products):
-    """발행된 적 있는 상품 제외 (blog_id 기준 전체 기간)"""
+    """발행된 적 있는 상품 제외 — 시간+횟수 복합 기준
+
+    기준:
+    - 30일 이내 사용된 상품 ID 차단 (시간 기반)
+    - 최근 15회 발행에 등장한 상품 ID 추가 차단 (횟수 기반)
+    → 두 조건 중 하나라도 해당되면 차단
+    → 필터 후 3개 미만이면 원본에서 가장 오래된 상품 보충 (차단 없이 발행 허용)
+    """
     if not products:
         return products
     conn = sqlite3.connect(str(DB_PATH))
-    used = conn.execute(
-        "SELECT product_id FROM published_products WHERE blog_id=? AND published_at > datetime('now', '-90 days')",
+
+    # ① 30일 이내 사용 상품
+    time_used = conn.execute(
+        "SELECT product_id FROM published_products WHERE blog_id=? AND published_at > datetime('now', '-30 days')",
         (blog_id,)
     ).fetchall()
+    time_used_ids = {str(r[0]) for r in time_used}
+
+    # ② 최근 15회 발행에 등장한 상품 (횟수 기반)
+    recent_pubs = conn.execute(
+        """SELECT pp.product_id FROM published_products pp
+           INNER JOIN (
+               SELECT published_at FROM published_products
+               WHERE blog_id=?
+               ORDER BY published_at DESC LIMIT 15
+           ) recent ON pp.published_at = recent.published_at
+           WHERE pp.blog_id=?""",
+        (blog_id, blog_id)
+    ).fetchall()
+    recent_ids = {str(r[0]) for r in recent_pubs}
     conn.close()
-    used_ids = {str(r[0]) for r in used}
 
-    # 현재 상품 product_id를 str로 통일
-    current_ids = {str(p["product_id"]) for p in products}
-    overlap = current_ids & used_ids
-    overlap_ratio = len(overlap) / len(current_ids) if current_ids else 0
-
-    if overlap_ratio >= 0.8:
-        logger.info(f"[{blog_id}] 상품 겹침 {overlap_ratio:.0%} ({len(overlap)}/{len(current_ids)}) — 발행 차단")
-        return []  # insufficient_products로 처리
+    used_ids = time_used_ids | recent_ids
 
     filtered = [p for p in products if str(p["product_id"]) not in used_ids]
     if len(filtered) < 3:
-        logger.warning(f"[{blog_id}] 미사용 상품 부족 ({len(filtered)}개), 원본 유지")
+        # 필터 후 부족하면: 원본에서 used_ids 제외 후 오래된 순으로 보충
+        logger.warning(f"[{blog_id}] 미사용 상품 부족 ({len(filtered)}개), 원본에서 보충")
+        fallback = [p for p in products if str(p["product_id"]) not in recent_ids]
+        if len(fallback) >= 3:
+            return fallback[:5]
+        # 최후 수단: 원본 그대로 (중복 허용)
+        logger.warning(f"[{blog_id}] 상품 보충 실패 — 원본 유지 (중복 가능)")
         return products[:5]
     return filtered[:5]
 
@@ -444,7 +465,7 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     products = get_products(keyword, limit=10)
     products = _filter_used_products(blog_id, products)
-    if len(products) < 5:
+    if len(products) < 3:
         logger.warning(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개) — 다음 키워드 시도")
         # 해당 키워드 캐시 삭제 후 다음 키워드로 재시도
         try:
@@ -472,7 +493,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         collect_keyword(keyword)
         products = get_products(keyword, limit=10)
         products = _filter_used_products(blog_id, products)
-        if len(products) < 5:
+        if len(products) < 3:
             logger.error(f"[{blog_id}] 대체 키워드도 상품 부족: {keyword} ({len(products)}개)")
             return {"success": False, "reason": "insufficient_products"}
 
