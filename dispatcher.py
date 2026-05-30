@@ -437,8 +437,12 @@ WORKERS_BLOGS = {
     "camping-hugo",
 }
 
+DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
+DEPLOY_LOCK_TIMEOUT = 600
+
 def _build_and_deploy_central(blog_id: str) -> bool:
     """중앙 빌드+배포 — ETAP/Workers 블로그 공용"""
+    import fcntl as _fcntl
     _all = _load_all_blogs().get("blogs", [])
     _cfg = next((b for b in _all if b.get("id") == blog_id), {})
     _sp = _cfg.get("site_path", "") or str(ETAP_BASE / blog_id)
@@ -456,26 +460,53 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             logger.error(f"[deploy] Hugo 빌드 실패 {blog_id}\nSTDERR: {r1.stderr[-400:]}")
             return False
 
-        if blog_id in WORKERS_BLOGS:
-            r2 = subprocess.run(
-                [WRANGLER, "deploy",
-                 "--config", str(site_path / "wrangler.toml")],
-                cwd=str(site_path),
-                capture_output=True, text=True,
-                timeout=300,
-                env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
-            )
-        else:
-            r2 = subprocess.run(
-                [WRANGLER, "pages", "deploy", "public",
-                 "--project-name", blog_id,
-                 "--commit-dirty=true",
-                 "--commit-message=publish"],
-                cwd=str(site_path),
-                capture_output=True, text=True,
-                timeout=300,
-                env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
-            )
+        # 파일 락 획득 (wrangler deploy 순차 직렬화)
+        lock_file = open(DEPLOY_LOCK, "w")
+        try:
+            lock_acquired = False
+            import time as _time
+            deadline = _time.time() + DEPLOY_LOCK_TIMEOUT
+            while _time.time() < deadline:
+                try:
+                    _fcntl.flock(lock_file, _fcntl.LOCK_EX | _fcntl.LOCK_NB)
+                    lock_acquired = True
+                    logger.info(f"[deploy] {blog_id} 락 획득 (wrangler deploy 직렬화)")
+                    break
+                except BlockingIOError:
+                    _time.sleep(2)
+
+            if not lock_acquired:
+                logger.error(f"[deploy] {blog_id} 락 대기 시간 초과 ({DEPLOY_LOCK_TIMEOUT}초)")
+                return False
+
+            if blog_id in WORKERS_BLOGS:
+                r2 = subprocess.run(
+                    [WRANGLER, "deploy",
+                     "--config", str(site_path / "wrangler.toml")],
+                    cwd=str(site_path),
+                    capture_output=True, text=True,
+                    timeout=300,
+                    env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+                )
+            else:
+                r2 = subprocess.run(
+                    [WRANGLER, "pages", "deploy", "public",
+                     "--project-name", blog_id,
+                     "--commit-dirty=true",
+                     "--commit-message=publish"],
+                    cwd=str(site_path),
+                    capture_output=True, text=True,
+                    timeout=300,
+                    env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+                )
+        finally:
+            try:
+                _fcntl.flock(lock_file, _fcntl.LOCK_UN)
+                lock_file.close()
+                logger.info(f"[deploy] {blog_id} 락 해제")
+            except Exception:
+                pass
+
         if r2.returncode != 0:
             logger.error(f"[deploy] Wrangler 배포 실패 {blog_id}\nSTDERR: {r2.stderr[-400:]}")
             return False
