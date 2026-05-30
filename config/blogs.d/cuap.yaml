@@ -8,7 +8,7 @@ blogs:
   domain: appliance.informationhot.kr
   cf_project: appliance-hugo
   repo: appliance-hugo
-  site_path: /Users/twinssn/Projects/CUAP/appliance-hugo
+  site_path: /Users/twinssn/Projects/cuap/appliance-hugo
   theme: blowfish
   schedule:
     times:
@@ -28,7 +28,7 @@ blogs:
   domain: baby.informationhot.kr
   cf_project: baby-hugo
   repo: baby-hugo
-  site_path: /Users/twinssn/Projects/CUAP/baby-hugo
+  site_path: /Users/twinssn/Projects/cuap/baby-hugo
   theme: blowfish
   schedule:
     times:
@@ -48,7 +48,7 @@ blogs:
   domain: fitness.informationhot.kr
   cf_project: fitness-hugo
   repo: fitness-hugo
-  site_path: /Users/twinssn/Projects/CUAP/fitness-hugo
+  site_path: /Users/twinssn/Projects/cuap/fitness-hugo
   theme: blowfish
   schedule:
     times:
@@ -68,7 +68,7 @@ blogs:
   domain: interior.informationhot.kr
   cf_project: interior-hugo
   repo: interior-hugo
-  site_path: /Users/twinssn/Projects/CUAP/interior-hugo
+  site_path: /Users/twinssn/Projects/cuap/interior-hugo
   theme: blowfish
   schedule:
     times:
@@ -88,7 +88,7 @@ blogs:
   domain: laptop.informationhot.kr
   cf_project: laptop-hugo
   repo: laptop-hugo
-  site_path: /Users/twinssn/Projects/CUAP/laptop-hugo
+  site_path: /Users/twinssn/Projects/cuap/laptop-hugo
   theme: blowfish
   schedule:
     times:
@@ -99,3 +99,103 @@ blogs:
     - '20:40'
   gsc_site: https://laptop.informationhot.kr/
   ga4_property: '532425912'
+- id: health-hugo
+  name: 건강기능식품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: health.informationhot.kr
+  cf_project: health-hugo
+  repo: health-hugo
+  site_path: /Users/twinssn/Projects/cuap/health-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 07:30
+    - '10:30'
+    - '13:30'
+    - '16:30'
+    - '20:30'
+  gsc_site: https://health.informationhot.kr/
+  ga4_property: ''
+- id: pet-hugo
+  name: 반려동물용품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: pet.informationhot.kr
+  cf_project: pet-hugo
+  repo: pet-hugo
+  site_path: /Users/twinssn/Projects/cuap/pet-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 07:00
+    - '10:00'
+    - '13:00'
+    - '16:00'
+    - '20:00'
+  gsc_site: https://pet.informationhot.kr/
+  ga4_property: ''
+- id: kitchen-hugo
+  name: 주방용품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: kitchen.informationhot.kr
+  cf_project: kitchen-hugo
+  repo: kitchen-hugo
+  site_path: /Users/twinssn/Projects/cuap/kitchen-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 08:30
+    - '11:30'
+    - '14:30'
+    - '17:30'
+    - '21:30'
+  gsc_site: https://kitchen.informationhot.kr/
+  ga4_property: ''
+- id: beauty-hugo
+  name: 뷰티/스킨케어 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: beauty.informationhot.kr
+  cf_project: beauty-hugo
+  repo: beauty-hugo
+  site_path: /Users/twinssn/Projects/cuap/beauty-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 08:40
+    - '11:40'
+    - '14:40'
+    - '17:40'
+    - '21:40'
+  gsc_site: https://beauty.informationhot.kr/
+  ga4_property: ''
+- id: camping-hugo
+  name: 캠핑/아웃도어 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 5
+  domain: camping.informationhot.kr
+  cf_project: camping-hugo
+  repo: camping-hugo
+  site_path: /Users/twinssn/Projects/cuap/camping-hugo
+  theme: blowfish
+  schedule:
+    times:
+    - 07:10
+    - '10:10'
+    - '13:10'
+    - '16:10'
+    - '20:10'
+  gsc_site: https://camping.informationhot.kr/
+  ga4_property: ''
