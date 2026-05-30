@@ -222,6 +222,8 @@ def collect_keyword(keyword):
 
     logger.info(f"Search API 호출: {keyword}")
     products = _search_api(keyword, limit=20)
+    if not products:
+        products = _search_api(keyword, limit=10)
 
     # 변형 키워드로 추가 수집 (상품 풀 확대)
     variants = _generate_keyword_variants(keyword)

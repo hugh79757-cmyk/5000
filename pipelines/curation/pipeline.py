@@ -150,6 +150,22 @@ def _select_keyword(blog_id):
         if cnt >= 3:
             conn.close()
             return kw
+    # 카테고리 필터된 후보에 상품 부족 시 → available(unfiltered)에서 상품 있는 키워드 사용
+    for kw in available:
+        cnt = conn.execute(
+            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
+        ).fetchone()[0]
+        if cnt >= 3:
+            conn.close()
+            return kw
+    # 그래도 없으면 전체 키워드에서 상품 있는 것 사용
+    for kw in keywords:
+        cnt = conn.execute(
+            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
+        ).fetchone()[0]
+        if cnt >= 3:
+            conn.close()
+            return kw
     conn.close()
     return candidates[0]
 
