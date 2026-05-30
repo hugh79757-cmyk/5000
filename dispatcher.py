@@ -463,6 +463,24 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         logger.error(f"[deploy] 예외 {blog_id}: {e}")
         return False
 
+# ─── 발행 실패 기록 (publish_ledger) ───
+
+def _record_failure(blog_id: str, stage: str, error_msg: str):
+    """publish_ledger에 실패 레코드 INSERT (예외 무시)"""
+    try:
+        conn = sqlite3.connect(str(LEDGER_DB))
+        conn.execute(
+            """INSERT INTO publish_ledger
+               (blog_id, title, status, stage, error_msg, created_at)
+               VALUES (?, ?, 'failed', ?, ?, ?)""",
+            (blog_id, stage, stage, error_msg, datetime.now().isoformat())
+        )
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
+
 # ─── 메인 디스패치 ───
 
 def dispatch(blog_id):
@@ -470,14 +488,17 @@ def dispatch(blog_id):
     cfg = get_blog_config(blog_id)
     if not cfg:
         logger.error(f"Unknown blog_id: {blog_id}")
+        _record_failure(blog_id, "config_error", "blogs.yaml에 없는 blog_id")
         _tg_error(blog_id, "config", "blogs.yaml에 없는 blog_id")
         return None
     if cfg.get("status") != "active":
         logger.info(f"{blog_id} is not active")
+        _record_failure(blog_id, "inactive", f"blog status = {cfg.get('status')}")
         return None
     # 발행 전 중복 체크
     if _is_duplicate(blog_id):
         logger.info(f"[DEDUP] {blog_id} 동일 제목 중복 — 발행 건너뜀 (quota 소모 안 함)")
+        _record_failure(blog_id, "duplicate_title", "daily_quota 도달")
         return {"success": False, "reason": "duplicate_title"}
 
     result = _run_pipeline(cfg)
@@ -494,11 +515,15 @@ def dispatch(blog_id):
             result = {"success": True, "reason": result}
     elif isinstance(result, bool):
         result = {"success": result}
-    # 성공 시 중앙 ledger에 기록
+    # 성공/실패 기록
     if result.get("success"):
         _record_ledger(blog_id)
         if blog_id in ETAP_PIPELINE_BLOGS:
             _build_and_deploy_central(blog_id)
+    else:
+        reason = result.get("reason", "unknown")
+        if reason not in ("quota_met", "already_running", "duplicate_title"):
+            _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
     return result
 
 
@@ -533,7 +558,12 @@ def main():
             print(f"Report failed: {e}")
         return
 
-    dispatch(cmd)
+    import json
+    result = dispatch(cmd)
+    if result is not None:
+        print(json.dumps(result, ensure_ascii=False))
+    else:
+        print(json.dumps({"success": False, "reason": "dispatch_returned_none"}))
 
 
 if __name__ == "__main__":

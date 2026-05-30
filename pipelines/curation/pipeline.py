@@ -432,6 +432,24 @@ def _record_publish(blog_id, keyword, title, slug):
     conn.close()
 
 
+LEDGER_DB = PROJECT_DIR / "data" / "content.db"
+
+def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = ""):
+    """publish_ledger에 발행 실패 기록 (예외를 삼켜 파이프라인 중단 방지)"""
+    try:
+        con = sqlite3.connect(str(LEDGER_DB))
+        con.execute(
+            """INSERT INTO publish_ledger
+               (blog_id, title, status, stage, error_msg, created_at)
+               VALUES (?, ?, 'failed', ?, ?, ?)""",
+            (blog_id, keyword or stage, stage, error_msg, datetime.now().isoformat())
+        )
+        con.commit()
+        con.close()
+    except Exception as e:
+        logger.warning(f"[ledger] 실패 기록 오류: {e}")
+
+
 def run(cfg):
     """curation 파이프라인 메인 — dispatcher에서 호출"""
     blog_id = cfg.get("id", "")
@@ -467,6 +485,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     keyword = _select_keyword(blog_id)
     if not keyword:
         logger.error(f"[{blog_id}] 사용 가능한 키워드 없음")
+        _record_failure(blog_id, "no_keyword", "사용 가능한 키워드 없음")
         return {"success": False, "reason": "no_keyword"}
 
     # 상품 수집 (캐시 또는 API)
@@ -475,8 +494,10 @@ def _run_inner(cfg, blog_id, daily_quota):
         from pipelines.curation.collector import _check_rate_limit
         if not _check_rate_limit():
             logger.warning(f"[{blog_id}] 쿠팡 API 차단 중 — 다음 실행 시 재시도")
+            _record_failure(blog_id, "rate_limited", "쿠팡 API 차단", keyword)
             return {"success": False, "reason": "rate_limited"}
         logger.error(f"[{blog_id}] 상품 수집 실패: {keyword}")
+        _record_failure(blog_id, "collect_error", f"쿠팡 API 수집 실패: {keyword}", keyword)
         return {"success": False, "reason": "collect_error"}
 
     products = get_products(keyword, limit=10)
@@ -503,6 +524,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         used_set = {r[0] for r in used} | {keyword}
         fallback_kws = [k for k in all_kws if k not in used_set]
         if not fallback_kws:
+            _record_failure(blog_id, "insufficient_products", "모든 키워드 사용 완료", keyword)
             return {"success": False, "reason": "insufficient_products"}
         keyword = fallback_kws[0]
         logger.info(f"[{blog_id}] 대체 키워드 사용: {keyword}")
@@ -511,12 +533,14 @@ def _run_inner(cfg, blog_id, daily_quota):
         products = _filter_used_products(blog_id, products)
         if len(products) < 3:
             logger.error(f"[{blog_id}] 대체 키워드도 상품 부족: {keyword} ({len(products)}개)")
+            _record_failure(blog_id, "insufficient_products", f"대체 키워드도 상품 부족: {keyword}", keyword)
             return {"success": False, "reason": "insufficient_products"}
 
     # 카테고리 무관 상품 필터링 (코드 레벨)
     products = _filter_irrelevant_products(blog_id, keyword, products)
     if len(products) < 3:
         logger.error(f"[{blog_id}] 필터 후 상품 부족: {keyword} ({len(products)}개)")
+        _record_failure(blog_id, "irrelevant_products", f"필터 후 상품 부족: {keyword}", keyword)
         return {"success": False, "reason": "irrelevant_products"}
 
     # 상품 데이터 인리치 (스펙 파싱 + 네이버 brand)
@@ -525,6 +549,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     # AI 글 생성
     article = generate_curation_article(keyword, products, blog_id=blog_id)
     if not article:
+        _record_failure(blog_id, "write_error", "AI 글 생성 실패", keyword)
         return {"success": False, "reason": "write_error"}
 
     title = sanitize_title(article["title"])
@@ -539,6 +564,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     for bw in title_blocked:
         if bw.lower() in title.lower():
             logger.warning(f"[{blog_id}] 제목에 blocked 키워드 감지: '{bw}' in '{title}'")
+            _record_failure(blog_id, "title_blocked", f"제목 blocked 키워드: {bw}", keyword)
             return {"success": False, "reason": "title_blocked"}
 
     # 썸네일: 첫 번째 상품 이미지를 R2에 업로드
@@ -549,6 +575,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     # 유사 제목 체크
     if _title_is_duplicate(blog_id, title):
         logger.warning(f"[{blog_id}] 유사 제목 존재: {title}")
+        _record_failure(blog_id, "similar_title", f"유사 제목 중복: {title}", keyword)
         return {"success": False, "reason": "similar_title"}
 
     # 발행
@@ -584,6 +611,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")
+        _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
         return {"success": False, "reason": "publish_error"}
 
     # 발행 기록

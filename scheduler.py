@@ -115,6 +115,7 @@ def run_publish(blog_id):
         logger.warning(f"Quota check failed for {blog_id}: {e}")
 
     logger.info("Publishing: " + blog_id)
+    import json as _json
     try:
         result = subprocess.run(
             [PYTHON, "dispatcher.py", blog_id],
@@ -123,7 +124,18 @@ def run_publish(blog_id):
         )
         if result.stdout:
             for line in result.stdout.strip().split("\n")[-3:]:
-                logger.info("  " + line)
+                logger.info("  [OUT] " + line)
+            # 마지막 줄이 JSON 결과라고 가정하고 파싱
+            last_line = result.stdout.strip().split("\n")[-1].strip()
+            try:
+                parsed = _json.loads(last_line)
+                if parsed.get("success"):
+                    logger.info(f"[PUBLISH] {blog_id} 발행 성공")
+                else:
+                    reason = parsed.get("reason", "unknown")
+                    logger.error(f"[PUBLISH] {blog_id} 발행 실패 — stage={reason}")
+            except (_json.JSONDecodeError, Exception):
+                pass
         if result.returncode != 0 and result.stderr:
             logger.error("  ERR: " + result.stderr[-200:])
             _tg_error(blog_id, "scheduler", result.stderr[-300:])
@@ -363,6 +375,20 @@ def _run_stap_collector():
         logger.error(f"[STAP collector] 오류: {e}")
 
 
+
+def _run_senior_sync():
+    """senior.db 서비스 데이터 일일 동기화 (pending 보충)"""
+    try:
+        import sys
+        sys.path.insert(0, "/Users/twinssn/Projects/5000")
+        from pipelines.senior.fetcher import sync_services, get_pending_count
+        pending = get_pending_count()
+        logger.info(f"[SeniorSync] 현재 pending: {pending}건")
+        synced = sync_services()
+        logger.info(f"[SeniorSync] 완료: {synced}건 신규 저장, pending: {get_pending_count()}건")
+    except Exception as e:
+        logger.error(f"[SeniorSync] 실패: {e}")
+
 def _run_festival_refresh():
     try:
         subprocess.run([sys.executable, "scripts/refresh_festival.py"],
@@ -410,6 +436,8 @@ def register_schedules():
     job_count += 1
 
     schedule.every().day.at("06:00").do(_run_festival_refresh)
+    schedule.every().day.at("05:30").do(_run_senior_sync)
+    logger.info("Senior DB sync scheduled at 05:30")
     logger.info("Festival refresh scheduled at 06:00")
     schedule.every().day.at("06:10").do(_run_stap_collector)
     logger.info("STAP data collector scheduled at 06:10")
