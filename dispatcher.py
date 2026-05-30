@@ -428,8 +428,17 @@ ETAP_PIPELINE_BLOGS = {
     "walking-hugo", "watersports-hugo", "watertours-hugo",
 }
 
+# Workers 배포 대상 블로그 (Pages 대신 Workers 사용)
+WORKERS_BLOGS = {
+    "health-hugo",
+    "pet-hugo",
+    "kitchen-hugo",
+    "beauty-hugo",
+    "camping-hugo",
+}
+
 def _build_and_deploy_central(blog_id: str) -> bool:
-    """dispatcher 중앙 빌드+배포 — ETAP 파이프라인 전용"""
+    """중앙 빌드+배포 — ETAP/Workers 블로그 공용"""
     _all = _load_all_blogs().get("blogs", [])
     _cfg = next((b for b in _all if b.get("id") == blog_id), {})
     _sp = _cfg.get("site_path", "") or str(ETAP_BASE / blog_id)
@@ -447,12 +456,26 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             logger.error(f"[deploy] Hugo 빌드 실패 {blog_id}\nSTDERR: {r1.stderr[-400:]}")
             return False
 
-        r2 = subprocess.run(
-            [WRANGLER, "pages", "deploy", "public", "--project-name", blog_id, "--commit-dirty=true", "--commit-message=publish"],
-            cwd=str(site_path),
-            capture_output=True, text=True,
-            env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
-        )
+        if blog_id in WORKERS_BLOGS:
+            r2 = subprocess.run(
+                [WRANGLER, "deploy",
+                 "--config", str(site_path / "wrangler.toml")],
+                cwd=str(site_path),
+                capture_output=True, text=True,
+                timeout=300,
+                env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+            )
+        else:
+            r2 = subprocess.run(
+                [WRANGLER, "pages", "deploy", "public",
+                 "--project-name", blog_id,
+                 "--commit-dirty=true",
+                 "--commit-message=publish"],
+                cwd=str(site_path),
+                capture_output=True, text=True,
+                timeout=300,
+                env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+            )
         if r2.returncode != 0:
             logger.error(f"[deploy] Wrangler 배포 실패 {blog_id}\nSTDERR: {r2.stderr[-400:]}")
             return False
@@ -518,7 +541,7 @@ def dispatch(blog_id):
     # 성공/실패 기록
     if result.get("success"):
         _record_ledger(blog_id)
-        if blog_id in ETAP_PIPELINE_BLOGS:
+        if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS:
             _build_and_deploy_central(blog_id)
     else:
         reason = result.get("reason", "unknown")
