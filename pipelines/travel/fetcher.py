@@ -488,11 +488,7 @@ def fetch_food():
     - 최근 5일간 발행된 시군구는 제외 (주제 중복 방지)
     """
     import requests as req
-    try:
-        from pipelines.travel.area_codes import get_weighted_random_sigungu, get_do_name
-    except ImportError:
-        sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
-        from pipelines.travel.area_codes import get_weighted_random_sigungu, get_do_name
+    from pipelines.travel.area_codes import get_weighted_random_sigungu, get_do_name
 
     key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
 
