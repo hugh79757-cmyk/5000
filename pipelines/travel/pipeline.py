@@ -32,9 +32,12 @@ def _travel_source_exists(blog_id, source_id):
     if not source_id:
         return False
     import sqlite3 as _sq
-    _db = "/Users/twinssn/Projects/5000/data/content.db"
     try:
-        _cn = _sq.connect(_db)
+        from shared.db_paths import PUBLISH_LEDGER_DB
+    except ImportError:
+        PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+    try:
+        _cn = _sq.connect(PUBLISH_LEDGER_DB)
         _row = _cn.execute(
             "SELECT 1 FROM publish_ledger WHERE blog_id=? AND source_id=?",
             (blog_id, source_id)
@@ -46,13 +49,17 @@ def _travel_source_exists(blog_id, source_id):
         return False
 
 def _travel_title_similar_exists(blog_id, title):
-    """publish_ledger에서 유사 제목 중복 확인"""
+    """publish_ledger에서 유사 제목 중복 확인 (정확 일치 + 80% 유사도)"""
     if not title:
         return False
     import sqlite3 as _sq
-    _db = "/Users/twinssn/Projects/5000/data/content.db"
+    from difflib import SequenceMatcher
     try:
-        _cn = _sq.connect(_db)
+        from shared.db_paths import PUBLISH_LEDGER_DB
+    except ImportError:
+        PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+    try:
+        _cn = _sq.connect(PUBLISH_LEDGER_DB)
         _rows = _cn.execute(
             "SELECT title FROM publish_ledger WHERE blog_id=? ORDER BY created_at DESC LIMIT 200",
             (blog_id,)
@@ -60,11 +67,81 @@ def _travel_title_similar_exists(blog_id, title):
         _cn.close()
         title_norm = title.replace(" ", "").lower()
         for (_t,) in _rows:
-            if _t and _t.replace(" ", "").lower() == title_norm:
+            if not _t:
+                continue
+            _t_norm = _t.replace(" ", "").lower()
+            if _t_norm == title_norm:
+                return True
+            if SequenceMatcher(None, title_norm, _t_norm).ratio() >= 0.8:
+                logger.info(f"제목 유사도 80% 이상: '{title[:30]}' ≈ '{_t[:30]}' ({SequenceMatcher(None, title_norm, _t_norm).ratio():.0%})")
                 return True
         return False
     except Exception as _e:
         logger.warning(f"_travel_title_similar_exists 오류: {_e}")
+        return False
+
+
+def _travel_sigungu_recently_published(blog_id, sigungu, days=14):
+    """
+    최근 days일 내 동일 blog_id + sigungu 조합이
+    published 상태로 존재하면 True 반환.
+
+    우선순위:
+      1순위: articles.sigungu 컬럼 직접 조회 (stap_content.db — 최신 발행 데이터)
+      2순위: articles.title 파싱 fallback
+             (sigungu 컬럼이 NULL인 기존 데이터 커버용)
+
+    sigungu가 빈 문자열이면 False 반환 (체크 스킵).
+    DB 오류 시 False 반환 (안전 방향 — 발행 허용).
+    """
+    if not sigungu or not sigungu.strip():
+        return False
+
+    from datetime import timedelta
+    from shared.db_paths import ARTICLES_DB
+    import sqlite3 as _sq
+
+    cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+
+    try:
+        _cn = _sq.connect(ARTICLES_DB)
+
+        # 1순위: sigungu 컬럼 직접 조회
+        _row = _cn.execute(
+            """SELECT id FROM articles
+               WHERE blog_id    = ?
+                 AND sigungu    = ?
+                 AND status     = 'published'
+                 AND created_at > ?
+               LIMIT 1""",
+            (blog_id, sigungu, cutoff)
+        ).fetchone()
+
+        if _row:
+            _cn.close()
+            logger.info(f"_travel_sigungu_recently_published: {blog_id} '{sigungu}' 컬럼매칭")
+            return True
+
+        # 2순위: title 파싱 fallback (기존 NULL 건 커버)
+        _rows = _cn.execute(
+            """SELECT title FROM articles
+               WHERE blog_id    = ?
+                 AND sigungu    IS NULL
+                 AND status     = 'published'
+                 AND created_at > ?""",
+            (blog_id, cutoff)
+        ).fetchall()
+        _cn.close()
+
+        for (_t,) in _rows:
+            if _t and sigungu in _t:
+                logger.info(f"_travel_sigungu_recently_published: {blog_id} '{sigungu}' 타이틀매칭 fallback")
+                return True
+
+        return False
+
+    except Exception as _e:
+        logger.warning(f"_travel_sigungu_recently_published 오류: {_e}")
         return False
 
 
@@ -143,11 +220,34 @@ def _run_single(target_blog_id, blog_cfg=None):
         if _travel_source_exists(target_blog_id, _sid):
             logger.warning(target_blog_id + " source_id 중복: " + _sid[:60])
             return None
-        # 개별 contentid도 체크 (복합 source_id 대응)
+        # 개별 contentid도 체크 (복합 source_id 대응 — INSTR 부분검색)
         for _cid in _content_ids:
-            if _cid and _travel_source_exists(target_blog_id, _cid):
-                logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
-                return None
+            if not _cid:
+                continue
+            try:
+                import sqlite3 as _sq
+                try:
+                    from shared.db_paths import PUBLISH_LEDGER_DB
+                except ImportError:
+                    PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+                _cn = _sq.connect(PUBLISH_LEDGER_DB)
+                _row = _cn.execute(
+                    # 앞뒤 콤마 감싸기로 정확한 contentId 매칭 (오탐 방지)
+                    "SELECT 1 FROM publish_ledger WHERE blog_id=? AND INSTR(',' || source_id || ',', ',' || ? || ',') > 0",
+                    (target_blog_id, _cid)
+                ).fetchone()
+                _cn.close()
+                if _row:
+                    logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
+                    return None
+            except Exception as _e:
+                logger.warning(f"개별 contentid 체크 오류: {_e}")
+
+    # ── 시군구 기반 주제 중복 발행 방지 (14일 룩백) ──
+    _sigungu = data.get("sigungu", "")
+    if _sigungu and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
+        logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최근 14일 내 발행됨)")
+        return None
 
     result = generate_content(data, blog_id=target_blog_id)
     if not result:
@@ -199,6 +299,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         prompt_id=result.get("prompt_id", ""),
         model=result.get("model", ""),
         is_draft=_is_draft,
+        sigungu=data.get("sigungu", ""),
     )
 
     if pub_result and pub_result.get("success"):
@@ -218,8 +319,11 @@ def _run_single(target_blog_id, blog_cfg=None):
         if data.get("source_type") == "course" and data.get("content_ids"):
             try:
                 import sqlite3 as _sq
-                _dbp = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db")
-                _cn = _sq.connect(_dbp)
+                try:
+                    from shared.db_paths import PUBLISH_LEDGER_DB
+                except ImportError:
+                    PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+                _cn = _sq.connect(PUBLISH_LEDGER_DB)
                 _cn.execute(
                     "CREATE TABLE IF NOT EXISTS course_published ("
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, blog_id TEXT NOT NULL, "

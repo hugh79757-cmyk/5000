@@ -11,6 +11,12 @@ load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), "
 
 logger = logging.getLogger(__name__)
 
+try:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from shared.telegram_notifier import send as _tg_send
+except ImportError:
+    _tg_send = lambda *a, **k: None
+
 def _fix_image_https(url):
     """http://tong.visitkorea.or.kr → https 변환"""
     if url and url.startswith("http://tong.visitkorea.or.kr"):
@@ -183,7 +189,7 @@ def fetch_korservice_heritage():
     return fetch_heritage()
 
 
-def fetch_festival():
+def fetch_festival(_is_retry=False):
     """festival.db 기반 스마트 발행: 축제 시작일 역산으로 발행 대상 자동 선택"""
     import sqlite3
     from datetime import datetime, timedelta
@@ -236,6 +242,17 @@ def fetch_festival():
         if not rows:
             logger.warning("festival.db: 미래 축제 0건")
             conn.close()
+            if not _is_retry:
+                logger.warning("festival 소진 감지 — refresh_festival 자동 트리거")
+                try:
+                    import subprocess as _sp
+                    _r = _sp.run([_sp.sys.executable, "scripts/refresh_festival.py"],
+                                 capture_output=True, text=True,
+                                 cwd="/Users/twinssn/Projects/5000", timeout=120)
+                    logger.info(f"festival 자동 갱신 결과: {_r.stdout.strip()}")
+                except Exception as _e:
+                    logger.error(f"festival 자동 갱신 실패: {_e}")
+                return fetch_festival(_is_retry=True)
             return None
 
         # 스마트 발행: 축제 시작일 역산으로 분류
@@ -271,6 +288,7 @@ def fetch_festival():
             # 61일+ 대기
 
         # 우선순위 순서대로 후보 선택
+        _is_fallback = False
         if urgent:
             candidates = urgent
             logger.info(f"festival 스마트발행: 긴급(14~21일) {len(urgent)}건")
@@ -284,9 +302,57 @@ def fetch_festival():
             candidates = low
             logger.info(f"festival 스마트발행: 낮음(43~60일) {len(low)}건")
         else:
-            logger.warning("festival 스마트발행: 발행 대상 0건")
-            conn.close()
-            return None
+            # [AUTO REFRESH] published_ids 필터로 후보 0건 → DB 갱신 후 1회 재시도
+            if not _is_retry:
+                logger.warning("festival 소진 감지 — refresh_festival 자동 트리거")
+                try:
+                    import subprocess as _sp
+                    _r = _sp.run([_sp.sys.executable, "scripts/refresh_festival.py"],
+                                 capture_output=True, text=True,
+                                 cwd="/Users/twinssn/Projects/5000", timeout=120)
+                    logger.info(f"festival 자동 갱신 결과: {_r.stdout.strip()}")
+                except Exception as _e:
+                    logger.error(f"festival 자동 갱신 실패: {_e}")
+                return fetch_festival(_is_retry=True)
+            _is_fallback = True
+            logger.warning("festival 스마트발행: 발행 대상 0건 — published_ids fallback 시도")
+            _tg_send("⚠️ travel1-hugo festival 콘텐츠 소진 — fallback 발행 중")
+            # [DEPLETION FALLBACK] 모든 축제가 이미 발행됨 → published_ids 무시하고 재시도
+            urgent = []
+            high = []
+            normal = []
+            low = []
+            for r in rows:
+                estart = r["eventstartdate"]
+                start_date = datetime.strptime(estart, "%Y%m%d")
+                days_left = (start_date - now).days
+                if days_left < 14:
+                    continue
+                elif days_left <= 21:
+                    urgent.append(r)
+                elif days_left <= 28:
+                    high.append(r)
+                elif days_left <= 42:
+                    normal.append(r)
+                elif days_left <= 60:
+                    low.append(r)
+            if urgent:
+                candidates = urgent
+                logger.info(f"festival fallback: 긴급(14~21일) {len(urgent)}건")
+            elif high:
+                candidates = high
+                logger.info(f"festival fallback: 높음(22~28일) {len(high)}건")
+            elif normal:
+                candidates = normal
+                logger.info(f"festival fallback: 보통(29~42일) {len(normal)}건")
+            elif low:
+                candidates = low
+                logger.info(f"festival fallback: 낮음(43~60일) {len(low)}건")
+            else:
+                logger.warning("festival: fallback 후에도 0건 (DB 갱신 필요)")
+                _tg_send("🚨 travel1-hugo festival 발행 불가 — DB 갱신 필요")
+                conn.close()
+                return None
 
         # 이미지 있는 것 우선
         with_image = [r for r in candidates if r["firstimage"]]
@@ -348,7 +414,8 @@ def fetch_festival():
 
         conn.close()
         # contentid 리스트 (중복 발행 방지용)
-        content_ids = [str(r["contentid"]) for r in selected if r["contentid"]]
+        # fallback 모드: 이미 발행된 contentid → 빈 리스트로 pipeline 중복체크 우회
+        content_ids = [] if _is_fallback else [str(r["contentid"]) for r in selected if r["contentid"]]
 
         result = {
             "items": adapted,
@@ -370,23 +437,66 @@ def fetch_festival():
         return None
 
 
+def _get_recent_published_sigungus(days=14):
+    """최근 N일간 travel3-hugo에 발행된 시군구 이름 집합
+    우선 articles.sigungu 컬럼 직접 조회 (stap_content.db), NULL이면 title 파싱 fallback"""
+    import sqlite3
+    try:
+        from shared.db_paths import ARTICLES_DB
+    except ImportError:
+        ARTICLES_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "stap_content.db")
+    sigungus = set()
+    try:
+        conn = sqlite3.connect(ARTICLES_DB)
+        # sigungu 컬럼 직접 조회
+        col_rows = conn.execute(
+            "SELECT DISTINCT sigungu FROM articles WHERE blog_id='travel3-hugo' AND sigungu IS NOT NULL AND sigungu != '' AND created_at >= datetime('now', ? || ' days')",
+            (str(days),)
+        ).fetchall()
+        if col_rows:
+            sigungus = {row[0] for row in col_rows}
+        else:
+            # title 파싱 fallback
+            rows = conn.execute(
+                "SELECT title FROM articles WHERE blog_id='travel3-hugo' AND created_at >= datetime('now', ? || ' days')",
+                (str(days),)
+            ).fetchall()
+            _do_set = {'서울','인천','대전','대구','광주','부산','울산','세종',
+                        '경기','강원','충북','충남','전북','전남','경북','경남','제주'}
+            for (title,) in rows:
+                if not title:
+                    continue
+                parts = title.split()
+                for p in parts:
+                    if p in _do_set:
+                        continue
+                    if p.endswith('시') or p.endswith('군') or p.endswith('구'):
+                        sigungus.add(p)
+                        break
+        conn.close()
+        if sigungus:
+            logger.info(f"_get_recent_sigungus ({days}일, ARTICLES_DB): {len(sigungus)}개: {sigungus}")
+    except Exception as e:
+        logger.warning(f"_get_recent_sigungus 오류: {e}")
+    return sigungus
+
+
 def fetch_food():
+    """TourAPI contentTypeId=39 + sigunguCode 직접 지정으로 균등 분산
+    - pipelines.travel.area_codes의 FOOD_AREA_SIGUNGU에서 랜덤 시군구 선택
+    - sigunguCode 파라미터 전달로 특정 시군구 데이터만 조회
+    - 최근 5일간 발행된 시군구는 제외 (주제 중복 방지)
+    """
     import requests as req
-    AREA_CODES = {
-        "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
-        "부산": 6, "울산": 7, "세종": 8, "경기": 31, "강원": 32,
-        "충북": 33, "충남": 34, "경북": 35, "경남": 36,
-        "전북": 37, "전남": 38, "제주": 39,
-    }
-    keywords = ["맛집"]
-    keyword = random.choice(keywords)
+    try:
+        from pipelines.travel.area_codes import get_weighted_random_sigungu, get_do_name
+    except ImportError:
+        sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
+        from pipelines.travel.area_codes import get_weighted_random_sigungu, get_do_name
+
     key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
 
-    # 중복 제외 후 pool 부족 시 지역 재시도 (전체 지역 순회)
-    _all_regions = list(AREA_CODES.keys())
-    random.shuffle(_all_regions)
-
-    # 기존 발행 contentid 사전 로드 (루프 밖에서 1회만)
+    # 기존 발행 contentid 사전 로드
     _published_cids = set()
     try:
         import sqlite3 as _sql
@@ -403,10 +513,17 @@ def fetch_food():
     except Exception as _e:
         logger.warning(f"food dup-check DB error: {_e}")
 
-    for _retry_idx, region_name in enumerate(_all_regions):
-        area_code = AREA_CODES[region_name]
-        if _retry_idx > 0:
-            logger.info(f"food: pool 부족 → 지역 재시도 ({_retry_idx+1}/{len(_all_regions)}): {region_name}")
+    # 최근 14일 발행 시군구 제외
+    _recent_sigungus = _get_recent_published_sigungus(14)
+
+    # 가중치 기반 시군구 선택 (최근 발행 시군구 제외)
+    # 최대 50회 시도 — exclude_sigungus로 전부 소진 시 제한 해제됨
+    for _attempt in range(50):
+        area_code, sigungu_code, sigungu_name = get_weighted_random_sigungu(
+            exclude_sigungus=_recent_sigungus
+        )
+        do_name = get_do_name(area_code)
+
         try:
             resp = req.get(
                 "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
@@ -415,26 +532,29 @@ def fetch_food():
                     "MobileOS": "ETC",
                     "MobileApp": "TAP",
                     "_type": "json",
-                    "numOfRows": 50,
-                    "pageNo": 1,
+                    "numOfRows": 100,
+                    "pageNo": random.randint(1, 3),
                     "contentTypeId": 39,
                     "areaCode": area_code,
-                    "arrange": "C",
+                    "sigunguCode": sigungu_code,
+                    "arrange": random.choice(["C", "Q", "A"]),
                 },
                 timeout=15,
             )
             data = resp.json()
             header = data.get("response", {}).get("header", {})
             if header.get("resultCode") != "0000":
-                logger.warning("food API error: " + str(header))
+                logger.warning(f"food API error ({do_name} {sigungu_name}): {header}")
                 continue
+
             items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
             if isinstance(items_raw, dict):
                 items_raw = [items_raw]
             if not items_raw:
-                logger.warning("food: no data for " + region_name)
+                logger.info(f"food: {do_name} {sigungu_name} 데이터 0건 → 다음 시군구")
                 continue
-            # [FIX] 음식점 + 카페 혼합 — 카페만으로 구성되지 않도록 보장
+
+            # 음식점 + 카페 혼합
             _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
             def _is_cafe(item):
                 return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
@@ -446,45 +566,110 @@ def fetch_food():
                 _mixed = _restaurants
             else:
                 _mixed = items_raw
+
             with_img = [i for i in _mixed if i.get("firstimage")]
             pool = with_img if len(with_img) >= 3 else _mixed
             pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+
             if len(pool) < 3:
-                logger.warning(f"food: {region_name} 중복 제외 후 {len(pool)}건 → 다음 지역")
+                logger.info(f"food: {do_name} {sigungu_name} 중복 제외 후 {len(pool)}건 → 다음 시군구")
                 continue
-            selected, _sg = _select_same_sigungu(pool, 3)
-            # 같은 시군구 3개 못 찾으면 시군구 조건 없이 pool에서 랜덤 3개
-            if len(selected) < 3:
-                import random as _rr
-                with_img_pool = [i for i in pool if i.get("firstimage")]
-                _fallback_pool = with_img_pool if len(with_img_pool) >= 3 else pool
-                if len(_fallback_pool) >= 3:
-                    selected = _rr.sample(_fallback_pool, 3)
-                    _sg = ""
-                    logger.info(f"food: 시군구 조건 완화 → {region_name}에서 랜덤 3건 선택")
-                else:
-                    logger.warning(f"food: {region_name} 최종 pool {len(_fallback_pool)}건 부족 → 다음 지역")
-                    continue
+
+            # 같은 시군구 내에서 3개 랜덤 선택 (_select_same_sigungu 불필요)
+            selected = random.sample(pool, min(3, len(pool)))
             adapted = _adapt_korservice_items(selected)
-            sigungu_name = _sg if _sg else region_name
-            display = f"{region_name} {sigungu_name}".strip() if sigungu_name and sigungu_name != region_name else region_name
+            display = f"{do_name} {sigungu_name}"
             content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+
+            logger.info(f"food 선택: {do_name} {sigungu_name} {len(selected)}건")
             return {
                 "items": adapted,
                 "display_region": display,
                 "sigungu": sigungu_name,
-                "do_name": region_name,
-                "theme": keyword,
+                "do_name": do_name,
+                "theme": "맛집",
                 "category": "맛집",
-                "angle": display + " " + keyword,
+                "angle": display + " 맛집",
                 "source_type": "korservice",
                 "content_ids": content_ids,
             }
         except Exception as e:
-            logger.warning(f"food fetch failed ({region_name}): " + str(e))
+            logger.warning(f"food fetch failed ({do_name} {sigungu_name}): " + str(e))
             continue
 
-    logger.warning("food: 전체 지역 순회 후 발행 가능 아이템 없음")
+    # [DEPLETION FALLBACK] sigungu 제한 완화 → published_ids 무시, 2건 허용
+    logger.warning("food: 콘텐츠 소진 — 중복 체크 완화 fallback 시도")
+    _tg_send("⚠️ travel3-hugo food 콘텐츠 소진 — fallback 발행 중")
+    for _attempt in range(50):
+        area_code, sigungu_code, sigungu_name = get_weighted_random_sigungu()
+        do_name = get_do_name(area_code)
+        try:
+            resp = req.get(
+                "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
+                params={
+                    "serviceKey": key,
+                    "MobileOS": "ETC",
+                    "MobileApp": "TAP",
+                    "_type": "json",
+                    "numOfRows": 100,
+                    "pageNo": random.randint(1, 3),
+                    "contentTypeId": 39,
+                    "areaCode": area_code,
+                    "sigunguCode": sigungu_code,
+                    "arrange": random.choice(["C", "Q", "A"]),
+                },
+                timeout=15,
+            )
+            data = resp.json()
+            header = data.get("response", {}).get("header", {})
+            if header.get("resultCode") != "0000":
+                continue
+            items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(items_raw, dict):
+                items_raw = [items_raw]
+            if not items_raw:
+                continue
+            _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
+            def _is_cafe_fb(item):
+                return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
+            _restaurants = [i for i in items_raw if not _is_cafe_fb(i)]
+            _cafes = [i for i in items_raw if _is_cafe_fb(i)]
+            if len(_restaurants) >= 1 and _cafes:
+                _mixed = _restaurants + _cafes[:1]
+            elif len(_restaurants) >= 2:
+                _mixed = _restaurants
+            else:
+                _mixed = items_raw
+            with_img = [i for i in _mixed if i.get("firstimage")]
+            pool = with_img if len(with_img) >= 2 else _mixed
+            if len(pool) < 2:
+                if len(pool) == 1:
+                    selected = pool
+                else:
+                    continue
+            else:
+                selected = random.sample(pool, min(2, len(pool)))
+            adapted = _adapt_korservice_items(selected)
+            display = f"{do_name} {sigungu_name}"
+            content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+            logger.info(f"food fallback 성공: {do_name} {sigungu_name} {len(selected)}건")
+            return {
+                "items": adapted,
+                "display_region": display,
+                "sigungu": sigungu_name,
+                "do_name": do_name,
+                "theme": "맛집",
+                "category": "맛집",
+                "angle": display + " 맛집",
+                "source_type": "korservice",
+                "content_ids": content_ids,
+            }
+        except Exception as e:
+            logger.warning(f"food fallback failed ({do_name} {sigungu_name}): " + str(e))
+            continue
+
+    logger.warning("food: fallback 전체 시군구 순회 후 발행 불가")
+    _tg_send("🚨 travel3-hugo food 발행 불가 — 모든 시군구 콘텐츠 소진")
     return None
 
 

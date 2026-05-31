@@ -35,6 +35,7 @@ def init_db():
         "published_at TEXT,"
         "platform TEXT,"
         "status TEXT DEFAULT 'draft',"
+        "sigungu TEXT,"
         "created_at TEXT DEFAULT (datetime('now'))"
         ")"
     )
@@ -61,8 +62,8 @@ def insert_article(article):
         "INSERT OR IGNORE INTO articles"
         " (blog_id, title, slug, body_md, body_html, thumbnail_url, category, tags,"
         "  data_source, source_id, prompt_id, model, published_url, published_at,"
-        "  platform, status, created_at)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "  platform, status, sigungu, created_at)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (
             article.get("blog_id", ""),
             article.get("title", ""),
@@ -80,6 +81,7 @@ def insert_article(article):
             article.get("published_at", ""),
             article.get("platform", ""),
             article.get("status", "published"),
+            article.get("sigungu", ""),
             article.get("created_at", datetime.now().isoformat()),
         ),
     )

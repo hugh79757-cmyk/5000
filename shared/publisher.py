@@ -628,15 +628,27 @@ def deploy_site(site_path, cf_project):
     index_file = site / "public" / "index.html"
     if not index_file.exists():
         raise Exception("Hugo build produced empty site: public/index.html not found")
+
+    # Workers + Assets 감지: wrangler.toml에 [assets] 있으면 workers deploy
+    wf = site / "wrangler.toml"
+    use_workers = wf.exists() and "[assets]" in wf.read_text()
+
     with open(log_path, "a") as log_f:
-        result = subprocess.run(
-            ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-             "--project-name=" + cf_project,
-             "--branch=main",
-             "--commit-dirty=true",
-             "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-            cwd=str(site), stdout=log_f, stderr=log_f
-        )
+        if use_workers:
+            result = subprocess.run(
+                ["/opt/homebrew/bin/wrangler", "deploy",
+                 "--config", str(wf)],
+                cwd=str(site), stdout=log_f, stderr=log_f
+            )
+        else:
+            result = subprocess.run(
+                ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+                 "--project-name=" + cf_project,
+                 "--branch=main",
+                 "--commit-dirty=true",
+                 "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
+                cwd=str(site), stdout=log_f, stderr=log_f
+            )
     if result.returncode != 0:
         raise Exception("Wrangler deploy failed: see deploy.log")
     return True
@@ -645,7 +657,7 @@ def deploy_site(site_path, cf_project):
 def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", blog_cfg=None,
             category="", tags="", thumbnail_url="",
             data_source="", source_id="", prompt_id="",
-            model="", wp_category=None, is_draft=False):
+            model="", wp_category=None, is_draft=False, sigungu=""):
 
     blog_cfg = get_blog_config(blog_id)
 
@@ -666,6 +678,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         "tags": tags,
         "data_source": data_source,
         "source_id": source_id,
+        "sigungu": sigungu,
         "prompt_id": prompt_id,
         "model": model,
         "platform": blog_cfg["platform"],
