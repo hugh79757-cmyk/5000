@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-from shared.content_store import init_db, get_today_count, register_images, register_places
+from shared.content_store import init_db, get_today_count, register_images, register_places, is_place_used
 from shared.publisher import publish, get_blog_config
 from pipelines.travel.fetcher import fetch_camping, fetch_korservice, fetch_korservice_heritage, fetch_wellness, fetch_heritage, fetch_festival, fetch_food, fetch_course, fetch_random
 from pipelines.travel.writer import generate_content
@@ -248,6 +248,21 @@ def _run_single(target_blog_id, blog_cfg=None):
     if _sigungu and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
         logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최근 14일 내 발행됨)")
         return None
+
+    # ── 가게명 기반 중복 발행 방지 (used_places ALL-TIME 체크) ──
+    _place_names = [
+        it.get("title", it.get("facltNm", "")).strip()
+        for it in data.get("items", [])
+        if it.get("title") or it.get("facltNm")
+    ]
+    if _place_names:
+        _used_places = [n for n in _place_names if is_place_used(n, target_blog_id)]
+        if _used_places:
+            logger.warning(
+                f"{target_blog_id} 가게명 중복: {', '.join(_used_places)}"
+                f" (이미 발행된 가게 — used_places에서 감지)"
+            )
+            return None
 
     result = generate_content(data, blog_id=target_blog_id)
     if not result:
