@@ -2,7 +2,7 @@
 import sys, os
 
 # area_codes.py 직접 로드
-_area_codes_path = '/Users/twinssn/Projects/TAP/pipelines/travel/area_codes.py'
+_area_codes_path = '/Users/twinssn/Projects/5000/pipelines/travel/area_codes.py'
 _ns = {}
 with open(_area_codes_path, 'r', encoding='utf-8') as _f:
     exec(compile(_f.read(), _area_codes_path, 'exec'), _ns)
