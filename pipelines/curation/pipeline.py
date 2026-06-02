@@ -302,6 +302,7 @@ TITLE_BLOCKED = {
                     "태블릿", "아이패드", "갤럭시탭", "서류가방", "장패드",
                     "CrowPi", "크롤파이", "이어폰", "스피커"],
     "baby-hugo":   ["강아지", "반려견", "반려동물", "개모차", "고양이"],
+    "camping-hugo": ["사이드", "사이드 테이블", "거실", "침실", "주방"],
     "appliance-hugo": [],
     "interior-hugo": [],
     "fitness-hugo": [],
@@ -337,7 +338,7 @@ def _filter_irrelevant_products(blog_id, keyword, products):
         # 허용 키워드 중 하나라도 포함되어야 통과 (product_name + category_name)
         has_allowed = False
         for aw in allowed:
-            if aw in combined or aw in keyword_lower:
+            if aw in combined:
                 has_allowed = True
                 break
         if not has_allowed:

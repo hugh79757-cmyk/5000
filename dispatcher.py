@@ -435,6 +435,7 @@ WORKERS_BLOGS = {
     "kitchen-hugo",
     "beauty-hugo",
     "camping-hugo",
+    "baby-hugo",
 }
 
 DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"

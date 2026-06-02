@@ -208,11 +208,11 @@ _catchup_lock = threading.Lock()  # catchup 중복 실행 방지
 
 
 def _get_ledger_count(blog_id, date_str):
-    """publish_ledger에서 오늘 발행 건수 조회 — 모든 블로그 동일 방식"""
+    """publish_ledger에서 오늘 발행 건수 조회 — published만 카운트"""
     try:
         conn = sqlite3.connect(LEDGER_DB)
         row = conn.execute(
-            "SELECT COUNT(*) FROM publish_ledger WHERE blog_id=? AND date(created_at)=?",
+            "SELECT COUNT(*) FROM publish_ledger WHERE blog_id=? AND date(created_at)=? AND status='published'",
             (blog_id, date_str)
         ).fetchone()
         conn.close()

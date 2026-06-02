@@ -611,7 +611,31 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
 def deploy_site(site_path, cf_project):
     site = Path(site_path)
-    # leaf bundle 방지: content/posts/index.md 존재 시 삭제
+    # deploy 직렬화 락 (wrangler 동시 실행 방지)
+    import fcntl as _fl
+    _lock_path = Path("/tmp/wrangler_deploy.lock")
+    _lock_file = open(_lock_path, "w")
+    _lock_acquired = False
+    try:
+        _fl.flock(_lock_file, _fl.LOCK_EX)
+        _lock_acquired = True
+    except Exception:
+        pass
+    try:
+        _deploy_site_inner(site_path, cf_project)
+    finally:
+        if _lock_acquired:
+            try:
+                _fl.flock(_lock_file, _fl.LOCK_UN)
+                _lock_file.close()
+            except Exception:
+                pass
+    return True
+
+
+def _deploy_site_inner(site_path, cf_project):
+    site = Path(site_path)
+    # leaf bundle 방기: content/posts/index.md 존재 시 삭제
     rogue = site / "content" / "posts" / "index.md"
     if rogue.exists():
         rogue.unlink()
@@ -650,7 +674,34 @@ def deploy_site(site_path, cf_project):
                 cwd=str(site), stdout=log_f, stderr=log_f
             )
     if result.returncode != 0:
-        raise Exception("Wrangler deploy failed: see deploy.log")
+        # 일시적 네트워크 오류 시 최대 2회 재시도
+        err_text = (result.stderr or "").lower()
+        if "fetch failed" in err_text or "fetch error" in err_text or "network" in err_text:
+            import time as _retry_t
+            for attempt in range(2):
+                _retry_t.sleep(10 * (attempt + 1))
+                print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 (network error)")
+                with open(log_path, "a") as log_f:
+                    if use_workers:
+                        result = subprocess.run(
+                            ["/opt/homebrew/bin/wrangler", "deploy",
+                             "--config", str(wf)],
+                            cwd=str(site), stdout=log_f, stderr=log_f
+                        )
+                    else:
+                        result = subprocess.run(
+                            ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+                             "--project-name=" + cf_project,
+                             "--branch=main",
+                             "--commit-dirty=true",
+                             "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
+                            cwd=str(site), stdout=log_f, stderr=log_f
+                        )
+                if result.returncode == 0:
+                    print(f"[deploy] {site.name} 재시도 성공")
+                    break
+        if result.returncode != 0:
+            raise Exception("Wrangler deploy failed: see deploy.log")
     return True
 
 
