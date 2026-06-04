@@ -266,6 +266,7 @@ def fetch_festival(_is_retry=False):
         high = []     # 22~28일
         normal = []   # 29~42일
         low = []      # 43~60일
+        late = []     # 7~14일 (늦게 등록된 축제, 최초 1회만 발행 허용)
 
         for r in rows:
             title = r["title"]
@@ -275,8 +276,10 @@ def fetch_festival(_is_retry=False):
             start_date = datetime.strptime(estart, "%Y%m%d")
             days_left = (start_date - now).days
 
-            if days_left < 14:
-                continue  # 색인 불가
+            if days_left < 7:
+                continue  # 7일 미만: SEO 색인 불가
+            elif days_left <= 14:
+                late.append(r)   # 늦게 등록 — 최초 1회 발행 허용
             elif days_left <= 21:
                 urgent.append(r)
             elif days_left <= 28:
@@ -301,6 +304,9 @@ def fetch_festival(_is_retry=False):
         elif low:
             candidates = low
             logger.info(f"festival 스마트발행: 낮음(43~60일) {len(low)}건")
+        elif late:
+            candidates = late
+            logger.info(f"festival 스마트발행: 늦등록(7~14일) {len(late)}건 — 최초 1회 발행")
         else:
             # [AUTO REFRESH] published_ids 필터로 후보 0건 → DB 갱신 후 1회 재시도
             if not _is_retry:
@@ -322,12 +328,15 @@ def fetch_festival(_is_retry=False):
             high = []
             normal = []
             low = []
+            late = []
             for r in rows:
                 estart = r["eventstartdate"]
                 start_date = datetime.strptime(estart, "%Y%m%d")
                 days_left = (start_date - now).days
-                if days_left < 14:
+                if days_left < 7:
                     continue
+                elif days_left <= 14:
+                    late.append(r)
                 elif days_left <= 21:
                     urgent.append(r)
                 elif days_left <= 28:
@@ -348,6 +357,9 @@ def fetch_festival(_is_retry=False):
             elif low:
                 candidates = low
                 logger.info(f"festival fallback: 낮음(43~60일) {len(low)}건")
+            elif late:
+                candidates = late
+                logger.info(f"festival fallback: 늦등록(7~14일) {len(late)}건")
             else:
                 logger.warning("festival: fallback 후에도 0건 (DB 갱신 필요)")
                 _tg_send("🚨 travel1-hugo festival 발행 불가 — DB 갱신 필요")
