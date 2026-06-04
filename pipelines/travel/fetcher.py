@@ -941,13 +941,18 @@ def fetch_course():
             logger.warning("course: adapted 결과 0건")
             return None
 
-        # 코스 제목에서 지역 보정
-        display_region = region_name
+        # 코스 제목에서 지역 보정 (시군구명 추출)
+        _course_do_name = region_name
+        _course_sigungu = ""
         addr1 = course_item.get("addr1", "")
         if addr1:
             parts = addr1.split()
-            if parts:
-                display_region = parts[0]
+            if len(parts) >= 2:
+                _course_do_name = parts[0]
+                _course_sigungu = parts[1]
+            elif parts:
+                _course_do_name = parts[0]
+        display_region = f"{_course_do_name} {_course_sigungu}".strip()
 
         # 코스 테마 추출 (cat2 기반)
         cat2_map = {
@@ -966,8 +971,8 @@ def fetch_course():
         return {
             "items": adapted,
             "display_region": display_region,
-            "sigungu": display_region,
-            "do_name": region_name,
+            "sigungu": _course_sigungu,
+            "do_name": _course_do_name,
             "theme": theme_label,
             "category": "여행코스",
             "angle": course_title,
@@ -1249,11 +1254,19 @@ def fetch_heritage():
     # content_ids: cpno 기반 중복 방지용
     _content_ids = [str(item.get("content_id", "")) for item in items if item.get("content_id")]
 
+    # 시군구명 추출 (선택된 items의 district 사용)
+    _sigungu_name = ""
+    for _it in selected:
+        _d = _it.get("district", "")
+        if _d:
+            _sigungu_name = _d
+            break
+
     return {
         "items": items,
         "region": region_name,
-        "display_region": region_name,
-        "sigungu": region_name,
+        "display_region": f"{region_name} {_sigungu_name}".strip(),
+        "sigungu": _sigungu_name,
         "do_name": region_name,
         "theme": theme,
         "category": theme,
