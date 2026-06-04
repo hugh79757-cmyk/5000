@@ -449,7 +449,7 @@ def fetch_festival(_is_retry=False):
         return None
 
 
-def _get_recent_published_sigungus(days=14):
+def _get_recent_published_sigungus(days=7):
     """최근 N일간 travel3-hugo에 발행된 시군구 이름 집합
     우선 articles.sigungu 컬럼 직접 조회 (stap_content.db), NULL이면 title 파싱 fallback"""
     import sqlite3
@@ -521,8 +521,8 @@ def fetch_food():
     except Exception as _e:
         logger.warning(f"food dup-check DB error: {_e}")
 
-    # 최근 14일 발행 시군구 제외
-    _recent_sigungus = _get_recent_published_sigungus(14)
+    # 최근 7일 발행 시군구 제외
+    _recent_sigungus = _get_recent_published_sigungus(7)
 
     # 가중치 기반 시군구 선택 (최근 발행 시군구 제외)
     # 최대 50회 시도 — exclude_sigungus로 전부 소진 시 제한 해제됨

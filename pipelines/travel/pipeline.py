@@ -81,7 +81,7 @@ def _travel_title_similar_exists(blog_id, title):
         return False
 
 
-def _travel_sigungu_recently_published(blog_id, sigungu, days=14):
+def _travel_sigungu_recently_published(blog_id, sigungu, days=7):
     """
     최근 days일 내 동일 blog_id + sigungu 조합이
     published 상태로 존재하면 True 반환.
@@ -247,7 +247,7 @@ def _run_single(target_blog_id, blog_cfg=None):
     # festival 파이프라인은 제외 (축제는 시간 기반 자연 순환)
     _source_type = data.get("source_type", "")
     _sigungu = data.get("sigungu", "")
-    if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
+    if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=7):
         logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최근 14일 내 발행됨)")
         return None
 
