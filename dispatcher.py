@@ -579,6 +579,9 @@ def dispatch(blog_id):
         reason = result.get("reason", "unknown")
         if reason not in ("quota_met", "already_running", "duplicate_title"):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
+            # no_result/데이터부족 등은 텔레그램 전송 (침묵 방지)
+            if reason in ("no_result", "no_data", "fetch_error", "no_content"):
+                _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음")
     return result
 
 

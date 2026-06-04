@@ -244,8 +244,10 @@ def _run_single(target_blog_id, blog_cfg=None):
                 logger.warning(f"개별 contentid 체크 오류: {_e}")
 
     # ── 시군구 기반 주제 중복 발행 방지 (14일 룩백) ──
+    # festival 파이프라인은 제외 (축제는 시간 기반 자연 순환)
+    _source_type = data.get("source_type", "")
     _sigungu = data.get("sigungu", "")
-    if _sigungu and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
+    if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
         logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최근 14일 내 발행됨)")
         return None
 
