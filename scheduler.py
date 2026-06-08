@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-# ── 패키지 의존성 체크 ──
+# ── 패키지 의존성 체크 (표면 + 심층) ──
 REQUIRED_PACKAGES = {
     "boto3": "boto3",
     "bs4": "beautifulsoup4",
@@ -29,7 +29,8 @@ REQUIRED_PACKAGES = {
     "schedule": "schedule",
 }
 
-def _check_dependencies():
+def _check_imports():
+    """표면 import 체크 — 모듈 로드 가능 여부"""
     missing = []
     for module, pip_name in REQUIRED_PACKAGES.items():
         try:
@@ -40,6 +41,110 @@ def _check_dependencies():
         print(f"[FATAL] 누락 패키지: {', '.join(missing)}")
         print(f"  실행: pip install {' '.join(missing)}")
         sys.exit(1)
+
+def _check_boto3_deep():
+    """boto3 심층 체크 — 실제 Client 생성 + R2 헬스체크
+    서브패키지 누락(boto3.resources) 등 표면 import로 못 잡는 문제 감지
+    """
+    try:
+        import boto3 as _b3
+        # 실제 session 생성으로 서브패키지完整性까지 검증
+        _session = _b3.session.Session()
+        _client = _session.client("s3",
+            endpoint_url=os.getenv("R2_ENDPOINT", "https://non-existent"),
+            aws_access_key_id=os.getenv("R2_ACCESS_KEY_ID", ""),
+            aws_secret_access_key=os.getenv("R2_ACCESS_SECRET_KEY", ""),
+            region_name="auto",
+        )
+        # Client 생성만으로 충분 (실제 API 호출하지 않음)
+        del _client, _session
+        return True
+    except ModuleNotFoundError as _e:
+        _mod_name = str(_e).split("'")[1] if "'" in str(_e) else str(_e)
+        print(f"[DEEP_CHECK] boto3 서브패키지 누락: {_mod_name}")
+        return False
+    except Exception as _e:
+        # 설정 오류는 무시 (Client 생성까지만 검증)
+        if "endpoint_url" in str(_e) or "access" in str(_e).lower():
+            return True  # 설정 부재는 환경 문제, 패키지 문제 아님
+        print(f"[DEEP_CHECK] boto3 비정상: {_e}")
+        return False
+
+def _auto_repair_boto3():
+    """boto3 재설치 + 텔레그램 알림"""
+    print("[AUTO_REPAIR] boto3 재설치 시작...")
+    try:
+        import subprocess as _sp
+        _pip = os.path.join(os.path.dirname(sys.executable), "pip")
+        _r = _sp.run([_pip, "install", "--force-reinstall", "--no-deps", "boto3"],
+                     capture_output=True, text=True, timeout=120)
+        if _r.returncode == 0:
+            # 버전 추출
+            _ver = ""
+            for _line in _r.stdout.split("\n"):
+                if "Successfully installed" in _line:
+                    _ver = _line.strip()
+            print(f"[AUTO_REPAIR] boto3 재설치 완료: {_ver}")
+            # 텔레그램 알림
+            try:
+                from shared.telegram_notifier import send_error
+                send_error("boto3-auto-repair",
+                           f"boto3 서브패키지 누락 → 자동 재설치 완료 ({_ver})")
+            except Exception:
+                pass
+            return True
+        else:
+            print(f"[AUTO_REPAIR] boto3 재설치 실패: {_r.stderr[-200:]}")
+            return False
+    except Exception as _e:
+        print(f"[AUTO_REPAIR] 예외: {_e}")
+        return False
+
+def _check_dependencies():
+    """통합 의존성 체크 — 표면 → 심층 → 자동복구"""
+    _check_imports()
+    if not _check_boto3_deep():
+        print("[WARN] boto3 심층 체크 실패 — 자동 복구 시도")
+        if _auto_repair_boto3():
+            # 재설치 후 재검증
+            if _check_boto3_deep():
+                print("[OK] boto3 복구 완료")
+            else:
+                print("[FATAL] boto3 복구 후에도 심층 체크 실패")
+                sys.exit(1)
+        else:
+            print("[FATAL] boto3 복구 실패 — 수동 조치 필요")
+            sys.exit(1)
+
+def _check_thumbnail_health():
+    """썸네일 생성 + R2 업로드 헬스체크 (스케줄러 시작 시 1회)"""
+    logger.info("[HealthCheck] 썸네일 생성 테스트 시작...")
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pipelines"))
+        from senior.thumbnail import generate_senior_thumbnail
+        url = generate_senior_thumbnail(
+            title="헬스체크 테스트",
+            category="생활지원",
+            department="테스트",
+            slug=f"healthcheck-{int(time.time())}",
+        )
+        if url and url.startswith("http"):
+            logger.info(f"[HealthCheck] senior 썸네일 ✅ → {url[:60]}...")
+        else:
+            logger.warning("[HealthCheck] senior 썸네일 생성 실패 (R2 문제일 수 있음)")
+    except Exception as e:
+        logger.warning(f"[HealthCheck] senior 썸네일 예외: {e}")
+
+    try:
+        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "STAP"))
+        from pipelines.thumbnail_factory import make_and_upload
+        url2 = make_and_upload("stock", "헬스체크 테스트", "공시분석")
+        if url2 and url2.startswith("http"):
+            logger.info(f"[HealthCheck] stock 썸네일 ✅ → {url2[:60]}...")
+        else:
+            logger.warning("[HealthCheck] stock 썸네일 생성 실패")
+    except Exception as e:
+        logger.warning(f"[HealthCheck] stock 썸네일 예외: {e}")
 
 _check_dependencies()
 
@@ -492,6 +597,8 @@ def main():
     job_count = register_schedules()
     logger.info(f"Registered {job_count} jobs")
     logger.info(f"Next run: {schedule.next_run()}")
+
+    _check_thumbnail_health()  # 썸네일 헬스체크
 
     _update_heartbeat()  # 시작 즉시 heartbeat
     last_catchup = 0
