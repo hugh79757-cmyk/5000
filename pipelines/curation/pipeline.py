@@ -302,7 +302,7 @@ TITLE_BLOCKED = {
                     "태블릿", "아이패드", "갤럭시탭", "서류가방", "장패드",
                     "CrowPi", "크롤파이", "이어폰", "스피커"],
     "baby-hugo":   ["강아지", "반려견", "반려동물", "개모차", "고양이"],
-    "camping-hugo": ["사이드", "사이드 테이블", "거실", "침실", "주방"],
+    "camping-hugo": ["침실"],
     "appliance-hugo": [],
     "interior-hugo": [],
     "fitness-hugo": [],
