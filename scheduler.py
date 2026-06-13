@@ -136,6 +136,7 @@ def _check_thumbnail_health():
         logger.warning(f"[HealthCheck] senior 썸네일 예외: {e}")
 
     try:
+        _stap_modules = set(sys.modules.keys())
         _stap_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "STAP")
         _old_path = sys.path.copy()
         sys.path.insert(0, _stap_path)
@@ -149,6 +150,9 @@ def _check_thumbnail_health():
         logger.warning(f"[HealthCheck] stock 썸네일 예외: {e}")
     finally:
         sys.path = _old_path
+        # STAP import 시 캐시된 모듈 제거 (auto_collector에서 5000/pipelines 사용하도록)
+        for _m in set(sys.modules.keys()) - _stap_modules:
+            del sys.modules[_m]
 
 _check_dependencies()
 
