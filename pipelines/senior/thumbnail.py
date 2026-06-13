@@ -1,13 +1,19 @@
 import os
+import sys
 import textwrap
 import logging
+import tempfile
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from shared.r2_uploader import upload_file
 
 logger = logging.getLogger(__name__)
 
 WIDTH = 800
 HEIGHT = 800
+SENIOR_R2_BUCKET = "senior-images"
 
 CATEGORY_COLORS = {
     "의료지원":     [(10, 40, 80), (25, 80, 140)],
@@ -66,7 +72,8 @@ def _get_font(size):
             try:
                 return ImageFont.truetype(fp, size)
             except Exception as e:
-                logger.debug(f"[SENIOR_THUMB] failed: {e}"); continue
+                logger.debug(f"[SENIOR_THUMB] failed: {e}")
+                continue
     return ImageFont.load_default()
 
 
@@ -92,11 +99,15 @@ def _calc_title_layout(draw, title, max_width, max_lines=3):
     return font, lines, 32, 48
 
 
-def generate_senior_thumbnail(title, category="default", department="", output_path="thumbnail.webp"):
+def generate_senior_thumbnail(title, category="default", department="", slug=None, output_path=None):
+    """
+    썸네일 생성 후 R2 업로드.
+    - slug 있으면 → R2 업로드 → URL 반환
+    - slug 없으면 → output_path에 로컬 저장 → 경로 반환 (테스트용)
+    """
     colors = CATEGORY_COLORS.get(category, CATEGORY_COLORS["default"])
     img = _make_gradient(WIDTH, HEIGHT, colors[0], colors[1])
 
-    # 하단 어두운 오버레이
     overlay = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     overlay_draw = ImageDraw.Draw(overlay)
     for y in range(HEIGHT // 3, HEIGHT):
@@ -108,7 +119,6 @@ def generate_senior_thumbnail(title, category="default", department="", output_p
     padding = 50
     max_text_width = WIDTH - padding * 2
 
-    # 카테고리 배지
     badge_bottom = padding
     if category and category != "default":
         badge_font = _get_font(20)
@@ -122,7 +132,6 @@ def generate_senior_thumbnail(title, category="default", department="", output_p
         draw.text((padding + 14, padding + 6), badge_text, font=badge_font, fill=(255, 255, 255))
         badge_bottom = padding + bh + 30
 
-    # 제목
     title_font, title_lines, font_size, line_height = _calc_title_layout(draw, title, max_text_width)
     total_title_h = len(title_lines) * line_height
     available_h = HEIGHT - badge_bottom - 120
@@ -133,25 +142,48 @@ def generate_senior_thumbnail(title, category="default", department="", output_p
         draw.text((padding + 2, y_pos + 2), line, font=title_font, fill=(0, 0, 0, 80))
         draw.text((padding, y_pos), line, font=title_font, fill=(240, 240, 245))
 
-    # 소관기관
     if department:
         sub_font = _get_font(20)
         sub_y = y_start + len(title_lines) * line_height + 15
         draw.text((padding, sub_y), department, font=sub_font, fill=(160, 175, 200))
 
-    # 하단 구분선 + 사이트명
     draw.line([(padding, HEIGHT - 60), (WIDTH - padding, HEIGHT - 60)], fill=(255, 255, 255, 30), width=1)
     bottom_font = _get_font(18)
     date_str = datetime.now().strftime("%Y.%m.%d")
     draw.text((padding, HEIGHT - 45), f"시니어복지가이드  |  {date_str}", font=bottom_font, fill=(110, 115, 130))
 
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
-    img.save(output_path, "WEBP", quality=85)
-    logger.info(f"[SeniorThumb] saved: {output_path}")
-    return output_path
+    # 저장
+    if slug:
+        tmp = tempfile.NamedTemporaryFile(suffix=".webp", delete=False)
+        save_path = tmp.name
+        tmp.close()
+    else:
+        save_path = output_path or "/tmp/senior_thumb.webp"
+
+    os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else ".", exist_ok=True)
+    img.save(save_path, "WEBP", quality=85)
+    logger.info(f"[SeniorThumb] saved locally: {save_path}")
+
+    # R2 업로드
+    if slug:
+        r2_key = f"senior/thumbnails/{slug}.webp"
+        url = upload_file(save_path, r2_key, content_type="image/webp", bucket=SENIOR_R2_BUCKET)
+        try:
+            os.unlink(save_path)
+        except Exception:
+            pass
+        if url:
+            logger.info(f"[SeniorThumb] R2 완료: {url}")
+            return url
+        else:
+            logger.error("[SeniorThumb] R2 업로드 실패")
+            return None
+
+    return save_path
 
 
 if __name__ == "__main__":
+    # 로컬 테스트 (slug 없이)
     generate_senior_thumbnail(
         title="치매 치료관리비 지원, 최대 월 3만원 신청 방법은?",
         category="의료지원",

@@ -32,6 +32,10 @@ EXCLUDE_KEYWORDS = [
     "월세자금보증", "공동생활가정", "해산급여", "HIV", "AIDS",
     "자활근로", "출산크레딧", "장애인 활동지원", "차상위 본인부담",
     "영아", "태아", "신생아", "모자보건", "산후조리",
+    "귀농", "귀촌", "청년창업", "청년농업", "후계농",
+    "18세 이상 65세 이하", "18세~65세", "만 65세 이하",
+    "사회복지시설", "노인복지시설", "복지시설", "급식소",
+    "경로당", "농업법인", "영농조합",
 ]
 
 CATEGORIES = {
@@ -127,6 +131,159 @@ def fetch_senior_jobs():
         logger.warning(f"노인일자리 API 오류 (무시): {e}")
         return []
 
+
+
+import sqlite3
+
+SENIOR_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "senior.db")
+
+
+def init_senior_db():
+    """senior.db 초기화 — services 테이블 생성"""
+    os.makedirs(os.path.dirname(SENIOR_DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(SENIOR_DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS services (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            service_id TEXT UNIQUE,
+            service_name TEXT NOT NULL,
+            description TEXT,
+            target TEXT,
+            category TEXT,
+            apply_method TEXT,
+            apply_url TEXT,
+            department TEXT,
+            support_content TEXT,
+            purpose TEXT,
+            selection_criteria TEXT,
+            documents TEXT,
+            contact TEXT,
+            law_basis TEXT,
+            deadline TEXT,
+            status TEXT DEFAULT 'pending',
+            collected_at TEXT,
+            published_at TEXT
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_services_status ON services(status)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_services_category ON services(category, status)")
+    conn.commit()
+    conn.close()
+    logger.info(f"senior.db 초기화 완료: {SENIOR_DB_PATH}")
+
+
+def sync_services():
+    """API에서 서비스 수집 후 senior.db에 저장 (신규만 INSERT, 기존 무시)"""
+    init_senior_db()
+    raw = fetch_senior_services(page=1, per_page=100, max_pages=10)
+    if not raw:
+        logger.error("sync_services: API 수집 실패")
+        return 0
+
+    # 만료 필터 (fetch_all 로직 재사용)
+    import re as _re
+    now_str = datetime.now().strftime("%Y-%m-%d")
+    now_year = datetime.now().year
+    filtered = []
+    for s in raw:
+        dl = str(s.get("deadline", "")).strip()
+        skip = False
+        for y in range(2018, now_year):
+            if str(y) in dl:
+                skip = True
+                break
+        if any(x in dl for x in ["마감", "신규신청 불가", "접수 마감"]):
+            skip = True
+        m = _re.search(r"(\d{4})[.\-](\d{2})[.\-](\d{2})\s*$", dl)
+        if m:
+            if f"{m.group(1)}-{m.group(2)}-{m.group(3)}" < now_str:
+                skip = True
+        if not skip:
+            m2 = _re.search(r"[~∼]\s*(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})", dl)
+            if m2:
+                if f"{m2.group(1)}-{int(m2.group(2)):02d}-{int(m2.group(3)):02d}" < now_str:
+                    skip = True
+        if not skip:
+            filtered.append(s)
+
+    conn = sqlite3.connect(SENIOR_DB_PATH)
+    inserted = 0
+    for s in filtered:
+        try:
+            conn.execute("""
+                INSERT OR IGNORE INTO services
+                (service_id, service_name, description, target, category,
+                 apply_method, apply_url, department, deadline, status, collected_at)
+                VALUES (?,?,?,?,?,?,?,?,?,'pending',?)
+            """, (
+                s.get("service_id", ""),
+                s.get("service_name", ""),
+                s.get("description", ""),
+                s.get("target", ""),
+                s.get("category", "생활지원"),
+                s.get("apply_method", ""),
+                s.get("apply_url", ""),
+                s.get("department", ""),
+                s.get("deadline", ""),
+                datetime.now().isoformat(),
+            ))
+            if conn.execute("SELECT changes()").fetchone()[0] > 0:
+                inserted += 1
+        except Exception as e:
+            logger.warning(f"services INSERT 실패: {e}")
+    conn.commit()
+    conn.close()
+    logger.info(f"sync_services 완료: {len(filtered)}건 처리, {inserted}건 신규 저장")
+    return inserted
+
+
+def get_pending_service(category=None):
+    """senior.db에서 pending 서비스 1건 반환 (category 우선, 없으면 전체)"""
+    init_senior_db()
+    conn = sqlite3.connect(SENIOR_DB_PATH)
+    try:
+        if category:
+            row = conn.execute(
+                "SELECT * FROM services WHERE status='pending' AND category=? ORDER BY id ASC LIMIT 1",
+                (category,)
+            ).fetchone()
+        else:
+            row = conn.execute(
+                "SELECT * FROM services WHERE status='pending' ORDER BY id ASC LIMIT 1"
+            ).fetchone()
+        if not row:
+            return None
+        cols = [d[0] for d in conn.execute("SELECT * FROM services LIMIT 0").description]
+        # description 재조회
+        cols = ["id","service_id","service_name","description","target","category",
+                "apply_method","apply_url","department","support_content","purpose",
+                "selection_criteria","documents","contact","law_basis","deadline",
+                "status","collected_at","published_at"]
+        return dict(zip(cols, row))
+    finally:
+        conn.close()
+
+
+def mark_published(service_id):
+    """서비스 발행 완료 처리"""
+    conn = sqlite3.connect(SENIOR_DB_PATH)
+    conn.execute(
+        "UPDATE services SET status='published', published_at=? WHERE service_id=?",
+        (datetime.now().isoformat(), service_id)
+    )
+    conn.commit()
+    conn.close()
+
+
+def get_pending_count():
+    """pending 서비스 수 반환"""
+    try:
+        conn = sqlite3.connect(SENIOR_DB_PATH)
+        count = conn.execute("SELECT COUNT(*) FROM services WHERE status='pending'").fetchone()[0]
+        conn.close()
+        return count
+    except Exception:
+        return 0
 
 CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "senior_services.json")
 

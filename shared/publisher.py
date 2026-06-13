@@ -718,6 +718,23 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
 
     slug = slugify(title)
 
+    # ✅ humanize 단계 (2026-06-12 추가) — 한국어 파이프라인 전용
+    _KO_PIPELINES = {"rap", "rap2", "rap3", "rap4", "rap5",
+                     "travel", "travel1", "travel2", "travel3", "travel4",
+                     "stock", "stock1", "stock2", "stock3", "stock4", "stock5",
+                     "car", "car1", "car2", "car3", "car4", "car5",
+                     "laptop", "appliance", "interior", "baby", "fitness",
+                     "senior", "senior2"}
+    _KO_BLOG_IDS = {b + "-hugo" for b in _KO_PIPELINES} | \
+                   {b + "-blogger" for b in _KO_PIPELINES}
+
+    if blog_id in _KO_BLOG_IDS and body_md:
+        try:
+            from shared.humanizer import humanize_korean
+            body_md = humanize_korean(body_md, blog_id, title)
+        except Exception as _he:
+            logger.warning(f"[HUMANIZE] 건너뜀 ({blog_id}): {_he}")
+
     article = {
         "blog_id": blog_id,
         "title": title,

@@ -16,7 +16,7 @@ blogs:
     - '13:16'
     - '16:16'
     - '20:16'
-  site_path: /Users/twinssn/Projects/CAP/compare-hugo
+  site_path: /Users/twinssn/Projects/cap/compare-hugo
   status: active
   theme: Blowfish
 - cf_project: deal-hugo
@@ -36,8 +36,8 @@ blogs:
     - '13:14'
     - '16:14'
     - '20:14'
-  site_path: /Users/twinssn/Projects/CAP/deal-hugo
-  status: active
+  site_path: /Users/twinssn/Projects/cap/deal-hugo
+  status: inactive
   theme: Blowfish
 - cf_project: ev-hugo
   daily_quota: 5
@@ -56,8 +56,8 @@ blogs:
     - '13:20'
     - '16:20'
     - '20:20'
-  site_path: /Users/twinssn/Projects/CAP/ev-hugo
-  status: active
+  site_path: /Users/twinssn/Projects/cap/ev-hugo
+  status: inactive
   theme: Blowfish
 - cf_project: guide-hugo
   daily_quota: 5
@@ -76,8 +76,8 @@ blogs:
     - '13:18'
     - '16:18'
     - '20:18'
-  site_path: /Users/twinssn/Projects/CAP/guide-hugo
-  status: active
+  site_path: /Users/twinssn/Projects/cap/guide-hugo
+  status: inactive
   theme: Blowfish
 - cf_project: hotissue-hugo
   daily_quota: 5
@@ -108,7 +108,7 @@ blogs:
     - '13:10'
     - '16:10'
     - '20:10'
-  site_path: /Users/twinssn/Projects/CAP/hotissue-hugo
+  site_path: /Users/twinssn/Projects/cap/hotissue-hugo
   status: active
   theme: PaperMod
 - cf_project: tco-hugo
@@ -128,8 +128,8 @@ blogs:
     - '13:12'
     - '16:12'
     - '20:12'
-  site_path: /Users/twinssn/Projects/CAP/tco-hugo
-  status: active
+  site_path: /Users/twinssn/Projects/cap/tco-hugo
+  status: inactive
   theme: Blowfish
 
 - cf_project: rank-hugo
@@ -149,8 +149,8 @@ blogs:
     - '13:22'
     - '16:22'
     - '20:22'
-  site_path: /Users/twinssn/Projects/CAP/rank-hugo
-  status: active
+  site_path: /Users/twinssn/Projects/cap/rank-hugo
+  status: inactive
   theme: Blowfish
 
 - cf_project: pick-hugo
@@ -170,6 +170,6 @@ blogs:
     - '13:24'
     - '16:24'
     - '20:24'
-  site_path: /Users/twinssn/Projects/CAP/pick-hugo
-  status: active
+  site_path: /Users/twinssn/Projects/cap/pick-hugo
+  status: inactive
   theme: Blowfish

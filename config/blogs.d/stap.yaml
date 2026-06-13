@@ -60,7 +60,7 @@ blogs:
   name: IPO·공모주 분석
   pipeline: stock
   platform: hugo
-  status: inactive
+  status: active
   repo: ipo-hugo
   schedule:
     times:

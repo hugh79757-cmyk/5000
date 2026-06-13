@@ -47,6 +47,18 @@ SOURCES = [
         "mapping": ("blog_id", "title", "slug", "published_at", "url"),
     },
     {
+        "name":    "seap",
+        "db":      DATA / "senior.db",
+        "sql":     "SELECT blog_id, service_name, service_id, published_at, '' FROM services WHERE status='published'",
+        "mapping": ("blog_id", "title", "slug", "published_at", "url"),
+    },
+    {
+        "name":    "seap_blogger",
+        "db":      DATA / "5000_content.db",
+        "sql":     "SELECT blog_id, title, slug, published_at, published_url FROM articles WHERE blog_id='senior-blogger' AND status='published'",
+        "mapping": ("blog_id", "title", "slug", "published_at", "url"),
+    },
+    {
         "name":    "tap",
         "db":      Path("/Users/twinssn/Projects/TAP/tap.db"),
         "sql":     "SELECT 'tap-hugo', post_title, '', published_at, post_url FROM publish_logs",

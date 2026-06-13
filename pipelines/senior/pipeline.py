@@ -19,7 +19,6 @@ _topic_index = {}
 # ─── 헬퍼 함수 ───
 
 def _get_published_titles(site_path):
-    """이미 발행된 제목 목록 조회"""
     try:
         import glob as _glob
         posts_dir = os.path.join(site_path, "content", "posts")
@@ -31,12 +30,11 @@ def _get_published_titles(site_path):
             if m:
                 published.add(m.group(1).strip())
         return published
-    except Exception as e:
+    except Exception:
         return set()
 
 
 def _pick_topic(blog_id, services):
-    """카테고리 순환 선택"""
     available = list(set(s["category"] for s in services))
     if not available:
         return "생활지원"
@@ -46,51 +44,36 @@ def _pick_topic(blog_id, services):
     return topic
 
 
+def _make_slug(title):
+    return re.sub(r'[^가-힣a-zA-Z0-9\s-]', '', title).replace(" ", "-")[:80]
+
+
 def _make_thumbnail(cfg, article, topic_type, platform):
-    """썸네일 생성 — Hugo: 로컬 feature.webp, Blogger: R2 업로드 URL"""
+    """썸네일 생성 — Hugo/Blogger 모두 R2 업로드 URL 반환"""
     try:
         from pipelines.senior.thumbnail import generate_senior_thumbnail
+        import hashlib
+        from datetime import datetime
 
-        if platform == "hugo":
-            site_path = cfg.get("site_path", "")
-            slug = re.sub(r'[^가-힣a-zA-Z0-9\s-]', '', article["title"]).replace(" ", "-")[:80]
-            post_dir = os.path.join(site_path, "content", "posts", slug)
-            os.makedirs(post_dir, exist_ok=True)
-            thumb_path = os.path.join(post_dir, "feature.webp")
-            generate_senior_thumbnail(
-                title=article["title"],
-                category=article.get("category", topic_type),
-                department=article.get("department", ""),
-                output_path=thumb_path,
-            )
-            logger.info(f"[SeniorThumb] saved: {thumb_path}")
-            return "feature.webp"
-        else:
-            import tempfile
-            import hashlib
-            from shared.r2_uploader import upload_file
-            from datetime import datetime
-            thumb_path = os.path.join(tempfile.gettempdir(), f"senior_thumb_{cfg.get('id','')}.webp")
-            generate_senior_thumbnail(
-                title=article["title"],
-                category=article.get("category", topic_type),
-                department=article.get("department", ""),
-                output_path=thumb_path,
-            )
-            if os.path.exists(thumb_path):
-                title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
-                r2_key = f"senior-thumbnails/{datetime.now().strftime('%Y%m%d')}-{title_hash}.webp"
-                url = upload_file(thumb_path, r2_key, content_type="image/webp")
-                os.remove(thumb_path)
-                logger.info(f"[SeniorThumb] R2: {url}")
-                return url
+        title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
+        slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
+
+        url = generate_senior_thumbnail(
+            title=article["title"],
+            category=article.get("category", topic_type),
+            department=article.get("department", ""),
+            slug=slug,
+        )
+        if url:
+            logger.info(f"[SeniorThumb] R2 완료: {url}")
+            return url
+        logger.warning("[SeniorThumb] R2 업로드 실패, 빈 값 반환")
     except Exception as e:
         logger.warning(f"Thumbnail failed: {e}")
     return ""
 
 
 def _prepare_tags(article, topic_type):
-    """tags를 문자열로 정규화"""
     raw = article.get("tags", [])
     if isinstance(raw, list):
         tags = ", ".join(str(t).strip() for t in raw if str(t).strip())
@@ -102,10 +85,8 @@ def _prepare_tags(article, topic_type):
 
 
 def _convert_md_to_blogger_html(body_md):
-    """마크다운을 Blogger용 HTML로 변환 (shortcode 처리 포함)"""
     import markdown
 
-    # Hugo shortcode → HTML 버튼
     body_md = re.sub(
         r'\{\{<\s*btn\s+url="([^"]*)"\s+text="([^"]*)"\s*>\}\}',
         r'<div style="text-align:center;margin:20px 0"><a href="\1" target="_blank" '
@@ -113,7 +94,6 @@ def _convert_md_to_blogger_html(body_md):
         r'color:#fff;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">\2</a></div>',
         body_md
     )
-    # 쿠팡 마크다운 링크 → HTML
     body_md = re.sub(
         r'- \[([^\]]*)\]\((https://link\.coupang\.com[^)]+)\)',
         r'<div style="margin:8px 0"><a href="\2" target="_blank" rel="noopener" '
@@ -132,113 +112,135 @@ def _convert_md_to_blogger_html(body_md):
 # ─── 메인 run ───
 
 def run(cfg):
-    """시니어 파이프라인 진입점 — 통일된 dict 반환"""
-    blog_id = cfg.get("id", "senior-hugo")
-    platform = cfg.get("platform", "hugo")
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"), override=True)
+
+    blog_id   = cfg.get("id", "senior-hugo")
+    platform  = cfg.get("platform", "hugo")
     site_path = cfg.get("site_path", "")
-    logger.info(f"Senior pipeline: {blog_id} (platform: {platform})")
 
-    # 1. Quota check
-    try:
-        from shared.content_store import get_today_count
-        today_count = get_today_count(blog_id)
-        daily_quota = cfg.get("daily_quota", 5)
-        if today_count >= daily_quota:
-            logger.info(f"{blog_id} quota met: {today_count}/{daily_quota}")
-            return {"success": False, "reason": "quota_met"}
-    except Exception as e:
-        logger.warning(f"Quota check failed (continue): {e}")
+    from shared.content_store import init_db, get_today_count
+    from shared.publisher import publish
+    from pipelines.senior.fetcher import (
+        sync_services, get_pending_service, get_pending_count,
+        mark_published, enrich_service_detail, SENIOR_DB_PATH
+    )
+    from pipelines.senior.writer import generate_senior_article as generate_article
 
-    # 2. Fetch data
-    try:
-        from pipelines.senior.fetcher import fetch_all
-        data = fetch_all()
-    except Exception as e:
-        logger.error(f"Fetch failed: {e}")
-        return {"success": False, "reason": "fetch_error"}
+    init_db()
 
-    if not data.get("services"):
-        logger.warning("No senior services data")
-        return {"success": False, "reason": "no_data"}
+    # 1. 일일 쿼터 체크
+    today_count = get_today_count(blog_id)
+    quota = cfg.get("daily_quota", 5)
+    if today_count >= quota:
+        logger.info(f"{blog_id}: 오늘 발행 완료 ({today_count}/{quota})")
+        return {"success": False, "reason": "quota_met"}
 
-    # 3. Pick topic + enrich
-    topic_type = _pick_topic(blog_id, data["services"])
+    # 2. pending 소진 시 자동 재수집
+    pending = get_pending_count()
+    logger.info(f"{blog_id}: pending 서비스 {pending}건")
+    if pending < 10:
+        logger.info(f"pending {pending}건 부족 → API 재수집 시작")
+        synced = sync_services()
+        logger.info(f"재수집 완료: {synced}건 신규 저장")
+        pending = get_pending_count()
+        if pending == 0:
+            logger.error(f"{blog_id}: 재수집 후에도 pending 0건")
+            return {"success": False, "reason": "no_data"}
+
+    # 3. 카테고리 선택
+    topic_type = _pick_topic(blog_id, [])
     logger.info(f"Topic selected: {topic_type}")
 
+    # 4. DB에서 pending 서비스 선택
+    candidate = get_pending_service(category=topic_type)
+    if not candidate:
+        candidate = get_pending_service(category=None)
+    if not candidate:
+        logger.error(f"{blog_id}: pending 서비스 없음")
+        return {"success": False, "reason": "no_data"}
+
+    # 5. 상세 보강
+    if not candidate.get("support_content"):
+        candidate = enrich_service_detail(candidate)
+
+    # 6. 만료 체크
+    import re as _re
+    from datetime import datetime as _dt
+    dl = str(candidate.get("deadline", "")).strip()
+    if dl:
+        date_match = _re.search(r"(\d{4})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})", dl)
+        if date_match:
+            try:
+                end_date = _dt(int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3)))
+                if end_date < _dt.now():
+                    logger.info(f"만료 서비스 skip: {candidate.get('service_name')} (deadline={dl})")
+                    import sqlite3 as _sq
+                    _c = _sq.connect(SENIOR_DB_PATH)
+                    _c.execute("UPDATE services SET status='expired' WHERE service_id=?", (candidate.get("service_id",""),))
+                    _c.commit()
+                    _c.close()
+                    return {"success": False, "reason": "expired_service"}
+            except Exception:
+                pass
+
+    # 7. 글 생성 + 썸네일 R2 업로드
     try:
-        from pipelines.senior.fetcher import enrich_service_detail
-        from pipelines.senior.writer import _select_service
-        published = _get_published_titles(site_path) if site_path else set()
-        # DB에서도 발행 이력 체크 (Blogger 포함)
-        published_svc_ids = set()
+        from datetime import datetime as _dt2
+        tags = _prepare_tags(candidate, topic_type)
+        # related 서비스 — 같은 카테고리 pending 3건 추가 조회
+        related_services = []
         try:
-            from shared.content_store import get_all_articles
-            db_articles = get_all_articles(blog_id=blog_id, limit=500)
-            for a in db_articles:
-                if a.get("title"):
-                    published.add(a["title"])
-                if a.get("source_id"):
-                    published_svc_ids.add(a["source_id"])
-            logger.info(f"발행 이력: 제목 {len(published)}건, service_id {len(published_svc_ids)}건")
-        except Exception as e:
-            logger.debug(f"[SENIOR] DB 이력 조회 실패: {e}")
-        candidate = _select_service(data["services"], topic_type, published=published, published_svc_ids=published_svc_ids)
-        if candidate and not candidate.get("support_content"):
-            candidate = enrich_service_detail(candidate)
-            # 만료 서비스 필터
-            dl = str(candidate.get("deadline", "")).strip()
-            if dl:
-                import re as _re
-                from datetime import datetime as _dt
-                date_match = _re.search(r"(\d{4})[.\-/년]\s*(\d{1,2})[.\-/월]\s*(\d{1,2})", dl)
-                if date_match:
-                    try:
-                        dl_date = _dt(int(date_match.group(1)), int(date_match.group(2)), int(date_match.group(3)))
-                        if dl_date < _dt.now():
-                            logger.warning(f"만료 서비스 스킵: {candidate.get('service_name')} (기한: {dl})")
-                            return "expired_service"
-                    except ValueError:
-                        pass
-            logger.info(f"Enriched: {candidate.get('service_name')}")
-    except Exception as e:
-        logger.warning(f"Enrich skipped: {e}")
+            import sqlite3 as _sq2
+            _rc = _sq2.connect(SENIOR_DB_PATH)
+            _rc.row_factory = _sq2.Row
+            _rows = _rc.execute(
+                """SELECT * FROM services
+                   WHERE status='pending'
+                   AND category=?
+                   AND service_id != ?
+                   ORDER BY id ASC LIMIT 3""",
+                (candidate.get("category", "생활지원"), candidate.get("service_id", ""))
+            ).fetchall()
+            cols = ["id","service_id","service_name","description","target","category",
+                    "apply_method","apply_url","department","support_content","purpose",
+                    "selection_criteria","documents","contact","law_basis","deadline",
+                    "status","collected_at","published_at"]
+            for row in _rows:
+                related_services.append(dict(zip(cols, row)))
+            _rc.close()
+            logger.info(f"related 서비스 {len(related_services)}건 조회")
+        except Exception as _re:
+            logger.warning(f"related 조회 실패: {_re}")
 
-    # 4. Generate article
-    try:
-        from pipelines.senior.writer import generate_senior_article
-        # enriched candidate를 writer에 전달 (재선택 방지)
-        _enriched = candidate if candidate and candidate.get("support_content") else None
-        article = generate_senior_article(data, topic_type=topic_type, enriched_service=_enriched)
-    except Exception as e:
-        logger.error(f"Writer failed: {e}")
-        return {"success": False, "reason": "write_error"}
+        data = {
+            "services": [candidate] + related_services,
+            "jobs": [],
+            "today": _dt2.now().strftime("%Y년 %m월 %d일"),
+            "total_services": 1 + len(related_services),
+            "total_jobs": 0,
+            "categories": [candidate.get("category", "생활지원")],
+        }
+        article = generate_article(data, topic_type=topic_type, enriched_service=candidate)
+        if not article:
+            logger.error(f"{blog_id}: 글 생성 실패")
+            return {"success": False, "reason": "no_content"}
 
-    if not article:
+        thumb_url = _make_thumbnail(cfg, article, topic_type, platform)
+    except Exception as e:
+        logger.error(f"{blog_id}: 글 생성 예외: {e}")
         return {"success": False, "reason": "no_content"}
 
-    # 5. Thumbnail
-    thumb_url = _make_thumbnail(cfg, article, topic_type, platform)
-
-    # 6. Tags
-    tags = _prepare_tags(article, topic_type)
-
-    # 7. Publish
+    # 8. 발행
     if platform == "hugo":
-        return _do_publish_hugo(cfg, blog_id, article, tags, thumb_url)
-    elif platform == "blogger":
-        return _do_publish_blogger(cfg, blog_id, article, tags, thumb_url)
+        return _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate)
     else:
-        logger.error(f"Unknown platform: {platform}")
-        return {"success": False, "reason": "config_error"}
+        return _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate)
 
 
-# ─── 발행 함수 (각각 하나의 작업만) ───
-
-def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
-    """Hugo 발행 — shared.publisher에 위임"""
+def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
     from shared.publisher import publish
 
-    # ── 발행 전 검증 ──
     _is_draft = False
     try:
         from shared.validators import validate_post_extended as _validate
@@ -270,6 +272,13 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
         )
         if result and result.get("success"):
             logger.info(f"Hugo published: {article['title']} -> {result.get('url')}")
+            if candidate and candidate.get("service_id"):
+                try:
+                    from pipelines.senior.fetcher import mark_published
+                    mark_published(candidate["service_id"])
+                    logger.info(f"mark_published: {candidate['service_id']}")
+                except Exception as _me:
+                    logger.warning(f"mark_published 실패: {_me}")
             return result
         else:
             logger.error(f"Hugo publish failed: {result}")
@@ -279,11 +288,9 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url):
         return {"success": False, "reason": "publish_error"}
 
 
-def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
-    """Blogger 발행 — shared.publisher에 위임"""
+def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate=None):
     body_html = _convert_md_to_blogger_html(article["body_md"])
 
-    # 썸네일을 body_html에 삽입
     if thumb_url:
         thumb_html = (
             '<div style="text-align:center;margin-bottom:20px">'
@@ -294,7 +301,6 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
 
     from shared.publisher import publish
 
-    # ── 발행 전 검증 ──
     _is_draft = False
     try:
         from shared.validators import validate_post_extended as _validate
@@ -326,6 +332,13 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
         )
         if result and result.get("success"):
             logger.info(f"Blogger published: {article['title']} -> {result.get('url')}")
+            if candidate and candidate.get("service_id"):
+                try:
+                    from pipelines.senior.fetcher import mark_published
+                    mark_published(candidate["service_id"])
+                    logger.info(f"mark_published: {candidate['service_id']}")
+                except Exception as _me:
+                    logger.warning(f"mark_published 실패: {_me}")
             return result
         else:
             logger.error(f"Blogger publish failed: {result}")
@@ -333,5 +346,3 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url):
     except Exception as e:
         logger.error(f"Blogger publish error: {e}")
         return {"success": False, "reason": "publish_error"}
-
-

@@ -136,7 +136,9 @@ def _check_thumbnail_health():
         logger.warning(f"[HealthCheck] senior 썸네일 예외: {e}")
 
     try:
-        sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "STAP"))
+        _stap_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "STAP")
+        _old_path = sys.path.copy()
+        sys.path.insert(0, _stap_path)
         from pipelines.thumbnail_factory import make_and_upload
         url2 = make_and_upload("stock", "헬스체크 테스트", "공시분석")
         if url2 and url2.startswith("http"):
@@ -145,6 +147,8 @@ def _check_thumbnail_health():
             logger.warning("[HealthCheck] stock 썸네일 생성 실패")
     except Exception as e:
         logger.warning(f"[HealthCheck] stock 썸네일 예외: {e}")
+    finally:
+        sys.path = _old_path
 
 _check_dependencies()
 
@@ -469,15 +473,50 @@ def _run_car_refresh():
 
 
 def _run_stap_collector():
+    """STAP data collector를 subprocess로 완전 격리 실행 (import shadow 방지)"""
+    import subprocess as _sp, tempfile as _tmp, json as _json
+    stap_root = "/Users/twinssn/Projects/STAP"
+    stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
+    if not os.path.exists(stap_python):
+        stap_python = sys.executable
+        logger.warning(f"[STAP collector] .venv/python3 없음 → sys.executable 사용")
+
+    runner = "\n".join([
+        "import sys, os",
+        "sys.path.insert(0, " + repr(stap_root) + ")",
+        "os.chdir(" + repr(stap_root) + ")",
+        "from dotenv import load_dotenv",
+        "load_dotenv(os.path.join(" + repr(stap_root) + ", \".env\"), override=True)",
+        "from pipelines.data_collector import collect_all",
+        "result = collect_all()",
+        "print('OK' if result else 'FAIL')",
+    ])
+
     try:
-        import sys
-        if '/Users/twinssn/Projects/STAP' not in sys.path:
-            sys.path.insert(0, '/Users/twinssn/Projects/STAP')
-        from pipelines.data_collector import collect_all
-        result = collect_all()
-        logger.info(f"[STAP collector] 완료: {result}")
+        with _tmp.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
+            f.write(runner)
+            runner_path = f.name
+
+        proc = _sp.run(
+            [stap_python, runner_path],
+            capture_output=True, text=True, timeout=300,
+            cwd=stap_root,
+        )
+        stdout = (proc.stdout or "").strip()
+        stderr = (proc.stderr or "").strip()
+        if proc.returncode == 0:
+            logger.info(f"[STAP collector] 완료: {stdout}")
+        else:
+            logger.error(f"[STAP collector] 실패 (exit={proc.returncode}): {stderr or stdout}")
+    except _sp.TimeoutExpired:
+        logger.error("[STAP collector] 300초 타임아웃")
     except Exception as e:
         logger.error(f"[STAP collector] 오류: {e}")
+    finally:
+        try:
+            os.unlink(runner_path)
+        except Exception:
+            pass
 
 
 
@@ -489,6 +528,10 @@ def _run_senior_sync():
         from pipelines.senior.fetcher import sync_services, get_pending_count
         pending = get_pending_count()
         logger.info(f"[SeniorSync] 현재 pending: {pending}건")
+        # ✅ pending 500건 이상이면 sync 불필요 (2026-06-12 추가)
+        if pending >= 500:
+            logger.info(f"[SeniorSync] pending {pending}건 충분 — sync 스킵")
+            return
         synced = sync_services()
         logger.info(f"[SeniorSync] 완료: {synced}건 신규 저장, pending: {get_pending_count()}건")
     except Exception as e:
@@ -536,8 +579,8 @@ def register_schedules():
     batch_time = config.get("batch_deploy", {}).get("schedule", "22:45")
     schedule.every().day.at(batch_time).do(batch_deploy)
 
-    schedule.every().day.at("05:00").do(_run_gap_keyword_sync)
-    logger.info("GAP keyword sync scheduled at 05:00")
+#     schedule.every().day.at("05:00").do(_run_gap_keyword_sync)
+#     logger.info("GAP keyword sync scheduled at 05:00")
     job_count += 1
 
     schedule.every().day.at("06:00").do(_run_festival_refresh)

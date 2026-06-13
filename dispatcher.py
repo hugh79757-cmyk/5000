@@ -26,6 +26,26 @@ from shared.validators import sanitize_title
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
+
+def check_package_imports():
+    """Python 3.14 호환성: 주요 패키지 서브패키지 누락을 시작 시 검증"""
+    _checks = [
+        ("openai.resources.chat", "Chat",
+         "pip install --upgrade openai>=2.40.0"),
+    ]
+    _ok = True
+    for _mod, _cls, _upgrade_cmd in _checks:
+        try:
+            __import__(_mod, fromlist=[_cls])
+        except ModuleNotFoundError:
+            print(f"❌ '{_mod}' 모듈을 불러올 수 없습니다 (Python 3.14 + 구버전 패키지 호환 문제).",
+                  file=sys.stderr)
+            print(f"   해결: source .venv/bin/activate && {_upgrade_cmd}", file=sys.stderr)
+            _ok = False
+    if not _ok:
+        sys.exit(1)
+
+
 PROJECT_DIR = Path(__file__).parent
 CONFIG_DIR = PROJECT_DIR / "config"
 LEDGER_DB = PROJECT_DIR / "data" / "content.db"
@@ -575,6 +595,14 @@ def dispatch(blog_id):
         _record_ledger(blog_id)
         if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS:
             _build_and_deploy_central(blog_id)
+        # STAP/Hugo 배포 실패 — success=True지만 배포는 실패한 경우
+        deploy_err = result.get("deploy_error")
+        if deploy_err:
+            _record_failure(blog_id, "deploy", deploy_err[:300])
+            _tg_error(blog_id, "deploy",
+                f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
+                f"원인: {deploy_err[:200]}\n"
+                f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
     else:
         reason = result.get("reason", "unknown")
         if reason not in ("quota_met", "already_running", "duplicate_title"):
@@ -582,10 +610,19 @@ def dispatch(blog_id):
             # no_result/데이터부족 등은 텔레그램 전송 (침묵 방지)
             if reason in ("no_result", "no_data", "fetch_error", "no_content"):
                 _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음")
+            elif reason in ("duplicate_slug", "duplicate_source_id"):
+                existing = result.get("existing_url", "")
+                dup_type = reason.replace("duplicate_", "")
+                _tg_error(blog_id, reason,
+                    f"[{blog_id}] 중복 발행 방지 — {dup_type} 중복\n"
+                    f"기존글: {existing or 'slug 확인 필요'}\n"
+                    f"조치: 데이터가 오래되어 동일 주제 반복 생성 중. "
+                    f"pipelines/data_collector.py의 collect_all() 실행 필요")
     return result
 
 
 def main():
+    check_package_imports()
     if len(sys.argv) < 2:
         print("usage: dispatcher.py <blog_id|report|init-db>")
         sys.exit(1)

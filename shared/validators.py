@@ -132,7 +132,7 @@ def _get_today_count(blog_id: str) -> int:
         conn = sqlite3.connect(_DB_PATH)
         cur = conn.execute(
             "SELECT COUNT(*) FROM publish_ledger "
-            "WHERE blog_id = ? AND date(created_at) = date('now', '+9 hours')",
+            "WHERE blog_id = ? AND date(created_at) = date('now', '+9 hours') AND status = 'published'",
             (blog_id,),
         )
         count = cur.fetchone()[0]
