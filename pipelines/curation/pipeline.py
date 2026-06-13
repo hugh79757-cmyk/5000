@@ -610,10 +610,13 @@ def _run_inner(cfg, blog_id, daily_quota):
         body_md = f"<!-- DESC: {description} -->\n\n{body_md}"
     slug = _make_slug(keyword)
 
-    # 제목 품질 검증 — blocked 키워드가 제목에 있으면 발행 차단
+    # 제목 품질 검증 — 문맥 확인 후 blocked 키워드 차단
+    # 제목에 allowed 키워드가 하나라도 있으면 (캠핑 맥락) 차단 스킵
+    _allowed_for_context = ALLOWED_PRODUCT.get(blog_id, {}).get("allowed", [])
+    _has_context = any(aw.lower() in title.lower() for aw in _allowed_for_context)
     title_blocked = TITLE_BLOCKED.get(blog_id, [])
     for bw in title_blocked:
-        if bw.lower() in title.lower():
+        if bw.lower() in title.lower() and not _has_context:
             logger.warning(f"[{blog_id}] 제목에 blocked 키워드 감지: '{bw}' in '{title}'")
             _record_failure(blog_id, "title_blocked", f"제목 blocked 키워드: {bw}", keyword)
             return {"success": False, "reason": "title_blocked"}
