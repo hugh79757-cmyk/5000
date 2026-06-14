@@ -635,6 +635,17 @@ def deploy_site(site_path, cf_project):
 
 def _deploy_site_inner(site_path, cf_project):
     site = Path(site_path)
+    # 5000/.env의 CLOUDFLARE 토큰을 wrangler에 주입 (oauth_token 만료 대응)
+    import os as _os2
+    from dotenv import load_dotenv as _ldenv3
+    _ldenv3("/Users/twinssn/Projects/5000/.env", override=True)
+    _wrangler_env = _os2.environ.copy()
+    _cf_token = _os2.getenv("CLOUDFLARE_API_TOKEN", "")
+    _cf_account = _os2.getenv("CLOUDFLARE_ACCOUNT_ID", "")
+    if _cf_token:
+        _wrangler_env["CLOUDFLARE_API_TOKEN"] = _cf_token
+    if _cf_account:
+        _wrangler_env["CLOUDFLARE_ACCOUNT_ID"] = _cf_account
     # leaf bundle 방기: content/posts/index.md 존재 시 삭제
     rogue = site / "content" / "posts" / "index.md"
     if rogue.exists():
@@ -645,7 +656,8 @@ def _deploy_site_inner(site_path, cf_project):
     with open(log_path, "a") as log_f:
         result = subprocess.run(
             ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
-            cwd=str(site), stdout=log_f, stderr=log_f
+            cwd=str(site), stdout=log_f, stderr=log_f,
+                         env=_wrangler_env
         )
     if result.returncode != 0:
         raise Exception("Hugo build failed: see deploy.log")
@@ -662,7 +674,8 @@ def _deploy_site_inner(site_path, cf_project):
             result = subprocess.run(
                 ["/opt/homebrew/bin/wrangler", "deploy",
                  "--config", str(wf)],
-                cwd=str(site), stdout=log_f, stderr=log_f
+                cwd=str(site), stdout=log_f, stderr=log_f,
+                             env=_wrangler_env
             )
         else:
             result = subprocess.run(
@@ -671,7 +684,8 @@ def _deploy_site_inner(site_path, cf_project):
                  "--branch=main",
                  "--commit-dirty=true",
                  "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-                cwd=str(site), stdout=log_f, stderr=log_f
+                cwd=str(site), stdout=log_f, stderr=log_f,
+                             env=_wrangler_env
             )
     if result.returncode != 0:
         # 일시적 네트워크 오류 시 최대 2회 재시도
@@ -686,7 +700,8 @@ def _deploy_site_inner(site_path, cf_project):
                         result = subprocess.run(
                             ["/opt/homebrew/bin/wrangler", "deploy",
                              "--config", str(wf)],
-                            cwd=str(site), stdout=log_f, stderr=log_f
+                            cwd=str(site), stdout=log_f, stderr=log_f,
+                                         env=_wrangler_env
                         )
                     else:
                         result = subprocess.run(
@@ -695,7 +710,8 @@ def _deploy_site_inner(site_path, cf_project):
                              "--branch=main",
                              "--commit-dirty=true",
                              "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-                            cwd=str(site), stdout=log_f, stderr=log_f
+                            cwd=str(site), stdout=log_f, stderr=log_f,
+                                         env=_wrangler_env
                         )
                 if result.returncode == 0:
                     print(f"[deploy] {site.name} 재시도 성공")
