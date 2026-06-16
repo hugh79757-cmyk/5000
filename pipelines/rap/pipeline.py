@@ -768,10 +768,24 @@ def run(blog_cfg):
     from dotenv import load_dotenv
     load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-    # ★ RAP DB 일일 갱신 (첫 발행 시 자동 실행)
+    # ★ RAP DB 일일 갱신 (첫 발행 시 자동 실행, 최대 120초)
     try:
         from pipelines.rap.rap_data_sync import daily_refresh
-        daily_refresh()
+        import threading as _th
+        _result = []
+        _err = []
+        def _run_refresh():
+            try:
+                _result.append(daily_refresh())
+            except Exception as _e:
+                _err.append(_e)
+        _t = _th.Thread(target=_run_refresh, daemon=True)
+        _t.start()
+        _t.join(120)
+        if _t.is_alive():
+            logger.warning("RAP DB 갱신 120초 초과 — 타임아웃 (non-fatal)")
+        elif _err:
+            raise _err[0]
     except Exception as e:
         logger.warning(f"RAP DB 갱신 실패 (non-fatal): {e}")
 

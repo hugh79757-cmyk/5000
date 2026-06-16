@@ -611,14 +611,23 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
 def deploy_site(site_path, cf_project):
     site = Path(site_path)
-    # deploy 직렬화 락 (wrangler 동시 실행 방지)
+    # deploy 직렬화 락 (wrangler 동시 실행 방지, 최대 60초 대기)
     import fcntl as _fl
+    import time as _lock_time
     _lock_path = Path("/tmp/wrangler_deploy.lock")
     _lock_file = open(_lock_path, "w")
     _lock_acquired = False
+    _deadline = _lock_time.time() + 60
     try:
-        _fl.flock(_lock_file, _fl.LOCK_EX)
-        _lock_acquired = True
+        while _lock_time.time() < _deadline:
+            try:
+                _fl.flock(_lock_file, _fl.LOCK_EX | _fl.LOCK_NB)
+                _lock_acquired = True
+                break
+            except BlockingIOError:
+                _lock_time.sleep(1)
+        if not _lock_acquired:
+            raise TimeoutError("wrangler deploy lock timeout (60s)")
     except Exception:
         pass
     try:
@@ -657,7 +666,7 @@ def _deploy_site_inner(site_path, cf_project):
         result = subprocess.run(
             ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
             cwd=str(site), stdout=log_f, stderr=log_f,
-                         env=_wrangler_env
+                         env=_wrangler_env, timeout=120
         )
     if result.returncode != 0:
         raise Exception("Hugo build failed: see deploy.log")
@@ -670,23 +679,27 @@ def _deploy_site_inner(site_path, cf_project):
     use_workers = wf.exists() and "[assets]" in wf.read_text()
 
     with open(log_path, "a") as log_f:
-        if use_workers:
-            result = subprocess.run(
-                ["/opt/homebrew/bin/wrangler", "deploy",
-                 "--config", str(wf)],
-                cwd=str(site), stdout=log_f, stderr=log_f,
-                             env=_wrangler_env
-            )
-        else:
-            result = subprocess.run(
-                ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-                 "--project-name=" + cf_project,
-                 "--branch=main",
-                 "--commit-dirty=true",
-                 "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-                cwd=str(site), stdout=log_f, stderr=log_f,
-                             env=_wrangler_env
-            )
+        _deploy_timeout = 120
+        try:
+            if use_workers:
+                result = subprocess.run(
+                    ["/opt/homebrew/bin/wrangler", "deploy",
+                     "--config", str(wf)],
+                    cwd=str(site), stdout=log_f, stderr=log_f,
+                                 env=_wrangler_env, timeout=_deploy_timeout
+                )
+            else:
+                result = subprocess.run(
+                    ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+                     "--project-name=" + cf_project,
+                     "--branch=main",
+                     "--commit-dirty=true",
+                     "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
+                    cwd=str(site), stdout=log_f, stderr=log_f,
+                                 env=_wrangler_env, timeout=_deploy_timeout
+                )
+        except subprocess.TimeoutExpired:
+            raise Exception(f"Wrangler deploy timed out ({_deploy_timeout}s)")
     if result.returncode != 0:
         # 일시적 네트워크 오류 시 최대 2회 재시도
         err_text = (result.stderr or "").lower()
@@ -696,23 +709,27 @@ def _deploy_site_inner(site_path, cf_project):
                 _retry_t.sleep(10 * (attempt + 1))
                 print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 (network error)")
                 with open(log_path, "a") as log_f:
-                    if use_workers:
-                        result = subprocess.run(
-                            ["/opt/homebrew/bin/wrangler", "deploy",
-                             "--config", str(wf)],
-                            cwd=str(site), stdout=log_f, stderr=log_f,
-                                         env=_wrangler_env
-                        )
-                    else:
-                        result = subprocess.run(
-                            ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-                             "--project-name=" + cf_project,
-                             "--branch=main",
-                             "--commit-dirty=true",
-                             "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-                            cwd=str(site), stdout=log_f, stderr=log_f,
-                                         env=_wrangler_env
-                        )
+                    try:
+                        if use_workers:
+                            result = subprocess.run(
+                                ["/opt/homebrew/bin/wrangler", "deploy",
+                                 "--config", str(wf)],
+                                cwd=str(site), stdout=log_f, stderr=log_f,
+                                             env=_wrangler_env, timeout=_deploy_timeout
+                            )
+                        else:
+                            result = subprocess.run(
+                                ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+                                 "--project-name=" + cf_project,
+                                 "--branch=main",
+                                 "--commit-dirty=true",
+                                 "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
+                                cwd=str(site), stdout=log_f, stderr=log_f,
+                                             env=_wrangler_env, timeout=_deploy_timeout
+                            )
+                    except subprocess.TimeoutExpired:
+                        print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 timeout ({_deploy_timeout}s)")
+                        continue
                 if result.returncode == 0:
                     print(f"[deploy] {site.name} 재시도 성공")
                     break

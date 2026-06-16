@@ -94,29 +94,47 @@ def _ensure_rents_table(conn):
 
 
 def is_today_refreshed():
-    """오늘 이미 갱신했는지 확인"""
+    """오늘 이미 갱신했는지 확인 (DB 락 발생 시 False 반환)"""
     today = datetime.now().strftime("%Y-%m-%d")
-    conn = sqlite3.connect(RAP_DB_PATH)
-    row = conn.execute("SELECT id FROM refresh_log WHERE refresh_date=?", (today,)).fetchone()
-    conn.close()
-    return row is not None
+    try:
+        conn = sqlite3.connect(RAP_DB_PATH, timeout=5)
+        row = conn.execute("SELECT id FROM refresh_log WHERE refresh_date=?", (today,)).fetchone()
+        conn.close()
+        return row is not None
+    except sqlite3.OperationalError:
+        logger.warning("is_today_refreshed: DB 락 — False 반환")
+        return False
 
 
-def sync_trades(conn):
-    """매매 실거래가 수집 → trades 테이블 저장"""
-    deal_ymd = datetime.now().strftime("%Y%m")
-    added = 0
-    for lawd_cd, city, district in SYNC_REGIONS:
-        trades = fetch_apt_trade(lawd_cd, deal_ymd=deal_ymd, rows=100)
-        for t in trades:
+_TRADE_INSERT = """INSERT OR IGNORE INTO trades
+    (lawd_cd, city, district, deal_ymd, apt_name, dong_name,
+     exclu_use_ar, floor, build_year, deal_amount,
+     deal_year, deal_month, deal_day)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)"""
+
+_RENT_INSERT = """INSERT OR IGNORE INTO rents
+    (lawd_cd, city, district, deal_ymd, apt_name, dong_name,
+     exclu_use_ar, floor, build_year, deposit, monthly_rent,
+     rent_type, deal_year, deal_month, deal_day)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"""
+
+_SUB_INSERT = """INSERT OR IGNORE INTO subscriptions
+    (pan_id, pan_nm, region_cd, region_nm, pan_type,
+     pan_start, pan_end, pan_status, detail_url)
+    VALUES (?,?,?,?,?,?,?,?,?)"""
+
+
+def _fetch_region_trades(args):
+    """단일 지역 매매 API 호출 (executor 워커용)"""
+    lawd_cd, city, district, deal_ymd = args
+    try:
+        items = fetch_apt_trade(lawd_cd, deal_ymd=deal_ymd, rows=100)
+        if not items:
+            return []
+        rows = []
+        for t in items:
             try:
-                conn.execute("""
-                    INSERT OR IGNORE INTO trades
-                    (lawd_cd, city, district, deal_ymd, apt_name, dong_name,
-                     exclu_use_ar, floor, build_year, deal_amount,
-                     deal_year, deal_month, deal_day)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-                """, (
+                rows.append((
                     lawd_cd, city, district, deal_ymd,
                     t.get("aptNm", "").strip(),
                     t.get("umdNm", "").strip(),
@@ -128,29 +146,25 @@ def sync_trades(conn):
                     int(t.get("dealMonth", 0) or 0),
                     int(t.get("dealDay", 0) or 0),
                 ))
-                added += 1
-            except Exception as e:
-                logger.warning(f"매매 저장 실패: {e}")
-    logger.info(f"매매 실거래가 수집 완료: {added}건 추가")
-    return added
+            except (ValueError, TypeError):
+                continue
+        return rows
+    except Exception as e:
+        logger.warning(f"매매 API 실패: {city} {district} — {e}")
+        return []
 
 
-def sync_rents(conn):
-    """전월세 실거래가 수집 → rents 테이블 저장 (rap4-hugo 전용 데이터)"""
-    _ensure_rents_table(conn)
-    deal_ymd = datetime.now().strftime("%Y%m")
-    added = 0
-    for lawd_cd, city, district in SYNC_REGIONS:
-        rents = fetch_apt_rent(lawd_cd, deal_ymd=deal_ymd, rows=100)
-        for r in rents:
+def _fetch_region_rents(args):
+    """단일 지역 전월세 API 호출 (executor 워커용)"""
+    lawd_cd, city, district, deal_ymd = args
+    try:
+        items = fetch_apt_rent(lawd_cd, deal_ymd=deal_ymd, rows=100)
+        if not items:
+            return []
+        rows = []
+        for r in items:
             try:
-                conn.execute("""
-                    INSERT OR IGNORE INTO rents
-                    (lawd_cd, city, district, deal_ymd, apt_name, dong_name,
-                     exclu_use_ar, floor, build_year, deposit, monthly_rent,
-                     rent_type, deal_year, deal_month, deal_day)
-                    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                """, (
+                rows.append((
                     lawd_cd, city, district, deal_ymd,
                     r.get("aptNm", "").strip(),
                     r.get("umdNm", "").strip(),
@@ -164,45 +178,84 @@ def sync_rents(conn):
                     int(r.get("dealMonth", 0) or 0),
                     int(r.get("dealDay", 0) or 0),
                 ))
-                added += 1
-            except Exception as e:
-                logger.warning(f"전월세 저장 실패: {e}")
-        time.sleep(0.1)
-    logger.info(f"전월세 실거래가 수집 완료: {added}건 추가")
-    return added
+            except (ValueError, TypeError):
+                continue
+        return rows
+    except Exception as e:
+        logger.warning(f"전월세 API 실패: {city} {district} — {e}")
+        return []
 
 
-def sync_subscriptions(conn):
-    """청약 공고 수집 → subscriptions 테이블 저장"""
-    added = 0
-    for region, code in REGION_CD_MAP.items():
-        subs = fetch_subscription_info(region_cd=code, page_size=20)
-        for s in subs:
+def _fetch_region_subs(args):
+    """단일 지역 청약 API 호출 (executor 워커용)"""
+    region, code = args
+    try:
+        items = fetch_subscription_info(region_cd=code, page_size=20)
+        if not items:
+            return []
+        rows = []
+        for s in items:
             pan_id = s.get("PAN_ID", "") or s.get("DTL_URL", "")
             if not pan_id:
                 continue
-            try:
-                conn.execute("""
-                    INSERT OR IGNORE INTO subscriptions
-                    (pan_id, pan_nm, region_cd, region_nm, pan_type,
-                     pan_start, pan_end, pan_status, detail_url)
-                    VALUES (?,?,?,?,?,?,?,?,?)
-                """, (
-                    pan_id,
-                    s.get("PAN_NM", "").strip(),
-                    code,
-                    region,
-                    s.get("AIS_TP_CD_NM", ""),
-                    s.get("PAN_NT_ST_DT", ""),
-                    s.get("CLSG_DT", ""),
-                    s.get("PAN_SS", ""),
-                    s.get("DTL_URL", ""),
-                ))
-                added += 1
-            except Exception as e:
-                logger.warning(f"청약 저장 실패: {e}")
-    logger.info(f"청약 공고 수집 완료: {added}건 추가")
-    return added
+            rows.append((
+                pan_id,
+                s.get("PAN_NM", "").strip(),
+                code,
+                region,
+                s.get("AIS_TP_CD_NM", ""),
+                s.get("PAN_NT_ST_DT", ""),
+                s.get("CLSG_DT", ""),
+                s.get("PAN_SS", ""),
+                s.get("DTL_URL", ""),
+            ))
+        return rows
+    except Exception as e:
+        logger.warning(f"청약 API 실패: {region} — {e}")
+        return []
+
+
+def _parallel_sync(conn, fetch_fn, regions_args, insert_sql, label):
+    """공용 병렬 동기화: ThreadPoolExecutor로 API 호출 분산 후 단일 connection INSERT"""
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    start = time.time()
+    all_rows = []
+
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        futures = {ex.submit(fetch_fn, args): args for args in regions_args}
+        for future in as_completed(futures):
+            rows = future.result()
+            if rows:
+                all_rows.extend(rows)
+
+    if all_rows:
+        conn.executemany(insert_sql, all_rows)
+        conn.commit()
+
+    elapsed = time.time() - start
+    logger.info(f"{label} 수집 완료: {len(all_rows)}건 ({elapsed:.1f}초)")
+    return len(all_rows)
+
+
+def sync_trades(conn):
+    """매매 실거래가 수집 (병렬, 최대 5워커)"""
+    deal_ymd = datetime.now().strftime("%Y%m")
+    args = [(lcd, ct, dt, deal_ymd) for lcd, ct, dt in SYNC_REGIONS]
+    return _parallel_sync(conn, _fetch_region_trades, args, _TRADE_INSERT, "매매 실거래가")
+
+
+def sync_rents(conn):
+    """전월세 실거래가 수집 (병렬, 최대 5워커, rap4-hugo 전용)"""
+    _ensure_rents_table(conn)
+    deal_ymd = datetime.now().strftime("%Y%m")
+    args = [(lcd, ct, dt, deal_ymd) for lcd, ct, dt in SYNC_REGIONS]
+    return _parallel_sync(conn, _fetch_region_rents, args, _RENT_INSERT, "전월세 실거래가")
+
+
+def sync_subscriptions(conn):
+    """청약 공고 수집 (병렬, 최대 5워커)"""
+    args = [(region, code) for region, code in REGION_CD_MAP.items()]
+    return _parallel_sync(conn, _fetch_region_subs, args, _SUB_INSERT, "청약 공고")
 
 
 def sync_keywords_from_gap():
@@ -336,20 +389,41 @@ def sync_gongsijiga(conn):
     return inserted, updated
 
 def daily_refresh():
-    """일일 갱신 메인 — 첫 발행 시 호출"""
+    """일일 갱신 메인 — 첫 발행 시 호출 (병렬 fetch + 90초 타임아웃)"""
     if is_today_refreshed():
         logger.info("오늘 이미 갱신됨 — 스킵")
         return False
 
     logger.info("=== RAP DB 일일 갱신 시작 ===")
     start = time.time()
+    deadline = time.monotonic() + 90.0
 
     conn = sqlite3.connect(RAP_DB_PATH)
     _ensure_rents_table(conn)
 
-    trades_added = sync_trades(conn)
-    rents_added  = sync_rents(conn)
-    subs_added   = sync_subscriptions(conn)
+    trades_added = 0
+    rents_added  = 0
+    subs_added   = 0
+
+    # 각 sync 함수는 내부적으로 5개 워커 ThreadPoolExecutor 사용
+    # 전체 90초 초과 시 중단 (일부만 갱신된 상태로 기록)
+    try:
+        trades_added = sync_trades(conn)
+    except Exception as e:
+        logger.warning(f"매매 수집 중단 (non-fatal): {e}")
+
+    if time.monotonic() < deadline:
+        try:
+            rents_added = sync_rents(conn)
+        except Exception as e:
+            logger.warning(f"전월세 수집 중단 (non-fatal): {e}")
+
+    if time.monotonic() < deadline:
+        try:
+            subs_added = sync_subscriptions(conn)
+        except Exception as e:
+            logger.warning(f"청약 수집 중단 (non-fatal): {e}")
+
     conn.commit()
 
     duration = time.time() - start
