@@ -251,7 +251,7 @@ def _extract_menus_from_reviews(reviews: List[str], shop_name: str) -> List[str]
 
     try:
         response = client.chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+            model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
             messages=[{
                 "role": "user",
                 "content": f"""다음은 식당 '{shop_name}'의 리뷰입니다.

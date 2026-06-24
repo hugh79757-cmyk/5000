@@ -584,6 +584,19 @@ def _post_process(body_md, blog_id, keyword):
     body_md = _re.sub(r"\n*---\s*\n*---", "", body_md)
     body_md = body_md.rstrip()
 
+    # 1-0. 표 깨짐 복원 — 마크다운 table separator 행 수정
+    _lines = body_md.split('\n')
+    for _i, _line in enumerate(_lines):
+        if _re.match(r'^\|[\|\-:\s]+\|$', _line):
+            _j = _i - 1
+            while _j >= 0 and not _lines[_j].strip():
+                _j -= 1
+            if _j >= 0 and _lines[_j].strip().startswith('|'):
+                _col_count = _lines[_j].count('|') - 1
+                if _col_count >= 1:
+                    _lines[_i] = '|' + '---|' * _col_count
+    body_md = '\n'.join(_lines)
+
     # 1-1. 글 중간 이탈방지 카드 삽입 (H2 3번째 뒤)
     try:
         import glob as _gl2
@@ -979,7 +992,7 @@ def run(blog_cfg):
         tags=article.get("tags", ""),
         data_source=data_source,
         source_id=keyword,
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         thumbnail_url=thumb_url,
         wp_category=wp_category,
     )

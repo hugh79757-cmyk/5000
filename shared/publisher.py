@@ -661,6 +661,9 @@ def _deploy_site_inner(site_path, cf_project):
         rogue.unlink()
         print(f"[guard] Removed rogue index.md from {site}")
 
+    # shared themesDir — Hugo v0.160.x에서 config 내 themesDir 미인식 이슈 대응
+    _wrangler_env.setdefault("HUGO_THEMESDIR", "/Users/twinssn/Projects/shared-themes")
+
     log_path = Path("/Users/twinssn/Projects/5000/logs/deploy.log")
     with open(log_path, "a") as log_f:
         result = subprocess.run(

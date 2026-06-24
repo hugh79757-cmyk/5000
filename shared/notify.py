@@ -4,6 +4,11 @@ import logging
 import urllib.request
 import urllib.parse
 import json
+from dotenv import load_dotenv
+
+# 중앙 env 파일 로드
+load_dotenv("/Users/twinssn/.env.common")
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 

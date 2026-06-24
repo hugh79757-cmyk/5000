@@ -1,6 +1,6 @@
 default:
-  provider: openai
-  model: gpt-4o-mini
+  provider: mimo
+  model: mimo-v2.5
   temperature: 0.5
 
 fallback:
@@ -9,8 +9,8 @@ fallback:
   temperature: 0.7
 
 economy:
-  provider: openai
-  model: gpt-4o-mini
+  provider: mimo
+  model: mimo-v2.5
   temperature: 0.7
 
 providers:
@@ -23,3 +23,6 @@ providers:
   clova:
     api_key_env: CLOVA_API_KEY
     base_url: https://clovastudio.stream.ntruss.com
+  mimo:
+    api_key_env: MIMO_API_KEY
+    base_url: https://api.xiaomimimo.com/v1

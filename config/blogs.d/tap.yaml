@@ -39,7 +39,7 @@ blogs:
     - '16:00'
     - '20:00'
   site_path: /Users/twinssn/Projects/TAP/travel-hugo
-  status: inactive
+  status: active
   theme: Blowfish
 - cf_project: travel1-hugo
   daily_quota: 5
@@ -63,7 +63,7 @@ blogs:
     - '16:02'
     - '20:02'
   site_path: /Users/twinssn/Projects/TAP/travel1-hugo
-  status: inactive
+  status: active
   theme: Blowfish
 - cf_project: travel2-hugo
   daily_quota: 5
@@ -87,7 +87,7 @@ blogs:
     - '16:04'
     - '20:04'
   site_path: /Users/twinssn/Projects/TAP/travel2-hugo
-  status: inactive
+  status: active
   theme: Blowfish
 - cf_project: travel3-hugo
   daily_quota: 5
@@ -135,7 +135,7 @@ blogs:
     - '16:08'
     - '20:08'
   site_path: /Users/twinssn/Projects/TAP/travel4-hugo
-  status: inactive
+  status: active
   theme: Blowfish
 - blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
   daily_quota: 5

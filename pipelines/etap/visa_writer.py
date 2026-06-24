@@ -1,23 +1,14 @@
 """visa_writer.py – 비자 가이드 생성 (여권 기준 + 도착국 기준)"""
 import os, sqlite3, logging, re
-from openai import OpenAI
-
+from shared.ai_writer import generate as ai_generate
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
 try:
     from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
     HAS_PP = True
 except ImportError:
     HAS_PP = False
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -138,13 +129,14 @@ RULES:
 - Do NOT include URLs or links
 
 Return ONLY the article in markdown starting with # title"""
-
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini", temperature=0.3, max_tokens=4500,
-        messages=[{"role":"system","content":"You are a visa and immigration content writer. Use ONLY the provided data. Never guess or fabricate visa requirements. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0."},
-                  {"role":"user","content": prompt}]
+    
+    result = ai_generate(
+    "You are a visa and immigration content writer. Use ONLY the provided data. Never guess or fabricate visa requirements. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0.",
+    prompt,
+    temperature=0.3,
+    max_tokens=4500,
     )
-    content = resp.choices[0].message.content.strip()
+    content = result["content"].strip()
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"{passport} Visa Guide")
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()

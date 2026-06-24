@@ -268,7 +268,7 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
             is_draft=_is_draft,
             data_source="gov24_api",
             source_id=article.get("service_id", ""),
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         )
         if result and result.get("success"):
             logger.info(f"Hugo published: {article['title']} -> {result.get('url')}")
@@ -328,7 +328,7 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate=None):
             is_draft=_is_draft,
             data_source="gov24_api",
             source_id=article.get("service_id", ""),
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+            model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         )
         if result and result.get("success"):
             logger.info(f"Blogger published: {article['title']} -> {result.get('url')}")

@@ -16,6 +16,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
+load_dotenv(os.path.expanduser("~/.env.common"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 # ── 패키지 의존성 체크 (표면 + 심층) ──
@@ -185,7 +186,7 @@ def _update_heartbeat():
         pass
 
 MAX_CATCHUP_PER_BLOG = 3
-PUBLISH_DELAY = 180  # 블로그 간 딜레이(초)
+PUBLISH_DELAY = 60  # 블로그 간 딜레이(초)
 
 
 # ─── Config ───
@@ -550,6 +551,15 @@ def _run_festival_refresh():
         logger.error(f"Festival refresh failed: {e}")
 
 
+def _run_course_refresh():
+    try:
+        subprocess.run([sys.executable, "scripts/refresh_course.py"],
+                       cwd=os.path.dirname(os.path.abspath(__file__)), timeout=120)
+        logger.info("Course refresh completed")
+    except Exception as e:
+        logger.error(f"Course refresh failed: {e}")
+
+
 def _send_morning_report():
     subprocess.run([sys.executable, "-m", "shared.daily_report"],
                    cwd=os.path.dirname(os.path.abspath(__file__)))
@@ -589,8 +599,10 @@ def register_schedules():
 
     schedule.every().day.at("06:00").do(_run_festival_refresh)
     schedule.every().day.at("05:30").do(_run_senior_sync)
-    logger.info("Senior DB sync scheduled at 05:30")
+
     logger.info("Festival refresh scheduled at 06:00")
+    schedule.every().day.at("06:05").do(_run_course_refresh)
+    logger.info("Course refresh scheduled at 06:05")
     schedule.every().day.at("06:10").do(_run_stap_collector)
     logger.info("STAP data collector scheduled at 06:10")
 
@@ -612,6 +624,17 @@ def register_schedules():
 
     schedule.every().hour.at(":50").do(_run_cuap_collector)
     logger.info("CUAP auto_collector scheduled every hour at :50")
+
+    # CUAP keyword_expander: 매일 02:00에 실행 (동적 키워드 확장)
+    def _run_keyword_expander():
+        try:
+            from pipelines.curation.keyword_expander import run_all
+            run_all()
+        except Exception as e:
+            logger.error(f"CUAP keyword_expander error: {e}")
+
+    schedule.every().day.at("02:00").do(_run_keyword_expander)
+    logger.info("CUAP keyword_expander scheduled daily at 02:00")
 
     schedule.every().day.at("23:00").do(_run_quality_scan)
     schedule.every().day.at("23:50").do(daily_report)

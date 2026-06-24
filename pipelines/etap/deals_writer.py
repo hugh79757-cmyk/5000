@@ -1,25 +1,15 @@
 """deals_writer.py - Flight deals guide (v4: all 35 routes fully utilized)"""
 import os, sqlite3, logging, re
 from datetime import datetime
-from openai import OpenAI
-
+from shared.ai_writer import generate as ai_generate
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
 try:
     from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
     HAS_PP = True
 except ImportError:
     HAS_PP = False
-
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
 
 
 def _get_db():
@@ -202,14 +192,20 @@ RULES:
 - NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, treasure trove, must-visit, paradise, bucket list, adventure awaits
 
 Return ONLY the article in markdown starting with # title"""
+    
+    result = ai_generate(
 
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
-        messages=[
-            {"role": "system", "content": "You are a travel journalist writing data-driven flight deal articles. Use ONLY provided price data. Write flowing paragraphs, no lists. Prices as whole numbers. Start with the cheapest deal."},
-            {"role": "user", "content": prompt}
-        ]
+        "You are a travel journalist writing data-driven flight deal articles. Use ONLY provided price data. Write flowing paragraphs, no lists. Prices as whole numbers. Start with the cheapest deal.",
+
+        prompt,
+
+        temperature=0.5,
+
+        max_tokens=4000,
+
     )
+
+    content = result["content"].strip()
 
     content = resp.choices[0].message.content.strip()
     if HAS_PP:

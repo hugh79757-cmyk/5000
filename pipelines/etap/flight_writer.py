@@ -5,9 +5,10 @@ import os
 import sqlite3
 import logging
 from datetime import datetime
-from openai import OpenAI
 from dotenv import load_dotenv
+from shared.ai_writer import generate as ai_generate
 load_dotenv('/Users/twinssn/Projects/5000/.env')
+load_dotenv(os.path.expanduser("~/.env.common"))
 
 logger = logging.getLogger(__name__)
 
@@ -15,9 +16,6 @@ DB_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
     "data", "travel-en.db"
 )
-
-_client = None
-
 
 # === ETAP v2 Enrichment ===
 try:
@@ -28,13 +26,6 @@ try:
 except ImportError:
     HAS_ENRICHMENT = False
 # === END ETAP v2 ===
-
-def _get_client():
-    global _client
-    if _client is None:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
-
 
 def _get_db():
     return sqlite3.connect(DB_PATH)
@@ -153,16 +144,13 @@ RULES:
 - Include a brief intro before the first H2
 """
     try:
-        response = _get_client().chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "You are a travel journalist writing data-driven flight deal articles. Use real price data when provided. Be specific and helpful. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.5,
-            max_tokens=3500,
+        result = ai_generate(
+        "You are a travel journalist writing data-driven flight deal articles. Use real price data when provided. Be specific and helpful. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0.",
+        prompt,
+        temperature=0.5,
+        max_tokens=3500,
         )
-        content = response.choices[0].message.content.strip()
+        content = result["content"].strip()
         if content.startswith("# "):
             content = content.split("\n", 1)[1].strip()
         description = f"Find the cheapest flights from {o_city} to {d_city}. Real-time prices, best booking times, airline comparisons, and money-saving tips."

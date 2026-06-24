@@ -142,7 +142,7 @@ def humanize_korean(body_md: str, blog_id: str, title: str = "") -> str:
         result = _ai_generate(
             system_prompt=_SYSTEM_PROMPT,
             user_prompt=user_prompt,
-            tier="economy"  # gpt-4o-mini, 경제적
+            tier="economy"  # mimo-v2.5, 경제적
         )
         
         if result and result.get("content"):

@@ -682,52 +682,70 @@ def fetch_food():
 
 
 def fetch_course():
-    """TourAPI contentTypeId=25(여행코스) + detailInfo2로 코스 하위 장소 데이터 확보"""
+    """course.db 기반 여행코스 발행 — DB에서 코스 선택 후 하위장소는 On-demand API 호출"""
+    import sqlite3 as _sql
     import requests as req
-    AREA_CODES = {
-        "서울": 1, "인천": 2, "대전": 3, "대구": 4, "광주": 5,
-        "부산": 6, "울산": 7, "세종": 8, "경기": 31, "강원": 32,
-        "충북": 33, "충남": 34, "경북": 35, "경남": 36,
-        "전북": 37, "전남": 38, "제주": 39,
-    }
-    region_name = random.choice(list(AREA_CODES.keys()))
-    area_code = AREA_CODES[region_name]
-    key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
-    try:
-        # 1단계: 여행코스 목록 조회 (contentTypeId=25)
-        resp = req.get(
-            "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
-            params={
-                "serviceKey": key,
-                "MobileOS": "ETC",
-                "MobileApp": "TAP",
-                "_type": "json",
-                "numOfRows": 30,
-                "pageNo": 1,
-                "contentTypeId": 25,
-                "areaCode": area_code,
-                "arrange": "C",
-            },
-            timeout=15,
-        )
-        data = resp.json()
-        header = data.get("response", {}).get("header", {})
-        if header.get("resultCode") != "0000":
-            logger.warning("course API error: %s", header)
-            return None
-        items_raw = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items_raw, dict):
-            items_raw = [items_raw]
-        if not items_raw:
-            logger.warning("course: no data for %s", region_name)
-            return None
+    import datetime
 
-        # 이미지 있는 코스 우선
-        with_img = [i for i in items_raw if i.get("firstimage")]
-        pool = with_img if len(with_img) >= 3 else items_raw
+    COURSE_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "course.db")
+    if not os.path.exists(COURSE_DB):
+        logger.warning("course.db not found: %s", COURSE_DB)
+        return None
+
+    AREA_NAMES = {
+        "1": "서울", "2": "인천", "3": "대전", "4": "대구", "5": "광주",
+        "6": "부산", "7": "울산", "8": "세종", "31": "경기", "32": "강원",
+        "33": "충북", "34": "충남", "35": "경북", "36": "경남",
+        "37": "전북", "38": "전남", "39": "제주",
+    }
+    CAT2_MAP = {
+        "C0112": "가족코스", "C0113": "나홀로코스", "C0114": "힐링코스",
+        "C0115": "도보코스", "C0116": "캠핑코스", "C0117": "맛코스",
+    }
+
+    try:
+        conn = _sql.connect(COURSE_DB)
+        conn.row_factory = _sql.Row
+
+        # 기존 발행 contentid 제외
+        _published_cids = set()
+        try:
+            _cdb = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+            for row in _cdb.execute("SELECT source_id FROM articles WHERE blog_id='travel4-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            for row in _cdb.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel4-hugo' AND source_id != ''"):
+                for _cid in row[0].split(","):
+                    if _cid.strip():
+                        _published_cids.add(_cid.strip())
+            try:
+                for row in _cdb.execute("SELECT course_contentid FROM course_published WHERE blog_id='travel4-hugo'"):
+                    if row[0]:
+                        _published_cids.add(row[0])
+            except Exception:
+                pass
+            _cdb.close()
+        except Exception as _e:
+            logger.warning("course dup-check DB error: %s", _e)
+
+        # 이미지 있는 미발행 코스 조회
+        rows = conn.execute(
+            "SELECT * FROM courses WHERE firstimage != '' AND firstimage IS NOT NULL ORDER BY RANDOM()"
+        ).fetchall()
+        pool = [r for r in rows if str(r["contentid"]) not in _published_cids]
+
+        if not pool:
+            # 이미지 없어도 포함하여 재시도
+            rows = conn.execute("SELECT * FROM courses ORDER BY RANDOM()").fetchall()
+            pool = [r for r in rows if str(r["contentid"]) not in _published_cids]
+
+        if not pool:
+            logger.warning("course: DB에서 미발행 코스 0건")
+            conn.close()
+            return None
 
         # 계절 필터링
-        import datetime
         _month = datetime.datetime.now().month
         _season_ban = {
             12: ["봄", "벚꽃", "유채꽃", "여름", "물놀이", "해수욕", "피서"],
@@ -745,88 +763,28 @@ def fetch_course():
         }
         ban_words = _season_ban.get(_month, [])
         if ban_words:
-            filtered = [i for i in pool if not any(bw in i.get("title", "") for bw in ban_words)]
-            if len(filtered) >= 1:
+            filtered = [r for r in pool if not any(bw in (r["title"] or "") for bw in ban_words)]
+            if filtered:
                 pool = filtered
 
-        # 기존 발행 contentid 제외 (articles + publish_ledger + course_published)
-        _published_cids = set()
-        _published_titles = set()
-        try:
-            import sqlite3 as _sql
-            _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
-            for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel4-hugo' AND source_id != ''"):
-                for _cid in row[0].split(","):
-                    if _cid.strip():
-                        _published_cids.add(_cid.strip())
-            for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel4-hugo' AND source_id != ''"):
-                for _cid in row[0].split(","):
-                    if _cid.strip():
-                        _published_cids.add(_cid.strip())
-            # course_published 테이블에서 contentid + 제목 수집
-            try:
-                for row in _db.execute("SELECT course_contentid, course_title FROM course_published WHERE blog_id='travel4-hugo'"):
-                    cid_val = row[0] or ""
-                    if cid_val and not cid_val.startswith("title_"):
-                        _published_cids.add(cid_val)
-                    if row[1]:
-                        _published_titles.add(row[1].strip())
-            except Exception:
-                pass  # 테이블 없으면 무시
-            _db.close()
-        except Exception as _e:
-            logger.warning("course dup-check DB error: %s", _e)
-        # 1차: contentid + title 둘 다 체크
-        pool_strict = [item for item in pool
-                if str(item.get("contentid", "")) not in _published_cids
-                and item.get("title", "").strip() not in _published_titles]
-        # 2차: contentid만 체크 (title 차단 누적 시 폴백)
-        pool_relaxed = [item for item in pool
-                if str(item.get("contentid", "")) not in _published_cids]
-        if pool_strict:
-            pool = pool_strict
-            logger.info(f"course: strict 필터 후 {len(pool)}건")
-        elif pool_relaxed:
-            pool = pool_relaxed
-            logger.warning(f"course: title 차단 완화 (relaxed) 후 {len(pool)}건")
-        else:
-            logger.warning("course: 중복 제외 후 아이템 0건 → 다른 지역으로 재시도")
-            # 지역 재시도를 위해 다른 areaCode 랜덤 선택 후 재귀 1회
-            import random as _rr
-            _fallback_codes = [c for c in [1,2,3,4,5,6,7,8,31,32,33,34,35,36,37,38,39] if c != area_code]
-            area_code = _rr.choice(_fallback_codes)
-            _resp_fb = req.get(
-                "http://apis.data.go.kr/B551011/KorService2/areaBasedList2",
-                params={"serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
-                        "_type": "json", "numOfRows": 30, "pageNo": 1,
-                        "contentTypeId": 25, "areaCode": area_code, "arrange": "C"},
-                timeout=15,
-            )
-            _fb_items = _resp_fb.json().get("response", {}).get("body", {}).get("items", {}).get("item", [])
-            if isinstance(_fb_items, dict):
-                _fb_items = [_fb_items]
-            pool = [i for i in _fb_items if str(i.get("contentid", "")) not in _published_cids]
-            if not pool:
-                logger.warning("course: 폴백 지역도 0건")
-                return None
-            logger.info(f"course: 폴백 지역 areaCode={area_code} → {len(pool)}건")
-
         # 랜덤 1개 코스 선택
-        course_item = random.choice(pool)
-        course_cid = course_item.get("contentid")
-        course_title = course_item.get("title", "")
-        course_image = _fix_image_https(course_item.get("firstimage", ""))
+        course_row = random.choice(pool)
+        course_cid = str(course_row["contentid"])
+        course_title = course_row["title"] or ""
+        course_image = _fix_image_https(course_row["firstimage"] or "")
+        course_overview = course_row["overview"] or ""
+        course_addr = course_row["addr1"] or ""
+        course_mapx = course_row["mapx"] or ""
+        course_mapy = course_row["mapy"] or ""
+        area_code = str(course_row["areacode"] or "")
 
-        # 2단계: detailInfo2로 코스 하위 장소 조회
+        # On-demand: detailInfo2로 하위 장소 조회
+        key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
         resp2 = req.get(
             "http://apis.data.go.kr/B551011/KorService2/detailInfo2",
             params={
-                "serviceKey": key,
-                "MobileOS": "ETC",
-                "MobileApp": "TAP",
-                "_type": "json",
-                "contentId": course_cid,
-                "contentTypeId": 25,
+                "serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
+                "_type": "json", "contentId": course_cid, "contentTypeId": 25,
             },
             timeout=15,
         )
@@ -836,41 +794,35 @@ def fetch_course():
             sub_items = [sub_items]
         if not sub_items:
             logger.warning("course detailInfo: %s 하위장소 0건", course_title)
+            conn.close()
             return None
 
-        # 3단계: detailCommon2로 코스 overview 조회
-        course_overview = ""
-        try:
-            resp3 = req.get(
-                "http://apis.data.go.kr/B551011/KorService2/detailCommon2",
-                params={
-                    "serviceKey": key,
-                    "MobileOS": "ETC",
-                    "MobileApp": "TAP",
-                    "_type": "json",
-                    "contentId": course_cid,
-                },
-                timeout=15,
-            )
-            data3 = resp3.json()
-            _items_raw3 = data3.get("response", {}).get("body", {}).get("items", "")
-            if isinstance(_items_raw3, str):
-                common_items = []
-            else:
-                common_items = _items_raw3.get("item", [])
-            if isinstance(common_items, dict):
-                common_items = [common_items]
-            if common_items:
-                import re as _re_ov
-                ov = common_items[0].get("overview", "")
-                course_overview = _re_ov.sub(r"<[^>]+>", "", ov).strip() if ov else ""
-        except Exception as _e3:
-            logger.warning("course detailCommon failed: %s", _e3)
+        # overview가 없으면 On-demand 보강
+        if not course_overview:
+            try:
+                resp3 = req.get(
+                    "http://apis.data.go.kr/B551011/KorService2/detailCommon2",
+                    params={"serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
+                            "_type": "json", "contentId": course_cid},
+                    timeout=10,
+                )
+                _items_raw3 = resp3.json().get("response", {}).get("body", {}).get("items", "")
+                if not isinstance(_items_raw3, str):
+                    _ci = _items_raw3.get("item", [])
+                    if isinstance(_ci, dict):
+                        _ci = [_ci]
+                    if _ci:
+                        import re as _re_ov
+                        ov = _ci[0].get("overview", "")
+                        course_overview = _re_ov.sub(r"<[^>]+>", "", ov).strip() if ov else ""
+                # DB에 저장
+                conn.execute("UPDATE courses SET overview=? WHERE contentid=?", (course_overview, course_cid))
+                conn.commit()
+            except Exception:
+                pass
 
-        # 4단계: 하위 장소를 adapted items로 변환 (subcontentid로 보강)
+        # 하위 장소를 adapted items로 변환
         import re as _re_html
-        course_mapx = course_item.get("mapx", "")
-        course_mapy = course_item.get("mapy", "")
         adapted = []
         for idx, sub in enumerate(sub_items):
             sub_overview = sub.get("subdetailoverview", "")
@@ -880,73 +832,55 @@ def fetch_course():
             sub_mapx = course_mapx
             sub_mapy = course_mapy
             sub_tel = ""
-            # subcontentid로 detailCommon2 호출하여 주소/좌표/overview 보강
             scid = sub.get("subcontentid", "")
             if scid:
                 try:
                     _resp_sub = req.get(
                         "http://apis.data.go.kr/B551011/KorService2/detailCommon2",
-                        params={
-                            "serviceKey": key,
-                            "MobileOS": "ETC",
-                            "MobileApp": "TAP",
-                            "_type": "json",
-                            "contentId": scid,
-                        },
+                        params={"serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
+                                "_type": "json", "contentId": scid},
                         timeout=10,
                     )
-                    _d_sub = _resp_sub.json()
-                    _items_sub = _d_sub.get("response", {}).get("body", {}).get("items", "")
-                    if isinstance(_items_sub, str):
-                        _items_sub_list = []
-                    else:
-                        _items_sub_list = _items_sub.get("item", [])
-                    if isinstance(_items_sub_list, dict):
-                        _items_sub_list = [_items_sub_list]
-                    if _items_sub_list:
-                        _si = _items_sub_list[0]
+                    _si_list = _resp_sub.json().get("response", {}).get("body", {}).get("items", "")
+                    if not isinstance(_si_list, str):
+                        _si_list = _si_list.get("item", [])
+                    if isinstance(_si_list, dict):
+                        _si_list = [_si_list]
+                    if _si_list:
+                        _si = _si_list[0]
                         sub_addr = _si.get("addr1", "")
-                        if _si.get("mapx"):
-                            sub_mapx = _si["mapx"]
-                        if _si.get("mapy"):
-                            sub_mapy = _si["mapy"]
-                        if _si.get("tel"):
-                            sub_tel = _si["tel"]
-                        # overview가 비었으면 보강
+                        if _si.get("mapx"): sub_mapx = _si["mapx"]
+                        if _si.get("mapy"): sub_mapy = _si["mapy"]
+                        if _si.get("tel"): sub_tel = _si["tel"]
                         if not sub_overview and _si.get("overview"):
                             sub_overview = _re_html.sub(r"<[^>]+>", "", _si["overview"]).strip()
-                        # 이미지가 비었으면 보강
                         if not sub_img and _si.get("firstimage"):
                             sub_img = _fix_image_https(_si["firstimage"])
-                except Exception as _e_sub:
-                    logger.debug("course sub detail failed for %s: %s", scid, _e_sub)
+                except Exception:
+                    pass
             adapted.append({
                 "title": sub.get("subname", ""),
                 "facltNm": sub.get("subname", ""),
-                "addr1": sub_addr,
-                "addr": sub_addr,
-                "firstimage": sub_img,
-                "firstImageUrl": sub_img,
-                "image": sub_img,
+                "addr1": sub_addr, "addr": sub_addr,
+                "firstimage": sub_img, "firstImageUrl": sub_img, "image": sub_img,
                 "overview": sub_overview,
                 "subnum": sub.get("subnum", str(idx)),
-                "subcontentid": scid,
-                "tel": sub_tel,
+                "subcontentid": scid, "tel": sub_tel,
                 "contenttypeid": "25",
-                "mapx": str(sub_mapx),
-                "mapy": str(sub_mapy),
+                "mapx": str(sub_mapx), "mapy": str(sub_mapy),
             })
+
+        conn.close()
 
         if not adapted:
             logger.warning("course: adapted 결과 0건")
             return None
 
-        # 코스 제목에서 지역 보정 (시군구명 추출)
-        _course_do_name = region_name
+        # 지역명 결정
+        _course_do_name = AREA_NAMES.get(area_code, "")
         _course_sigungu = ""
-        addr1 = course_item.get("addr1", "")
-        if addr1:
-            parts = addr1.split()
+        if course_addr:
+            parts = course_addr.split()
             if len(parts) >= 2:
                 _course_do_name = parts[0]
                 _course_sigungu = parts[1]
@@ -954,19 +888,9 @@ def fetch_course():
                 _course_do_name = parts[0]
         display_region = f"{_course_do_name} {_course_sigungu}".strip()
 
-        # 코스 테마 추출 (cat2 기반)
-        cat2_map = {
-            "C0112": "가족코스",
-            "C0113": "나홀로코스",
-            "C0114": "힐링코스",
-            "C0115": "도보코스",
-            "C0116": "캠핑코스",
-            "C0117": "맛코스",
-        }
-        cat2 = course_item.get("cat2", "")
-        theme_label = cat2_map.get(cat2, "여행코스")
+        theme_label = CAT2_MAP.get(course_row["cat2"] or "", "여행코스")
 
-        logger.info("course: %s / %s / %d개 하위장소", course_title, region_name, len(adapted))
+        logger.info("course: %s / %s / %d개 하위장소 (DB 캐시)", course_title, display_region, len(adapted))
 
         return {
             "items": adapted,
@@ -980,7 +904,7 @@ def fetch_course():
             "course_title": course_title,
             "course_overview": course_overview,
             "course_image": course_image,
-            "content_ids": [str(course_cid)],
+            "content_ids": [course_cid],
         }
     except Exception as e:
         logger.warning("course fetch failed: %s", e)

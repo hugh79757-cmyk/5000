@@ -1,19 +1,10 @@
 """layover_writer.py - Layover Tours And Stopover Guide generator"""
 import os, sqlite3, logging, re
-from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_tours
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
-
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -42,6 +33,7 @@ _CATEGORY_DURATION = {
 
 # description 텍스트에서 duration 보조 추출
 import re as _re
+from shared.ai_writer import generate as ai_generate
 _DUR_PATTERNS = [
     (_re.compile(r'(\d+)[-\s]?night', _re.I),  lambda m: int(m.group(1)) * 1440),
     (_re.compile(r'(\d+)[-\s]?day',   _re.I),  lambda m: int(m.group(1)) * 480),
@@ -284,26 +276,21 @@ STRICT WRITING RULES:
   unforgettable, stunning landscapes, perfect backdrop
 
 Return ONLY markdown starting with # title"""
-
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini",
-        temperature=0.45,
-        max_tokens=3500,
-        messages=[
-            {"role": "system", "content": (
-                "You are a seasoned frequent flyer who specializes in layover experiences. "
-                "ABSOLUTE RULES: "
-                "1) Only mention tours from TABLE TOURS in the article body. "
-                "2) Never recommend a tour whose duration exceeds the layover window. "
-                "3) 'Prices and Logistics' must NOT re-list tour names. "
-                "4) Never output broken text like 'A Practical visit' or 'A Practical experience'. "
-                "5) Never use placeholder text like {city} in the output. "
-                "6) Airport tips must be specific to the named airport, not generic."
-            )},
-            {"role": "user", "content": prompt}
-        ]
+    
+    result = ai_generate(
+    "You are a seasoned frequent flyer who specializes in layover experiences. "
+    "ABSOLUTE RULES: "
+    "1) Only mention tours from TABLE TOURS in the article body. "
+    "2) Never recommend a tour whose duration exceeds the layover window. "
+    "3) 'Prices and Logistics' must NOT re-list tour names. "
+    "4) Never output broken text like 'A Practical visit' or 'A Practical experience'. "
+    "5) Never use placeholder text like {city} in the output. "
+    "6) Airport tips must be specific to the named airport, not generic.",
+    prompt,
+    temperature=0.45,
+    max_tokens=3500,
     )
-    content = resp.choices[0].message.content.strip()
+    content = result["content"].strip()
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else f"Layover Tours and Stopover Guide for {city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()

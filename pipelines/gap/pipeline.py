@@ -161,7 +161,7 @@ def run(blog_cfg):
         tags=article.get("tags", ""),
         data_source="naver_search",
         source_id=keyword,
-        model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+        model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         thumbnail_url=thumb_url,
         wp_category=wp_cat_id,
     )

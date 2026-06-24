@@ -308,6 +308,11 @@ TITLE_BLOCKED = {
     "fitness-hugo": [],
 }
 
+# 제목 문맥 확인용 allowed 키워드 (blocked 키워드가 있어도 allowed 키워드가 제목에 있으면 차단 스킵)
+ALLOWED_PRODUCT = {
+    "camping-hugo": {"allowed": ["텐트", "캠핑", "침낭", "랜턴", "야영", "등산"]},
+}
+
 
 def _filter_irrelevant_products(blog_id, keyword, products):
     """카테고리와 무관한 상품 제거 (코드 레벨 필터)"""

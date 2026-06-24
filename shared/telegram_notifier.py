@@ -3,6 +3,9 @@ import requests
 import logging
 from dotenv import load_dotenv
 
+# 중앙 env 파일 로드
+load_dotenv("/Users/twinssn/.env.common")
+# 프로젝트 .env 파일도 로드 ( 덮어쓰기 가능)
 load_dotenv()
 
 logger = logging.getLogger(__name__)

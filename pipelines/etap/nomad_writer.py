@@ -1,14 +1,12 @@
 """nomad_writer.py - Digital Nomad Guide And Coworking guide generator"""
 import os, sqlite3, logging, re
 from urllib.parse import quote_plus
-from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_tours
+from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
 # Exchange rates to USD (as of 2026-04)
 # Update quarterly or move to a DB table / API when rates drift significantly
 _FX_TO_USD = {
@@ -52,12 +50,6 @@ def _fmt_money(amount, currency):
     else:
         usd_str = f"~${usd:,.2f}"
     return f"{local_str} ({usd_str})"
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -602,14 +594,13 @@ STYLE RULES:
 - Write from first-person experience perspective
 
 Return ONLY the article in markdown starting with # title"""
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
-        messages=[
-            {"role": "system", "content": "You are a full-time digital nomad and remote work consultant who has lived and worked in 50+ cities for 8+ years. STRICT RULES: 1) BANNED WORDS - never use: vibrant, bustling, hidden gem, treasure trove, must-visit, immerse yourself, embark, crystal-clear, world-class, bucket list, plethora, tapestry, myriad, making it an attractive, making it an ideal, making it appealing, rich culture, like-minded individuals, unique blend, whether you, no wonder. 2) USE PROVIDED DATA as primary source of truth. Do not invent facts when data is given. 3) Every section must include one bold actionable tip. 4) Write with specific details, not generic praise. 5) Acknowledge real downsides - no city is perfect. 6) When cost data is provided, always use the exact figures with local currency and USD conversion."},
-            {"role": "user", "content": prompt}
-        ]
-    )
-    content = resp.choices[0].message.content.strip()
+    result = ai_generate(
+        "You are a full-time digital nomad and remote work consultant who has lived and worked in 50+ cities for 8+ years. STRICT RULES: 1) BANNED WORDS - never use: vibrant, bustling, hidden gem, treasure trove, must-visit, immerse yourself, embark, crystal-clear, world-class, bucket list, plethora, tapestry, myriad, making it an attractive, making it an ideal, making it appealing, rich culture, like-minded individuals, unique blend, whether you, no wonder. 2) USE PROVIDED DATA as primary source of truth. Do not invent facts when data is given. 3) Every section must include one bold actionable tip. 4) Write with specific details, not generic praise. 5) Acknowledge real downsides - no city is perfect. 6) When cost data is provided, always use the exact figures with local currency and USD conversion.",
+        prompt,
+        temperature=0.5,
+        max_tokens=4000,
+        )
+    content = result["content"].strip()
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else f"Digital Nomad Guide to {city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()

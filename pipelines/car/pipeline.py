@@ -310,7 +310,7 @@ def run(blog_cfg):
         data_source="car_db",
         source_id=str(topic['car_id']),
         prompt_id=topic.get("post_type", blog_cfg.get("post_type", "")),
-        model="gpt-4o-mini",
+        model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         segment=data.get("segment", ""),
         fuel_type=data.get("fuel_type", ""),
         is_draft=_is_draft,

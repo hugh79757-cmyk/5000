@@ -4,6 +4,7 @@
 1. 네이버 자동완성 API → 연관 키워드 수집
 2. 쿠팡 상품명 역추출 → 기존 products DB 활용
 3. 네이버 쇼핑 검색 API → 카테고리 상품명에서 키워드 추출
+4. 키워드 상호 변환 → 블로그 간 연관 키워드 공유
 
 실행: python3 pipelines/curation/keyword_expander.py baby-hugo
 """
@@ -15,6 +16,7 @@ from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(BASE_DIR / ".env")
+load_dotenv(os.path.expanduser("~/.env.common"))
 
 DB_PATH       = BASE_DIR / "data" / "curation.db"
 KEYWORDS_PATH = BASE_DIR / "pipelines" / "curation" / "keywords.py"
@@ -22,30 +24,63 @@ KEYWORDS_PATH = BASE_DIR / "pipelines" / "curation" / "keywords.py"
 NAVER_CLIENT_ID     = os.getenv("NAVER_CLIENT_ID", "")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "")
 
-# 카테고리별 루트 시드 (확장의 출발점)
-ROOT_SEEDS = {
-    "baby-hugo": [
-        "아기", "신생아", "유아", "기저귀", "분유", "유모차",
-        "카시트", "아기띠", "이유식", "유축기", "아기 장난감",
-        "육아", "출산", "돌잔치", "어린이",
-    ],
-    "fitness-hugo": [
-        "운동", "헬스", "요가", "러닝", "홈트", "다이어트",
-        "등산", "캠핑", "수영", "자전거",
-    ],
-    "laptop-hugo": [
-        "노트북", "맥북", "게이밍", "사무용 노트북", "학생 노트북",
-        "SSD", "RAM", "모니터", "키보드", "마우스",
-    ],
-    "appliance-hugo": [
-        "에어프라이어", "로봇청소기", "공기청정기", "세탁기",
-        "냉장고", "전기밥솥", "청소기", "가습기", "제습기",
-    ],
-    "interior-hugo": [
-        "소파", "침대", "책상", "의자", "조명", "커튼",
-        "매트리스", "선반", "수납", "인테리어",
-    ],
+# 동적 시드 생성: 기존 products DB에서 카테고리별 대표 키워드 추출
+def _get_dynamic_seeds(blog_id: str, limit: int = 20) -> list[str]:
+    """기존 products DB에서 빈도 높은 키워드를 동적 시드로 사용"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        # 블로그 카테고리별 키워드 매핑
+        category_map = {
+            "baby-hugo": ["아기", "신생아", "유아", "육아", "기저귀", "유모차", "카시트", "이유식"],
+            "fitness-hugo": ["운동", "헬스", "요가", "덤벨", "러닝", "홈트", "필라테스"],
+            "laptop-hugo": ["노트북", "맥북", "게이밍", "삼성", "LG", "레노버"],
+            "appliance-hugo": ["청소기", "에어프라이어", "공기청정기", "세탁기", "냉장고", "밥솥"],
+            "interior-hugo": ["소파", "침대", "책상", "의자", "조명", "커튼", "매트리스"],
+            "pet-hugo": ["강아지", "고양이", "사료", "간식", "장난감", "캣타워"],
+            "health-hugo": ["비타민", "영양제", "오메가3", "유산균", "루테인", "홍삼"],
+            "kitchen-hugo": ["냄비", "프라이팬", "도마", "칼", "식기", "밥솥"],
+            "beauty-hugo": ["화장품", "스킨케어", "세럼", "토너", "크림", "샴푸"],
+            "camping-hugo": ["텐트", "캠핑", "침낭", "의자", "테이블", "랜턴"],
+        }
+        keywords = category_map.get(blog_id, [])
+        
+        # 관련 키워드로 검색된 상품의 키워드를 빈도순으로 가져오기
+        placeholders = ",".join(["?" for _ in keywords])
+        rows = conn.execute(f"""
+            SELECT keyword, COUNT(*) as cnt 
+            FROM products 
+            WHERE keyword LIKE ? OR keyword LIKE ? OR keyword LIKE ?
+            GROUP BY keyword 
+            ORDER BY cnt DESC 
+            LIMIT ?
+        """, (f"%{keywords[0]}%", f"%{keywords[1] if len(keywords) > 1 else keywords[0]}%", 
+              f"%{keywords[2] if len(keywords) > 2 else keywords[0]}%", limit)).fetchall()
+        conn.close()
+        return [row[0] for row in rows if row[0]]
+    except Exception:
+        return []
+
+# 블로그별 기본 시드 (동적 시드가 부족할 때 사용)
+DEFAULT_SEEDS = {
+    "baby-hugo": ["아기", "신생아", "유아", "육아", "출산"],
+    "fitness-hugo": ["운동", "헬스", "요가", "홈트", "다이어트"],
+    "laptop-hugo": ["노트북", "맥북", "게이밍", "사무용", "학생"],
+    "appliance-hugo": ["에어프라이어", "청소기", "공기청정기", "세탁기", "냉장고"],
+    "interior-hugo": ["소파", "침대", "책상", "의자", "조명"],
+    "pet-hugo": ["강아지", "고양이", "반려동물", "사료", "간식"],
+    "health-hugo": ["비타민", "영양제", "건강", "오메가3", "유산균"],
+    "kitchen-hugo": ["냄비", "프라이팬", "도마", "칼", "식기"],
+    "beauty-hugo": ["화장품", "스킨케어", "메이크업", "샴푸", "선크림"],
+    "camping-hugo": ["텐트", "캠핑", "등산", "배낭", "침낭"],
 }
+
+def get_root_seeds(blog_id: str) -> list[str]:
+    """동적 시드 + 기본 시드 결합"""
+    dynamic = _get_dynamic_seeds(blog_id)
+    default = DEFAULT_SEEDS.get(blog_id, [])
+    # 동적 시드 우선, 부족하면 기본 시드로 보충
+    seeds = list(dict.fromkeys(dynamic + default))  # 중복 제거 유지
+    return seeds[:30]  # 최대 30개
 
 
 # ════════════════════════════════════════════════════════
@@ -205,7 +240,7 @@ def save_expanded_keywords(blog_id: str, keywords: set[str]):
 
 
 def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100) -> int:
-    """keywords.py KEYWORD_MAP 업데이트"""
+    """keywords.py KEYWORD_MAP 업데이트 - 기존 키워드를 유지하면서 새 키워드 추가"""
     content = Path(KEYWORDS_PATH).read_text(encoding="utf-8")
     target  = f'"{blog_id}": ['
     idx     = content.find(target)
@@ -213,8 +248,8 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100
         print(f"[WARN] keywords.py에서 {blog_id} 미발견")
         return 0
 
+    # 해당 블로그 키워드 블록 찾기
     start = idx + len(target)
-    # 중첩 대괄호를 고려해 올바른 닫는 ] 위치 탐색
     depth, pos = 1, start
     while pos < len(content) and depth > 0:
         if content[pos] == "[":
@@ -222,17 +257,31 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100
         elif content[pos] == "]":
             depth -= 1
         pos += 1
-    end = pos - 1  # 실제 닫는 ] 위치
+    end = pos - 1  # 닫는 ] 위치
 
+    # 기존 키워드 추출
     existing = set(re.findall(r'["\'](.[^"\']*)["\']', content[start:end]))
 
+    # 새 키워드 필터링
     added = [kw for kw in new_keywords if kw not in existing][:max_add]
     if not added:
         print(f"[keywords.py] {blog_id}: 추가할 신규 키워드 없음")
         return 0
 
-    new_entries = ",\n        ".join([f'"{k}"' for k in added])
-    new_content = content[:end] + f",\n        {new_entries}\n    " + content[end:]
+    # 기존 블록 내용에서 마지막 항목 뒤에 새 항목 추가
+    block_content = content[start:end]
+    # 마지막 항목 찾기 (쉼표 뒤에 있는 항목)
+    last_item_match = re.search(r'"([^"]+)"\s*$', block_content.strip())
+    if last_item_match:
+        # 마지막 항목 뒤에 새 항목 추가
+        insert_pos = start + block_content.strip().rfind('"') + 1
+        new_entries = ",\n        ".join([f'"{k}"' for k in added])
+        new_content = content[:insert_pos] + f",\n        {new_entries}" + content[insert_pos:]
+    else:
+        # 블록이 비어있으면 첫 번째 항목으로 추가
+        new_entries = ",\n        ".join([f'"{k}"' for k in added])
+        new_content = content[:start] + f"\n        {new_entries}" + content[start:]
+
     Path(KEYWORDS_PATH).write_text(new_content, encoding="utf-8")
     print(f"[keywords.py] {blog_id}: {len(added)}개 추가")
     return len(added)
@@ -243,13 +292,13 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100
 # ════════════════════════════════════════════════════════
 
 def run(blog_id: str):
-    seeds = ROOT_SEEDS.get(blog_id)
+    seeds = get_root_seeds(blog_id)
     if not seeds:
-        print(f"[ERROR] 지원하지 않는 blog_id: {blog_id}")
+        print(f"[ERROR] 시드 키워드 없음: {blog_id}")
         sys.exit(1)
 
     print(f"\n{'='*60}")
-    print(f" 키워드 확장: {blog_id} (시드 {len(seeds)}개)")
+    print(f" 키워드 확장: {blog_id} (동적 시드 {len(seeds)}개)")
     print(f"{'='*60}")
 
     all_keywords = set()
@@ -303,7 +352,7 @@ def run(blog_id: str):
 
 
 def run_all():
-    for blog_id in ROOT_SEEDS:
+    for blog_id in DEFAULT_SEEDS:
         run(blog_id)
         time.sleep(3)
 

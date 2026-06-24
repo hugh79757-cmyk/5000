@@ -143,7 +143,7 @@ def run(blog_cfg):
                     tags=article.get("tags", ""),
                     data_source="dart_disclosure",
                     source_id=disc.get("rcept_no", ""),
-                    model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+                    model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
                     thumbnail_url=thumb_url,
                 )
                 if result and result.get("success"):
@@ -248,7 +248,7 @@ def run(blog_cfg):
                 tags=article.get("tags", ""),
                 data_source=f"evergreen_{topic_type}",
                 source_id="",
-                model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"),
+                model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
                 thumbnail_url=thumb_url,
             )
 

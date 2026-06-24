@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, "/Users/twinssn/Projects/TAP")
 
 from dotenv import load_dotenv
+load_dotenv(os.path.expanduser("~/.env.common"))
 load_dotenv("/Users/twinssn/Projects/TAP/.env")
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 

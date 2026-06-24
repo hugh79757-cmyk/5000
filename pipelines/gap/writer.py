@@ -51,7 +51,7 @@ def generate_gap_article(keyword, fetched_data, model=None):
     from shared.ai_writer import generate as ai_generate
 
     if model is None:
-        model = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
+        model = os.getenv("OPENAI_MODEL", "mimo-v2.5")
 
     reference = _build_reference_block(fetched_data)
 

@@ -1,19 +1,11 @@
 """ghost_writer.py - Ghost Tours And Dark History guide generator"""
 import os, sqlite3, logging, re
-from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_tours
+from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
-
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -178,25 +170,20 @@ WRITING RULES:
   long history, rich history, standout experience, a practical guide
 
 Return ONLY markdown starting with # title"""
-
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini",
-        temperature=0.45,
-        max_tokens=3500,
-        messages=[
-            {"role": "system", "content": (
-                "You are a paranormal investigator and historian who leads ghost tours. "
-                "ABSOLUTE RULES: "
-                "1) Only reference tours explicitly listed in TABLE TOURS. "
-                "2) Never invent prices, names, or historical events. "
-                "3) 'Prices and What to Expect' must NOT re-list tour names already in 'Best Ghost Tours'. "
-                "4) Every section must open differently — no two sections start with the same word. "
-                "5) Never use placeholder text like {city} or [city] in the output."
-            )},
-            {"role": "user", "content": prompt}
-        ]
+    
+    result = ai_generate(
+    "You are a paranormal investigator and historian who leads ghost tours. "
+    "ABSOLUTE RULES: "
+    "1) Only reference tours explicitly listed in TABLE TOURS. "
+    "2) Never invent prices, names, or historical events. "
+    "3) 'Prices and What to Expect' must NOT re-list tour names already in 'Best Ghost Tours'. "
+    "4) Every section must open differently — no two sections start with the same word. "
+    "5) Never use placeholder text like {city} or [city] in the output.",
+    prompt,
+    temperature=0.45,
+    max_tokens=3500,
     )
-    content = resp.choices[0].message.content.strip()
+    content = result["content"].strip()
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else f"Ghost Tours and Dark History in {city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()

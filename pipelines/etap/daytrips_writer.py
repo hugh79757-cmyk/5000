@@ -1,16 +1,12 @@
 """daytrips_writer.py - Day Trips guide generator (v2: curated, deduplicated)"""
 import os, sqlite3, logging, re
 from difflib import SequenceMatcher
-from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
+from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
-
-
 # === ETAP v2 Enrichment ===
 try:
     from pipelines.etap.data_enricher import get_city_context, format_context_for_prompt, get_airline_context, get_route_context
@@ -20,13 +16,6 @@ try:
 except ImportError:
     HAS_ENRICHMENT = False
 # === END ETAP v2 ===
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
-
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -233,21 +222,14 @@ WRITING RULES:
 6. FORMAT: Flowing paragraphs only. NO numbered lists, NO bullet points. Bold tour names on first mention.
 7. CLOSING: End with a single "If you only have one day" recommendation with specific tour name and price.
 8. NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, culinary delights, gastronomic, rich cultural heritage, seamlessly, breathtaking, brimming with, a must-visit, treasure trove, staggering"""
-
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini",
-        temperature=0.6,
-        max_tokens=3500,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a travel writer who has visited these destinations. Write in second-person informed tone. STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. 4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific concrete scene or fact. 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, treasure trove, a must-visit.",
-            },
-            {"role": "user", "content": prompt},
-        ],
+    
+    result = ai_generate(
+    "You are a travel writer who has visited these destinations. Write in second-person informed tone. STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. 4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific concrete scene or fact. 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, treasure trove, a must-visit.",
+    prompt,
+    temperature=0.6,
+    max_tokens=3500,
     )
-
-    content = resp.choices[0].message.content.strip()
+    content = result["content"].strip()
 
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"Best Day Trips from {city}")

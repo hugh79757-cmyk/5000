@@ -26,7 +26,7 @@ def _enrich_service(service):
 logger = logging.getLogger(__name__)
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
-MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+MODEL = os.getenv("OPENAI_MODEL", "mimo-v2.5")
 
 # 카테고리별 글 구조 템플릿
 ARTICLE_STRUCTURES = {

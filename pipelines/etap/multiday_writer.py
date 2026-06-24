@@ -1,24 +1,16 @@
 """multiday_writer.py - Multi-day tour guide generator"""
 import os, sqlite3, logging, re
-from openai import OpenAI
 from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
+from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
-_client = None
-
 try:
     from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
     HAS_PP = True
 except ImportError:
     HAS_PP = False
-
-def _get_client():
-    global _client
-    if not _client:
-        _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    return _client
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -122,15 +114,14 @@ RULES:
 - End with best value pick and best premium pick by name and price
 
 Return ONLY the article in markdown starting with # title"""
-
-    resp = _get_client().chat.completions.create(
-        model="gpt-4o-mini", temperature=0.5, max_tokens=4000,
-        messages=[
-            {"role": "system", "content": "You are a travel blogger who specializes in multi-day group tours. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, unforgettable, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) NEVER invent data. If a price is not in the provided DATA, do NOT mention it. Do NOT estimate prices. 4) Every section must include one practical tip (what hotel tier to expect, group size reality, tipping the guide, packing for overnight). 5) Open with a concrete itinerary snapshot or a distance/time detail."},
-            {"role": "user", "content": prompt}
-        ]
+    
+    result = ai_generate(
+    "You are a travel blogger who specializes in multi-day group tours. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, unforgettable, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) NEVER invent data. If a price is not in the provided DATA, do NOT mention it. Do NOT estimate prices. 4) Every section must include one practical tip (what hotel tier to expect, group size reality, tipping the guide, packing for overnight). 5) Open with a concrete itinerary snapshot or a distance/time detail.",
+    prompt,
+    temperature=0.5,
+    max_tokens=4000,
     )
-    content = resp.choices[0].message.content.strip()
+    content = result["content"].strip()
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"Multi-Day Tours From {city}")
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()

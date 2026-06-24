@@ -6,7 +6,7 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "mimo-v2.5")
 
 
 def generate_disclosure_article(disclosure, company_info=None, financials=None, financials_prev=None, dividend=None):

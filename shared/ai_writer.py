@@ -4,6 +4,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
+load_dotenv(os.path.expanduser("~/.env.common"))
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
 
@@ -19,7 +20,7 @@ def get_client(provider_name, providers):
     return OpenAI(api_key=api_key, base_url=provider["base_url"])
 
 
-def generate(system_prompt, user_prompt, tier="default"):
+def generate(system_prompt, user_prompt, tier="default", temperature=None, max_tokens=None):
     config = load_models_config()
     tiers = ["default", "fallback", "economy"]
     if tier not in tiers:
@@ -28,17 +29,20 @@ def generate(system_prompt, user_prompt, tier="default"):
     tier_config = config[tier]
     providers = config["providers"]
 
+    kwargs = dict(
+        model=tier_config["model"],
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=temperature if temperature is not None else tier_config.get("temperature", 0.7),
+    )
+    if max_tokens is not None:
+        kwargs["max_tokens"] = max_tokens
+
     try:
         client = get_client(tier_config["provider"], providers)
-        response = client.chat.completions.create(
-            model=tier_config["model"],
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            # max_tokens 제한 제거 — GPT가 필요한 만큼 생성
-            temperature=tier_config.get("temperature", 0.7),
-        )
+        response = client.chat.completions.create(**kwargs)
         content = response.choices[0].message.content
         return {
             "content": content,
