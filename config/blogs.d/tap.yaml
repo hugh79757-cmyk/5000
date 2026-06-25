@@ -19,7 +19,7 @@ blogs:
     - '11:00'
   status: active
 - cf_project: travel-hugo
-  daily_quota: 5
+  daily_quota: 2
   domain: tour1.rotcha.kr
   fetch_sources:
   - type: camping
@@ -42,7 +42,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel1-hugo
-  daily_quota: 5
+  daily_quota: 2
   domain: travel1.rotcha.kr
   fetch_sources:
   - type: festival
@@ -66,7 +66,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel2-hugo
-  daily_quota: 5
+  daily_quota: 2
   domain: travel2.rotcha.kr
   fetch_sources:
   - type: heritage
@@ -114,7 +114,7 @@ blogs:
   status: inactive
   theme: Blowfish
 - cf_project: travel4-hugo
-  daily_quota: 5
+  daily_quota: 2
   domain: tour3.rotcha.kr
   fetch_sources:
   - type: course

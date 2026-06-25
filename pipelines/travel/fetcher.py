@@ -291,7 +291,6 @@ def fetch_festival(_is_retry=False):
             # 61일+ 대기
 
         # 우선순위 순서대로 후보 선택
-        _is_fallback = False
         if urgent:
             candidates = urgent
             logger.info(f"festival 스마트발행: 긴급(14~21일) {len(urgent)}건")
@@ -320,51 +319,11 @@ def fetch_festival(_is_retry=False):
                 except Exception as _e:
                     logger.error(f"festival 자동 갱신 실패: {_e}")
                 return fetch_festival(_is_retry=True)
-            _is_fallback = True
-            logger.warning("festival 스마트발행: 발행 대상 0건 — published_ids fallback 시도")
-            _tg_send("⚠️ travel1-hugo festival 콘텐츠 소진 — fallback 발행 중")
-            # [DEPLETION FALLBACK] 모든 축제가 이미 발행됨 → published_ids 무시하고 재시도
-            urgent = []
-            high = []
-            normal = []
-            low = []
-            late = []
-            for r in rows:
-                estart = r["eventstartdate"]
-                start_date = datetime.strptime(estart, "%Y%m%d")
-                days_left = (start_date - now).days
-                if days_left < 7:
-                    continue
-                elif days_left <= 14:
-                    late.append(r)
-                elif days_left <= 21:
-                    urgent.append(r)
-                elif days_left <= 28:
-                    high.append(r)
-                elif days_left <= 42:
-                    normal.append(r)
-                elif days_left <= 60:
-                    low.append(r)
-            if urgent:
-                candidates = urgent
-                logger.info(f"festival fallback: 긴급(14~21일) {len(urgent)}건")
-            elif high:
-                candidates = high
-                logger.info(f"festival fallback: 높음(22~28일) {len(high)}건")
-            elif normal:
-                candidates = normal
-                logger.info(f"festival fallback: 보통(29~42일) {len(normal)}건")
-            elif low:
-                candidates = low
-                logger.info(f"festival fallback: 낮음(43~60일) {len(low)}건")
-            elif late:
-                candidates = late
-                logger.info(f"festival fallback: 늦등록(7~14일) {len(late)}건")
-            else:
-                logger.warning("festival: fallback 후에도 0건 (DB 갱신 필요)")
-                _tg_send("🚨 travel1-hugo festival 발행 불가 — DB 갱신 필요")
-                conn.close()
-                return None
+            # [NO FALLBACK] 새 축제가 없으면 발행하지 않음 (이미 발행된 것 재발행 방지)
+            logger.warning("festival: 발행 대상 0건 — 새 축제 없음")
+            _tg_send("⚠️ travel1-hugo festival 새 축제 없음 — 발행 건너뜀")
+            conn.close()
+            return None
 
         # 이미지 있는 것 우선
         with_image = [r for r in candidates if r["firstimage"]]
@@ -426,8 +385,7 @@ def fetch_festival(_is_retry=False):
 
         conn.close()
         # contentid 리스트 (중복 발행 방지용)
-        # fallback 모드: 이미 발행된 contentid → 빈 리스트로 pipeline 중복체크 우회
-        content_ids = [] if _is_fallback else [str(r["contentid"]) for r in selected if r["contentid"]]
+        content_ids = [str(r["contentid"]) for r in selected if r["contentid"]]
 
         result = {
             "items": adapted,
