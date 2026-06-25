@@ -105,12 +105,14 @@ def _write_hugo_post(cfg: dict, article: dict) -> str:
     image_block = ""
     credit_line = ""
     if article.get("image"):
-        img_url = article["image"]["url"]
+        from shared.publisher import sanitize_featureimage_url
+        img_url = sanitize_featureimage_url(article["image"]["url"])
         credit = article["image"].get("credit", "")
-        if credit:
-            image_block = f'\nfeatureimage: "{img_url}"\nfeatureimagecaption: "{credit}"\n'
-        else:
-            image_block = f'\nfeatureimage: "{img_url}"\n'
+        if img_url:
+            if credit:
+                image_block = f'\nfeatureimage: "{img_url}"\nfeatureimagecaption: "{credit}"\n'
+            else:
+                image_block = f'\nfeatureimage: "{img_url}"\n'
 
     draft_line = "draft: true\n" if article.get("_draft") else ""
     frontmatter = f"""---

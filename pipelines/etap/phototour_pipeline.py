@@ -47,7 +47,10 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     cover_line = ""
     credit_line = ""
     if cover_image and cover_image.get("url"):
-        cover_line = 'featureimage: "' + cover_image["url"] + '"'
+        from shared.publisher import sanitize_featureimage_url
+        img_url = sanitize_featureimage_url(cover_image["url"])
+        if img_url:
+            cover_line = 'featureimage: "' + img_url + '"'
     if cover_image and cover_image.get("credit"):
         credit_line = 'featureimagecredit: "' + cover_image.get("credit", "") + '"'
     title_safe = article["title"].replace('"', "'")

@@ -12,6 +12,18 @@ load_dotenv(override=True)
 from shared.content_store import insert_article, update_published, get_today_count
 
 
+def sanitize_featureimage_url(url, max_len=255):
+    """
+    featureimage URL 검증: 255자 초과 시 빈 문자열 반환 (Hugo 파일명 Too Long 방지)
+    """
+    if not url:
+        return ""
+    if len(url) > max_len:
+        logger.warning(f"[featureimage] URL이 {len(url)}자로 {max_len}자 초과 → 기본 이미지로 대체: {url[:80]}...")
+        return ""
+    return url
+
+
 STAP_ENTITY_DB = "/Users/twinssn/Projects/STAP/data/stap_entities.db"
 STAP_ENTITY_LINKER_PATH = "/Users/twinssn/Projects/STAP/shared"
 STAP_BLOGS = {
@@ -296,6 +308,8 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     if thumbnail_url:
         if "tong.visitkorea.or.kr" in thumbnail_url and thumbnail_url.startswith("http://"):
             thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
+        thumbnail_url = sanitize_featureimage_url(thumbnail_url)
+    if thumbnail_url:
         fm += 'featureimage: "' + thumbnail_url + '"\n'
     else:
         if "stock" in blog_id:
@@ -662,7 +676,26 @@ def _deploy_site_inner(site_path, cf_project):
         print(f"[guard] Removed rogue index.md from {site}")
 
     # shared themesDir — Hugo v0.160.x에서 config 내 themesDir 미인식 이슈 대응
-    _wrangler_env.setdefault("HUGO_THEMESDIR", "/Users/twinssn/Projects/shared-themes")
+    # 로컬 themes/<테마>가 있으면 HUGO_THEMESDIR 설정 안 함 (로컬 우선)
+    _hugo_toml = site / "hugo.toml"
+    _hugo_theme = ""
+    _themes_dir = "/Users/twinssn/Projects/shared-themes"
+    if _hugo_toml.exists():
+        try:
+            import re as _toml_re
+            _toml_text = _hugo_toml.read_text(encoding="utf-8")
+            _m_theme = _toml_re.search(r'^theme\s*=\s*["\'](.+?)["\']', _toml_text, _toml_re.MULTILINE)
+            if _m_theme:
+                _hugo_theme = _m_theme.group(1)
+            _m_dir = _toml_re.search(r'^themesDir\s*=\s*["\'](.+?)["\']', _toml_text, _toml_re.MULTILINE)
+            if _m_dir:
+                _themes_dir = _m_dir.group(1)
+        except Exception:
+            pass
+    # 로컬 themes/<테마> 디렉토리가 있으면 HUGO_THEMESDIR 설정하지 않음
+    _local_theme = site / "themes" / _hugo_theme if _hugo_theme else None
+    if not (_local_theme and _local_theme.is_dir()):
+        _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
 
     log_path = Path("/Users/twinssn/Projects/5000/logs/deploy.log")
     with open(log_path, "a") as log_f:
