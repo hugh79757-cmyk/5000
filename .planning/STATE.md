@@ -26,12 +26,12 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 ## Current Phase
 
-**Phase 2 — Complete ✓**
+**Phase 3 — Complete ✓**
 
-- ✓ Dispatcher registry: elif chain → dynamic `_resolve_pipeline()` + integration test
-- ✓ GAP pipeline removed (no active blogs)
-- ✓ Publisher decomposition: `shared/publishers/` (hugo_writer, deploy, content_enhancer)
-- ✓ 197 backup files deleted, cleanup script added
+- ✓ `shared/paths.py` — env-driven project roots, binary paths
+- ✓ 133+ hardcoded `/Users/twinssn` paths replaced
+- ✓ Error handling audited — dispatcher/scheduler/publisher
+- ✓ TAP/STAP missing-project guards with clear error messages
 
 ## Progress
 
@@ -39,7 +39,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 |-------|--------|-------|----------|
 | 1     | ✓      | 2/2   | 100%     |
 | 2     | ✓      | 3/3   | 100%     |
-| 3     | ○      | 0/3   | 0%       |
+| 3     | ✓      | 3/3   | 100%     |
 
 ## Active Workspace
 
