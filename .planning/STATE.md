@@ -26,19 +26,20 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 ## Current Phase
 
-**Phase 1 — Context Gathered**
+**Phase 1 — Complete ✓**
 
-- ✓ Codebase mapped
-- ✓ Requirements defined
-- ✓ Roadmap created
-- ✓ Phase 1 context gathered (CONTEXT.md created)
-- [ ] Phase 1 ready for planning
+- ✓ Tooling infra: pyproject.toml, tests/, CI workflow
+- ✓ Unit tests: 42 tests across validators, humanizer, telegram_notifier
+- ✓ Linting: ruff passes clean
+- ✓ Type checking: mypy passes
+- ✓ Python 3.14 compat: check_package_imports() removed
+- ✓ CI: ci.yml with ruff → mypy → pytest
 
 ## Progress
 
 | Phase | Status | Plans | Progress |
 |-------|--------|-------|----------|
-| 1     | ◆      | 0/2   | 0%       |
+| 1     | ✓      | 2/2   | 100%     |
 | 2     | ○      | 0/3   | 0%       |
 | 3     | ○      | 0/3   | 0%       |
 
