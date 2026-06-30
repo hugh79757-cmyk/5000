@@ -272,8 +272,8 @@ def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):
             module_path = f"pipelines.etap.{stem}_pipeline"
         try:
             mod = importlib.import_module(module_path)
-        except ModuleNotFoundError:
-            logger.warning(f"[registry] {blog_id}: {module_path} not found, falling back to etap default")
+        except ModuleNotFoundError as _e:
+            logger.warning(f"[registry] {blog_id}: {module_path} not found ({_e}), falling back to etap default")
             mod = importlib.import_module("pipelines.etap.pipeline")
         run = mod.run
         import inspect
