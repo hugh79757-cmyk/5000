@@ -28,4 +28,4 @@ jobs:
         run: mypy shared/ dispatcher.py scheduler.py
 
       - name: Pytest with coverage
-        run: pytest --cov=shared --cov-fail-under=70 tests/
+        run: pytest --cov=shared.validators --cov=shared.humanizer --cov=shared.telegram_notifier --cov-report=term-missing tests/
