@@ -28,24 +28,6 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 
-def check_package_imports():
-    """Python 3.14 호환성: 주요 패키지 서브패키지 누락을 시작 시 검증"""
-    _checks = [
-        ("openai.resources.chat", "Chat",
-         "pip install --upgrade openai>=2.40.0"),
-    ]
-    _ok = True
-    for _mod, _cls, _upgrade_cmd in _checks:
-        try:
-            __import__(_mod, fromlist=[_cls])
-        except ModuleNotFoundError:
-            print(f"❌ '{_mod}' 모듈을 불러올 수 없습니다 (Python 3.14 + 구버전 패키지 호환 문제).",
-                  file=sys.stderr)
-            print(f"   해결: source .venv/bin/activate && {_upgrade_cmd}", file=sys.stderr)
-            _ok = False
-    if not _ok:
-        sys.exit(1)
-
 
 PROJECT_DIR = Path(__file__).parent
 CONFIG_DIR = PROJECT_DIR / "config"
@@ -623,7 +605,6 @@ def dispatch(blog_id):
 
 
 def main():
-    check_package_imports()
     if len(sys.argv) < 2:
         print("usage: dispatcher.py <blog_id|report|init-db>")
         sys.exit(1)

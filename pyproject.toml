@@ -1,0 +1,83 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=shared --cov-report=term-missing --cov-report=xml"
+
+[tool.coverage.run]
+source = ["shared"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D100",  # Missing docstring in public module
+    "D101",  # Missing docstring in public class
+    "D102",  # Missing docstring in public method
+    "D103",  # Missing docstring in public function
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D107",  # Missing docstring in __init__
+    "D200",  # Docstring fits on one line
+    "D205",  # Blank line after docstring
+    "D400",  # Docstring ends in period
+    "D401",  # Docstring imperative mood
+    "D415",  # Docstring ends in punctuation
+    "COM812", # Trailing comma missing
+    "ISC001", # Implicit string concat
+    "EM101",  # Exception must not use string literal
+    "PLR2004", # Magic value comparison
+    "S101",   # Use of assert
+    "T201",   # `print` found
+    "ANN101", # Missing type annotation for self (not valid in py3.14)
+    "ANN102", # Missing type annotation for cls
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "S101",   # Allow assert in tests
+    "D",      # No docstring requirements for tests
+    "ANN",    # No annotation requirements for tests
+    "PLR0913", # Too many arguments
+    "PLR0914", # Too many locals
+    "PLR0915", # Too many statements
+    "TRY004",  # Prefer TypeException
+]
+"**/__init__.py" = ["F403", "F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unused_configs = true
+show_error_codes = true
+files = ["shared/", "dispatcher.py", "scheduler.py"]
+
+[tool.mypy.per_module_checks]
+"shared/validators" = { disallow_untyped_defs = true }
+"shared/humanizer" = { disallow_untyped_defs = true }
+"shared/telegram_notifier" = { disallow_untyped_defs = true }
+
+[[tool.mypy.overrides]]
+module = [
+    "shared.blogger_publisher",
+    "shared.wordpress_publisher",
+    "shared.r2_uploader",
+    "shared.coupang_*",
+]
+ignore_errors = true
