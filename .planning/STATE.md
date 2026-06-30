@@ -14,7 +14,7 @@ progress:
 
 # Project State: 5000
 
-**Status:** Initialized
+**Status:** Context gathered
 **Initialized:** 2026-06-30
 
 ## Project Reference
@@ -22,22 +22,23 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 **Core value:** Pipelines run reliably with clear errors when they don't
-**Current focus:** Not started — ready for Phase 1
+**Current focus:** Phase 1 — Foundation (Test & Tooling)
 
 ## Current Phase
 
-**Phase 0 — Project Setup**
+**Phase 1 — Context Gathered**
 
 - ✓ Codebase mapped
 - ✓ Requirements defined
 - ✓ Roadmap created
-- [ ] Phase 1 not yet started
+- ✓ Phase 1 context gathered (CONTEXT.md created)
+- [ ] Phase 1 ready for planning
 
 ## Progress
 
 | Phase | Status | Plans | Progress |
 |-------|--------|-------|----------|
-| 1     | ○      | 0/2   | 0%       |
+| 1     | ◆      | 0/2   | 0%       |
 | 2     | ○      | 0/3   | 0%       |
 | 3     | ○      | 0/3   | 0%       |
 
@@ -48,6 +49,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - `.planning/REQUIREMENTS.md` — 10 v1 requirements
 - `.planning/ROADMAP.md` — 3 phases
 - `.planning/codebase/` — Codebase map (7 documents)
+- `.planning/phases/01-foundation-test-tooling-infrastructure/01-CONTEXT.md` — Phase 1 context
 
 ---
 *Last updated: 2026-06-30 after project initialization*
