@@ -7,6 +7,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from shared.paths import FIVEK_ROOT, SHARED_THEMES, HUGO_PATH, WRANGLER_PATH
+
 logger = logging.getLogger(__name__)
 
 
@@ -44,7 +46,7 @@ def deploy_site(site_path, cf_project) -> bool:
 
 def _deploy_site_inner(site_path, cf_project) -> bool:
     site = Path(site_path)
-    load_dotenv("/Users/twinssn/Projects/5000/.env", override=True)
+    load_dotenv(os.path.join(FIVEK_ROOT, ".env"), override=True)
     _wrangler_env = os.environ.copy()
     _cf_token = os.getenv("CLOUDFLARE_API_TOKEN", "")
     _cf_account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
@@ -59,7 +61,7 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
 
     _hugo_toml = site / "hugo.toml"
     _hugo_theme = ""
-    _themes_dir = "/Users/twinssn/Projects/shared-themes"
+    _themes_dir = SHARED_THEMES
     if _hugo_toml.exists():
         try:
             _toml_text = _hugo_toml.read_text(encoding="utf-8")
@@ -75,10 +77,10 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
     if not (_local_theme and _local_theme.is_dir()):
         _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
 
-    log_path = Path("/Users/twinssn/Projects/5000/logs/deploy.log")
+    log_path = Path(os.path.join(FIVEK_ROOT, "logs", "deploy.log"))
     with open(log_path, "a") as log_f:
         result = subprocess.run(
-            ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
+            [HUGO_PATH, "--gc", "--minify"],
             cwd=str(site), stdout=log_f, stderr=log_f,
             env=_wrangler_env, timeout=120
         )
@@ -96,14 +98,14 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
         try:
             if use_workers:
                 result = subprocess.run(
-                    ["/opt/homebrew/bin/wrangler", "deploy",
+                    [WRANGLER_PATH, "deploy",
                      "--config", str(wf)],
                     cwd=str(site), stdout=log_f, stderr=log_f,
                     env=_wrangler_env, timeout=_deploy_timeout
                 )
             else:
                 result = subprocess.run(
-                    ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+                    [WRANGLER_PATH, "pages", "deploy", "./public",
                      "--project-name=" + cf_project,
                      "--branch=main",
                      "--commit-dirty=true",
@@ -124,14 +126,14 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
                     try:
                         if use_workers:
                             result = subprocess.run(
-                                ["/opt/homebrew/bin/wrangler", "deploy",
+[WRANGLER_PATH, "deploy",
                                  "--config", str(wf)],
                                 cwd=str(site), stdout=log_f, stderr=log_f,
                                 env=_wrangler_env, timeout=_deploy_timeout
                             )
                         else:
                             result = subprocess.run(
-                                ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
+                                [WRANGLER_PATH, "pages", "deploy", "./public",
                                  "--project-name=" + cf_project,
                                  "--branch=main",
                                  "--commit-dirty=true",

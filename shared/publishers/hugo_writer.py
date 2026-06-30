@@ -4,6 +4,7 @@ import re
 from datetime import datetime
 from pathlib import Path
 
+from shared.paths import FIVEK_ROOT
 logger = logging.getLogger(__name__)
 
 
@@ -147,7 +148,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     theme = blog_cfg.get("theme", "PaperMod")
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
-        site_path = os.path.join("/Users/twinssn/Projects", blog_cfg.get("repo", ""))
+        site_path = os.path.join(os.path.dirname(FIVEK_ROOT), blog_cfg.get("repo", ""))
     description = _extract_description(body_md)
 
     if not thumbnail_url:

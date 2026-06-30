@@ -3,16 +3,18 @@ import os
 import re
 import sqlite3
 
+from shared.paths import STAP_ROOT, TAP_ROOT
+
 logger = logging.getLogger(__name__)
 
-STAP_ENTITY_DB = "/Users/twinssn/Projects/STAP/data/stap_entities.db"
-STAP_ENTITY_LINKER_PATH = "/Users/twinssn/Projects/STAP/shared"
+STAP_ENTITY_DB = os.path.join(STAP_ROOT, "data", "stap_entities.db")
+STAP_ENTITY_LINKER_PATH = os.path.join(STAP_ROOT, "shared")
 STAP_BLOGS = {"stock-hugo", "dividend-hugo", "etf-hugo", "sector-hugo", "ipo-hugo", "finance-hugo"}
 TAP_TRAVEL_BLOGS = {"travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"}
 
 try:
     import sys as _sys
-    _sys.path.insert(0, "/Users/twinssn/Projects/TAP/core")
+    _sys.path.insert(0, os.path.join(TAP_ROOT, "core"))
     from tap_entity_manager import inject_cards as _tap_inject_cards
     from tap_entity_manager import register_post as _tap_register_post
     TAP_ENTITY_AVAILABLE = True
@@ -92,7 +94,7 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
     import re as _re
     import sqlite3 as _sq
 
-    STAP_CONTENT_DB = "/Users/twinssn/Projects/STAP/data/stap_content.db"
+    STAP_CONTENT_DB = os.path.join(STAP_ROOT, "data", "stap_content.db")
     BLOG_DOMAINS = {
         "stock-hugo": "https://stock.informationhot.kr",
         "dividend-hugo": "https://dividend.techpawz.com",

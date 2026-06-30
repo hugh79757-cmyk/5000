@@ -18,31 +18,29 @@ from shared.content_store import get_today_count, insert_article, update_publish
 
 
 def sanitize_featureimage_url(url, max_len=255):
-    """Featureimage URL 검증: 255자 초과 시 빈 문자열 반환 (Hugo 파일명 Too Long 방지)
-    """
     if not url:
         return ""
     if len(url) > max_len:
-        logger.warning(f"[featureimage] URL이 {len(url)}자로 {max_len}자 초과 → 기본 이미지로 대체: {url[:80]}...")
+        logger.warning(f"[featureimage] URL이 {len(url)}자로 {max_len}자 초과")
         return ""
     return url
 
 
-STAP_ENTITY_DB = "/Users/twinssn/Projects/STAP/data/stap_entities.db"
-STAP_ENTITY_LINKER_PATH = "/Users/twinssn/Projects/STAP/shared"
+from shared.paths import STAP_ROOT as _STAP_ROOT, TAP_ROOT as _TAP_ROOT
+STAP_ENTITY_DB = os.path.join(_STAP_ROOT, "data", "stap_entities.db")
+STAP_ENTITY_LINKER_PATH = os.path.join(_STAP_ROOT, "shared")
 STAP_BLOGS = {
     "stock-hugo", "dividend-hugo", "etf-hugo",
     "sector-hugo", "ipo-hugo", "finance-hugo",
 }
 
-# TAP 엔티티 (6개 여행 블로그 교차 카드)
 TAP_TRAVEL_BLOGS = {
     "travel-hugo", "travel1-hugo", "travel2-hugo",
     "travel3-hugo", "travel4-hugo",
 }
 try:
     import sys as _sys
-    _sys.path.insert(0, "/Users/twinssn/Projects/TAP/core")
+    _sys.path.insert(0, os.path.join(_TAP_ROOT, "core"))
     from tap_entity_manager import inject_cards as _tap_inject_cards
     from tap_entity_manager import register_post as _tap_register_post
     TAP_ENTITY_AVAILABLE = True
@@ -113,34 +111,7 @@ def _sanitize_yaml_value(s, max_len=None):
     return s
 
 
-def _validate_frontmatter(fm_text):
-    """Front matter 텍스트가 YAML 파싱 가능한지 검증."""
-    try:
-        if not fm_text.startswith("---"):
-            return False, "front matter does not start with ---"
-        end = fm_text.find("---", 3)
-        if end < 0:
-            return False, "front matter has no closing ---"
-        fm_body = fm_text[3:end].strip()
-        parsed = yaml.safe_load(fm_body)
-        if not isinstance(parsed, dict):
-            return False, "front matter is not a dict"
-        if not parsed.get("title"):
-            return False, "title is missing or empty"
-        if not parsed.get("date"):
-            return False, "date is missing"
-        try:
-            from datetime import datetime as _dt
-            d_str = str(parsed.get("date"))
-            d = _dt.fromisoformat(d_str)
-            now = _dt.now(d.tzinfo) if d.tzinfo else _dt.now()
-            if (d - now).total_seconds() > 3600:
-                return False, "date is in the future: " + d_str
-        except Exception:
-            pass
-        return True, None
-    except Exception as e:
-        return False, "yaml.safe_load failed: " + str(e)
+from shared.publishers.hugo_writer import _validate_frontmatter
 
 
 
@@ -764,6 +735,25 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
         if result.returncode != 0:
             raise Exception("Wrangler deploy failed: see deploy.log")
     return True
+
+# Re-export from sub-modules (overrides local definitions)
+from shared.publishers.hugo_writer import (  # noqa: E402, F811
+    _build_frontmatter_blowfish,
+    _build_frontmatter_congo,
+    _build_frontmatter_papermod,
+    _clean_body,
+    _extract_description,
+    _extract_first_image,
+    _write_hugo_post,
+)
+from shared.publishers.content_enhancer import (  # noqa: E402, F811
+    _get_related_posts,
+    _inject_related_cards,
+    _inject_related_cards_midpoint,
+    _insert_coupang,
+    _insert_internal_links,
+)
+from shared.publishers.deploy import deploy_site, _deploy_site_inner  # noqa: E402, F811
 
 
 def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", blog_cfg=None,

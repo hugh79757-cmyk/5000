@@ -14,14 +14,16 @@ from pathlib import Path
 
 import yaml
 
+from shared.paths import FIVEK_ROOT, TAP_ROOT, STAP_ROOT
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, "/Users/twinssn/Projects/TAP")
+sys.path.insert(0, TAP_ROOT)
 
 from dotenv import load_dotenv
 
 load_dotenv(os.path.expanduser("~/.env.common"))
-load_dotenv("/Users/twinssn/Projects/TAP/.env")
-load_dotenv("/Users/twinssn/Projects/5000/.env")
+load_dotenv(os.path.join(TAP_ROOT, ".env"))
+load_dotenv(os.path.join(FIVEK_ROOT, ".env"))
 
 import contextlib
 
@@ -32,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 
 
-PROJECT_DIR = Path(__file__).parent
+PROJECT_DIR = Path(FIVEK_ROOT)
 CONFIG_DIR = PROJECT_DIR / "config"
 LEDGER_DB = PROJECT_DIR / "data" / "content.db"
 
@@ -116,7 +118,7 @@ def _record_ledger(blog_id) -> None:
 
         # STAP 블로그는 STAP DB에서 조회
         if blog_id in STAP_PIPELINE_MAP:
-            stap_db = "/Users/twinssn/Projects/STAP/data/stap_content.db"
+            stap_db = os.path.join(STAP_ROOT, "data", "stap_content.db")
             conn_src = sqlite3.connect(stap_db)
             row = conn_src.execute(
                 "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
@@ -140,7 +142,7 @@ def _record_ledger(blog_id) -> None:
             conn_src.close()
         elif blog_id in ("travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"):
             # travel 블로그는 stap_content.db articles에서 조회
-            conn_src = sqlite3.connect("/Users/twinssn/Projects/5000/data/stap_content.db")
+            conn_src = sqlite3.connect(os.path.join(FIVEK_ROOT, "data", "stap_content.db"))
             row = conn_src.execute(
                 "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
                 (blog_id,)
@@ -200,7 +202,8 @@ def _run_stap(stap_name, cfg):
     import json as _json
     import subprocess as _sp
     import tempfile as _tmp
-    stap_root = os.getenv("STAP_ROOT", "/Users/twinssn/Projects/STAP")
+    from shared.paths import STAP_ROOT as _STAP_ROOT
+    stap_root = _STAP_ROOT
     stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
     if not os.path.exists(stap_python):
         stap_python = sys.executable
@@ -302,7 +305,7 @@ def _run_tap_subprocess(cfg):
     """TAP 파이프라인을 subprocess로 완전 격리 실행"""
     import json
     import tempfile
-    tap_root = "/Users/twinssn/Projects/TAP"
+    tap_root = TAP_ROOT
     tap_python = os.path.join(tap_root, "venv", "bin", "python3")
     if not os.path.exists(tap_python):
         tap_python = sys.executable
@@ -352,9 +355,10 @@ def _run_pipeline(cfg):
 
 
 # ─── ETAP 중앙 빌드/배포 ───────────────────────────────────
-ETAP_BASE = Path("/Users/twinssn/Projects/ETAP")
-HUGO      = "/opt/homebrew/bin/hugo"
-WRANGLER  = "/opt/homebrew/bin/wrangler"
+from shared.paths import ETAP_ROOT as _ETAP_ROOT, HUGO_PATH as _HUGO_PATH, WRANGLER_PATH as _WRANGLER_PATH
+ETAP_BASE = Path(_ETAP_ROOT)
+HUGO      = _HUGO_PATH
+WRANGLER  = _WRANGLER_PATH
 
 ETAP_PIPELINE_BLOGS = {
     "adventure-hugo", "airlines-hugo", "airports-hugo", "bus-hugo",

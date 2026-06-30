@@ -16,10 +16,12 @@ import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from shared.paths import FIVEK_ROOT, STAP_ROOT
+
 from dotenv import load_dotenv
 
 load_dotenv(os.path.expanduser("~/.env.common"))
-load_dotenv("/Users/twinssn/Projects/5000/.env")
+load_dotenv(os.path.join(FIVEK_ROOT, ".env"))
 
 # ── 패키지 의존성 체크 (표면 + 심층) ──
 REQUIRED_PACKAGES = {
@@ -189,13 +191,14 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger(__name__)
 
 # FileHandler: scheduler.log 직접 기록
-_log_file = "/Users/twinssn/Projects/5000/logs/scheduler.log"
+from shared.paths import LOGS_DIR
+_log_file = os.path.join(LOGS_DIR, "scheduler.log")
 _fh = logging.FileHandler(_log_file, encoding="utf-8")
 _fh.setLevel(logging.INFO)
 _fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
 logging.getLogger().addHandler(_fh)
 
-PROJECT_DIR = "/Users/twinssn/Projects/5000"
+PROJECT_DIR = FIVEK_ROOT
 CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
 PYTHON = os.path.join(PROJECT_DIR, ".venv", "bin", "python3")
 LEDGER_DB = os.path.join(PROJECT_DIR, "data", "content.db")
@@ -507,7 +510,7 @@ def _run_stap_collector() -> None:
     """STAP data collector를 subprocess로 완전 격리 실행 (import shadow 방지)"""
     import subprocess as _sp
     import tempfile as _tmp
-    stap_root = "/Users/twinssn/Projects/STAP"
+    stap_root = STAP_ROOT
     stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
     if not os.path.exists(stap_python):
         stap_python = sys.executable
@@ -554,7 +557,7 @@ def _run_senior_sync() -> None:
     """senior.db 서비스 데이터 일일 동기화 (pending 보충)"""
     try:
         import sys
-        sys.path.insert(0, "/Users/twinssn/Projects/5000")
+        sys.path.insert(0, FIVEK_ROOT)
         from pipelines.senior.fetcher import get_pending_count, sync_services
         pending = get_pending_count()
         logger.info(f"[SeniorSync] 현재 pending: {pending}건")
