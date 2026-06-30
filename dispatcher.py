@@ -199,11 +199,14 @@ def _record_ledger(blog_id) -> None:
 
 def _run_stap(stap_name, cfg):
     """STAP 파이프라인을 subprocess로 완전 격리 실행"""
+    from shared.paths import STAP_ROOT as _STAP_ROOT
+    stap_root = _STAP_ROOT
+    if not os.path.isdir(stap_root):
+        logger.error(f"[STAP] STAP 프로젝트를 찾을 수 없음: {stap_root}. STAP_ROOT 환경변수를 확인하세요.")
+        return {"success": False, "reason": "stap_not_found"}
     import json as _json
     import subprocess as _sp
     import tempfile as _tmp
-    from shared.paths import STAP_ROOT as _STAP_ROOT
-    stap_root = _STAP_ROOT
     stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
     if not os.path.exists(stap_python):
         stap_python = sys.executable
@@ -303,6 +306,9 @@ def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):
 
 def _run_tap_subprocess(cfg):
     """TAP 파이프라인을 subprocess로 완전 격리 실행"""
+    if not os.path.isdir(TAP_ROOT):
+        logger.error(f"[TAP] TAP 프로젝트를 찾을 수 없음: {TAP_ROOT}. TAP_ROOT 환경변수를 확인하세요.")
+        return {"success": False, "reason": "tap_not_found"}
     import json
     import tempfile
     tap_root = TAP_ROOT
