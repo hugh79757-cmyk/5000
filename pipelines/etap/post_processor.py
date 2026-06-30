@@ -1,7 +1,7 @@
 """ETAP post_processor — 글 본문에 상품 카드, 비교 테이블, 크로스셀 블록 삽입"""
 
-import re
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
         max_cards: 최대 카드 수
     Returns:
         상품 카드가 삽입된 본문
+
     """
     if not products:
         return content
@@ -39,17 +40,17 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
         if discount and str(discount) not in ("0", ""):
             try:
                 disc_val = abs(float(str(discount).replace("%","").replace("-","")))
-                discount_badge = f' <span class="badge">-{int(round(disc_val))}%</span>'
+                discount_badge = f' <span class="badge">-{round(disc_val)}%</span>'
             except (ValueError, TypeError):
                 discount_badge = f' <span class="badge">-{discount}%</span>'
 
         img_tag = ""
         if image_url:
-            img_tag = f'[![{name}]({image_url})]({link})\n\n'
+            img_tag = f"[![{name}]({image_url})]({link})\n\n"
 
-        lines.append(f'{img_tag}**[{name}]({link})**{discount_badge}\n\n')
+        lines.append(f"{img_tag}**[{name}]({link})**{discount_badge}\n\n")
         if category:
-            lines.append(f'_{category}_\n\n')
+            lines.append(f"_{category}_\n\n")
         if price:
             try:
                 pv = float(str(price).replace("$","").replace(",",""))
@@ -59,13 +60,13 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
             # Normalize to $integer
             try:
                 _pv = float(str(ps).replace("$","").replace(",","").replace("USD","").replace("GBP","").replace("EUR","").strip())
-                ps = f"${int(round(_pv))}"
+                ps = f"${round(_pv)}"
             except (ValueError, TypeError):
                 pass
-            lines.append(f'From **{ps}**\n\n')
-        lines.append(f'[Book Now]({link})\n\n---\n\n')
+            lines.append(f"From **{ps}**\n\n")
+        lines.append(f"[Book Now]({link})\n\n---\n\n")
 
-    lines.append('</div>\n')
+    lines.append("</div>\n")
     card_block = "".join(lines)
 
     # 삽입 위치: 마지막 H2 "Travel Tips" 앞, 없으면 본문 끝
@@ -74,12 +75,11 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
     if cards_pos > 0:
         return content
 
-    tips_match = re.search(r'^## (?:Travel Tips|Budget Breakdown|Getting Around)', content, re.MULTILINE)
+    tips_match = re.search(r"^## (?:Travel Tips|Budget Breakdown|Getting Around)", content, re.MULTILINE)
     if tips_match:
         pos = tips_match.start()
         return content[:pos] + card_block + "\n" + content[pos:]
-    else:
-        return content + card_block
+    return content + card_block
 
 
 def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> str:
@@ -91,6 +91,7 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
         max_rows: 최대 행 수
     Returns:
         비교 테이블이 삽입된 본문
+
     """
     if not products:
         return content
@@ -109,7 +110,7 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
         if discount and str(discount) not in ("0", ""):
             try:
                 disc_val = abs(float(str(discount).replace("%","").replace("-","")))
-                discount_str = f"-{int(round(disc_val))}%"
+                discount_str = f"-{round(disc_val)}%"
             except (ValueError, TypeError):
                 discount_str = f"-{discount}%"
         else:
@@ -121,7 +122,7 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
             ps = f"{currency} {price}"
             try:
                 _pv2 = float(str(ps).replace("$","").replace(",","").replace("USD","").replace("GBP","").replace("EUR","").strip())
-                ps = f"${int(round(_pv2))}"
+                ps = f"${round(_pv2)}"
             except (ValueError, TypeError):
                 pass
         table_lines.append(f"| [{name}]({link}) | {ps} | {discount_str} | [Book]({link}) |\n")
@@ -130,7 +131,7 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
     table_block = "".join(table_lines)
 
     # 삽입 위치: "Top Things to Do" H2 뒤, 없으면 두 번째 H2 뒤
-    h2_matches = list(re.finditer(r'^## .+', content, re.MULTILINE))
+    h2_matches = list(re.finditer(r"^## .+", content, re.MULTILINE))
     target = None
     for m in h2_matches:
         if "things to do" in m.group().lower() or "top tours" in m.group().lower():
@@ -144,8 +145,7 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
         if insert_pos == -1:
             insert_pos = target.end()
         return content[:insert_pos] + table_block + content[insert_pos:]
-    else:
-        return content + table_block
+    return content + table_block
 
 
 def insert_cross_sell_block(content: str, cross_html: str, position: str = "top") -> str:
@@ -155,8 +155,10 @@ def insert_cross_sell_block(content: str, cross_html: str, position: str = "top"
         content: 마크다운 본문
         cross_html: 삽입할 크로스셀 HTML/마크다운 블록
         position: "top" (첫 H2 뒤) 또는 "bottom" (본문 끝)
+
     Returns:
         크로스셀 블록이 삽입된 본문
+
     """
     if not cross_html:
         return content
@@ -165,7 +167,7 @@ def insert_cross_sell_block(content: str, cross_html: str, position: str = "top"
 
     if position == "top":
         # 첫 번째 H2의 첫 번째 문단 뒤에 삽입
-        first_h2 = re.search(r'^## .+', content, re.MULTILINE)
+        first_h2 = re.search(r"^## .+", content, re.MULTILINE)
         if first_h2:
             # H2 다음의 빈 줄 이후 첫 문단 끝 찾기
             after_h2 = first_h2.end()
@@ -176,10 +178,8 @@ def insert_cross_sell_block(content: str, cross_html: str, position: str = "top"
                 if second_para_end != -1:
                     return content[:second_para_end] + block + content[second_para_end:]
             return content[:after_h2] + block + content[after_h2:]
-        else:
-            return block + content
-    else:
-        return content + block
+        return block + content
+    return content + block
 
 
 # ── AdSense 본문 광고 삽입 ──
@@ -245,12 +245,11 @@ def fix_encoding(text: str) -> str:
         "hes": "he's", "shes": "she's", "whos": "who's",
     }
     for wrong, right in contractions.items():
-        text = _re.sub(r'\b' + wrong + r'\b', right, text, flags=_re.IGNORECASE)
-    text = _re.sub(
+        text = _re.sub(r"\b" + wrong + r"\b", right, text, flags=_re.IGNORECASE)
+    return _re.sub(
         r"\bits (a |an |the |not |also |worth|important|essential|advisable|best|easy|hard|possible|clear|no )",
         r"it's \1", text, flags=_re.IGNORECASE
     )
-    return text
 
 
 def clean_tags(tags: list) -> list:
@@ -258,10 +257,10 @@ def clean_tags(tags: list) -> list:
     if not tags:
         return tags
     import re as _re
-    bad = [r'^H[1-6]$', r'^##', r'^\*\*', r'^Title:', r'^Slug:', r'^Tags:', r'^Category:']
+    bad = [r"^H[1-6]$", r"^##", r"^\*\*", r"^Title:", r"^Slug:", r"^Tags:", r"^Category:"]
     cleaned = []
     for tag in tags:
-        tag = str(tag).strip().replace('#', '').replace('*', '').strip()
+        tag = str(tag).strip().replace("#", "").replace("*", "").strip()
         if not tag or len(tag) < 2:
             continue
         if any(_re.match(p, tag, _re.IGNORECASE) for p in bad):
@@ -276,10 +275,10 @@ def clean_prompt_leaks(content: str) -> str:
         return content
     import re as _re
     patterns = [
-        r'\[Note:.*?\]',
-        r'\[Instructions?:.*?\]',
-        r'\(Note to (?:self|AI|assistant):.*?\)',
+        r"\[Note:.*?\]",
+        r"\[Instructions?:.*?\]",
+        r"\(Note to (?:self|AI|assistant):.*?\)",
     ]
     for p in patterns:
-        content = _re.sub(p, '', content, flags=_re.IGNORECASE)
+        content = _re.sub(p, "", content, flags=_re.IGNORECASE)
     return content.strip()

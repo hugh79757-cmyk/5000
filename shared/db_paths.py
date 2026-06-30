@@ -1,5 +1,4 @@
-"""
-db_paths.py — 프로젝트 전체 DB 경로 단일 관리
+"""db_paths.py — 프로젝트 전체 DB 경로 단일 관리
 
 content.db:      publish_ledger (source_id/title 중복 체크용)
 stap_content.db: articles (최신 발행 데이터, sigungu 중복 체크용)

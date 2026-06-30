@@ -1,9 +1,9 @@
 """GAP 내부링크 + CTA 자동 삽입"""
 
-import sqlite3
-import re
 import logging
 import random
+import re
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
@@ -162,9 +162,9 @@ def build_cta_block(category="생활정보", count=2):
     # HTML 생성
     html_parts = []
     for cta in selected:
-        html_parts.append(f'''<div style="background:{cta['color']}; padding:14px; border-radius:10px; margin:8px 0; text-align:center;">
+        html_parts.append(f"""<div style="background:{cta['color']}; padding:14px; border-radius:10px; margin:8px 0; text-align:center;">
 <a href="{cta['url']}" target="_blank" rel="noopener" style="color:#fff; text-decoration:none; font-size:16px; font-weight:600;">{cta['text']} →</a>
-</div>''')
+</div>""")
 
     return "\n".join(html_parts)
 

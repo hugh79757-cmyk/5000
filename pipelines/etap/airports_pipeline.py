@@ -1,15 +1,31 @@
-import os, sys, sqlite3, logging, time, subprocess, re
-from datetime import datetime, timezone, timedelta
+import logging
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
+from pipelines.etap.post_processor import (
+    insert_adsense,
+    insert_cross_sell_block,
+    insert_product_cards,
+)
 from pipelines.etap.quality_guard import postprocess_content, send_alert
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id, check_exhaustion
+from pipelines.etap.topic_manager import mark_published_by_id, pick_topic_by_id
+from shared.entity_linker import (
+    build_cross_sell_html,
+    inject_internal_links,
+    mark_entity_published,
+    register_entity,
+)
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -86,7 +102,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     logger.info(f"Post written: {post_dir}")
     return post_dir
 
-def _build_and_deploy(site_path, blog_id):
+def _build_and_deploy(site_path, blog_id) -> bool | None:
     hugo = "/opt/homebrew/bin/hugo"
     wrangler = "/opt/homebrew/bin/wrangler"
     try:
@@ -102,12 +118,11 @@ def _build_and_deploy(site_path, blog_id):
         logger.info(f"Deploy OK: {blog_id}")
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Deploy failed: {e}")
+        logger.exception(f"Deploy failed: {e}")
         return False
 
-def _mark_published(article, blog_id, topic_table, topic_id):
+def _mark_published(article, blog_id, topic_table, topic_id) -> None:
     """topic_manager 통합 — PK 기준 발행 기록"""
-    from shared.entity_linker import mark_entity_published
     mark_published_by_id(
         topic_id=topic_id,
         topic_table=topic_table,
@@ -143,11 +158,11 @@ def _add_product_cards(article):
     if esim: esim = dict(esim)
     if esim:
         p = esim["sale_price"] or esim["price"]
-        cross.append(dict(
-            name=country + " eSIM", price=str(p).replace("$",""),
-            currency="$", discount="", image_url=esim.get("image_link","") or "",
-            link=esim["link"], category="eSIM",
-        ))
+        cross.append({
+            "name": country + " eSIM", "price": str(p).replace("$",""),
+            "currency": "$", "discount": "", "image_url": esim.get("image_link","") or "",
+            "link": esim["link"], "category": "eSIM",
+        })
     tour = conn.execute(
         "SELECT product_name, price, currency, deep_link, image_url, category FROM viator_tours "
         "WHERE city = ? AND deep_link != '' ORDER BY CAST(price AS REAL) ASC LIMIT 1",
@@ -155,18 +170,18 @@ def _add_product_cards(article):
     ).fetchone()
     if tour: tour = dict(tour)
     if tour:
-        cross.append(dict(
-            name=tour["product_name"], price=tour["price"],
-            currency=tour.get("currency","USD"), discount="",
-            image_url=tour.get("image_url",""), link=tour["deep_link"],
-            category=tour.get("category",""),
-        ))
+        cross.append({
+            "name": tour["product_name"], "price": tour["price"],
+            "currency": tour.get("currency","USD"), "discount": "",
+            "image_url": tour.get("image_url",""), "link": tour["deep_link"],
+            "category": tour.get("category",""),
+        })
     conn.close()
     if cross:
         article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
     return article
 
-def run():
+def run() -> bool:
     topic = pick_topic()
     if not topic:
         logger.info("[airports-hugo] No topics")
@@ -188,7 +203,7 @@ def run():
         logger.warning("[%s] DRAFT 감지 → 발행 중단: %s - %s", BLOG_ID, article["slug"], _qg_issues)
         send_alert(BLOG_ID, article["slug"], _qg_issues)
         return False
-    elif _qg_issues:
+    if _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
     city = article.get("city", "")
@@ -196,7 +211,7 @@ def run():
     iata = article.get("iata", "")
     cover = fetch_city_image(city or iata, country, article["slug"]) if city else None
     body = fetch_body_images(city or iata, country, article["slug"], count=8) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY, is_draft=article.get('_draft', False))
+    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY, is_draft=article.get("_draft", False))
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"], "airport in " + city, 60, 1)

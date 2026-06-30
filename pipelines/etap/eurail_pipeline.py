@@ -1,15 +1,32 @@
-import os, sys, sqlite3, logging, time, subprocess, re
-from datetime import datetime, timezone, timedelta
+import logging
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
+from pipelines.etap.post_processor import (
+    insert_adsense,
+    insert_comparison_table,
+    insert_cross_sell_block,
+    insert_product_cards,
+)
 from pipelines.etap.quality_guard import postprocess_content, send_alert
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id, check_exhaustion
+from pipelines.etap.topic_manager import mark_published_by_id, pick_topic_by_id
+from shared.entity_linker import (
+    build_cross_sell_html,
+    inject_internal_links,
+    mark_entity_published,
+    register_entity,
+)
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -26,7 +43,7 @@ CATEGORY = "European Rail"
 
 # === ETAP v2 Postprocessing ===
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, calculate_quality_metrics
+    from pipelines.etap.post_processor import calculate_quality_metrics, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -93,7 +110,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     logger.info(f"Post written: {post_dir}")
     return post_dir
 
-def _build_and_deploy(site_path, blog_id):
+def _build_and_deploy(site_path, blog_id) -> bool | None:
     hugo = "/opt/homebrew/bin/hugo"
     wrangler = "/opt/homebrew/bin/wrangler"
     try:
@@ -109,12 +126,11 @@ def _build_and_deploy(site_path, blog_id):
         logger.info(f"Deploy OK: {blog_id}")
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Deploy failed: {e}")
+        logger.exception(f"Deploy failed: {e}")
         return False
 
-def _mark_published(article, blog_id, topic_table, topic_id):
+def _mark_published(article, blog_id, topic_table, topic_id) -> None:
     """topic_manager 통합 — PK 기준 발행 기록"""
-    from shared.entity_linker import mark_entity_published
     mark_published_by_id(
         topic_id=topic_id,
         topic_table=topic_table,
@@ -143,29 +159,29 @@ def _add_product_cards(article):
     currency = r.get("currency", "USD")
     comp = []
     if r.get("train_min_price"):
-        comp.append(dict(name="Train", price=str(r["train_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
+        comp.append({"name": "Train", "price": str(r["train_min_price"]), "currency": currency, "discount": "", "link": r.get("link_url", "#")})
     if r.get("bus_min_price"):
-        comp.append(dict(name="Bus", price=str(r["bus_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
+        comp.append({"name": "Bus", "price": str(r["bus_min_price"]), "currency": currency, "discount": "", "link": r.get("link_url", "#")})
     if r.get("flight_min_price"):
-        comp.append(dict(name="Flight", price=str(r["flight_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
+        comp.append({"name": "Flight", "price": str(r["flight_min_price"]), "currency": currency, "discount": "", "link": r.get("link_url", "#")})
     if r.get("ferry_min_price"):
-        comp.append(dict(name="Ferry", price=str(r["ferry_min_price"]), currency=currency, discount="", link=r.get("link_url", "#")))
+        comp.append({"name": "Ferry", "price": str(r["ferry_min_price"]), "currency": currency, "discount": "", "link": r.get("link_url", "#")})
     if comp:
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     link_url = r.get("link_url", "")
     if link_url:
         origin = article.get("origin", "")
         dest = article.get("destination", "")
-        cards = [dict(
-            name="Compare and book " + origin + " to " + dest,
-            price="", currency="", discount="",
-            image_url=r.get("image_url",""),
-            link=link_url, category="Train / Bus / Flight",
-        )]
+        cards = [{
+            "name": "Compare and book " + origin + " to " + dest,
+            "price": "", "currency": "", "discount": "",
+            "image_url": r.get("image_url",""),
+            "link": link_url, "category": "Train / Bus / Flight",
+        }]
         article["content"] = insert_product_cards(article["content"], cards, max_cards=1)
     return article
 
-def run():
+def run() -> bool:
     topic = pick_topic()
     if not topic:
         logger.info("[eurail-hugo] No topics")
@@ -191,7 +207,7 @@ def run():
         except Exception:
             pass
     article["content"], _qg_issues, _qg_draft = postprocess_content(
-        article["content"], data_prices=_data_prices if _data_prices else None,
+        article["content"], data_prices=_data_prices or None,
         blog_id=BLOG_ID, slug=article["slug"])
     if _qg_draft:
         logger.warning("[%s] DRAFT: %s - %s", BLOG_ID, article["slug"], _qg_issues)

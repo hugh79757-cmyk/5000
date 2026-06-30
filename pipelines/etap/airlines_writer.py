@@ -1,11 +1,16 @@
 """airlines_writer.py – 항공사 리뷰 (v3: flight_direct + flight_monthly 데이터)"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
+
 from shared.ai_writer import generate as ai_generate
+
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -17,7 +22,9 @@ def _get_db():
     return conn
 
 
-def _airport_name(code, cache={}):
+def _airport_name(code, cache=None):
+    if cache is None:
+        cache = {}
     if not cache:
         conn = _get_db()
         try:
@@ -147,7 +154,7 @@ def generate_airline_review(topic):
 
     # 데이터 풍부도 체크
     has_routes = len(routes) > 0
-    has_prices = len(directs) > 0 or len(monthly) > 0
+    len(directs) > 0 or len(monthly) > 0
     total_data_points = len(routes) + len(directs) + len(monthly)
 
     if total_data_points < 3:
@@ -254,7 +261,7 @@ def generate_airline_review(topic):
     if popular:
         sections.append(f"## Trending Routes on {name}")
     sections.append(f"## What to Expect Flying {name}")
-    sections.append(f"## Booking Tips")
+    sections.append("## Booking Tips")
     sections.append(f"## Verdict: Is {name} Worth It?")
     section_text = "\n".join(sections)
 
@@ -277,7 +284,7 @@ RULES:
 - NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, treasure trove, must-visit, paradise, bucket list, adventure awaits
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
 
         "You are an aviation journalist who writes data-driven airline reviews. Use ONLY provided data, never fabricate details. Write in flowing paragraphs. Format prices as whole numbers.",

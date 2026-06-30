@@ -1,14 +1,16 @@
 """시니어 복지 파이프라인 — fetch → write → publish"""
 
+import logging
 import os
 import re
 import sys
-import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from dotenv import load_dotenv
-from shared.validators import sanitize_title
+
+from shared.validators import assert_korean_or_reject, sanitize_title
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
 logger = logging.getLogger(__name__)
@@ -35,7 +37,7 @@ def _get_published_titles(site_path):
 
 
 def _pick_topic(blog_id, services):
-    available = list(set(s["category"] for s in services))
+    available = list({s["category"] for s in services})
     if not available:
         return "생활지원"
     idx = _topic_index.get(blog_id, 0)
@@ -45,15 +47,16 @@ def _pick_topic(blog_id, services):
 
 
 def _make_slug(title):
-    return re.sub(r'[^가-힣a-zA-Z0-9\s-]', '', title).replace(" ", "-")[:80]
+    return re.sub(r"[^가-힣a-zA-Z0-9\s-]", "", title).replace(" ", "-")[:80]
 
 
 def _make_thumbnail(cfg, article, topic_type, platform):
     """썸네일 생성 — Hugo/Blogger 모두 R2 업로드 URL 반환"""
     try:
-        from pipelines.senior.thumbnail import generate_senior_thumbnail
         import hashlib
         from datetime import datetime
+
+        from pipelines.senior.thumbnail import generate_senior_thumbnail
 
         title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
         slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
@@ -95,18 +98,17 @@ def _convert_md_to_blogger_html(body_md):
         body_md
     )
     body_md = re.sub(
-        r'- \[([^\]]*)\]\((https://link\.coupang\.com[^)]+)\)',
+        r"- \[([^\]]*)\]\((https://link\.coupang\.com[^)]+)\)",
         r'<div style="margin:8px 0"><a href="\2" target="_blank" rel="noopener" '
         r'style="color:#e74c3c;font-weight:bold">\1</a></div>',
         body_md
     )
     import re as _re
     html = markdown.markdown(body_md, extensions=["tables", "fenced_code"])
-    def _auto_link(m):
+    def _auto_link(m) -> str:
         url = m.group(0)
         return f'<a href="{url}" target="_blank" rel="noopener">{url}</a>'
-    html = _re.sub(r'(?<!href=\")(?<!src=\")(https?://[^\s<>\"\)]+)', _auto_link, html)
-    return html
+    return _re.sub(r'(?<!href=\")(?<!src=\")(https?://[^\s<>\"\)]+)', _auto_link, html)
 
 
 # ─── 메인 run ───
@@ -117,15 +119,17 @@ def run(cfg):
 
     blog_id   = cfg.get("id", "senior-hugo")
     platform  = cfg.get("platform", "hugo")
-    site_path = cfg.get("site_path", "")
+    cfg.get("site_path", "")
 
-    from shared.content_store import init_db, get_today_count
-    from shared.publisher import publish
     from pipelines.senior.fetcher import (
-        sync_services, get_pending_service, get_pending_count,
-        mark_published, enrich_service_detail, SENIOR_DB_PATH
+        SENIOR_DB_PATH,
+        enrich_service_detail,
+        get_pending_count,
+        get_pending_service,
+        sync_services,
     )
     from pipelines.senior.writer import generate_senior_article as generate_article
+    from shared.content_store import get_today_count, init_db
 
     init_db()
 
@@ -207,14 +211,14 @@ def run(cfg):
                     "selection_criteria","documents","contact","law_basis","deadline",
                     "status","collected_at","published_at"]
             for row in _rows:
-                related_services.append(dict(zip(cols, row)))
+                related_services.append(dict(zip(cols, row, strict=False)))
             _rc.close()
             logger.info(f"related 서비스 {len(related_services)}건 조회")
         except Exception as _re:
             logger.warning(f"related 조회 실패: {_re}")
 
         data = {
-            "services": [candidate] + related_services,
+            "services": [candidate, *related_services],
             "jobs": [],
             "today": _dt2.now().strftime("%Y년 %m월 %d일"),
             "total_services": 1 + len(related_services),
@@ -226,16 +230,21 @@ def run(cfg):
             logger.error(f"{blog_id}: 글 생성 실패")
             return {"success": False, "reason": "no_content"}
 
+        # 언어 검증 — 중국어 생성 차단
+        _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
+        if _lang_err:
+            logger.error(f"[{blog_id}] {_lang_err}")
+            return {"success": False, "reason": "language_error"}
+
         thumb_url = _make_thumbnail(cfg, article, topic_type, platform)
     except Exception as e:
-        logger.error(f"{blog_id}: 글 생성 예외: {e}")
+        logger.exception(f"{blog_id}: 글 생성 예외: {e}")
         return {"success": False, "reason": "no_content"}
 
     # 8. 발행
     if platform == "hugo":
         return _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate)
-    else:
-        return _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate)
+    return _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate)
 
 
 def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
@@ -280,11 +289,10 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
                 except Exception as _me:
                     logger.warning(f"mark_published 실패: {_me}")
             return result
-        else:
-            logger.error(f"Hugo publish failed: {result}")
-            return {"success": False, "reason": "publish_error"}
+        logger.error(f"Hugo publish failed: {result}")
+        return {"success": False, "reason": "publish_error"}
     except Exception as e:
-        logger.error(f"Hugo publish error: {e}")
+        logger.exception(f"Hugo publish error: {e}")
         return {"success": False, "reason": "publish_error"}
 
 
@@ -340,9 +348,8 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate=None):
                 except Exception as _me:
                     logger.warning(f"mark_published 실패: {_me}")
             return result
-        else:
-            logger.error(f"Blogger publish failed: {result}")
-            return {"success": False, "reason": "publish_error"}
+        logger.error(f"Blogger publish failed: {result}")
+        return {"success": False, "reason": "publish_error"}
     except Exception as e:
-        logger.error(f"Blogger publish error: {e}")
+        logger.exception(f"Blogger publish error: {e}")
         return {"success": False, "reason": "publish_error"}

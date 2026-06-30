@@ -1,11 +1,17 @@
 """tours_writer.py – Viator 투어 가이드 생성 (카이로, 파리 등 도시별)"""
-import os, sqlite3, logging, re
+import contextlib
+import logging
+import os
+import re
+import sqlite3
+
 from shared.ai_writer import generate as ai_generate
+
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -38,8 +44,7 @@ def _build_tour_summary(tours, city):
         cat = t.get("category") or "Other"
         categories[cat] = categories.get(cat, 0) + 1
         p = 0
-        try: p = float(t["price"])
-        except: pass
+        with contextlib.suppress(BaseException): p = float(t["price"])
         if p > 0 and p < 50: price_buckets["under_50"].append(t)
         elif p >= 50 and p <= 200: price_buckets["50_200"].append(t)
         elif p > 200: price_buckets["over_200"].append(t)
@@ -101,7 +106,7 @@ RULES:
 - End with a brief practical summary, no links
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a travel content writer. Use only provided data. Never fabricate information. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0.",
     prompt,

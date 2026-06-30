@@ -1,6 +1,10 @@
 """dining_writer.py - Michelin dining guide generator (city-focused, practical angle)"""
-import os, sqlite3, logging, re
-from pipelines.etap.quality_guard import preprocess_restaurants, postprocess_content
+import logging
+import os
+import re
+import sqlite3
+
+from pipelines.etap.quality_guard import preprocess_restaurants
 from shared.ai_writer import generate as ai_generate
 
 PRICE_LABEL = {
@@ -26,7 +30,7 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -119,16 +123,16 @@ def generate_dining_guide(topic):
 
     sections = f"  ## The Dining Scene in {city}\n"
     if has_3star or has_2star:
-        sections += f"  ## Fine Dining at Its Best: Multi-Star Restaurants\n"
+        sections += "  ## Fine Dining at Its Best: Multi-Star Restaurants\n"
     if has_1star:
-        sections += f"  ## One-Star Restaurants Worth a Detour\n"
+        sections += "  ## One-Star Restaurants Worth a Detour\n"
     if has_bib:
-        sections += f"  ## Bib Gourmand: Great Food Without the Splurge\n"
+        sections += "  ## Bib Gourmand: Great Food Without the Splurge\n"
     if has_green:
         sections += f"  ## Green Star: Sustainable Dining in {city}\n"
     sections += f"  ## Cuisine Styles and What {city} Does Best\n"
-    sections += f"  ## Price Guide: What to Budget for Michelin Dining\n"
-    sections += f"  ## Booking Tips and What to Know Before You Go\n"
+    sections += "  ## Price Guide: What to Budget for Michelin Dining\n"
+    sections += "  ## Booking Tips and What to Know Before You Go\n"
 
     prompt = f"""Write a practical Michelin dining guide for {city}, {country}.
 
@@ -150,7 +154,7 @@ RULES:
 - End with a "where to eat tonight" quick recommendation for different budgets
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a food and travel blogger who dines at Michelin restaurants worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, culinary journey, gastronomic, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Never invent data. 3) Every section must include one practical tip (reservation lead time, dress code reality, lunch vs dinner value, which tasting menu to pick). 4) Open with a specific dish, restaurant detail, or dining scene.",
     prompt,

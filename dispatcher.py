@@ -2,27 +2,29 @@
 blog_id를 받아 해당 pipeline의 run(cfg)를 호출하고,
 결과를 publish_ledger에 기록한다.
 """
-import sys
-import os
 import logging
-import importlib
+import os
 import sqlite3
-import yaml
-import uuid
 import subprocess
+import sys
+import uuid
 from datetime import datetime
 from pathlib import Path
+
+import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, "/Users/twinssn/Projects/TAP")
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.expanduser("~/.env.common"))
 load_dotenv("/Users/twinssn/Projects/TAP/.env")
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
+import contextlib
+
 from shared.telegram_notifier import send_error as _tg_error
-from shared.validators import sanitize_title
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -52,14 +54,14 @@ def load_blogs():
 def _load_all_blogs():
     """blogs.yaml + blogs.d/*.yaml 통합 로드"""
     main_path = CONFIG_DIR / "blogs.yaml"
-    with open(main_path, "r", encoding="utf-8") as f:
+    with open(main_path, encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
     if "blogs" not in config:
         config["blogs"] = []
     blogs_d = CONFIG_DIR / "blogs.d"
     if blogs_d.is_dir():
         for fpath in sorted(blogs_d.glob("*.yaml")):
-            with open(fpath, "r", encoding="utf-8") as f:
+            with open(fpath, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
             config["blogs"].extend(data.get("blogs", []))
     return config
@@ -106,7 +108,7 @@ CAP_BLOGS = {
 CAP_DB = PROJECT_DIR / "data" / "car.db"
 
 
-def _record_ledger(blog_id):
+def _record_ledger(blog_id) -> None:
     """publish_ledger에 발행 사실 기록 — 각 파이프라인 DB에서 최신 건 조회"""
     try:
         title, url, source_id = "", "", ""
@@ -147,7 +149,8 @@ def _record_ledger(blog_id):
             conn_src.close()
         else:
             # ETAP 블로그는 Hugo content/posts 최신 파일에서 title 직접 조회
-            import glob as _glob, os as _os
+            import glob as _glob
+            import os as _os
             etap_site = next(
                 (b.get("site_path","") for b in _load_all_blogs().get("blogs", [])
                  if b.get("id") == blog_id and b.get("pipeline") == "etap"),
@@ -161,7 +164,7 @@ def _record_ledger(blog_id):
                 if files:
                     import re as _re
                     _content = open(files[0], encoding="utf-8").read()
-                    _m = _re.search(r'''^\s*title:\s*["\']?(.+?)["\']?\s*$''', _content, _re.MULTILINE)
+                    _m = _re.search(r"""^\s*title:\s*["\']?(.+?)["\']?\s*$""", _content, _re.MULTILINE)
                     title = _m.group(1).strip() if _m else ""
                     slug = files[0].split("/")[-2]
                     domain = blog_id.replace("-hugo", "")
@@ -186,14 +189,16 @@ def _record_ledger(blog_id):
         conn.commit()
         conn.close()
     except Exception as e:
-        logger.error(f"ledger 기록 실패: {e}")
+        logger.exception(f"ledger 기록 실패: {e}")
 
 
 # ─── STAP 모듈 격리 ───
 
 def _run_stap(stap_name, cfg):
     """STAP 파이프라인을 subprocess로 완전 격리 실행"""
-    import json as _json, tempfile as _tmp, subprocess as _sp
+    import json as _json
+    import subprocess as _sp
+    import tempfile as _tmp
     stap_root = os.getenv("STAP_ROOT", "/Users/twinssn/Projects/STAP")
     stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
     if not os.path.exists(stap_python):
@@ -207,12 +212,12 @@ def _run_stap(stap_name, cfg):
         "sys.path.insert(0, " + repr(stap_root) + ")",
         "os.chdir(" + repr(stap_root) + ")",
         "from dotenv import load_dotenv",
-        "load_dotenv(os.path.join(" + repr(stap_root) + ", \".env\"), override=True)",
+        "load_dotenv(os.path.join(" + repr(stap_root) + ', ".env"), override=True)',
         "load_dotenv(" + repr(project_env) + ", override=True)",
         "cfg = json.loads(" + repr(cfg_json) + ")",
         "from pipelines." + stap_name + ".pipeline import run",
         "result = run(cfg)",
-        "print(json.dumps(result or {\"success\": False, \"reason\": \"no_result\"}, ensure_ascii=False))",
+        'print(json.dumps(result or {"success": False, "reason": "no_result"}, ensure_ascii=False))',
     ])
 
     try:
@@ -238,21 +243,19 @@ def _run_stap(stap_name, cfg):
         return {"success": False, "reason": "stap_no_output"}
 
     except _sp.TimeoutExpired:
-        logger.error(f"STAP {stap_name} timeout (600s)")
-        try:
+        logger.exception(f"STAP {stap_name} timeout (600s)")
+        with contextlib.suppress(Exception):
             os.unlink(runner_path)
-        except Exception:
-            pass
         return {"success": False, "reason": "stap_timeout"}
     except Exception as e:
-        logger.error(f"STAP {stap_name} error: {e}")
+        logger.exception(f"STAP {stap_name} error: {e}")
         return {"success": False, "reason": "stap_error"}
 
 
 # ─── 파이프라인 실행 ───
 
 def _run_pipeline(cfg):
-    """pipeline 종류에 따라 해당 모듈의 run(cfg)를 호출"""
+    """Pipeline 종류에 따라 해당 모듈의 run(cfg)를 호출"""
     pipeline = cfg.get("pipeline", "")
     blog_id = cfg["id"]
 
@@ -333,31 +336,33 @@ def _run_pipeline(cfg):
             from pipelines.etap.pipeline import run
         # run(cfg) 또는 run() 호환
         import inspect
-        if 'cfg' in inspect.signature(run).parameters or len(inspect.signature(run).parameters) > 0:
+        if "cfg" in inspect.signature(run).parameters or len(inspect.signature(run).parameters) > 0:
             return run(cfg)
-        else:
-            return run()
-    elif pipeline == "curation":
+        return run()
+    if pipeline == "curation":
         from pipelines.curation.pipeline import run
         return run(cfg)
-    elif pipeline == "car":
+    if pipeline == "car":
         from pipelines.car.pipeline import run
         return run(cfg)
 
-    elif pipeline == "travel":
+    if pipeline == "travel":
         from pipelines.travel.pipeline import run
         return run(cfg)
 
-    elif pipeline == "senior":
+    if pipeline == "senior":
         from pipelines.senior.pipeline import run
         return run(cfg)
 
-    elif pipeline == "gap":
+    if pipeline == "gap":
         from pipelines.gap.pipeline import run
         return run(cfg)
 
-    elif pipeline == "tap":
-        import subprocess, json, tempfile, os
+    if pipeline == "tap":
+        import json
+        import os
+        import subprocess
+        import tempfile
         tap_root = "/Users/twinssn/Projects/TAP"
         tap_python = os.path.join(tap_root, "venv", "bin", "python3")
         if not os.path.exists(tap_python):
@@ -390,10 +395,10 @@ def _run_pipeline(cfg):
                     pass
             return {"success": True}
         except subprocess.TimeoutExpired:
-            logger.error("TAP timeout (600s)")
+            logger.exception("TAP timeout (600s)")
             return {"success": False, "reason": "tap_timeout"}
         except Exception as e:
-            logger.error(f"TAP error: {e}")
+            logger.exception(f"TAP error: {e}")
             return {"success": False, "reason": "tap_error"}
     elif pipeline == "rap":
         from pipelines.rap.pipeline import run
@@ -403,9 +408,8 @@ def _run_pipeline(cfg):
         stap_name = STAP_PIPELINE_MAP.get(blog_id)
         if stap_name:
             return _run_stap(stap_name, cfg)
-        else:
-            logger.error(f"STAP 매핑 없음: {blog_id}")
-            return {"success": False, "reason": "unknown_stap_blog"}
+        logger.error(f"STAP 매핑 없음: {blog_id}")
+        return {"success": False, "reason": "unknown_stap_blog"}
 
     else:
         logger.error(f"Unknown pipeline: {pipeline}")
@@ -518,12 +522,12 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         logger.info(f"[deploy] OK: {blog_id}")
         return True
     except Exception as e:
-        logger.error(f"[deploy] 예외 {blog_id}: {e}")
+        logger.exception(f"[deploy] 예외 {blog_id}: {e}")
         return False
 
 # ─── 발행 실패 기록 (publish_ledger) ───
 
-def _record_failure(blog_id: str, stage: str, error_msg: str):
+def _record_failure(blog_id: str, stage: str, error_msg: str) -> None:
     """publish_ledger에 실패 레코드 INSERT (예외 무시)"""
     try:
         conn = sqlite3.connect(str(LEDGER_DB))
@@ -604,7 +608,7 @@ def dispatch(blog_id):
     return result
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print("usage: dispatcher.py <blog_id|report|init-db>")
         sys.exit(1)

@@ -1,6 +1,6 @@
-import os
 import logging
-import sys
+import os
+
 import boto3
 from dotenv import load_dotenv
 
@@ -28,8 +28,8 @@ def _get_client():
     )
 
 
-def _public_url(bucket, r2_key):
-    base = BUCKET_PUBLIC_URLS.get(bucket, f"https://pub-unknown.r2.dev")
+def _public_url(bucket, r2_key) -> str:
+    base = BUCKET_PUBLIC_URLS.get(bucket, "https://pub-unknown.r2.dev")
     return f"{base}/{r2_key}"
 
 
@@ -49,7 +49,7 @@ def upload_file(local_path, r2_key, content_type="image/webp", bucket=None):
         logger.info(f"R2 업로드 완료: {url}")
         return url
     except Exception as e:
-        logger.error(f"R2 업로드 실패: {e}")
+        logger.exception(f"R2 업로드 실패: {e}")
         return None
 
 
@@ -68,11 +68,11 @@ def upload_bytes(data, r2_key, content_type="image/png", bucket=None):
         logger.info(f"R2 업로드 완료: {url}")
         return url
     except Exception as e:
-        logger.error(f"R2 업로드 실패: {e}")
+        logger.exception(f"R2 업로드 실패: {e}")
         return None
 
 
-def file_exists(r2_key, bucket=None):
+def file_exists(r2_key, bucket=None) -> bool | None:
     """R2에 파일 존재 여부 확인"""
     bucket = bucket or R2_BUCKET_DEFAULT
     try:

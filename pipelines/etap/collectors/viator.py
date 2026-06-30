@@ -1,5 +1,10 @@
 """Viator deals feed collector – downloads gzipped JSON from Travelpayouts."""
-import os, sys, json, gzip, sqlite3, logging, io
+import gzip
+import io
+import json
+import logging
+import os
+import sqlite3
 from datetime import datetime
 
 try:

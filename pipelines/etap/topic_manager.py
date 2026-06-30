@@ -3,12 +3,13 @@
 모든 ETAP 파이프라인은 이 모듈의 함수를 사용해야 합니다.
 중복 체크는 topics 테이블의 PK(id)를 기준으로 합니다.
 """
-import sqlite3
 import logging
 import os
-import requests
+import sqlite3
+from datetime import datetime, timedelta
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
+
+import requests
 from dotenv import load_dotenv
 
 # 중앙 env 파일 로드
@@ -43,7 +44,7 @@ def _get_pk_col(conn, topic_table):
 
 
 
-def send_telegram(message):
+def send_telegram(message) -> bool | None:
     """텔레그램 메시지 전송"""
     if not TG_TOKEN or not TG_CHAT_ID:
         logger.warning("[TG] Token or chat_id missing, skip telegram")
@@ -58,11 +59,10 @@ def send_telegram(message):
         if resp.status_code == 200:
             logger.info(f"[TG] Sent: {message[:50]}...")
             return True
-        else:
-            logger.error(f"[TG] Failed: {resp.status_code} {resp.text[:100]}")
-            return False
+        logger.error(f"[TG] Failed: {resp.status_code} {resp.text[:100]}")
+        return False
     except Exception as e:
-        logger.error(f"[TG] Error: {e}")
+        logger.exception(f"[TG] Error: {e}")
         return False
 
 
@@ -73,7 +73,7 @@ def get_remaining_count(topic_table, blog_id):
     conn = _get_db()
     try:
         pk = _get_pk_col(conn, topic_table)
-        count = conn.execute(
+        return conn.execute(
             f"SELECT count(*) FROM {topic_table} "
             f"WHERE exhausted = 0 "
             f"AND {pk} NOT IN ("
@@ -82,9 +82,8 @@ def get_remaining_count(topic_table, blog_id):
             f")",
             (blog_id,)
         ).fetchone()[0]
-        return count
     except Exception as e:
-        logger.error(f"get_remaining_count error: {e}")
+        logger.exception(f"get_remaining_count error: {e}")
         return -1  # 예외 시 안전값 반환 (고갈 알림 방지)
     finally:
         conn.close()
@@ -124,7 +123,7 @@ def check_exhaustion(topic_table, blog_id):
 
 def pick_topic_by_id(topic_table, blog_id):
     """PK(id) 기준으로 미발행 토픽 1개 선택.
-    
+
     중복 방지 로직:
     1. exhausted = 0 (아직 소진 안 됨)
     2. id NOT IN publish_log (PK 기준으로 이미 발행된 적 없음)
@@ -193,15 +192,15 @@ def pick_topic_by_id(topic_table, blog_id):
         return topic
 
     except Exception as e:
-        logger.error(f"pick_topic_by_id error: {e}")
+        logger.exception(f"pick_topic_by_id error: {e}")
         return None
     finally:
         conn.close()
 
 
-def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url=""):
+def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url="") -> bool | None:
     """PK 기준으로 발행 완료 기록.
-    
+
     1. publish_log에 topic_id 포함하여 INSERT
     2. topics 테이블의 exhausted = 1로 UPDATE (id 기준)
     3. 중복 INSERT 방지 (같은 topic_id + blog_id 조합)
@@ -240,7 +239,7 @@ def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url=""):
         return True
 
     except Exception as e:
-        logger.error(f"mark_published_by_id error: {e}")
+        logger.exception(f"mark_published_by_id error: {e}")
         conn.rollback()
         return False
     finally:
@@ -271,7 +270,7 @@ def pick_topic(blog_id, window_days=30):
         conn.close()
 
 
-def mark_published(topic_id, blog_id, title, slug, url=""):
+def mark_published(topic_id, blog_id, title, slug, url="") -> bool | None:
     """tour-hugo 전용 mark_published (topics 테이블 사용)"""
     conn = _get_db()
     try:
@@ -293,7 +292,7 @@ def mark_published(topic_id, blog_id, title, slug, url=""):
         conn.commit()
         return True
     except Exception as e:
-        logger.error(f"mark_published error: {e}")
+        logger.exception(f"mark_published error: {e}")
         return False
     finally:
         conn.close()
@@ -308,7 +307,7 @@ def check_daily_quota(blog_id, max_per_day=5):
     conn = sqlite3.connect(db_path)
     # 테이블 존재 확인
     _tables = [r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
-    if 'publish_log' not in _tables:
+    if "publish_log" not in _tables:
         logger.error(f"[{blog_id}] publish_log NOT FOUND in {db_path}! tables={_tables[:10]}")
         conn.close()
         return True, 0

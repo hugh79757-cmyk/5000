@@ -5,7 +5,10 @@
 - deduplicate_tours(): 중복 투어 그룹핑
 - build_city_context(): GPT 프롬프트용 도시 컨텍스트
 """
-import os, sqlite3, re, logging
+import logging
+import os
+import re
+import sqlite3
 from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
@@ -42,7 +45,8 @@ def fetch_city_meta(city):
 
 def deduplicate_tours(tours, similarity_threshold=0.65):
     """유사한 투어를 그룹핑하고 각 그룹에서 대표 1개만 선택.
-    기준: $10 이상 + 이미지 있는 것 우선 + 최저가."""
+    기준: $10 이상 + 이미지 있는 것 우선 + 최저가.
+    """
     if not tours:
         return []
 
@@ -74,7 +78,7 @@ def deduplicate_tours(tours, similarity_threshold=0.65):
         if not valid:
             valid = group
         with_img = [t for t in valid if t.get("image_url")]
-        pool = with_img if with_img else valid
+        pool = with_img or valid
         best = sorted(pool, key=lambda x: _safe_price(x.get("price")))[0]
         best["_group_size"] = len(group)
         best["_group_price_range"] = (
@@ -95,7 +99,7 @@ def build_city_context(city, city_meta):
     lat = city_meta.get("latitude", "")
     lon = city_meta.get("longitude", "")
 
-    ctx = f"CITY CONTEXT:\n"
+    ctx = "CITY CONTEXT:\n"
     ctx += f"City: {city}\n"
     ctx += f"Local currency: {currency}\n"
     ctx += f"Timezone: {tz}\n"

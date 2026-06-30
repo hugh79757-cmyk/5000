@@ -1,5 +1,10 @@
 """Omio popular routes collector – parses local CSV.gz files. US (USD) first, UK supplements."""
-import os, sys, csv, gzip, sqlite3, logging, glob
+import csv
+import glob
+import gzip
+import logging
+import os
+import sqlite3
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -41,7 +46,7 @@ def collect_from_csv(csv_path, mode="insert_or_replace"):
         if csv_path.endswith(".gz"):
             f = gzip.open(csv_path, "rt", encoding="utf-8", errors="replace")
         else:
-            f = open(csv_path, "r", encoding="utf-8", errors="replace")
+            f = open(csv_path, encoding="utf-8", errors="replace")
 
         reader = csv.DictReader(f)
         for row in reader:
@@ -95,7 +100,7 @@ def collect_from_csv(csv_path, mode="insert_or_replace"):
 
         f.close()
     except Exception as e:
-        logger.error(f"[Omio] 파일 읽기 오류 {csv_path}: {e}")
+        logger.exception(f"[Omio] 파일 읽기 오류 {csv_path}: {e}")
 
     db.commit()
     db.close()

@@ -1,14 +1,15 @@
 """시니어 복지 데이터 수집 — 공공서비스(혜택) API + 노인일자리 API"""
 
-import os
-import re
 import logging
-import requests
+import os
 from datetime import datetime
+
+import requests
 
 logger = logging.getLogger(__name__)
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 API_KEY = os.getenv("DATA_GO_KR_API_KEY", "")
 SERVICE_LIST_URL = "https://api.odcloud.kr/api/gov24/v3/serviceList"
@@ -78,7 +79,7 @@ def fetch_senior_services(page=1, per_page=100, max_pages=110):
             all_services.extend(items)
             logger.info(f"  페이지 {p}: {len(items)}건 수집")
     except Exception as e:
-        logger.error(f"공공서비스 API 오류: {e}")
+        logger.exception(f"공공서비스 API 오류: {e}")
         return []
 
     # 시니어 관련 필터링
@@ -138,7 +139,7 @@ import sqlite3
 SENIOR_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "senior.db")
 
 
-def init_senior_db():
+def init_senior_db() -> None:
     """senior.db 초기화 — services 테이블 생성"""
     os.makedirs(os.path.dirname(SENIOR_DB_PATH), exist_ok=True)
     conn = sqlite3.connect(SENIOR_DB_PATH)
@@ -195,9 +196,8 @@ def sync_services():
         if any(x in dl for x in ["마감", "신규신청 불가", "접수 마감"]):
             skip = True
         m = _re.search(r"(\d{4})[.\-](\d{2})[.\-](\d{2})\s*$", dl)
-        if m:
-            if f"{m.group(1)}-{m.group(2)}-{m.group(3)}" < now_str:
-                skip = True
+        if m and f"{m.group(1)}-{m.group(2)}-{m.group(3)}" < now_str:
+            skip = True
         if not skip:
             m2 = _re.search(r"[~∼]\s*(\d{4})[.\-](\d{1,2})[.\-](\d{1,2})", dl)
             if m2:
@@ -259,12 +259,12 @@ def get_pending_service(category=None):
                 "apply_method","apply_url","department","support_content","purpose",
                 "selection_criteria","documents","contact","law_basis","deadline",
                 "status","collected_at","published_at"]
-        return dict(zip(cols, row))
+        return dict(zip(cols, row, strict=False))
     finally:
         conn.close()
 
 
-def mark_published(service_id):
+def mark_published(service_id) -> None:
     """서비스 발행 완료 처리"""
     conn = sqlite3.connect(SENIOR_DB_PATH)
     conn.execute(
@@ -276,7 +276,7 @@ def mark_published(service_id):
 
 
 def get_pending_count():
-    """pending 서비스 수 반환"""
+    """Pending 서비스 수 반환"""
     try:
         conn = sqlite3.connect(SENIOR_DB_PATH)
         count = conn.execute("SELECT COUNT(*) FROM services WHERE status='pending'").fetchone()[0]
@@ -301,15 +301,14 @@ def _load_cache():
         if updated == today:
             logger.info("캐시 로드: %s (%d건)" % (CACHE_PATH, data.get("total", 0)))
             return data.get("services", [])
-        else:
-            logger.info("캐시 만료: %s (갱신 필요)" % updated)
-            return None
+        logger.info(f"캐시 만료: {updated} (갱신 필요)")
+        return None
     except Exception as e:
-        logger.warning("캐시 로드 실패: %s" % e)
+        logger.warning(f"캐시 로드 실패: {e}")
         return None
 
 
-def _save_cache(services):
+def _save_cache(services) -> None:
     """캐시 저장"""
     import json
     os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)

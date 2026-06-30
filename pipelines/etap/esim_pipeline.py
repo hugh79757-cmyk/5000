@@ -1,15 +1,31 @@
-import os, sys, sqlite3, logging, time, subprocess, re
-from datetime import datetime, timezone, timedelta
+import logging
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
+from pipelines.etap.post_processor import (
+    insert_adsense,
+    insert_cross_sell_block,
+    insert_product_cards,
+)
 from pipelines.etap.quality_guard import postprocess_content, send_alert
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id, check_exhaustion
+from pipelines.etap.topic_manager import mark_published_by_id, pick_topic_by_id
+from shared.entity_linker import (
+    build_cross_sell_html,
+    inject_internal_links,
+    mark_entity_published,
+    register_entity,
+)
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -84,7 +100,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     logger.info(f"Post written: {post_dir}")
     return post_dir
 
-def _build_and_deploy(site_path, blog_id):
+def _build_and_deploy(site_path, blog_id) -> bool | None:
     hugo = "/opt/homebrew/bin/hugo"
     wrangler = "/opt/homebrew/bin/wrangler"
     try:
@@ -100,12 +116,11 @@ def _build_and_deploy(site_path, blog_id):
         logger.info(f"Deploy OK: {blog_id}")
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Deploy failed: {e}")
+        logger.exception(f"Deploy failed: {e}")
         return False
 
-def _mark_published(article, blog_id, topic_table, topic_id):
+def _mark_published(article, blog_id, topic_table, topic_id) -> None:
     """topic_manager 통합 — PK 기준 발행 기록"""
-    from shared.entity_linker import mark_entity_published
     mark_published_by_id(
         topic_id=topic_id,
         topic_table=topic_table,
@@ -139,19 +154,19 @@ def _add_product_cards(article):
             pf = float(price_val)
             of = float(original)
             if pf < of:
-                discount = str(int(round((1 - pf/of) * 100)))
+                discount = str(round((1 - pf/of) * 100))
         except:
             pass
-        selected.append(dict(
-            name=p.get("title",""), price=price_val, currency="$",
-            discount=discount, image_url=p.get("image_link",""),
-            link=p.get("link",""), category="eSIM Plan",
-        ))
+        selected.append({
+            "name": p.get("title",""), "price": price_val, "currency": "$",
+            "discount": discount, "image_url": p.get("image_link",""),
+            "link": p.get("link",""), "category": "eSIM Plan",
+        })
     if selected:
         article["content"] = insert_product_cards(article["content"], selected, max_cards=8)
     return article
 
-def run():
+def run() -> bool:
     topic = pick_topic()
     if not topic:
         logger.info("[esim-hugo] No topics")

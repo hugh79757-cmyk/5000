@@ -1,6 +1,8 @@
 """ETAP 공통 안전장치 - 데이터 기반 발행 원칙 적용"""
-import sqlite3, os, logging
-from datetime import datetime
+import contextlib
+import logging
+import os
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,7 @@ def get_db():
 def check_remaining_topics(blog_id, topic_table="topics"):
     db = get_db()
     try:
-        remaining = db.execute(
+        return db.execute(
             "SELECT COUNT(*) FROM " + topic_table + " t "
             "WHERE t.exhausted = 0 "
             "AND NOT EXISTS ("
@@ -23,7 +25,6 @@ def check_remaining_topics(blog_id, topic_table="topics"):
             "  WHERE pl.topic_id = t.id AND pl.blog_id = ?"
             ")", (blog_id,)
         ).fetchone()[0]
-        return remaining
     finally:
         db.close()
 
@@ -48,23 +49,19 @@ def should_publish(blog_id, topic_table, data_table, min_data=1):
     return True, "OK (%d topics left)" % remaining
 
 
-def send_exhaustion_alert(blog_id, remaining, tg_func=None):
+def send_exhaustion_alert(blog_id, remaining, tg_func=None) -> None:
     if remaining <= 0:
-        msg = "[ETAP] %s: topics exhausted, publishing stopped." % blog_id
+        msg = f"[ETAP] {blog_id}: topics exhausted, publishing stopped."
         logger.error(msg)
         if tg_func:
-            try:
+            with contextlib.suppress(Exception):
                 tg_func(msg)
-            except Exception:
-                pass
     elif remaining <= 10:
         msg = "[ETAP] %s: only %d topics left." % (blog_id, remaining)
         logger.warning(msg)
         if tg_func:
-            try:
+            with contextlib.suppress(Exception):
                 tg_func(msg)
-            except Exception:
-                pass
 
 
 def safe_run(blog_id, topic_table, data_table, run_fn, tg_func=None, min_data=1):
@@ -76,12 +73,10 @@ def safe_run(blog_id, topic_table, data_table, run_fn, tg_func=None, min_data=1)
     try:
         result = run_fn()
     except Exception as e:
-        logger.error("[%s] error: %s", blog_id, e)
+        logger.exception("[%s] error: %s", blog_id, e)
         if tg_func:
-            try:
-                tg_func("[ETAP] %s error: %s" % (blog_id, e))
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                tg_func(f"[ETAP] {blog_id} error: {e}")
         return {"status": "error", "reason": str(e)}
     remaining = check_remaining_topics(blog_id, topic_table)
     send_exhaustion_alert(blog_id, remaining, tg_func)

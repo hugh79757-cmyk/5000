@@ -1,5 +1,4 @@
-"""
-quality_scanner.py — 발행 후 사후 품질 스캔 + 일별 로테이션 수동 검토 리포트
+"""quality_scanner.py — 발행 후 사후 품질 스캔 + 일별 로테이션 수동 검토 리포트
 매일 스케줄러에서 1회 실행 (예: 23:00)
 
 기능:
@@ -7,7 +6,12 @@ quality_scanner.py — 발행 후 사후 품질 스캔 + 일별 로테이션 수
   2. 36개 블로그 로테이션 (매일 5개씩) → 수동 검토 대상 URL 텔레그램 전송
 """
 
-import os, re, glob, sqlite3, json, logging
+import glob
+import json
+import logging
+import os
+import re
+import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -19,7 +23,7 @@ TRAVEL_DB   = PROJECT_DIR / "data" / "travel-en.db"
 SCANNER_DB  = PROJECT_DIR / "data" / "scanner.db"
 
 # 로테이션 상태 저장 DB 초기화
-def _init_scanner_db():
+def _init_scanner_db() -> None:
     conn = sqlite3.connect(str(SCANNER_DB))
     conn.execute("""
         CREATE TABLE IF NOT EXISTS rotation_log (
@@ -49,19 +53,19 @@ def _init_scanner_db():
 # ============================================================
 # 텔레그램
 # ============================================================
-def _tg(msg: str):
+def _tg(msg: str) -> None:
     try:
         from shared.telegram_notifier import send
         send(msg)
     except Exception as e:
-        logger.error(f"[Scanner] TG 전송 실패: {e}")
+        logger.exception(f"[Scanner] TG 전송 실패: {e}")
 
-def _tg_warning(title, detail=""):
+def _tg_warning(title, detail="") -> None:
     try:
         from shared.telegram_notifier import send
         send(f"{title} {detail}")
     except Exception as e:
-        logger.error(f"[Scanner] TG warning 실패: {e}")
+        logger.exception(f"[Scanner] TG warning 실패: {e}")
 
 
 # ============================================================
@@ -88,7 +92,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
         return {"score": 0, "issues": [f"파일 읽기 실패: {e}"], "word_count": 0, "h2_count": 0}
 
     # 프론트매터 / 본문 분리
-    fm_match = re.match(r'^---\n(.*?)\n---\n(.*)', raw, re.DOTALL)
+    fm_match = re.match(r"^---\n(.*?)\n---\n(.*)", raw, re.DOTALL)
     if not fm_match:
         return {"score": 0, "issues": ["프론트매터 파싱 실패"], "word_count": 0, "h2_count": 0}
 
@@ -96,7 +100,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
     body         = fm_match.group(2)
 
     # ── draft 체크 (-30)
-    if re.search(r'^draft:\s*true', front_matter, re.MULTILINE):
+    if re.search(r"^draft:\s*true", front_matter, re.MULTILINE):
         issues.append("[CRITICAL] draft: true 상태로 발행됨")
         score -= 30
 
@@ -110,7 +114,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
         score -= 10
 
     # ── H2 섹션 수
-    h2_count = len(re.findall(r'^## ', body, re.MULTILINE))
+    h2_count = len(re.findall(r"^## ", body, re.MULTILINE))
     if h2_count < 3:
         issues.append(f"[CRITICAL] H2 섹션 부족: {h2_count}개 (최소 3)")
         score -= 20
@@ -119,7 +123,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
         score -= 5
 
     # ── 이미지 삽입 여부
-    img_count = len(re.findall(r'!\[', body))
+    img_count = len(re.findall(r"!\[", body))
     if img_count == 0:
         issues.append("[WARNING] 이미지 없음")
         score -= 10
@@ -128,10 +132,10 @@ def score_post(filepath: str, blog_id: str) -> dict:
         score -= 5
 
     # ── $0 / 0만원 데이터 오류
-    if re.search(r'\$0\b', body):
+    if re.search(r"\$0\b", body):
         issues.append("[CRITICAL] $0 가격 오류 발견")
         score -= 20
-    if re.search(r'\b0만원|\b0%', body):
+    if re.search(r"\b0만원|\b0%", body):
         issues.append("[CRITICAL] 0만원 또는 0% 데이터 오류 발견")
         score -= 20
 
@@ -148,7 +152,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
         score -= len(banned_found) * 2
 
     # ── disclaimer 누락
-    if 'etap-disclaimer-card' not in body:
+    if "etap-disclaimer-card" not in body:
         issues.append("[WARNING] disclaimer 누락")
         score -= 5
 
@@ -164,7 +168,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
         score -= len(bad_urls) * 3
 
     # ── title 누락
-    if not re.search(r'^title:', front_matter, re.MULTILINE):
+    if not re.search(r"^title:", front_matter, re.MULTILINE):
         issues.append("[CRITICAL] title 누락")
         score -= 20
 
@@ -180,7 +184,7 @@ def score_post(filepath: str, blog_id: str) -> dict:
 # ============================================================
 # 전날 발행 포스트 자동 스캔
 # ============================================================
-def scan_yesterday(blogs: list, target_date: str = None) -> list:
+def scan_yesterday(blogs: list, target_date: str | None = None) -> list:
     """target_date(YYYY-MM-DD) 발행 포스트 전체 스캔. 기본값=어제."""
     if target_date is None:
         target_date = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
@@ -206,7 +210,7 @@ def scan_yesterday(blogs: list, target_date: str = None) -> list:
                 continue
 
             # 날짜 필터
-            date_match = re.search(r'^date:\s*(\d{4}-\d{2}-\d{2})', raw, re.MULTILINE)
+            date_match = re.search(r"^date:\s*(\d{4}-\d{2}-\d{2})", raw, re.MULTILINE)
             if not date_match or date_match.group(1) != target_date:
                 continue
 
@@ -243,7 +247,7 @@ def scan_yesterday(blogs: list, target_date: str = None) -> list:
 # ============================================================
 # 로테이션 — 매일 5개 블로그 수동 검토 대상 선정
 # ============================================================
-def get_rotation_blogs(blogs: list, today: str = None) -> list:
+def get_rotation_blogs(blogs: list, today: str | None = None) -> list:
     """오늘 수동 검토할 5개 블로그 반환. 순서는 blog_id 알파벳 기준 순환."""
     if today is None:
         today = datetime.now().strftime("%Y-%m-%d")
@@ -332,9 +336,8 @@ def get_sample_urls(blog_ids: list, blogs: list) -> list:
 # 텔레그램 리포트 전송
 # ============================================================
 def send_report(low_score_posts: list, total_scanned: int,
-                rotation_samples: list, target_date: str):
+                rotation_samples: list, target_date: str) -> None:
     """스캔 결과 + 로테이션 수동 검토 대상을 텔레그램으로 전송."""
-
     lines = [f"📊 *ETAP 품질 리포트 — {target_date}*",
              f"스캔: {total_scanned}건 | 저품질(70점↓): {len(low_score_posts)}건",
              ""]
@@ -365,13 +368,13 @@ def send_report(low_score_posts: list, total_scanned: int,
 
     msg = "\n".join(lines)
     _tg(msg)
-    logger.info(f"[Scanner] 텔레그램 리포트 전송 완료")
+    logger.info("[Scanner] 텔레그램 리포트 전송 완료")
 
 
 # ============================================================
 # 메인 진입점
 # ============================================================
-def run_scan(target_date: str = None):
+def run_scan(target_date: str | None = None):
     """스케줄러에서 호출하는 메인 함수."""
     _init_scanner_db()
 
@@ -386,8 +389,8 @@ def run_scan(target_date: str = None):
         etap_yaml = PROJECT_DIR / "config" / "blogs.d" / "etap.yaml"
         blogs = yaml.safe_load(open(etap_yaml))["blogs"]
     except Exception as e:
-        logger.error(f"[Scanner] blogs 로드 실패: {e}")
-        return
+        logger.exception(f"[Scanner] blogs 로드 실패: {e}")
+        return None
 
     # ① 자동 스캔
     low_score_posts, total_scanned = scan_yesterday(blogs, target_date)

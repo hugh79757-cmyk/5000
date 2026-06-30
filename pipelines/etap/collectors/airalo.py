@@ -1,6 +1,8 @@
 """Airalo eSIM feed collector – parses local XML or remote feed."""
-import os, sys, sqlite3, logging, xml.etree.ElementTree as ET
-from datetime import datetime
+import logging
+import os
+import sqlite3
+import xml.etree.ElementTree as ET
 
 logger = logging.getLogger(__name__)
 

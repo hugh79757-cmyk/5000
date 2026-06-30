@@ -5,14 +5,15 @@
 - 이미지 부족 차량 보충
 - publish.py 실행 전 호출됨
 """
-import sqlite3
-import requests
-from bs4 import BeautifulSoup
-import time
-import re
 import logging
+import re
+import sqlite3
+import time
 from datetime import datetime
 from pathlib import Path
+
+import requests
+from bs4 import BeautifulSoup
 
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "car.db"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
@@ -30,12 +31,12 @@ def get_conn():
 def refresh_trims(conn):
     """기존 차량의 트림/가격 업데이트 + 가격 변동 기록"""
     c = conn.cursor()
-    cars = c.execute('SELECT car_id, carisyou_id, brand, model FROM cars WHERE carisyou_id > 0').fetchall()
+    cars = c.execute("SELECT car_id, carisyou_id, brand, model FROM cars WHERE carisyou_id > 0").fetchall()
     updated = 0
     price_changed = 0
 
     for car in cars:
-        cid = car['carisyou_id']
+        cid = car["carisyou_id"]
         try:
             resp = requests.get(f"https://m.carisyou.com/car/{cid}", headers=HEADERS, timeout=10)
             if resp.status_code != 200:
@@ -53,11 +54,11 @@ def refresh_trims(conn):
                 raw_name = cells[-2].get_text(strip=True) if len(cells) >= 3 else cells[0].get_text(strip=True)
                 raw_price = cells[-1].get_text(strip=True)
 
-                trim_name = re.sub(r'(A/T|M/T|DCT)', '', raw_name).strip()
+                trim_name = re.sub(r"(A/T|M/T|DCT)", "", raw_name).strip()
                 # 가격 파싱: "1억 2,345만원" → 12345, "5,745만원" → 5745
-                raw_p = raw_price.replace(',', '').strip()
-                eok_match = re.search(r'(\d+)억\s*(\d*)', raw_p)
-                man_match = re.search(r'(\d+)만', raw_p)
+                raw_p = raw_price.replace(",", "").strip()
+                eok_match = re.search(r"(\d+)억\s*(\d*)", raw_p)
+                man_match = re.search(r"(\d+)만", raw_p)
                 if eok_match:
                     eok = int(eok_match.group(1)) * 10000
                     rest = int(eok_match.group(2)) if eok_match.group(2) else 0
@@ -65,7 +66,7 @@ def refresh_trims(conn):
                 elif man_match:
                     price = int(man_match.group(1))
                 else:
-                    price_match = re.search(r'\d+', raw_p)
+                    price_match = re.search(r"\d+", raw_p)
                     if not price_match:
                         continue
                     price = int(price_match.group())
@@ -77,18 +78,18 @@ def refresh_trims(conn):
                 if "단종" in first_cell:
                     status = "단종"
 
-                existing_trim = c.execute('SELECT price FROM trims WHERE car_id=? AND trim_name=?',
-                    (car['car_id'], trim_name)).fetchone()
-                if existing_trim and existing_trim['price'] and existing_trim['price'] != price:
-                    old_p = existing_trim['price']
+                existing_trim = c.execute("SELECT price FROM trims WHERE car_id=? AND trim_name=?",
+                    (car["car_id"], trim_name)).fetchone()
+                if existing_trim and existing_trim["price"] and existing_trim["price"] != price:
+                    old_p = existing_trim["price"]
                     change_pct = round((price - old_p) / old_p * 100, 1)
                     c.execute("""INSERT INTO price_history (car_id, trim_name, old_price, new_price, change_amount, change_percent, detected_at)
                         VALUES (?,?,?,?,?,?,datetime('now'))""",
-                        (car['car_id'], trim_name, old_p, price, price - old_p, change_pct))
+                        (car["car_id"], trim_name, old_p, price, price - old_p, change_pct))
                     price_changed += 1
-                c.execute('''INSERT OR REPLACE INTO trims (car_id, trim_name, price, status, updated_at)
-                    VALUES (?, ?, ?, ?, ?)''',
-                    (car['car_id'], trim_name, price, status, datetime.now().isoformat()))
+                c.execute("""INSERT OR REPLACE INTO trims (car_id, trim_name, price, status, updated_at)
+                    VALUES (?, ?, ?, ?, ?)""",
+                    (car["car_id"], trim_name, price, status, datetime.now().isoformat()))
                 updated += 1
 
         except Exception as e:
@@ -104,7 +105,7 @@ AUTO_REGISTER_BRANDS = {"현대", "기아", "제네시스", "테슬라", "벤츠
 
 def parse_car_info(title):
     """카이즈유 타이틀에서 연도, 브랜드, 모델명 추출"""
-    title = re.sub(r'\(.*?\)', '', title).strip()
+    title = re.sub(r"\(.*?\)", "", title).strip()
     parts = title.split(" ", 2)
     if len(parts) < 3:
         return None, None, None
@@ -132,13 +133,13 @@ def make_car_id(brand, model, year):
         "모닝": "morning", "레이 EV": "ray_ev", "레이": "ray", "모델 Y": "model_y",
         "GV80 쿠페": "gv80_coupe", "GV80": "gv80",
     }
-    model_key = model_map.get(model, re.sub(r'[^a-zA-Z0-9]', '_', model.lower()))
+    model_key = model_map.get(model, re.sub(r"[^a-zA-Z0-9]", "_", model.lower()))
     prefix = brand_map.get(brand, brand.lower())
     cid = f"{prefix}_{model_key}_{year}" if prefix else f"{model_key}_{year}"
     return cid.strip("_").replace("__", "_")
 
 
-def guess_fuel_type(title):
+def guess_fuel_type(title) -> str:
     t = title.upper()
     if "하이브리드" in title: return "가솔린/하이브리드"
     # 전기차 모델명 패턴
@@ -152,7 +153,7 @@ def guess_fuel_type(title):
     return "가솔린"
 
 
-def guess_segment(title):
+def guess_segment(title) -> str:
     if any(k in title for k in ["K9", "마이바흐", "팬텀"]): return "대형세단"
     if any(k in title for k in ["그랜저", "K8"]): return "준대형세단"
     if any(k in title for k in ["쏘나타", "K5", "어코드"]): return "중형세단"
@@ -167,14 +168,14 @@ def guess_segment(title):
 def scan_new_cars(conn):
     """카이즈유에서 최신 차량 탐색 + 자동 등록"""
     c = conn.cursor()
-    today = datetime.now().strftime('%Y-%m-%d')
-    already = c.execute('SELECT id FROM scan_log WHERE scan_date=?', (today,)).fetchone()
+    today = datetime.now().strftime("%Y-%m-%d")
+    already = c.execute("SELECT id FROM scan_log WHERE scan_date=?", (today,)).fetchone()
     if already:
         logger.info("오늘 이미 탐색 완료 - 스킵")
         return []
-    
-    max_id = c.execute('SELECT MAX(carisyou_id) FROM cars').fetchone()[0] or 7650
-    last_scan = c.execute('SELECT max_scanned_id FROM scan_log ORDER BY id DESC LIMIT 1').fetchone()
+
+    max_id = c.execute("SELECT MAX(carisyou_id) FROM cars").fetchone()[0] or 7650
+    last_scan = c.execute("SELECT max_scanned_id FROM scan_log ORDER BY id DESC LIMIT 1").fetchone()
     if last_scan and last_scan[0] > max_id:
         max_id = last_scan[0]
     scan_start = max_id + 1
@@ -208,12 +209,12 @@ def scan_new_cars(conn):
             if not brand or brand not in AUTO_REGISTER_BRANDS:
                 continue
 
-            existing = c.execute('SELECT car_id FROM cars WHERE carisyou_id=?', (cid,)).fetchone()
+            existing = c.execute("SELECT car_id FROM cars WHERE carisyou_id=?", (cid,)).fetchone()
             if existing:
                 continue
 
             car_id = make_car_id(brand, model, year)
-            existing2 = c.execute('SELECT car_id FROM cars WHERE car_id=?', (car_id,)).fetchone()
+            existing2 = c.execute("SELECT car_id FROM cars WHERE car_id=?", (car_id,)).fetchone()
             if existing2:
                 continue
 
@@ -243,7 +244,7 @@ def scan_new_cars(conn):
                 if src.startswith("//"): src = "https:" + src
                 elif not src.startswith("http"): continue
                 src = src.replace("/thumb/", "/")
-                c.execute('INSERT OR IGNORE INTO car_images (car_id, image_url, source) VALUES (?, ?, ?)',
+                c.execute("INSERT OR IGNORE INTO car_images (car_id, image_url, source) VALUES (?, ?, ?)",
                           (car_id, src, "carisyou"))
 
             auto_added += 1
@@ -254,7 +255,7 @@ def scan_new_cars(conn):
         time.sleep(0.2)
 
     conn.commit()
-    c.execute('INSERT OR REPLACE INTO scan_log (scan_date, max_scanned_id, cars_found, cars_registered) VALUES (?,?,?,?)',
+    c.execute("INSERT OR REPLACE INTO scan_log (scan_date, max_scanned_id, cars_found, cars_registered) VALUES (?,?,?,?)",
               (today, scan_end, len(found), auto_added))
     conn.commit()
     logger.info(f"신규 차량 {len(found)}대 발견, {auto_added}대 자동 등록 (탐색범위: {scan_start}~{scan_end})")
@@ -262,7 +263,7 @@ def scan_new_cars(conn):
 
 
 def fill_trim_efficiency(conn):
-    """trims 테이블의 fuel_efficiency가 NULL인 항목을 public_fuel_data에서 보충"""
+    """Trims 테이블의 fuel_efficiency가 NULL인 항목을 public_fuel_data에서 보충"""
     import sys
     if "/Users/twinssn/Projects/5000" not in sys.path:
         sys.path.insert(0, "/Users/twinssn/Projects/5000")
@@ -293,11 +294,11 @@ def refresh_images(conn):
     c = conn.cursor()
     c.execute("CREATE TABLE IF NOT EXISTS blocked_images (id INTEGER PRIMARY KEY, image_url TEXT UNIQUE, blocked_at TEXT DEFAULT (datetime('now')))")
     blocked = {r[0] for r in c.execute("SELECT image_url FROM blocked_images").fetchall()}
-    cars = c.execute('SELECT car_id, carisyou_id, brand, model FROM cars WHERE carisyou_id > 0').fetchall()
+    cars = c.execute("SELECT car_id, carisyou_id, brand, model FROM cars WHERE carisyou_id > 0").fetchall()
     total_new = 0
 
     for car in cars:
-        cnt = c.execute('SELECT COUNT(*) FROM car_images WHERE car_id=?', (car['car_id'],)).fetchone()[0]
+        cnt = c.execute("SELECT COUNT(*) FROM car_images WHERE car_id=?", (car["car_id"],)).fetchone()[0]
         if cnt >= 8:
             continue
 
@@ -318,8 +319,8 @@ def refresh_images(conn):
                 if src in blocked:
                     continue
                 try:
-                    c.execute('INSERT OR IGNORE INTO car_images (car_id, image_url, source) VALUES (?, ?, ?)',
-                              (car['car_id'], src, "carisyou"))
+                    c.execute("INSERT OR IGNORE INTO car_images (car_id, image_url, source) VALUES (?, ?, ?)",
+                              (car["car_id"], src, "carisyou"))
                     if c.rowcount > 0:
                         added += 1
                 except (AttributeError, ValueError):
@@ -426,7 +427,7 @@ def replenish_topics(conn, min_pending=50):
             continue
         created = 0
 
-        if post_type == "resale_compare" or post_type == "ranking_compare":
+        if post_type in {"resale_compare", "ranking_compare"}:
             # 비교 글: 경쟁차 조합 필요
             for car_a, car_b in pairs:
                 if created >= need:
@@ -661,7 +662,7 @@ def detect_price_changes(conn):
 
     events_created = 0
     for ch in changes:
-        car = c.execute('SELECT brand, model FROM cars WHERE car_id=?', (ch[1],)).fetchone()
+        car = c.execute("SELECT brand, model FROM cars WHERE car_id=?", (ch[1],)).fetchone()
         if not car:
             continue
         direction = "인하" if ch[5] < 0 else "인상"
@@ -685,13 +686,13 @@ def detect_price_changes(conn):
     return events_created
 
 
-def run_refresh():
+def run_refresh() -> None:
     """전체 갱신 실행 (하루 1회)"""
     conn = get_conn()
     c = conn.cursor()
 
-    today = datetime.now().strftime('%Y-%m-%d')
-    already = c.execute('SELECT id FROM refresh_log WHERE refresh_date=?', (today,)).fetchone()
+    today = datetime.now().strftime("%Y-%m-%d")
+    already = c.execute("SELECT id FROM refresh_log WHERE refresh_date=?", (today,)).fetchone()
     if already:
         logger.info("오늘 이미 데이터 갱신 완료 - 스킵")
         conn.close()
@@ -708,32 +709,32 @@ def run_refresh():
     try:
         trims_updated = refresh_trims(conn)
     except Exception as e:
-        logger.error(f"refresh_trims 실패: {e}")
+        logger.exception(f"refresh_trims 실패: {e}")
 
     try:
         fill_trim_efficiency(conn)
     except Exception as e:
-        logger.error(f"fill_trim_efficiency 실패: {e}")
+        logger.exception(f"fill_trim_efficiency 실패: {e}")
 
     try:
         images_added = refresh_images(conn)
     except Exception as e:
-        logger.error(f"refresh_images 실패: {e}")
+        logger.exception(f"refresh_images 실패: {e}")
 
     try:
         new_cars = scan_new_cars(conn)
     except Exception as e:
-        logger.error(f"scan_new_cars 실패: {e}")
+        logger.exception(f"scan_new_cars 실패: {e}")
 
     try:
         price_changes = detect_price_changes(conn)
     except Exception as e:
-        logger.error(f"detect_price_changes 실패: {e}")
+        logger.exception(f"detect_price_changes 실패: {e}")
 
     try:
         topics_created = replenish_topics(conn)
     except Exception as e:
-        logger.error(f"replenish_topics 실패: {e}")
+        logger.exception(f"replenish_topics 실패: {e}")
 
     if new_cars:
         logger.info(f"신규 차량 {len(new_cars)}대 발견 (수동 등록 필요)")
@@ -744,10 +745,10 @@ def run_refresh():
               (today, trims_updated, images_added, price_changes, len(new_cars) if new_cars else 0))
     conn.commit()
 
-    total_cars = conn.execute('SELECT COUNT(*) FROM cars WHERE carisyou_id > 0').fetchone()[0]
-    total_imgs = conn.execute('SELECT COUNT(*) FROM car_images').fetchone()[0]
-    total_trims = conn.execute('SELECT COUNT(*) FROM trims').fetchone()[0]
-    pending = conn.execute("SELECT COUNT(*) FROM topics WHERE status=\'pending\'").fetchone()[0]
+    total_cars = conn.execute("SELECT COUNT(*) FROM cars WHERE carisyou_id > 0").fetchone()[0]
+    total_imgs = conn.execute("SELECT COUNT(*) FROM car_images").fetchone()[0]
+    total_trims = conn.execute("SELECT COUNT(*) FROM trims").fetchone()[0]
+    pending = conn.execute("SELECT COUNT(*) FROM topics WHERE status='pending'").fetchone()[0]
 
     logger.info(f"=== 갱신 완료: 차량 {total_cars}대, 트림 {total_trims}개, 이미지 {total_imgs}장, 대기토픽 {pending}개, 신규토픽 {topics_created}개 ===")
     conn.close()

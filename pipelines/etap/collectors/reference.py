@@ -1,10 +1,10 @@
-"""
-Aviasales 레퍼런스 데이터 수집기 (인증 불필요)
+"""Aviasales 레퍼런스 데이터 수집기 (인증 불필요)
 - 공항, 항공사, 도시, 국가 JSON
 """
+import logging
 import os
 import sqlite3
-import logging
+
 import requests
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ def collect_airports():
         logger.info(f"[Reference] airports: {count}건")
         return count
     except Exception as e:
-        logger.error(f"[Reference] airports error: {e}")
+        logger.exception(f"[Reference] airports error: {e}")
         return 0
 
 
@@ -80,7 +80,7 @@ def collect_airlines():
         logger.info(f"[Reference] airlines: {count}건")
         return count
     except Exception as e:
-        logger.error(f"[Reference] airlines error: {e}")
+        logger.exception(f"[Reference] airlines error: {e}")
         return 0
 
 
@@ -112,7 +112,7 @@ def collect_cities():
         logger.info(f"[Reference] cities: {count}건")
         return count
     except Exception as e:
-        logger.error(f"[Reference] cities error: {e}")
+        logger.exception(f"[Reference] cities error: {e}")
         return 0
 
 
@@ -141,7 +141,7 @@ def collect_countries():
         logger.info(f"[Reference] countries: {count}건")
         return count
     except Exception as e:
-        logger.error(f"[Reference] countries error: {e}")
+        logger.exception(f"[Reference] countries error: {e}")
         return 0
 
 

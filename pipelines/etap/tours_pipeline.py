@@ -1,15 +1,31 @@
-import os, sys, sqlite3, logging, time, subprocess, re
-from datetime import datetime, timezone, timedelta
+import logging
+import os
+import re
+import sqlite3
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
+from pipelines.etap.post_processor import (
+    insert_adsense,
+    insert_cross_sell_block,
+    insert_product_cards,
+)
 from pipelines.etap.quality_guard import postprocess_content, send_alert
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id, check_exhaustion
+from pipelines.etap.topic_manager import mark_published_by_id, pick_topic_by_id
+from shared.entity_linker import (
+    build_cross_sell_html,
+    inject_internal_links,
+    mark_entity_published,
+    register_entity,
+)
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -84,7 +100,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     logger.info(f"Post written: {post_dir}")
     return post_dir
 
-def _build_and_deploy(site_path, blog_id):
+def _build_and_deploy(site_path, blog_id) -> bool | None:
     hugo = "/opt/homebrew/bin/hugo"
     wrangler = "/opt/homebrew/bin/wrangler"
     try:
@@ -100,12 +116,11 @@ def _build_and_deploy(site_path, blog_id):
         logger.info(f"Deploy OK: {blog_id}")
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Deploy failed: {e}")
+        logger.exception(f"Deploy failed: {e}")
         return False
 
-def _mark_published(article, blog_id, topic_table, topic_id):
+def _mark_published(article, blog_id, topic_table, topic_id) -> None:
     """topic_manager 통합 — PK 기준 발행 기록"""
-    from shared.entity_linker import mark_entity_published
     mark_published_by_id(
         topic_id=topic_id,
         topic_table=topic_table,
@@ -131,7 +146,7 @@ def _add_product_cards(article):
     if not tours:
         return article
     with_img = [t for t in tours if t.get("image_url")]
-    pool = with_img if with_img else tours
+    pool = with_img or tours
     budget = [t for t in pool if 0 < _safe_price(t.get("price")) < 50][:3]
     mid = [t for t in pool if 50 <= _safe_price(t.get("price")) <= 200][:3]
     deals = sorted(
@@ -146,17 +161,17 @@ def _add_product_cards(article):
         if nm in seen:
             continue
         seen.add(nm)
-        selected.append(dict(
-            name=nm, price=t.get("price",""), currency=t.get("currency","USD"),
-            discount=str(t.get("discount_percent","")).replace("%",""),
-            image_url=t.get("image_url",""), link=t.get("deep_link",""),
-            category=t.get("category",""),
-        ))
+        selected.append({
+            "name": nm, "price": t.get("price",""), "currency": t.get("currency","USD"),
+            "discount": str(t.get("discount_percent","")).replace("%",""),
+            "image_url": t.get("image_url",""), "link": t.get("deep_link",""),
+            "category": t.get("category",""),
+        })
     if selected:
         article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
     return article
 
-def run():
+def run() -> bool:
     topic = pick_topic()
     if not topic:
         logger.info("[tours-hugo] No topics")
@@ -180,7 +195,7 @@ def run():
         except Exception:
             pass
     article["content"], _qg_issues, _qg_draft = postprocess_content(
-        article["content"], data_prices=_data_prices if _data_prices else None,
+        article["content"], data_prices=_data_prices or None,
         blog_id=BLOG_ID, slug=article["slug"])
     if _qg_draft:
         logger.warning("[%s] DRAFT: %s - %s", BLOG_ID, article["slug"], _qg_issues)

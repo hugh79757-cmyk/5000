@@ -1,12 +1,13 @@
-import sys
-import os
 import logging
+import os
 import re
+import sys
 
 sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
 os.chdir(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
@@ -44,7 +45,7 @@ HERITAGE_CARDS = {
 def _build_heritage_card(region: str) -> str:
     """지역에 맞는 heritage 카드 HTML을 생성한다."""
     card = HERITAGE_CARDS.get(region, HERITAGE_CARDS["default"])
-    html = (
+    return (
         '\n<div style="margin:1.5em 0;padding:0;border:1px solid #e0d5c1;border-radius:12px;'
         'overflow:hidden;max-width:600px;background:#fffdf7;">'
         '<a href="' + card["url"] + '" target="_blank" rel="noopener" '
@@ -57,10 +58,9 @@ def _build_heritage_card(region: str) -> str:
         '<p style="margin:0 0 6px;font-size:15px;font-weight:700;line-height:1.35;'
         'color:#2c2416;">' + card["title"] + '</p>'
         '<p style="margin:0;font-size:13px;color:#6b5e4f;line-height:1.4;">'
-        + card["desc"] + '</p>'
-        '</div></a></div>\n'
+        + card["desc"] + "</p>"
+        "</div></a></div>\n"
     )
-    return html
 
 
 BLOG_PROMPT_MAP = {
@@ -90,8 +90,7 @@ def _select_prompt_id(blog_id, source_type, item_count=None):
     if blog_id == "travel2-hugo" and source_type == "heritage" and item_count is not None:
         if item_count == 1:
             return "travel2_heritage_deep"
-        else:
-            return "travel2_heritage_grouped"
+        return "travel2_heritage_grouped"
     return base
 
 
@@ -296,7 +295,7 @@ def _inject_naver_map(body_md, items, is_festival=False):
             url = "https://map.naver.com/v5/search/" + encoded
         _btn_label = " 네이버에서 검색하기" if is_festival else " 네이버 지도에서 보기"
         _btn_cls = "naver-search-btn" if is_festival else "naver-map-btn"
-        btn_html = '<a class="' + _btn_cls + '" href="' + url + '" target="_blank" rel="nofollow">' + title + _btn_label + '</a>'
+        btn_html = '<a class="' + _btn_cls + '" href="' + url + '" target="_blank" rel="nofollow">' + title + _btn_label + "</a>"
         map_links.append((title, btn_html))
     if not map_links:
         return body_md
@@ -392,7 +391,7 @@ def _fallback_image_from_korservice(items, theme):
 
 def _inject_images(items, content, blog_id=None):
     """API image URLs into body after each H2 in order"""
-    existing = len(re.findall(r'!\[', content))
+    existing = len(re.findall(r"!\[", content))
     if existing >= len(items):
         return content
 
@@ -420,7 +419,7 @@ def _inject_images(items, content, blog_id=None):
     img_idx = 0
     for line in lines:
         result.append(line)
-        if (line.startswith("## ") or line.startswith("### ")) and img_idx < len(img_list) and not any(skip in line for skip in ["여행 준비", "함께 읽어보기", "코스 주변 맛집", "반경 10km"]):
+        if (line.startswith(("## ", "### "))) and img_idx < len(img_list) and not any(skip in line for skip in ["여행 준비", "함께 읽어보기", "코스 주변 맛집", "반경 10km"]):
             name, img_url = img_list[img_idx]
             result.append("")
             result.append(f"![{name}]({img_url})")
@@ -461,11 +460,11 @@ def _enrich_with_nearby_restaurants_only(data, html):
         if img:
             card += '<img class="nearby-card-img" src="' + img + '" alt="' + name + '" loading="lazy">'
         card += '<div class="nearby-card-body">'
-        card += '<strong class="nearby-card-name">' + name + '</strong>'
+        card += '<strong class="nearby-card-name">' + name + "</strong>"
         if addr:
-            card += '<span class="nearby-card-addr">' + addr + '</span>'
+            card += '<span class="nearby-card-addr">' + addr + "</span>"
         card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도에서 보기</a>'
-        card += '</div></div>'
+        card += "</div></div>"
         return card
 
     restaurants = nearby_data.get("restaurants", [])
@@ -514,11 +513,11 @@ def _enrich_with_nearby(data, html):
         if img:
             card += '<img class="nearby-card-img" src="' + img + '" alt="' + name + '" loading="lazy">'
         card += '<div class="nearby-card-body">'
-        card += '<strong class="nearby-card-name">' + name + '</strong>'
+        card += '<strong class="nearby-card-name">' + name + "</strong>"
         if addr:
-            card += '<span class="nearby-card-addr">' + addr + '</span>'
+            card += '<span class="nearby-card-addr">' + addr + "</span>"
         card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도에서 보기</a>'
-        card += '</div></div>'
+        card += "</div></div>"
         return card
 
     attractions = nearby_data.get("attractions", [])
@@ -570,57 +569,57 @@ def _post_process(content):
 
     """후처리: 미완성 문장, HTML 주석, 과잉 질문 정리"""
     # 노출되면 안 되는 HTML 주석 제거
-    content = re.sub(r'<!--\s*(여행용 카메라|편한 워킹화|보조배터리)\s*-->', '', content)
+    content = re.sub(r"<!--\s*(여행용 카메라|편한 워킹화|보조배터리)\s*-->", "", content)
     # 미완성 문장 수정
-    content = re.sub(r'계획하시기\s*\.', '계획하는 것을 추천한다.', content)
-    content = re.sub(r'확인하여\s*\.', '확인하는 것이 좋다.', content)
-    content = re.sub(r'확인해 보시기\s*\.', '확인해 보는 것이 좋다.', content)
+    content = re.sub(r"계획하시기\s*\.", "계획하는 것을 추천한다.", content)
+    content = re.sub(r"확인하여\s*\.", "확인하는 것이 좋다.", content)
+    content = re.sub(r"확인해 보시기\s*\.", "확인해 보는 것이 좋다.", content)
     # "궁금하지 않으세요/않으신가요" 2회 초과 시 제거
-    q_matches = re.findall(r'[^\n]*궁금하[^\n]*\n?', content)
+    q_matches = re.findall(r"[^\n]*궁금하[^\n]*\n?", content)
     if len(q_matches) > 2:
         count = 0
-        lines = content.split('\n')
+        lines = content.split("\n")
         new_lines = []
         for line in lines:
-            if '궁금하' in line:
+            if "궁금하" in line:
                 count += 1
                 if count > 2:
                     continue
             new_lines.append(line)
-        content = '\n'.join(new_lines)
+        content = "\n".join(new_lines)
     # 연속 빈줄 정리
-    content = re.sub(r'\n{4,}', '\n\n\n', content)
+    content = re.sub(r"\n{4,}", "\n\n\n", content)
 
     # ── 금지 표현 자동 치환 ──────────────────────────────
     _REPLACE_MAP = [
         # 문장 잘림 수정 ("참고하시기 ." → 완성 문장)
-        (r'참고하시기\s*\.', '참고하시는 것이 좋습니다.'),
-        (r'유의하시기\s*\.', '유의하셔야 합니다.'),
-        (r'방문하시기\s*\.', '방문하시는 것이 좋습니다.'),
-        (r'이용하시기\s*\.', '이용하시는 것이 좋습니다.'),
-        (r'확인하시기\s*\.', '확인하시는 것이 좋습니다.'),
-        (r'준비하시기\s*\.', '준비하시는 것이 좋습니다.'),
+        (r"참고하시기\s*\.", "참고하시는 것이 좋습니다."),
+        (r"유의하시기\s*\.", "유의하셔야 합니다."),
+        (r"방문하시기\s*\.", "방문하시는 것이 좋습니다."),
+        (r"이용하시기\s*\.", "이용하시는 것이 좋습니다."),
+        (r"확인하시기\s*\.", "확인하시는 것이 좋습니다."),
+        (r"준비하시기\s*\.", "준비하시는 것이 좋습니다."),
         # 상투적 블로그 표현 → 정중한 비즈니스 톤
-        (r'추천드립니다', '추천합니다'),
-        (r'참고하시기 바랍니다', '참고하시면 좋겠습니다'),
-        (r'참고하시기를 권장합니다', '참고하시면 좋겠습니다'),
-        (r'많은 이들에게 사랑받고 있습니다', '꾸준히 찾는 분들이 많습니다'),
-        (r'많은 사랑을 받고 있으며', '꾸준히 찾는 분들이 많으며'),
-        (r'많은 사랑을 받고 있습니다', '꾸준히 찾는 분들이 많습니다'),
-        (r'사랑받고 있습니다', '찾는 분들이 많습니다'),
-        (r'많은 고객들에게 사랑받고 있습니다', '단골 손님이 많은 편입니다'),
-        (r'인기를 끌고 있으며', '찾는 손님이 많으며'),
-        (r'인기를 끌고 있습니다', '찾는 손님이 많습니다'),
-        (r'인기가 많습니다', '찾는 분들이 많습니다'),
-        (r'인기가 많은', '자주 찾는'),
-        (r'인기가 높습니다', '찾는 분들이 많습니다'),
-        (r'인기 있는 메뉴들로 인해', '대표 메뉴로 인해'),
-        (r'많은 손님들이 만족할 수 있는', '만족도가 높은'),
-        (r'많은 이들이 찾고 있습니다', '방문객이 꾸준한 편입니다'),
-        (r'느껴보는 것은 좋은 선택이 될 것입니다', '경험해 보시는 것도 좋습니다'),
-        (r'느껴보자', '확인해 보시기 바랍니다'),
-        (r'것을 추천드립니다', '것을 추천합니다'),
-        (r'것을 권장합니다', '것이 좋습니다'),
+        (r"추천드립니다", "추천합니다"),
+        (r"참고하시기 바랍니다", "참고하시면 좋겠습니다"),
+        (r"참고하시기를 권장합니다", "참고하시면 좋겠습니다"),
+        (r"많은 이들에게 사랑받고 있습니다", "꾸준히 찾는 분들이 많습니다"),
+        (r"많은 사랑을 받고 있으며", "꾸준히 찾는 분들이 많으며"),
+        (r"많은 사랑을 받고 있습니다", "꾸준히 찾는 분들이 많습니다"),
+        (r"사랑받고 있습니다", "찾는 분들이 많습니다"),
+        (r"많은 고객들에게 사랑받고 있습니다", "단골 손님이 많은 편입니다"),
+        (r"인기를 끌고 있으며", "찾는 손님이 많으며"),
+        (r"인기를 끌고 있습니다", "찾는 손님이 많습니다"),
+        (r"인기가 많습니다", "찾는 분들이 많습니다"),
+        (r"인기가 많은", "자주 찾는"),
+        (r"인기가 높습니다", "찾는 분들이 많습니다"),
+        (r"인기 있는 메뉴들로 인해", "대표 메뉴로 인해"),
+        (r"많은 손님들이 만족할 수 있는", "만족도가 높은"),
+        (r"많은 이들이 찾고 있습니다", "방문객이 꾸준한 편입니다"),
+        (r"느껴보는 것은 좋은 선택이 될 것입니다", "경험해 보시는 것도 좋습니다"),
+        (r"느껴보자", "확인해 보시기 바랍니다"),
+        (r"것을 추천드립니다", "것을 추천합니다"),
+        (r"것을 권장합니다", "것이 좋습니다"),
     ]
     for _pat, _repl in _REPLACE_MAP:
         content = re.sub(_pat, _repl, content)
@@ -628,43 +627,43 @@ def _post_process(content):
     # ── 문체 통일: ~다/~한다 종결 → ~습니다 체 (포괄 치환) ──
     _STYLE_RULES = [
         # 고정 패턴
-        ('잊지 말아야 한다.', '잊지 말아야 합니다.'),
-        ('경험해 보길 바란다.', '경험해 보시는 것을 추천합니다.'),
-        ('보내기 좋다.', '보내기 좋습니다.'),
+        ("잊지 말아야 한다.", "잊지 말아야 합니다."),
+        ("경험해 보길 바란다.", "경험해 보시는 것을 추천합니다."),
+        ("보내기 좋다.", "보내기 좋습니다."),
     ]
     for _old, _new in _STYLE_RULES:
         content = content.replace(_old, _new)
 
     # 포괄 정규식: "~ㄹ 수 있다." → "~ㄹ 수 있습니다."
-    content = re.sub(r'할 수 있다\.', '할 수 있습니다.', content)
-    content = re.sub(r'될 수 있다\.', '될 수 있습니다.', content)
-    content = re.sub(r'([가-힣])ㄹ 수 있다\.', r'\1ㄹ 수 있습니다.', content)
+    content = re.sub(r"할 수 있다\.", "할 수 있습니다.", content)
+    content = re.sub(r"될 수 있다\.", "될 수 있습니다.", content)
+    content = re.sub(r"([가-힣])ㄹ 수 있다\.", r"\1ㄹ 수 있습니다.", content)
 
     # "~하다." → "~합니다." 포괄 치환
     _DA_PATTERNS = [
-        ('필요하다.', '필요합니다.'),
-        ('적합하다.', '적합합니다.'),
-        ('가능하다.', '가능합니다.'),
-        ('유명하다.', '유명합니다.'),
-        ('좋다.', '좋습니다.'),
-        ('많다.', '많습니다.'),
-        ('크다.', '큽니다.'),
-        ('없다.', '없습니다.'),
-        ('있다.', '있습니다.'),
-        ('된다.', '됩니다.'),
-        ('한다.', '합니다.'),
-        ('간다.', '갑니다.'),
-        ('온다.', '옵니다.'),
-        ('본다.', '봅니다.'),
-        ('준다.', '줍니다.'),
-        ('난다.', '납니다.'),
+        ("필요하다.", "필요합니다."),
+        ("적합하다.", "적합합니다."),
+        ("가능하다.", "가능합니다."),
+        ("유명하다.", "유명합니다."),
+        ("좋다.", "좋습니다."),
+        ("많다.", "많습니다."),
+        ("크다.", "큽니다."),
+        ("없다.", "없습니다."),
+        ("있다.", "있습니다."),
+        ("된다.", "됩니다."),
+        ("한다.", "합니다."),
+        ("간다.", "갑니다."),
+        ("온다.", "옵니다."),
+        ("본다.", "봅니다."),
+        ("준다.", "줍니다."),
+        ("난다.", "납니다."),
     ]
     for _da_old, _da_new in _DA_PATTERNS:
         content = content.replace(_da_old, _da_new)
 
     # 추가 금지 표현 변형 제거
-    content = content.replace('만끽하며', '충분히 경험하며')
-    content = content.replace('만끽할', '충분히 즐길')
+    content = content.replace("만끽하며", "충분히 경험하며")
+    content = content.replace("만끽할", "충분히 즐길")
 
     # ── H2 없는 H3 가드: 첫 H3 위에 H2가 없으면 자동 삽입 ─────
     _lines = content.split("\n")
@@ -682,7 +681,7 @@ def _post_process(content):
                     break
             if _prev_non_empty and not _prev_non_empty.startswith("## "):
                 _insert_idx = _i
-    if _insert_idx is not None and getattr(_post_process, '_current_blog_id', '') == 'travel3-hugo':
+    if _insert_idx is not None and getattr(_post_process, "_current_blog_id", "") == "travel3-hugo":
         _lines.insert(_insert_idx, "## 식당별 상세 정보\n")
         content = "\n".join(_lines)
 
@@ -692,7 +691,7 @@ def _post_process(content):
         content = content[:_related_idx].rstrip()
 
     # H2 과다 방지: GPT가 5개 초과 H2를 생성하면 마지막 H2 섹션들을 제거
-    _h2_positions = [m.start() for m in re.finditer(r'^## ', content, re.MULTILINE)]
+    _h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
     if len(_h2_positions) > 5:
         _cut_pos = _h2_positions[5]
         content = content[:_cut_pos].rstrip()
@@ -703,7 +702,7 @@ def _post_process(content):
         from shared.coupang_travel import CoupangTravel
         _ct = CoupangTravel()
         if _ct.is_configured():
-            _blog_id = getattr(_post_process, '_current_blog_id', 'travel-hugo')
+            _blog_id = getattr(_post_process, "_current_blog_id", "travel-hugo")
             _coupang_md = _ct.get_travel_product_links(blog_id=_blog_id, count=2)
             if _coupang_md:
                 content = content.rstrip() + _coupang_md
@@ -722,24 +721,24 @@ def _post_process(content):
 
 
     # GPT가 생성한 인라인 네이버 지도 링크 제거 (마크다운 + blockquote 모두)
-    content = re.sub(r'\s*\[네이버 지도에서 보기\]\(https://map\.naver\.com[^)]*\)', '', content)
-    content = re.sub(r'^>\s*.*네이버 지도에서 보기.*$', '', content, flags=re.MULTILINE)
-    content = re.sub(r'^>\s*\[.*?\]\(https://map\.naver\.com[^)]*\)\s*', '', content, flags=re.MULTILINE)
-    content = re.sub(r'\[네이버 지도에서 보기\]\(https://search\.naver\.com[^)]*\)', '', content)
+    content = re.sub(r"\s*\[네이버 지도에서 보기\]\(https://map\.naver\.com[^)]*\)", "", content)
+    content = re.sub(r"^>\s*.*네이버 지도에서 보기.*$", "", content, flags=re.MULTILINE)
+    content = re.sub(r"^>\s*\[.*?\]\(https://map\.naver\.com[^)]*\)\s*", "", content, flags=re.MULTILINE)
+    return re.sub(r"\[네이버 지도에서 보기\]\(https://search\.naver\.com[^)]*\)", "", content)
 
-    return content
 
 
 
 def _validate_place_names(content: str, real_names: list) -> tuple:
     """API 실제 장소명이 본문에 포함되어 있는지 검증.
-    
+
     Returns:
         (content, names_ok): 수정된 본문과 검증 통과 여부
+
     """
     if not real_names:
         return content, True
-    
+
     found = 0
     missing = []
     for name in real_names:
@@ -755,26 +754,26 @@ def _validate_place_names(content: str, real_names: list) -> tuple:
                 found += 1
             else:
                 missing.append(name)
-    
+
     total = len([n for n in real_names if n])
     if total == 0:
         return content, True
-    
+
     ratio = found / total
     names_ok = ratio >= 0.5  # 50% 이상 매칭이면 통과
-    
+
     if missing:
         import logging
         logging.getLogger(__name__).debug(
             f"장소명 불일치 {len(missing)}/{total}: {missing[:5]}")
-    
+
     return content, names_ok
 
 def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
     """생성된 콘텐츠의 H2 수, 글자수, 금지표현을 검증하고 미달 시 재생성"""
     BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요", "느껴보세요"]
-    
-    for attempt in range(max_retries + 1):
+
+    for _attempt in range(max_retries + 1):
         # 검증
         # GPT 생성 H2만 카운트 (후처리 자동삽입 H2 제외)
         _auto_h2_skip = ["여행 준비", "함께 읽어보기", "추천 용품"]
@@ -782,7 +781,7 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
         h2_count = len([h for h in _all_h2_titles if not any(s in h for s in _auto_h2_skip)])
         char_count = len(content)
         banned_found = [b for b in BANNED if b in content]
-        
+
         issues = []
         if h2_count > 6:
             issues.append(f"H2 {h2_count}개→4개 필요")
@@ -790,19 +789,19 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
             issues.append(f"글자수 {char_count}→2200 필요")
         if banned_found:
             issues.append(f"금지표현: {banned_found}")
-        
+
         if not issues:
             logger.info("콘텐츠 검증 통과 (H2:%d, 글자수:%d)", h2_count, char_count)
-        
+
     # [과거연도 방어] 제목/본문에서 과거연도 -> 현재연도 변환
     import re as _yre
-    _cy = str(__import__('datetime').datetime.now().year)
+    _cy = str(__import__("datetime").datetime.now().year)
     for _py in [str(y) for y in range(2020, int(_cy))]:
         # 제목에서 변환
         if _py in content:
             # URL 내부의 연도는 제외하고 변환
             content = _yre.sub(
-                r'(?<!/)(?<![\w])' + _py + r'(?=[ 년.~,\-가-힣])',
+                r"(?<!/)(?<![\w])" + _py + r"(?=[ 년.~,\-가-힣])",
                 _cy, content
             )
 
@@ -841,7 +840,7 @@ def generate_content(data, blog_id="travel-hugo"):
             logger.warning(f"다이닝코드 enrichment 실패 (무시): {e}")
 
     # 축제 파이프라인이면 네이버 블로그 검색으로 추가 정보 보강
-    if source_type in ("korservice",) and prompt_id == "travel1_festival":
+    if source_type == "korservice" and prompt_id == "travel1_festival":
         try:
             from core.naver_blog_api import load_naver_blog_api
             blog_api = load_naver_blog_api()
@@ -1003,7 +1002,7 @@ def generate_content(data, blog_id="travel-hugo"):
 
     items = data.get("items", [])
     content = _inject_images(items, content, blog_id=blog_id)
-    _is_festival = (source_type in ("korservice",) and _select_prompt_id(blog_id, source_type) == "travel1_festival")
+    _is_festival = (source_type == "korservice" and _select_prompt_id(blog_id, source_type) == "travel1_festival")
     content = _inject_naver_map(content, items, is_festival=_is_festival)
 
     display_region = data.get("display_region", "")
@@ -1119,7 +1118,7 @@ def generate_content(data, blog_id="travel-hugo"):
         theme = "여행"
 
     # 캠핑장 실명 변수 추출
-    _camp_names = [i.get('title', i.get('facltNm', ''))[:15] for i in items if i.get('title') or i.get('facltNm')]
+    _camp_names = [i.get("title", i.get("facltNm", ""))[:15] for i in items if i.get("title") or i.get("facltNm")]
     first_camp = _camp_names[0] if _camp_names else theme
     last_camp = _camp_names[-1] if len(_camp_names) > 1 else first_camp
     first_name = first_camp  # travel2용 호환
@@ -1134,7 +1133,7 @@ def generate_content(data, blog_id="travel-hugo"):
         first_name=first_name,
     )
 
-    place_names = ', '.join([i.get('title', i.get('facltNm', ''))[:12] for i in items[:3]])
+    place_names = ", ".join([i.get("title", i.get("facltNm", ""))[:12] for i in items[:3]])
 
     # blog_id별 제목 프롬프트 분기
     if blog_id == "travel2-hugo":
@@ -1214,25 +1213,25 @@ def generate_content(data, blog_id="travel-hugo"):
 
     if title_result and title_result.get("content"):
         generated_title = title_result["content"].strip().strip('"').strip("'").strip()
-        generated_title = re.sub(r'^(제목[:\s]*|Title[:\s]*)', '', generated_title).strip()
+        generated_title = re.sub(r"^(제목[:\s]*|Title[:\s]*)", "", generated_title).strip()
         # "1곳" 어색한 제목 보정
-        if '1곳' in generated_title:
-            generated_title = generated_title.replace(' 1곳', '').replace('1곳 ', '')
+        if "1곳" in generated_title:
+            generated_title = generated_title.replace(" 1곳", "").replace("1곳 ", "")
         if len(generated_title) > 5:
             import random as _r
             import re as _re
-            ban_endings = ['소개', '알아보기', '만나보기', '살펴보기', '확인하기', '코스 안내', '안내']
-            ban_phrases = ['에서 즐기는', '에서 만나는', '에서 즐길 수 있는']
+            ban_endings = ["소개", "알아보기", "만나보기", "살펴보기", "확인하기", "코스 안내", "안내"]
+            ban_phrases = ["에서 즐기는", "에서 만나는", "에서 즐길 수 있는"]
             for ban in ban_endings:
                 if generated_title.endswith(ban):
-                    replacements = ['추천', '한눈에 보기', '메뉴 비교', '코스 추천', '비교', '체크리스트', '방문 전 필독']
-                    generated_title = generated_title[:-len(ban)].rstrip() + ' ' + _r.choice(replacements)
+                    replacements = ["추천", "한눈에 보기", "메뉴 비교", "코스 추천", "비교", "체크리스트", "방문 전 필독"]
+                    generated_title = generated_title[:-len(ban)].rstrip() + " " + _r.choice(replacements)
                     break
             for bp in ban_phrases:
                 if bp in generated_title:
-                    generated_title = generated_title.replace(bp, ' ')
-                    generated_title = ' '.join(generated_title.split())
-            long_words = _re.findall(r'[가-힣]{8,}', generated_title)
+                    generated_title = generated_title.replace(bp, " ")
+                    generated_title = " ".join(generated_title.split())
+            long_words = _re.findall(r"[가-힣]{8,}", generated_title)
             if long_words:
                 generated_title = fallback_title
             if len(generated_title) > 45 or len(generated_title) < 15:

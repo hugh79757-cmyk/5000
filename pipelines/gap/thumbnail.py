@@ -1,8 +1,9 @@
-import os
 import hashlib
 import logging
+import os
 import tempfile
 from datetime import datetime
+
 from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger(__name__)

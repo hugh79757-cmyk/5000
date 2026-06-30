@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""
-네이버 데이터랩 쇼핑인사이트 → curation keywords.py 자동 동기화
+"""네이버 데이터랩 쇼핑인사이트 → curation keywords.py 자동 동기화
 실행: python3 pipelines/curation/naver_datalab_sync.py [blog_id]
 스케줄: 매주 월요일 자동 실행 권장
 """
 
-import os
-import sys
 import json
-import sqlite3
-import time
 import logging
-import requests
+import os
+import sqlite3
+import sys
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
+
+import requests
 from dotenv import load_dotenv
 
 # ── 환경 설정 ──────────────────────────────────────────────────────────────
@@ -49,10 +49,9 @@ TREND_DAYS = 30  # 최근 30일 평균 클릭률 기준
 # ════════════════════════════════════════════════════════════════════════════
 
 def fetch_top_keywords(cat_id: str, top_n: int = 100) -> list[dict]:
-    """
-    쇼핑인사이트 분야별 인기 키워드 조회
+    """쇼핑인사이트 분야별 인기 키워드 조회
     → 반환: [{"keyword": str, "ratio": float}, ...] (ratio 높은 순)
-    
+
     ※ 네이버 API는 키워드 트렌드 비교만 가능하고 '분야 내 TOP 키워드 목록'을
       직접 제공하지 않으므로, 사전 시드 키워드를 기반으로 ratio를 비교해
       상위 키워드를 선별하는 방식을 사용합니다.
@@ -149,7 +148,7 @@ def fetch_top_keywords(cat_id: str, top_n: int = 100) -> list[dict]:
             time.sleep(0.3)  # API rate limit 준수
 
         except Exception as e:
-            logger.error(f"API 호출 오류 (batch {i}~{i+BATCH}): {e}")
+            logger.exception(f"API 호출 오류 (batch {i}~{i+BATCH}): {e}")
             time.sleep(1)
 
     # ratio 기준 정렬
@@ -163,7 +162,7 @@ def fetch_top_keywords(cat_id: str, top_n: int = 100) -> list[dict]:
 # 2. DB 저장: naver_trending_keywords 테이블
 # ════════════════════════════════════════════════════════════════════════════
 
-def save_to_db(blog_id: str, keywords: list[dict]):
+def save_to_db(blog_id: str, keywords: list[dict]) -> None:
     """트렌드 키워드를 DB에 저장 (upsert)"""
     conn = sqlite3.connect(DB_PATH)
     conn.execute("""
@@ -194,8 +193,7 @@ def save_to_db(blog_id: str, keywords: list[dict]):
 # ════════════════════════════════════════════════════════════════════════════
 
 def update_keywords_py(blog_id: str, new_keywords: list[str], top_n: int = 50):
-    """
-    keywords.py의 KEYWORD_MAP[blog_id] 목록을 
+    """keywords.py의 KEYWORD_MAP[blog_id] 목록을
     네이버 트렌드 TOP 키워드로 갱신 (기존 키워드는 유지 + 신규 추가)
     """
     content = Path(KEYWORDS_PATH).read_text(encoding="utf-8")
@@ -263,7 +261,7 @@ def bulk_collect_coupang(blog_id: str, keywords: list[str]):
                 logger.warning(f"  [{i:03d}] ❌ {kw}: 0개")
                 fail += 1
         except Exception as e:
-            logger.error(f"  [{i:03d}] 💥 {kw}: {e}")
+            logger.exception(f"  [{i:03d}] 💥 {kw}: {e}")
             fail += 1
         time.sleep(0.4)
 
@@ -275,7 +273,7 @@ def bulk_collect_coupang(blog_id: str, keywords: list[str]):
 # 5. 메인 실행
 # ════════════════════════════════════════════════════════════════════════════
 
-def run(blog_id: str = "baby-hugo"):
+def run(blog_id: str = "baby-hugo") -> None:
     if blog_id not in CATEGORY_MAP:
         logger.error(f"지원하지 않는 blog_id: {blog_id}")
         logger.error(f"지원 목록: {list(CATEGORY_MAP.keys())}")
@@ -314,7 +312,7 @@ def run(blog_id: str = "baby-hugo"):
     logger.info(f"=== 완료: {blog_id} ===\n")
 
 
-def run_all():
+def run_all() -> None:
     """모든 블로그 순차 동기화"""
     for blog_id in CATEGORY_MAP:
         run(blog_id)

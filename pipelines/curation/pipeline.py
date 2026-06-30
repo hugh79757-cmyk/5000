@@ -2,34 +2,37 @@
 
 흐름: 키워드 선택 → 상품 수집(캐시) → AI 글 생성 → Hugo 발행
 """
+import logging
 import os
-import sys
 import re
 import sqlite3
-import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from dotenv import load_dotenv
+
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-from shared.content_store import get_today_count, title_similar_exists
-from shared.publisher import publish
-from shared.validators import sanitize_title
-from shared.image_handler import process_and_upload
 import requests as _requests
-from shared.telegram_notifier import send_error as _tg_error
-from pipelines.curation.keywords import get_keywords
+
 from pipelines.curation.collector import collect_keyword, get_products
-from pipelines.curation.writer import generate_curation_article
 from pipelines.curation.enricher import enrich_products
+from pipelines.curation.keywords import get_keywords
+from pipelines.curation.writer import generate_curation_article
+from shared.content_store import get_today_count
+from shared.image_handler import process_and_upload
+from shared.publisher import publish
+from shared.telegram_notifier import send_error as _tg_error
+from shared.validators import assert_korean_or_reject, sanitize_title
 
 logger = logging.getLogger(__name__)
 
 # -- 동시실행 방지 락 --
 import fcntl
+
 
 def _acquire_lock(blog_id):
     """블로그별 파일 락 - 동시 실행 방지"""
@@ -44,7 +47,7 @@ def _acquire_lock(blog_id):
         lock_file.close()
         return None
 
-def _release_lock(lock_file):
+def _release_lock(lock_file) -> None:
     if lock_file:
         try:
             fcntl.flock(lock_file, fcntl.LOCK_UN)
@@ -55,7 +58,7 @@ def _release_lock(lock_file):
 PROJECT_DIR = Path(__file__).parent.parent.parent
 DB_PATH = PROJECT_DIR / "data" / "curation.db"
 
-def _init_db():
+def _init_db() -> None:
     """DB 테이블이 없으면 자동 생성 (DB 초기화 복구용)"""
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute("""
@@ -104,7 +107,11 @@ def _extract_category(keyword):
 
 
 def _select_keyword(blog_id):
-    """키워드 선택 - 30일 TTL + 카테고리 14일 중복 억제"""
+    """키워드 선택 - 30일 TTL + 카테고리 14일 중복 억제
+
+    모든 키워드가 소진되면 None 반환 (강제 fallback 금지).
+    dispatcher가 no_keyword 사유로 텔레그램 알림 전송 → 사용자 수동 재시작.
+    """
     keywords = get_keywords(blog_id)
     if not keywords:
         return None
@@ -123,51 +130,33 @@ def _select_keyword(blog_id):
         " WHERE blog_id=? AND published_at > datetime('now', '-14 days')",
         (blog_id,)
     ).fetchall()
-    conn.close()
 
     used_set = {r[0] for r in used_rows}
     recent_cats = {_extract_category(r[0]) for r in recent_rows}
 
     available = [k for k in keywords if k not in used_set]
-    cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
-    candidates = cat_filtered if cat_filtered else available
-
-    if not candidates:
-        conn = _sq.connect(str(DB_PATH))
-        oldest = conn.execute(
-            "SELECT keyword FROM publish_log"
-            " WHERE blog_id=? ORDER BY published_at ASC LIMIT 1",
-            (blog_id,)
-        ).fetchone()
+    if not available:
         conn.close()
-        candidates = [oldest[0]] if oldest else [keywords[0]]
+        logger.warning(f"[{blog_id}] 모든 키워드 30일 내 사용 완료 — 발행 중단")
+        return None  # 강제 fallback 금지, 사용자 알림 대기
+
+    cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
+    candidates = cat_filtered or available
 
     conn = _sq.connect(str(DB_PATH))
-    for kw in candidates:
-        cnt = conn.execute(
-            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
-        ).fetchone()[0]
-        if cnt >= 3:
-            conn.close()
-            return kw
-    # 카테고리 필터된 후보에 상품 부족 시 → available(unfiltered)에서 상품 있는 키워드 사용
-    for kw in available:
-        cnt = conn.execute(
-            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
-        ).fetchone()[0]
-        if cnt >= 3:
-            conn.close()
-            return kw
-    # 그래도 없으면 전체 키워드에서 상품 있는 것 사용
-    for kw in keywords:
-        cnt = conn.execute(
-            "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
-        ).fetchone()[0]
-        if cnt >= 3:
-            conn.close()
-            return kw
+    # candidates → available → 전체 순으로 상품 3개 이상인 키워드 탐색
+    for pool in [candidates, available]:
+        for kw in pool:
+            cnt = conn.execute(
+                "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
+            ).fetchone()[0]
+            if cnt >= 3:
+                conn.close()
+                return kw
     conn.close()
-    return candidates[0]
+    # 상품 있는 키워드가 하나도 없음
+    logger.warning(f"[{blog_id}] 모든 키워드 상품 부족 — 발행 중단")
+    return None
 
 
 def _upload_thumbnail(image_url):
@@ -175,8 +164,7 @@ def _upload_thumbnail(image_url):
     try:
         resp = _requests.get(image_url, timeout=10)
         if resp.status_code == 200 and len(resp.content) > 1000:
-            r2_url = process_and_upload(resp.content, key_prefix="curation-images")
-            return r2_url
+            return process_and_upload(resp.content, key_prefix="curation-images")
     except Exception as e:
         logger.warning(f"썸네일 업로드 실패: {e}")
     return ""
@@ -322,7 +310,7 @@ def _filter_irrelevant_products(blog_id, keyword, products):
 
     allowed = filters["allowed"]
     blocked = filters["blocked"]
-    keyword_lower = keyword.lower()
+    keyword.lower()
 
     filtered = []
     for p in products:
@@ -408,7 +396,7 @@ def _filter_used_products(blog_id, products):
     return filtered[:5]
 
 
-def _record_products(blog_id, keyword, products):
+def _record_products(blog_id, keyword, products) -> None:
     """발행에 사용된 상품 ID 기록"""
     conn = sqlite3.connect(str(DB_PATH))
     now = datetime.utcnow().isoformat()
@@ -470,14 +458,14 @@ def _title_is_duplicate(blog_id, title):
     return found
 
 
-def _make_slug(keyword):
+def _make_slug(keyword) -> str:
     slug = keyword.replace(" ", "-").lower()
-    slug = re.sub(r'[^a-z0-9가-힣\-]', '', slug)
+    slug = re.sub(r"[^a-z0-9가-힣\-]", "", slug)
     date_prefix = datetime.now().strftime("%Y%m%d")
     return f"{date_prefix}-{slug}"
 
 
-def _record_publish(blog_id, keyword, title, slug):
+def _record_publish(blog_id, keyword, title, slug) -> None:
     """publish_log에 발행 기록"""
     conn = sqlite3.connect(str(DB_PATH))
     conn.execute(
@@ -490,7 +478,7 @@ def _record_publish(blog_id, keyword, title, slug):
 
 LEDGER_DB = PROJECT_DIR / "data" / "content.db"
 
-def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = ""):
+def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "") -> None:
     """publish_ledger에 발행 실패 기록 (예외를 삼켜 파이프라인 중단 방지)"""
     try:
         con = sqlite3.connect(str(LEDGER_DB))
@@ -507,7 +495,7 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
 
 
 def run(cfg):
-    """curation 파이프라인 메인 — dispatcher에서 호출"""
+    """Curation 파이프라인 메인 — dispatcher에서 호출"""
     blog_id = cfg.get("id", "")
     daily_quota = cfg.get("daily_quota", 5)
 
@@ -608,6 +596,13 @@ def _run_inner(cfg, blog_id, daily_quota):
         _record_failure(blog_id, "write_error", "AI 글 생성 실패", keyword)
         return {"success": False, "reason": "write_error"}
 
+    # 언어 검증 — 중국어 생성 차단
+    _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
+    if _lang_err:
+        _record_failure(blog_id, "language_error", _lang_err, keyword)
+        logger.error(f"[{blog_id}] {_lang_err}")
+        return {"success": False, "reason": "language_error"}
+
     title = sanitize_title(article["title"])
     body_md = article["body_md"]
     description = article.get("description", "")
@@ -639,7 +634,6 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     # 발행
     # 태그 생성: 키워드 + 제목에서 브랜드명 추출
-    import re as _tag_re
     tag_set = set()
     # 키워드 자체
     tag_set.add(keyword)
@@ -666,7 +660,7 @@ def _run_inner(cfg, blog_id, daily_quota):
             if bv and len(bv) >= 2:
                 tag_set.add(bv)
     tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
-    
+
     result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")

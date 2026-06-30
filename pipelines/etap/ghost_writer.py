@@ -1,5 +1,9 @@
 """ghost_writer.py - Ghost Tours And Dark History guide generator"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
+
 from pipelines.etap.quality_guard import preprocess_tours
 from shared.ai_writer import generate as ai_generate
 
@@ -37,8 +41,8 @@ def fetch_tours(city, country=None):
 
 def _categorize_tours(tours):
     """투어를 카테고리별로 분류. ghost/underground/historical 로 구분."""
-    ghost     = [t for t in tours if t.get("category") in ("Ghost Tours",)]
-    underground = [t for t in tours if t.get("category") in ("Underground Tours",)]
+    ghost     = [t for t in tours if t.get("category") == "Ghost Tours"]
+    underground = [t for t in tours if t.get("category") == "Underground Tours"]
     historical  = [t for t in tours if t.get("category") in (
         "Historical Tours","Archaeology Tours","Cultural Tours",
         "Walking Tours","Architecture Tours","Movie Tours"
@@ -50,7 +54,7 @@ def _build_tour_block(tours, max_items=5):
     lines = []
     for t in tours[:max_items]:
         name = re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
-        price = int(round(_safe_price(t.get("price", 0))))
+        price = round(_safe_price(t.get("price", 0)))
         disc = t.get("discount") or ""
         disc_str = f" | -{disc}% off" if disc and str(disc) not in ("0","","0.0") else ""
         lines.append(f"- {name} | ${price}{disc_str} | {t.get('category','')}")
@@ -170,7 +174,7 @@ WRITING RULES:
   long history, rich history, standout experience, a practical guide
 
 Return ONLY markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a paranormal investigator and historian who leads ghost tours. "
     "ABSOLUTE RULES: "

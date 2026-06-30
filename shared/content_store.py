@@ -1,6 +1,6 @@
+import os
 import re
 import sqlite3
-import os
 from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "stap_content.db")
@@ -14,7 +14,7 @@ def get_conn():
     return conn
 
 
-def init_db():
+def init_db() -> None:
     conn = get_conn()
     conn.execute(
         "CREATE TABLE IF NOT EXISTS articles ("
@@ -91,7 +91,7 @@ def insert_article(article):
     return row_id
 
 
-def update_published(article_id, published_url):
+def update_published(article_id, published_url) -> None:
     conn = get_conn()
     try:
         conn.execute(
@@ -152,7 +152,7 @@ def get_all_articles(blog_id=None, limit=100, offset=0):
 def register_images(article_id, blog_id, html):
     conn = get_conn()
     urls = re.findall(r'<img[^>]+src=["\'](https?://[^"\'>]+)["\'"]', html or "")
-    md_urls = re.findall(r'!\[[^\]]*\]\((https?://[^)]+)\)', html or "")
+    md_urls = re.findall(r"!\[[^\]]*\]\((https?://[^)]+)\)", html or "")
     all_urls = list(set(urls + md_urls))
     count = 0
     for url in all_urls:
@@ -238,7 +238,7 @@ def title_similar_exists(blog_id, title):
     conn.close()
     return row is not None
 
-def init_used_places():
+def init_used_places() -> None:
     conn = get_conn()
     conn.execute("""
         CREATE TABLE IF NOT EXISTS used_places (
@@ -279,7 +279,7 @@ def register_places(article_id, blog_id, place_names, content_ids=None):
             count += 1
         except sqlite3.Error as e:
             import logging
-            logging.getLogger(__name__).error(f"[DB_ERROR] INSERT used_places failed: {e}")
+            logging.getLogger(__name__).exception(f"[DB_ERROR] INSERT used_places failed: {e}")
     conn.commit()
     conn.close()
     return count

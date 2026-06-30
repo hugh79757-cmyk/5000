@@ -1,9 +1,10 @@
 """RAP fetcher — 부동산 공공데이터 API 수집"""
-import os
 import logging
-import requests
+import os
 import xml.etree.ElementTree as ET
 from datetime import datetime
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +30,7 @@ def fetch_apt_trade(lawd_cd, deal_ymd=None, rows=30):
     """
     if not deal_ymd:
         deal_ymd = datetime.now().strftime("%Y%m")
-    
+
     url = "https://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade"
     try:
         r = requests.get(url, params={
@@ -40,15 +41,15 @@ def fetch_apt_trade(lawd_cd, deal_ymd=None, rows=30):
             "numOfRows": str(rows),
         }, timeout=20)
         r.raise_for_status()
-        
+
         root = ET.fromstring(r.text)
-        result_code = root.findtext('.//resultCode', '')
-        if result_code != '000':
+        result_code = root.findtext(".//resultCode", "")
+        if result_code != "000":
             logger.error(f"실거래가 API 오류: {root.findtext('.//resultMsg', '')}")
             return []
-        
+
         items = []
-        for item in root.findall('.//item'):
+        for item in root.findall(".//item"):
             data = {}
             for child in item:
                 data[child.tag] = (child.text or "").strip()
@@ -59,19 +60,20 @@ def fetch_apt_trade(lawd_cd, deal_ymd=None, rows=30):
                 except ValueError:
                     data["dealAmountInt"] = 0
             items.append(data)
-        
+
         logger.info(f"실거래가 조회: {lawd_cd}/{deal_ymd} → {len(items)}건")
         return items
     except Exception as e:
-        logger.error(f"실거래가 API 실패: {e}")
+        logger.exception(f"실거래가 API 실패: {e}")
         return []
 
 
 def fetch_apt_trade_multi(lawd_cd, months=3, rows=50):
     """최근 N개월 실거래가 조회"""
     from datetime import datetime
+
     from dateutil.relativedelta import relativedelta
-    
+
     all_items = []
     now = datetime.now()
     for i in range(months):
@@ -146,7 +148,7 @@ def fetch_apt_rent(lawd_cd: str, deal_ymd: str, rows: int = 30) -> list:
         logger.info(f"전월세 조회: {lawd_cd}/{deal_ymd} → {len(results)}건 (전세 {jeonse}, 월세 {monthly})")
         return results
     except Exception as e:
-        logger.error(f"전월세 API 실패: {e}")
+        logger.exception(f"전월세 API 실패: {e}")
         return []
 
 def fetch_subscription_info(region_cd=None, page_size=10):
@@ -165,19 +167,19 @@ def fetch_subscription_info(region_cd=None, page_size=10):
     }
     if region_cd:
         params["CNP_CD"] = region_cd
-    
+
     try:
         r = requests.get(url, params=params, timeout=20)
         r.raise_for_status()
         data = r.json()
-        
+
         if isinstance(data, list) and len(data) > 1:
             items = data[1].get("dsList", [])
             logger.info(f"청약홈 조회: region={region_cd} → {len(items)}건")
             return items
         return []
     except Exception as e:
-        logger.error(f"청약홈 API 실패: {e}")
+        logger.exception(f"청약홈 API 실패: {e}")
         return []
 
 

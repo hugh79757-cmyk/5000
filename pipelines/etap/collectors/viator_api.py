@@ -1,5 +1,8 @@
 """Viator Partner API v2 직접 수집기 — products/search 기반"""
-import os, sys, json, sqlite3, logging, time
+import logging
+import os
+import sqlite3
+import time
 from datetime import datetime
 
 try:
@@ -12,7 +15,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.pa
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
 API_BASE = "https://api.viator.com/partner"
-HEADERS = lambda key: {
+def HEADERS(key):
+    return {
     "exp-api-key": key,
     "Accept": "application/json;version=2.0",
     "Accept-Language": "en-US",

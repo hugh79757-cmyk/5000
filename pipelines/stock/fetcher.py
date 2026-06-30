@@ -1,8 +1,9 @@
-import os
-import requests
 import logging
+import os
 import sqlite3
 from datetime import datetime, timedelta
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +177,7 @@ def fetch_etf_daily(top_n=10):
                 logging.getLogger(__name__).info(f"ETF {saved}건 DB 캐시 저장")
         except Exception as e:
             import logging
-            logging.getLogger(__name__).error(f"ETF fetch 실패: {e}")
+            logging.getLogger(__name__).exception(f"ETF fetch 실패: {e}")
             return None
 
     if not items:
@@ -276,7 +277,7 @@ def fetch_dividend_ranking(top_n=10):
         }
     except Exception as e:
         import logging
-        logging.getLogger(__name__).error(f"KSD 배당순위 fetch 실패: {e}")
+        logging.getLogger(__name__).exception(f"KSD 배당순위 fetch 실패: {e}")
         return None
 
 
@@ -354,7 +355,7 @@ def _get_dividend_from_db():
     return [dict(r) for r in rows]
 
 
-def refresh_daily_data():
+def refresh_daily_data() -> None:
     """하루 1회 ETF 시세 + 배당 순위 데이터를 API에서 가져와 DB에 저장"""
     import logging
     _log = logging.getLogger(__name__)

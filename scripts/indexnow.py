@@ -1,11 +1,11 @@
-import os
-import sys
 import glob
+import os
 import sqlite3
-import requests
 import xml.etree.ElementTree as ET
-import yaml
 from datetime import datetime
+
+import requests
+import yaml
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH  = os.path.join(BASE_DIR, "data", "indexnow.db")
@@ -68,11 +68,11 @@ def init_db():
 
 
 def get_submitted(conn):
-    return set(r[0] for r in conn.execute("SELECT url FROM submitted_urls").fetchall())
+    return {r[0] for r in conn.execute("SELECT url FROM submitted_urls").fetchall()}
 
 
 def _parse_sitemap(content, base_domain):
-    """sitemap XML에서 URL 추출. sitemap index 중첩 처리 포함."""
+    """Sitemap XML에서 URL 추출. sitemap index 중첩 처리 포함."""
     ns = {"s": "http://www.sitemaps.org/schemas/sitemap/0.9"}
     root = ET.fromstring(content)
     urls = [loc.text.strip() for loc in root.findall(".//s:loc", ns) if loc.text]
@@ -137,7 +137,7 @@ def submit(domain, urls):
     return ok
 
 
-def save(conn, domain, urls, code):
+def save(conn, domain, urls, code) -> None:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     for u in urls:
         conn.execute(
@@ -147,7 +147,7 @@ def save(conn, domain, urls, code):
     conn.commit()
 
 
-def run():
+def run() -> None:
     print(f"=== IndexNow 5000 ({datetime.now().strftime('%Y-%m-%d %H:%M')}) ===")
     conn   = init_db()
     already = get_submitted(conn)
@@ -171,7 +171,7 @@ def run():
             t_ok += len(new_urls)
             print(f"  -> {len(new_urls)}건 제출 완료 ({success}/{len(ENGINES)} 엔진)")
         else:
-            print(f"  -> 제출 실패")
+            print("  -> 제출 실패")
 
     conn.close()
     print(f"\n=== 완료: {t_ok}/{t_new} URLs 제출 ===")

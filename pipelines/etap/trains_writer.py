@@ -1,13 +1,28 @@
 """trains_writer.py – 기차/버스/항공 노선 비교 가이드"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
+
 from shared.ai_writer import generate as ai_generate
+
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 # === ETAP v2 Enrichment ===
 try:
-    from pipelines.etap.data_enricher import get_city_context, format_context_for_prompt, get_airline_context, get_route_context
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks, calculate_quality_metrics
+    from pipelines.etap.data_enricher import (
+        format_context_for_prompt,
+        get_airline_context,
+        get_city_context,
+        get_route_context,
+    )
+    from pipelines.etap.post_processor import (
+        calculate_quality_metrics,
+        clean_prompt_leaks,
+        clean_tags,
+        fix_encoding,
+    )
     from pipelines.etap.prompt_angles import pick_city_angle, pick_flight_angle, pick_route_angle
     HAS_ENRICHMENT = True
 except ImportError:
@@ -89,7 +104,7 @@ RULES:
 - Write practically with real numbers
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a European travel writer specializing in transportation. Use only provided data. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0.",
     prompt,

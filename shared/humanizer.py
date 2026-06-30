@@ -1,5 +1,4 @@
-"""
-humanizer.py — 한국어 AI 말투 다듬기 (Humanize)
+"""humanizer.py — 한국어 AI 말투 다듬기 (Humanize)
 
 AI가 생성한 한국어 블로그 글에서 AI 티가 나는 어미·관용구·번역투를
 자연스러운 한국어로 교체한다. 실패 시 원본을 그대로 반환하여
@@ -9,13 +8,11 @@ AI가 생성한 한국어 블로그 글에서 AI 티가 나는 어미·관용구
 import logging
 import re
 import time
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
 # ── API 클라이언트 재사용 ──────────────────────────────────────────
 from shared.ai_writer import generate as _ai_generate
-
 
 # ── System Prompt: Fast 모드 핵심 룰 ──────────────────────────────
 
@@ -87,43 +84,43 @@ _SYSTEM_PROMPT = """당신은 한국어 블로그 에디터입니다. AI가 생�
 
 
 def humanize_korean(body_md: str, blog_id: str, title: str = "") -> str:
-    """
-    한국어 AI 말투를 자연스러운 글로 변환한다.
-    
+    """한국어 AI 말투를 자연스러운 글로 변환한다.
+
     - AI Writer의 generate() 함수를 재사용 (OpenAI API)
     - Fast 모드: 단일 호출 (5,000자 미만/이상 모두)
     - 실패 시 원본 body_md 그대로 반환
     - 영문 텍스트 비율 70% 이상이면 즉시 원본 반환
     - 처리 시간 로깅
-    
+
     Args:
         body_md: AI가 생성한 마크다운 본문
         blog_id: 블로그 ID (로깅용)
         title: 글 제목 (컨텍스트 제공용)
-    
+
     Returns:
         str: 다듬어진 본문 (실패 시 원본)
+
     """
     start = time.time()
     original_len = len(body_md)
-    
+
     # ── 가드: 빈 본문 ──────────────────────────────────────────
     if not body_md or not body_md.strip():
         logger.debug(f"[HUMANIZE] {blog_id} | 빈 본문 스킵")
         return body_md
-    
+
     # ── 영문 비율 감지: 70% 이상이면 스킵 ────────────────────────
-    _hangle = len(re.findall(r'[가-힣]', body_md))
-    _english = len(re.findall(r'[a-zA-Z]', body_md))
+    _hangle = len(re.findall(r"[가-힣]", body_md))
+    _english = len(re.findall(r"[a-zA-Z]", body_md))
     total_letters = _hangle + _english
     if total_letters > 0 and (_english / total_letters) >= 0.70:
         elapsed = time.time() - start
         logger.info(f"[HUMANIZE] {blog_id} | 영문 70%+ 스킵 ({_english}/{total_letters}) | {elapsed:.1f}s")
         return body_md
-    
+
     # ── User Prompt 구성 ────────────────────────────────────────
     _title_part = f"제목: {title}\n블로그: {blog_id}\n" if title else f"블로그: {blog_id}\n"
-    
+
     user_prompt = f"""다음 한국어 블로그 글의 AI 말투를 자연스러운 한국어로 다듬어라.
 
 {_title_part}
@@ -136,7 +133,7 @@ def humanize_korean(body_md: str, blog_id: str, title: str = "") -> str:
 - 어투와 문장 흐름만 자연스럽게 교체
 - 원본과 동일한 길이(±10%) 유지
 - 수정된 글만 출력하고 설명, 요약, 메타 텍스트 일절 금지"""
-    
+
     # ── API 호출 ────────────────────────────────────────────────
     try:
         result = _ai_generate(
@@ -144,19 +141,19 @@ def humanize_korean(body_md: str, blog_id: str, title: str = "") -> str:
             user_prompt=user_prompt,
             tier="economy"  # mimo-v2.5, 경제적
         )
-        
+
         if result and result.get("content"):
             raw = result["content"].strip()
-            
+
             # ── 후처리: AI가 앞뒤에 설명을 붙인 경우 제거 ────────
             # 가장 긴 마크다운 블록 또는 원본과 유사한 첫 부분 추출
             if raw.startswith(("```", "수정", "변경", "다음", "결과", "원본")):
                 # 코드블록 제거
-                raw = re.sub(r'^```(?:markdown)?\s*\n?', '', raw)
-                raw = re.sub(r'\n?```\s*$', '', raw)
+                raw = re.sub(r"^```(?:markdown)?\s*\n?", "", raw)
+                raw = re.sub(r"\n?```\s*$", "", raw)
                 # '수정된 글:' 같은 접두사 제거
-                raw = re.sub(r'^(수정된 글|변경|결과)[:\n]\s*', '', raw)
-            
+                raw = re.sub(r"^(수정된 글|변경|결과)[:\n]\s*", "", raw)
+
             # 길이 검증: ±15% 초과 시 원본 유지
             length_ratio = len(raw) / original_len if original_len > 0 else 1.0
             if length_ratio < 0.50:
@@ -169,16 +166,16 @@ def humanize_korean(body_md: str, blog_id: str, title: str = "") -> str:
                 elapsed = time.time() - start
                 logger.info(f"[HUMANIZE] {blog_id} | {original_len}자 → {original_len}자 (유지) | {elapsed:.1f}s")
                 return body_md
-            
+
             elapsed = time.time() - start
             logger.info(f"[HUMANIZE] {blog_id} | {original_len}자 → {len(raw)}자 | {elapsed:.1f}s")
             return raw
-        
+
         # 결과 없음 → 원본
         elapsed = time.time() - start
         logger.warning(f"[HUMANIZE] {blog_id} | 응답 없음, 원본 유지 | {elapsed:.1f}s")
         return body_md
-    
+
     except Exception as e:
         elapsed = time.time() - start
         logger.warning(f"[HUMANIZE] {blog_id} | 실패 (원본 유지): {e} | {elapsed:.1f}s")

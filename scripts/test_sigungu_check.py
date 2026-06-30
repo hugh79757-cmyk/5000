@@ -1,12 +1,13 @@
 """sigungu 중복 체크 단위 테스트 — 5케이스"""
-import sys, sqlite3
+import sqlite3
+import sys
 from datetime import datetime
 
-sys.path.insert(0, '/Users/twinssn/Projects/TAP')
-sys.path.insert(0, '/Users/twinssn/Projects/5000')
+sys.path.insert(0, "/Users/twinssn/Projects/TAP")
+sys.path.insert(0, "/Users/twinssn/Projects/5000")
 
-from shared.db_paths import ARTICLES_DB
 from pipelines.travel.pipeline import _travel_sigungu_recently_published
+from shared.db_paths import ARTICLES_DB
 
 conn = sqlite3.connect(ARTICLES_DB)
 

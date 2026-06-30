@@ -7,13 +7,12 @@ D1의 Bing 키워드에서 GAP 적합 키워드를 추출하여 gap.db에 저장
 스케줄러에서 주 1회 또는 daily로 호출 가능.
 """
 
-import os
-import sys
-import sqlite3
 import logging
+import os
+import sqlite3
+import sys
+
 import requests
-import json
-from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -71,17 +70,14 @@ def classify_category(query):
     return "생활정보"
 
 
-def is_gap_suitable(query):
+def is_gap_suitable(query) -> bool:
     q = query.lower()
     for p in EXCLUDE_PATTERNS:
         if p.lower() in q:
             return False
     if len(query) < 4:
         return False
-    has_korean = any('\uac00' <= c <= '\ud7a3' for c in query)
-    if not has_korean:
-        return False
-    return True
+    return any("\uac00" <= c <= "\ud7a3" for c in query)
 
 
 def calc_priority(query, impressions, position):
@@ -110,7 +106,7 @@ def fetch_d1_keywords(limit=10000):
         r.raise_for_status()
         return r.json()
     except Exception as e:
-        logger.error(f"D1 키워드 조회 실패: {e}")
+        logger.exception(f"D1 키워드 조회 실패: {e}")
         return []
 
 

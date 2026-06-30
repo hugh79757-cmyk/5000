@@ -1,5 +1,9 @@
 """layover_writer.py - Layover Tours And Stopover Guide generator"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
+
 from pipelines.etap.quality_guard import preprocess_tours
 
 logger = logging.getLogger(__name__)
@@ -33,17 +37,19 @@ _CATEGORY_DURATION = {
 
 # description 텍스트에서 duration 보조 추출
 import re as _re
+
 from shared.ai_writer import generate as ai_generate
+
 _DUR_PATTERNS = [
-    (_re.compile(r'(\d+)[-\s]?night', _re.I),  lambda m: int(m.group(1)) * 1440),
-    (_re.compile(r'(\d+)[-\s]?day',   _re.I),  lambda m: int(m.group(1)) * 480),
-    (_re.compile(r'(\d+)\s*hour',     _re.I),  lambda m: int(m.group(1)) * 60),
-    (_re.compile(r'half[-\s]day',      _re.I),  lambda m: 210),
-    (_re.compile(r'full[-\s]day',      _re.I),  lambda m: 480),
+    (_re.compile(r"(\d+)[-\s]?night", _re.IGNORECASE),  lambda m: int(m.group(1)) * 1440),
+    (_re.compile(r"(\d+)[-\s]?day",   _re.IGNORECASE),  lambda m: int(m.group(1)) * 480),
+    (_re.compile(r"(\d+)\s*hour",     _re.IGNORECASE),  lambda m: int(m.group(1)) * 60),
+    (_re.compile(r"half[-\s]day",      _re.IGNORECASE),  lambda m: 210),
+    (_re.compile(r"full[-\s]day",      _re.IGNORECASE),  lambda m: 480),
 ]
 
 def _estimate_duration(tour: dict) -> int:
-    """category + description에서 소요 시간(분) 추정. 실패 시 category 기본값."""
+    """Category + description에서 소요 시간(분) 추정. 실패 시 category 기본값."""
     desc = (tour.get("description") or "").lower()
     for pattern, extractor in _DUR_PATTERNS:
         m = pattern.search(desc)
@@ -76,7 +82,7 @@ def fetch_tours(city, country=None):
     return [dict(r) for r in rows]
 
 def _bucket_by_duration(tours):
-    """category + description 기반 duration 추정으로 시간대 버킷 분류."""
+    """Category + description 기반 duration 추정으로 시간대 버킷 분류."""
     short  = []  # ≤ 180분 (3시간 이하)
     half   = []  # 181–300분 (3~5시간, 반나절)
     full   = []  # 301–1439분 (5시간+, 당일)
@@ -95,9 +101,9 @@ def _bucket_by_duration(tours):
 
     return short, half, full, multi
 
-def _build_tour_line(t):
+def _build_tour_line(t) -> str:
     name  = re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
-    price = int(round(_safe_price(t.get("price", 0))))
+    price = round(_safe_price(t.get("price", 0)))
     disc  = t.get("discount") or ""
     disc_str = f" | -{disc}% off" if disc and str(disc) not in ("0","","0.0") else ""
     dur     = _estimate_duration(t)
@@ -108,12 +114,12 @@ def _build_summary(tours, city):
     if not tours:
         return None, None
 
-    short, half, full, multi = _bucket_by_duration(tours)
+    short, half, full, _multi = _bucket_by_duration(tours)
     discounted = [t for t in tours if t.get("discount") and
                   str(t["discount"]) not in ("0","","0.0")]
     budget  = [t for t in tours if 0 < _safe_price(t.get("price")) < 30]
     mid     = [t for t in tours if 30 <= _safe_price(t.get("price")) <= 100]
-    premium = [t for t in tours if _safe_price(t.get("price")) > 100]
+    [t for t in tours if _safe_price(t.get("price")) > 100]
 
     # 테이블 투어: mid price 우선 5개
     table_tours = (mid[:5] if len(mid) >= 2 else budget[:5]) or tours[:5]
@@ -126,17 +132,17 @@ def _build_summary(tours, city):
 
     # 시간대별 버킷 (실제 데이터 기반)
     if short:
-        summary += f"[SHORT TOURS ≤3h — good for tight layovers]\n"
+        summary += "[SHORT TOURS ≤3h — good for tight layovers]\n"
         for t in short[:4]:
             summary += _build_tour_line(t) + "\n"
         summary += "\n"
     if half:
-        summary += f"[HALF-DAY TOURS 3-5h]\n"
+        summary += "[HALF-DAY TOURS 3-5h]\n"
         for t in half[:4]:
             summary += _build_tour_line(t) + "\n"
         summary += "\n"
     if full:
-        summary += f"[FULL-DAY TOURS 5h+ — only for layovers 8h+]\n"
+        summary += "[FULL-DAY TOURS 5h+ — only for layovers 8h+]\n"
         for t in full[:3]:
             summary += _build_tour_line(t) + "\n"
         summary += "\n"
@@ -160,7 +166,7 @@ def _build_summary(tours, city):
         names = [re.sub(r"^Save [\d.]+%!\s*","",t["product_name"]) for t in full[:2]]
         summary += f"- 8h+ layover: {', '.join(names)}\n"
     elif not full and half:
-        summary += f"- 8h+ layover: combine two half-day tours or explore independently\n"
+        summary += "- 8h+ layover: combine two half-day tours or explore independently\n"
 
     return summary, table_tours
 
@@ -177,14 +183,14 @@ def generate_layover_guide(topic):
     if not summary:
         return None
 
-    short, half, full, multi = _bucket_by_duration(tours)
+    short, half, _full, _multi = _bucket_by_duration(tours)
 
     table_tour_names = [
         re.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
         for t in table_tours
     ]
-    table_list_str = "\n".join(f"  {i+1}. {n} (${int(round(_safe_price(t.get('price',0))))})"
-                                for i, (n, t) in enumerate(zip(table_tour_names, table_tours)))
+    "\n".join(f"  {i+1}. {n} (${round(_safe_price(t.get('price',0)))})"
+                                for i, (n, t) in enumerate(zip(table_tour_names, table_tours, strict=False)))
 
     # 섹션 조건부 구성
     sections = [f"## Making the Most of a Layover in {city}"]
@@ -201,7 +207,7 @@ def generate_layover_guide(topic):
     tour_desc_block = ""
     for i, t in enumerate(table_tours):
         tname  = _re2.sub(r"^Save [\d.]+%!\s*", "", t["product_name"])
-        tprice = int(round(_safe_price(t.get("price", 0))))
+        tprice = round(_safe_price(t.get("price", 0)))
         tdesc  = (t.get("description") or "")[:200].strip()
         tdur   = _estimate_duration(t)
         tdur_str = f"~{tdur//60}h{tdur%60:02d}m" if tdur else "duration varies"
@@ -276,7 +282,7 @@ STRICT WRITING RULES:
   unforgettable, stunning landscapes, perfect backdrop
 
 Return ONLY markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a seasoned frequent flyer who specializes in layover experiences. "
     "ABSOLUTE RULES: "

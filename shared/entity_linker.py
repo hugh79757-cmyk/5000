@@ -1,5 +1,4 @@
-"""
-entity_linker.py – ETAP 내부링크 자동 삽입 시스템
+"""entity_linker.py – ETAP 내부링크 자동 삽입 시스템
 
 기능:
 1. register_entity() – 글 발행 시 엔티티 DB에 등록
@@ -15,10 +14,10 @@ entity_linker.py – ETAP 내부링크 자동 삽입 시스템
 - published=1인 엔티티만 링크 대상
 """
 
-import sqlite3
-import re
-import os
 import logging
+import os
+import re
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +71,7 @@ def _get_db():
 
 
 def register_entity(entity_type, entity_name, blog_id, post_slug,
-                     link_label, priority=50, published=0):
+                     link_label, priority=50, published=0) -> None:
     """글 발행 시 엔티티 등록. 이미 있으면 무시."""
     if not entity_name or len(entity_name) <= 2:
         return
@@ -92,7 +91,7 @@ def register_entity(entity_type, entity_name, blog_id, post_slug,
               post_url, link_label, priority, published))
         conn.commit()
     except Exception as e:
-        logger.error(f"register_entity failed: {e}")
+        logger.exception(f"register_entity failed: {e}")
     finally:
         conn.close()
 
@@ -110,15 +109,14 @@ def mark_entity_published(blog_id, post_slug):
             logger.info(f"Entity published: {blog_id}/{post_slug} ({updated}건)")
         return updated
     except Exception as e:
-        logger.error(f"mark_entity_published failed: {e}")
+        logger.exception(f"mark_entity_published failed: {e}")
         return 0
     finally:
         conn.close()
 
 
 def get_cross_links(country=None, city=None, exclude_blog=None, max_links=5):
-    """
-    같은 국가/도시에 대해 다른 블로그에서 발행된 글 목록 반환.
+    """같은 국가/도시에 대해 다른 블로그에서 발행된 글 목록 반환.
     published=1인 것만.
     """
     conn = _get_db()
@@ -156,15 +154,14 @@ def get_cross_links(country=None, city=None, exclude_blog=None, max_links=5):
 
         links = [dict(r) for r in conn.execute(sql, params).fetchall()]
     except Exception as e:
-        logger.error(f"get_cross_links failed: {e}")
+        logger.exception(f"get_cross_links failed: {e}")
     finally:
         conn.close()
     return links
 
 
 def inject_internal_links(content, current_blog, max_links=5):
-    """
-    본문(markdown)에서 entity_name이 등장하면 내부링크로 교체.
+    """본문(markdown)에서 entity_name이 등장하면 내부링크로 교체.
 
     규칙:
     - published=1인 엔티티만 대상
@@ -184,7 +181,7 @@ def inject_internal_links(content, current_blog, max_links=5):
             ORDER BY priority DESC, length(entity_name) DESC
         """, (current_blog,)).fetchall()
     except Exception as e:
-        logger.error(f"inject_internal_links DB error: {e}")
+        logger.exception(f"inject_internal_links DB error: {e}")
         entities = []
     finally:
         conn.close()
@@ -212,15 +209,15 @@ def inject_internal_links(content, current_blog, max_links=5):
 
         # 정규식: 단어 경계로 매칭, 대소문자 무시하지 않음 (고유명사)
         pattern = re.compile(
-            r'(?<!\[)(?<!\()'          # 앞에 [ 또는 ( 가 아닌
-            r'\b(' + re.escape(name) + r')\b'
-            r'(?!\]|\))'               # 뒤에 ] 또는 ) 가 아닌
+            r"(?<!\[)(?<!\()"          # 앞에 [ 또는 ( 가 아닌
+            r"\b(" + re.escape(name) + r")\b"
+            r"(?!\]|\))"               # 뒤에 ] 또는 ) 가 아닌
         )
 
         replaced = False
         for i, line in enumerate(lines):
             # H1/H2 라인 skip
-            if line.startswith("# ") or line.startswith("## "):
+            if line.startswith(("# ", "## ")):
                 continue
 
             # 이미 링크 안에 있는지 전체 체크
@@ -231,11 +228,11 @@ def inject_internal_links(content, current_blog, max_links=5):
             # 이미 이 라인에 마크다운 링크가 있으면, 링크 내부 텍스트 제외하고 매칭
             # 링크 영역을 임시로 플레이스홀더로 교체
             placeholders = []
-            def _placeholder(m):
+            def _placeholder(m) -> str:
                 placeholders.append(m.group(0))
                 return f"__LINK_PH_{len(placeholders)-1}__"
 
-            safe_line = re.sub(r'\[.*?\]\(.*?\)', _placeholder, line)
+            safe_line = re.sub(r"\[.*?\]\(.*?\)", _placeholder, line)
 
             m = pattern.search(safe_line)
             if m:
@@ -266,8 +263,8 @@ def inject_internal_links(content, current_blog, max_links=5):
         _before = result[:_cards_start]
         _after = result[_cards_start:]
         _after = re.sub(
-            r'\[([^\]]+)\]\(https://(?:tours|michelin|adventure|daytrips|watersports|walking|foodtour|culture|airlines|airports|bus|ferry|flights|transfers|trains|visa|esim|multiday|dining)\.techpawz\.com/[^)]+\)',
-            r'\1',
+            r"\[([^\]]+)\]\(https://(?:tours|michelin|adventure|daytrips|watersports|walking|foodtour|culture|airlines|airports|bus|ferry|flights|transfers|trains|visa|esim|multiday|dining)\.techpawz\.com/[^)]+\)",
+            r"\1",
             _after
         )
         result = _before + _after
@@ -278,8 +275,7 @@ def inject_internal_links(content, current_blog, max_links=5):
 
 
 def build_cross_sell_html(country=None, city=None, exclude_blog=None, max_items=3):
-    """
-    크로스셀 HTML 블록 생성.
+    """크로스셀 HTML 블록 생성.
     상단에 자연스럽게 배치할 수 있는 관련 링크 카드.
     """
     links = get_cross_links(country=country, city=city,
@@ -330,13 +326,12 @@ def build_cross_sell_html(country=None, city=None, exclude_blog=None, max_items=
         )
 
     name = city or country or ""
-    html = (
+    return (
         f'\n<div style="margin:20px 0;padding:16px;background:#fafbfc;'
         f'border-radius:12px;border:1px solid #e8ecf0">\n'
         f'<p style="margin:0 0 10px;font-weight:600;font-size:15px;color:#374151">'
         f'📌 More about {name}</p>\n'
         f'<div style="display:flex;flex-wrap:wrap;gap:4px">\n'
         + "\n".join(items_html) +
-        f'\n</div>\n</div>\n'
+        "\n</div>\n</div>\n"
     )
-    return html

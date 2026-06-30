@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
@@ -11,13 +12,13 @@ def load_prompts():
         merged = {}
         for fname in sorted(os.listdir(prompts_dir)):
             if fname.endswith(".yaml"):
-                with open(os.path.join(prompts_dir, fname), "r", encoding="utf-8") as f:
+                with open(os.path.join(prompts_dir, fname), encoding="utf-8") as f:
                     data = yaml.safe_load(f)
                 if data:
                     merged.update(data)
         return merged
     # 폴백: 기존 단일 파일
-    with open(os.path.join(CONFIG_DIR, "prompts.yaml"), "r", encoding="utf-8") as f:
+    with open(os.path.join(CONFIG_DIR, "prompts.yaml"), encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 

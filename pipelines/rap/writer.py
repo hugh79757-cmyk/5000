@@ -1,7 +1,6 @@
 """RAP writer — 부동산 기사 생성 (GAP frontmatter 방식)"""
-import os
-import re
 import logging
+import re
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -35,7 +34,8 @@ def _build_trade_reference(keyword, trades, region_info=None):
 
     # ── 공시가격 추정치 조회 (gongsijiga 테이블) ──
     try:
-        import sqlite3 as _sq3, os as _os3
+        import os as _os3
+        import sqlite3 as _sq3
         _RAP_DB = _os3.path.join(
             _os3.path.dirname(_os3.path.dirname(_os3.path.dirname(_os3.path.abspath(__file__)))),
             "data", "rap.db"
@@ -55,7 +55,7 @@ def _build_trade_reference(keyword, trades, region_info=None):
                 lines.append(f"- 평균 실거래가: {_avg_deal:,}만원 ({_avg_deal/10000:.1f}억)")
                 lines.append(f"- 추정 공시가격: {_est_price:,}만원 ({_est_price/10000:.1f}억)")
                 lines.append(f"- 공시가율: 약 {_gongsi_rate}% (국토부 평균 적용)")
-                lines.append(f"- ※ 실제 공시가격은 국토부 부동산공시가격알리미에서 확인하세요")
+                lines.append("- ※ 실제 공시가격은 국토부 부동산공시가격알리미에서 확인하세요")
                 lines.append("")
     except Exception as _ge:
         pass  # 공시가 조회 실패 시 무시
@@ -126,7 +126,7 @@ def _build_trade_reference(keyword, trades, region_info=None):
         else:
             lines.append(f"### ★ [{apt_kw}] 해당 기간 실거래 없음")
             lines.append(f"- 아래 {district} 내 인근 단지 데이터를 참고하여 분석하세요.")
-            lines.append(f"- 이 단지의 매매가를 임의로 가정하거나 추측하지 마세요.")
+            lines.append("- 이 단지의 매매가를 임의로 가정하거나 추측하지 마세요.")
         lines.append("")
 
     # ── 구 내 인근 단지 참고 데이터 ──
@@ -280,7 +280,7 @@ def _build_subscription_reference(keyword, subscriptions):
     return "\n".join(lines)
 
 
-def _base_trade_rules():
+def _base_trade_rules() -> str:
     """공통 규칙 (모든 trade 블로그)"""
     return """[핵심 규칙]
 1. 참고자료에 없는 가격, 날짜를 절대 지어내지 마세요
@@ -306,7 +306,7 @@ def _base_trade_rules():
 - 표의 모든 행은 반드시 각각 별도 줄에 작성 (한 줄로 압축 금지)"""
 
 
-def _base_output_format():
+def _base_output_format() -> str:
     """공통 출력 형식"""
     return """출력 형식:
 ---
@@ -319,7 +319,7 @@ description: "120자 이내 설명"
 본문 마크다운"""
 
 
-def _build_trade_system_prompt(keyword, month, blog_id=None):
+def _build_trade_system_prompt(blog_id=None):
     """blog_id별 특화 프롬프트 생성"""
     rules = _base_trade_rules()
 
@@ -387,9 +387,9 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 
 [제목]
 - SEO 최적화 한국어, 반드시 32자 이내 (절대 35자 초과 금지). 짧고 임팩트 있게
-- "{month}" 포함 권장
+- 현재 월 포함 권장
 - "취득세", "양도세", "세금" 중 하나 포함
-- 키워드 "{keyword}" 반영
+- 제공된 키워드 반영
 
 [본문 형식]
 - 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
@@ -460,9 +460,9 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 
 [제목]
 - SEO 최적화 한국어, 반드시 32자 이내 (절대 35자 초과 금지). 짧고 임팩트 있게
-- "{month}" 포함 권장
+- 현재 월 포함 권장
 - "전세", "월세", "임대" 중 하나 포함
-- 키워드 "{keyword}" 반영
+- 제공된 키워드 반영
 
 [본문 형식]
 - 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
@@ -550,9 +550,9 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 
 [제목]
 - SEO 최적화 한국어, 반드시 32자 이내 (절대 35자 초과 금지). 짧고 임팩트 있게
-- "{month}" 포함 권장
+- 현재 월 포함 권장
 - 브랜드명 또는 단지명 포함
-- 키워드 "{keyword}" 반영
+- 제공된 키워드 반영
 
 [본문 형식]
 - 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
@@ -574,15 +574,15 @@ def _build_trade_system_prompt(keyword, month, blog_id=None):
 """ + _base_output_format().replace("{category}", "브랜드아파트")
 
     # ─── rap-hugo (기본): 시세 분석 중심 ───
-    return f"""당신은 부동산 시세 분석 전문 블로그 작가입니다.
+    return f"""당신은 부동산 시세 분석 전문 블로그 작가입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
 아래 국토교통부 실거래가 데이터를 바탕으로 블로그 글을 작성하세요.
 
 {rules}
 
 [제목]
 - SEO 최적화 한국어, 반드시 32자 이내 (절대 35자 초과 금지). 짧고 임팩트 있게
-- "{month}" 포함 권장
-- 키워드 "{keyword}" 반영
+- 현재 월 포함 권장
+- 제공된 키워드 반영
 
 [본문 형식]
 - 마크다운 형식, 반드시 2,500자~3,500자 (2,200자 미만 불합격)
@@ -635,9 +635,9 @@ def generate_trade_article(keyword, trades, region_info=None, blog_id=None):
     reference = _build_trade_reference(keyword, trades, region_info)
     month = datetime.now().strftime("%Y년 %m월")
 
-    system_prompt = _build_trade_system_prompt(keyword, month, blog_id)
+    system_prompt = _build_trade_system_prompt(blog_id)
 
-    user_prompt = f"키워드: {keyword}\n\n참고자료:\n{reference}"
+    user_prompt = f"키워드: {keyword}\n기준: {month}\n\n참고자료:\n{reference}"
     result = ai_generate(system_prompt, user_prompt)
     if not result or not result.get("content"):
         logger.error(f"RAP 실거래가 글 생성 실패: {keyword}")
@@ -651,7 +651,7 @@ def generate_subscription_article(keyword, subscriptions):
     reference = _build_subscription_reference(keyword, subscriptions)
     month = datetime.now().strftime("%Y년 %m월")
 
-    system_prompt = f"""당신은 10년 경력의 부동산 청약 전문 블로그 작가입니다.
+    system_prompt = """당신은 10년 경력의 부동산 청약 전문 블로그 작가입니다.
 한국부동산원 청약홈 공고 데이터를 바탕으로 실용적인 청약 안내 글을 작성하세요.
 
 [핵심 규칙]
@@ -704,8 +704,8 @@ def generate_subscription_article(keyword, subscriptions):
 
 [제목]
 - SEO 최적화 한국어, 반드시 32자 이내 (절대 35자 초과 금지)
-- "{month}" 포함 권장
-- 키워드 "{keyword}" 반영
+- 현재 월 포함 권장
+- 제공된 키워드 반영
 
 [본문 형식]
 - 마크다운, 각 H2 섹션마다 최소 4~6문장, 한 문장 40자 이상
@@ -735,7 +735,7 @@ description: "120자 이내 설명"
 
 본문 마크다운"""
 
-    user_prompt = f"키워드: {keyword}\n\n참고자료:\n{reference}"
+    user_prompt = f"키워드: {keyword}\n기준: {month}\n\n참고자료:\n{reference}"
     result = ai_generate(system_prompt, user_prompt)
     if not result or not result.get("content"):
         logger.error(f"RAP 청약 글 생성 실패: {keyword}")

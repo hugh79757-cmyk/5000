@@ -1,27 +1,27 @@
 from pipelines.etap.post_processor import insert_adsense
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published
 from pipelines.etap.quality_guard import postprocess_content, send_alert
+from shared.entity_linker import inject_internal_links, mark_entity_published, register_entity
+
 """
 항공권 딜 글 발행 파이프라인
 """
-import os
-import sys
-import sqlite3
 import logging
+import os
+import sqlite3
 import subprocess
+import sys
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 KST = timezone(timedelta(hours=9))
 
-from pipelines.etap.topic_manager import check_exhaustion, send_telegram
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 sys.path.insert(0, BASE_DIR)
 
 from pipelines.etap.flight_writer import generate_flight_deal
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
 
 
 def _get_db():
@@ -115,7 +115,7 @@ showTableOfContents: true
     return filepath
 
 
-def _build_and_deploy(cfg):
+def _build_and_deploy(cfg) -> None:
     site = cfg["site_path"]
     # leaf bundle 방지: content/posts/index.md 존재 시 삭제
     from pathlib import Path as _Path
@@ -129,7 +129,7 @@ def _build_and_deploy(cfg):
     logger.info(f"[ETAP-Flight] Deployed to {cfg['domain']}")
 
 
-def mark_published(topic_id, blog_id, title, slug):
+def mark_published(topic_id, blog_id, title, slug) -> None:
     db = _get_db()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     db.execute("""

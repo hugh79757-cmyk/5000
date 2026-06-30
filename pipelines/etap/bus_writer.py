@@ -1,13 +1,17 @@
 """bus_writer.py - Bus route guide generator using Omio data"""
-import os, sqlite3, logging, re
-from pipelines.etap.quality_guard import preprocess_routes, postprocess_content
+import logging
+import os
+import re
+import sqlite3
+
+from pipelines.etap.quality_guard import preprocess_routes
 from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -74,7 +78,7 @@ def generate_bus_guide(topic):
     if not summary:
         return None
 
-    has_bus = bool(routes[0].get("bus_min_price"))
+    bool(routes[0].get("bus_min_price"))
     has_train = bool(routes[0].get("train_min_price"))
     has_flight = bool(routes[0].get("flight_min_price"))
     has_ferry = bool(routes[0].get("ferry_min_price"))
@@ -83,12 +87,12 @@ def generate_bus_guide(topic):
     if has_train:
         sections += f"  ## Bus vs Train: Which Is Better for {origin} to {destination}?\n"
     if has_flight:
-        sections += f"  ## Is It Worth Flying Instead?\n"
+        sections += "  ## Is It Worth Flying Instead?\n"
     if has_ferry:
-        sections += f"  ## Ferry as an Alternative\n"
-    sections += f"  ## What to Expect on the Bus Journey\n"
-    sections += f"  ## How to Get the Cheapest Bus Tickets\n"
-    sections += f"  ## Practical Tips for This Route\n"
+        sections += "  ## Ferry as an Alternative\n"
+    sections += "  ## What to Expect on the Bus Journey\n"
+    sections += "  ## How to Get the Cheapest Bus Tickets\n"
+    sections += "  ## Practical Tips for This Route\n"
 
     prompt = f"""Write a bus travel guide from {origin} to {destination}.
 
@@ -110,7 +114,7 @@ RULES:
 - End with a clear recommendation on when bus is the best choice
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a budget travel blogger who rides buses across Europe. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (station location, luggage policy, wifi availability, seat selection strategy). 5) Open with a concrete detail about this specific route.",
     prompt,

@@ -3,16 +3,15 @@
 상품 5개 데이터를 받아 "TOP5 추천" 형태의 블로그 글을 생성.
 각 상품에 어필리에이트 링크 포함.
 """
-import os
-import sys
 import logging
+import os
 import re
+import sys
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from shared.ai_writer import generate as ai_generate
-
 
 ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
      crossorigin="anonymous"></script>
@@ -203,13 +202,13 @@ def _build_product_block(products):
     return "\n".join(lines)
 
 
-def _build_system_prompt(keyword, blog_id=None):
+def _build_system_prompt(keyword, blog_id=None) -> str:
     year = datetime.now().year
     month = datetime.now().month
     extra = BLOG_EXTRA_RULES.get(blog_id or "", "")
     extra_block = f"\n\n{extra}" if extra else ""
 
-    return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다.
+    return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
 {year}년 {month}월 기준 "{keyword}" 관련 추천 상품 글을 작성합니다.
 
 [제목 규칙 — 가장 중요]
@@ -223,7 +222,7 @@ def _build_system_prompt(keyword, blog_id=None):
 [본문 구조]
 1. **도입부 (2~3문장)**: 이 제품을 고를 때 겪는 구체적 고민. 공감하는 톤으로. "{year}년 {month}월 기준"을 명시하여 시의성 강조.
 
-2. **선택 가이드 (H2)**: 
+2. **선택 가이드 (H2)**:
    - H2 소제목: "○○ 고를 때 확인할 포인트"
    - 핵심 선택 기준 3~4가지를 본문으로 서술 (예: 흡입력, 배터리, 무게, 소음)
    - 각 기준마다 구체적 수치 기준 제시 (예: "배터리는 최소 30분 이상이 기본입니다")
@@ -292,7 +291,7 @@ def _build_system_prompt(keyword, blog_id=None):
 - 전체 글이 2500자 미만이면 절대 안 됩니다.{extra_block}"""
 
 
-def _build_user_prompt(keyword, product_block):
+def _build_user_prompt(keyword, product_block) -> str:
     # 상품명에서 브랜드/모델명 추출하여 제목 힌트 제공
     brand_hints = []
     for line in product_block.split("\n"):
@@ -319,7 +318,7 @@ def _build_user_prompt(keyword, product_block):
 
 def _insert_adsense(body):
     """본문에 애드센스 광고 2개 삽입: 첫 문단 직후 + 두 번째 H2 아래
-    
+
     구조: 도입문단 → [광고1] → ## 구매포인트(내용) → ## 첫상품 → [광고2] → 나머지
     두 광고 사이에 반드시 H2 섹션 내용이 들어가도록 분리.
     """
@@ -405,7 +404,7 @@ def generate_curation_article(keyword, products, blog_id=None):
     desc_lines = []
     for line in body.split("\n"):
         line = line.strip()
-        if not line or line.startswith("#") or line.startswith("!") or line.startswith("["):
+        if not line or line.startswith(("#", "!", "[")):
             continue
         desc_lines.append(line)
         if len("".join(desc_lines)) > 80:

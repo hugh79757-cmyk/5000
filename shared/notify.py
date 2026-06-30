@@ -1,9 +1,9 @@
 """텔레그램 경고 알림 (발행 프로세스를 중단시키지 않음)"""
-import os
 import logging
-import urllib.request
+import os
 import urllib.parse
-import json
+import urllib.request
+
 from dotenv import load_dotenv
 
 # 중앙 env 파일 로드

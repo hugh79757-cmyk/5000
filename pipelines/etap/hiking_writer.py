@@ -1,5 +1,9 @@
 """hiking_writer.py - Hiking And Mountain Bike Tours guide generator"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
+
 from pipelines.etap.quality_guard import preprocess_tours
 from shared.ai_writer import generate as ai_generate
 
@@ -78,7 +82,7 @@ def generate_hiking_guide(topic):
     result = _build_summary(tours, city)
     if not result:
         return None
-    summary, picks = result
+    summary, _picks = result
     h2s = """  ## Best Hiking Around {city}
   ## Top Guided Hiking Tours in {city}
   ## Mountain Biking Options

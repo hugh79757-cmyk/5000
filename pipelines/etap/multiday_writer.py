@@ -1,13 +1,17 @@
 """multiday_writer.py - Multi-day tour guide generator"""
-import os, sqlite3, logging, re
-from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
+import logging
+import os
+import re
+import sqlite3
+
+from pipelines.etap.quality_guard import preprocess_tours
 from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -83,7 +87,7 @@ def generate_multiday_guide(topic):
     result = _build_summary(tours, city)
     if not result:
         return None
-    summary, picks = result
+    summary, _picks = result
 
     prompt = f"""Write a multi-day tour guide for travelers departing from {city}, {country}.
 
@@ -114,7 +118,7 @@ RULES:
 - End with best value pick and best premium pick by name and price
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a travel blogger who specializes in multi-day group tours. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, unforgettable, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) NEVER invent data. If a price is not in the provided DATA, do NOT mention it. Do NOT estimate prices. 4) Every section must include one practical tip (what hotel tier to expect, group size reality, tipping the guide, packing for overnight). 5) Open with a concrete itinerary snapshot or a distance/time detail.",
     prompt,

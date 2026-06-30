@@ -1,22 +1,23 @@
+import logging
 import os
-import sys
 import re
 import sqlite3
-import logging
+import sys
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from dotenv import load_dotenv
+
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-from shared.content_store import init_db, get_today_count, title_similar_exists
-from shared.publisher import publish
-from shared.ai_writer import generate_car
-from shared.telegram_notifier import send_error as _tg_error
-from pipelines.car.topic_manager import select_topic, generate_title, make_slug, validate_body
 from pipelines.car.data_builder import build_input
+from pipelines.car.topic_manager import generate_title, make_slug, select_topic, validate_body
+from shared.ai_writer import generate_car
+from shared.content_store import get_today_count, init_db, title_similar_exists
+from shared.publisher import publish
+from shared.telegram_notifier import send_error as _tg_error
 from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
@@ -32,27 +33,27 @@ def _select_car_image(conn, car_id, slug):
         used = c.execute(
             "SELECT r2_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND r2_url IS NOT NULL AND r2_url != ''"
         ).fetchall()
-        used_urls = {r['r2_url'] for r in used} if used else set()
+        used_urls = {r["r2_url"] for r in used} if used else set()
         images = c.execute(
             "SELECT r2_url, image_url FROM car_images WHERE car_id = ? AND verified = 1 AND r2_url IS NOT NULL AND r2_url != '' ORDER BY RANDOM()",
             (car_id,)
         ).fetchall()
         selected = None
         for img in images:
-            if img['r2_url'] not in used_urls:
+            if img["r2_url"] not in used_urls:
                 selected = img
                 break
         if not selected and images:
             selected = images[0]
         if not selected:
-            base_id = re.sub(r'_(hev|phev|ev|25|35|lpg)(?=_)', '', car_id)
+            base_id = re.sub(r"_(hev|phev|ev|25|35|lpg)(?=_)", "", car_id)
             if base_id != car_id:
                 fallback_imgs = c.execute(
                     "SELECT r2_url, image_url FROM car_images WHERE car_id = ? AND verified = 1 AND r2_url IS NOT NULL AND r2_url != '' ORDER BY RANDOM()",
                     (base_id,)
                 ).fetchall()
                 for img in fallback_imgs:
-                    if img['r2_url'] not in used_urls:
+                    if img["r2_url"] not in used_urls:
                         selected = img
                         break
                 if not selected and fallback_imgs:
@@ -60,7 +61,7 @@ def _select_car_image(conn, car_id, slug):
         if not selected:
             logger.warning("No verified R2 image for: " + car_id)
             return "", ""
-        return selected['r2_url'], selected['image_url']
+        return selected["r2_url"], selected["image_url"]
     except Exception as e:
         logger.warning("Image failed: " + str(e))
         return "", ""
@@ -91,15 +92,15 @@ def run(blog_cfg):
     _today_rows = conn.execute(
         "SELECT DISTINCT t.car_id FROM publish_log p JOIN topics t ON t.id=p.topic_id "
         "WHERE p.site=? AND date(p.published_at)=date('now','localtime')",
-        (blog_id.replace('-hugo', ''),)
+        (blog_id.replace("-hugo", ""),)
     ).fetchall()
     today_car_ids = {r[0] for r in _today_rows}
     logger.info("today car_ids for " + blog_id + ": " + str(today_car_ids))
 
-    car_site_id = blog_id.replace('-hugo', '')
+    car_site_id = blog_id.replace("-hugo", "")
 
     # ── post_type 확정 ──
-    pt_cfg = blog_cfg.get('post_type')
+    pt_cfg = blog_cfg.get("post_type")
     if isinstance(pt_cfg, list):
         import random as _rnd
         _rnd.shuffle(pt_cfg)
@@ -133,9 +134,9 @@ def run(blog_cfg):
 
         topic = dict(topic)
 
-        if topic['car_id'] in today_car_ids:
-            logger.info("car_id dup skip: " + str(topic['car_id']))
-            skip_ids.append(topic['id'])
+        if topic["car_id"] in today_car_ids:
+            logger.info("car_id dup skip: " + str(topic["car_id"]))
+            skip_ids.append(topic["id"])
             continue
 
         post_type = topic.get("post_type", resolved_post_type)
@@ -144,14 +145,16 @@ def run(blog_cfg):
         if post_type in NEW_TYPES:
             try:
                 if post_type == "top5_rank":
-                    from pipelines.car.data_builder import build_top5_rank_input
                     import random as _rnd
+
+                    from pipelines.car.data_builder import build_top5_rank_input
                     topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
                     data = build_top5_rank_input(conn, topic, CAR_DB_PATH)
 
                 elif post_type == "persona_pick":
-                    from pipelines.car.data_builder import build_persona_pick_input, PERSONA_CONFIGS
                     import random as _rnd
+
+                    from pipelines.car.data_builder import build_persona_pick_input
                     # 차량 가격대 조회
                     _car_price_row = conn.execute(
                         "SELECT MIN(price) as min_price FROM trims WHERE car_id=? AND status='시판' AND price >= 500",
@@ -183,33 +186,31 @@ def run(blog_cfg):
                 data = None
 
             if data:
-                data['site_id'] = blog_id
+                data["site_id"] = blog_id
                 break
-            else:
-                # 신규 타입 실패 → skip_no_data 아닌 pending 유지 (재시도 가능하게)
-                logger.warning(f"{blog_id} {post_type} 데이터 없음: {topic['car_id']} — skip 처리 안함")
-                skip_ids.append(topic['id'])
-                continue
+            # 신규 타입 실패 → skip_no_data 아닌 pending 유지 (재시도 가능하게)
+            logger.warning(f"{blog_id} {post_type} 데이터 없음: {topic['car_id']} — skip 처리 안함")
+            skip_ids.append(topic["id"])
+            continue
 
         # ── 기존 타입: build_input() 사용 ──
-        else:
-            data = build_input(conn, topic, CAR_DB_PATH)
-            if data:
-                data['site_id'] = blog_id
-                break
-            skip_ids.append(topic['id'])
-            conn.execute("UPDATE topics SET status='skip_no_data' WHERE id=?", (topic['id'],))
-            conn.commit()
+        data = build_input(conn, topic, CAR_DB_PATH)
+        if data:
+            data["site_id"] = blog_id
+            break
+        skip_ids.append(topic["id"])
+        conn.execute("UPDATE topics SET status='skip_no_data' WHERE id=?", (topic["id"],))
+        conn.commit()
 
     if not data:
         conn.close()
         return {"success": False, "reason": "no_data"}
 
-    logger.info(data['model'] + " " + data.get('trim', '') + " (" + str(data.get('base_price', '')) + "만원)")
+    logger.info(data["model"] + " " + data.get("trim", "") + " (" + str(data.get("base_price", "")) + "만원)")
 
     prompt_cfg = blog_cfg.get("prompt", "")
     if isinstance(prompt_cfg, dict):
-        prompt_file = PROMPTS_DIR / prompt_cfg.get(topic['post_type'], "")
+        prompt_file = PROMPTS_DIR / prompt_cfg.get(topic["post_type"], "")
     else:
         prompt_file = PROMPTS_DIR / prompt_cfg
     if not prompt_file.exists():
@@ -257,7 +258,7 @@ def run(blog_cfg):
     slug = make_slug(title)
     logger.info("제목: " + title)
 
-    r2_url, origin_url = _select_car_image(conn, topic['car_id'], slug)
+    r2_url, origin_url = _select_car_image(conn, topic["car_id"], slug)
     if r2_url:
         logger.info("R2: " + r2_url)
 
@@ -275,7 +276,7 @@ def run(blog_cfg):
             f"{datetime.now().strftime('%Y년 %m월')} 기준 실비용 비교."
         )
     else:
-        _maint_m = round((data.get('tax_annual',0)+data.get('insurance_estimate',0)+data.get('annual_fuel_cost',0))/12)
+        _maint_m = round((data.get("tax_annual",0)+data.get("insurance_estimate",0)+data.get("annual_fuel_cost",0))/12)
         _seo_desc = (
             f"{data['model']} {data.get('trim','')} "
             f"3년 총비용 {data.get('three_year_total_cost',0):,}만원, "
@@ -308,7 +309,7 @@ def run(blog_cfg):
         tags=tags_str,
         thumbnail_url=r2_url,
         data_source="car_db",
-        source_id=str(topic['car_id']),
+        source_id=str(topic["car_id"]),
         prompt_id=topic.get("post_type", blog_cfg.get("post_type", "")),
         model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         segment=data.get("segment", ""),
@@ -319,10 +320,10 @@ def run(blog_cfg):
     c = conn.cursor()
     c.execute(
         "INSERT INTO publish_log (topic_id, site, title, slug, published_at, image_url, r2_url) VALUES (?,?,?,?,?,?,?)",
-        (topic['id'], car_site_id, title, slug, datetime.now().isoformat(), origin_url or "", r2_url or "")
+        (topic["id"], car_site_id, title, slug, datetime.now().isoformat(), origin_url or "", r2_url or "")
     )
     c.execute("UPDATE topics SET status='published', published_at=? WHERE id=?",
-              (datetime.now().isoformat(), topic['id']))
+              (datetime.now().isoformat(), topic["id"]))
     conn.commit()
     conn.close()
 

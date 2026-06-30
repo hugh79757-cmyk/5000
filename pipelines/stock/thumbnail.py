@@ -1,10 +1,11 @@
-import os
 import io
-import textwrap
 import logging
+import os
+import textwrap
+from datetime import datetime
+
 import requests
 from PIL import Image, ImageDraw, ImageFont
-from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +71,7 @@ def _fetch_logo(stock_code):
         try:
             r = requests.get(url_pattern, timeout=5)
             if r.status_code == 200 and len(r.content) > 500:
-                logo = Image.open(io.BytesIO(r.content)).convert("RGBA")
-                return logo
+                return Image.open(io.BytesIO(r.content)).convert("RGBA")
         except Exception as e:
             logger.debug(f"[STOCK_THUMB] failed: {e}"); continue
     return None
@@ -138,7 +138,7 @@ def generate_stock_thumbnail(title, category="default", stock_code="", corp_name
         draw.text((padding + 12, padding + 5), category, font=badge_font, fill=(255, 255, 255))
         badge_bottom = padding + bh + 25
 
-    title_font, title_lines, font_size, line_height = _calc_title_layout(draw, title, max_text_width)
+    title_font, title_lines, _font_size, line_height = _calc_title_layout(draw, title, max_text_width)
     total_title_h = len(title_lines) * line_height
     available_h = HEIGHT - badge_bottom - 100
     y_start = badge_bottom + max((available_h - total_title_h) // 2, 10)
@@ -159,7 +159,7 @@ def generate_stock_thumbnail(title, category="default", stock_code="", corp_name
     date_str = datetime.now().strftime("%Y.%m.%d")
     draw.text((padding, HEIGHT - 45), f"캔들트렌드  |  {date_str}", font=bottom_font, fill=(110, 115, 130))
 
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
     img.save(output_path, "WEBP", quality=85)
     logger.info(f"[StockThumb] saved: {output_path}")
     return output_path

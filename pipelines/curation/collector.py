@@ -4,19 +4,20 @@
 - 캐시 유효기간 3일, 만료 시 재수집
 - Search API 시간당 10회 제한 준수
 """
-import os
-import sys
-import sqlite3
-import logging
-import time
-import hmac
 import hashlib
-import requests
+import hmac
+import logging
+import os
+import sqlite3
+import sys
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
+import requests
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
+
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 logger = logging.getLogger(__name__)
@@ -25,7 +26,7 @@ DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 BASE_URL = "https://api-gateway.coupang.com"
 CACHE_DAYS = 3
 
-def _init_db():
+def _init_db() -> None:
     """DB 테이블이 없으면 자동 생성 (DB 초기화 복구용)"""
     conn = sqlite3.connect(DB_PATH)
     conn.execute("""
@@ -144,7 +145,7 @@ def _check_rate_limit():
     except Exception:
         return True
 
-def _log_api_call():
+def _log_api_call() -> None:
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.execute("CREATE TABLE IF NOT EXISTS api_call_log (id INTEGER PRIMARY KEY AUTOINCREMENT, called_at TEXT DEFAULT (datetime('now')))")
@@ -193,7 +194,7 @@ def _search_api(keyword, limit=10):
         logger.error(f"Search API {resp.status_code}: {keyword}")
         return []
     except Exception as e:
-        logger.error(f"Search API 오류 [{keyword}]: {e}")
+        logger.exception(f"Search API 오류 [{keyword}]: {e}")
         return []
 
 
@@ -215,7 +216,7 @@ def is_cache_valid(keyword):
     return datetime.now() - last < timedelta(days=CACHE_DAYS)
 
 
-def collect_keyword(keyword):
+def collect_keyword(keyword) -> bool:
     if is_cache_valid(keyword):
         logger.info(f"캐시 유효: {keyword}")
         return True

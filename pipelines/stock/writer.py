@@ -1,12 +1,10 @@
-import os
 import json
 import logging
 import re
-import requests
+
+from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
-
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "mimo-v2.5")
 
 
 def generate_disclosure_article(disclosure, company_info=None, financials=None, financials_prev=None, dividend=None):
@@ -32,7 +30,7 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
         except (ValueError, TypeError):
             return str(val_str)
 
-    def _yoy(t_str, f_str):
+    def _yoy(t_str, f_str) -> str:
         """YoY 증감률 계산"""
         try:
             t = int(str(t_str).replace(",", ""))
@@ -100,7 +98,7 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
 
     context = "\n".join(context_parts)
 
-    prompt = f"""당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
+    system_prompt = """당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
 아래 DART 공시 데이터를 바탕으로 블로그 글을 작성하세요.
 
 [핵심 원칙]
@@ -108,9 +106,6 @@ def generate_disclosure_article(disclosure, company_info=None, financials=None, 
 - 데이터에 없는 주가, 금리, PER, PBR 등의 숫자를 절대 지어내지 마세요
 - "함께 읽어보기", "관련 글" 등 내부링크 섹션을 절대 만들지 마세요
 - 제공된 재무 데이터를 적극 활용하여 전기 대비 증감률, 영업이익률 등을 직접 계산해서 분석하세요
-
-[공시 정보]
-{context}
 
 [제목 작성 규칙]
 - 패턴: "기업명 + 핵심숫자(금액 또는 증감률) + 의미 요약"
@@ -151,22 +146,22 @@ DESC: (구글 검색결과에 노출될 150자 이내 설명문. 핵심 수치 1
 BODY:
 (본문 마크다운)"""
 
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    resp = requests.post(
-        "https://api.openai.com/v1/chat/completions",
-        headers={"Authorization": f"Bearer {api_key}"},
-        json={
-            "model": OPENAI_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.7,
-            "max_tokens": 4000,
-        },
-        timeout=120,
+    user_prompt = f"""아래 DART 공시 데이터를 바탕으로 블로그 글을 작성하세요.
+
+[공시 정보]
+{context}"""
+
+    result = ai_generate(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        tier="default",
+        temperature=0.7,
+        max_tokens=4000,
     )
-    resp.raise_for_status()
-    content = resp.json()["choices"][0]["message"]["content"]
-    parsed = _parse_response(content)
-    return parsed
+    if not result or not result.get("content"):
+        logger.error("AI generation failed for disclosure article")
+        return None
+    return _parse_response(result["content"])
 
 
 def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
@@ -258,9 +253,7 @@ def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
             base_prompt += f"\n참고: {extra_data['note']}\n"
         base_prompt += "\n위 데이터는 KSD 증권정보포털 실시간 기준입니다. 이 수치만 사용하고 날조하지 마세요."
 
-    prompt = f"""당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
-
-{base_prompt}
+    system_prompt = """당신은 네이버 증권 인기 블로거이자 전직 증권사 애널리스트입니다.
 
 [제목 작성 규칙]
 - 패턴: "비교 대상 + 핵심 수치 + 결론 힌트", 제공 데이터의 실제 숫자 1개 이상 포함
@@ -296,38 +289,38 @@ DESC: (구글 검색결과에 노출될 150자 이내 설명문. 핵심 수치 1
 BODY:
 (본문 마크다운)"""
 
-    api_key = os.getenv("OPENAI_API_KEY", "")
-    resp = requests.post(
-        "https://api.openai.com/v1/chat/completions",
-        headers={"Authorization": f"Bearer {api_key}"},
-        json={
-            "model": OPENAI_MODEL,
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.7,
-        },
-        timeout=60,
+    user_prompt = f"""아래 데이터를 바탕으로 블로그 글을 작성하세요.
+
+{base_prompt}"""
+
+    result = ai_generate(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        tier="default",
+        temperature=0.7,
     )
-    resp.raise_for_status()
-    content = resp.json()["choices"][0]["message"]["content"]
-    parsed = _parse_response(content)
+    if not result or not result.get("content"):
+        logger.error("AI generation failed for evergreen article")
+        return None
+    parsed = _parse_response(result["content"])
     # 후처리: 배당 데이터가 있으면 빈 배당 TOP10 표 채우기
-    if extra_data and isinstance(extra_data, dict) and extra_data.get('rankings') and parsed.get('body_md'):
-        _body = parsed['body_md']
-        if '| 순위 | 종목명 |' in _body:
-            _blines = _body.split('\n')
+    if extra_data and isinstance(extra_data, dict) and extra_data.get("rankings") and parsed.get("body_md"):
+        _body = parsed["body_md"]
+        if "| 순위 | 종목명 |" in _body:
+            _blines = _body.split("\n")
             _out = []
             _j = 0
             while _j < len(_blines):
                 _out.append(_blines[_j])
-                if _blines[_j].startswith('| 순위 | 종목명') and _j + 1 < len(_blines) and _blines[_j+1].startswith('|---'):
+                if _blines[_j].startswith("| 순위 | 종목명") and _j + 1 < len(_blines) and _blines[_j+1].startswith("|---"):
                     _out.append(_blines[_j+1])
-                    for _r in extra_data['rankings'][:10]:
-                        _dps = str(_r.get('dividend_per_share', ''))
+                    for _r in extra_data["rankings"][:10]:
+                        _dps = str(_r.get("dividend_per_share", ""))
                         _out.append(f'| {_r["rank"]} | {_r["name"]} | {_r["dividend_yield"]} | {_dps} | 2025년 |')
                     _j += 2
                     continue
                 _j += 1
-            parsed['body_md'] = '\n'.join(_out)
+            parsed["body_md"] = "\n".join(_out)
 
     return parsed
 

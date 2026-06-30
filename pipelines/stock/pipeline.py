@@ -1,8 +1,9 @@
+import logging
 import os
 import random
-import logging
 import sqlite3
 from datetime import datetime
+
 from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
@@ -10,7 +11,8 @@ logger = logging.getLogger(__name__)
 try:
     from shared.telegram_notifier import send_error as tg_error
 except ImportError:
-    tg_error = lambda *a, **k: None
+    def tg_error(*a, **k) -> None:
+        return None
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
 EVERGREEN_TYPES = ["dividend_ranking", "etf_comparison", "sector_analysis", "ipo_schedule", "cma_savings"]
@@ -32,12 +34,17 @@ def run(blog_cfg):
     blog_id = blog_cfg["id"]
     logger.info(f"STAP pipeline: {blog_id}")
 
-    from shared.content_store import init_db, get_today_count
-    from shared.publisher import publish
-    from pipelines.stock.fetcher import fetch_recent_disclosure, fetch_company_info, fetch_financial_summary, get_listed_corps, fetch_etf_daily, fetch_dividend_ranking
+    from pipelines.stock.fetcher import (
+        fetch_company_info,
+        fetch_dividend_ranking,
+        fetch_etf_daily,
+        fetch_financial_summary,
+        fetch_recent_disclosure,
+        get_listed_corps,
+    )
     from pipelines.stock.writer import generate_disclosure_article, generate_evergreen_article
-    from pipelines.stock.thumbnail import generate_stock_thumbnail
-    from shared.r2_uploader import upload_file
+    from shared.content_store import get_today_count, init_db
+    from shared.publisher import publish
 
     init_db()
     today_count = get_today_count(blog_id)
@@ -125,7 +132,7 @@ def run(blog_cfg):
             article = generate_disclosure_article(disc, company, financials, financials_prev, dividend)
             if article.get("title") and article.get("body_md"):
                 # 썸네일 생성 + R2 업로드
-                stock_code = company.get("stock_code", "") if company else ""
+                company.get("stock_code", "") if company else ""
                 article["title"] = sanitize_title(article["title"])
                 thumb_url = _make_thumbnail(article["title"], article.get("category", "공시분석"), company.get("stock_code", "") if company else "", disc.get("corp_name", ""))
                 # [P3] SEO description
@@ -231,7 +238,7 @@ def run(blog_cfg):
             extra = fetch_dividend_ranking(top_n=10)
             if extra:
                 logger.info(f"배당 종목 데이터: {len(extra.get('rankings', []))}건")
-        article = generate_evergreen_article(topic_type, corp_data=enriched if enriched else sample, extra_data=extra)
+        article = generate_evergreen_article(topic_type, corp_data=enriched or sample, extra_data=extra)
         if article.get("title") and article.get("body_md"):
             # 썸네일 생성 + R2 업로드
             thumb_url = _make_thumbnail(article["title"], article.get("category", "시장분석"), "", "")
@@ -262,7 +269,7 @@ def run(blog_cfg):
     return result or {"success": False, "reason": "no_content"}
 
 
-def _pick_strategy(conn, blog_id):
+def _pick_strategy(conn, blog_id) -> str:
     """blog_id별 전략 선택: stock은 disclosure 우선, 나머지는 evergreen 우선"""
     evergreen_blogs = ("dividend-hugo", "etf-hugo", "sector-hugo", "ipo-hugo", "finance-hugo")
     if blog_id in evergreen_blogs:
@@ -279,7 +286,7 @@ def _filter_unpublished(conn, blog_id, disclosures):
     return [d for d in disclosures if d.get("corp_code") not in published]
 
 
-def _record_publish(conn, blog_id, disclosure):
+def _record_publish(conn, blog_id, disclosure) -> None:
     conn.execute(
         "INSERT INTO publish_history (corp_code, stock_code, post_type, title, site_id) VALUES (?,?,?,?,?)",
         (disclosure.get("corp_code", ""), disclosure.get("stock_code", ""), "disclosure", disclosure.get("report_nm", ""), blog_id)

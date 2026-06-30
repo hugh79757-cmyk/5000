@@ -1,7 +1,7 @@
 """ETAP writer — GPT로 영문 도시 가이드 생성."""
-import os
 import sqlite3
 from pathlib import Path
+
 from shared.ai_writer import generate as ai_generate
 
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "travel-en.db"

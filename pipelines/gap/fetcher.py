@@ -1,7 +1,8 @@
-import os
 import logging
-import requests
+import os
 from datetime import datetime
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def search_web(keyword, display=10):
         r.raise_for_status()
         return r.json().get("items", [])
     except Exception as e:
-        logger.error(f"네이버 웹 검색 실패 [{keyword}]: {e}")
+        logger.exception(f"네이버 웹 검색 실패 [{keyword}]: {e}")
         return []
 
 
@@ -41,7 +42,7 @@ def search_blog(keyword, display=10):
         r.raise_for_status()
         return r.json().get("items", [])
     except Exception as e:
-        logger.error(f"네이버 블로그 검색 실패 [{keyword}]: {e}")
+        logger.exception(f"네이버 블로그 검색 실패 [{keyword}]: {e}")
         return []
 
 
@@ -56,7 +57,7 @@ def search_news(keyword, display=10):
         r.raise_for_status()
         return r.json().get("items", [])
     except Exception as e:
-        logger.error(f"네이버 뉴스 검색 실패 [{keyword}]: {e}")
+        logger.exception(f"네이버 뉴스 검색 실패 [{keyword}]: {e}")
         return []
 
 
@@ -71,7 +72,7 @@ def search_image(keyword, display=5):
         r.raise_for_status()
         return r.json().get("items", [])
     except Exception as e:
-        logger.error(f"네이버 이미지 검색 실패 [{keyword}]: {e}")
+        logger.exception(f"네이버 이미지 검색 실패 [{keyword}]: {e}")
         return []
 
 

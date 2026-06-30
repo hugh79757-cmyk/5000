@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-키워드 대량 확장기
+"""키워드 대량 확장기
 1. 네이버 자동완성 API → 연관 키워드 수집
 2. 쿠팡 상품명 역추출 → 기존 products DB 활용
 3. 네이버 쇼핑 검색 API → 카테고리 상품명에서 키워드 추출
@@ -9,9 +8,15 @@
 실행: python3 pipelines/curation/keyword_expander.py baby-hugo
 """
 
-import os, sys, re, time, json, sqlite3, requests
-from pathlib import Path
+import os
+import re
+import sqlite3
+import sys
+import time
 from collections import Counter
+from pathlib import Path
+
+import requests
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -43,17 +48,17 @@ def _get_dynamic_seeds(blog_id: str, limit: int = 20) -> list[str]:
             "camping-hugo": ["텐트", "캠핑", "침낭", "의자", "테이블", "랜턴"],
         }
         keywords = category_map.get(blog_id, [])
-        
+
         # 관련 키워드로 검색된 상품의 키워드를 빈도순으로 가져오기
-        placeholders = ",".join(["?" for _ in keywords])
-        rows = conn.execute(f"""
-            SELECT keyword, COUNT(*) as cnt 
-            FROM products 
+        ",".join(["?" for _ in keywords])
+        rows = conn.execute("""
+            SELECT keyword, COUNT(*) as cnt
+            FROM products
             WHERE keyword LIKE ? OR keyword LIKE ? OR keyword LIKE ?
-            GROUP BY keyword 
-            ORDER BY cnt DESC 
+            GROUP BY keyword
+            ORDER BY cnt DESC
             LIMIT ?
-        """, (f"%{keywords[0]}%", f"%{keywords[1] if len(keywords) > 1 else keywords[0]}%", 
+        """, (f"%{keywords[0]}%", f"%{keywords[1] if len(keywords) > 1 else keywords[0]}%",
               f"%{keywords[2] if len(keywords) > 2 else keywords[0]}%", limit)).fetchall()
         conn.close()
         return [row[0] for row in rows if row[0]]
@@ -103,14 +108,13 @@ def get_autocomplete(keyword: str) -> list[str]:
             if items and isinstance(items[0], list):
                 return [item[0] for item in items[0] if item]
             return [item[0] for item in items if isinstance(item, list) and item]
-    except Exception as e:
+    except Exception:
         pass
     return []
 
 
 def expand_via_autocomplete(seeds: list[str], depth: int = 2) -> set[str]:
-    """
-    자동완성 재귀 확장
+    """자동완성 재귀 확장
     depth=1: 시드 → 자동완성 (약 10배 확장)
     depth=2: 시드 → 자동완성 → 자동완성 결과도 한 번 더 (약 100배)
     """
@@ -141,8 +145,7 @@ def expand_via_autocomplete(seeds: list[str], depth: int = 2) -> set[str]:
 # ════════════════════════════════════════════════════════
 
 def extract_from_products_db(blog_id: str, top_n: int = 200) -> list[str]:
-    """
-    products 테이블의 product_name에서 명사 추출
+    """Products 테이블의 product_name에서 명사 추출
     → 2~5글자 한국어 단어 중 빈도 높은 것 추출
     """
     conn   = sqlite3.connect(DB_PATH)
@@ -158,14 +161,14 @@ def extract_from_products_db(blog_id: str, top_n: int = 200) -> list[str]:
     for (name,) in rows:
         if not name:
             continue
-        tokens = re.findall(r'[가-힣]{2,6}', name)
+        tokens = re.findall(r"[가-힣]{2,6}", name)
         word_counter.update(tokens)
 
     # 불용어 제거
     STOPWORDS = {
         "추천", "브랜드", "정품", "특가", "무료", "배송", "할인",
         "신상", "최신", "인기", "베스트", "고급", "프리미엄",
-        "국내", "해외", "직구", "공식", "정품", "세트",
+        "국내", "해외", "직구", "공식", "세트",
     }
     result = [
         w for w, cnt in word_counter.most_common(top_n * 2)
@@ -196,13 +199,13 @@ def get_naver_shopping_keywords(query: str, display: int = 100) -> list[str]:
             items = resp.json().get("items", [])
             words = []
             for item in items:
-                title = re.sub(r'<[^>]+>', '', item.get("title", ""))
-                tokens = re.findall(r'[가-힣]{2,6}', title)
+                title = re.sub(r"<[^>]+>", "", item.get("title", ""))
+                tokens = re.findall(r"[가-힣]{2,6}", title)
                 words.extend(tokens)
             counter = Counter(words)
             STOPWORDS = {"추천", "정품", "배송", "할인", "특가", "무료", "세트"}
             return [w for w, c in counter.most_common(50) if w not in STOPWORDS and c >= 2]
-    except Exception as e:
+    except Exception:
         pass
     return []
 
@@ -211,7 +214,7 @@ def get_naver_shopping_keywords(query: str, display: int = 100) -> list[str]:
 # 4. DB 저장 및 keywords.py 업데이트
 # ════════════════════════════════════════════════════════
 
-def save_expanded_keywords(blog_id: str, keywords: set[str]):
+def save_expanded_keywords(blog_id: str, keywords: set[str]) -> None:
     """확장된 키워드를 naver_trending_keywords에 저장"""
     conn = sqlite3.connect(DB_PATH)
     conn.execute("""
@@ -291,7 +294,7 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100
 # 5. 메인
 # ════════════════════════════════════════════════════════
 
-def run(blog_id: str):
+def run(blog_id: str) -> None:
     seeds = get_root_seeds(blog_id)
     if not seeds:
         print(f"[ERROR] 시드 키워드 없음: {blog_id}")
@@ -326,7 +329,7 @@ def run(blog_id: str):
     # 필터링: 1글자 이하, 특수문자 포함 제거
     filtered = {
         kw for kw in all_keywords
-        if len(kw) >= 2 and re.match(r'^[가-힣a-zA-Z0-9\s]+$', kw)
+        if len(kw) >= 2 and re.match(r"^[가-힣a-zA-Z0-9\s]+$", kw)
     }
     print(f"\n[필터링 후] {len(filtered)}개 (원본 {len(all_keywords)}개)")
 
@@ -351,7 +354,7 @@ def run(blog_id: str):
     print(f"\n✅ {blog_id} 완료 — 총 {len(filtered)}개 수집, {added}개 keywords.py 추가")
 
 
-def run_all():
+def run_all() -> None:
     for blog_id in DEFAULT_SEEDS:
         run(blog_id)
         time.sleep(3)

@@ -1,16 +1,16 @@
-"""
-Aviasales 항공권 가격 수집기
+"""Aviasales 항공권 가격 수집기
 - /v2/prices/latest: 최근 48시간 최저가
 - /v1/prices/cheap: 노선별 최저가
 - /v1/prices/calendar: 월별 일일 가격
 - /v1/city-directions: 도시별 인기 방면
 """
-import os
-import time
-import sqlite3
 import logging
-import requests
+import os
+import sqlite3
+import time
 from datetime import datetime
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ def _get_db():
 
 def _get_destination_iata_codes():
     db = _get_db()
-    rows = db.execute("SELECT iata_code, city, country FROM destinations WHERE iata_code != \'\'").fetchall()
+    rows = db.execute("SELECT iata_code, city, country FROM destinations WHERE iata_code != ''").fetchall()
     db.close()
     return [(r[0], r[1], r[2]) for r in rows]
 
@@ -78,7 +78,7 @@ def collect_latest_prices(origin="NYC", limit=30):
         logger.info(f"[Aviasales] {origin} latest prices: {count}건 저장")
         return count
     except Exception as e:
-        logger.error(f"[Aviasales] latest prices error ({origin}): {e}")
+        logger.exception(f"[Aviasales] latest prices error ({origin}): {e}")
         return 0
 
 
@@ -118,7 +118,7 @@ def collect_cheap_prices(origin="NYC", destinations=None):
                     total += 1
             time.sleep(0.5)
         except Exception as e:
-            logger.error(f"[Aviasales] cheap {origin}-{dest}: {e}")
+            logger.exception(f"[Aviasales] cheap {origin}-{dest}: {e}")
             continue
 
     db.commit()
@@ -156,7 +156,7 @@ def collect_popular_directions(origin="NYC"):
         logger.info(f"[Aviasales] {origin} popular directions: {count}건 저장")
         return count
     except Exception as e:
-        logger.error(f"[Aviasales] popular directions error ({origin}): {e}")
+        logger.exception(f"[Aviasales] popular directions error ({origin}): {e}")
         return 0
 
 
@@ -192,7 +192,7 @@ def collect_calendar(origin="NYC", destination="TYO", month=None):
         logger.info(f"[Aviasales] {origin}-{destination} calendar ({month}): {count}건 저장")
         return count
     except Exception as e:
-        logger.error(f"[Aviasales] calendar error ({origin}-{destination}): {e}")
+        logger.exception(f"[Aviasales] calendar error ({origin}-{destination}): {e}")
         return 0
 
 
@@ -218,7 +218,7 @@ def collect_direct_prices(origin="NYC", destinations=None):
                 continue
             data = resp.json().get("data", {})
             for dest_code, stops_dict in data.items():
-                for stop_key, info in stops_dict.items():
+                for info in stops_dict.values():
                     db.execute("""
                         INSERT INTO flight_direct
                         (origin, destination, price, currency, airline, flight_number,
@@ -233,7 +233,7 @@ def collect_direct_prices(origin="NYC", destinations=None):
                     total += 1
             time.sleep(0.5)
         except Exception as e:
-            logger.error(f"[Aviasales] direct {origin}-{dest}: {e}")
+            logger.exception(f"[Aviasales] direct {origin}-{dest}: {e}")
     db.commit()
     db.close()
     logger.info(f"[Aviasales] {origin} direct prices: {total}건 저장")
@@ -271,7 +271,7 @@ def collect_monthly_prices(origin="NYC", destination="TYO"):
         logger.info(f"[Aviasales] {origin}-{destination} monthly: {count}건 저장")
         return count
     except Exception as e:
-        logger.error(f"[Aviasales] monthly error ({origin}-{destination}): {e}")
+        logger.exception(f"[Aviasales] monthly error ({origin}-{destination}): {e}")
         return 0
 
 
@@ -305,7 +305,7 @@ def collect_nearby_prices(origin="NYC", destination="TYO"):
         logger.info(f"[Aviasales] {origin}-{destination} nearby: {count}건 저장")
         return count
     except Exception as e:
-        logger.error(f"[Aviasales] nearby error ({origin}-{destination}): {e}")
+        logger.exception(f"[Aviasales] nearby error ({origin}-{destination}): {e}")
         return 0
 
 
@@ -334,7 +334,7 @@ def collect_airline_routes(airline_code="AA", limit=50):
         logger.info(f"[Aviasales] {airline_code} routes: {count}건 저장")
         return count
     except Exception as e:
-        logger.error(f"[Aviasales] airline routes error ({airline_code}): {e}")
+        logger.exception(f"[Aviasales] airline routes error ({airline_code}): {e}")
         return 0
 
 def run_full_collection():
@@ -356,7 +356,7 @@ def run_full_collection():
     # Phase 3: 캘린더 + 월별 + 인근공항 (상위 5개 × 상위 10개)
     top_dests = destinations[:10]
     for origin in ORIGIN_CITIES[:5]:
-        for iata, city, country in top_dests:
+        for iata, _city, _country in top_dests:
             if iata and iata != origin:
                 total += collect_calendar(origin, iata)
                 total += collect_monthly_prices(origin, iata)

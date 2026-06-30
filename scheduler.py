@@ -2,20 +2,22 @@
 blogs.yaml의 스케줄에 따라 dispatcher를 실행하고,
 놓친 스케줄을 publish_ledger 기반으로 보충한다.
 """
-import os
-import sys
-import yaml
-import time
 import logging
-import schedule
-import subprocess
-import threading
+import os
 import sqlite3
+import subprocess
+import sys
+import threading
+import time
 from datetime import datetime
+
+import schedule
+import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.expanduser("~/.env.common"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
@@ -30,7 +32,7 @@ REQUIRED_PACKAGES = {
     "schedule": "schedule",
 }
 
-def _check_imports():
+def _check_imports() -> None:
     """표면 import 체크 — 모듈 로드 가능 여부"""
     missing = []
     for module, pip_name in REQUIRED_PACKAGES.items():
@@ -43,7 +45,7 @@ def _check_imports():
         print(f"  실행: pip install {' '.join(missing)}")
         sys.exit(1)
 
-def _check_boto3_deep():
+def _check_boto3_deep() -> bool | None:
     """boto3 심층 체크 — 실제 Client 생성 + R2 헬스체크
     서브패키지 누락(boto3.resources) 등 표면 import로 못 잡는 문제 감지
     """
@@ -71,7 +73,7 @@ def _check_boto3_deep():
         print(f"[DEEP_CHECK] boto3 비정상: {_e}")
         return False
 
-def _auto_repair_boto3():
+def _auto_repair_boto3() -> bool | None:
     """boto3 재설치 + 텔레그램 알림"""
     print("[AUTO_REPAIR] boto3 재설치 시작...")
     try:
@@ -94,15 +96,37 @@ def _auto_repair_boto3():
             except Exception:
                 pass
             return True
-        else:
-            print(f"[AUTO_REPAIR] boto3 재설치 실패: {_r.stderr[-200:]}")
-            return False
+        print(f"[AUTO_REPAIR] boto3 재설치 실패: {_r.stderr[-200:]}")
+        return False
     except Exception as _e:
         print(f"[AUTO_REPAIR] 예외: {_e}")
         return False
 
-def _check_dependencies():
+def _check_python_syntax() -> None:
+    """프로젝트 내 모든 .py 파일 구문 검증 (IndentationError 사전 방지)"""
+    import ast
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    errors = []
+    for root, _dirs, files in os.walk(project_root):
+        _dirs[:] = [d for d in _dirs if d.startswith(".") or d in {"__pycache__", ".venv"}]
+        for f in files:
+            if not f.endswith(".py"):
+                continue
+            fpath = os.path.join(root, f)
+            try:
+                with open(fpath, encoding="utf-8") as fh:
+                    ast.parse(fh.read())
+            except SyntaxError as e:
+                errors.append(f"{fpath}:{e.lineno} — {e.msg}")
+    if errors:
+        print(f"[FATAL] 구문 오류 발견 ({len(errors)}건):", file=sys.stderr)
+        for err in errors:
+            print(f"  ❌ {err}", file=sys.stderr)
+        sys.exit(1)
+
+def _check_dependencies() -> None:
     """통합 의존성 체크 — 표면 → 심층 → 자동복구"""
+    _check_python_syntax()
     _check_imports()
     if not _check_boto3_deep():
         print("[WARN] boto3 심층 체크 실패 — 자동 복구 시도")
@@ -117,7 +141,7 @@ def _check_dependencies():
             print("[FATAL] boto3 복구 실패 — 수동 조치 필요")
             sys.exit(1)
 
-def _check_thumbnail_health():
+def _check_thumbnail_health() -> None:
     """썸네일 생성 + R2 업로드 헬스체크 (스케줄러 시작 시 1회)"""
     logger.info("[HealthCheck] 썸네일 생성 테스트 시작...")
     try:
@@ -157,6 +181,8 @@ def _check_thumbnail_health():
 
 _check_dependencies()
 
+import contextlib
+
 from shared.telegram_notifier import send_error as _tg_error
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -178,7 +204,7 @@ LEDGER_DB = os.path.join(PROJECT_DIR, "data", "content.db")
 # ─── Heartbeat ───
 HB_FILE = os.path.join(PROJECT_DIR, "logs", "heartbeat")
 
-def _update_heartbeat():
+def _update_heartbeat() -> None:
     try:
         with open(HB_FILE, "w") as f:
             f.write(str(int(time.time())))
@@ -194,7 +220,7 @@ PUBLISH_DELAY = 60  # 블로그 간 딜레이(초)
 def load_config():
     """blogs.yaml(공통) + blogs.d/*.yaml(파이프라인별) 통합 로드"""
     main_path = os.path.join(CONFIG_DIR, "blogs.yaml")
-    with open(main_path, "r", encoding="utf-8") as f:
+    with open(main_path, encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
     if "blogs" not in config:
         config["blogs"] = []
@@ -204,7 +230,7 @@ def load_config():
             if not fname.endswith(".yaml"):
                 continue
             fpath = os.path.join(blogs_d, fname)
-            with open(fpath, "r", encoding="utf-8") as f:
+            with open(fpath, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
             config["blogs"].extend(data.get("blogs", []))
     return config
@@ -212,7 +238,7 @@ def load_config():
 
 # ─── 발행 실행 ───
 
-def run_publish(blog_id):
+def run_publish(blog_id) -> bool | None:
     """dispatcher를 subprocess로 실행 (quota 게이트 포함)"""
     # 중앙 quota 체크: ledger 기준으로 초과 시 skip
     try:
@@ -256,11 +282,11 @@ def run_publish(blog_id):
             return False
         return True
     except subprocess.TimeoutExpired:
-        logger.error(blog_id + " timeout (600s)")
+        logger.exception(blog_id + " timeout (600s)")
         _tg_error(blog_id, "scheduler", "timeout 600s")
         return False
     except Exception as e:
-        logger.error(blog_id + " failed: " + str(e))
+        logger.exception(blog_id + " failed: " + str(e))
         _tg_error(blog_id, "scheduler", str(e)[:300])
         return False
 
@@ -271,7 +297,7 @@ _publish_queue = []
 _queue_lock = threading.Lock()
 
 
-def queue_publish(blog_id):
+def queue_publish(blog_id) -> None:
     """동시간대 블로그를 큐에 넣고 순차 실행 (중복 방지)"""
     # ── inactive 실시간 체크: YAML이 바뀌어도 즉시 반영 ──
     try:
@@ -296,7 +322,7 @@ def queue_publish(blog_id):
             threading.Thread(target=_drain_queue, daemon=True).start()
 
 
-def _drain_queue():
+def _drain_queue() -> None:
     """큐에 쌓인 블로그를 순차적으로 실행"""
     while True:
         with _queue_lock:
@@ -307,7 +333,7 @@ def _drain_queue():
         try:
             run_publish(blog_id)
         except Exception as e:
-            logger.error(f"Queue publish failed: {blog_id} - {e}")
+            logger.exception(f"Queue publish failed: {blog_id} - {e}")
         with _queue_lock:
             if not _publish_queue:
                 return
@@ -335,7 +361,7 @@ def _get_ledger_count(blog_id, date_str):
         return 0
 
 
-def catchup_missed():
+def catchup_missed() -> None:
     """놓친 스케줄 보충 발행 — 5분마다 체크 (중복 실행 방지)"""
     if not _catchup_lock.acquire(blocking=False):
         logger.debug("Catchup already running, skipping")
@@ -347,8 +373,8 @@ def catchup_missed():
         _catchup_lock.release()
 
 
-def _catchup_missed_inner():
-    """catchup 실제 로직"""
+def _catchup_missed_inner() -> None:
+    """Catchup 실제 로직"""
     global _catchup_attempts, _catchup_date
 
     config = load_config()
@@ -412,13 +438,13 @@ def _catchup_missed_inner():
             if not success:
                 logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
         except Exception as e:
-            logger.error(f"CATCHUP: {blog_id} 예외: {e}")
+            logger.exception(f"CATCHUP: {blog_id} 예외: {e}")
         time.sleep(5)
 
 
 # ─── 배치 작업 ───
 
-def batch_deploy():
+def batch_deploy() -> None:
     logger.info("Batch deploy started")
     try:
         result = subprocess.run(
@@ -429,21 +455,21 @@ def batch_deploy():
             for line in result.stdout.strip().split("\n")[-5:]:
                 logger.info("  " + line)
     except Exception as e:
-        logger.error("Batch deploy failed: " + str(e))
+        logger.exception("Batch deploy failed: " + str(e))
 
 
-def _run_quality_scan():
+def _run_quality_scan() -> None:
     """발행 후 품질 스캔 + 텔레그램 리포트 (매일 23:00)"""
     try:
         from pipelines.etap.quality_scanner import run_scan
         result = run_scan()
         logger.info(f"[QualityScan] 완료: {result}")
     except Exception as e:
-        logger.error(f"[QualityScan] 실패: {e}")
+        logger.exception(f"[QualityScan] 실패: {e}")
         _tg_error("QualityScan 오류", str(e))
 
 
-def daily_report():
+def daily_report() -> None:
     logger.info("Daily report")
     try:
         result = subprocess.run(
@@ -454,10 +480,10 @@ def daily_report():
         if result.stdout:
             logger.info("  " + result.stdout.strip()[-200:])
     except Exception as e:
-        logger.error("Report failed: " + str(e))
+        logger.exception("Report failed: " + str(e))
 
 
-def _run_gap_keyword_sync():
+def _run_gap_keyword_sync() -> None:
     """news-keyword-pro golden CSV -> gap.db 동기화"""
     try:
         result = subprocess.run(
@@ -468,30 +494,31 @@ def _run_gap_keyword_sync():
         if result.returncode != 0:
             logger.warning(f"GAP keyword sync stderr: {result.stderr[:200]}")
     except Exception as e:
-        logger.error(f"GAP keyword sync failed: {e}")
+        logger.exception(f"GAP keyword sync failed: {e}")
 
 
-def _run_car_refresh():
+def _run_car_refresh() -> None:
     subprocess.run([sys.executable, "pipelines/car/daily_refresh.py"],
                    cwd=os.path.dirname(os.path.abspath(__file__)))
     logger.info("CAR daily_refresh completed")
 
 
-def _run_stap_collector():
+def _run_stap_collector() -> None:
     """STAP data collector를 subprocess로 완전 격리 실행 (import shadow 방지)"""
-    import subprocess as _sp, tempfile as _tmp, json as _json
+    import subprocess as _sp
+    import tempfile as _tmp
     stap_root = "/Users/twinssn/Projects/STAP"
     stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
     if not os.path.exists(stap_python):
         stap_python = sys.executable
-        logger.warning(f"[STAP collector] .venv/python3 없음 → sys.executable 사용")
+        logger.warning("[STAP collector] .venv/python3 없음 → sys.executable 사용")
 
     runner = "\n".join([
         "import sys, os",
         "sys.path.insert(0, " + repr(stap_root) + ")",
         "os.chdir(" + repr(stap_root) + ")",
         "from dotenv import load_dotenv",
-        "load_dotenv(os.path.join(" + repr(stap_root) + ", \".env\"), override=True)",
+        "load_dotenv(os.path.join(" + repr(stap_root) + ', ".env"), override=True)',
         "from pipelines.data_collector import collect_all",
         "result = collect_all()",
         "print('OK' if result else 'FAIL')",
@@ -514,23 +541,21 @@ def _run_stap_collector():
         else:
             logger.error(f"[STAP collector] 실패 (exit={proc.returncode}): {stderr or stdout}")
     except _sp.TimeoutExpired:
-        logger.error("[STAP collector] 300초 타임아웃")
+        logger.exception("[STAP collector] 300초 타임아웃")
     except Exception as e:
-        logger.error(f"[STAP collector] 오류: {e}")
+        logger.exception(f"[STAP collector] 오류: {e}")
     finally:
-        try:
+        with contextlib.suppress(Exception):
             os.unlink(runner_path)
-        except Exception:
-            pass
 
 
 
-def _run_senior_sync():
+def _run_senior_sync() -> None:
     """senior.db 서비스 데이터 일일 동기화 (pending 보충)"""
     try:
         import sys
         sys.path.insert(0, "/Users/twinssn/Projects/5000")
-        from pipelines.senior.fetcher import sync_services, get_pending_count
+        from pipelines.senior.fetcher import get_pending_count, sync_services
         pending = get_pending_count()
         logger.info(f"[SeniorSync] 현재 pending: {pending}건")
         # ✅ pending 500건 이상이면 sync 불필요 (2026-06-12 추가)
@@ -540,39 +565,39 @@ def _run_senior_sync():
         synced = sync_services()
         logger.info(f"[SeniorSync] 완료: {synced}건 신규 저장, pending: {get_pending_count()}건")
     except Exception as e:
-        logger.error(f"[SeniorSync] 실패: {e}")
+        logger.exception(f"[SeniorSync] 실패: {e}")
 
-def _run_festival_refresh():
+def _run_festival_refresh() -> None:
     try:
         subprocess.run([sys.executable, "scripts/refresh_festival.py"],
                        cwd=os.path.dirname(os.path.abspath(__file__)), timeout=600)
         logger.info("Festival refresh completed")
     except Exception as e:
-        logger.error(f"Festival refresh failed: {e}")
+        logger.exception(f"Festival refresh failed: {e}")
 
 
-def _run_course_refresh():
+def _run_course_refresh() -> None:
     try:
         subprocess.run([sys.executable, "scripts/refresh_course.py"],
                        cwd=os.path.dirname(os.path.abspath(__file__)), timeout=120)
         logger.info("Course refresh completed")
     except Exception as e:
-        logger.error(f"Course refresh failed: {e}")
+        logger.exception(f"Course refresh failed: {e}")
 
 
-def _send_morning_report():
+def _send_morning_report() -> None:
     subprocess.run([sys.executable, "-m", "shared.daily_report"],
                    cwd=os.path.dirname(os.path.abspath(__file__)))
 
 
 
-def _run_indexnow():
+def _run_indexnow() -> None:
     try:
         subprocess.run([sys.executable, "scripts/indexnow.py"],
                        cwd=os.path.dirname(os.path.abspath(__file__)), timeout=600)
         logger.info("IndexNow 제출 완료")
     except Exception as e:
-        logger.error(f"IndexNow 실패: {e}")
+        logger.exception(f"IndexNow 실패: {e}")
 
 # ─── 스케줄 등록 ───
 
@@ -615,23 +640,23 @@ def register_schedules():
     job_count += 1
 
     # CUAP auto_collector: 매 시간 :50에 실행
-    def _run_cuap_collector():
+    def _run_cuap_collector() -> None:
         try:
             from pipelines.curation.auto_collector import run as cuap_collect
             cuap_collect()
         except Exception as e:
-            logger.error(f"CUAP auto_collector error: {e}")
+            logger.exception(f"CUAP auto_collector error: {e}")
 
     schedule.every().hour.at(":50").do(_run_cuap_collector)
     logger.info("CUAP auto_collector scheduled every hour at :50")
 
     # CUAP keyword_expander: 매일 02:00에 실행 (동적 키워드 확장)
-    def _run_keyword_expander():
+    def _run_keyword_expander() -> None:
         try:
             from pipelines.curation.keyword_expander import run_all
             run_all()
         except Exception as e:
-            logger.error(f"CUAP keyword_expander error: {e}")
+            logger.exception(f"CUAP keyword_expander error: {e}")
 
     schedule.every().day.at("02:00").do(_run_keyword_expander)
     logger.info("CUAP keyword_expander scheduled daily at 02:00")
@@ -645,7 +670,7 @@ def register_schedules():
 
 # ─── 메인 ───
 
-def _wait_for_network(timeout=300):
+def _wait_for_network(timeout=300) -> bool:
     """네트워크 연결 대기 — DNS 해석 가능할 때까지 최대 timeout초"""
     import socket
     start = time.time()
@@ -661,7 +686,7 @@ def _wait_for_network(timeout=300):
     return False
 
 
-def main():
+def main() -> None:
     logger.info("=== 5000 Scheduler Starting ===")
     _wait_for_network()
     job_count = register_schedules()
@@ -680,7 +705,7 @@ def main():
             try:
                 catchup_missed()
             except Exception as e:
-                logger.error(f"Catchup error: {e}")
+                logger.exception(f"Catchup error: {e}")
             last_catchup = now_ts
         time.sleep(30)
 

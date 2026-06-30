@@ -3,8 +3,9 @@
 """
 import logging
 from datetime import datetime
-from shared.telegram_notifier import send
+
 from shared.content_store import get_conn
+from shared.telegram_notifier import send
 
 logger = logging.getLogger(__name__)
 

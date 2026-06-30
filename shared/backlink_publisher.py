@@ -1,12 +1,12 @@
-"""
-백링크 자동 발행 모듈 v1.0
+"""백링크 자동 발행 모듈 v1.0
 - telegra.ph: 글 발행 직후 요약본 자동 게시
 - GitHub README: 글 목록 자동 업데이트 (Phase 1)
 """
 
+import logging
 import os
 import re
-import logging
+
 import requests
 
 logger = logging.getLogger(__name__)
@@ -32,11 +32,11 @@ DEFAULT_AUTHOR = {"name": "informationhot", "url": "https://informationhot.kr"}
 def _md_to_telegraph_content(body_md, original_url):
     """마크다운 본문에서 요약 300자 + 원문 링크 Telegraph 노드 생성"""
     # 마크다운 태그 제거
-    plain = re.sub(r'#{1,6}\s*', '', body_md)
-    plain = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', plain)
-    plain = re.sub(r'[*_`~]', '', plain)
-    plain = re.sub(r'<[^>]+>', '', plain)
-    plain = re.sub(r'\n{2,}', '\n', plain).strip()
+    plain = re.sub(r"#{1,6}\s*", "", body_md)
+    plain = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", plain)
+    plain = re.sub(r"[*_`~]", "", plain)
+    plain = re.sub(r"<[^>]+>", "", plain)
+    plain = re.sub(r"\n{2,}", "\n", plain).strip()
 
     # 요약 (처음 300자)
     summary = plain[:300]
@@ -44,7 +44,7 @@ def _md_to_telegraph_content(body_md, original_url):
         summary += "..."
 
     # H2 헤딩 추출 (최대 5개)
-    h2s = re.findall(r'^## (.+)$', body_md, re.MULTILINE)[:5]
+    h2s = re.findall(r"^## (.+)$", body_md, re.MULTILINE)[:5]
 
     content = []
 
@@ -95,9 +95,8 @@ def publish_to_telegraph(title, body_md, original_url, blog_id=None):
             url = data["result"]["url"]
             logger.info(f"Telegraph 백링크 생성: {url}")
             return url
-        else:
-            logger.warning(f"Telegraph 발행 실패: {data.get('error')}")
-            return None
+        logger.warning(f"Telegraph 발행 실패: {data.get('error')}")
+        return None
     except Exception as e:
         logger.warning(f"Telegraph 요청 실패: {e}")
         return None

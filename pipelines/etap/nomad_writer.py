@@ -1,7 +1,10 @@
 """nomad_writer.py - Digital Nomad Guide And Coworking guide generator"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
 from urllib.parse import quote_plus
-from pipelines.etap.quality_guard import preprocess_tours
+
 from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
@@ -62,13 +65,13 @@ def _safe_price(val):
     except:
         return 0
 
-def _maps_url(name, address="", city="", country=""):
+def _maps_url(name, address="", city="", country="") -> str:
     """Build a Google Maps search URL from name + address + city + country."""
     parts = [name, address, city, country]
     query = " ".join(p for p in parts if p).strip()
     return f"https://www.google.com/maps/search/?api=1&query={quote_plus(query)}"
 
-def _maps_button(name, address="", hours="", website="", city="", country=""):
+def _maps_button(name, address="", hours="", website="", city="", country="") -> str:
     """Render a Google Maps markdown link for a coworking space."""
     url = _maps_url(name, address, city, country)
     parts = []
@@ -99,11 +102,11 @@ def _clean_gpt_map_tags(content):
     # 1) 마크다운 링크 — 이모지 유무 무관, website/메타 후속 제거
     patterns = [
         # [📍 View on Google Maps](url) + 선택적 website 링크 — 문장 중간 포함
-        r'\s*\[[^\]]*?(?:📍|View on Google Maps)[^\]]*?\]\([^\)]*\)(?:\s*·\s*\[[^\]]*?(?:🌐|Website)[^\]]*?\]\([^\)]*\))?(?:\s*_[^_]*_)?',
+        r"\s*\[[^\]]*?(?:📍|View on Google Maps)[^\]]*?\]\([^\)]*\)(?:\s*·\s*\[[^\]]*?(?:🌐|Website)[^\]]*?\]\([^\)]*\))?(?:\s*_[^_]*_)?",
         # 연속 두 번째 맵 링크 (공백으로 이어진 경우)
-        r'(?<=\))\s*\[[^\]]*?(?:📍|View on Google Maps)[^\]]*?\]\([^\)]*\)',
+        r"(?<=\))\s*\[[^\]]*?(?:📍|View on Google Maps)[^\]]*?\]\([^\)]*\)",
         # 텍스트만 있는 경우: 📍 View on Google Maps
-        r'\s*📍\s*View on Google Maps[^\n]*',
+        r"\s*📍\s*View on Google Maps[^\n]*",
         # HTML 링크
         r'<a\s+href="[^"]*google\.com/maps[^"]*"[^>]*>[^<]*(?:📍|View on Google Maps)[^<]*</a>',
         # broken HTML
@@ -113,7 +116,7 @@ def _clean_gpt_map_tags(content):
     total_removed = 0
     for pat in patterns:
         compiled = re.compile(pat, re.IGNORECASE | re.DOTALL)
-        cleaned, n = compiled.subn('', cleaned)
+        cleaned, n = compiled.subn("", cleaned)
         total_removed += n
 
     if total_removed:
@@ -160,11 +163,11 @@ def _inject_map_buttons(content, coworking, city="", country=""):
         if m:
             return m, name
         # 2) **bold** 형태로 부분 단어 매칭 (>=5자 단어만)
-        words = [w for w in re.split(r'[\s/,.-]+', name) if len(w) >= 5]
+        words = [w for w in re.split(r"[\s/,.-]+", name) if len(w) >= 5]
         for word in sorted(words, key=len, reverse=True):
             # bold 형태(**word**) 또는 문장 시작/끝 단어 경계
             m = re.search(
-                r'(?:\*\*[^*]*' + re.escape(word) + r'[^*]*\*\*)',
+                r"(?:\*\*[^*]*" + re.escape(word) + r"[^*]*\*\*)",
                 body_text, re.IGNORECASE
             )
             if m:
@@ -177,18 +180,18 @@ def _inject_map_buttons(content, coworking, city="", country=""):
         if name in used:
             continue
         info = lookup[name]
-        match, matched_name = _find_match_in_body(name, result_body)
+        match, _matched_name = _find_match_in_body(name, result_body)
         if not match:
             continue
 
         start = match.end()
 
         # 문장 끝(. ! ?) 다음에 삽입
-        sentence_end = re.search(r'[.!?](?=\s|\n|$)', result_body[start:])
+        sentence_end = re.search(r"[.!?](?=\s|\n|$)", result_body[start:])
         if sentence_end:
             insert_pos = start + sentence_end.end()
         else:
-            para_end = re.search(r'\n\n', result_body[start:])
+            para_end = re.search(r"\n\n", result_body[start:])
             insert_pos = start + para_end.start() if para_end else len(result_body)
 
         card = _maps_button(
@@ -209,11 +212,11 @@ def _inject_map_buttons(content, coworking, city="", country=""):
         db_names = list(lookup.keys())
         # 코워킹 섹션 범위 찾기
         cowork_start = re.search(
-            r'## Best Coworking[^\n]*\n',
+            r"## Best Coworking[^\n]*\n",
             result_body, re.IGNORECASE
         )
         cowork_end = re.search(
-            r'\n## ',
+            r"\n## ",
             result_body[cowork_start.end():] if cowork_start else result_body
         )
         if cowork_start:
@@ -223,13 +226,13 @@ def _inject_map_buttons(content, coworking, city="", country=""):
 
             # 리스트 아이템(- 또는 숫자.) 끝 문장들 찾기
             sentence_ends = [(m.end(), m) for m in re.finditer(
-                r'(?:^[\-\*]|^\d+\.)[^\n]+[.!?]', section, re.MULTILINE
+                r"(?:^[\-\*]|^\d+\.)[^\n]+[.!?]", section, re.MULTILINE
             )]
 
             if not sentence_ends:
                 # 리스트 없으면 단락 끝 문장들
                 sentence_ends = [(m.end(), m) for m in re.finditer(
-                    r'[^\n][.!?](?=\s|\n|$)', section
+                    r"[^\n][.!?](?=\s|\n|$)", section
                 )]
 
             # DB 상위 N개를 분산 삽입 (최대 sentence_ends 수만큼)
@@ -269,7 +272,7 @@ def _clean_hours(hours):
              and not any(m in p for m in ["Jan ","Feb ","Mar ","Apr ","May ","Jun ",
                                            "Jul ","Aug ","Sep ","Oct ","Nov ","Dec "])]
     result = "; ".join(clean[:2])
-    return result if result else hours[:60]
+    return result or hours[:60]
 
 def _address_in_city(address, city):
     """Check if address string mentions the target city (OSM boundary sanity check)."""
@@ -285,7 +288,7 @@ def fetch_data(city, country=None):
         SELECT title, description, link FROM airalo_esim
         WHERE LOWER(description) LIKE ? OR LOWER(title) LIKE ?
         LIMIT 5
-    """, (f'%{esim_term}%', f'%{esim_term}%')).fetchall()
+    """, (f"%{esim_term}%", f"%{esim_term}%")).fetchall()
 
     # Visa: nationality-specific lookup for main nomad-source countries
     # Schema: (passport, destination, requirement)
@@ -304,14 +307,14 @@ def fetch_data(city, country=None):
             ORDER BY passport
         """
         visa_rows = conn.execute(
-            q, [country.lower()] + MAIN_PASSPORTS
+            q, [country.lower(), *MAIN_PASSPORTS]
         ).fetchall()
 
     coworking_raw = conn.execute("""
         SELECT name, address, website, opening_hours, internet_access, fee
         FROM coworking_spaces
         WHERE LOWER(city) LIKE ? LIMIT 20
-    """, (f'%{city.lower()}%',)).fetchall()
+    """, (f"%{city.lower()}%",)).fetchall()
     # Filter: must have a name AND address should mention the city (or have no address)
     coworking = []
     for r in coworking_raw:
@@ -330,14 +333,14 @@ def fetch_data(city, country=None):
                rain_days, humidity_pct
         FROM nomad_climate
         WHERE LOWER(city) LIKE ? ORDER BY month
-    """, (f'%{city.lower()}%',)).fetchall()
+    """, (f"%{city.lower()}%",)).fetchall()
 
     cafes_raw = conn.execute("""
         SELECT name, address, website, opening_hours, internet_access, cuisine
         FROM nomad_cafes
         WHERE LOWER(city) LIKE ? AND name IS NOT NULL AND name != ''
         LIMIT 20
-    """, (f'%{city.lower()}%',)).fetchall()
+    """, (f"%{city.lower()}%",)).fetchall()
     cafes = []
     for r in cafes_raw:
         d = dict(r)
@@ -351,7 +354,7 @@ def fetch_data(city, country=None):
     cost = conn.execute("""
         SELECT * FROM nomad_cost_of_living
         WHERE LOWER(city) LIKE ? LIMIT 1
-    """, (f'%{city.lower()}%',)).fetchone()
+    """, (f"%{city.lower()}%",)).fetchone()
     conn.close()
     return {
         "esim": [dict(r) for r in esim],
@@ -401,7 +404,7 @@ def _build_summary(data, city, country):
     cost = data.get("cost", {})
     if cost:
         cur = cost.get("currency", "USD")
-        summary += f"\n[COST OF LIVING - use these EXACT strings, do not recalculate]\n"
+        summary += "\n[COST OF LIVING - use these EXACT strings, do not recalculate]\n"
         fields = [
             ("meal_inexpensive", "Cheap meal"),
             ("meal_mid_range", "Mid-range meal (2 people)"),

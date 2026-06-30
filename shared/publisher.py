@@ -1,20 +1,24 @@
 import logging
+
 logger = logging.getLogger(__name__)
 import os
-import sqlite3
 import re
-import yaml
+import sqlite3
 import subprocess
 from datetime import datetime
 from pathlib import Path
+
+import yaml
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
-from shared.content_store import insert_article, update_published, get_today_count
+import contextlib
+
+from shared.content_store import get_today_count, insert_article, update_published
 
 
 def sanitize_featureimage_url(url, max_len=255):
-    """
-    featureimage URL 검증: 255자 초과 시 빈 문자열 반환 (Hugo 파일명 Too Long 방지)
+    """Featureimage URL 검증: 255자 초과 시 빈 문자열 반환 (Hugo 파일명 Too Long 방지)
     """
     if not url:
         return ""
@@ -52,14 +56,14 @@ CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file
 def load_blogs():
     blogs = []
     main_path = os.path.join(CONFIG_DIR, "blogs.yaml")
-    with open(main_path, "r", encoding="utf-8") as f:
+    with open(main_path, encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
     blogs.extend(data.get("blogs", []))
     blogs_d = os.path.join(CONFIG_DIR, "blogs.d")
     if os.path.isdir(blogs_d):
         for fname in sorted(os.listdir(blogs_d)):
             if fname.endswith(".yaml"):
-                with open(os.path.join(blogs_d, fname), "r", encoding="utf-8") as f:
+                with open(os.path.join(blogs_d, fname), encoding="utf-8") as f:
                     d = yaml.safe_load(f) or {}
                 blogs.extend(d.get("blogs", []))
     return blogs
@@ -110,7 +114,7 @@ def _sanitize_yaml_value(s, max_len=None):
 
 
 def _validate_frontmatter(fm_text):
-    """front matter 텍스트가 YAML 파싱 가능한지 검증."""
+    """Front matter 텍스트가 YAML 파싱 가능한지 검증."""
     try:
         if not fm_text.startswith("---"):
             return False, "front matter does not start with ---"
@@ -128,7 +132,7 @@ def _validate_frontmatter(fm_text):
         try:
             from datetime import datetime as _dt
             d_str = str(parsed.get("date"))
-            d = _dt.fromisoformat(d_str.replace("Z", "+00:00"))
+            d = _dt.fromisoformat(d_str)
             now = _dt.now(d.tzinfo) if d.tzinfo else _dt.now()
             if (d - now).total_seconds() > 3600:
                 return False, "date is in the future: " + d_str
@@ -150,40 +154,39 @@ def _clean_body(body_md):
 
 
 def _insert_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
-    """
-    쿠팡 파트너스 링크 삽입
-    
+    """쿠팡 파트너스 링크 삽입
+
     Returns:
         tuple[str, str]: (수정된 body_md, 상태) 상태는 "OK", "FAIL", "SKIP" 중 하나
+
     """
     # blog_cfg 없으면 SKIP (publish()에서 조건 필터링)
     if not blog_cfg:
         return body_md, "SKIP"
-    
+
     try:
         from shared.coupang_car import CoupangCar
         coupang = CoupangCar()
         if not coupang.is_configured():
             return body_md, "SKIP"
-        
+
         coupang_md = coupang.get_car_product_links(segment=segment, fuel_type=fuel_type, count=2)
         if not coupang_md:
             return body_md, "SKIP"
-        
+
         body_md = body_md.rstrip() + coupang_md
         return body_md, "OK"
-        
+
     except ImportError as e:
-        logger.error(f"[COUPANG_ERROR] Import failed: {e}")
+        logger.exception(f"[COUPANG_ERROR] Import failed: {e}")
         return body_md, "FAIL"
     except Exception as e:
-        logger.error(f"[COUPANG_ERROR] Insert failed: {e}")
+        logger.exception(f"[COUPANG_ERROR] Insert failed: {e}")
         return body_md, "FAIL"
 
 
 def _insert_internal_links(body_md, blog_id, slug):
-    """
-    StapEntityLinker inject — stock-hugo 포함 전체 블로그 적용
+    """StapEntityLinker inject — stock-hugo 포함 전체 블로그 적용
     Returns:
         tuple[str, int]: (수정된 body_md, 삽입된 링크 수)
     """
@@ -203,7 +206,7 @@ def _insert_internal_links(body_md, blog_id, slug):
 
 
 def _extract_first_image(body_md):
-    m = re.search(r'!\[.*?\]\((https?://[^)]+)\)', body_md)
+    m = re.search(r"!\[.*?\]\((https?://[^)]+)\)", body_md)
     if not m:
         return ""
     url = m.group(1)
@@ -220,7 +223,7 @@ def _extract_description(body_md):
         return _m.group(1).strip()[:160]
     # 기존 로직 (아래에서 본문 기반 추출 — DESC 주석 우선, 없으면 본문 기반"""
     import re as _re
-    _desc_match = _re.search(r'<!-- DESC: (.+?) -->', body_md)
+    _desc_match = _re.search(r"<!-- DESC: (.+?) -->", body_md)
     if _desc_match:
         return _desc_match.group(1).strip()[:160]
     lines = []
@@ -228,9 +231,9 @@ def _extract_description(body_md):
         line = line.strip()
         if not line:
             continue
-        if line.startswith("#") or line.startswith(">") or line.startswith("!") or line.startswith("---") or line.startswith("<!--") or line.startswith("|") or line.startswith("<"):
+        if line.startswith(("#", ">", "!", "---", "<!--", "|", "<")):
             continue
-        clean = re.sub(r'\*\*|\[([^\]]+)\]\([^)]*\)', r'\1', line)
+        clean = re.sub(r"\*\*|\[([^\]]+)\]\([^)]*\)", r"\1", line)
         if len(clean) > 20:
             lines.append(clean)
         if len(lines) >= 3:
@@ -260,11 +263,10 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
         fm += "tags: [" + ", ".join('"' + t + '"' for t in tag_list) + "]\n"
     if thumbnail_url:
         fm += 'image: "' + thumbnail_url + '"\n'
+    elif "stock" in blog_id:
+        fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
     else:
-        if "stock" in blog_id:
-            fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
-        else:
-            fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
+        fm += 'image: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n"
     return fm, date_str
 
@@ -311,11 +313,10 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
         thumbnail_url = sanitize_featureimage_url(thumbnail_url)
     if thumbnail_url:
         fm += 'featureimage: "' + thumbnail_url + '"\n'
+    elif "stock" in blog_id:
+        fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
     else:
-        if "stock" in blog_id:
-            fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"\n'
-        else:
-            fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
+        fm += 'featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"\n'
     fm += "---\n\n"
     return fm, date_str
 
@@ -337,8 +338,7 @@ def _get_related_posts(blog_id, current_slug, max_count=3):
 
 
 def _inject_related_cards_midpoint(body_md, blog_id, slug, title, category):
-    """
-    관련 글 카드를 마지막 ## 헤딩 바로 앞에 삽입
+    """관련 글 카드를 마지막 ## 헤딩 바로 앞에 삽입
     마지막 ## 헤딩이 없으면 본문 말미에 삽입
     """
     import re as _re
@@ -349,18 +349,16 @@ def _inject_related_cards_midpoint(body_md, blog_id, slug, title, category):
     if len(matches) >= 2:
         insert_pos = matches[-1].start()
         return body_md[:insert_pos] + cards_html.lstrip("\n") + "\n\n" + body_md[insert_pos:]
-    else:
-        return body_md.rstrip() + cards_html
+    return body_md.rstrip() + cards_html
 
 
 def _inject_related_cards(body_md, blog_id, slug, title, category):
-    """
-    후처리: 관련 글 카드 섹션을 본문 말미에 HTML로 삽입
+    """후처리: 관련 글 카드 섹션을 본문 말미에 HTML로 삽입
     - 같은 블로그 동일 카테고리 최근 2개 (same-blog, 자기 자신 제외)
     - cross-blog: 제목에서 한글 고유명사(3자 이상)만 추출해 타 블로그 검색 최대 2개
     """
-    import sqlite3 as _sq
     import re as _re
+    import sqlite3 as _sq
 
     STAP_CONTENT_DB = "/Users/twinssn/Projects/STAP/data/stap_content.db"
     BLOG_DOMAINS = {
@@ -391,7 +389,7 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
             "영업","이익","매출","증가","감소","급등","급락","순이익","손실",
             "원가","절감","업종","업황","리스크","판단","결론","현황","정리",
             "방법","이유","원인","효과","전략","수익","금리","예금","적금",
-            "영향","기록","개선","감소","증가","비밀","가져온","미친","지속",
+            "영향","기록","개선","비밀","가져온","미친","지속",
         }
         candidates = _re.findall(r"[가-힣]{3,10}", t)
         result = []
@@ -520,7 +518,7 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
 
     # HTML 카드 블록 생성
     html = '\n\n<div class="stap-related">\n'
-    html += '<h2>📌 관련 글</h2>\n'
+    html += "<h2>📌 관련 글</h2>\n"
     html += '<div class="stap-cards">\n'
     for c in cards:
         badge_cls = "stap-card-badge cross" if c["cross"] else "stap-card-badge"
@@ -530,8 +528,8 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         html += f'  <span class="{badge_cls}">{c["label"]}</span>\n'
         html += f'  <div class="stap-card-title">{c["title"]}</div>\n'
         html += f'  <div class="stap-card-meta">{c["meta"]}</div>\n'
-        html += '</a>\n'
-    html += '</div>\n</div>\n'
+        html += "</a>\n"
+    html += "</div>\n</div>\n"
 
     return body_md.rstrip() + html
 
@@ -539,10 +537,8 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
 def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
     # ✅ slug 빈값 가드 (2026-05-01 추가) — content/posts/index.md 폭탄 방지
     if not slug or not str(slug).strip():
-        try:
+        with contextlib.suppress(Exception):
             logger.error(f"[PUBLISH] slug가 비어있어 발행 중단: title={title}")
-        except Exception:
-            pass
         return {"success": False, "error": "empty slug"}
 
     theme = blog_cfg.get("theme", "PaperMod")
@@ -557,7 +553,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         _blog_id = blog_cfg.get("id", "")
         if "stock" in _blog_id:
          thumbnail_url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
-        
+
     if thumbnail_url and thumbnail_url.startswith("http://tong.visitkorea.or.kr"):
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
 
@@ -572,7 +568,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         os.makedirs(post_dir, exist_ok=True)
         file_path = os.path.join(post_dir, "index.md")
     else:
-        fm, date_str = _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
+        fm, _date_str = _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft)
         date_prefix = datetime.now().strftime("%Y-%m-%d")
         post_dir = os.path.join(site_path, "content", "posts")
         os.makedirs(post_dir, exist_ok=True)
@@ -587,10 +583,8 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ✅ 작성 전 front matter 검증 (2026-05-01 추가)
     _ok, _err = _validate_frontmatter(fm)
     if not _ok:
-        try:
+        with contextlib.suppress(Exception):
             logger.error("[PUBLISH] front matter 검증 실패, 발행 중단: blog=" + str(blog_cfg.get("id","")) + " err=" + str(_err))
-        except Exception:
-            pass
         return {"success": False, "error": "frontmatter invalid: " + str(_err)}
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -598,7 +592,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     # ✅ 작성 후 디스크 재검증 (2026-05-01 추가) — 인코딩 문제까지 차단
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             _disk = f.read()
         _ok2, _err2 = _validate_frontmatter(_disk)
         if not _ok2:
@@ -608,23 +602,19 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
                     os.rmdir(post_dir)
             except Exception:
                 pass
-            try:
+            with contextlib.suppress(Exception):
                 logger.error("[PUBLISH] 디스크 재검증 실패, 파일 삭제: " + str(_err2))
-            except Exception:
-                pass
             return {"success": False, "error": "frontmatter invalid on disk: " + str(_err2)}
     except Exception as _e:
-        try:
+        with contextlib.suppress(Exception):
             logger.warning("[PUBLISH] 디스크 재검증 예외(무시): " + str(_e))
-        except Exception:
-            pass
 
     expected_url = "https://" + blog_cfg.get("domain", "") + "/posts/" + slug + "/"
     return {"success": True, "url": expected_url, "file_path": file_path}
 
 
-def deploy_site(site_path, cf_project):
-    site = Path(site_path)
+def deploy_site(site_path, cf_project) -> bool:
+    Path(site_path)
     # deploy 직렬화 락 (wrangler 동시 실행 방지, 최대 60초 대기)
     import fcntl as _fl
     import time as _lock_time
@@ -656,10 +646,11 @@ def deploy_site(site_path, cf_project):
     return True
 
 
-def _deploy_site_inner(site_path, cf_project):
+def _deploy_site_inner(site_path, cf_project) -> bool:
     site = Path(site_path)
     # 5000/.env의 CLOUDFLARE 토큰을 wrangler에 주입 (oauth_token 만료 대응)
     import os as _os2
+
     from dotenv import load_dotenv as _ldenv3
     _ldenv3("/Users/twinssn/Projects/5000/.env", override=True)
     _wrangler_env = _os2.environ.copy()
@@ -735,7 +726,8 @@ def _deploy_site_inner(site_path, cf_project):
                                  env=_wrangler_env, timeout=_deploy_timeout
                 )
         except subprocess.TimeoutExpired:
-            raise Exception(f"Wrangler deploy timed out ({_deploy_timeout}s)")
+            msg = f"Wrangler deploy timed out ({_deploy_timeout}s)"
+            raise Exception(msg)
     if result.returncode != 0:
         # 일시적 네트워크 오류 시 최대 2회 재시도
         err_text = (result.stderr or "").lower()
@@ -829,6 +821,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
 
     if platform == "blogger":
         import os
+
         from dotenv import load_dotenv as _ldenv
         _ldenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
         from shared.blogger_publisher import publish_to_blogger
@@ -843,12 +836,13 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         # markdown -> HTML 변환 (Blogger는 HTML 필요)
         if not body_html and body_md:
             import markdown
-            html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
+            html_content = markdown.markdown(body_md, extensions=["tables", "fenced_code"])
         result = publish_to_blogger(blogger_blog_id, title, html_content, labels)
         logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang=SKIP | internal_links=0 | chars={len(body_md)}')
 
     elif platform == "wordpress":
         import os
+
         from dotenv import load_dotenv as _ldenv2
         _ldenv2(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
         from shared.wordpress_publisher import publish_to_wordpress
@@ -861,7 +855,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         # markdown -> HTML 변환 (WordPress도 HTML 필요)
         if not body_html and body_md:
             import markdown
-            html_content = markdown.markdown(body_md, extensions=['tables', 'fenced_code'])
+            html_content = markdown.markdown(body_md, extensions=["tables", "fenced_code"])
         result = publish_to_wordpress(wp_url, wp_user, wp_pass, title, html_content, categories=[wp_category] if wp_category else None, featured_image_url=thumbnail_url)
         logger.info(f'[PUBLISH] blog={blog_id} | title="{title}" | coupang=SKIP | internal_links=0 | chars={len(body_md)}')
 
@@ -870,11 +864,11 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         # 서브함수 순서대로 호출
         if body_md:
             body_md = _clean_body(body_md)
-        
+
         coupang_status = "SKIP"
         if data_source == "car_db":
             body_md, coupang_status = _insert_coupang(body_md, segment, fuel_type, blog_cfg)
-        
+
         # STAP 블로그만 엔티티 링커 / 관련 카드 삽입
         if blog_id in STAP_BLOGS:
             body_md, link_count = _insert_internal_links(body_md, blog_id, slug)
@@ -887,20 +881,19 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         # TAP 엔티티 카드 삽입 (travel 6개 블로그)
         if TAP_ENTITY_AVAILABLE and blog_id in TAP_TRAVEL_BLOGS:
             try:
-                import re as _re
                 _region = ""
                 for _tag in (tags or "").split(","):
                     _tag = _tag.strip()
-                    for _do in ['서울','부산','대구','인천','광주','대전','울산','세종',
-                                '경기','강원','충북','충남','전북','전남','경북','경남','제주']:
+                    for _do in ["서울","부산","대구","인천","광주","대전","울산","세종",
+                                "경기","강원","충북","충남","전북","전남","경북","경남","제주"]:
                         if _tag.startswith(_do):
                             _region = _do
                             break
                     if _region:
                         break
                 if not _region:
-                    for _do in ['서울','부산','대구','인천','광주','대전','울산','세종',
-                                '경기','강원','충북','충남','전북','전남','경북','경남','제주']:
+                    for _do in ["서울","부산","대구","인천","광주","대전","울산","세종",
+                                "경기","강원","충북","충남","전북","전남","경북","경남","제주"]:
                         if _do in title:
                             _region = _do
                             break
@@ -933,7 +926,7 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
                         url=_pub_url,
                         slug=slug,
                         category=category,
-                        region=_region if '_region' in dir() else "",
+                        region=_region if "_region" in dir() else "",
                     )
                 except Exception as _te:
                     logger.warning(f"[TapEntity] register 실패 (무시): {_te}")

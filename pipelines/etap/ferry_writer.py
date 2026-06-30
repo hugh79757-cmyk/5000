@@ -1,13 +1,17 @@
 """ferry_writer.py - Ferry route guide generator using Omio data"""
-import os, sqlite3, logging, re
-from pipelines.etap.quality_guard import preprocess_routes, postprocess_content
+import logging
+import os
+import re
+import sqlite3
+
+from pipelines.etap.quality_guard import preprocess_routes
 from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -74,19 +78,19 @@ def generate_ferry_guide(topic):
     if not summary:
         return None
 
-    has_ferry = bool(routes[0].get("ferry_min_price"))
+    bool(routes[0].get("ferry_min_price"))
     has_bus = bool(routes[0].get("bus_min_price"))
     has_train = bool(routes[0].get("train_min_price"))
     has_flight = bool(routes[0].get("flight_min_price"))
 
     sections = f"  ## Taking the Ferry From {origin} to {destination}\n"
     if has_bus or has_train:
-        sections += f"  ## Ferry vs Land Transport: Price and Time Comparison\n"
+        sections += "  ## Ferry vs Land Transport: Price and Time Comparison\n"
     if has_flight:
-        sections += f"  ## Is Flying a Better Option?\n"
-    sections += f"  ## What to Expect on Board\n"
-    sections += f"  ## How to Book and Get the Best Ferry Prices\n"
-    sections += f"  ## Practical Tips for This Ferry Route\n"
+        sections += "  ## Is Flying a Better Option?\n"
+    sections += "  ## What to Expect on Board\n"
+    sections += "  ## How to Book and Get the Best Ferry Prices\n"
+    sections += "  ## Practical Tips for This Ferry Route\n"
 
     prompt = f"""Write a ferry travel guide from {origin} to {destination}.
 
@@ -109,7 +113,7 @@ RULES:
 - End with a clear recommendation on when ferry is the best choice
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
     "You are a travel blogger who loves ferry crossings. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Format prices as whole numbers when .0. 3) Never invent data. 4) Every section must include one practical tip (which deck has the best view, seasickness prevention, vehicle booking, port arrival timing). 5) Open with the view from the ferry or the port scene.",
     prompt,

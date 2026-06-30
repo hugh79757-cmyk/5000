@@ -1,13 +1,15 @@
+"""항공권 딜 글 작성기 - DB 가격 데이터 기반 GPT 글 생성
 """
-항공권 딜 글 작성기 - DB 가격 데이터 기반 GPT 글 생성
-"""
+import logging
 import os
 import sqlite3
-import logging
 from datetime import datetime
+
 from dotenv import load_dotenv
+
 from shared.ai_writer import generate as ai_generate
-load_dotenv('/Users/twinssn/Projects/5000/.env')
+
+load_dotenv("/Users/twinssn/Projects/5000/.env")
 load_dotenv(os.path.expanduser("~/.env.common"))
 
 logger = logging.getLogger(__name__)
@@ -19,8 +21,18 @@ DB_PATH = os.path.join(
 
 # === ETAP v2 Enrichment ===
 try:
-    from pipelines.etap.data_enricher import get_city_context, format_context_for_prompt, get_airline_context, get_route_context
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks, calculate_quality_metrics
+    from pipelines.etap.data_enricher import (
+        format_context_for_prompt,
+        get_airline_context,
+        get_city_context,
+        get_route_context,
+    )
+    from pipelines.etap.post_processor import (
+        calculate_quality_metrics,
+        clean_prompt_leaks,
+        clean_tags,
+        fix_encoding,
+    )
     from pipelines.etap.prompt_angles import pick_city_angle, pick_flight_angle, pick_route_angle
     HAS_ENRICHMENT = True
 except ImportError:
@@ -161,5 +173,5 @@ RULES:
             "origin": o_city, "destination": d_city, "has_price_data": has_data,
         }
     except Exception as e:
-        logger.error(f"[FlightWriter] GPT error: {e}")
+        logger.exception(f"[FlightWriter] GPT error: {e}")
         return None

@@ -1,9 +1,10 @@
-import os
-import sys
 import json
+import os
 import sqlite3
-import yaml
+import sys
 from datetime import datetime, timedelta
+
+import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -17,7 +18,7 @@ LAP_LOG = "/Users/twinssn/Projects/LAP/data/publish_log.json"
 
 
 def load_active_blogs():
-    with open(os.path.join(CONFIG_DIR, "blogs.yaml"), "r", encoding="utf-8") as f:
+    with open(os.path.join(CONFIG_DIR, "blogs.yaml"), encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return [b for b in data["blogs"] if b.get("status") == "active"]
 
@@ -46,7 +47,7 @@ def _get_tap_blogger_posts(target_date):
 def _get_lap_posts(target_date):
     if not os.path.exists(LAP_LOG):
         return []
-    with open(LAP_LOG, "r", encoding="utf-8") as f:
+    with open(LAP_LOG, encoding="utf-8") as f:
         data = json.load(f)
     posts = data if isinstance(data, list) else data.get("posts", data.get("logs", []))
     if isinstance(data, dict) and not posts:

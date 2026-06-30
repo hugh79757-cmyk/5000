@@ -1,7 +1,11 @@
 """phototour_writer.py - Photography Tours guide generator (v2: curated, deduplicated)"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
 from difflib import SequenceMatcher
-from pipelines.etap.quality_guard import preprocess_tours, postprocess_content, clean_tour_name
+
+from pipelines.etap.quality_guard import preprocess_tours
 from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
@@ -9,8 +13,18 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 # === ETAP v2 Enrichment ===
 try:
-    from pipelines.etap.data_enricher import get_city_context, format_context_for_prompt, get_airline_context, get_route_context
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks, calculate_quality_metrics
+    from pipelines.etap.data_enricher import (
+        format_context_for_prompt,
+        get_airline_context,
+        get_city_context,
+        get_route_context,
+    )
+    from pipelines.etap.post_processor import (
+        calculate_quality_metrics,
+        clean_prompt_leaks,
+        clean_tags,
+        fix_encoding,
+    )
     from pipelines.etap.prompt_angles import pick_city_angle, pick_flight_angle, pick_route_angle
     HAS_ENRICHMENT = True
 except ImportError:
@@ -93,7 +107,7 @@ def _deduplicate_tours(tours, similarity_threshold=0.65):
         if not valid:
             valid = group
         with_img = [t for t in valid if t.get("image_url")]
-        pool = with_img if with_img else valid
+        pool = with_img or valid
         best = sorted(pool, key=lambda x: _safe_price(x.get("price")))[0]
         best["_group_size"] = len(group)
         best["_group_price_range"] = (
@@ -136,7 +150,7 @@ def _build_summary(tours, city, city_meta):
     min_price = min(all_prices) if all_prices else 0
     max_price = max(all_prices) if all_prices else 0
 
-    summary = f"CITY CONTEXT:\n"
+    summary = "CITY CONTEXT:\n"
     summary += f"City: {city}\n"
     summary += f"Local currency: {currency}\n"
     summary += f"Timezone: {tz}\n"
@@ -186,7 +200,7 @@ def generate_phototour_guide(topic):
     result = _build_summary(tours, city, city_meta)
     if not result:
         return None
-    summary, picks = result
+    summary, _picks = result
 
     prompt = f"""Write a photography tours guide for {city}, {country}.
 
@@ -215,7 +229,7 @@ WRITING RULES:
 6. FORMAT: Flowing paragraphs only. NO numbered lists, NO bullet points. Bold tour names on first mention.
 7. CLOSING: End with a single "If you only have one day" recommendation with specific tour name and price.
 8. NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, culinary delights, gastronomic, rich cultural heritage, seamlessly, breathtaking, brimming with, a must-visit, treasure trove, staggering"""
-    
+
     result = ai_generate(
     "You are a travel writer who has visited these destinations. Write in second-person informed tone. STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. 4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific concrete scene or fact. 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, treasure trove, a must-visit.",
     prompt,

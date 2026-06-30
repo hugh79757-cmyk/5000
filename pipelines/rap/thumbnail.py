@@ -1,9 +1,10 @@
 """RAP 썸네일 생성 + R2 업로드 — v2"""
-import os
 import hashlib
 import logging
+import os
 import tempfile
 from datetime import datetime
+
 from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ def _wrap_text(text, font, max_width, draw):
     return lines
 
 
-def _draw_gradient(draw, width, height, color1, color2):
+def _draw_gradient(draw, width, height, color1, color2) -> None:
     """수직 그라데이션"""
     for y in range(height):
         ratio = y / height
@@ -61,7 +62,7 @@ def _draw_gradient(draw, width, height, color1, color2):
         draw.line([(0, y), (width, y)], fill=(r, g, b))
 
 
-def _draw_rounded_rect(draw, xy, fill, radius=12):
+def _draw_rounded_rect(draw, xy, fill, radius=12) -> None:
     """둥근 모서리 사각형"""
     x1, y1, x2, y2 = xy
     draw.rectangle([x1 + radius, y1, x2 - radius, y2], fill=fill)

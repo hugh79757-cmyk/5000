@@ -1,17 +1,33 @@
 """ghost_pipeline.py - Ghost Tours And Dark History pipeline"""
-import os, sys, sqlite3, logging, time, subprocess, re
-from datetime import datetime, timezone, timedelta
+import logging
+import os
+import re
+import subprocess
+import sys
+import time
+from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from pipelines.etap.post_processor import insert_product_cards, insert_comparison_table, insert_cross_sell_block, insert_adsense
-from pipelines.etap.quality_guard import postprocess_content, send_alert
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.topic_manager import pick_topic_by_id, mark_published_by_id
 from pipelines.etap.ghost_writer import generate_ghost_guide
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
+from pipelines.etap.post_processor import (
+    insert_adsense,
+    insert_comparison_table,
+    insert_cross_sell_block,
+    insert_product_cards,
+)
+from pipelines.etap.quality_guard import postprocess_content, send_alert
+from pipelines.etap.topic_manager import mark_published_by_id, pick_topic_by_id
+from shared.entity_linker import (
+    build_cross_sell_html,
+    inject_internal_links,
+    mark_entity_published,
+    register_entity,
+)
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -83,7 +99,7 @@ def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, 
     logger.info(f"Post written: {post_dir}")
     return post_dir
 
-def _build_and_deploy(site_path, blog_id):
+def _build_and_deploy(site_path, blog_id) -> bool | None:
     hugo = "/opt/homebrew/bin/hugo"
     wrangler = "/opt/homebrew/bin/wrangler"
     try:
@@ -99,7 +115,7 @@ def _build_and_deploy(site_path, blog_id):
         logger.info(f"Deploy OK: {blog_id}")
         return True
     except subprocess.CalledProcessError as e:
-        logger.error(f"Deploy failed: {e}")
+        logger.exception(f"Deploy failed: {e}")
         return False
 
 def _affiliate_link(link):
@@ -127,20 +143,20 @@ def _add_product_cards(article):
         if nm in seen:
             continue
         seen.add(nm)
-        selected.append(dict(name=nm, price=t.get("price",""), currency=t.get("currency","USD"),
-            discount=str(t.get("discount","")).replace("%",""),
-            image_url=t.get("image_url",""), link=_affiliate_link(t.get("deep_link","")), category=t.get("category","")))
+        selected.append({"name": nm, "price": t.get("price",""), "currency": t.get("currency","USD"),
+            "discount": str(t.get("discount","")).replace("%",""),
+            "image_url": t.get("image_url",""), "link": _affiliate_link(t.get("deep_link","")), "category": t.get("category","")})
     if selected:
         article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
     comp_tours = [t for t in sorted(tours, key=lambda x: _safe_price(x.get("price",0))) if t.get("product_name","") not in seen][:5]
-    comp = [dict(name=re.sub(r"^Save [\d.]+%!\s*","",t["product_name"]), price=t.get("price",""),
-                 currency=t.get("currency","USD"), discount=str(t.get("discount","")).replace("%",""),
-                 link=t.get("deep_link","")) for t in comp_tours if t.get("deep_link")]
+    comp = [{"name": re.sub(r"^Save [\d.]+%!\s*","",t["product_name"]), "price": t.get("price",""),
+                 "currency": t.get("currency","USD"), "discount": str(t.get("discount","")).replace("%",""),
+                 "link": t.get("deep_link","")} for t in comp_tours if t.get("deep_link")]
     if comp:
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
-def run(cfg=None):
+def run(cfg=None) -> bool:
     topic = pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
     if not topic:
         logger.info(f"[{BLOG_ID}] No topics")
@@ -159,7 +175,7 @@ def run(cfg=None):
         logger.warning(f"[{BLOG_ID}] DRAFT 감지 → 발행 중단: {article['slug']} - {post_issues}")
         send_alert(BLOG_ID, article["slug"], post_issues)
         return False
-    elif post_issues:
+    if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
     cover = fetch_city_image(city + " ghost tour haunted historic", country, article["slug"]) if city else None

@@ -18,15 +18,15 @@ def _has_batchim(word):
     return False
 
 
-def _jwa(w):
+def _jwa(w) -> str:
     return "과" if _has_batchim(w) else "와"
 
 
-def _jeul(w):
+def _jeul(w) -> str:
     return "을" if _has_batchim(w) else "를"
 
 
-def _ji(w):
+def _ji(w) -> str:
     return "이" if _has_batchim(w) else "가"
 
 
@@ -324,8 +324,8 @@ def _ev_solo(v):
 # ev 사이트 — 하이브리드 전용 템플릿
 # ════════════════════════════════════════════════════════════
 def _ev_hev_vs(v):
-    m = v['m']
-    c = v['c']
+    m = v["m"]
+    c = v["c"]
     return [
         f"{m} vs {c} — 연비 대결, 3년 유지비 차이 {v['dep_diff']:,}만원",
         f"{m} 월 유지비 {v['maint_m']:,}만원 vs {c} — 어느 쪽이 경제적?",
@@ -336,7 +336,7 @@ def _ev_hev_vs(v):
     ]
 
 def _ev_hev_solo(v):
-    m = v['m']
+    m = v["m"]
     h_tag = "" if "하이브리드" in m else " 하이브리드"
     return [
         f"{m} 연비 {v['eff']}km/L — 유지비 월 {v['maint_m']:,}만원의 현실",

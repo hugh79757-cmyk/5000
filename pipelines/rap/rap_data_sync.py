@@ -1,17 +1,23 @@
 """RAP DB 일일 갱신 — 매매 실거래가 + 전월세 + 청약 API 수집"""
+import logging
 import os
+import sqlite3
 import sys
 import time
-import sqlite3
-import logging
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"))
 
-from pipelines.rap.fetcher import fetch_apt_trade, fetch_apt_rent, fetch_subscription_info, LAWD_MAP, REGION_CD_MAP
+from pipelines.rap.fetcher import (
+    REGION_CD_MAP,
+    fetch_apt_rent,
+    fetch_apt_trade,
+    fetch_subscription_info,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,8 +70,8 @@ SYNC_REGIONS = [
 ]
 
 
-def _ensure_rents_table(conn):
-    """rents 테이블 없으면 생성"""
+def _ensure_rents_table(conn) -> None:
+    """Rents 테이블 없으면 생성"""
     conn.execute("""
         CREATE TABLE IF NOT EXISTS rents (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -319,7 +325,7 @@ def sync_keywords_from_gap():
 
 
 
-def _ensure_gongsijiga_table(conn):
+def _ensure_gongsijiga_table(conn) -> None:
     conn.execute("""
         CREATE TABLE IF NOT EXISTS gongsijiga (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -338,7 +344,7 @@ def _ensure_gongsijiga_table(conn):
 
 
 def sync_gongsijiga(conn):
-    """trades 테이블 기반 공시가격 추정치 계산 (실거래가 × 0.69)
+    """Trades 테이블 기반 공시가격 추정치 계산 (실거래가 × 0.69)
     단지별 연도별 평균 실거래가를 기준으로 추정 공시가격 생성
     """
     _ensure_gongsijiga_table(conn)
@@ -355,7 +361,7 @@ def sync_gongsijiga(conn):
 
     inserted = 0
     updated  = 0
-    for lawd_cd, apt_name, deal_year, avg_amt, cnt in rows:
+    for lawd_cd, apt_name, deal_year, avg_amt, _cnt in rows:
         if not avg_amt or avg_amt <= 0:
             continue
         estimated = int(avg_amt * 0.69)
@@ -388,7 +394,7 @@ def sync_gongsijiga(conn):
     )
     return inserted, updated
 
-def daily_refresh():
+def daily_refresh() -> bool:
     """일일 갱신 메인 — 첫 발행 시 호출 (병렬 fetch + 90초 타임아웃)"""
     if is_today_refreshed():
         logger.info("오늘 이미 갱신됨 — 스킵")

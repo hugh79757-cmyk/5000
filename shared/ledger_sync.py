@@ -1,5 +1,5 @@
-import sqlite3
 import logging
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 
@@ -66,7 +66,7 @@ SOURCES = [
     },
 ]
 
-def _ensure_schema(conn):
+def _ensure_schema(conn) -> None:
     conn.execute("""
         CREATE TABLE IF NOT EXISTS publish_ledger (
             id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,7 +99,7 @@ def _sync_source(ledger_conn, src):
         rows = src_conn.execute(src["sql"]).fetchall()
         src_conn.close()
     except Exception as e:
-        logger.error(f"[ledger_sync] {src['name']} 조회 실패: {e}")
+        logger.exception(f"[ledger_sync] {src['name']} 조회 실패: {e}")
         return 0
     inserted = 0
     for row in rows:
@@ -130,7 +130,7 @@ def run_sync():
         conn = sqlite3.connect(str(LEDGER_DB))
         _ensure_schema(conn)
     except Exception as e:
-        logger.error(f"[ledger_sync] ledger DB 연결 실패: {e}")
+        logger.exception(f"[ledger_sync] ledger DB 연결 실패: {e}")
         return {"success": False, "reason": str(e)}
     results = {}
     total = 0
@@ -158,7 +158,7 @@ def report(days=1):
         conn.close()
         return rows
     except Exception as e:
-        logger.error(f"[ledger_sync] report 실패: {e}")
+        logger.exception(f"[ledger_sync] report 실패: {e}")
         return []
 
 if __name__ == "__main__":

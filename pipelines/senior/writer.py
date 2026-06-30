@@ -1,24 +1,28 @@
 """시니어 복지 글 생성 v2 — 서비스 단위 심층 글, 데이터 기반 강제"""
 
-import os
-import re
-import random
 import logging
+import os
+import random
+import re
 from datetime import datetime
+
 from openai import OpenAI
+
 from shared.ai_writer import generate as ai_generate
+
 
 # 상세 데이터 보강
 def _enrich_service(service):
     """서비스 상세 API로 데이터 보강 (캐시 체크 후 1회만)"""
-    if service.get('_enriched'):
+    if service.get("_enriched"):
         return service
     try:
-        import sys, os
+        import os
+        import sys
         sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
         from fetcher import enrich_service_detail
         service = enrich_service_detail(service)
-        service['_enriched'] = True
+        service["_enriched"] = True
     except Exception as e:
         logger.warning(f"상세 보강 실패: {e}")
     return service
@@ -151,35 +155,35 @@ def _build_data_block(service):
     fields = []
     fields.append(f"서비스명: {service.get('service_name', '미정')}")
     fields.append(f"서비스ID: {service.get('service_id', '')}")
-    if service.get('description'):
+    if service.get("description"):
         fields.append(f"서비스 설명: {service['description']}")
-    if service.get('target'):
+    if service.get("target"):
         fields.append(f"지원 대상: {service['target']}")
-    if service.get('support_content'):
+    if service.get("support_content"):
         fields.append(f"지원 내용: {service['support_content']}")
-    if service.get('apply_method'):
+    if service.get("apply_method"):
         fields.append(f"신청 방법: {service['apply_method']}")
-    if service.get('apply_url'):
+    if service.get("apply_url"):
         fields.append(f"신청 URL: {service['apply_url']}")
-    if service.get('department'):
+    if service.get("department"):
         fields.append(f"소관기관: {service['department']}")
-    if service.get('contact'):
+    if service.get("contact"):
         fields.append(f"문의처: {service['contact']}")
-    if service.get('law_basis'):
+    if service.get("law_basis"):
         fields.append(f"법적 근거: {service['law_basis']}")
-    if service.get('purpose'):
+    if service.get("purpose"):
         fields.append(f"서비스목적: {service['purpose']}")
-    if service.get('selection_criteria'):
+    if service.get("selection_criteria"):
         fields.append(f"선정기준: {service['selection_criteria']}")
-    if service.get('documents'):
+    if service.get("documents"):
         fields.append(f"구비서류: {service['documents']}")
-    if service.get('deadline'):
+    if service.get("deadline"):
         fields.append(f"신청기한: {service['deadline']}")
-    if service.get('apply_method_detail'):
+    if service.get("apply_method_detail"):
         fields.append(f"상세 신청방법: {service['apply_method_detail']}")
-    if service.get('reception_agency'):
+    if service.get("reception_agency"):
         fields.append(f"접수기관: {service['reception_agency']}")
-    if service.get('support_type'):
+    if service.get("support_type"):
         fields.append(f"지원유형: {service['support_type']}")
     # [PATCH] 오늘 날짜 주입 - GPT가 마감 여부 판단하도록
     from datetime import datetime as _dt
@@ -204,7 +208,7 @@ def _build_prompt(service, topic_type, related_services, today):
     if related_services:
         # [PATCH] 메인 서비스와 같은 지역의 관련 서비스만 선택
         main_dept = service.get("department", "")
-        main_region_tokens = [t for t in main_dept.replace("(", " ").replace(")", " ").split() 
+        main_region_tokens = [t for t in main_dept.replace("(", " ").replace(")", " ").split()
                               if any(t.endswith(s) for s in ["시", "군", "구"])]
         if main_region_tokens:
             region_filtered = []
@@ -214,8 +218,8 @@ def _build_prompt(service, topic_type, related_services, today):
                     region_filtered.append(rs)
             # 지역 매칭이 없으면 전국 서비스(지역 미표기)만 사용
             if not region_filtered:
-                region_filtered = [rs for rs in related_services 
-                                   if not any(m in rs.get("department", "") 
+                region_filtered = [rs for rs in related_services
+                                   if not any(m in rs.get("department", "")
                                               for m in ["시 ", "군 ", "구 ", "시)", "군)", "구)"])]
             related_services = region_filtered[:3]
         else:
@@ -232,9 +236,7 @@ def _build_prompt(service, topic_type, related_services, today):
 
     region_line = f"\n\n이 서비스는 [{region_name}] 지역 한정입니다. 제목 앞부분에 반드시 지역명을 넣으세요." if region_name else ""
 
-    system_msg = f"""당신은 65세 이상 어르신과 그 가족을 위한 복지 정보 전문 블로거입니다.
-
-오늘 날짜: {today}{region_line}
+    system_msg = f"""당신은 65세 이상 어르신과 그 가족을 위한 복지 정보 전문 블로거입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
 
 당신의 임무: "{service_name}" 제도에 대해, {structure['angle']}하는 글을 작성합니다.
 
@@ -298,7 +300,9 @@ def _build_prompt(service, topic_type, related_services, today):
 ■ SEO:
 - 태그: 실제 검색되는 롱테일 키워드 5~7개 (대형 키워드 금지)
 - 카테고리: {topic_type}
-- description: 구체적 상황+핵심 답변 1문장 (80~120자). "안내드립니다"로 끝내지 말고 핵심 정보를 담으세요."""
+- description: 구체적 상황+핵심 답변 1문장 (80~120자). "안내드립니다"로 끝내지 말고 핵심 정보를 담으세요.
+
+오늘 날짜: {today}{region_line}"""
 
     user_msg = f"""아래 데이터를 기반으로 글을 작성하세요.
 
@@ -328,15 +332,15 @@ BODY:
 def _parse_response(content):
     """LLM 응답 파싱 — TITLE/BODY 또는 제목/본문 형식 모두 대응"""
     result = {"title": "", "body_md": "", "tags": [], "category": "", "description": ""}
-    
+
     lines = content.strip().split("\n")
     body_lines = []
     in_body = False
-    
+
     for line in lines:
         stripped = line.strip()
         low = stripped.lower()
-        
+
         if low.startswith("title:") or stripped.startswith("제목:"):
             result["title"] = stripped.split(":", 1)[1].strip().strip('"').strip("'").strip()
             continue
@@ -353,20 +357,20 @@ def _parse_response(content):
         if low.startswith("body:"):
             in_body = True
             continue
-        
+
         if stripped.startswith("## ") or in_body:
             in_body = True
             body_lines.append(line)
-    
+
     result["body_md"] = "\n".join(body_lines).strip()
-    
+
     if not result["body_md"] and "## " in content:
         first_h2 = content.find("## ")
         result["body_md"] = content[first_h2:].strip()
-    
+
     if not result["body_md"]:
         result["body_md"] = content.strip()
-    
+
     if not result["description"] and result["body_md"]:
         clean = result["body_md"].replace("## ", "").strip()
         first_para = clean.split("\n\n")[0] if "\n\n" in clean else clean[:120]
@@ -383,10 +387,10 @@ def _select_service(services, topic_type, published=None, published_svc_ids=None
         published_svc_ids = set()
 
     # 시니어 무관 서비스 제외 (서비스명 기준)
-    _EXCLUDE_NAMES = ["청년", "청장년", "미혼모", "미혼부", "영유아", "아동복지", "어린이", 
-                      "장학금", "대학생", "세대융합", "예비창업", "창업지원", "청소년", 
+    _EXCLUDE_NAMES = ["청년", "청장년", "미혼모", "미혼부", "영유아", "아동복지", "어린이",
+                      "장학금", "대학생", "세대융합", "예비창업", "창업지원", "청소년",
                       "신혼부부", "다자녀", "영아", "산모", "출산"]
-    def _is_senior(s):
+    def _is_senior(s) -> bool:
         name = s.get("service_name", "")
         return not any(kw in name for kw in _EXCLUDE_NAMES)
 
@@ -409,7 +413,7 @@ def _select_service(services, topic_type, published=None, published_svc_ids=None
         return score
 
     # [PATCH] 서비스명 포함 매칭 + 핵심 키워드 중복 체크 (제목만 다른 중복 방지)
-    def _is_dup(svc_name, published_set):
+    def _is_dup(svc_name, published_set) -> bool:
         if not svc_name:
             return False
         for p in published_set:
@@ -422,9 +426,9 @@ def _select_service(services, topic_type, published=None, published_svc_ids=None
             if len(overlap) >= 3 and len(overlap) / max(len(svc_words), 1) >= 0.5:
                 return True
         return False
-    
+
     unpublished = [
-        s for s in category_services 
+        s for s in category_services
         if not _is_dup(s.get("service_name", ""), published)
         and s.get("service_id", "") not in published_svc_ids
     ]
@@ -477,7 +481,7 @@ def _validate_article(result, min_length=1500):
     if len(body) < min_length:
         issues.append(f"본문 부족: {len(body)}/{min_length}자")
 
-    h2_count = len(re.findall(r'^## ', body, re.MULTILINE))
+    h2_count = len(re.findall(r"^## ", body, re.MULTILINE))
     if h2_count < 4:
         issues.append(f"H2 부족: {h2_count}개")
 
@@ -491,7 +495,6 @@ def _validate_article(result, min_length=1500):
 
 def _clean_vague_phrases(body_md):
     """[PATCH] 금지 표현이 포함된 문장을 통째로 제거"""
-    import re as _re_clean
     banned = [
         "확인해 보세요", "확인해 보아야", "다를 수 있습니다",
         "도움이 될 것입니다", "도움이 될 수 있습니다",
@@ -519,14 +522,14 @@ def _clean_vague_phrases(body_md):
 
 def generate_senior_article(data, topic_type=None, enriched_service=None):
     """시니어 복지 글 생성 — 서비스 단위 심층 글
-    
+
     enriched_service: pipeline에서 상세 API로 보강된 서비스 (있으면 재선택 안 함)
     """
     today = data.get("today", datetime.now().strftime("%Y년 %m월 %d일"))
     services = data.get("services", [])
 
     if not topic_type:
-        available = list(set(s["category"] for s in services))
+        available = list({s["category"] for s in services})
         topic_type = random.choice(available) if available else "생활지원"
 
     logger.info(f"시니어 글 생성: 토픽={topic_type}")
@@ -574,16 +577,16 @@ def generate_senior_article(data, topic_type=None, enriched_service=None):
             logger.info(f"글 생성 완료: {result['title']} ({len(result['body_md'])}자)")
 
             # [PATCH] 금지 표현 제거 후 링크 추가
-            if result.get('body_md'):
-                result['body_md'] = _clean_vague_phrases(result['body_md'])
-                result['body_md'] = _append_links(
-                    result['body_md'], main_service,
-                    result.get('category', topic_type or '')
+            if result.get("body_md"):
+                result["body_md"] = _clean_vague_phrases(result["body_md"])
+                result["body_md"] = _append_links(
+                    result["body_md"], main_service,
+                    result.get("category", topic_type or "")
                 )
             return result
 
         except Exception as e:
-            logger.error(f"GPT 호출 실패 (시도 {attempt}): {e}")
+            logger.exception(f"GPT 호출 실패 (시도 {attempt}): {e}")
 
     return None
 

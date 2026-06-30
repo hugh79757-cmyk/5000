@@ -1,12 +1,13 @@
-import sys
+import logging
 import os
 import random
-import logging
+import sys
 
 sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
 os.chdir(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,8 @@ try:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     from shared.telegram_notifier import send as _tg_send
 except ImportError:
-    _tg_send = lambda *a, **k: None
+    def _tg_send(*a, **k) -> None:
+        return None
 
 def _fix_image_https(url):
     """http://tong.visitkorea.or.kr → https 변환"""
@@ -156,7 +158,7 @@ def fetch_korservice():
         "do_name": ks.get("region", ""),
         "theme": ks.get("theme_name", ""),
         "category": ks.get("category", "관광지"),
-        "angle": search_detail if search_detail else ks.get("theme_name", ""),
+        "angle": search_detail or ks.get("theme_name", ""),
         "source_type": "korservice",
         "season": ks.get("season", ""),
         "keywords": ks.get("keywords", []),
@@ -192,8 +194,8 @@ def fetch_korservice_heritage():
 def fetch_festival(_is_retry=False):
     """festival.db 기반 스마트 발행: 축제 시작일 역산으로 발행 대상 자동 선택"""
     import sqlite3
-    from datetime import datetime, timedelta
     from collections import defaultdict
+    from datetime import datetime
 
     DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "festival.db")
     CONTENT_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "content.db")
@@ -214,11 +216,11 @@ def fetch_festival(_is_retry=False):
         published_ids = set()
         if os.path.exists(CONTENT_DB):
             cconn = sqlite3.connect(CONTENT_DB)
-            published_ids = set(
+            published_ids = {
                 r[0] for r in cconn.execute(
                     "SELECT source_id FROM publish_ledger WHERE blog_id='travel1-hugo' AND source_id != ''"
                 ).fetchall()
-            )
+            }
             # articles 테이블도 확인
             published_ids.update(
                 r[0] for r in cconn.execute(
@@ -251,7 +253,7 @@ def fetch_festival(_is_retry=False):
                                  cwd="/Users/twinssn/Projects/5000", timeout=120)
                     logger.info(f"festival 자동 갱신 결과: {_r.stdout.strip()}")
                 except Exception as _e:
-                    logger.error(f"festival 자동 갱신 실패: {_e}")
+                    logger.exception(f"festival 자동 갱신 실패: {_e}")
                 return fetch_festival(_is_retry=True)
             return None
 
@@ -269,8 +271,8 @@ def fetch_festival(_is_retry=False):
         late = []     # 7~14일 (늦게 등록된 축제, 최초 1회만 발행 허용)
 
         for r in rows:
-            title = r["title"]
-            if str(r['contentid']) in published_ids:
+            r["title"]
+            if str(r["contentid"]) in published_ids:
                 continue
             estart = r["eventstartdate"]
             start_date = datetime.strptime(estart, "%Y%m%d")
@@ -278,7 +280,7 @@ def fetch_festival(_is_retry=False):
 
             if days_left < 7:
                 continue  # 7일 미만: SEO 색인 불가
-            elif days_left <= 14:
+            if days_left <= 14:
                 late.append(r)   # 늦게 등록 — 최초 1회 발행 허용
             elif days_left <= 21:
                 urgent.append(r)
@@ -317,7 +319,7 @@ def fetch_festival(_is_retry=False):
                                  cwd="/Users/twinssn/Projects/5000", timeout=120)
                     logger.info(f"festival 자동 갱신 결과: {_r.stdout.strip()}")
                 except Exception as _e:
-                    logger.error(f"festival 자동 갱신 실패: {_e}")
+                    logger.exception(f"festival 자동 갱신 실패: {_e}")
                 return fetch_festival(_is_retry=True)
             # [NO FALLBACK] 새 축제가 없으면 발행하지 않음 (이미 발행된 것 재발행 방지)
             logger.warning("festival: 발행 대상 0건 — 새 축제 없음")
@@ -409,7 +411,8 @@ def fetch_festival(_is_retry=False):
 
 def _get_recent_published_sigungus(days=7):
     """최근 N일간 travel3-hugo에 발행된 시군구 이름 집합
-    우선 articles.sigungu 컬럼 직접 조회 (stap_content.db), NULL이면 title 파싱 fallback"""
+    우선 articles.sigungu 컬럼 직접 조회 (stap_content.db), NULL이면 title 파싱 fallback
+    """
     import sqlite3
     try:
         from shared.db_paths import ARTICLES_DB
@@ -431,8 +434,8 @@ def _get_recent_published_sigungus(days=7):
                 "SELECT title FROM articles WHERE blog_id='travel3-hugo' AND created_at >= datetime('now', ? || ' days')",
                 (str(days),)
             ).fetchall()
-            _do_set = {'서울','인천','대전','대구','광주','부산','울산','세종',
-                        '경기','강원','충북','충남','전북','전남','경북','경남','제주'}
+            _do_set = {"서울","인천","대전","대구","광주","부산","울산","세종",
+                        "경기","강원","충북","충남","전북","전남","경북","경남","제주"}
             for (title,) in rows:
                 if not title:
                     continue
@@ -440,7 +443,7 @@ def _get_recent_published_sigungus(days=7):
                 for p in parts:
                     if p in _do_set:
                         continue
-                    if p.endswith('시') or p.endswith('군') or p.endswith('구'):
+                    if p.endswith(("시", "군", "구")):
                         sigungus.add(p)
                         break
         conn.close()
@@ -458,7 +461,8 @@ def fetch_food():
     - 최근 5일간 발행된 시군구는 제외 (주제 중복 방지)
     """
     import requests as req
-    from pipelines.travel.area_codes import get_weighted_random_sigungu, get_do_name
+
+    from pipelines.travel.area_codes import get_do_name, get_weighted_random_sigungu
 
     key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
 
@@ -641,9 +645,10 @@ def fetch_food():
 
 def fetch_course():
     """course.db 기반 여행코스 발행 — DB에서 코스 선택 후 하위장소는 On-demand API 호출"""
-    import sqlite3 as _sql
-    import requests as req
     import datetime
+    import sqlite3 as _sql
+
+    import requests as req
 
     COURSE_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "course.db")
     if not os.path.exists(COURSE_DB):
@@ -896,10 +901,9 @@ def fetch_wellness():
             items_raw = [items_raw]
         if not items_raw:
             return None
-        with_img = [i for i in items_raw if i.get('orgImage') or i.get('thumbImage')]
+        with_img = [i for i in items_raw if i.get("orgImage") or i.get("thumbImage")]
         pool = with_img if len(with_img) >= 3 else items_raw
         # [PATCH] 지역별 그룹핑 후 가장 많은 지역에서 최대 3곳 선택
-        from collections import Counter
         _region_items = {}
         for item in pool:
             _addr = item.get("baseAddr", "")
@@ -930,7 +934,7 @@ def fetch_wellness():
                 "contentId": item.get("contentId", ""),
                 "_raw": item,
             })
-        region = _best_region if _best_region else (_safe_region(items[0].get("addr", "")) if items else "")
+        region = _best_region or (_safe_region(items[0].get("addr", "")) if items else "")
         return {
             "items": items,
             "display_region": region,
@@ -949,25 +953,20 @@ def fetch_wellness():
 
 def fetch_heritage():
     """국가유산청 데이터(heritage_list.json)에서 문화유산 아이템을 가져옵니다."""
-    import json, random, time, re
+    import json
+    import random
+    import re
 
     HERITAGE_JSON = "/Users/twinssn/Projects/heritage/scripts/data/heritage_list.json"
 
     # 시도명 → 지역명 매핑
-    region_map = {
-        "서울": "서울", "부산": "부산", "대구": "대구", "인천": "인천",
-        "광주": "광주", "대전": "대전", "울산": "울산", "세종": "세종",
-        "경기": "경기", "강원": "강원", "충북": "충북", "충남": "충남",
-        "전북": "전북", "전남": "전남", "경북": "경북", "경남": "경남",
-        "제주": "제주",
-    }
 
     try:
-        with open(HERITAGE_JSON, "r", encoding="utf-8") as f:
+        with open(HERITAGE_JSON, encoding="utf-8") as f:
             all_items = json.load(f)
         logger.info(f"heritage: heritage_list.json 로드 완료 ({len(all_items)}건)")
     except Exception as e:
-        logger.error(f"heritage: heritage_list.json 로드 실패: {e}")
+        logger.exception(f"heritage: heritage_list.json 로드 실패: {e}")
         return None
 
     # 취소되지 않은 항목만
@@ -1012,7 +1011,7 @@ def fetch_heritage():
         logger.info("heritage 중복 제외: %d → %d건", before_count, len(valid))
 
     # 랜덤 지역 선택
-    cities = list(set(i.get("city", "") for i in valid if i.get("city")))
+    cities = list({i.get("city", "") for i in valid if i.get("city")})
     if not cities:
         logger.warning("heritage: 유효한 지역 없음")
         return None
@@ -1058,7 +1057,7 @@ def fetch_heritage():
             _era_groups = defaultdict(list)
             for i in _items:
                 _era = (i.get("detail") or {}).get("era", "")[:2]
-                _era_groups[_era if _era else "미상"].append(i)
+                _era_groups[_era or "미상"].append(i)
             # 같은 시대 2곳 이상 있으면 그 그룹에서 선택
             _era_match = None
             for _era, _eitems in sorted(_era_groups.items(), key=lambda x: -len(x[1])):

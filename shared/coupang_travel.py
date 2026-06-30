@@ -1,14 +1,16 @@
+import hashlib
+import hmac
+import logging
 import os
 import sys
 import time
-import hmac
-import hashlib
-import logging
-import requests
 from urllib.parse import urlencode
+
+import requests
 
 sys.path.insert(0, "/Users/twinssn/Projects/5000")
 from dotenv import load_dotenv
+
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 logger = logging.getLogger(__name__)
@@ -109,7 +111,7 @@ TRAVEL_EXCLUDE_WORDS = [
 
 
 class CoupangTravel:
-    def __init__(self):
+    def __init__(self) -> None:
         self.access_key = os.environ.get("COUPANG_ACCESS_KEY", "")
         self.secret_key = os.environ.get("COUPANG_SECRET_KEY", "")
         self.partner_id = os.environ.get("COUPANG_PARTNER_ID", "")
@@ -117,7 +119,7 @@ class CoupangTravel:
     def is_configured(self):
         return bool(self.access_key and self.secret_key and self.partner_id)
 
-    def _generate_signature(self, method, url_path, query_string=""):
+    def _generate_signature(self, method, url_path, query_string="") -> str:
         datetime_now = time.strftime("%y%m%dT%H%M%SZ", time.gmtime())
         message = datetime_now + method + url_path + query_string
         signature = hmac.new(
@@ -141,7 +143,7 @@ class CoupangTravel:
             data = resp.json()
             return data.get("data", {}).get("productData", [])
         except Exception as e:
-            logger.error("쿠팡 검색 실패 (%s): %s", keyword, e)
+            logger.exception("쿠팡 검색 실패 (%s): %s", keyword, e)
             return []
 
     def generate_affiliate_link(self, product_id):
@@ -166,19 +168,16 @@ class CoupangTravel:
                 if "/a/" in short_url:
                     return short_url
         except Exception as e:
-            logger.error("딥링크 변환 실패 (pid=%s): %s", product_id, e)
+            logger.exception("딥링크 변환 실패 (pid=%s): %s", product_id, e)
         return ""
 
     @staticmethod
-    def _is_travel_relevant(product_name):
+    def _is_travel_relevant(product_name) -> bool:
         name_lower = product_name.lower()
         for ex in TRAVEL_EXCLUDE_WORDS:
             if ex in name_lower:
                 return False
-        for inc in TRAVEL_INCLUDE_WORDS:
-            if inc in name_lower:
-                return True
-        return False
+        return any(inc in name_lower for inc in TRAVEL_INCLUDE_WORDS)
 
     def get_travel_product_links(self, blog_id="travel-hugo", count=2):
         if not self.is_configured():
@@ -234,6 +233,6 @@ class CoupangTravel:
             price_str = f'{p["productPrice"]:,}원'
             lines.append(f'- [{p["productName"]}]({p["affiliateLink"]}) — {price_str}')
         lines.append("")
-        lines.append('> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**')
+        lines.append("> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**")
         lines.append("")
         return "\n".join(lines)

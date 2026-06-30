@@ -1,0 +1,511 @@
+$ git -C /Users/twinssn/Projects/shared-themes/blowfish show --stat HEAD
+[exit 0]
+commit e9699d8c5da9a64a105eb8401fd2cf79c6015c6f
+Author: Nuno Coração <nunocoracao@gmail.com>
+Date:   Wed May 13 23:27:16 2026 +0100
+
+    release cut
+
+ .editorconfig                                      |   10 +
+ .github/CODEOWNERS                                 |    1 +
+ .github/ISSUE_TEMPLATE/01-bug-report.yml           |  121 +
+ .github/ISSUE_TEMPLATE/02-feature-request.yml      |   60 +
+ .github/ISSUE_TEMPLATE/config.yml                  |   22 +
+ .../PULL_REQUEST_TEMPLATE/pull_request_template.md |    7 +
+ .github/dependabot.yml                             |   25 +
+ .github/workflows/build.yml                        |   54 +
+ .github/workflows/create-config-zip.yml            |   21 +
+ .github/workflows/greetings.yml                    |   16 +
+ .github/workflows/hugo-version-update.yml          |   54 +
+ .github/workflows/pages.yml                        |   68 +
+ .github/workflows/stale.yml                        |   35 +
+ .github/workflows/test.yml                         |   27 +
+ .gitignore                                         |   44 +
+ .prettierignore                                    |   34 +
+ .prettierrc                                        |   44 +
+ .vscode/blowfish.code-snippets                     |  265 +
+ .vscode/codesnippets-doc.md                        |  237 +
+ .vscode/textmate-code-snippets.md                  |  185 +
+ .watchfire/project.yaml                            |   43 +
+ .watchfire/secrets/instructions.md                 |   33 +
+ CODE_OF_CONDUCT.md                                 |  128 +
+ CONTRIBUTING.md                                    |   65 +
+ FUNDING.yml                                        |   18 +
+ LICENSE                                            |   20 +
+ README.de.md                                       |  179 +
+ README.es.md                                       |  179 +
+ README.fr.md                                       |  179 +
+ README.id.md                                       |  145 +
+ README.ja.md                                       |  179 +
+ README.md                                          |  179 +
+ README.pt-br.md                                    |  179 +
+ README.pt-pt.md                                    |  179 +
+ README.zh-cn.md                                    |  176 +
+ archetypes/default.md                              |    6 +
+ archetypes/external.md                             |   10 +
+ assets/css/compiled/main.css                       | 5420 ++++++++++++++++++++
+ assets/css/components/a11y.css                     |   77 +
+ assets/css/components/admonition.css               |  220 +
+ assets/css/components/carousel.css                 |   65 +
+ assets/css/components/chroma.css                   |  207 +
+ assets/css/components/gallery.css                  |  595 +++
+ assets/css/components/gist.css                     |   51 +
+ assets/css/components/tabs.css                     |    9 +
+ assets/css/components/zen-mode.css                 |   14 +
+ assets/css/main.css                                |  319 ++
+ assets/css/schemes/autumn.css                      |   33 +
+ assets/css/schemes/avocado.css                     |   37 +
+ assets/css/schemes/bloody.css                      |   33 +
+ assets/css/schemes/blowfish.css                    |   37 +
+ assets/css/schemes/congo.css                       |   37 +
+ assets/css/schemes/fire.css                        |   37 +
+ assets/css/schemes/forest.css                      |   33 +
+ assets/css/schemes/github.css                      |   35 +
+ assets/css/schemes/marvel.css                      |   33 +
+ assets/css/schemes/neon.css                        |   33 +
+ assets/css/schemes/noir.css                        |   33 +
+ assets/css/schemes/ocean.css                       |   37 +
+ assets/css/schemes/one-light.css                   |   35 +
+ assets/css/schemes/princess.css                    |   33 +
+ assets/css/schemes/slate.css                       |   37 +
+ assets/css/schemes/terminal.css                    |   33 +
+ assets/icons/a11y.svg                              |    1 +
+ assets/icons/amazon.svg                            |    1 +
+ assets/icons/ansible.svg                           |    2 +
+ assets/icons/apple.svg                             |    1 +
+ assets/icons/bars.svg                              |    1 +
+ assets/icons/bell.svg                              |    2 +
+ assets/icons/blogger.svg                           |    1 +
+ assets/icons/bluesky.svg                           |    1 +
+ assets/icons/bomb.svg                              |    2 +
+ assets/icons/bug.svg                               |    1 +
+ assets/icons/check.svg                             |    1 +
+ assets/icons/chevron-down.svg                      |   12 +
+ assets/icons/circle-info.svg                       |    1 +
+ assets/icons/circle-question.svg                   |    3 +
+ assets/icons/cloud-moon.svg                        |    1 +
+ assets/icons/cloud.svg                             |    1 +
+ assets/icons/code.svg                              |    2 +
+ assets/icons/codeberg.svg                          |    2 +
+ assets/icons/codepen.svg                           |    1 +
+ assets/icons/comment.svg                           |    1 +
+ assets/icons/dev.svg                               |    1 +
+ assets/icons/discord.svg                           |    1 +
+ assets/icons/discourse.svg                         |    2 +
+ assets/icons/docker.svg                            |    2 +
+ assets/icons/download.svg                          |    2 +
+ assets/icons/dribbble.svg                          |    1 +
+ assets/icons/edit.svg                              |    1 +
+ assets/icons/email.svg                             |    1 +
+ assets/icons/envelope.svg                          |    1 +
+ assets/icons/expand.svg                            |    3 +
+ assets/icons/eye.svg                               |    2 +
+ assets/icons/facebook.svg                          |    1 +
+ assets/icons/fediverse.svg                         |   22 +
+ assets/icons/file-lines.svg                        |    3 +
+ assets/icons/fire.svg                              |    2 +
+ assets/icons/flickr.svg                            |    1 +
+ assets/icons/forgejo.svg                           |    1 +
+ assets/icons/fork.svg                              |    1 +
+ assets/icons/foursquare.svg                        |    1 +
+ assets/icons/ghost.svg                             |    2 +
+ assets/icons/gitea.svg                             |    1 +
+ assets/icons/github.svg                            |    1 +
+ assets/icons/gitlab.svg                            |    1 +
+ assets/icons/globe.svg                             |    1 +
+ assets/icons/goodreads.svg                         |    2 +
+ assets/icons/google-scholar.svg                    |    1 +
+ assets/icons/google.svg                            |    1 +
+ assets/icons/graduation-cap.svg                    |    2 +
+ assets/icons/hackernews.svg                        |    2 +
+ assets/icons/hashnode.svg                          |    1 +
+ assets/icons/heart-empty.svg                       |    2 +
+ assets/icons/heart.svg                             |    2 +
+ assets/icons/image.svg                             |    2 +
+ assets/icons/instagram.svg                         |    1 +
+ assets/icons/itch-io.svg                           |    1 +
+ assets/icons/keybase.svg                           |    1 +
+ assets/icons/keyoxide.svg                          |   16 +
+ assets/icons/kickstarter.svg                       |    1 +
+ assets/icons/ko-fi.svg                             |   21 +
+ assets/icons/language.svg                          |    2 +
+ assets/icons/lastfm.svg                            |    1 +
+ assets/icons/lightbulb.svg                         |    1 +
+ assets/icons/line.svg                              |    1 +
+ assets/icons/link.svg                              |    1 +
+ assets/icons/linkedin.svg                          |    1 +
+ assets/icons/list-check.svg                        |    3 +
+ assets/icons/list-ol.svg                           |    3 +
+ assets/icons/list.svg                              |    1 +
+ assets/icons/location-dot.svg                      |    2 +
+ assets/icons/lock.svg                              |    2 +
+ assets/icons/mastodon.svg                          |    1 +
+ assets/icons/matrix.svg                            |    1 +
+ assets/icons/medium.svg                            |    1 +
+ assets/icons/microsoft.svg                         |    1 +
+ assets/icons/moon.svg                              |    1 +
+ assets/icons/mug-hot.svg                           |    2 +
+ assets/icons/music.svg                             |    2 +
+ assets/icons/orcid.svg                             |    1 +
+ assets/icons/patreon.svg                           |    1 +
+ assets/icons/paypal.svg                            |    2 +
+ assets/icons/peertube.svg                          |    1 +
+ assets/icons/pencil.svg                            |    1 +
+ assets/icons/pgpkey.svg                            |    2 +
+ assets/icons/phone.svg                             |    2 +
+ assets/icons/pinterest.svg                         |    1 +
+ assets/icons/pixelfed.svg                          |    1 +
+ assets/icons/poo.svg                               |    1 +
+ assets/icons/printables.svg                        |    1 +
+ assets/icons/quote-left.svg                        |    3 +
+ assets/icons/reddit.svg                            |    1 +
+ assets/icons/researchgate.svg                      |    1 +
+ assets/icons/rss-square.svg                        |    1 +
+ assets/icons/rss.svg                               |    1 +
+ assets/icons/scale-balanced.svg                    |    2 +
+ assets/icons/search.svg                            |    1 +
+ assets/icons/shield.svg                            |    2 +
+ assets/icons/signal.svg                            |    1 +
+ assets/icons/skull-crossbones.svg                  |    1 +
+ assets/icons/slack.svg                             |    1 +
+ assets/icons/snapchat.svg                          |    1 +
+ assets/icons/soundcloud.svg                        |    1 +
+ assets/icons/spotify.svg                           |    1 +
+ assets/icons/stack-overflow.svg                    |    1 +
+ assets/icons/star.svg                              |    1 +
+ assets/icons/steam.svg                             |    1 +
+ assets/icons/strava.svg                            |    1 +
+ assets/icons/stripe.svg                            |    2 +
+ assets/icons/substack.svg                          |    1 +
+ assets/icons/sun.svg                               |    1 +
+ assets/icons/tag.svg                               |    1 +
+ assets/icons/telegram.svg                          |    1 +
+ assets/icons/threads.svg                           |    2 +
+ assets/icons/tiktok.svg                            |    1 +
+ assets/icons/triangle-exclamation.svg              |    1 +
+ assets/icons/tumblr.svg                            |    1 +
+ assets/icons/twitch.svg                            |    1 +
+ assets/icons/twitter.svg                           |    1 +
+ assets/icons/untappd.svg                           |    1 +
+ assets/icons/wand-magic-sparkles.svg               |    2 +
+ assets/icons/whatsapp.svg                          |    1 +
+ assets/icons/worktree.svg                          |    5 +
+ assets/icons/x-twitter.svg                         |    1 +
+ assets/icons/xing.svg                              |    1 +
+ assets/icons/xmark.svg                             |    1 +
+ assets/icons/youtube.svg                           |    1 +
+ assets/img/background.svg                          |  574 +++
+ assets/img/blowfish_banner.png                     |  Bin 0 -> 99792 bytes
+ assets/img/blowfish_banner_transparent.png         |  Bin 0 -> 88042 bytes
+ assets/img/blowfish_logo.png                       |  Bin 0 -> 227816 bytes
+ assets/img/blowfish_logo_transparent.png           |  Bin 0 -> 180422 bytes
+ assets/img/featured.svg                            |   10 +
+ assets/img/fireflies.svg                           | 2312 +++++++++
+ assets/img/lavalamp.svg                            |   24 +
+ assets/img/rain.svg                                |   17 +
+ assets/img/ripples.svg                             |  257 +
+ assets/img/traffic.svg                             |   18 +
+ assets/img/waves.svg                               |   24 +
+ assets/js/a11y.js                                  |  170 +
+ assets/js/appearance.js                            |  144 +
+ assets/js/background-blur.js                       |   39 +
+ assets/js/chart.js                                 |   13 +
+ assets/js/code.js                                  |   78 +
+ assets/js/email.js                                 |   13 +
+ assets/js/fetch-repo.js                            |   92 +
+ assets/js/firebase.js                              |  154 +
+ assets/js/katex-render.js                          |    4 +
+ assets/js/mermaid.js                               |   33 +
+ assets/js/print-support.js                         |   17 +
+ assets/js/rtl.js                                   |    3 +
+ assets/js/scroll-to-top.js                         |   13 +
+ assets/js/search.js                                |  200 +
+ assets/js/shortcodes/gallery.js                    |   39 +
+ assets/js/shortcodes/tabs.js                       |   59 +
+ assets/js/zen-mode.js                              |   67 +
+ assets/lib/chart/chart.min.js                      |   14 +
+ assets/lib/fuse/fuse.min.cjs                       |    9 +
+ assets/lib/katex/auto-render.min.js                |    1 +
+ assets/lib/katex/fonts/KaTeX_AMS-Regular.ttf       |  Bin 0 -> 63632 bytes
+ assets/lib/katex/fonts/KaTeX_AMS-Regular.woff      |  Bin 0 -> 33516 bytes
+ assets/lib/katex/fonts/KaTeX_AMS-Regular.woff2     |  Bin 0 -> 28076 bytes
+ assets/lib/katex/fonts/KaTeX_Caligraphic-Bold.ttf  |  Bin 0 -> 12368 bytes
+ assets/lib/katex/fonts/KaTeX_Caligraphic-Bold.woff |  Bin 0 -> 7716 bytes
+ .../lib/katex/fonts/KaTeX_Caligraphic-Bold.woff2   |  Bin 0 -> 6912 bytes
+ .../lib/katex/fonts/KaTeX_Caligraphic-Regular.ttf  |  Bin 0 -> 12344 bytes
+ .../lib/katex/fonts/KaTeX_Caligraphic-Regular.woff |  Bin 0 -> 7656 bytes
+ .../katex/fonts/KaTeX_Caligraphic-Regular.woff2    |  Bin 0 -> 6908 bytes
+ assets/lib/katex/fonts/KaTeX_Fraktur-Bold.ttf      |  Bin 0 -> 19584 bytes
+ assets/lib/katex/fonts/KaTeX_Fraktur-Bold.woff     |  Bin 0 -> 13296 bytes
+ assets/lib/katex/fonts/KaTeX_Fraktur-Bold.woff2    |  Bin 0 -> 11348 bytes
+ assets/lib/katex/fonts/KaTeX_Fraktur-Regular.ttf   |  Bin 0 -> 19572 bytes
+ assets/lib/katex/fonts/KaTeX_Fraktur-Regular.woff  |  Bin 0 -> 13208 bytes
+ assets/lib/katex/fonts/KaTeX_Fraktur-Regular.woff2 |  Bin 0 -> 11316 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Bold.ttf         |  Bin 0 -> 51336 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Bold.woff        |  Bin 0 -> 29912 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Bold.woff2       |  Bin 0 -> 25324 bytes
+ assets/lib/katex/fonts/KaTeX_Main-BoldItalic.ttf   |  Bin 0 -> 32968 bytes
+ assets/lib/katex/fonts/KaTeX_Main-BoldItalic.woff  |  Bin 0 -> 19412 bytes
+ assets/lib/katex/fonts/KaTeX_Main-BoldItalic.woff2 |  Bin 0 -> 16780 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Italic.ttf       |  Bin 0 -> 33580 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Italic.woff      |  Bin 0 -> 19676 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Italic.woff2     |  Bin 0 -> 16988 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Regular.ttf      |  Bin 0 -> 53580 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Regular.woff     |  Bin 0 -> 30772 bytes
+ assets/lib/katex/fonts/KaTeX_Main-Regular.woff2    |  Bin 0 -> 26272 bytes
+ assets/lib/katex/fonts/KaTeX_Math-BoldItalic.ttf   |  Bin 0 -> 31196 bytes
+ assets/lib/katex/fonts/KaTeX_Math-BoldItalic.woff  |  Bin 0 -> 18668 bytes
+ assets/lib/katex/fonts/KaTeX_Math-BoldItalic.woff2 |  Bin 0 -> 16400 bytes
+ assets/lib/katex/fonts/KaTeX_Math-Italic.ttf       |  Bin 0 -> 31308 bytes
+ assets/lib/katex/fonts/KaTeX_Math-Italic.woff      |  Bin 0 -> 18748 bytes
+ assets/lib/katex/fonts/KaTeX_Math-Italic.woff2     |  Bin 0 -> 16440 bytes
+ assets/lib/katex/fonts/KaTeX_SansSerif-Bold.ttf    |  Bin 0 -> 24504 bytes
+ assets/lib/katex/fonts/KaTeX_SansSerif-Bold.woff   |  Bin 0 -> 14408 bytes
+ assets/lib/katex/fonts/KaTeX_SansSerif-Bold.woff2  |  Bin 0 -> 12216 bytes
+ assets/lib/katex/fonts/KaTeX_SansSerif-Italic.ttf  |  Bin 0 -> 22364 bytes
+ assets/lib/katex/fonts/KaTeX_SansSerif-Italic.woff |  Bin 0 -> 14112 bytes
+ .../lib/katex/fonts/KaTeX_SansSerif-Italic.woff2   |  Bin 0 -> 12028 bytes
+ assets/lib/katex/fonts/KaTeX_SansSerif-Regular.ttf |  Bin 0 -> 19436 bytes
+ .../lib/katex/fonts/KaTeX_SansSerif-Regular.woff   |  Bin 0 -> 12316 bytes
+ .../lib/katex/fonts/KaTeX_SansSerif-Regular.woff2  |  Bin 0 -> 10344 bytes
+ assets/lib/katex/fonts/KaTeX_Script-Regular.ttf    |  Bin 0 -> 16648 bytes
+ assets/lib/katex/fonts/KaTeX_Script-Regular.woff   |  Bin 0 -> 10588 bytes
+ assets/lib/katex/fonts/KaTeX_Script-Regular.woff2  |  Bin 0 -> 9644 bytes
+ assets/lib/katex/fonts/KaTeX_Size1-Regular.ttf     |  Bin 0 -> 12228 bytes
+ assets/lib/katex/fonts/KaTeX_Size1-Regular.woff    |  Bin 0 -> 6496 bytes
+ assets/lib/katex/fonts/KaTeX_Size1-Regular.woff2   |  Bin 0 -> 5468 bytes
+ assets/lib/katex/fonts/KaTeX_Size2-Regular.ttf     |  Bin 0 -> 11508 bytes
+ assets/lib/katex/fonts/KaTeX_Size2-Regular.woff    |  Bin 0 -> 6188 bytes
+ assets/lib/katex/fonts/KaTeX_Size2-Regular.woff2   |  Bin 0 -> 5208 bytes
+ assets/lib/katex/fonts/KaTeX_Size3-Regular.ttf     |  Bin 0 -> 7588 bytes
+ assets/lib/katex/fonts/KaTeX_Size3-Regular.woff    |  Bin 0 -> 4420 bytes
+ assets/lib/katex/fonts/KaTeX_Size3-Regular.woff2   |  Bin 0 -> 3624 bytes
+ assets/lib/katex/fonts/KaTeX_Size4-Regular.ttf     |  Bin 0 -> 10364 bytes
+ assets/lib/katex/fonts/KaTeX_Size4-Regular.woff    |  Bin 0 -> 5980 bytes
+ assets/lib/katex/fonts/KaTeX_Size4-Regular.woff2   |  Bin 0 -> 4928 bytes
+ .../lib/katex/fonts/KaTeX_Typewriter-Regular.ttf   |  Bin 0 -> 27556 bytes
+ .../lib/katex/fonts/KaTeX_Typewriter-Regular.woff  |  Bin 0 -> 16028 bytes
+ .../lib/katex/fonts/KaTeX_Typewriter-Regular.woff2 |  Bin 0 -> 13568 bytes
+ assets/lib/katex/katex.min.css                     |    1 +
+ assets/lib/katex/katex.min.js                      |    1 +
+ assets/lib/lite-youtube-embed/lite-yt-embed.css    |   95 +
+ assets/lib/lite-youtube-embed/lite-yt-embed.js     |  241 +
+ assets/lib/mermaid/mermaid.min.js                  | 3405 ++++++++++++
+ assets/lib/packery/packery.pkgd.min.js             |   10 +
+ assets/lib/tw-elements/index.min.js                |   29 +
+ assets/lib/typeit/typeit.umd.js                    |    2 +
+ assets/lib/zoom/style.css                          |    1 +
+ assets/lib/zoom/zoom.min.umd.js                    |    2 +
+ blowfish_logo.png                                  |  Bin 0 -> 531131 bytes
+ config.toml                                        |    5 +
+ config/_default/hugo.toml                          |   69 +
+ config/_default/languages.en.toml                  |   79 +
+ config/_default/markup.toml                        |   26 +
+ config/_default/menus.en.toml                      |   69 +
+ config/_default/module.toml                        |    0
+ config/_default/params.toml                        |  193 +
+ data/contributors.json                             | 1622 ++++++
+ data/repoColors.json                               |  533 ++
+ data/sharing.json                                  |   57 +
+ data/sponsors.json                                 |    1 +
+ exampleSite/.hugo_build.lock                       |    0
+ exampleSite/archetypes/default.md                  |    6 +
+ exampleSite/assets/img/author2.png                 |  Bin 0 -> 1552535 bytes
+ exampleSite/assets/img/bg.jpg                      |  Bin 0 -> 2021825 bytes
+ exampleSite/assets/img/blowfish.jpg                |  Bin 0 -> 2076716 bytes
+ exampleSite/assets/img/iceland.jpg                 |  Bin 0 -> 5000159 bytes
+ exampleSite/assets/img/nuno_avatar.jpg             |  Bin 0 -> 113497 bytes
+ exampleSite/assets/img/ocean.jpg                   |  Bin 0 -> 5097493 bytes
+ exampleSite/assets/img/paint.png                   |  Bin 0 -> 1864112 bytes
+ exampleSite/assets/js/home.js                      |   62 +
+ exampleSite/config/_default/hugo.toml              |   88 +
+ exampleSite/config/_default/languages.de.toml      |   22 +
+ exampleSite/config/_default/languages.en.toml      |   23 +
+ exampleSite/config/_default/languages.es.toml      |   22 +
+ exampleSite/config/_default/languages.fr.toml      |   22 +
+ exampleSite/config/_default/languages.it.toml      |   22 +
+ exampleSite/config/_default/languages.ja.toml      |   23 +
+ exampleSite/config/_default/languages.pt-br.toml   |   22 +
+ exampleSite/config/_default/languages.pt-pt.toml   |   22 +
+ exampleSite/config/_default/languages.zh-cn.toml   |   22 +
+ exampleSite/config/_default/markup.toml            |   26 +
+ exampleSite/config/_default/menus.de.toml          |   69 +
+ exampleSite/config/_default/menus.en.toml          |   91 +
+ exampleSite/config/_default/menus.es.toml          |   69 +
+ exampleSite/config/_default/menus.fr.toml          |   69 +
+ exampleSite/config/_default/menus.it.toml          |   91 +
+ exampleSite/config/_default/menus.ja.toml          |   91 +
+ exampleSite/config/_default/menus.pt-br.toml       |   69 +
+ exampleSite/config/_default/menus.pt-pt.toml       |   69 +
+ exampleSite/config/_default/menus.zh-cn.toml       |   91 +
+ exampleSite/config/_default/params.toml            |  178 +
+ exampleSite/config/development/hugo.toml           |    5 +
+ exampleSite/content/_index.de.md                   |   29 +
+ exampleSite/content/_index.es.md                   |   29 +
+ exampleSite/content/_index.fr.md                   |   29 +
+ exampleSite/content/_index.it.md                   |   25 +
+ exampleSite/content/_index.ja.md                   |   29 +
+ exampleSite/content/_index.md                      |   29 +
+ exampleSite/content/_index.pt-br.md                |   29 +
+ exampleSite/content/_index.pt-pt.md                |   29 +
+ exampleSite/content/_index.zh-cn.md                |   29 +
+ exampleSite/content/authors/_index.it.md           |    5 +
+ exampleSite/content/authors/_index.ja.md           |    5 +
+ exampleSite/content/authors/_index.md              |    5 +
+ exampleSite/content/authors/_index.zh-cn.md        |    5 +
+ .../content/authors/nunocoracao/_index.de.md       |    5 +
+ .../content/authors/nunocoracao/_index.es.md       |    5 +
+ .../content/authors/nunocoracao/_index.fr.md       |    5 +
+ .../content/authors/nunocoracao/_index.it.md       |    5 +
+ .../content/authors/nunocoracao/_index.ja.md       |    5 +
+ exampleSite/content/authors/nunocoracao/_index.md  |    5 +
+ .../content/authors/nunocoracao/_index.pt-br.md    |    5 +
+ .../content/authors/nunocoracao/_index.pt-pt.md    |    5 +
+ .../content/authors/nunocoracao/_index.zh-cn.md    |    5 +
+ .../content/authors/secondauthor/_index.de.md      |    5 +
+ .../content/authors/secondauthor/_index.es.md      |    5 +
+ .../content/authors/secondauthor/_index.fr.md      |    5 +
+ .../content/authors/secondauthor/_index.it.md      |    5 +
+ .../content/authors/secondauthor/_index.ja.md      |    5 +
+ exampleSite/content/authors/secondauthor/_index.md |    5 +
+ .../content/authors/secondauthor/_index.pt-br.md   |    5 +
+ .../content/authors/secondauthor/_index.pt-pt.md   |    5 +
+ .../content/authors/secondauthor/_index.zh-cn.md   |    5 +
+ exampleSite/content/docs/_index.de.md              |   17 +
+ exampleSite/content/docs/_index.es.md              |   17 +
+ exampleSite/content/docs/_index.fr.md              |   17 +
+ exampleSite/content/docs/_index.it.md              |   15 +
+ exampleSite/content/docs/_index.ja.md              |   17 +
+ exampleSite/content/docs/_index.md                 |   17 +
+ exampleSite/content/docs/_index.pt-br.md           |   17 +
+ exampleSite/content/docs/_index.pt-pt.md           |   17 +
+ exampleSite/content/docs/_index.zh-cn.md           |   18 +
+ .../docs/advanced-customisation/background.svg     |  574 +++
+ .../docs/advanced-customisation/featured.svg       |  146 +
+ .../docs/advanced-customisation/index.de.md        |  265 +
+ .../docs/advanced-customisation/index.es.md        |  265 +
+ .../docs/advanced-customisation/index.fr.md        |  265 +
+ .../docs/advanced-customisation/index.it.md        |  265 +
+ .../docs/advanced-customisation/index.ja.md        |  266 +
+ .../content/docs/advanced-customisation/index.md   |  214 +
+ .../docs/advanced-customisation/index.pt-br.md     |  265 +
+ .../docs/advanced-customisation/index.pt-pt.md     |  265 +
+ .../docs/advanced-customisation/index.zh-cn.md     |  219 +
+ .../content/docs/configuration/background.svg      |  574 +++
+ .../content/docs/configuration/featured.svg        |  827 +++
+ exampleSite/content/docs/configuration/index.de.md |  125 +
+ exampleSite/content/docs/configuration/index.es.md |  125 +
+ exampleSite/content/docs/configuration/index.fr.md |  125 +
+ exampleSite/content/docs/configuration/index.it.md |  390 ++
+ exampleSite/content/docs/configuration/index.ja.md |  390 ++
+ exampleSite/content/docs/configuration/index.md    |  407 ++
+ .../content/docs/configuration/index.pt-br.md      |  125 +
+ .../content/docs/configuration/index.pt-pt.md      |  125 +
+ .../content/docs/configuration/index.zh-cn.md      |  395 ++
+ exampleSite/content/docs/configuration/old.svg     |  257 +
+ .../content/docs/content-examples/background.svg   |  574 +++
+ .../content/docs/content-examples/featured.svg     | 3019 +++++++++++
+ .../content/docs/content-examples/index.de.md      |  318 ++
+ .../content/docs/content-examples/index.es.md      |  318 ++
+ .../content/docs/content-examples/index.fr.md      |  318 ++
+ .../content/docs/content-examples/index.it.md      |  318 ++
+ .../content/docs/content-examples/index.ja.md      |  318 ++
+ exampleSite/content/docs/content-examples/index.md |  318 ++
+ .../content/docs/content-examples/index.pt-br.md   |  318 ++
+ .../content/docs/content-examples/index.pt-pt.md   |  318 ++
+ .../content/docs/content-examples/index.zh-cn.md   |  317 ++
+ .../content/docs/firebase-views/background.svg     |  574 +++
+ .../content/docs/firebase-views/featured.svg       | 1308 +++++
+ .../content/docs/firebase-views/index.de.md        |   80 +
+ .../content/docs/firebase-views/index.es.md        |   80 +
+ .../content/docs/firebase-views/index.fr.md        |   80 +
+ .../content/docs/firebase-views/index.it.md        |   80 +
+ .../content/docs/firebase-views/index.ja.md        |   80 +
+ exampleSite/content/docs/firebase-views/index.md   |   80 +
+ .../content/docs/firebase-views/index.pt-br.md     |   80 +
+ .../content/docs/firebase-views/index.pt-pt.md     |   80 +
+ .../content/docs/firebase-views/index.zh-cn.md     |   80 +
+ .../content/docs/front-matter/background.svg       |  574 +++
+ exampleSite/content/docs/front-matter/featured.svg | 1100 ++++
+ exampleSite/content/docs/front-matter/index.de.md  |   61 +
+ exampleSite/content/docs/front-matter/index.es.md  |   61 +
+ exampleSite/content/docs/front-matter/index.fr.md  |   61 +
+ exampleSite/content/docs/front-matter/index.it.md  |   59 +
+ exampleSite/content/docs/front-matter/index.ja.md  |   60 +
+ exampleSite/content/docs/front-matter/index.md     |   61 +
+ .../content/docs/front-matter/index.pt-br.md       |   61 +
+ .../content/docs/front-matter/index.pt-pt.md       |   61 +
+ .../content/docs/front-matter/index.zh-cn.md       |   60 +
+ .../content/docs/getting-started/background.svg    |  574 +++
+ .../content/docs/getting-started/featured.svg      |  516 ++
+ .../content/docs/getting-started/index.de.md       |  224 +
+ .../content/docs/getting-started/index.es.md       |  224 +
+ .../content/docs/getting-started/index.fr.md       |  224 +
+ .../content/docs/getting-started/index.it.md       |  228 +
+ .../content/docs/getting-started/index.ja.md       |  224 +
+ exampleSite/content/docs/getting-started/index.md  |  224 +
+ .../content/docs/getting-started/index.pt-br.md    |  224 +
+ .../content/docs/getting-started/index.pt-pt.md    |  224 +
+ .../content/docs/getting-started/index.zh-cn.md    |  224 +
+ exampleSite/content/docs/getting-started/old.svg   |   17 +
+ exampleSite/content/docs/homepage-layout/a.svg     | 2312 +++++++++
+ .../content/docs/homepage-layout/background.svg    |  574 +++
+ .../content/docs/homepage-layout/featured.svg      |  146 +
+ .../docs/homepage-layout/img/home-background.png   |  Bin 0 -> 3799385 bytes
+ .../content/docs/homepage-layout/img/home-card.png |  Bin 0 -> 3715726 bytes
+ .../content/docs/homepage-layout/img/home-hero.png |  Bin 0 -> 4445128 bytes
+ .../content/docs/homepage-layout/img/home-list.png |  Bin 0 -> 1508931 bytes
+ .../content/docs/homepage-layout/img/home-page.png |  Bin 0 -> 1389667 bytes
+ .../docs/homepage-layout/img/home-profile.png      |  Bin 0 -> 1648178 bytes
+ .../content/docs/homepage-layout/index.de.md       |   89 +
+ .../content/docs/homepage-layout/index.es.md       |   89 +
+ .../content/docs/homepage-layout/index.fr.md       |   89 +
+ .../content/docs/homepage-layout/index.it.md       |   88 +
+ .../content/docs/homepage-layout/index.ja.md       |   88 +
+ exampleSite/content/docs/homepage-layout/index.md  |   89 +
+ .../content/docs/homepage-layout/index.pt-br.md    |   89 +
+ .../content/docs/homepage-layout/index.pt-pt.md    |   89 +
+ .../content/docs/homepage-layout/index.zh-cn.md    |   91 +
+ exampleSite/content/docs/homepage-layout/old.svg   |   24 +
+ .../content/docs/hosting-deployment/background.svg |  574 +++
+ .../content/docs/hosting-deployment/featured.svg   |  827 +++
+ .../hosting-deployment/github-pages-source.jpg     |  Bin 0 -> 18137 bytes
+ .../content/docs/hosting-deployment/index.de.md    |  148 +
+ .../content/docs/hosting-deployment/index.es.md    |  148 +
+ .../content/docs/hosting-deployment/index.fr.md    |  148 +
+ .../content/docs/hosting-deployment/index.it.md    |  148 +
+ .../content/docs/hosting-deployment/index.ja.md    |  148 +
+ .../content/docs/hosting-deployment/index.md       |  148 +
+ .../content/docs/hosting-deployment/index.pt-br.md |  148 +
+ .../content/docs/hosting-deployment/index.pt-pt.md |  148 +
+ .../content/docs/hosting-deployment/index.zh-cn.md |  148 +
+ .../hosting-deployment/netlify-build-settings.jpg  |  Bin 0 -> 37581 bytes
+ .../docs/hosting-deployment/render-settings.jpg    |  Bin 0 -> 29209 bytes
+ .../content/docs/installation/background.svg       |  574 +++
+ exampleSite/content/docs/installation/featured.svg | 1100 ++++
+ exampleSite/content/docs/installation/index.de.md  |  211 +
+ exampleSite/content/docs/installation/index.es.md  |  211 +
+ exampleSite/content/docs/installation/index.fr.md  |  211 +
+ exampleSite/content/docs/installation/index.it.md  |  210 +
+ exampleSite/content/docs/installation/index.ja.md  |  211 +
+ exampleSite/content/docs/installation/index.md     |  211 +
+ .../content/docs/installation/index.pt-br.md       |  211 +
+ .../content/docs/installation/index.pt-pt.md       |  211 +
+ .../content/docs/installation/index.zh-cn.md       |  210 +
+ exampleSite/content/docs/installation/old.svg      |   10 +
+ .../content/docs/multi-author/background.svg       |  574 +++
+ exampleSite/content/docs/multi-author/featured.svg |  516 ++
+ exampleSite/content/docs/multi-author/index.de.md  |  102 +
+ exampleSite/content/docs/multi-author/index.es.md  |  102 +
+ exampleSite/content/docs/multi-author/index.fr.md  |  102 +
+ exampleSite/content/docs/multi-author/index.it.md  |  102 +
+ exampleSite/content/docs/multi-author/index.ja.md  |  100 +
+ exampleSite/content/docs/multi-author/index.md     |  102 +
+ .../content/docs/multi-author/index.pt-br.md       |  102 +
+ .../content/docs/multi-author/index.pt-pt.md       |  102 +
+ .../content/docs/multi-author/index.zh-cn.md       |  100 +
+ exampleSite/content/docs/partials/background.svg   |  574 +++
+ exampleSite/content/docs/partials/featured.svg     |  874 ++++
+ exa
+
+[… truncated 112221 chars …]

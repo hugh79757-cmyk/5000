@@ -1,8 +1,7 @@
-import os
-import random
 import logging
+import os
 import sqlite3
-from datetime import datetime
+
 from shared.validators import sanitize_title
 
 logger = logging.getLogger(__name__)
@@ -10,7 +9,8 @@ logger = logging.getLogger(__name__)
 try:
     from shared.telegram_notifier import send_error as tg_error
 except ImportError:
-    tg_error = lambda *a, **k: None
+    def tg_error(*a, **k) -> None:
+        return None
 
 # WordPress 카테고리 ID 매핑 (kuta.informationhot.kr)
 WP_CATEGORY_MAP = {
@@ -65,7 +65,7 @@ def _pick_keyword(blog_id):
         conn.commit()
         return keyword
     except Exception as e:
-        logger.error(f"키워드 선택 실패: {e}")
+        logger.exception(f"키워드 선택 실패: {e}")
         return None
     finally:
         conn.close()
@@ -78,11 +78,11 @@ def run(blog_cfg):
     blog_id = blog_cfg["id"]
     logger.info(f"GAP pipeline: {blog_id}")
 
-    from shared.content_store import init_db, get_today_count
-    from shared.publisher import publish
     from pipelines.gap.fetcher import fetch_keyword_data
-    from pipelines.gap.writer import generate_gap_article
     from pipelines.gap.thumbnail import upload_thumbnail
+    from pipelines.gap.writer import generate_gap_article
+    from shared.content_store import get_today_count, init_db
+    from shared.publisher import publish
 
     init_db()
     today_count = get_today_count(blog_id)
@@ -128,8 +128,9 @@ def run(blog_cfg):
     # 내부링크 + CTA 삽입 (WordPress만)
     if blog_cfg.get("platform") == "wordpress":
         try:
-            from pipelines.gap.internal_links import process_gap_content
             import markdown as _md
+
+            from pipelines.gap.internal_links import process_gap_content
             _html = _md.markdown(article["body_md"], extensions=["tables", "fenced_code"])
             _html = process_gap_content(_html, kw_category)
             article["body_html"] = _html

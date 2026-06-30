@@ -1,5 +1,9 @@
 """ETAP 이미지 수집 - Pexels (primary) + Unsplash (fallback) + 관련성 필터 + 중복 방지"""
-import os, logging, sqlite3, requests, re
+import logging
+import os
+import sqlite3
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +16,7 @@ def _get_db():
     return sqlite3.connect(DB_PATH)
 
 
-def _init_used_images_table():
+def _init_used_images_table() -> None:
     db = _get_db()
     db.execute("""CREATE TABLE IF NOT EXISTS used_images (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +33,8 @@ def _init_used_images_table():
 
 def _is_image_used(image_url, slug=None):
     """같은 URL이라도 다른 slug(포스트)에서는 재사용 허용.
-    단, 같은 slug 내에서는 중복 방지."""
+    단, 같은 slug 내에서는 중복 방지.
+    """
     db = _get_db()
     if slug:
         # 동일 slug 내 중복만 차단
@@ -46,7 +51,7 @@ def _is_image_used(image_url, slug=None):
     return row is not None
 
 
-def _mark_image_used(image_url, photographer, source, slug, usage_type):
+def _mark_image_used(image_url, photographer, source, slug, usage_type) -> None:
     db = _get_db()
     try:
         db.execute(
@@ -63,7 +68,7 @@ def _mark_image_used(image_url, photographer, source, slug, usage_type):
 _init_used_images_table()
 
 
-def _is_relevant(photo, city, country):
+def _is_relevant(photo, city, country) -> bool:
     """Pexels alt 텍스트 또는 URL에 도시명/국가명이 포함되어 있는지 확인"""
     alt = (photo.get("alt") or "").lower()
     url = (photo.get("url") or "").lower()
@@ -87,10 +92,7 @@ def _is_relevant(photo, city, country):
                 keywords.append(w)
 
     # 키워드 중 하나라도 매칭되면 관련 있음
-    for kw in keywords:
-        if kw in text:
-            return True
-    return False
+    return any(kw in text for kw in keywords)
 
 
 def _search_pexels(query, per_page=15, city="", country=""):
@@ -110,7 +112,7 @@ def _search_pexels(query, per_page=15, city="", country=""):
             photo_data = {
                 "url": p["src"]["landscape"],
                 "thumb": p["src"]["medium"],
-                "credit": "Photo by [%s](%s) on [Pexels](https://www.pexels.com)" % (p["photographer"], p["photographer_url"]),
+                "credit": "Photo by [{}]({}) on [Pexels](https://www.pexels.com)".format(p["photographer"], p["photographer_url"]),
                 "photographer": p["photographer"],
                 "download_location": None,
                 "source": "pexels",
@@ -137,7 +139,7 @@ def _search_unsplash(query, per_page=15, city="", country=""):
     try:
         r = requests.get("https://api.unsplash.com/search/photos", params={
             "query": query, "per_page": per_page, "orientation": "landscape"
-        }, headers={"Authorization": "Client-ID %s" % key}, timeout=10)
+        }, headers={"Authorization": f"Client-ID {key}"}, timeout=10)
         if r.status_code != 200:
             logger.warning("[Unsplash] %s: %s", r.status_code, query)
             return []
@@ -146,7 +148,7 @@ def _search_unsplash(query, per_page=15, city="", country=""):
             photo_data = {
                 "url": p["urls"]["regular"],
                 "thumb": p["urls"]["thumb"],
-                "credit": "Photo by [%s](%s) on [Unsplash](https://unsplash.com)" % (p["user"]["name"], p["user"]["links"]["html"]),
+                "credit": "Photo by [{}]({}) on [Unsplash](https://unsplash.com)".format(p["user"]["name"], p["user"]["links"]["html"]),
                 "photographer": p["user"]["name"],
                 "download_location": p["links"]["download_location"],
                 "source": "unsplash",
@@ -173,19 +175,19 @@ def _search_with_fallback(query, per_page=15, city="", country=""):
 def _upload_to_r2(r2_key, image_url, force=False):
     from shared.r2_uploader import file_exists, upload_bytes
     if not force and file_exists(r2_key):
-        return "%s/%s" % (R2_BASE, r2_key)
+        return f"{R2_BASE}/{r2_key}"
     img_data = requests.get(image_url, timeout=15).content
     upload_bytes(img_data, r2_key, content_type="image/jpeg")
-    r2_url = "%s/%s" % (R2_BASE, r2_key)
+    r2_url = f"{R2_BASE}/{r2_key}"
     logger.info("R2 upload: %s", r2_url)
     return r2_url
 
 
-def _trigger_unsplash_download(photo):
+def _trigger_unsplash_download(photo) -> None:
     if photo.get("source") == "unsplash" and photo.get("download_location"):
         try:
             key = os.getenv("UNSPLASH_ACCESS_KEY", "")
-            requests.get(photo["download_location"], headers={"Authorization": "Client-ID %s" % key}, timeout=5)
+            requests.get(photo["download_location"], headers={"Authorization": f"Client-ID {key}"}, timeout=5)
         except Exception:
             pass
 
@@ -194,9 +196,9 @@ def fetch_city_image(city, country, slug, force=False):
     """커버 이미지 검색. 도시+국가명 관련성 필터 적용."""
     # 여러 쿼리 패턴 시도 (구체적 → 일반적)
     queries = [
-        "%s %s city" % (city, country) if country else "%s city" % city,
-        "%s skyline" % city,
-        "%s travel" % city,
+        f"{city} {country} city" if country else f"{city} city",
+        f"{city} skyline",
+        f"{city} travel",
     ]
 
     for query in queries:
@@ -206,7 +208,7 @@ def fetch_city_image(city, country, slug, force=False):
         for photo in results:
             if not force and _is_image_used(photo["url"], slug):
                 continue
-            r2_key = "etap/%s/cover.jpg" % slug
+            r2_key = f"etap/{slug}/cover.jpg"
             try:
                 r2_url = _upload_to_r2(r2_key, photo["url"], force=force)
                 _trigger_unsplash_download(photo)
@@ -214,17 +216,17 @@ def fetch_city_image(city, country, slug, force=False):
                 logger.info("[ETAP] cover: %s (%s)", r2_url, photo["photographer"])
                 return {"url": r2_url, "credit": photo["credit"]}
             except Exception as e:
-                logger.error("[Image] cover upload error: %s", e)
+                logger.exception("[Image] cover upload error: %s", e)
                 continue
 
     # 관련성 필터로 모두 탈락한 경우, 필터 없이 재시도 (이미지 없는 것보다는 나음)
     logger.warning("[Image] No relevant cover for %s, trying without filter", slug)
-    fallback_query = "%s travel" % city
+    fallback_query = f"{city} travel"
     results = _search_with_fallback(fallback_query, per_page=5, city="", country="")
     for photo in results:
         if _is_image_used(photo["url"], slug):
             continue
-        r2_key = "etap/%s/cover.jpg" % slug
+        r2_key = f"etap/{slug}/cover.jpg"
         try:
             r2_url = _upload_to_r2(r2_key, photo["url"], force=force)
             _trigger_unsplash_download(photo)
@@ -240,11 +242,11 @@ def fetch_city_image(city, country, slug, force=False):
 def fetch_body_images(city, country, slug, count=3, force=False):
     """본문 이미지. 관련성 필터 적용, 다양한 쿼리."""
     queries = [
-        "%s %s skyline cityscape" % (city, country) if country else "%s skyline" % city,
-        "%s %s street food market" % (city, country) if country else "%s food" % city,
-        "%s %s famous landmark" % (city, country) if country else "%s landmark" % city,
-        "%s %s nature scenery" % (city, country) if country else "%s scenery" % city,
-        "%s %s culture people" % (city, country) if country else "%s culture" % city,
+        f"{city} {country} skyline cityscape" if country else f"{city} skyline",
+        f"{city} {country} street food market" if country else f"{city} food",
+        f"{city} {country} famous landmark" if country else f"{city} landmark",
+        f"{city} {country} nature scenery" if country else f"{city} scenery",
+        f"{city} {country} culture people" if country else f"{city} culture",
     ]
     collected = []
 

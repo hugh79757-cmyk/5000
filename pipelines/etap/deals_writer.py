@@ -1,12 +1,17 @@
 """deals_writer.py - Flight deals guide (v4: all 35 routes fully utilized)"""
-import os, sqlite3, logging, re
+import logging
+import os
+import re
+import sqlite3
 from datetime import datetime
+
 from shared.ai_writer import generate as ai_generate
+
 logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 try:
-    from pipelines.etap.post_processor import fix_encoding, clean_tags, clean_prompt_leaks
+    from pipelines.etap.post_processor import clean_prompt_leaks, clean_tags, fix_encoding
     HAS_PP = True
 except ImportError:
     HAS_PP = False
@@ -114,7 +119,7 @@ def generate_deals_guide(topic):
 
     for label, group in [("UNDER $200", budget), ("$200-$500", mid), ("OVER $500", premium)]:
         if group:
-            lines.append(f"")
+            lines.append("")
             lines.append(f"[{label}] — {len(group)} destinations:")
             for d in group:
                 sellers = d.get("sellers", "")
@@ -167,7 +172,7 @@ def generate_deals_guide(topic):
         if direct_count > 0:
             sections.append(f"## Direct Flight Options from {origin_city} ({direct_count} non-stop routes)")
     if calendar_data:
-        sections.append(f"## When to Fly: Price Calendar Insights")
+        sections.append("## When to Fly: Price Calendar Insights")
     sections.append(f"## How to Get the Best Price from {origin_city}")
     section_text = "\n".join(sections)
 
@@ -192,7 +197,7 @@ RULES:
 - NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, treasure trove, must-visit, paradise, bucket list, adventure awaits
 
 Return ONLY the article in markdown starting with # title"""
-    
+
     result = ai_generate(
 
         "You are a travel journalist writing data-driven flight deal articles. Use ONLY provided price data. Write flowing paragraphs, no lists. Prices as whole numbers. Start with the cheapest deal.",

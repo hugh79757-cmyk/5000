@@ -1,9 +1,11 @@
-import os
 import hashlib
-import boto3
-from io import BytesIO
+import os
 from datetime import datetime
+from io import BytesIO
+
+import boto3
 from PIL import Image
+
 
 def get_r2_client():
     return boto3.client(
@@ -13,7 +15,7 @@ def get_r2_client():
         aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
     )
 
-def process_and_upload(image_data, bucket=None, key_prefix="car-images"):
+def process_and_upload(image_data, bucket=None, key_prefix="car-images") -> str:
     if bucket is None:
         bucket = os.getenv("R2_BUCKET", "hotissue-images")
 
@@ -52,5 +54,4 @@ def process_and_upload(image_data, bucket=None, key_prefix="car-images"):
         ContentType="image/webp",
     )
 
-    public_url = f"{os.getenv('R2_PUBLIC_URL')}/{key}"
-    return public_url
+    return f"{os.getenv('R2_PUBLIC_URL')}/{key}"

@@ -1,10 +1,7 @@
 import logging
+
 logger = logging.getLogger(__name__)
 import sqlite3
-import json
-import random
-import re
-from pathlib import Path
 
 # 모델명 매핑 (carisyou → public_fuel_data)
 MODEL_NAME_MAP = {
@@ -86,7 +83,7 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
     brand_names = BRAND_MAP_API.get(brand, [brand])
     placeholders = ",".join(["?" for _ in brand_names])
     query = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
-    params = ["%" + search_key + "%"] + brand_names
+    params = ["%" + search_key + "%", *brand_names]
     rows = c.execute(query, params).fetchall()
     if not rows:
         query2 = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
@@ -110,14 +107,14 @@ def lookup_ev_specs(conn, brand, model):
     for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보"]:
         model_clean = model_clean.replace(suffix, "")
     search_key = model_clean.split()[0] if model_clean.split() else model_clean
-    
+
     rows = c.execute("""
         SELECT display_eff, range_per_charge, engine_displacement, fuel_nm, model_nm
-        FROM public_fuel_data 
+        FROM public_fuel_data
         WHERE source='CAREFF' AND fuel_nm='전기' AND model_nm LIKE ?
         ORDER BY CAST(year AS INTEGER) DESC LIMIT 1
     """, ["%" + search_key + "%"]).fetchall()
-    
+
     if rows:
         r = rows[0]
         return {
@@ -146,7 +143,7 @@ def build_engine_desc(car):
         desc += " 터보"
     elif disp:
         desc += " 가솔린"
-    return desc if desc else ft
+    return desc or ft
 
 def calc_tax(displacement, fuel_type):
     if not displacement:
@@ -159,13 +156,13 @@ def calc_tax(displacement, fuel_type):
         base = displacement * 80
     return round(base * 1.3 / 10000)
 
-def fuel_type_to_code(fuel_type):
+def fuel_type_to_code(fuel_type) -> str:
     ft = str(fuel_type)
     if "경유" in ft or "디젤" in ft:
         return "D047"
-    elif "LPG" in ft or "부탄" in ft or "엘피지" in ft:
+    if "LPG" in ft or "부탄" in ft or "엘피지" in ft:
         return "K015"
-    elif "고급" in ft:
+    if "고급" in ft:
         return "B034"
     return "B027"
 
@@ -196,7 +193,7 @@ def calc_fuel_cost(annual_km, efficiency, fuel_type, db_path):
     price = get_live_fuel_price(fuel_type, db_path)
     return round((annual_km / efficiency) * price / 10000)
 
-def calc_insurance(price):
+def calc_insurance(price) -> int:
     if price <= 2000: return 70
     if price <= 3000: return 90
     if price <= 4000: return 110
@@ -209,7 +206,6 @@ def calc_insurance(price):
 
 def estimate_resale(base_price, brand, fuel_type, segment="", model=""):
     """브랜드/연료/세그먼트/모델별 3년 잔존가치 추정 (결정론적)"""
-
     # 브랜드별 3년 잔존가치 기본율 (%, 실거래 시장 반영 2025 기준)
     brand_rates = {
         "현대": 56, "기아": 54, "제네시스": 62,
@@ -338,13 +334,13 @@ def select_matching_trim(comp_trims, target_price):
 
 def build_input(conn, topic, db_path):
     c = conn.cursor()
-    car_row = c.execute('SELECT * FROM cars WHERE car_id = ?', (topic['car_id'],)).fetchone()
+    car_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (topic["car_id"],)).fetchone()
     if not car_row:
         return None
     car = dict(car_row)
     trims_raw = c.execute(
         'SELECT * FROM trims WHERE car_id = ? AND status = "시판" ORDER BY price',
-        (topic['car_id'],)
+        (topic["car_id"],)
     ).fetchall()
     trims = [dict(t) for t in trims_raw]
     # === 데이터 품질 필터 ===
@@ -360,37 +356,37 @@ def build_input(conn, topic, db_path):
     idx = select_representative_trim(trims)
     main_trim = trims[idx]
     annual_km = ANNUAL_KM
-    tax = calc_tax(car['displacement'], car['fuel_type'])
-    insurance = calc_insurance(main_trim['price'])
-    fuel_eff = main_trim['fuel_efficiency']
+    tax = calc_tax(car["displacement"], car["fuel_type"])
+    insurance = calc_insurance(main_trim["price"])
+    fuel_eff = main_trim["fuel_efficiency"]
     if not fuel_eff or fuel_eff == 0:
-        fuel_eff = lookup_fuel_efficiency(conn, car['brand'], car['model'], car['displacement'])
+        fuel_eff = lookup_fuel_efficiency(conn, car["brand"], car["model"], car["displacement"])
     if not fuel_eff or fuel_eff == 0:
-        logger.warning("[BLOCK] 연비 데이터 없음 - 발행 차단: " + car['model'])
+        logger.warning("[BLOCK] 연비 데이터 없음 - 발행 차단: " + car["model"])
         return None
-    fuel_cost = calc_fuel_cost(annual_km, fuel_eff, car['fuel_type'], db_path)
-    resale = estimate_resale(main_trim['price'], car['brand'], car['fuel_type'], car.get('segment', ''), car.get('model', ''))
-    dep_3yr = main_trim['price'] - resale["resale_3yr"]
+    fuel_cost = calc_fuel_cost(annual_km, fuel_eff, car["fuel_type"], db_path)
+    resale = estimate_resale(main_trim["price"], car["brand"], car["fuel_type"], car.get("segment", ""), car.get("model", ""))
+    dep_3yr = main_trim["price"] - resale["resale_3yr"]
     maint_3yr = (tax + insurance + fuel_cost) * 3
     total_3yr = dep_3yr + maint_3yr
     data = {
-        "type": topic['post_type'],
+        "type": topic["post_type"],
         "model": car["model"],
-        "brand": car['brand'],
-        "year": car['year'],
-        "trim": main_trim['trim_name'],
+        "brand": car["brand"],
+        "year": car["year"],
+        "trim": main_trim["trim_name"],
         "seats": "5인승",
-        "base_price": main_trim['price'],
+        "base_price": main_trim["price"],
         "engine": build_engine_desc(car),
-        "fuel_type": car['fuel_type'],
-        "segment": car.get('segment', ''),
+        "fuel_type": car["fuel_type"],
+        "segment": car.get("segment", ""),
         "fuel_efficiency": fuel_eff,
-        "displacement": car['displacement'],
+        "displacement": car["displacement"],
         "discount": 0, "discount_conditions": "",
         "finance_rate": FINANCE_RATE, "finance_term_months": FINANCE_TERMS[0],
-        "monthly_payment_48": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 48),
-        "monthly_payment_36": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 36),
-        "monthly_payment_60": calc_monthly_payment(main_trim['price'], FINANCE_RATE, 60),
+        "monthly_payment_48": calc_monthly_payment(main_trim["price"], FINANCE_RATE, 48),
+        "monthly_payment_36": calc_monthly_payment(main_trim["price"], FINANCE_RATE, 36),
+        "monthly_payment_60": calc_monthly_payment(main_trim["price"], FINANCE_RATE, 60),
         "annual_km": annual_km, "fuel_price_source": "opinet", "tax_annual": tax, "tax_annual_3yr": tax * 3,
         "insurance_estimate": insurance, "fuel_price": get_live_fuel_price(car["fuel_type"], db_path),
         "annual_fuel_cost": fuel_cost,
@@ -398,40 +394,40 @@ def build_input(conn, topic, db_path):
         "three_year_depreciation": dep_3yr,
         "three_year_maintenance": maint_3yr,
         "three_year_total_cost": total_3yr,
-        "final_price": main_trim['price'],
-        "trim_lineup": [{"name": t['trim_name'], "price": t['price'], "fuel_eff": t.get('fuel_efficiency') or fuel_eff, "fuel": t.get('fuel', car['fuel_type'])} for t in trims],
+        "final_price": main_trim["price"],
+        "trim_lineup": [{"name": t["trim_name"], "price": t["price"], "fuel_eff": t.get("fuel_efficiency") or fuel_eff, "fuel": t.get("fuel", car["fuel_type"])} for t in trims],
     }
-    if topic['competitor_car_id']:
-        comp_row = c.execute('SELECT * FROM cars WHERE car_id = ?', (topic['competitor_car_id'],)).fetchone()
+    if topic["competitor_car_id"]:
+        comp_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (topic["competitor_car_id"],)).fetchone()
         comp = dict(comp_row) if comp_row else None
         comp_trims_raw = c.execute(
             'SELECT * FROM trims WHERE car_id = ? AND status = "시판" ORDER BY price',
-            (topic['competitor_car_id'],)
+            (topic["competitor_car_id"],)
         ).fetchall()
         comp_trims = [dict(t) for t in comp_trims_raw]
         comp_trims = [t for t in comp_trims if t["price"] and t["price"] >= 500]
         if comp and comp_trims:
-            cidx = select_matching_trim(comp_trims, main_trim['price'])
+            cidx = select_matching_trim(comp_trims, main_trim["price"])
             ct = comp_trims[cidx]
-            c_tax = calc_tax(comp['displacement'], comp['fuel_type'])
-            c_ins = calc_insurance(ct['price'])
-            c_eff = ct['fuel_efficiency']
+            c_tax = calc_tax(comp["displacement"], comp["fuel_type"])
+            c_ins = calc_insurance(ct["price"])
+            c_eff = ct["fuel_efficiency"]
             if not c_eff or c_eff == 0:
-                c_eff = lookup_fuel_efficiency(conn, comp['brand'], comp['model'], comp['displacement'])
+                c_eff = lookup_fuel_efficiency(conn, comp["brand"], comp["model"], comp["displacement"])
             if not c_eff or c_eff == 0:
                 c_eff = 12.0
-            c_fuel = calc_fuel_cost(annual_km, c_eff, comp['fuel_type'], db_path)
-            c_resale = estimate_resale(ct['price'], comp['brand'], comp['fuel_type'], comp.get('segment', ''), comp.get('model', ''))
-            c_dep = ct['price'] - c_resale["resale_3yr"]
+            c_fuel = calc_fuel_cost(annual_km, c_eff, comp["fuel_type"], db_path)
+            c_resale = estimate_resale(ct["price"], comp["brand"], comp["fuel_type"], comp.get("segment", ""), comp.get("model", ""))
+            c_dep = ct["price"] - c_resale["resale_3yr"]
             c_maint = (c_tax + c_ins + c_fuel) * 3
             c_total = c_dep + c_maint
             data.update({
                 "competitor": comp["model"],
-                "competitor_trim": ct['trim_name'],
-                "competitor_price": ct['price'],
+                "competitor_trim": ct["trim_name"],
+                "competitor_price": ct["price"],
                 "competitor_engine": build_engine_desc(comp),
                 "competitor_fuel_efficiency": c_eff,
-                "competitor_displacement": comp['displacement'],
+                "competitor_displacement": comp["displacement"],
                 "competitor_resale_1yr": c_resale["resale_1yr"],
                 "competitor_resale_2yr": c_resale["resale_2yr"],
                 "competitor_resale_3yr": c_resale["resale_3yr"],
@@ -442,7 +438,7 @@ def build_input(conn, topic, db_path):
                 "competitor_three_year_depreciation": c_dep,
                 "competitor_three_year_maintenance": c_maint,
                 "competitor_three_year_total_cost": c_total,
-                "competitor_final_price": ct['price'],
+                "competitor_final_price": ct["price"],
                 "competitor_trim_lineup": " / ".join(f"{t['trim_name']} {t['price']:,}" for t in comp_trims),
             })
     data.update({
@@ -494,7 +490,7 @@ def build_top5_rank_input(conn, topic, db_path):
     """, (segment, car["car_id"])).fetchall()
     seg_cars = [dict(r) for r in seg_cars]
 
-    candidates = [car] + seg_cars
+    candidates = [car, *seg_cars]
 
     # 각 차량 대표 트림 데이터 수집
     ranked = []
@@ -638,7 +634,7 @@ def build_top5_rank_input(conn, topic, db_path):
         "total_candidates": len(ranked),
     }
 
-   
+
 PERSONA_CONFIGS = {
     "commuter": {
         "label": "출퇴근 40km 직장인",

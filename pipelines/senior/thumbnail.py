@@ -1,12 +1,15 @@
+import logging
 import os
 import sys
-import textwrap
-import logging
 import tempfile
-from PIL import Image, ImageDraw, ImageFont
+import textwrap
 from datetime import datetime
 
+from PIL import Image, ImageDraw, ImageFont
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+import contextlib
+
 from shared.r2_uploader import upload_file
 
 logger = logging.getLogger(__name__)
@@ -100,8 +103,7 @@ def _calc_title_layout(draw, title, max_width, max_lines=3):
 
 
 def generate_senior_thumbnail(title, category="default", department="", slug=None, output_path=None):
-    """
-    썸네일 생성 후 R2 업로드.
+    """썸네일 생성 후 R2 업로드.
     - slug 있으면 → R2 업로드 → URL 반환
     - slug 없으면 → output_path에 로컬 저장 → 경로 반환 (테스트용)
     """
@@ -132,7 +134,7 @@ def generate_senior_thumbnail(title, category="default", department="", slug=Non
         draw.text((padding + 14, padding + 6), badge_text, font=badge_font, fill=(255, 255, 255))
         badge_bottom = padding + bh + 30
 
-    title_font, title_lines, font_size, line_height = _calc_title_layout(draw, title, max_text_width)
+    title_font, title_lines, _font_size, line_height = _calc_title_layout(draw, title, max_text_width)
     total_title_h = len(title_lines) * line_height
     available_h = HEIGHT - badge_bottom - 120
     y_start = badge_bottom + max((available_h - total_title_h) // 2, 10)
@@ -160,7 +162,7 @@ def generate_senior_thumbnail(title, category="default", department="", slug=Non
     else:
         save_path = output_path or "/tmp/senior_thumb.webp"
 
-    os.makedirs(os.path.dirname(save_path) if os.path.dirname(save_path) else ".", exist_ok=True)
+    os.makedirs(os.path.dirname(save_path) or ".", exist_ok=True)
     img.save(save_path, "WEBP", quality=85)
     logger.info(f"[SeniorThumb] saved locally: {save_path}")
 
@@ -168,16 +170,13 @@ def generate_senior_thumbnail(title, category="default", department="", slug=Non
     if slug:
         r2_key = f"senior/thumbnails/{slug}.webp"
         url = upload_file(save_path, r2_key, content_type="image/webp", bucket=SENIOR_R2_BUCKET)
-        try:
+        with contextlib.suppress(Exception):
             os.unlink(save_path)
-        except Exception:
-            pass
         if url:
             logger.info(f"[SeniorThumb] R2 완료: {url}")
             return url
-        else:
-            logger.error("[SeniorThumb] R2 업로드 실패")
-            return None
+        logger.error("[SeniorThumb] R2 업로드 실패")
+        return None
 
     return save_path
 

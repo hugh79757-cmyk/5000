@@ -1,17 +1,19 @@
 """RAP (Real estate Auto Publisher) pipeline — RAP 전용 DB 사용"""
+import logging
 import os
 import random
 import sqlite3
-import logging
 from datetime import datetime
-from shared.validators import sanitize_title
+
+from shared.validators import assert_korean_or_reject, sanitize_title
 
 logger = logging.getLogger(__name__)
 
 try:
     from shared.telegram_notifier import send_error as tg_error
 except ImportError:
-    tg_error = lambda *a, **k: None
+    def tg_error(*a, **k) -> None:
+        return None
 
 RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
 GAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "gap.db")
@@ -177,7 +179,7 @@ def _fetch_rents_from_db(lawd_cd, keyword, months=3):
             f"deposit, monthly_rent, rent_type, deal_year, deal_month, deal_day "
             f"FROM rents WHERE lawd_cd=? AND deal_ymd IN ({placeholders}) "
             f"ORDER BY deal_ymd DESC, deposit DESC",
-            [lawd_cd] + ymd_list
+            [lawd_cd, *ymd_list]
         ).fetchall()
         conn.close()
 
@@ -225,7 +227,7 @@ def _fetch_rents_from_db(lawd_cd, keyword, months=3):
                 "data_type":      "rent",
             }
 
-        def _match(apt_name):
+        def _match(apt_name) -> bool:
             n = (apt_name or "").strip()
             if not apt_kw:
                 return False
@@ -244,7 +246,7 @@ def _fetch_rents_from_db(lawd_cd, keyword, months=3):
                     not after_char
                     or not after_char.isalnum()
                     or (last_kw_char.isdigit()
-                        and '가' <= after_char <= '힣')
+                        and "가" <= after_char <= "힣")
                 )
                 if before_ok and after_ok:
                     return True
@@ -266,7 +268,7 @@ def _fetch_rents_from_db(lawd_cd, keyword, months=3):
         }
 
     except Exception as e:
-        logger.error(f"DB rents 조회 실패: {e}")
+        logger.exception(f"DB rents 조회 실패: {e}")
         return []
 
 
@@ -281,6 +283,7 @@ BRAND_KEYWORDS = [
 def _fetch_brand_trades_from_db(keyword, months=3):
     """rap5-hugo 전용 — 키워드에서 브랜드명 추출 후 전국 LIKE 검색"""
     import re as _re
+
     from dateutil.relativedelta import relativedelta
 
     if not os.path.exists(RAP_DB_PATH):
@@ -304,7 +307,7 @@ def _fetch_brand_trades_from_db(keyword, months=3):
         )
         tokens = keyword.strip().split()
         apt_kw = " ".join(t for t in tokens if not _SUFFIX_PAT.match(t)).strip()
-        brand_kw = apt_kw if apt_kw else None
+        brand_kw = apt_kw or None
 
     if not brand_kw:
         logger.warning(f"rap5 브랜드 추출 실패: {keyword}")
@@ -321,7 +324,7 @@ def _fetch_brand_trades_from_db(keyword, months=3):
             f"deal_amount, deal_year, deal_month, deal_day, city, district "
             f"FROM trades WHERE apt_name LIKE ? AND deal_ymd IN ({placeholders}) "
             f"ORDER BY deal_ymd DESC, deal_amount DESC",
-            [f"%{brand_kw}%"] + ymd_list
+            [f"%{brand_kw}%", *ymd_list]
         ).fetchall()
         conn.close()
 
@@ -378,7 +381,7 @@ def _fetch_brand_trades_from_db(keyword, months=3):
         }
 
     except Exception as e:
-        logger.error(f"rap5 브랜드 DB 조회 실패: {e}")
+        logger.exception(f"rap5 브랜드 DB 조회 실패: {e}")
         return None
 
 def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
@@ -416,7 +419,7 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
             f"deal_amount, deal_year, deal_month, deal_day "
             f"FROM trades WHERE lawd_cd=? AND deal_ymd IN ({placeholders}) "
             f"ORDER BY deal_ymd DESC, deal_amount DESC",
-            [lawd_cd] + ymd_list
+            [lawd_cd, *ymd_list]
         ).fetchall()
         conn.close()
 
@@ -451,7 +454,7 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
         tokens = keyword.strip().split()
         apt_kw = " ".join(t for t in tokens if not _SUFFIX_PAT.match(t)).strip()
 
-        def _match(apt_name):
+        def _match(apt_name) -> bool:
             n = (apt_name or "").strip()
             if not apt_kw:
                 return False
@@ -470,7 +473,7 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
                     not after_char
                     or not after_char.isalnum()
                     or (last_kw_char.isdigit()
-                        and '가' <= after_char <= '힣')
+                        and "가" <= after_char <= "힣")
                 )
                 if before_ok and after_ok:
                     return True
@@ -492,7 +495,7 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
         }
 
     except Exception as e:
-        logger.error(f"DB trades 조회 실패: {e}")
+        logger.exception(f"DB trades 조회 실패: {e}")
         return []
 
 def _post_process(body_md, blog_id, keyword):
@@ -501,9 +504,9 @@ def _post_process(body_md, blog_id, keyword):
     body_md = body_md.replace("특히,", "").replace("  ", " ")
 
     """발행 전 후처리: 금지표현 제거 + 면책조항 + 쿠팡 + 내부링크"""
-    import re as _re
     import glob as _gl2
     import random as _rand2
+    import re as _re
 
     # 0. 내부링크 상단 삽입
     try:
@@ -585,17 +588,17 @@ def _post_process(body_md, blog_id, keyword):
     body_md = body_md.rstrip()
 
     # 1-0. 표 깨짐 복원 — 마크다운 table separator 행 수정
-    _lines = body_md.split('\n')
+    _lines = body_md.split("\n")
     for _i, _line in enumerate(_lines):
-        if _re.match(r'^\|[\|\-:\s]+\|$', _line):
+        if _re.match(r"^\|[\|\-:\s]+\|$", _line):
             _j = _i - 1
             while _j >= 0 and not _lines[_j].strip():
                 _j -= 1
-            if _j >= 0 and _lines[_j].strip().startswith('|'):
-                _col_count = _lines[_j].count('|') - 1
+            if _j >= 0 and _lines[_j].strip().startswith("|"):
+                _col_count = _lines[_j].count("|") - 1
                 if _col_count >= 1:
-                    _lines[_i] = '|' + '---|' * _col_count
-    body_md = '\n'.join(_lines)
+                    _lines[_i] = "|" + "---|" * _col_count
+    body_md = "\n".join(_lines)
 
     # 1-1. 글 중간 이탈방지 카드 삽입 (H2 3번째 뒤)
     try:
@@ -619,15 +622,15 @@ def _post_process(body_md, blog_id, keyword):
                 _candidates.append({"title": _tm.group(1), "slug": _sm.group(1)})
         if len(_candidates) >= 1:
             _pick = _rand2.choice(_candidates)
-            _card_html = f'''
+            _card_html = f"""
 
 <div style="margin:28px 0;padding:18px 22px;background:linear-gradient(135deg,#f8f9ff 0%,#e8f4fd 100%);border-radius:14px;border-left:4px solid #3182ce;">
   <p style="margin:0 0 6px 0;font-size:0.85rem;color:#718096;">📌 놓치면 아쉬운 글</p>
   <a href="/posts/{_pick['slug']}/" style="font-size:1.05rem;font-weight:600;color:#2d3748;text-decoration:none;">{_pick['title']}</a>
 </div>
 
-'''
-            _h2_positions = [m.start() for m in _re.finditer(r'^## ', body_md, _re.MULTILINE)]
+"""
+            _h2_positions = [m.start() for m in _re.finditer(r"^## ", body_md, _re.MULTILINE)]
             if len(_h2_positions) >= 4:
                 _insert_pos = _h2_positions[3]
                 body_md = body_md[:_insert_pos] + _card_html + body_md[_insert_pos:]
@@ -673,6 +676,7 @@ def _post_process(body_md, blog_id, keyword):
     _skip_map = any(nk in keyword for nk in _NO_MAP_KEYWORDS) if keyword else True
     try:
         import urllib.parse as _up
+
         import requests as _req
         if _skip_map:
             logger.info(f"네이버지도 스킵 (비지역 키워드): {keyword}")
@@ -711,7 +715,7 @@ def _post_process(body_md, blog_id, keyword):
                     any(pc in it.get("category", "") for pc in _PLACE_CATS)
                     for it in _items[:5]
                 )
-        
+
         if not _has_place:
             logger.info(f"네이버지도 부동산 결과 없음 → 버튼 생략: {_search_q}")
             raise ValueError("no place result")
@@ -783,11 +787,12 @@ def run(blog_cfg):
 
     # ★ RAP DB 일일 갱신 (첫 발행 시 자동 실행, 최대 120초)
     try:
-        from pipelines.rap.rap_data_sync import daily_refresh
         import threading as _th
+
+        from pipelines.rap.rap_data_sync import daily_refresh
         _result = []
         _err = []
-        def _run_refresh():
+        def _run_refresh() -> None:
             try:
                 _result.append(daily_refresh())
             except Exception as _e:
@@ -802,11 +807,15 @@ def run(blog_cfg):
     except Exception as e:
         logger.warning(f"RAP DB 갱신 실패 (non-fatal): {e}")
 
-    from shared.content_store import init_db, get_today_count
-    from shared.publisher import publish
-    from pipelines.rap.fetcher import fetch_apt_trade, fetch_subscription_info, find_lawd_cd, REGION_CD_MAP
-    from pipelines.rap.writer import generate_trade_article, generate_subscription_article
+    from pipelines.rap.fetcher import (
+        REGION_CD_MAP,
+        fetch_subscription_info,
+        find_lawd_cd,
+    )
     from pipelines.rap.thumbnail import upload_thumbnail
+    from pipelines.rap.writer import generate_subscription_article, generate_trade_article
+    from shared.content_store import get_today_count, init_db
+    from shared.publisher import publish
 
     blog_id = blog_cfg["id"]
     logger.info(f"RAP pipeline: {blog_id}")
@@ -882,7 +891,7 @@ def run(blog_cfg):
             try:
                 _sc = sqlite3.connect(RAP_DB_PATH, timeout=30)
                 # 키워드에서 지역명 추출해 DB 매칭
-                _region_tokens = [r for r in REGION_CD_MAP.keys() if r in keyword]
+                _region_tokens = [r for r in REGION_CD_MAP if r in keyword]
                 if _region_tokens:
                     _placeholders = ",".join("?" * len(_region_tokens))
                     _subs_rows = _sc.execute(
@@ -942,6 +951,12 @@ def run(blog_cfg):
 
     if not article:
         return {"success": False, "reason": "write_failed"}
+
+    # 언어 검증 — 중국어 생성 차단
+    _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
+    if _lang_err:
+        logger.error(f"[{blog_id}] {_lang_err}")
+        return {"success": False, "reason": "language_error"}
 
     # 썸네일
     article["title"] = sanitize_title(article["title"])

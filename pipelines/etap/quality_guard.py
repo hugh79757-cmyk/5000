@@ -4,30 +4,32 @@ Pre-processing: validates and cleans tour/route data before sending to GPT.
 Post-processing: validates generated content for suspicious numbers, formatting issues.
 If quality check fails, marks post as draft and sends Telegram alert.
 """
-import os, re, logging
+import logging
+import os
+import re
 
 logger = logging.getLogger(__name__)
 
 # ── 텔레그램 알림은 shared/telegram_notifier 경유 ──
-def _tg_warning(title, detail=""):
+def _tg_warning(title, detail="") -> None:
     try:
         from shared.telegram_notifier import send_warning
         send_warning(title, detail)
     except Exception as _e:
-        logger.error(f"[QualityGuard] 텔레그램 전송 실패: {_e}")
+        logger.exception(f"[QualityGuard] 텔레그램 전송 실패: {_e}")
 
-def _tg_critical(title, detail=""):
+def _tg_critical(title, detail="") -> None:
     try:
         from shared.telegram_notifier import send_critical
         send_critical(title, detail)
     except Exception as _e:
-        logger.error(f"[QualityGuard] 텔레그램 전송 실패: {_e}")
+        logger.exception(f"[QualityGuard] 텔레그램 전송 실패: {_e}")
 
 
 # ============================================================
 # TELEGRAM ALERT
 # ============================================================
-def send_alert(blog_id, slug, issues):
+def send_alert(blog_id, slug, issues) -> None:
     """품질 이슈 알림 — CRITICAL/WARNING 자동 분리."""
     if not issues:
         return
@@ -66,8 +68,7 @@ def clean_tour_name(name):
     if not name:
         return name
     name = re.sub(r"^Save\s+[\d.]+%!\s*", "", name)
-    name = re.sub(r"\s{2,}", " ", name).strip()
-    return name
+    return re.sub(r"\s{2,}", " ", name).strip()
 
 def validate_tour(tour):
     """Validate a single tour dict. Returns (cleaned_tour, issues_list).
@@ -245,7 +246,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     # Extract tour/product names to protect them from replacement
     import re as _re2
     _protected_names = set()
-    for pattern_pn in [r'\*\*\[([^\]]+)\]', r'\[([^\]]+)\]\(https://www\.viator\.com']:
+    for pattern_pn in [r"\*\*\[([^\]]+)\]", r"\[([^\]]+)\]\(https://www\.viator\.com"]:
         for m in _re2.finditer(pattern_pn, content):
             _protected_names.add(m.group(1))
 
@@ -344,45 +345,45 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
             issues.append(f"Auto-replaced: '{phrase}' -> '{replacement}'")
 
     # Fix article mismatches from replacements (an -> a before consonant)
-    content = re.sub(r'\ban (standout|busy|lively|lesser-known|mix|long|start)\b', r'a \1', content)
-    content = re.sub(r'\bAn (standout|busy|lively|lesser-known|mix|long|start)\b', r'A \1', content)
+    content = re.sub(r"\ban (standout|busy|lively|lesser-known|mix|long|start)\b", r"a \1", content)
+    content = re.sub(r"\bAn (standout|busy|lively|lesser-known|mix|long|start)\b", r"A \1", content)
 
     # Fix price formatting: $X.0 -> $X, $X.00 -> $X
-    content = re.sub(r'\$(\d+)\.0\b', r'$\1', content)
-    content = re.sub(r'\$(\d+)\.00\b', r'$\1', content)
+    content = re.sub(r"\$(\d+)\.0\b", r"$\1", content)
+    content = re.sub(r"\$(\d+)\.00\b", r"$\1", content)
 
     # Normalize currency: "USD 31.50" -> "$32", "GBP 10.31" -> "$10", "EUR 25.00" -> "$25"
-    def _normalize_currency(m):
-        cur = m.group(1)
+    def _normalize_currency(m) -> str:
+        m.group(1)
         val = float(m.group(2))
-        return f'${int(round(val))}'
-    content = re.sub(r'\b(USD|GBP|EUR)\s+(\d+(?:\.\d+)?)', _normalize_currency, content)
+        return f"${round(val)}"
+    content = re.sub(r"\b(USD|GBP|EUR)\s+(\d+(?:\.\d+)?)", _normalize_currency, content)
 
     # Also fix "From **USD X**" patterns in product cards
-    content = re.sub(r'From \*\*(USD|GBP|EUR)\s+(\d+(?:\.\d+)?)\*\*',
-                     lambda m: f'From **${int(round(float(m.group(2))))}**', content)
+    content = re.sub(r"From \*\*(USD|GBP|EUR)\s+(\d+(?:\.\d+)?)\*\*",
+                     lambda m: f"From **${round(float(m.group(2)))}**", content)
     # Round prices with single decimal: $31.5 -> $32, $159.2 -> $159
-    def _round_price(m):
-        val = float(m.group(1) + '.' + m.group(2))
-        return f'${int(round(val))}'
-    content = re.sub(r'\$(\d+)\.(\d)\b(?!\d)', _round_price, content)
+    def _round_price(m) -> str:
+        val = float(m.group(1) + "." + m.group(2))
+        return f"${round(val)}"
+    content = re.sub(r"\$(\d+)\.(\d)\b(?!\d)", _round_price, content)
 
     # Fix discount percentages in text: -20.01% -> -20%, -35.0% -> -35%, -0.0% -> remove
-    def _fix_discount_text(m):
+    def _fix_discount_text(m) -> str:
         val = abs(float(m.group(1)))
         if val < 0.5:
             return ""
-        return f'-{int(round(val))}%'
-    content = re.sub(r'-(\d+\.?\d*)%', _fix_discount_text, content)
+        return f"-{round(val)}%"
+    content = re.sub(r"-(\d+\.?\d*)%", _fix_discount_text, content)
 
     # Check for suspicious prices in text ($0, $0.X, $1 — $2~$4 is valid for rail/tour data)
-    suspicious_prices = re.findall(r'\$0(?!\.\d)\b', content)
+    suspicious_prices = re.findall(r"\$0(?!\.\d)\b", content)
     if suspicious_prices:
-        issues.append(f"Suspicious low prices in text: $0 found")
+        issues.append("Suspicious low prices in text: $0 found")
         is_draft = True
 
     # Check for very high prices (possible hallucination)
-    high_prices = re.findall(r'\$(\d{5,})', content)
+    high_prices = re.findall(r"\$(\d{5,})", content)
     if high_prices:
         issues.append(f"Suspiciously high prices: ${', $'.join(high_prices)}")
         is_draft = True
@@ -390,7 +391,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     # Validate prices against source data if provided
     hallucinated_prices = []
     if data_prices:
-        text_prices = set(re.findall(r'\$(\d+(?:\.\d{1,2})?)', content))
+        text_prices = set(re.findall(r"\$(\d+(?:\.\d{1,2})?)", content))
         for tp in text_prices:
             try:
                 tpf = float(tp)
@@ -399,7 +400,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
                     issues.append(f"Hallucinated price ${tp} not in source data")
                     # Remove sentence containing the hallucinated price
                     escaped = re.escape(f"${tp}")
-                    content = re.sub(r'[^.!?]*' + escaped + r'[^.!?]*[.!?]', '', content, count=1)
+                    content = re.sub(r"[^.!?]*" + escaped + r"[^.!?]*[.!?]", "", content, count=1)
             except ValueError:
                 pass
     if len(hallucinated_prices) >= 3:
@@ -407,7 +408,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         issues.append(f"Too many hallucinated prices ({len(hallucinated_prices)}), marking as draft")
 
     # Check for fabricated URLs (GPT sometimes adds them despite instructions)
-    url_pattern = re.findall(r'https?://[^\s\)]+', content)
+    url_pattern = re.findall(r"https?://[^\s\)]+", content)
     allowed_domains = ["r2.dev", "techpawz.com", "googlesyndication.com"]
     for url in url_pattern:
         if not any(d in url for d in allowed_domains):
@@ -430,18 +431,18 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
 
     # Remove empty H2 sections (GPT writes "Currently there are no..." filler)
     empty_patterns = [
-        r'## [^\n]+\n+(?:Currently,? there are no|No specific|There are no specific|No data available|This section)[^\n]*(?:\n(?!## |<div|<script)[^\n]*)*',
+        r"## [^\n]+\n+(?:Currently,? there are no|No specific|There are no specific|No data available|This section)[^\n]*(?:\n(?!## |<div|<script)[^\n]*)*",
     ]
     for ep in empty_patterns:
-        content = re.sub(ep, '', content, flags=re.IGNORECASE)
+        content = re.sub(ep, "", content, flags=re.IGNORECASE)
 
         # Check for fabricated relative links (GPT invents /posts/slug/ links)
-    fake_link_pattern = re.findall(r'\[([^\]]+)\]\(/posts/([^)]+)/\)', content)
+    fake_link_pattern = re.findall(r"\[([^\]]+)\]\(/posts/([^)]+)/\)", content)
     if fake_link_pattern:
         import sqlite3 as _sql
         _db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "travel-en.db")
         _conn = _sql.connect(_db)
-        _published_slugs = set(r[0] for r in _conn.execute("SELECT DISTINCT post_slug FROM entity_links WHERE published = 1").fetchall())
+        _published_slugs = {r[0] for r in _conn.execute("SELECT DISTINCT post_slug FROM entity_links WHERE published = 1").fetchall()}
         _conn.close()
         for label, slug in fake_link_pattern:
             if slug.rstrip("/") not in _published_slugs:
@@ -450,7 +451,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
                 issues.append(f"Removed fabricated link: {fake_md[:80]}")
 
     # Check minimum H2 sections
-    h2_count = len(re.findall(r'^## ', content, re.MULTILINE))
+    h2_count = len(re.findall(r"^## ", content, re.MULTILINE))
     if h2_count < 3:
         issues.append(f"Only {h2_count} H2 sections (minimum 3)")
         is_draft = True
@@ -473,7 +474,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
 
 </div>
 """
-    if 'etap-disclaimer-card' not in content:
+    if "etap-disclaimer-card" not in content:
         content = content + disclaimer
 
     return content, issues, is_draft

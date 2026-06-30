@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""
-CUAP 백그라운드 상품 수집기
+"""CUAP 백그라운드 상품 수집기
 - 매시간 scheduler.py에서 호출
 - 캐시 없는 키워드 우선 수집 (시간당 최대 5개 키워드)
 - 쿠팡 API 시간당 6회 한도 준수
 - 전체 키워드 캐시 완료 시 자동 슬립
 """
-import os, sys, sqlite3, logging, time
+import logging
+import sqlite3
+import sys
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -14,7 +16,10 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(BASE_DIR))
 
 from pipelines.curation.collector import (
-    _check_rate_limit, _search_api, _log_api_call, _generate_keyword_variants
+    _check_rate_limit,
+    _generate_keyword_variants,
+    _log_api_call,
+    _search_api,
 )
 from pipelines.curation.keywords import KEYWORD_MAP
 
@@ -26,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_cached_keywords() -> dict:
-    """keyword → 최신 collected_at 매핑 반환"""
+    """Keyword → 최신 collected_at 매핑 반환"""
     conn = sqlite3.connect(DB_PATH)
     rows = conn.execute(
         "SELECT keyword, MAX(collected_at) FROM products GROUP BY keyword"

@@ -1,14 +1,13 @@
 """시군구 분산 검증 — area_codes 가중치 dry-run"""
-import sys, os
 
 # area_codes.py 직접 로드
-_area_codes_path = '/Users/twinssn/Projects/5000/pipelines/travel/area_codes.py'
+_area_codes_path = "/Users/twinssn/Projects/5000/pipelines/travel/area_codes.py"
 _ns = {}
-with open(_area_codes_path, 'r', encoding='utf-8') as _f:
-    exec(compile(_f.read(), _area_codes_path, 'exec'), _ns)
+with open(_area_codes_path, encoding="utf-8") as _f:
+    exec(compile(_f.read(), _area_codes_path, "exec"), _ns)
 
-get_weighted_random_sigungu = _ns['get_weighted_random_sigungu']
-FOOD_AREA_SIGUNGU_WEIGHTED = _ns['FOOD_AREA_SIGUNGU_WEIGHTED']
+get_weighted_random_sigungu = _ns["get_weighted_random_sigungu"]
+FOOD_AREA_SIGUNGU_WEIGHTED = _ns["FOOD_AREA_SIGUNGU_WEIGHTED"]
 
 from collections import Counter
 
@@ -32,8 +31,8 @@ for name, cnt in dist.most_common(15):
     print(f"  {name:<12} {bar} ({cnt}회)")
 
 # 검증
-gangneung_cnt = sum(1 for r in results if r == '강릉시')
-jangsu_cnt    = sum(1 for r in results if r == '장수군')
+gangneung_cnt = sum(1 for r in results if r == "강릉시")
+jangsu_cnt    = sum(1 for r in results if r == "장수군")
 total_weight  = sum(x[3] for x in FOOD_AREA_SIGUNGU_WEIGHTED)
 
 print(f"\n강릉시(가중치3): {gangneung_cnt}/500 → {'⚠️ 과다' if gangneung_cnt > 30 else '✅ 정상'}")

@@ -1,6 +1,6 @@
+import logging
 import os
 import sys
-import logging
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -8,23 +8,43 @@ sys.path.insert(0, os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
 os.chdir(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"))
 
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
-from shared.content_store import init_db, get_today_count, register_images, register_places, is_place_used
-from shared.publisher import publish, get_blog_config
-from pipelines.travel.fetcher import fetch_camping, fetch_korservice, fetch_korservice_heritage, fetch_wellness, fetch_heritage, fetch_festival, fetch_food, fetch_course, fetch_random
+from pipelines.travel.fetcher import (
+    fetch_camping,
+    fetch_course,
+    fetch_festival,
+    fetch_food,
+    fetch_heritage,
+    fetch_korservice,
+    fetch_korservice_heritage,
+    fetch_random,
+    fetch_wellness,
+)
 from pipelines.travel.writer import generate_content
+from shared.content_store import (
+    get_today_count,
+    init_db,
+    is_place_used,
+    register_images,
+    register_places,
+)
+from shared.publisher import get_blog_config, publish
 
 logger = logging.getLogger(__name__)
 
 try:
     from shared.telegram_notifier import send_error as tg_error
 except ImportError:
-    tg_error = lambda *a, **k: None
+    def tg_error(*a, **k) -> None:
+        return None
 
 import random
+
 from shared.validators import sanitize_title
+
 
 # ── travel pipeline 전용 중복체크 (content.db/publish_ledger 기반) ──
 def _travel_source_exists(blog_id, source_id):
@@ -48,7 +68,7 @@ def _travel_source_exists(blog_id, source_id):
         logger.warning(f"_travel_source_exists 오류: {_e}")
         return False
 
-def _travel_title_similar_exists(blog_id, title):
+def _travel_title_similar_exists(blog_id, title) -> bool | None:
     """publish_ledger에서 유사 제목 중복 확인 (정확 일치 + 80% 유사도)"""
     if not title:
         return False
@@ -81,9 +101,8 @@ def _travel_title_similar_exists(blog_id, title):
         return False
 
 
-def _travel_sigungu_recently_published(blog_id, sigungu, days=7):
-    """
-    최근 days일 내 동일 blog_id + sigungu 조합이
+def _travel_sigungu_recently_published(blog_id, sigungu, days=7) -> bool | None:
+    """최근 days일 내 동일 blog_id + sigungu 조합이
     published 상태로 존재하면 True 반환.
 
     우선순위:
@@ -97,9 +116,10 @@ def _travel_sigungu_recently_published(blog_id, sigungu, days=7):
     if not sigungu or not sigungu.strip():
         return False
 
-    from datetime import timedelta
-    from shared.db_paths import ARTICLES_DB
     import sqlite3 as _sq
+    from datetime import timedelta
+
+    from shared.db_paths import ARTICLES_DB
 
     cutoff = (datetime.now() - timedelta(days=days)).isoformat()
 
@@ -371,7 +391,8 @@ def run(cfg):
     # 발행 후 섹션 인덱스 가드 (2026-05-01 추가)
     # content/posts/index.md 폭탄 방지 — 발견 시 로그 경고
     try:
-        import subprocess, logging
+        import logging
+        import subprocess
         _logger = logging.getLogger(__name__)
         _guard = "/Users/twinssn/Projects/TAP/scripts/check_section_index.sh"
         _r = subprocess.run(["bash", _guard], capture_output=True, text=True, timeout=10)

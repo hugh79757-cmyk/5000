@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """nomad 데이터 주간 수집기 - 코워킹/기후/카페 (Overpass + Open-Meteo)
-Numbeo는 rate-limit 심해서 별도 실행"""
-import sqlite3, requests, time, re, logging
+Numbeo는 rate-limit 심해서 별도 실행
+"""
+import logging
+import sqlite3
+import time
+
+import requests
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -25,7 +30,7 @@ def _geocode(city, country):
 
 
 def _overpass_query(lat, lon, radius, tags):
-    filters = "\n".join([f'node[{t}](around:{radius},{lat},{lon});way[{t}](around:{radius},{lat},{lon});'
+    filters = "\n".join([f"node[{t}](around:{radius},{lat},{lon});way[{t}](around:{radius},{lat},{lon});"
                          for t in tags])
     query = f"[out:json][timeout:60];({filters});out body;"
     try:
@@ -41,9 +46,9 @@ def _overpass_query(lat, lon, radius, tags):
     return []
 
 
-def collect_coworking(conn, cities):
+def collect_coworking(conn, cities) -> None:
     logger.info("=== 코워킹 수집 시작 ===")
-    existing = set(r[0] for r in conn.execute("SELECT DISTINCT city FROM coworking_spaces").fetchall())
+    existing = {r[0] for r in conn.execute("SELECT DISTINCT city FROM coworking_spaces").fetchall()}
     added = 0
     for city, country in cities:
         if city in existing:
@@ -75,9 +80,9 @@ def collect_coworking(conn, cities):
     logger.info(f"코워킹 신규: {added}건")
 
 
-def collect_cafes(conn, cities):
+def collect_cafes(conn, cities) -> None:
     logger.info("=== 카페 수집 시작 ===")
-    existing = set(r[0] for r in conn.execute("SELECT DISTINCT city FROM nomad_cafes").fetchall())
+    existing = {r[0] for r in conn.execute("SELECT DISTINCT city FROM nomad_cafes").fetchall()}
     added = 0
     for city, country in cities:
         if city in existing:
@@ -109,9 +114,9 @@ def collect_cafes(conn, cities):
     logger.info(f"카페 신규: {added}건")
 
 
-def collect_climate(conn, cities):
+def collect_climate(conn, cities) -> None:
     logger.info("=== 기후 수집 시작 ===")
-    existing = set(r[0] for r in conn.execute("SELECT DISTINCT city FROM nomad_climate").fetchall())
+    existing = {r[0] for r in conn.execute("SELECT DISTINCT city FROM nomad_climate").fetchall()}
     added = 0
     for city, country in cities:
         if city in existing:
@@ -149,7 +154,7 @@ def collect_climate(conn, cities):
     logger.info(f"기후 신규: {added}건")
 
 
-def main():
+def main() -> None:
     conn = sqlite3.connect(DB)
     conn.execute("PRAGMA journal_mode=WAL")
     cities = conn.execute("SELECT DISTINCT city, country FROM nomad_topics ORDER BY priority").fetchall()

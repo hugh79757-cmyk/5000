@@ -4,15 +4,15 @@ coupang_car.py를 기반으로 시니어 복지 카테고리 전용으로 구현
 고가 상품 우선 정렬 — 수수료 극대화.
 """
 
-import hmac
 import hashlib
-import time
-import random
-import requests
-import os
+import hmac
 import logging
+import os
+import random
+import time
 from urllib.parse import urlencode
-from typing import List, Optional
+
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -79,12 +79,9 @@ EXCLUDE_WORDS = ["코카콜라", "콜라", "사이다", "음료수", "과자", "
                  "커피",
                  "차"]
 
-def _is_relevant(product_name, category):
+def _is_relevant(product_name, category) -> bool:
     name_lower = product_name.lower()
-    for word in EXCLUDE_WORDS:
-        if word in name_lower:
-            return False
-    return True
+    return all(word not in name_lower for word in EXCLUDE_WORDS)
 
 
 class CoupangSenior:
@@ -92,20 +89,20 @@ class CoupangSenior:
 
     BASE_URL = "https://api-gateway.coupang.com"
 
-    def __init__(self):
-        self.access_key = os.getenv('COUPANG_ACCESS_KEY', '')
-        self.secret_key = os.getenv('COUPANG_SECRET_KEY', '')
-        self.partner_id = os.getenv('COUPANG_PARTNER_ID', '')
+    def __init__(self) -> None:
+        self.access_key = os.getenv("COUPANG_ACCESS_KEY", "")
+        self.secret_key = os.getenv("COUPANG_SECRET_KEY", "")
+        self.partner_id = os.getenv("COUPANG_PARTNER_ID", "")
 
     def is_configured(self) -> bool:
         return bool(self.access_key and self.secret_key and self.partner_id)
 
     def _generate_signature(self, method: str, url_path: str, query_string: str = "") -> dict:
-        datetime_now = time.strftime('%y%m%dT%H%M%SZ', time.gmtime())
+        datetime_now = time.strftime("%y%m%dT%H%M%SZ", time.gmtime())
         message = datetime_now + method + url_path + query_string
         signature = hmac.new(
-            self.secret_key.encode('utf-8'),
-            message.encode('utf-8'),
+            self.secret_key.encode("utf-8"),
+            message.encode("utf-8"),
             hashlib.sha256
         ).hexdigest()
         authorization = f"CEA algorithm=HmacSHA256, access-key={self.access_key}, signed-date={datetime_now}, signature={signature}"
@@ -125,10 +122,10 @@ class CoupangSenior:
             )
             if response.status_code == 200:
                 data = response.json()
-                return data.get('data', {}).get('productData', [])
+                return data.get("data", {}).get("productData", [])
             return []
         except Exception as e:
-            logger.error(f"쿠팡 검색 실패 [{keyword}]: {e}")
+            logger.exception(f"쿠팡 검색 실패 [{keyword}]: {e}")
             return []
 
     def generate_affiliate_link(self, product_id) -> str:
@@ -146,15 +143,15 @@ class CoupangSenior:
             )
             if response.status_code == 200:
                 data = response.json()
-                links = data.get('data', [])
+                links = data.get("data", [])
                 if links:
-                    short = links[0].get('shortenUrl', '')
-                    if short and '/a/' in short:
+                    short = links[0].get("shortenUrl", "")
+                    if short and "/a/" in short:
                         return short
             logger.warning(f"deeplink 변환 실패: productId={product_id}")
             return ""
         except Exception as e:
-            logger.error(f"제휴 링크 생성 실패: {e}")
+            logger.exception(f"제휴 링크 생성 실패: {e}")
             return ""
 
     def get_senior_product_links(self, category: str = "", count: int = 2) -> str:
@@ -175,18 +172,18 @@ class CoupangSenior:
 
             results = self.search_products(search_term, limit=5)
             # 연관성 필터 적용
-            results = [p for p in results if _is_relevant(p.get('productName', ''), category)]
+            results = [p for p in results if _is_relevant(p.get("productName", ""), category)]
             if results:
                 product = results[0]
-                name = product.get('productName', search_term)[:30]
-                price = product.get('productPrice', 0)
-                product_url = product.get('productUrl', '')
+                name = product.get("productName", search_term)[:30]
+                price = product.get("productPrice", 0)
+                product_url = product.get("productUrl", "")
 
                 # 이미 affiliate URL이면 그대로 사용
-                if product_url and 'link.coupang.com' in product_url:
+                if product_url and "link.coupang.com" in product_url:
                     affiliate_url = product_url
                 else:
-                    product_id = product.get('productId', '')
+                    product_id = product.get("productId", "")
                     if not product_id:
                         continue
                     affiliate_url = self.generate_affiliate_link(product_id)

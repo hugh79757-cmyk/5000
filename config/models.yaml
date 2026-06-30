@@ -1,12 +1,12 @@
 default:
-  provider: mimo
-  model: mimo-v2.5
+  provider: deepseek
+  model: deepseek-chat
   temperature: 0.5
 
 fallback:
-  provider: upstage
-  model: solar-pro3
-  temperature: 0.7
+  provider: mimo
+  model: mimo-v2.5
+  temperature: 0.5
 
 economy:
   provider: mimo
@@ -26,3 +26,6 @@ providers:
   mimo:
     api_key_env: MIMO_API_KEY
     base_url: https://api.xiaomimimo.com/v1
+  deepseek:
+    api_key_env: DEEPSEEK_API_TOKEN
+    base_url: https://api.deepseek.com/v1

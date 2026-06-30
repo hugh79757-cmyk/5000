@@ -1,6 +1,7 @@
-import os
-import requests
 import logging
+import os
+
+import requests
 from dotenv import load_dotenv
 
 # 중앙 env 파일 로드
@@ -15,7 +16,7 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 API_URL = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage"
 
 
-def send(message, parse_mode="HTML"):
+def send(message, parse_mode="HTML") -> bool | None:
     if not BOT_TOKEN or not CHAT_ID:
         logger.warning("Telegram credentials missing")
         return False
@@ -30,7 +31,7 @@ def send(message, parse_mode="HTML"):
         logger.warning("Telegram send failed: " + str(resp.status_code))
         return False
     except requests.RequestException as e:
-        logger.error(f"[TELEGRAM_ERROR] Request failed: {e}")
+        logger.exception(f"[TELEGRAM_ERROR] Request failed: {e}")
         return False
 
 
@@ -46,14 +47,15 @@ def send_error(blog_id, stage, error_msg):
     domain = ""
     repo = ""
     try:
-        import yaml
         from pathlib import Path
+
+        import yaml
         config_dir = Path(__file__).parent.parent / "config"
         all_blogs = []
         blogs_d = config_dir / "blogs.d"
         if blogs_d.is_dir():
             for fpath in sorted(blogs_d.glob("*.yaml")):
-                with open(fpath, "r", encoding="utf-8") as yf:
+                with open(fpath, encoding="utf-8") as yf:
                     data = yaml.safe_load(yf) or {}
                 all_blogs.extend(data.get("blogs", []))
         for blog in all_blogs:
@@ -61,8 +63,8 @@ def send_error(blog_id, stage, error_msg):
                 domain = blog.get("domain", "")
                 repo = blog.get("repo", "")
                 break
-    except (IOError, yaml.YAMLError) as e:
-        logger.error(f"[CONFIG_ERROR] Failed to load blogs.d: {e}")
+    except (OSError, yaml.YAMLError) as e:
+        logger.exception(f"[CONFIG_ERROR] Failed to load blogs.d: {e}")
 
     text = "🚨 <b>발행 오류</b>\n"
     text += "<b>블로그:</b> " + blog_id + "\n"

@@ -1,10 +1,9 @@
 """ETAP pipeline — 영문 travel 블로그 자동 발행."""
 import logging
 import os
-import logging
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
 
 KST = timezone(timedelta(hours=9))
 logger = logging.getLogger(__name__)
@@ -13,21 +12,31 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from dotenv import load_dotenv
+
 load_dotenv(PROJECT_ROOT / ".env")
 
-from pipelines.etap.topic_manager import pick_topic, mark_published, check_exhaustion, send_telegram
+import re  # viator
+
+from pipelines.etap.image_fetcher import fetch_body_images, fetch_city_image
+from pipelines.etap.post_processor import (
+    insert_adsense,
+    insert_cross_sell_block,
+    insert_product_cards,
+)
+from pipelines.etap.quality_guard import postprocess_content, send_alert
+from pipelines.etap.topic_manager import check_exhaustion, mark_published, pick_topic
 from pipelines.etap.writer import generate_city_guide
-from pipelines.etap.quality_guard import postprocess_content, send_alert, make_draft
-from pipelines.etap.image_fetcher import fetch_city_image, fetch_body_images
-from shared.entity_linker import inject_internal_links, register_entity, mark_entity_published, build_cross_sell_html
-from pipelines.etap.post_processor import insert_adsense, insert_product_cards, insert_cross_sell_block
+from shared.entity_linker import (
+    build_cross_sell_html,
+    inject_internal_links,
+    mark_entity_published,
+    register_entity,
+)
 
 
-
-import re as re  # viator
 def _get_viator_products(city: str, limit: int = 5, blog_id: str = "") -> list:
     """viator_tours 테이블에서 해당 도시 투어 상품 조회 + 어필리에이트 파라미터 추가."""
-    import sqlite3, os, re
+    import sqlite3
     from pathlib import Path
     db_path = Path(__file__).parent.parent.parent / "data" / "travel-en.db"
     pid  = os.getenv("VIATOR_PID", "")
@@ -86,8 +95,7 @@ def _insert_body_images(content, images):
         img = images[inserted]
         img_md = f"\n![Photo]({img['url']})\n*{img['credit']}*\n"
         pos = idx + offset + 2  # H2 다음 줄 + 한 줄 여유
-        if pos > len(lines):
-            pos = len(lines)
+        pos = min(pos, len(lines))
         lines.insert(pos, img_md)
         offset += 1
         inserted += 1
@@ -205,7 +213,7 @@ def run(cfg: dict) -> dict:
 
 
     # 고갈 체크
-    can_pub, remaining = check_exhaustion("topics", blog_id)
+    can_pub, _remaining = check_exhaustion("topics", blog_id)
     if not can_pub:
         return {"status": "exhausted", "remaining": 0}
 
@@ -414,6 +422,7 @@ _BLOG_CONTENT_RULES = {
 }
 def run(cfg: dict) -> dict:
     import importlib
+
     from pipelines.etap.topic_manager import check_daily_quota
     blog_id = cfg.get("id", "")
     max_daily = cfg.get("daily_quota", 5)
@@ -438,12 +447,9 @@ def run(cfg: dict) -> dict:
     try:
         mod = importlib.import_module(module_path)
         fn  = getattr(mod, func_name)
-        if blog_id == "tour-hugo":
-            result = fn(cfg, count=count)
-        else:
-            result = fn(count=count)
+        result = fn(cfg, count=count) if blog_id == "tour-hugo" else fn(count=count)
         ok = result if isinstance(result, int) else (1 if result else 0)
         return {"success": ok > 0, "published": ok}
     except Exception as e:
-        logger.error(f"[ETAP] {blog_id} 실패: {e}")
+        logger.exception(f"[ETAP] {blog_id} 실패: {e}")
         return {"success": False, "reason": str(e)}
