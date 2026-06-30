@@ -26,21 +26,19 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 ## Current Phase
 
-**Phase 1 — Complete ✓**
+**Phase 2 — Complete ✓**
 
-- ✓ Tooling infra: pyproject.toml, tests/, CI workflow
-- ✓ Unit tests: 42 tests across validators, humanizer, telegram_notifier
-- ✓ Linting: ruff passes clean
-- ✓ Type checking: mypy passes
-- ✓ Python 3.14 compat: check_package_imports() removed
-- ✓ CI: ci.yml with ruff → mypy → pytest
+- ✓ Dispatcher registry: elif chain → dynamic `_resolve_pipeline()` + integration test
+- ✓ GAP pipeline removed (no active blogs)
+- ✓ Publisher decomposition: `shared/publishers/` (hugo_writer, deploy, content_enhancer)
+- ✓ 197 backup files deleted, cleanup script added
 
 ## Progress
 
 | Phase | Status | Plans | Progress |
 |-------|--------|-------|----------|
 | 1     | ✓      | 2/2   | 100%     |
-| 2     | ○      | 0/3   | 0%       |
+| 2     | ✓      | 3/3   | 100%     |
 | 3     | ○      | 0/3   | 0%       |
 
 ## Active Workspace
