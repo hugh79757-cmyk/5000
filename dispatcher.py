@@ -300,7 +300,8 @@ def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):
 
 def _run_tap_subprocess(cfg):
     """TAP 파이프라인을 subprocess로 완전 격리 실행"""
-    import json, tempfile
+    import json
+    import tempfile
     tap_root = "/Users/twinssn/Projects/TAP"
     tap_python = os.path.join(tap_root, "venv", "bin", "python3")
     if not os.path.exists(tap_python):
