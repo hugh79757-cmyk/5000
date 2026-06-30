@@ -2,6 +2,7 @@
 blog_id를 받아 해당 pipeline의 run(cfg)를 호출하고,
 결과를 publish_ledger에 기록한다.
 """
+import importlib
 import logging
 import os
 import sqlite3
@@ -252,169 +253,100 @@ def _run_stap(stap_name, cfg):
         return {"success": False, "reason": "stap_error"}
 
 
-# ─── 파이프라인 실행 ───
+# ─── 파이프라인 레지스트리 ───
 
-def _run_pipeline(cfg):
-    """Pipeline 종류에 따라 해당 모듈의 run(cfg)를 호출"""
-    pipeline = cfg.get("pipeline", "")
-    blog_id = cfg["id"]
+_ETAP_BLOG_EXCEPTIONS = {
+    "flights-hugo": "pipelines.etap.flight_pipeline",
+}
 
+def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):
+    """Pipeline 모듈을 동적으로 찾아 실행"""
     if pipeline == "etap":
-        if blog_id == "flights-hugo":
-            from pipelines.etap.flight_pipeline import run
-        elif blog_id == "cruise-hugo":
-            from pipelines.etap.cruise_pipeline import run
-        elif blog_id == "luxury-hugo":
-            from pipelines.etap.luxury_pipeline import run
-        elif blog_id == "citytours-hugo":
-            from pipelines.etap.citytours_pipeline import run
-        elif blog_id == "watertours-hugo":
-            from pipelines.etap.watertours_pipeline import run
-        elif blog_id == "hiking-hugo":
-            from pipelines.etap.hiking_pipeline import run
-        elif blog_id == "escape-hugo":
-            from pipelines.etap.escape_pipeline import run
-        elif blog_id == "extreme-hugo":
-            from pipelines.etap.extreme_pipeline import run
-        elif blog_id == "nightlife-hugo":
-            from pipelines.etap.nightlife_pipeline import run
-        elif blog_id == "ghost-hugo":
-            from pipelines.etap.ghost_pipeline import run
-        elif blog_id == "layover-hugo":
-            from pipelines.etap.layover_pipeline import run
-        elif blog_id == "nomad-hugo":
-            from pipelines.etap.nomad_pipeline import run
-        elif blog_id == "airlines-hugo":
-            from pipelines.etap.airlines_pipeline import run
-        elif blog_id == "adventure-hugo":
-            from pipelines.etap.adventure_pipeline import run
-        elif blog_id == "airports-hugo":
-            from pipelines.etap.airports_pipeline import run
-        elif blog_id == "bus-hugo":
-            from pipelines.etap.bus_pipeline import run
-        elif blog_id == "culture-hugo":
-            from pipelines.etap.culture_pipeline import run
-        elif blog_id == "daytrips-hugo":
-            from pipelines.etap.daytrips_pipeline import run
-        elif blog_id == "deals-hugo":
-            from pipelines.etap.deals_pipeline import run
-        elif blog_id == "dining-hugo":
-            from pipelines.etap.dining_pipeline import run
-        elif blog_id == "esim-hugo":
-            from pipelines.etap.esim_pipeline import run
-        elif blog_id == "eurail-hugo":
-            from pipelines.etap.eurail_pipeline import run
-        elif blog_id == "ferry-hugo":
-            from pipelines.etap.ferry_pipeline import run
-        elif blog_id == "foodtour-hugo":
-            from pipelines.etap.foodtour_pipeline import run
-        elif blog_id == "michelin-hugo":
-            from pipelines.etap.michelin_pipeline import run
-        elif blog_id == "multiday-hugo":
-            from pipelines.etap.multiday_pipeline import run
-        elif blog_id == "nature-hugo":
-            from pipelines.etap.nature_pipeline import run
-        elif blog_id == "phototour-hugo":
-            from pipelines.etap.phototour_pipeline import run
-        elif blog_id == "tours-hugo":
-            from pipelines.etap.tours_pipeline import run
-        elif blog_id == "trains-hugo":
-            from pipelines.etap.trains_pipeline import run
-        elif blog_id == "transfers-hugo":
-            from pipelines.etap.transfers_pipeline import run
-        elif blog_id == "visa-hugo":
-            from pipelines.etap.visa_pipeline import run
-        elif blog_id == "visafree-hugo":
-            from pipelines.etap.visafree_pipeline import run
-        elif blog_id == "walking-hugo":
-            from pipelines.etap.walking_pipeline import run
-        elif blog_id == "watersports-hugo":
-            from pipelines.etap.watersports_pipeline import run
-        elif blog_id == "watertours-hugo":
-            from pipelines.etap.watertours_pipeline import run
+        if blog_id in _ETAP_BLOG_EXCEPTIONS:
+            module_path = _ETAP_BLOG_EXCEPTIONS[blog_id]
         else:
-            from pipelines.etap.pipeline import run
-        # run(cfg) 또는 run() 호환
+            stem = blog_id.replace("-hugo", "")
+            module_path = f"pipelines.etap.{stem}_pipeline"
+        try:
+            mod = importlib.import_module(module_path)
+        except ModuleNotFoundError:
+            logger.warning(f"[registry] {blog_id}: {module_path} not found, falling back to etap default")
+            mod = importlib.import_module("pipelines.etap.pipeline")
+        run = mod.run
         import inspect
         if "cfg" in inspect.signature(run).parameters or len(inspect.signature(run).parameters) > 0:
             return run(cfg)
         return run()
-    if pipeline == "curation":
-        from pipelines.curation.pipeline import run
-        return run(cfg)
-    if pipeline == "car":
-        from pipelines.car.pipeline import run
-        return run(cfg)
 
-    if pipeline == "travel":
-        from pipelines.travel.pipeline import run
-        return run(cfg)
-
-    if pipeline == "senior":
-        from pipelines.senior.pipeline import run
-        return run(cfg)
-
-    if pipeline == "gap":
-        from pipelines.gap.pipeline import run
-        return run(cfg)
-
-    if pipeline == "tap":
-        import json
-        import os
-        import subprocess
-        import tempfile
-        tap_root = "/Users/twinssn/Projects/TAP"
-        tap_python = os.path.join(tap_root, "venv", "bin", "python3")
-        if not os.path.exists(tap_python):
-            tap_python = sys.executable
-        runner_code = (
-            "import sys, os; sys.path.insert(0, " + repr(tap_root) + "); "
-            "os.chdir(" + repr(tap_root) + "); "
-            "from dotenv import load_dotenv; "
-            "load_dotenv(os.path.join(" + repr(tap_root) + ", '.env'), override=True); "
-            "from app import run_publish; "
-            "result = run_publish(); "
-            "import json; print(json.dumps(result if isinstance(result, dict) else {'success': bool(result)}))"
-        )
-        runner_path = os.path.join(tempfile.gettempdir(), f"tap_runner_{uuid.uuid4().hex}.py")
-        with open(runner_path, "w") as _f:
-            _f.write(runner_code)
-        try:
-            proc = subprocess.run(
-                [tap_python, runner_path],
-                capture_output=True, text=True, timeout=600, cwd=tap_root
-            )
-            if proc.returncode != 0:
-                logger.error(f"TAP subprocess failed: {proc.stderr[-300:]}")
-                return {"success": False, "reason": "tap_subprocess_error"}
-            out = proc.stdout.strip().split("\n")[-1]
-            if out:
-                try:
-                    return json.loads(out)
-                except Exception:
-                    pass
-            return {"success": True}
-        except subprocess.TimeoutExpired:
-            logger.exception("TAP timeout (600s)")
-            return {"success": False, "reason": "tap_timeout"}
-        except Exception as e:
-            logger.exception(f"TAP error: {e}")
-            return {"success": False, "reason": "tap_error"}
-    elif pipeline == "rap":
-        from pipelines.rap.pipeline import run
-        return run(cfg)
-
-    elif pipeline == "stock":
+    if pipeline == "stock":
         stap_name = STAP_PIPELINE_MAP.get(blog_id)
         if stap_name:
             return _run_stap(stap_name, cfg)
         logger.error(f"STAP 매핑 없음: {blog_id}")
         return {"success": False, "reason": "unknown_stap_blog"}
 
-    else:
+    if pipeline == "tap":
+        return _run_tap_subprocess(cfg)
+
+    module_path = f"pipelines.{pipeline}.pipeline"
+    try:
+        mod = importlib.import_module(module_path)
+    except ModuleNotFoundError:
         logger.error(f"Unknown pipeline: {pipeline}")
         _tg_error(blog_id, "pipeline", f"Unknown pipeline: {pipeline}")
         return {"success": False, "reason": "unknown_pipeline"}
+    return mod.run(cfg)
+
+
+def _run_tap_subprocess(cfg):
+    """TAP 파이프라인을 subprocess로 완전 격리 실행"""
+    import json, tempfile
+    tap_root = "/Users/twinssn/Projects/TAP"
+    tap_python = os.path.join(tap_root, "venv", "bin", "python3")
+    if not os.path.exists(tap_python):
+        tap_python = sys.executable
+    runner_code = (
+        "import sys, os; sys.path.insert(0, " + repr(tap_root) + "); "
+        "os.chdir(" + repr(tap_root) + "); "
+        "from dotenv import load_dotenv; "
+        "load_dotenv(os.path.join(" + repr(tap_root) + ", '.env'), override=True); "
+        "from app import run_publish; "
+        "result = run_publish(); "
+        "import json; print(json.dumps(result if isinstance(result, dict) else {'success': bool(result)}))"
+    )
+    runner_path = os.path.join(tempfile.gettempdir(), f"tap_runner_{uuid.uuid4().hex}.py")
+    with open(runner_path, "w") as _f:
+        _f.write(runner_code)
+    try:
+        proc = subprocess.run(
+            [tap_python, runner_path],
+            capture_output=True, text=True, timeout=600, cwd=tap_root
+        )
+        if proc.returncode != 0:
+            logger.error(f"TAP subprocess failed: {proc.stderr[-300:]}")
+            return {"success": False, "reason": "tap_subprocess_error"}
+        out = proc.stdout.strip().split("\n")[-1]
+        if out:
+            try:
+                return json.loads(out)
+            except Exception:
+                pass
+        return {"success": True}
+    except subprocess.TimeoutExpired:
+        logger.exception("TAP timeout (600s)")
+        return {"success": False, "reason": "tap_timeout"}
+    except Exception as e:
+        logger.exception(f"TAP error: {e}")
+        return {"success": False, "reason": "tap_error"}
+
+
+# ─── 파이프라인 실행 ───
+
+def _run_pipeline(cfg):
+    """Pipeline 종류에 따라 해당 모듈의 run(cfg)를 호출"""
+    pipeline = cfg.get("pipeline", "")
+    blog_id = cfg["id"]
+    return _resolve_pipeline(blog_id, pipeline, cfg)
 
 
 
