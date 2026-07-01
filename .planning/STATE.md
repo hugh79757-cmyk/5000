@@ -2,19 +2,19 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
-status: complete
-last_updated: "2026-07-01T19:00:00.000Z"
+status: active
+last_updated: "2026-07-01T20:00:00.000Z"
 progress:
-  total_phases: 7
-  completed_phases: 7
-  total_plans: 18
-  completed_plans: 18
-  percent: 100
+  total_phases: 9
+  completed_phases: 8
+  total_plans: 20
+  completed_plans: 19
+  percent: 95
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — All 7 phases done (milestone v1.0 → v1.1)
+**Status:** v1.1 — 8 phases done, Phase 8 pending (milestone v1.0 → v1.1)
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -29,7 +29,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 **Core value:** Pipelines run reliably with clear errors when they don't
-**Current focus:** Phase 5 — Post-Stabilization Enhancement
+**Current focus:** Phase 9 — AI-Tell Pattern Enrichment
 
 ## Current Phase
 
@@ -63,11 +63,17 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - ✓ B: 10 test migration to tests/
 - ✓ G1: _enrich_title keyword-first
 - ✓ G2: JSON-LD schema markup
-- ✓ G3: Regional hub pages → deferred to Phase 8
 - ✓ G4: Travel blog internal linking (related cards)
 - ✓ G5: Practical info fields (13개) in AI prompt
 - ✓ 3 bugs fixed: _clean_body DOTALL, _build_schema_json tags type, pydantic-core version
 - ✓ 48/48 tests pass (validators + post_validator)
+
+**Phase 9 — AI-Tell Pattern Enrichment (Complete ✓)**
+
+- ✓ 09-01: humanizer.py `_SYSTEM_PROMPT` — B/E/H/I/J계열 신규 + A계열 보강
+- ✓ _SYSTEM_PROMPT 10대 카테고리(A~J) 전면 커버
+- ✓ im-not-ai ai-tell-taxonomy.md v2.0 기준 16개 패턴 추가 (S1×5, S2×11)
+- ✓ 기존 테스트 65/65 통과
 
 ## Progress
 
@@ -79,7 +85,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 | 4     | ✓      | 2/2   | 100%     |
 | 5     | ✓      | 3/3   | 100%     |
 | 6     | ✓      | 10/10 | 100%     |
-| 7     | ✓      | 9/10* | 90%*     |
+| 7     | ✓      | 9/9   | 100%     |
+| 8     | 🔄     | 2/2   | 대기      |
+| 9     | ✓      | 1/1   | 100%     |
 
 ## Active Workspace
 
