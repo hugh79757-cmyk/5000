@@ -118,9 +118,34 @@
 
 ---
 
+## Phase 10: Blowfish Engagement Optimization — tour1.rotcha.kr
+
+**Goal:** Add Blowfish theme shortcodes (lead, figure, alert, badge, gallery, accordion, chart) to AI-generated camping articles to increase time-on-page and engagement
+**Mode:** mvp
+**Commit:** (pending)
+
+**Success Criteria:**
+1. First paragraph in new articles displays with larger lead styling via `{{< lead >}}`
+2. Images display with captions via `{{< figure >}}` (replacing bare `![alt](url)`)
+3. Pet policy and facility tips shown in `{{< alert >}}` callout boxes
+4. Camping type shown via `{{< badge >}}` inline badge next to camp name
+5. Consecutive images grouped into `{{< gallery >}}` shortcode
+6. Facility/amenity sections use `{{< accordion >}}` collapsible sections
+7. Campsite stats displayed as Chart.js radar/bar chart via `{{< chart >}}`
+8. Only new articles affected — existing published articles unchanged
+9. Hugo build succeeds without errors for travel-hugo
+
+**Plans:**
+1. **10-01** — P0 Post-processor: lead + figure shortcodes (hugo_writer.py)
+2. **10-02** — P1 AI Prompt: alert + badge shortcode instructions (travel.yaml)
+3. **10-03** — P2 Post-processor + Prompt: gallery + accordion (hugo_writer.py + travel.yaml)
+4. **10-04** — P3 Post-processor: chart shortcode via embedded data comment (pipeline + publisher)
+
+---
+
 ## Configuration
 
-**Granularity:** Coarse (3 phases) + Fix (1 phase) + Enhancement (2 phases)
+**Granularity:** Coarse (3 phases) + Fix (1 phase) + Enhancement (2 phases) + Optimization (1 phase)
 **Execution:** Parallel within phases
 **Mode:** Vertical MVP (each phase delivers end-to-end improvement)
 **Research:** Yes (before each phase)

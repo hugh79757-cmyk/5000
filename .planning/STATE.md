@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-07-01T20:00:00.000Z"
+last_updated: "2026-07-01T22:00:00.000Z"
 progress:
-  total_phases: 9
-  completed_phases: 8
-  total_plans: 20
-  completed_plans: 19
-  percent: 95
+  total_phases: 10
+  completed_phases: 9
+  total_plans: 24
+  completed_plans: 20
+  percent: 83
 ---
 
 # Project State: 5000
@@ -29,7 +29,7 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 **Core value:** Pipelines run reliably with clear errors when they don't
-**Current focus:** Phase 9 — AI-Tell Pattern Enrichment
+**Current focus:** Phase 10 — Blowfish Engagement Optimization
 
 ## Current Phase
 
@@ -75,6 +75,13 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - ✓ im-not-ai ai-tell-taxonomy.md v2.0 기준 16개 패턴 추가 (S1×5, S2×11)
 - ✓ 기존 테스트 65/65 통과
 
+**Phase 10 — Blowfish Engagement Optimization (🔲 Planned)**
+
+- 🔲 10-01: P0 Post-processor — lead + figure shortcodes (Wave 1)
+- 🔲 10-02: P1 AI Prompt — alert + badge shortcode instructions (Wave 1)
+- 🔲 10-03: P2 Gallery + accordion post-processor + prompt (Wave 2)
+- 🔲 10-04: P3 Chart shortcode via embedded data comment (Wave 3)
+
 ## Progress
 
 | Phase | Status | Plans | Progress |
@@ -88,6 +95,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 | 7     | ✓      | 9/9   | 100%     |
 | 8     | 🔄     | 2/2   | 대기      |
 | 9     | ✓      | 1/1   | 100%     |
+| 10    | 🔄     | 0/4   | 0%       |
 
 ## Active Workspace
 
