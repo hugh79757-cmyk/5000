@@ -116,6 +116,17 @@ tour1_camping:
     - "일반야영장" → {{< badge >}}일반야영장{{< /badge >}}
     - "자동차야영장" → {{< badge >}}오토캠핑{{< /badge >}}
 
+
+    [SHORTCODE — accordion]
+
+    아래 섹션을 accordion으로 접어서 가독성을 높이세요:
+
+    - "한눈에 비교" 섹션 → {{< accordion "{region} {theme} {count}곳 한눈에 비교" >}}내용{{< /accordion >}}
+    - "체크포인트" 또는 "참고사항" 섹션 → accordion 처리
+    - 마무리 부분 → accordion으로 접지 않음
+
+    accordion 라벨은 섹션 H2 제목을 그대로 사용하세요.
+
     '
   user: '아래 데이터를 바탕으로 캠핑·글램핑 블로그 글을 작성하세요.
 

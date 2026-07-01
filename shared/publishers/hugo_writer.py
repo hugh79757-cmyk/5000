@@ -164,6 +164,71 @@ def _apply_figure_shortcode(body_md: str) -> str:
     return "\n".join(result)
 
 
+def _apply_gallery_shortcode(body_md: str) -> str:
+    """Wrap 2+ consecutive {{< figure >}} blocks in {{< gallery >}}"""
+    if "{{< figure " not in body_md:
+        return body_md
+    lines = body_md.split("\n")
+    result = []
+    i = 0
+    while i < len(lines):
+        if lines[i].strip().startswith("{{< figure "):
+            fig_lines = [lines[i]]
+            i += 1
+            while i < len(lines) and lines[i].strip().startswith("{{< figure "):
+                fig_lines.append(lines[i])
+                i += 1
+            if len(fig_lines) >= 2:
+                result.append("{{< gallery >}}")
+                result.extend(fig_lines)
+                result.append("{{< /gallery >}}")
+            else:
+                result.extend(fig_lines)
+            continue
+        result.append(lines[i])
+        i += 1
+    return "\n".join(result)
+
+
+def _apply_accordion_shortcode(body_md: str) -> str:
+    """Wrap certain H2 sections (체크포인트, 준비사항) in {{< accordion >}}"""
+    lines = body_md.split("\n")
+    result = []
+    i = 0
+    collapse_patterns = ["체크포인트", "준비사항", "참고사항"]
+    in_collapse = False
+    depth = 0
+    buf = []
+    label = ""
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        is_h2 = stripped.startswith("## ") and not stripped.startswith("### ")
+        if is_h2:
+            if in_collapse:
+                buf.append("{{< /accordion >}}")
+                result.extend(buf)
+                buf = []
+                in_collapse = False
+            should_collapse = any(p in stripped for p in collapse_patterns)
+            if should_collapse:
+                label = stripped.lstrip("#").strip()
+                in_collapse = True
+                buf.append(f'{{{{< accordion "{label}" >}}}}')
+                buf.append("")
+                i += 1
+                continue
+        if in_collapse:
+            buf.append(line)
+        else:
+            result.append(line)
+        i += 1
+    if in_collapse:
+        buf.append("{{< /accordion >}}")
+        result.extend(buf)
+    return "\n".join(result)
+
+
 def _validate_frontmatter(fm_text):
     """간단한 front matter 문법 검증"""
     if not fm_text or "---" not in fm_text:
@@ -288,6 +353,8 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     if blog_cfg.get("theme", "").lower() == "blowfish":
         body_md = _apply_lead_shortcode(body_md)
         body_md = _apply_figure_shortcode(body_md)
+        body_md = _apply_gallery_shortcode(body_md)
+        body_md = _apply_accordion_shortcode(body_md)
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags)
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
