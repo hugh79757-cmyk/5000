@@ -394,7 +394,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
 
     body_md = re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
-    if blog_cfg.get("theme", "").lower() == "blowfish":
+    if blog_cfg.get("theme", "").lower() == "blowfish" and blog_cfg.get("shortcodes_enabled", True):
         body_md = _apply_lead_shortcode(body_md)
         body_md = _apply_figure_shortcode(body_md)
         body_md = _apply_gallery_shortcode(body_md)

@@ -283,7 +283,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         body_md = "<!-- DESC: " + _travel_desc + " -->\n" + body_md
 
     # ── camping 차트 데이터 삽입 (site counts 비교) ──
-    if data.get("source_type") == "camping":
+    if blog_cfg.get("shortcodes_enabled", True) and data.get("source_type") == "camping":
         _chart_items = []
         for _item in data.get("items", []):
             _has_num = any(_item.get(k, "") for k in ("gnrlSiteCo", "glampSiteCo", "caravSiteCo", "toiletCo", "swrmCo"))
