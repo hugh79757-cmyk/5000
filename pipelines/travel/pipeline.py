@@ -282,6 +282,24 @@ def _run_single(target_blog_id, blog_cfg=None):
     if _travel_desc:
         body_md = "<!-- DESC: " + _travel_desc + " -->\n" + body_md
 
+    # ── camping 차트 데이터 삽입 (site counts 비교) ──
+    if data.get("source_type") == "camping":
+        _chart_items = []
+        for _item in data.get("items", []):
+            _has_num = any(_item.get(k, "") for k in ("gnrlSiteCo", "glampSiteCo", "caravSiteCo", "toiletCo", "swrmCo"))
+            if _has_num:
+                _chart_items.append({
+                    "name": _item.get("title", "")[:20],
+                    "gnrlSiteCo": int(_item.get("gnrlSiteCo", 0)) if str(_item.get("gnrlSiteCo", "")).isdigit() else 0,
+                    "glampSiteCo": int(_item.get("glampSiteCo", 0)) if str(_item.get("glampSiteCo", "")).isdigit() else 0,
+                    "caravSiteCo": int(_item.get("caravSiteCo", 0)) if str(_item.get("caravSiteCo", "")).isdigit() else 0,
+                    "toiletCo": int(_item.get("toiletCo", 0)) if str(_item.get("toiletCo", "")).isdigit() else 0,
+                    "swrmCo": int(_item.get("swrmCo", 0)) if str(_item.get("swrmCo", "")).isdigit() else 0,
+                })
+        if len(_chart_items) >= 2:
+            import json as _json
+            body_md += f"\n<!-- CHART: {_json.dumps(_chart_items, ensure_ascii=False)} -->\n"
+
 
     # ── 발행 전 검증 (문제 시 draft, 텔레그램 경고) ──
     _is_draft = False

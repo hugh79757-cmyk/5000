@@ -197,7 +197,6 @@ def _apply_accordion_shortcode(body_md: str) -> str:
     i = 0
     collapse_patterns = ["체크포인트", "준비사항", "참고사항"]
     in_collapse = False
-    depth = 0
     buf = []
     label = ""
     while i < len(lines):
@@ -226,6 +225,51 @@ def _apply_accordion_shortcode(body_md: str) -> str:
     if in_collapse:
         buf.append("{{< /accordion >}}")
         result.extend(buf)
+    return "\n".join(result)
+
+
+def _apply_chart_shortcode(body_md: str) -> str:
+    """Convert <!-- CHART: ... --> into {{< chart >}} bar chart"""
+    if "<!-- CHART:" not in body_md:
+        return body_md
+    import json, re
+    lines = body_md.split("\n")
+    result = []
+    for line in lines:
+        m = re.search(r"<!--\s*CHART:\s*(.*?)-->", line)
+        if m:
+            try:
+                items = json.loads(m.group(1))
+                if len(items) < 2:
+                    continue
+                labels = [it["name"][:15] for it in items]
+                datasets = []
+                _m = {"gnrlSiteCo": "일반야영장", "glampSiteCo": "글램핑", "caravSiteCo": "카라반"}
+                _f = {"toiletCo": "화장실", "swrmCo": "샤워실"}
+                for key, label in {**_m, **_f}.items():
+                    vals = [int(it.get(key, 0)) for it in items]
+                    if any(v > 0 for v in vals):
+                        datasets.append({"label": label, "data": vals})
+                if not datasets:
+                    continue
+                cfg = json.dumps({
+                    "type": "bar",
+                    "data": {"labels": labels, "datasets": datasets},
+                    "options": {
+                        "responsive": True,
+                        "plugins": {
+                            "title": {"display": True, "text": "캠핑장 시설 비교", "font": {"size": 16}}
+                        },
+                        "scales": {
+                            "y": {"beginAtZero": True, "title": {"display": True, "text": "개수"}}
+                        }
+                    }
+                }, ensure_ascii=False)
+                result.append("{{< chart >}}" + cfg + "{{< /chart >}}")
+            except Exception:
+                pass
+            continue
+        result.append(line)
     return "\n".join(result)
 
 
@@ -354,6 +398,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         body_md = _apply_lead_shortcode(body_md)
         body_md = _apply_figure_shortcode(body_md)
         body_md = _apply_gallery_shortcode(body_md)
+        body_md = _apply_chart_shortcode(body_md)
         body_md = _apply_accordion_shortcode(body_md)
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags)
     body_md = body_md + "\n\n" + schema_json
