@@ -3,13 +3,14 @@ blog_id를 받아 해당 pipeline의 run(cfg)를 호출하고,
 결과를 publish_ledger에 기록한다.
 """
 import importlib
+import json
 import logging
 import os
 import sqlite3
 import subprocess
 import sys
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -36,6 +37,40 @@ logger = logging.getLogger(__name__)
 
 PROJECT_DIR = Path(FIVEK_ROOT)
 CONFIG_DIR = PROJECT_DIR / "config"
+
+# ── Config validation ──────────────────────────────────────────
+_REQUIRED_ENV_VARS = [
+    "FIVEK_ROOT", "TAP_ROOT", "STAP_ROOT", "HUGO_PATH",
+]
+_OPTIONAL_ENV_VARS = [
+    "OPENAI_API_KEY", "TOURAPI_KEY", "BLOGGER_API_KEY",
+    "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID",
+]
+
+
+def validate_config() -> list[str]:
+    """Startup-time config integrity check. Returns list of warnings/errors."""
+    issues = []
+    for var in _REQUIRED_ENV_VARS:
+        val = os.getenv(var)
+        if not val:
+            issues.append(f"MISSING ENV: {var}")
+        elif not os.path.isdir(val):
+            issues.append(f"ENV PATH NOT FOUND: {var}={val}")
+    for var in _OPTIONAL_ENV_VARS:
+        if not os.getenv(var):
+            logger.warning(f"Optional env var not set: {var}")
+    db_dir = PROJECT_DIR / "data"
+    for db_name in ["content.db", "stap_content.db"]:
+        db_path = db_dir / db_name
+        if not db_path.exists():
+            issues.append(f"DB NOT FOUND: {db_path}")
+    if issues:
+        for issue in issues:
+            logger.error(f"[CONFIG] {issue}")
+    else:
+        logger.info("[CONFIG] All checks passed")
+    return issues
 LEDGER_DB = PROJECT_DIR / "data" / "content.db"
 
 # --- STAP 파이프라인 매핑 (확장 시 여기만 추가) ---
@@ -47,6 +82,35 @@ STAP_PIPELINE_MAP = {
     "ipo-hugo": "ipo",
     "finance-hugo": "finance",
 }
+
+# --- no_result backoff (30분 쿨다운) ---
+_COOLDOWN_FILE = os.path.join(FIVEK_ROOT, "data", "cooldown.json")
+_COOLDOWN_MINUTES = 30
+
+
+def _get_cooldowns() -> dict:
+    try:
+        with open(_COOLDOWN_FILE) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _set_cooldown(blog_id: str) -> None:
+    cooldowns = _get_cooldowns()
+    cooldowns[blog_id] = datetime.now().isoformat()
+    os.makedirs(os.path.dirname(_COOLDOWN_FILE), exist_ok=True)
+    with open(_COOLDOWN_FILE, "w") as f:
+        json.dump(cooldowns, f)
+
+
+def _is_on_cooldown(blog_id: str) -> bool:
+    cooldowns = _get_cooldowns()
+    last = cooldowns.get(blog_id)
+    if not last:
+        return False
+    elapsed = datetime.now() - datetime.fromisoformat(last)
+    return elapsed < timedelta(minutes=_COOLDOWN_MINUTES)
 
 
 def load_blogs():
@@ -506,10 +570,17 @@ def dispatch(blog_id):
         _record_failure(blog_id, "duplicate_title", "daily_quota 도달")
         return {"success": False, "reason": "duplicate_title"}
 
+    # no_result backoff 체크
+    if _is_on_cooldown(blog_id):
+        logger.info(f"[SKIP] {blog_id} cooldown ({_COOLDOWN_MINUTES}분) — 발행 건너뜀")
+        _record_failure(blog_id, "no_result", f"cooldown {_COOLDOWN_MINUTES}분")
+        return {"success": False, "reason": "no_result"}
+
     result = _run_pipeline(cfg)
 
     # 결과 정규화: 모든 pipeline이 dict를 반환하도록
     if result is None:
+        _set_cooldown(blog_id)
         result = {"success": False, "reason": "no_result"}
     elif isinstance(result, str):
         # senior 등 문자열 반환 pipeline 호환

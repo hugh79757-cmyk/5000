@@ -15,6 +15,7 @@ sys.path.insert(0, "/Users/twinssn/Projects/5000")
 
 from shared.ai_writer import generate as ai_generate
 from shared.prompt_builder import build as build_prompt
+from pipelines.travel.area_codes import validate_display_region
 
 logger = logging.getLogger(__name__)
 
@@ -230,6 +231,34 @@ def _build_data_block(data):
         if item.get("category1"):
             cats = " > ".join(filter(None, [item.get("category1",""), item.get("category2","")]))
             lines.append(f"분류: {cats}")
+        # [실용 정보] 캠핑/관광 API 원천 필드
+        if item.get("animalCmgCl"):
+            lines.append(f"반려동물: {item['animalCmgCl']}")
+        if item.get("glampInnerFclty"):
+            lines.append(f"글램핑내부시설: {item['glampInnerFclty']}")
+        if item.get("caravInnerFclty"):
+            lines.append(f"카라반내부시설: {item['caravInnerFclty']}")
+        if item.get("operPdCl"):
+            lines.append(f"운영기간: {item['operPdCl']}")
+        if item.get("operDeCl"):
+            lines.append(f"운영요일: {item['operDeCl']}")
+        if item.get("gnrlSiteCo"):
+            lines.append(f"일반야영장: {item['gnrlSiteCo']}면")
+        if item.get("autoSiteCo"):
+            lines.append(f"오토캠핑: {item['autoSiteCo']}면")
+        if item.get("glampSiteCo"):
+            lines.append(f"글램핑사이트: {item['glampSiteCo']}면")
+        if item.get("caravSiteCo"):
+            lines.append(f"카라반사이트: {item['caravSiteCo']}면")
+        if item.get("brazierCl"):
+            lines.append(f"화로대: {item['brazierCl']}")
+        if item.get("toiletCo"):
+            lines.append(f"화장실: {item['toiletCo']}개")
+        if item.get("swrmCo"):
+            lines.append(f"샤워실: {item['swrmCo']}개")
+        if item.get("wtrplCo"):
+            lines.append(f"개수대: {item['wtrplCo']}개")
+
         if item.get("blog_snippets"):
             lines.append("네이버 블로그 참고정보 (사실 확인 불가, 참고용):")
             for sn in item["blog_snippets"][:6]:
@@ -724,6 +753,7 @@ def _post_process(content):
     content = re.sub(r"\s*\[네이버 지도에서 보기\]\(https://map\.naver\.com[^)]*\)", "", content)
     content = re.sub(r"^>\s*.*네이버 지도에서 보기.*$", "", content, flags=re.MULTILINE)
     content = re.sub(r"^>\s*\[.*?\]\(https://map\.naver\.com[^)]*\)\s*", "", content, flags=re.MULTILINE)
+    content = re.sub(r"\s*지도에서\s*보기\s*", "", content)
     return re.sub(r"\[네이버 지도에서 보기\]\(https://search\.naver\.com[^)]*\)", "", content)
 
 
@@ -807,6 +837,37 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
 
     return content
 
+
+
+def _enrich_title(title, data, display_region, theme, source_type, prompt_id=""):
+    """Prepend search-intent keyword after region name in title.
+
+    Pattern: '{region} {store}' → '{region} {intent_keyword} {store}'
+    Intent keywords: 맛집(식당), 캠핑/글램핑(캠핑장), 여행(관광지/코스), 축제(축제)
+    Skips if keyword already exists as a standalone word in the title.
+    """
+    kw = ""
+    if source_type in ("food", "korservice"):
+        kw = "축제" if prompt_id == "travel1_festival" else "맛집"
+    elif source_type == "camping":
+        kw = "글램핑" if "글램핑" in (theme or "") else "캠핑"
+    elif source_type in ("heritage", "course"):
+        kw = "여행"
+
+    if not kw:
+        return title
+    if re.search(rf"(?<!\w){re.escape(kw)}(?!\w)", title):
+        return title
+    if display_region and len(display_region) >= 2:
+        escaped = re.escape(display_region)
+        new_title, n = re.subn(
+            rf"{escaped}(?=\s|$)",
+            f"{display_region} {kw}",
+            title, count=1
+        )
+        if n:
+            return re.sub(r"\s+", " ", new_title).strip()
+    return title
 
 
 def generate_content(data, blog_id="travel-hugo"):
@@ -1132,6 +1193,7 @@ def generate_content(data, blog_id="travel-hugo"):
         last_camp=last_camp,
         first_name=first_name,
     )
+    title = fallback_title
 
     place_names = ", ".join([i.get("title", i.get("facltNm", ""))[:12] for i in items[:3]])
 
@@ -1241,10 +1303,13 @@ def generate_content(data, blog_id="travel-hugo"):
                 generated_title = fallback_title
             title = generated_title
 
+    validated_region = validate_display_region(display_region)
+    if display_region and not validated_region:
+        logger.warning(f"[TAG] 지역 태그 오분류 의심: '{display_region}' → 태그 제거")
     labels = list(set(filter(None, [
         data.get("category", "국내여행"),
         theme,
-        display_region,
+        validated_region,
     ])))
 
     # SEO description 생성: 지역 + 테마 + 핵심정보
@@ -1259,6 +1324,8 @@ def generate_content(data, blog_id="travel-hugo"):
     # [FIX] 상단 쿠팡 문구 삽입 제거 — 하단 _post_process에서 1회만 삽입
     # if "쿠팡 파트너스" not in content:
     #     content = '> **이 포스팅은 ...** \n\n' + content
+
+    title = _enrich_title(title, data, display_region, theme, source_type, prompt_id)
 
     return {
         "title": title,

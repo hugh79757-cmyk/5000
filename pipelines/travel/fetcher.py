@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP"), ".env"))
 
 logger = logging.getLogger(__name__)
+from shared.log_config import log_stage
 
 try:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -122,6 +123,8 @@ def _filter_by_season(items, title_key="title"):
         return items
     return [i for i in items if not any(w in i.get(title_key, "") for w in bw)]
 
+@log_stage("fetch_camping")
+
 def fetch_camping():
     from core.camping_data import get_camping_data, get_random_theme
     theme_name, theme_conf = get_random_theme()
@@ -136,6 +139,9 @@ def fetch_camping():
         data["angle"] = theme_name
     data["source_type"] = "camping"
     return data
+
+
+@log_stage("fetch_korservice")
 
 
 def fetch_korservice():
@@ -171,6 +177,8 @@ def fetch_korservice():
 HERITAGE_TYPES = {"14"}  # 14=cultural only (12=tourist 제거 — 테마파크 유입 차단)
 HERITAGE_KEYWORDS = {"국보", "보물", "사적", "유산", "문화재", "사찰", "고궁", "서원", "탑", "성곽", "역사"}
 
+@log_stage("fetch_korservice_heritage")
+
 def fetch_korservice_heritage():
     """fetch_korservice filtered for cultural heritage content"""
     for _ in range(5):
@@ -191,14 +199,16 @@ def fetch_korservice_heritage():
     return fetch_heritage()
 
 
+@log_stage("fetch_festival")
+
+
 def fetch_festival(_is_retry=False):
     """festival.db 기반 스마트 발행: 축제 시작일 역산으로 발행 대상 자동 선택"""
     import sqlite3
     from collections import defaultdict
     from datetime import datetime
 
-    DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "festival.db")
-    CONTENT_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "content.db")
+    from shared.db_paths import FESTIVAL_DB as DB_PATH, PUBLISH_LEDGER_DB as CONTENT_DB
 
     if not os.path.exists(DB_PATH):
         logger.warning("festival.db not found: " + DB_PATH)
@@ -409,15 +419,12 @@ def fetch_festival(_is_retry=False):
         return None
 
 
-def _get_recent_published_sigungus(days=7):
+def _get_recent_published_sigungus(days=14):
     """최근 N일간 travel3-hugo에 발행된 시군구 이름 집합
     우선 articles.sigungu 컬럼 직접 조회 (stap_content.db), NULL이면 title 파싱 fallback
     """
     import sqlite3
-    try:
-        from shared.db_paths import ARTICLES_DB
-    except ImportError:
-        ARTICLES_DB = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "stap_content.db")
+    from shared.db_paths import ARTICLES_DB
     sigungus = set()
     try:
         conn = sqlite3.connect(ARTICLES_DB)
@@ -454,6 +461,9 @@ def _get_recent_published_sigungus(days=7):
     return sigungus
 
 
+@log_stage("fetch_food")
+
+
 def fetch_food():
     """TourAPI contentTypeId=39 + sigunguCode 직접 지정으로 균등 분산
     - pipelines.travel.area_codes의 FOOD_AREA_SIGUNGU에서 랜덤 시군구 선택
@@ -470,7 +480,8 @@ def fetch_food():
     _published_cids = set()
     try:
         import sqlite3 as _sql
-        _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+        from shared.db_paths import PUBLISH_LEDGER_DB
+        _db = _sql.connect(PUBLISH_LEDGER_DB)
         for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel3-hugo' AND source_id != ''"):
             for _cid in row[0].split(","):
                 if _cid.strip():
@@ -483,8 +494,8 @@ def fetch_food():
     except Exception as _e:
         logger.warning(f"food dup-check DB error: {_e}")
 
-    # 최근 7일 발행 시군구 제외
-    _recent_sigungus = _get_recent_published_sigungus(7)
+    # 최근 14일 발행 시군구 제외
+    _recent_sigungus = _get_recent_published_sigungus(14)
 
     # 가중치 기반 시군구 선택 (최근 발행 시군구 제외)
     # 최대 50회 시도 — exclude_sigungus로 전부 소진 시 제한 해제됨
@@ -643,6 +654,9 @@ def fetch_food():
     return None
 
 
+@log_stage("fetch_course")
+
+
 def fetch_course():
     """course.db 기반 여행코스 발행 — DB에서 코스 선택 후 하위장소는 On-demand API 호출"""
     import datetime
@@ -673,7 +687,8 @@ def fetch_course():
         # 기존 발행 contentid 제외
         _published_cids = set()
         try:
-            _cdb = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+            from shared.db_paths import PUBLISH_LEDGER_DB
+            _cdb = _sql.connect(PUBLISH_LEDGER_DB)
             for row in _cdb.execute("SELECT source_id FROM articles WHERE blog_id='travel4-hugo' AND source_id != ''"):
                 for _cid in row[0].split(","):
                     if _cid.strip():
@@ -874,6 +889,9 @@ def fetch_course():
         return None
 
 
+@log_stage("fetch_wellness")
+
+
 def fetch_wellness():
     """웰니스관광정보 API (WellnessTursmService) - http, langDivCd=KOR 필수"""
     import requests
@@ -951,6 +969,10 @@ def fetch_wellness():
 
 
 
+@log_stage("fetch_heritage")
+
+
+
 def fetch_heritage():
     """국가유산청 데이터(heritage_list.json)에서 문화유산 아이템을 가져옵니다."""
     import json
@@ -997,7 +1019,8 @@ def fetch_heritage():
     _published_cids = set()
     try:
         import sqlite3 as _sql
-        _db = _sql.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "content.db"))
+        from shared.db_paths import PUBLISH_LEDGER_DB
+        _db = _sql.connect(PUBLISH_LEDGER_DB)
         for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel2-hugo' AND source_id != ''"):
             for _cid in str(row[0]).split(","):
                 if _cid.strip():
@@ -1155,6 +1178,9 @@ def fetch_heritage():
         "source_type": "heritage",
         "content_ids": _content_ids,
     }
+
+
+@log_stage("fetch_random")
 
 
 def fetch_random():

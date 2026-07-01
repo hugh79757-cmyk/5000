@@ -68,7 +68,7 @@ _DUP_JACCARD_THRESHOLD = 0.7
 _STALE_DAYS = 7
 _DAILY_QUOTA_DEFAULT = 5
 
-_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "content.db")
+from shared.db_paths import PUBLISH_LEDGER_DB as _DB_PATH
 
 # ── 네이버지도 비지역 키워드 (지도 버튼이 있으면 안 되는 키워드) ──
 _NO_MAP_KEYWORDS = [

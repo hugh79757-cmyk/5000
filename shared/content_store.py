@@ -3,12 +3,12 @@ import re
 import sqlite3
 from datetime import datetime
 
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "stap_content.db")
+from shared.db_paths import ARTICLES_DB
 
 
 def get_conn():
-    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-    conn = sqlite3.connect(DB_PATH)
+    os.makedirs(os.path.dirname(ARTICLES_DB), exist_ok=True)
+    conn = sqlite3.connect(ARTICLES_DB)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL")
     return conn
@@ -257,6 +257,7 @@ def init_used_places() -> None:
 
 def is_place_used(place_name, blog_id):
     conn = get_conn()
+    init_used_places()
     row = conn.execute(
         "SELECT 1 FROM used_places WHERE place_name=? AND blog_id=?",
         (place_name, blog_id),

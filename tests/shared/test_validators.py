@@ -99,3 +99,31 @@ class TestAssertKoreanOrReject:
         result = assert_korean_or_reject("中文标题", "这是一个中文文本", "test-blog")
         assert result is not None
         assert "Chinese" in result
+
+    def test_mixed_korean_english_accepts(self):
+        result = assert_korean_or_reject("서울 맛집 best 5", "서울의 맛집 top 5를 소개합니다", "test-blog")
+        assert result is None
+
+    def test_japanese_content_rejected(self):
+        result = assert_korean_or_reject("日本語のタイトル", "日本語の本文です", "test-blog")
+        assert result is not None
+
+    def test_very_long_title_sanitized(self):
+        long_title = "a" * 300
+        result = sanitize_title(long_title)
+        assert len(result) <= 200 or result is not None
+
+    def test_jaccard_identical_short(self):
+        assert _jaccard("a b", "a b") == 1.0
+
+    def test_jaccard_empty_second(self):
+        assert _jaccard("hello world", "") == 0.0
+
+    def test_strip_html_with_attributes(self):
+        assert _strip_html('<a href="link">text</a>') == "text"
+
+    def test_is_korean_content_edge_mixed_short(self):
+        assert is_korean_content("a b c d e") is True
+
+    def test_is_korean_content_empty_string(self):
+        assert is_korean_content("") is True

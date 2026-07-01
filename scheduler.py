@@ -334,9 +334,11 @@ def _drain_queue() -> None:
             blog_id = _publish_queue.pop(0)
         logger.info(f"Queue executing: {blog_id} (remaining: {len(_publish_queue)})")
         try:
-            run_publish(blog_id)
+            _success = run_publish(blog_id)
+            _track_publish_result(blog_id, bool(_success))
         except Exception as e:
             logger.exception(f"Queue publish failed: {blog_id} - {e}")
+            _track_publish_result(blog_id, False)
         with _queue_lock:
             if not _publish_queue:
                 return
@@ -438,6 +440,7 @@ def _catchup_missed_inner() -> None:
         )
         try:
             success = run_publish(blog_id)
+            _track_publish_result(blog_id, bool(success))
             if not success:
                 logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
         except Exception as e:
@@ -687,6 +690,31 @@ def _wait_for_network(timeout=300) -> bool:
             time.sleep(30)
     logger.error("Network timeout after %ds", timeout)
     return False
+
+
+# ── Consecutive Failure Detection ──────────────────────────────
+_CONSECUTIVE_FAILURES: dict[str, int] = {}
+_FAILURE_THRESHOLD = 3
+
+
+def _track_publish_result(blog_id: str, success: bool) -> None:
+    """Track consecutive publish failures per blog_id.
+    Resets on success. Sends Telegram alert on threshold breach."""
+    if success:
+        _CONSECUTIVE_FAILURES.pop(blog_id, None)
+        return
+
+    count = _CONSECUTIVE_FAILURES.get(blog_id, 0) + 1
+    _CONSECUTIVE_FAILURES[blog_id] = count
+    logger.warning(f"[FAILURE] {blog_id}: consecutive failures={count}/{_FAILURE_THRESHOLD}")
+
+    if count >= _FAILURE_THRESHOLD:
+        try:
+            from shared.telegram_notifier import send_error as _tg
+            _tg(f"{blog_id} 연속 {count}회 실패", f"scheduler — {count} consecutive failures")
+        except Exception as _e:
+            logger.warning(f"Telegram alert failed: {_e}")
+        _CONSECUTIVE_FAILURES[blog_id] = 0  # 알림 발송 후 카운터 리셋
 
 
 def main() -> None:

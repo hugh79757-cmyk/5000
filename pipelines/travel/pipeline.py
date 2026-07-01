@@ -35,6 +35,7 @@ from shared.publisher import get_blog_config, publish
 
 logger = logging.getLogger(__name__)
 
+from shared.log_config import log_stage
 try:
     from shared.telegram_notifier import send_error as tg_error
 except ImportError:
@@ -52,10 +53,7 @@ def _travel_source_exists(blog_id, source_id):
     if not source_id:
         return False
     import sqlite3 as _sq
-    try:
-        from shared.db_paths import PUBLISH_LEDGER_DB
-    except ImportError:
-        PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+    from shared.db_paths import PUBLISH_LEDGER_DB
     try:
         _cn = _sq.connect(PUBLISH_LEDGER_DB)
         _row = _cn.execute(
@@ -74,10 +72,7 @@ def _travel_title_similar_exists(blog_id, title) -> bool | None:
         return False
     import sqlite3 as _sq
     from difflib import SequenceMatcher
-    try:
-        from shared.db_paths import PUBLISH_LEDGER_DB
-    except ImportError:
-        PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+    from shared.db_paths import PUBLISH_LEDGER_DB
     try:
         _cn = _sq.connect(PUBLISH_LEDGER_DB)
         _rows = _cn.execute(
@@ -101,7 +96,7 @@ def _travel_title_similar_exists(blog_id, title) -> bool | None:
         return False
 
 
-def _travel_sigungu_recently_published(blog_id, sigungu, days=7) -> bool | None:
+def _travel_sigungu_recently_published(blog_id, sigungu, days=14) -> bool | None:
     """최근 days일 내 동일 blog_id + sigungu 조합이
     published 상태로 존재하면 True 반환.
 
@@ -142,21 +137,7 @@ def _travel_sigungu_recently_published(blog_id, sigungu, days=7) -> bool | None:
             logger.info(f"_travel_sigungu_recently_published: {blog_id} '{sigungu}' 컬럼매칭")
             return True
 
-        # 2순위: title 파싱 fallback (기존 NULL 건 커버)
-        _rows = _cn.execute(
-            """SELECT title FROM articles
-               WHERE blog_id    = ?
-                 AND sigungu    IS NULL
-                 AND status     = 'published'
-                 AND created_at > ?""",
-            (blog_id, cutoff)
-        ).fetchall()
         _cn.close()
-
-        for (_t,) in _rows:
-            if _t and sigungu in _t:
-                logger.info(f"_travel_sigungu_recently_published: {blog_id} '{sigungu}' 타이틀매칭 fallback")
-                return True
 
         return False
 
@@ -246,13 +227,9 @@ def _run_single(target_blog_id, blog_cfg=None):
                 continue
             try:
                 import sqlite3 as _sq
-                try:
-                    from shared.db_paths import PUBLISH_LEDGER_DB
-                except ImportError:
-                    PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+                from shared.db_paths import PUBLISH_LEDGER_DB
                 _cn = _sq.connect(PUBLISH_LEDGER_DB)
                 _row = _cn.execute(
-                    # 앞뒤 콤마 감싸기로 정확한 contentId 매칭 (오탐 방지)
                     "SELECT 1 FROM publish_ledger WHERE blog_id=? AND INSTR(',' || source_id || ',', ',' || ? || ',') > 0",
                     (target_blog_id, _cid)
                 ).fetchone()
@@ -267,7 +244,7 @@ def _run_single(target_blog_id, blog_cfg=None):
     # festival 파이프라인은 제외 (축제는 시간 기반 자연 순환)
     _source_type = data.get("source_type", "")
     _sigungu = data.get("sigungu", "")
-    if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=7):
+    if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
         logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최근 14일 내 발행됨)")
         return None
 
@@ -356,10 +333,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         if data.get("source_type") == "course" and data.get("content_ids"):
             try:
                 import sqlite3 as _sq
-                try:
-                    from shared.db_paths import PUBLISH_LEDGER_DB
-                except ImportError:
-                    PUBLISH_LEDGER_DB = "/Users/twinssn/Projects/5000/data/content.db"
+                from shared.db_paths import PUBLISH_LEDGER_DB
                 _cn = _sq.connect(PUBLISH_LEDGER_DB)
                 _cn.execute(
                     "CREATE TABLE IF NOT EXISTS course_published ("
@@ -381,6 +355,9 @@ def _run_single(target_blog_id, blog_cfg=None):
 
     logger.info(target_blog_id + " result: " + str(pub_result.get("success", False)) + " " + str(pub_result.get("url", "")))
     return pub_result
+
+
+@log_stage("travel_pipeline")
 
 
 def run(cfg):

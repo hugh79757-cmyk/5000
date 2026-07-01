@@ -386,3 +386,20 @@ def find_by_sigungu_name(name: str):
         if display.startswith(name) or name in display:
             return entry
     return None
+
+
+# ── 지역명 검증 집합 (태그용) ──────────────────────────────────
+_REGION_NAME_SET = {name for _, _, name in FOOD_AREA_SIGUNGU}
+
+
+def validate_display_region(display_region: str) -> str | None:
+    """display_region(예: '강원도 강릉시')이 알려진 지역명인지 검증.
+    유효하면 원래 문자열 반환, 무효하면 None 반환 (태그 제거).
+    """
+    if not display_region or not display_region.strip():
+        return None
+    parts = display_region.split()
+    for p in parts:
+        if p in _REGION_NAME_SET:
+            return display_region
+    return None

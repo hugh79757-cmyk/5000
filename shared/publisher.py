@@ -2,6 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 import os
+from shared.log_config import log_stage
 import re
 import sqlite3
 import subprocess
@@ -295,8 +296,8 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
 def _get_related_posts(blog_id, current_slug, max_count=3):
     """같은 블로그의 최근 발행 글에서 관련 글 추출"""
     try:
-        db_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "stap_content.db")
-        conn = sqlite3.connect(db_path)
+        from shared.db_paths import ARTICLES_DB
+        conn = sqlite3.connect(ARTICLES_DB)
         conn.row_factory = sqlite3.Row
         rows = conn.execute(
             "SELECT title, slug FROM articles WHERE blog_id=? AND slug!=? AND status='published' ORDER BY created_at DESC LIMIT ?",
@@ -331,7 +332,7 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
     import re as _re
     import sqlite3 as _sq
 
-    STAP_CONTENT_DB = "/Users/twinssn/Projects/STAP/data/stap_content.db"
+    from shared.db_paths import ARTICLES_DB as STAP_CONTENT_DB
     BLOG_DOMAINS = {
         "stock-hugo":    "https://stock.informationhot.kr",
         "dividend-hugo": "https://dividend.techpawz.com",
@@ -339,6 +340,11 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         "sector-hugo":   "https://sector.techpawz.com",
         "ipo-hugo":      "https://ipo.techpawz.com",
         "finance-hugo":  "https://finance.techpawz.com",
+        "travel3-hugo":  "https://tour1.rotcha.kr",
+        "travel-hugo":   "https://travel.rotcha.kr",
+        "travel1-hugo":  "https://travel1.rotcha.kr",
+        "travel2-hugo":  "https://travel2.rotcha.kr",
+        "travel4-hugo":  "https://travel4.rotcha.kr",
     }
     BLOG_LABELS = {
         "stock-hugo":    "주식분석",
@@ -347,6 +353,11 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         "sector-hugo":   "업종분석",
         "ipo-hugo":      "IPO블로그",
         "finance-hugo":  "금융블로그",
+        "travel3-hugo":  "여행",
+        "travel-hugo":   "여행",
+        "travel1-hugo":  "여행",
+        "travel2-hugo":  "여행",
+        "travel4-hugo":  "여행",
     }
 
     # 동사/형용사/조사 어미 패턴 (cross-blog 키워드 오염 방지)
@@ -437,11 +448,33 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
                         "meta": r["category"], "cross": False,
                     })
 
-        # ② cross-blog: 한글 고유명사(3자 이상)만 추출
+        # ② travel 내부링크: 동일 시군구/테마 우선 매칭
+        travel_blogs = [b for b in BLOG_DOMAINS if b.startswith("travel")]
+        if blog_id in travel_blogs:
+            same_region = conn.execute(
+                "SELECT title, slug, category, blog_id FROM articles "
+                "WHERE blog_id=? AND slug!=? AND status='published' "
+                "AND category=? "
+                "ORDER BY created_at DESC LIMIT 5",
+                (blog_id, slug, category)
+            ).fetchall()
+            for r in same_region:
+                if len(cross_found) >= 2:
+                    break
+                domain = BLOG_DOMAINS.get(r["blog_id"], "")
+                url = domain + "/posts/" + r["slug"] + "/"
+                cross_found.append({
+                    "title": r["title"], "url": url,
+                    "label": BLOG_LABELS.get(r["blog_id"], "관련글"),
+                    "meta": r["category"], "cross": True,
+                })
+
+        # ③ cross-blog: 한글 고유명사(3자 이상)만 추출
         keywords = _extract_keywords(title)
 
         cross_blogs = [b for b in BLOG_DOMAINS if b != blog_id]
-        cross_found = []
+        if not cross_found:
+            cross_found = []
         for kw in keywords:
             if len(cross_found) >= 2:
                 break
@@ -754,6 +787,31 @@ from shared.publishers.content_enhancer import (  # noqa: E402, F811
     _insert_internal_links,
 )
 from shared.publishers.deploy import deploy_site, _deploy_site_inner  # noqa: E402, F811
+from shared.post_validator import validate_post_html as _validate_post_html
+
+
+def _run_validation(site_path, slug, blog_id, title, result):
+    """발행 후 Hugo 출력 HTML을 읽어서 품질 검증"""
+    import os
+    html_path = os.path.join(site_path, "public", "posts", slug, "index.html")
+    if not os.path.isfile(html_path):
+        logger.info(f"[VALIDATE] HTML 파일 없음 (건너뜀): {html_path}")
+        return
+    with open(html_path, encoding="utf-8") as _f:
+        html = _f.read()
+    v = _validate_post_html(html, blog_id)
+    if v["issues"]:
+        from shared.telegram_notifier import send_error as _tg_err
+        emoji = "🔴" if not v["passed"] else "🟡"
+        msg = f"[{emoji} VALIDATION] {blog_id}: {title}\n"
+        for i in v["issues"]:
+            sev = "🔴" if i["severity"] == "ERROR" else "🟡"
+            msg += f"{sev} {i['check']}: {i['msg']}\n"
+        _tg_err(blog_id, "validation", msg)
+    logger.info(f"[VALIDATE] {blog_id} {'✅' if v['passed'] else '⚠️'} ({len(v['issues'])} issues)")
+
+
+@log_stage("publish_post")
 
 
 def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", blog_cfg=None,
@@ -932,6 +990,11 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
             try:
                 deploy_site(site_path, cf_project)
                 result["deployed"] = True
+                # 발행 품질 검증
+                try:
+                    _run_validation(site_path, slug, blog_id, title, result)
+                except Exception as _ve:
+                    logger.warning(f"[VALIDATE] 검증 실패 (무시): {_ve}")
             except Exception as e:
                 result["deployed"] = False
                 result["deploy_error"] = str(e)

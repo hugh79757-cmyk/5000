@@ -146,6 +146,10 @@ def humanize_korean(body_md: str, blog_id: str, title: str = "") -> str:
             raw = result["content"].strip()
 
             # ── 후처리: AI가 앞뒤에 설명을 붙인 경우 제거 ────────
+            # 프롬프트 메타데이터 누수 제거
+            raw = re.sub(r"블로그:\s*\S+", "", raw)
+            raw = re.sub(r"\[원본\]", "", raw)
+            raw = re.sub(r"제목:\s*.+", "", raw)
             # 가장 긴 마크다운 블록 또는 원본과 유사한 첫 부분 추출
             if raw.startswith(("```", "수정", "변경", "다음", "결과", "원본")):
                 # 코드블록 제거

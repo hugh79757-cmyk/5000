@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import re
@@ -90,10 +91,21 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
 
 
 def _clean_body(body_md):
-    """Clean body markdown from various artifacts"""
+    """Clean body markdown — AI 가짜 내부링크, 빈 템플릿, 과도한 개행 제거"""
     if not body_md:
         return body_md
-    body_md = re.sub(r"</?[^>]+>", "", body_md)
+    body_md = re.sub(
+        r"\n+##\s*(함께|관련|추천|더)\s*(읽어보기|읽을거리|글|포스트|게시물|기사)[^\n]*(\n(?!##|$)[^\n]*)*",
+        lambda m: m.group() if "{{<" in m.group() else "",
+        body_md,
+    )
+    body_md = re.sub(r"\{\{(?![<%])[^}]+\}\}", "", body_md)
+    # 외부 CDN 이미지 차단 → Cloudflare R2 fallback으로 대체
+    body_md = re.sub(
+        r"https?://[^/\s]*sspark\.genspark\.ai[^\s)]*",
+        "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/placeholder.webp",
+        body_md
+    )
     body_md = re.sub(r"\n{3,}", "\n\n", body_md)
     return body_md.strip()
 
@@ -135,9 +147,49 @@ def _extract_first_image(body_md):
 
 
 def _extract_description(body_md):
+    _m = re.search(r"<!-- DESC:\s*(.+?)-->", body_md or "")
+    if _m:
+        return _m.group(1).strip()[:200]
     clean = re.sub(r"<[^>]+>", "", body_md or "")
     clean = re.sub(r"\s+", " ", clean).strip()
     return clean[:200]
+
+
+def _build_schema_json(cfg, title, slug, body_md, category, tags):
+    schema_type = "Article"
+    if category in ("맛집", "식당"):
+        schema_type = "LocalBusiness"
+    elif category in ("관광", "여행"):
+        schema_type = "Article"
+    elif category == "캠핑":
+        schema_type = "Campground"
+
+    domain = cfg.get("domain", "")
+    url = f"https://{domain}/posts/{slug}/" if domain else ""
+
+    description = _extract_description(body_md)
+    date_published = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    author_name = cfg.get("name", domain)
+
+    schema = {
+        "@context": "https://schema.org",
+        "@type": schema_type,
+        "name": title,
+        "description": description,
+        "datePublished": date_published,
+        "author": {"@type": "Person", "name": author_name},
+    }
+    if url:
+        schema["url"] = url
+
+    if tags:
+        if isinstance(tags, list):
+            tag_list = [t.strip() for t in tags if t.strip()]
+        else:
+            tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        schema["keywords"] = ", ".join(tag_list)
+
+    return '<script type="application/ld+json">\n' + json.dumps(schema, ensure_ascii=False, indent=2) + "\n</script>"
 
 
 def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
@@ -179,6 +231,8 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
 
     body_md = re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
+    schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags)
+    body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
 
     _ok, _err = _validate_frontmatter(fm)
