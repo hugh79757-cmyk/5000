@@ -110,6 +110,60 @@ def _clean_body(body_md):
     return body_md.strip()
 
 
+def _apply_lead_shortcode(body_md: str) -> str:
+    if not body_md or body_md.strip().startswith("{{< lead >}}"):
+        return body_md
+    if not body_md.strip():
+        return body_md
+    blocks = body_md.split("\n\n")
+    for i, block in enumerate(blocks):
+        stripped = block.strip()
+        if not stripped:
+            continue
+        if stripped.startswith(("# ", "## ", "### ", "{{<", "```", ">")):
+            continue
+        blocks[i] = f"{{{{< lead >}}}}\n{stripped}\n{{{{< /lead >}}}}"
+        break
+    return "\n\n".join(blocks)
+
+
+def _apply_figure_shortcode(body_md: str) -> str:
+    if "![" not in body_md:
+        return body_md
+    lines = body_md.split("\n")
+    in_code = False
+    result = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if line.strip().startswith("```"):
+            in_code = not in_code
+            result.append(line)
+            i += 1
+            continue
+        if not in_code:
+            m = re.match(r'!\[([^\]]*)\]\(([^)]+)\)', line.strip())
+            if m:
+                alt = m.group(1)
+                url = m.group(2)
+                caption = alt
+                for j in range(i + 1, min(i + 3, len(lines))):
+                    next_line = lines[j].strip()
+                    if not next_line:
+                        continue
+                    if not next_line.startswith(("#", "##", "###", "{{<", "![", "```", ">")):
+                        if len(next_line) < 150:
+                            caption = next_line
+                            i = j
+                        break
+                result.append(f'{{{{< figure src="{url}" alt="{alt}" caption="{caption}" >}}}}')
+                i += 1
+                continue
+        result.append(line)
+        i += 1
+    return "\n".join(result)
+
+
 def _validate_frontmatter(fm_text):
     """간단한 front matter 문법 검증"""
     if not fm_text or "---" not in fm_text:
@@ -231,6 +285,9 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
 
     body_md = re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
+    if blog_cfg.get("theme", "").lower() == "blowfish":
+        body_md = _apply_lead_shortcode(body_md)
+        body_md = _apply_figure_shortcode(body_md)
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags)
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
