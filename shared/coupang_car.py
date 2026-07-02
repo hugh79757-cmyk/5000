@@ -216,6 +216,17 @@ class CoupangCar:
         return md
 
 
+def inject_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
+    """content_enhancer에서 호출하는 standalone 함수"""
+    if not body_md:
+        return body_md
+    car = CoupangCar()
+    products_md = car.get_car_product_links(segment=segment, fuel_type=fuel_type, count=2)
+    if not products_md:
+        return body_md
+    return body_md.rstrip() + "\n\n" + products_md
+
+
 if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv("/Users/twinssn/Projects/5000/.env")
