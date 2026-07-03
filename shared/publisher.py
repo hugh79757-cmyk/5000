@@ -783,9 +783,10 @@ from shared.publishers.content_enhancer import (  # noqa: E402, F811
     _get_related_posts,
     _inject_related_cards,
     _inject_related_cards_midpoint,
-    _insert_coupang,
+    _insert_coupang as _enhancer_insert_coupang,
     _insert_internal_links,
 )
+_insert_coupang = _enhancer_insert_coupang  # content_enhancer 고도화 버전 사용 (coupang_senior/car 분기)
 from shared.publishers.deploy import deploy_site, _deploy_site_inner  # noqa: E402, F811
 from shared.post_validator import validate_post_html as _validate_post_html
 

@@ -24,7 +24,7 @@ except Exception:
 
 def _insert_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
     if not body_md:
-        return body_md
+        return body_md, "SKIP"
     if blog_cfg and blog_cfg.get("id", "").startswith("rap"):
         from shared.coupang_senior import inject_coupang as _cp
     elif segment or fuel_type:
@@ -32,10 +32,11 @@ def _insert_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
     else:
         from shared.coupang_senior import inject_coupang as _cp
     try:
-        return _cp(body_md, segment=segment, fuel_type=fuel_type, blog_cfg=blog_cfg)
+        result = _cp(body_md, segment=segment, fuel_type=fuel_type, blog_cfg=blog_cfg)
+        return result, "OK"
     except Exception as e:
         logger.warning(f"[COUPANG] inject failed: {e}")
-        return body_md
+        return body_md, "FAIL"
 
 
 def _insert_internal_links(body_md, blog_id, slug):
