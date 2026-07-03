@@ -33,6 +33,7 @@ def _insert_coupang(body_md, segment="", fuel_type="", blog_cfg=None):
         from shared.coupang_senior import inject_coupang as _cp
     try:
         result = _cp(body_md, segment=segment, fuel_type=fuel_type, blog_cfg=blog_cfg)
+        result = re.sub(r"\{\{(?![<%])[^}]*\}\}", "", result)
         return result, "OK"
     except Exception as e:
         logger.warning(f"[COUPANG] inject failed: {e}")
