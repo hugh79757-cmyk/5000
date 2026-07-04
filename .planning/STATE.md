@@ -75,6 +75,13 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - ✓ im-not-ai ai-tell-taxonomy.md v2.0 기준 16개 패턴 추가 (S1×5, S2×11)
 - ✓ 기존 테스트 65/65 통과
 
+**Phase 8 — Content Cleanup (🔄 In Progress)**
+
+- ✓ 8-1: detection script (scripts/phase8/detect_problematic_posts.py)
+- ✓ 8-2: dry-run scan (43 offtopic posts flagged, 0 Chinese titles)
+- 🔲 8-3:批量 삭제 스크립트 (Wave 2)
+- 🔲 8-4: 검증 및 롤백 (Wave 2)
+
 **Phase 10 — Blowfish Engagement Optimization (🔲 Planned)**
 
 - 🔲 10-01: P0 Post-processor — lead + figure shortcodes (Wave 1)
@@ -93,7 +100,7 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 | 5     | ✓      | 3/3   | 100%     |
 | 6     | ✓      | 10/10 | 100%     |
 | 7     | ✓      | 9/9   | 100%     |
-| 8     | 🔄     | 2/2   | 대기      |
+| 8     | 🔄     | 1/2   | 50%      |
 | 9     | ✓      | 1/1   | 100%     |
 | 10    | 🔄     | 0/4   | 0%       |
 
@@ -109,4 +116,4 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - `.planning/phases/05-post-stabilization-enhancement/05-CONTEXT.md` — Phase 5 context
 
 ---
-*Last updated: 2026-06-30 after project initialization*
+*Last updated: 2026-07-04 after Phase 8 Plan 1 completion*
