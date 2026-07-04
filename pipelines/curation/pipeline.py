@@ -27,7 +27,7 @@ from shared.image_handler import process_and_upload
 from shared.publisher import publish
 from shared.telegram_notifier import send_error as _tg_error
 from shared.validators import assert_korean_or_reject, sanitize_title
-from shared.relevance_scorer import migrate_publish_log
+from shared.relevance_scorer import migrate_publish_log, score_products, passes_gate
 
 logger = logging.getLogger(__name__)
 
@@ -605,6 +605,20 @@ def _run_inner(cfg, blog_id, daily_quota):
         _record_failure(blog_id, "irrelevant_products", f"필터 후 상품 부족: {keyword}", keyword)
         return {"success": False, "reason": "irrelevant_products"}
 
+    # ── 관련성 점수 검증 게이트 ──
+    try:
+        scores = score_products(products, blog_id)
+        passed, reason = passes_gate(scores)
+        if not passed:
+            logger.warning(f"[{blog_id}] 관련성 점수 미달: {scores['avg']:.2f} < {scores['threshold']}")
+            _record_failure(blog_id, "low_relevance", f"관련성 점수 {scores['avg']:.2f} < 임계값 {scores['threshold']}", keyword)
+            return {"success": False, "reason": "low_relevance"}
+        logger.info(f"[{blog_id}] 관련성 점수: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
+    except Exception as e:
+        # Fail open: scoring exception should not block publication
+        logger.warning(f"[{blog_id}] 관련성 점수 계산 실패 (fail-open): {e}")
+        scores = {"avg": 1.0, "min": 1.0, "scores": [], "blog_id": blog_id, "threshold": 1.0}
+
     # 상품 데이터 인리치 (스펙 파싱 + 네이버 brand)
     products = enrich_products(products, blog_id)
 
@@ -685,8 +699,15 @@ def _run_inner(cfg, blog_id, daily_quota):
         _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
         return {"success": False, "reason": "publish_error"}
 
-    # 발행 기록
-    _record_publish(blog_id, keyword, title, slug)
+    # 발행 기록 (관련성 점수 포함)
+    from shared.relevance_scorer import log_publish_audit
+    final_scores = score_products(products, blog_id)
+    log_publish_audit(
+        str(DB_PATH),
+        blog_id, keyword, title, slug,
+        scores=final_scores,
+        passed=True,
+    )
     _record_products(blog_id, keyword, products[:5])
     logger.info(f"[{blog_id}] 발행 완료: {title}")
 
