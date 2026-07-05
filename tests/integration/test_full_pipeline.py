@@ -188,11 +188,14 @@ def mock_coupang_api(monkeypatch):
     """Mock _search_api to return predefined products per keyword."""
     original_search = _search_api
 
+    # Build keyword -> products mapping
+    keyword_map = {}
+    for blog_cfg in BLOG_TEST_DATA.values():
+        keyword_map[blog_cfg["keyword"]] = blog_cfg["products"]
+
     def mock_search(keyword, limit=10):
-        data = BLOG_TEST_DATA.get(keyword)
-        if data:
-            return data["products"][:limit]
-        return []
+        products = keyword_map.get(keyword, [])
+        return products[:limit]
 
     monkeypatch.setattr("pipelines.curation.collector._search_api", mock_search)
     yield
@@ -247,28 +250,34 @@ def test_relevance_scoring_integration():
 
 def test_used_products_filtering_with_db(temp_db_integration):
     """Test that _filter_used_products excludes recently published items."""
-    # This test uses the same temp DB; we'll seed published_products
+    # Use custom products rather than relying on collect_keyword
     blog_id = "fitness-hugo"
     keyword = "덤벨"
-    # Collect some products
-    collect_keyword(keyword)
-    products = get_products(keyword)
+    sample_products = [
+        {"product_name": "덤벨 20kg", "product_id": "DUM1", "category_name": "스포츠/레저", "rank": 1, "is_rocket": True, "is_free_shipping": True, "collected_at": datetime.utcnow().isoformat()},
+        {"product_name": "요가매트", "product_id": "DUM2", "category_name": "스포츠/레저", "rank": 2, "is_rocket": False, "is_free_shipping": False, "collected_at": datetime.utcnow().isoformat()},
+        {"product_name": "러닝화", "product_id": "DUM3", "category_name": "스포츠/레저", "rank": 3, "is_rocket": True, "is_free_shipping": True, "collected_at": datetime.utcnow().isoformat()},
+        {"product_name": "피트니스 밴드", "product_id": "DUM4", "category_name": "스포츠/레저", "rank": 4, "is_rocket": False, "is_free_shipping": False, "collected_at": datetime.utcnow().isoformat()},
+    ]
 
     # Initially, no used products => all pass
-    filtered_initial = _filter_used_products(blog_id, products)
-    assert len(filtered_initial) == len(products)
+    filtered_initial = _filter_used_products(blog_id, sample_products)
+    assert len(filtered_initial) == len(sample_products)
 
-    # Now manually insert a published product record
+    # Now manually insert a published product record for DUM1
     conn = sqlite3.connect(temp_db_integration)
     conn.execute(
         "INSERT INTO published_products (blog_id, product_id, keyword, published_at) VALUES (?,?,?,?)",
-        (blog_id, products[0]["product_id"], keyword, datetime.utcnow().isoformat())
+        (blog_id, sample_products[0]["product_id"], keyword, datetime.utcnow().isoformat())
     )
     conn.commit()
     conn.close()
 
     # Re-run filter
-    filtered_after = _filter_used_products(blog_id, products)
-    # Should have at least one less (the used one removed)
-    assert len(filtered_after) < len(products)
-    assert products[0]["product_id"] not in [p["product_id"] for p in filtered_after]
+    filtered_after = _filter_used_products(blog_id, sample_products)
+    # Should have one less (the used one removed); since we have >=4 total, fallback not triggered
+    assert len(filtered_after) == len(sample_products) - 1
+    assert sample_products[0]["product_id"] not in [p["product_id"] for p in filtered_after]
+    # The remaining should be DUM2, DUM3, DUM4
+    remaining_ids = {p["product_id"] for p in filtered_after}
+    assert remaining_ids == {"DUM2", "DUM3", "DUM4"}

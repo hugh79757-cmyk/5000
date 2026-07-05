@@ -186,11 +186,12 @@ def test_get_health_summary_returns_counts():
             # Record some quarantined and failing
             store.record_failure("blog1", "k1", "r1")
             store.record_failure("blog1", "k2", "r1")
-            store.record_failure("blog1", "k3", "r1")  # k1,k2,k3 consecutive >0
+            store.record_failure("blog1", "k3", "r1")  # three failures but cap may block 3rd
             summary = store.get_health_summary("blog1")
             assert summary["total_keywords"] == 10
-            assert summary["quarantined_count"] == 3  # all three quarantined after several consecutive failures
-            assert summary["healthy_count"] == 7
+            # Due to MAX_QUARANTINE_PERCENT=0.20 with 10 keywords, max quarantined = 2
+            assert summary["quarantined_count"] == 2
+            assert summary["healthy_count"] == 8
             assert len(summary["most_failing_keywords"]) <= 10
         finally:
             kw_mod.get_keywords = original_get

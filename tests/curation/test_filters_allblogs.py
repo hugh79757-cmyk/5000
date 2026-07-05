@@ -93,7 +93,7 @@ class TestBabyBlogFilters:
         result = _filter_irrelevant_products("baby-hugo", "아기용품", prods)
         assert len(result) == 0
 
-    def test_blocks_成人 slavery_products_without_allowed_word(self):
+    def test_blocks_adult_products_without_allowed_word(self):
         # Ensure adult products are blocked (not applicable in baby blog, but blocked category)
         prods = [{"product_name": "성인용품", "product_id": "B3", "category_name": "성인용품"}]
         result = _filter_irrelevant_products("baby-hugo", "아기", prods)

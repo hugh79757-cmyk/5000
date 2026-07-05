@@ -168,6 +168,14 @@ def _select_keyword(blog_id):
                 "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
             ).fetchone()[0]
             if cnt >= 3:
+                # Relevance gate: 샘플 제품 3개의 평균 relevance가 threshold 미만이면 스킵
+                from shared.relevance_scorer import score_products, passes_gate
+                sample = get_products(kw, limit=3)
+                if sample:
+                    scores = score_products(sample, blog_id)
+                    if not passes_gate(scores)[0]:
+                        logger.debug(f"[{blog_id}] relevance gate 통과 실패: {kw} (avg={scores['avg']:.2f} < threshold={scores['threshold']:.2f})")
+                        continue
                 conn.close()
                 return kw
     conn.close()

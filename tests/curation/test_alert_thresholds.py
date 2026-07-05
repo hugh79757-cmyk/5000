@@ -19,8 +19,9 @@ def test_get_config_uses_blog_overrides():
     cfg = checker.get_config("pet-hugo")
     # pet-hugo has override of 2 consecutive failures
     assert cfg["consecutive_failures"] == 2
-    # fitness-hugo has 5
-    assert cfg["consecutive_failures"] == 5
+    # Also check health-hugo has 5
+    cfg2 = checker.get_config("health-hugo")
+    assert cfg2["consecutive_failures"] == 5
 
 
 def test_check_consecutive_failures_against_threshold():
@@ -37,8 +38,8 @@ def test_check_consecutive_failures_against_threshold():
 def test_check_keyword_streak():
     checker = ThresholdChecker()
     # default keyword_fail_streak 5
-    assert checker.check_keyword_streak("unknown-blog", 4) is False
-    assert checker.check_keyword_streak("unknown-blog", 5) is True
+    assert checker.check_keyword_streak("unknown-blog", "anykw", 4) is False
+    assert checker.check_keyword_streak("unknown-blog", "anykw", 5) is True
 
 
 def test_cooldown_prevents_duplicate_alerts():

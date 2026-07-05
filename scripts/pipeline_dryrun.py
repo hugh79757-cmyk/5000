@@ -98,31 +98,31 @@ if select_none_list:
     for b in select_none_list:
         print(f"  ❌ {b}")
 
- total = len(BLOGS)
- healthy = len(can_publish_list)
- if healthy == total:
-     verdict = "GREEN"
- elif healthy >= total / 2:
-     verdict = "YELLOW"
- else:
-     verdict = "RED"
+total = len(BLOGS)
+healthy = len(can_publish_list)
+if healthy == total:
+    verdict = "GREEN"
+elif healthy >= total / 2:
+    verdict = "YELLOW"
+else:
+    verdict = "RED"
 
- print(f"\n{'='*60}")
- print(f"OVERALL HEALTH VERDICT: {verdict}")
- print(f"{'='*60}")
- print(f"Healthy: {healthy}/{total} blogs can publish")
- print(f"Issues:  {total - healthy}/{total} blogs have problems")
+print(f"\n{'='*60}")
+print(f"OVERALL HEALTH VERDICT: {verdict}")
+print(f"{'='*60}")
+print(f"Healthy: {healthy}/{total} blogs can publish")
+print(f"Issues:  {total - healthy}/{total} blogs have problems")
 
- # Determine exit code: fail if any blog cannot publish or missing filter
- has_critical_issue = False
- for blog_id, r in results.items():
-     if not r["can_publish"] or not r["has_filter"]:
-         has_critical_issue = True
-         break
+# Determine exit code: fail if any blog cannot publish or missing filter
+has_critical_issue = False
+for blog_id, r in results.items():
+    if not r["can_publish"] or not r["has_filter"]:
+        has_critical_issue = True
+        break
 
- if has_critical_issue:
-     print("\n❌ Dry-run FAILED: One or more blogs cannot publish or missing filters.")
-     sys.exit(1)
- else:
-     print("\n✅ Dry-run PASSED: All blogs healthy.")
-     sys.exit(0)
+if has_critical_issue:
+    print("\n❌ Dry-run FAILED: One or more blogs cannot publish or missing filters.")
+    sys.exit(1)
+else:
+    print("\n✅ Dry-run PASSED: All blogs healthy.")
+    sys.exit(0)
