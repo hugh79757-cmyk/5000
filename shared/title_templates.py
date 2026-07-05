@@ -15,27 +15,65 @@ logger = logging.getLogger(__name__)
 # ── 템플릿 정의 ────────────────────────────────────────────────────────
 
 TITLE_TEMPLATES: dict[str, str] = {
-    "comparison": "1위 {brand1} vs {brand2} — {year}년 {month}월 가성비 비교",
-    "ranking": "{year}년 {month}월 {keyword} BEST 5 추천",
-    "toplist": "TOP 5 {keyword} — 인기 순위와 추천 이유",
+    "comparison": "{brand1} vs {brand2} — {keyword} 어떤 게 나을까?",
+    "ranking": "{keyword} BEST 5 — {year}년 {month}월 엄선",
+    "toplist": "TOP 5 {keyword} — 선택한 이유와 후기",
     "buying_guide": "{keyword} 고르는 법: {year}년 최신 가이드",
-    "budget": "가성비 {keyword} 추천: {price_range}만원 이하 BEST 5",
-    "review_style": "실제 구매자가 말하는 {keyword} 추천 TOP 5",
-    "question_style": "{keyword} 고민된다면? 지금 사야 하는 BEST 5",
+    "budget": "{keyword} 추천: {price_range}만원 이하 합격점 TOP 5",
+    "review_style": "실제 써본 사람이 말하는 {keyword} TOP 5",
+    "question_style": "{keyword} 고민된다면? 지금 사야 하는 이유",
     "spec_style": "{year}년 {month}월 스펙 비교: {brand1} vs {brand2} vs {brand3}",
+    "myth_busting": "{keyword} 흔한 오해 3가지 — {year}년 기준 바로잡기",
+    "new_release": "최근 출시 {keyword} {brand1} — 첫인상과 실사용 느낌",
+    "situation_based": "{keyword} 어떤 걸 골라야 할까? 상황별 추천",
 }
 
 # ── 블로그별 오버라이드 (추후 확장용) ─────────────────────────────────
 
 BLOG_TEMPLATE_OVERRIDES: dict[str, dict] = {
-    # 예시:
-    # "laptop-hugo": {
-    #     "preferred_templates": ["comparison", "ranking", "spec_style", "toplist"],
-    #     "avoid_templates": ["budget"],
-    # },
+    "interior-hugo": {
+        "preferred_templates": ["buying_guide", "budget", "question_style", "review_style", "toplist"],
+        "avoid_templates": ["comparison"],
+    },
+    "kitchen-hugo": {
+        "preferred_templates": ["question_style", "budget", "review_style", "toplist", "buying_guide"],
+        "avoid_templates": ["comparison"],
+    },
+    "camping-hugo": {
+        "preferred_templates": ["toplist", "buying_guide", "budget", "question_style", "review_style"],
+        "avoid_templates": ["ranking", "comparison"],
+    },
+    "appliance-hugo": {
+        "preferred_templates": ["review_style", "buying_guide", "question_style", "myth_busting"],
+        "avoid_templates": ["ranking"],
+    },
+    "health-hugo": {
+        "preferred_templates": ["buying_guide", "budget", "question_style", "review_style", "toplist"],
+        "avoid_templates": ["comparison"],
+    },
+    "beauty-hugo": {
+        "preferred_templates": ["buying_guide", "budget", "review_style", "spec_style", "question_style"],
+        "avoid_templates": [],
+    },
+    "baby-hugo": {
+        "preferred_templates": ["buying_guide", "question_style", "review_style", "situation_based", "toplist"],
+        "avoid_templates": ["comparison"],
+    },
+    "pet-hugo": {
+        "preferred_templates": ["review_style", "question_style", "situation_based", "toplist", "buying_guide"],
+        "avoid_templates": ["comparison"],
+    },
+    "fitness-hugo": {
+        "preferred_templates": ["review_style", "question_style", "buying_guide", "myth_busting", "new_release"],
+        "avoid_templates": [],
+    },
+    "laptop-hugo": {
+        "preferred_templates": ["comparison", "spec_style", "buying_guide", "question_style", "myth_busting"],
+        "avoid_templates": [],
+    },
 }
 
-TEMPLATE_ROTATION_WINDOW = 5  # 같은 타입 N회 내 재사용 방지
+TEMPLATE_ROTATION_WINDOW = 10  # 같은 타입 N회 내 재사용 방지
 
 
 # ── 헬퍼: 제목 분류 ───────────────────────────────────────────────────
@@ -51,29 +89,38 @@ def _classify_title(title: str) -> str:
     """
     if not title:
         return ""
-    # comparison: vs + 비교
-    if re.search(r"vs\s*[—\-]|vs\..*비교|비교\s*$", title):
-        return "comparison"
+    # myth_busting: 오해
+    if re.search(r"오해|흔한.*오해|바로잡기", title):
+        return "myth_busting"
+    # new_release: 최신 출시 or 첫인상
+    if re.search(r"최근\s*출시|첫인상|실사용\s*느낌", title):
+        return "new_release"
+    # situation_based: 상황별 추천
+    if re.search(r"상황별\s*추천|어떤.*골라야", title):
+        return "situation_based"
     # spec_style: 스펙 비교 + vs 다수
     if re.search(r"스펙\s*비교", title) and title.count("vs") >= 2:
         return "spec_style"
-    # budget: 가성비 + 만원
-    if re.search(r"가성비", title) and re.search(r"\d+만원", title):
+    # comparison: vs 포함
+    if re.search(r"\bvs\b", title):
+        return "comparison"
+    # budget: 가격대 + 만원
+    if re.search(r"\d+만원", title) and re.search(r"이하|미만|이상", title):
         return "budget"
     # buying_guide: 고르는 법 or 가이드
     if re.search(r"고르는\s*법|최신\s*가이드", title):
         return "buying_guide"
     # review_style: 실제 구매자 or 리뷰
-    if re.search(r"실제\s*구매자|리뷰\s*추천", title):
+    if re.search(r"실제.*써본|실제.*구매|리뷰", title):
         return "review_style"
     # question_style: 고민 or ? 또는 의문문 패턴
-    if re.search(r"고민|다면\?|까\?", title):
+    if re.search(r"고민|다면\?|까\?|어떻게", title):
         return "question_style"
     # toplist: TOP 으로 시작
     if re.match(r"TOP\s*\d+", title):
         return "toplist"
-    # ranking: BEST 포함, 연월 패턴
-    if re.search(r"BEST\s*\d+", title) and re.search(r"년.*월", title):
+    # ranking: BEST 포함
+    if re.search(r"BEST\s*\d+", title):
         return "ranking"
     # fallback — 추천 포함이면 ranking
     if re.search(r"추천", title):
