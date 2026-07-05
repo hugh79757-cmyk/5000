@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from dotenv import load_dotenv
 
+load_dotenv(os.path.expanduser("~/.env.common"))
 load_dotenv("/Users/twinssn/Projects/5000/.env")
 
 import requests as _requests
@@ -178,7 +179,8 @@ CATEGORY_FILTERS = {
         "allowed": ["노트북", "laptop", "랩탑", "맥북", "macbook", "그램", "gram",
                      "갤럭시북", "thinkpad", "씽크패드", "victus", "오멘", "vivobook",
                      "비보북", "zenbook", "젠북", "ideapad", "아이디어패드",
-                     "크롬북", "chromebook", "울트라북", "서피스"],
+                     "크롬북", "chromebook", "울트라북", "서피스",
+                     "컴퓨터", "전자기기"],
         "blocked": ["도서", "교재", "필기", "실기", "기능사", "자격증",
                      "스티커", "마우스패드", "장패드", "키보드", "마우스",
                      "가방", "파우치", "거치대", "받침대", "쿨링패드",
@@ -196,7 +198,8 @@ CATEGORY_FILTERS = {
         "allowed": ["청소기", "에어프라이어", "공기청정기", "제습기", "가습기",
                      "냉장고", "세탁기", "건조기", "식기세척기", "전자레인지",
                      "오븐", "밥솥", "정수기", "선풍기", "히터", "난방기",
-                     "로봇청소기", "스팀청소기", "물걸레", "다리미"],
+                     "로봇청소기", "스팀청소기", "물걸레", "다리미",
+                     "가전", "디지털"],
         "blocked": ["도서", "교재", "스티커", "인형", "장난감",
                      "의류", "패션", "화장품",
                      "생활용품", "출산/유아", "반려동물", "식품", "완구"],
@@ -204,7 +207,8 @@ CATEGORY_FILTERS = {
     "interior-hugo": {
         "allowed": ["의자", "책상", "소파", "매트리스", "침대", "선반", "수납",
                      "커튼", "블라인드", "조명", "램프", "러그", "카페트",
-                     "테이블", "화장대", "옷장", "행거", "거울"],
+                     "테이블", "화장대", "옷장", "행거", "거울",
+                     "가구", "인테리어"],
         "blocked": ["도서", "교재", "식품", "화장품", "의류", "패션",
                      "장난감", "완구",
                      "생활용품", "전자기기", "가전", "출산/유아", "반려동물",
@@ -214,7 +218,8 @@ CATEGORY_FILTERS = {
         "allowed": ["카시트", "유모차", "아기띠", "바운서", "젖병", "분유",
                      "기저귀", "보행기", "범퍼침대", "아기침대", "수유",
                      "이유식", "체온계", "멸균기", "신생아", "유아",
-                     "아기", "베이비", "유아용", "영아"],
+                     "아기", "베이비", "유아용", "영아",
+                     "육아", "출산"],
         "blocked": ["강아지", "반려견", "반려동물", "개모차", "pet", "여성의류", "남성의류", "패션의류", "여성패션", "남성패션",
                      "고양이", "강아지용", "도그", "dog",
                      "도서", "교재", "성인용",
@@ -222,7 +227,7 @@ CATEGORY_FILTERS = {
                      "유모차 가방", "유모차 후크", "유모차 고리", "유모차 걸이",
                      "유모차 정리함", "유모차 양산", "유모차 액세서리",
                      "핸들장난감", "드라이빙", "모빌",
-                     "생활용품", "식품", "가전", "가구", "홈인테리어"],
+                      "생활용품", "가전", "가구", "홈인테리어"],
     },
     "fitness-hugo": {
         "allowed": ["덤벨", "아령", "바벨", "케틀벨", "런닝머신", "러닝머신",
@@ -236,9 +241,10 @@ CATEGORY_FILTERS = {
                      "단백질", "프로틴", "크레아틴", "BCAA", "보충제", "쉐이커",
                      "보호대", "헬스장갑", "헬스벨트",
                      "마사지건", "짐볼", "필라테스", "ab롤러", "복근",
-                     "홈짐", "홈트", "파워랙", "스쿼트랙", "스미스머신", "딥스바"],
+                     "홈짐", "홈트", "파워랙", "스쿼트랙", "스미스머신", "딥스바",
+                      "스포츠", "레저", "다이어트", "논슬립", "괄약근"],
         "blocked": ["도서", "교재", "인형", "장난감", "화장품",
-                     "생활용품", "출산/유아", "반려동물", "식품", "가전",
+                     "생활용품", "출산/유아", "반려동물", "가전",
                      "패션의류", "여성의류", "남성의류"],
     },
     "health-hugo": {
@@ -247,9 +253,10 @@ CATEGORY_FILTERS = {
                      "단백질", "보충제", "크레아틴", "글루타치온", "비오틴",
                      "코엔자임", "밀크씨슬", "프로바이오틱스", "엽산",
                      "면역", "혈행", "혈압", "혈당", "장건강", "간건강",
-                     "관절", "뼈", "갱년기", "전립선", "피로"],
+                     "관절", "뼈", "갱년기", "전립선", "피로",
+                     "건강식품", "영양제"],
         "blocked": ["생활용품", "주방", "반려동물", "패션", "전자기기", "장난감", "완구",
-                     "식품", "가전", "출산/유아"],
+                     "가전", "출산/유아"],
         "required": [],
     },
     "pet-hugo": {
@@ -258,7 +265,7 @@ CATEGORY_FILTERS = {
                      "배변", "화장실", "모래", "이동장", "켄넬", "방석",
                      "급식기", "정수기", "드라이룸", "샴푸", "치약",
                      "유모차", "장난감", "노즈워크", "그루밍", "영양제"],
-        "blocked": ["식품", "의류", "전자기기", "가전", "주방", "완구", "장난감",
+        "blocked": ["의류", "전자기기", "가전", "주방", "완구",
                      "생활용품", "출산/유아", "가구", "홈인테리어", "스포츠/레저", "패션"],
         "required": [],
     },
@@ -268,7 +275,8 @@ CATEGORY_FILTERS = {
                      "가위", "저울", "타이머", "주걱", "냄비받침",
                      "에어프라이어", "전기냄비", "밥솥", "믹서기", "전기포트",
                      "커피머신", "식기세척기", "찜기", "와플", "토스터",
-                     "블렌더", "착즙기", "그릴", "인덕션", "세제"],
+                     "블렌더", "착즙기", "그릴", "인덕션", "세제",
+                     "주방용품", "조리"],
         "blocked": ["패션", "의류", "반려동물", "완구", "장난감", "건강식품", "영양제",
                      "생활용품", "가전디지털", "출산/유아", "스포츠/레저", "식품"],
         "required": [],
@@ -280,7 +288,8 @@ CATEGORY_FILTERS = {
                      "블러셔", "하이라이터", "파우더", "컨실러", "향수",
                      "헤어", "샴푸", "린스", "트리트먼트", "바디로션",
                      "바디워시", "핸드크림", "미스트", "여드름", "각질",
-                     "고데기", "드라이어"],
+                     "고데기", "드라이어",
+                     "뷰티", "화장품", "스킨케어"],
         "blocked": ["식품", "전자기기", "가전", "완구", "반려동물", "주방", "캠핑", "생활용품", "위생용품", "음료",
                      "출산/유아", "스포츠/레저", "문구/오피스", "가구"],
         "required": [],
@@ -291,7 +300,8 @@ CATEGORY_FILTERS = {
                      "헤드랜턴", "해먹", "모기장", "선풍기", "난로", "조명",
                      "카트", "가스통", "방수포", "멀티툴", "배낭", "등산화",
                      "트레킹폴", "폴대", "페그", "우비", "모자",
-                     "백패킹", "스노우피크", "정리함"],
+                     "백패킹", "스노우피크", "정리함",
+                     "아웃도어", "레저"],
         "blocked": ["식품", "건강식품", "완구", "장난감", "주방가전", "뷰티", "화장품",
                      "생활용품", "출산/유아", "가전", "패션", "의류", "문구/오피스"],
         "required": [],
@@ -332,11 +342,14 @@ def _filter_irrelevant_products(blog_id, keyword, products):
         cat = p.get("category_name", "").lower()
         combined = name + " " + cat
 
+        # 상품명이 allowed 키워드를 포함하면 카테고리 blocked 무시 (context-aware)
+        name_has_allowed = any(aw in name for aw in allowed)
+
         # 차단 키워드 — category_name + product_name 모두 확인
         is_blocked = False
         for bw in blocked:
             bw_lower = bw.lower()
-            if bw_lower in cat or bw_lower in name:
+            if (bw_lower in cat and not name_has_allowed) or (bw_lower in name and not name_has_allowed):
                 logger.info(f"[필터] 차단: '{p.get('product_name', '')[:40]}' (차단어: {bw}, 대상: {'카테고리' if bw_lower in cat else '상품명'})")
                 is_blocked = True
                 break
@@ -455,7 +468,7 @@ def _title_is_duplicate(blog_id, title):
     # 방법2: 주요 단어 3개 이상 겹치면 중복
     if not found:
         title_words = set(_re.findall(r"[가-힣a-zA-Z0-9]{2,}", title))
-        stop_words = {"추천", "비교", "가성비", "인기", "순위", "정리", "선택", "소개"}
+        stop_words = {"추천", "비교", "가성비", "인기", "순위", "정리", "선택", "소개", "vs", "년", "월", "위"}
         title_words -= stop_words
         if len(title_words) >= 3:
             recent = conn.execute(
@@ -599,11 +612,45 @@ def _run_inner(cfg, blog_id, daily_quota):
             return {"success": False, "reason": "insufficient_products"}
 
     # 카테고리 무관 상품 필터링 (코드 레벨)
-    products = _filter_irrelevant_products(blog_id, keyword, products)
-    if len(products) < 3:
-        logger.error(f"[{blog_id}] 필터 후 상품 부족: {keyword} ({len(products)}개)")
-        _record_failure(blog_id, "irrelevant_products", f"필터 후 상품 부족: {keyword}", keyword)
-        return {"success": False, "reason": "irrelevant_products"}
+    # ── 3회 재시도: 불량 키워드로 인한 단일 실패가 전체 pipeline을 죽이지 않도록 ──
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
+        products = _filter_irrelevant_products(blog_id, keyword, products)
+        if len(products) >= 3:
+            break
+        if attempt == max_retries:
+            logger.error(f"[{blog_id}] {max_retries}회 재시도 후 필터 실패: {keyword} ({len(products)}개)")
+            _record_failure(blog_id, "irrelevant_products", f"{max_retries}회 재시도 후 필터 실패: {keyword}", keyword)
+            return {"success": False, "reason": "irrelevant_products"}
+        logger.warning(f"[{blog_id}] 필터 후 상품 부족 ({len(products)}개), 대체 키워드 시도 ({attempt}/{max_retries})")
+        # 해당 키워드 캐시 삭제
+        try:
+            conn = sqlite3.connect(str(DB_PATH))
+            conn.execute("DELETE FROM products WHERE keyword=?", (keyword,))
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+        # 다음 키워드 선택
+        all_kws = get_keywords(blog_id)
+        used_conn = sqlite3.connect(str(DB_PATH))
+        used = used_conn.execute(
+            """SELECT keyword FROM publish_log
+               WHERE blog_id=? AND published_at > datetime('now', '-7 days')""",
+            (blog_id,)
+        ).fetchall()
+        used_conn.close()
+        used_set = {r[0] for r in used} | {keyword}
+        fallback_kws = [k for k in all_kws if k not in used_set]
+        if not fallback_kws:
+            logger.error(f"[{blog_id}] 대체 키워드 없음 — 발행 중단")
+            _record_failure(blog_id, "irrelevant_products", "대체 키워드 없음", keyword)
+            return {"success": False, "reason": "irrelevant_products"}
+        keyword = fallback_kws[0]
+        logger.info(f"[{blog_id}] 대체 키워드 사용 ({attempt}/{max_retries}): {keyword}")
+        collect_keyword(keyword)
+        products = get_products(keyword, limit=10)
+        products = _filter_used_products(blog_id, products)
 
     # ── 관련성 점수 검증 게이트 ──
     try:
