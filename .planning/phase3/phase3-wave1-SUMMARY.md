@@ -2,39 +2,42 @@
 phase: 3
 plan: wave1
 subsystem: curation-content-validation
-tags: [relevance-scoring, publish-log-migration, content-validation]
+tags: [title-diversity, template-rotation, content-validation]
 requires: []
-provides: [relevance-scorer-module, pipeline-migration-hook]
-affects: [pipelines/curation/pipeline.py]
+provides: [title-template-registry, prompt-style-variation]
+affects: [pipelines/curation/writer.py]
 tech-stack:
-  added: [shared/relevance_scorer.py]
-  patterns: [deferred-import-for-circular-deps, try-except-alter-table]
+  added: [shared/title_templates.py]
+  patterns: [weighted-random-selection, lazy-db-connection, regex-classifier]
 key-files:
   created:
-    - shared/relevance_scorer.py
-    - tests/shared/test_relevance_scorer.py
+    - shared/title_templates.py
   modified:
-    - pipelines/curation/pipeline.py
+    - pipelines/curation/writer.py
 decisions:
-  - 'Deferred import for CATEGORY_FILTERS inside score_products() avoids circular import between relevance_scorer.py and pipeline.py'
-  - 'migrate_publish_log uses try/except on ALTER TABLE (each column individually) rather than IF NOT EXISTS syntax, matching _init_db() pattern'
-  - 'weekly_offtopic_report uses percentage values (0-100) for rate comparison to keep message template formula readable'
+  - '8 universal templates with weighted random selection (not strict round-robin) to avoid predictable patterns while maintaining diversity'
+  - 'Template rotation window of 5 — same type avoided within last 5 publications'
+  - 'Blog-specific overrides dict (BLOG_TEMPLATE_OVERRIDES) as optional, empty by default for future use'
+  - 'comparison template gets weight 0.6 (vs 1.0 for others) since it was the current default and most likely to cause duplicates'
+  - 'Style hint injected as prompt directive, not code-level parameter — follows existing BLOG_EXTRA_RULES pattern'
+  - 'get_recent_styles opens/closes DB connection per call, matching existing connection management pattern in pipeline.py'
 metrics:
-  duration: 12min
-  completed: "2026-07-04"
+  duration: ~1min
+  completed: "2026-07-05"
 ---
 
-# Phase 3 Wave 1: Relevance Scorer Foundation + Pipeline Migration Hook
+# Phase 3 Wave 1: Title Diversity System
 
-Built the standalone `shared/relevance_scorer.py` module with all 9 functions (score_product, score_products, get_threshold, passes_gate, migrate_publish_log, log_publish_audit, weekly_offtopic_report, run_all_weekly_reports, get_last_week_range) and fully tested them with 13 pytest tests. Wired the migration hook into `pipelines/curation/pipeline.py` so publish_log gets score columns on next import.
+Created the title template registry module (shared/title_templates.py) with 8 template types and a TitleTemplatePicker class for weighted random selection with recent-use avoidance. Integrated into writer.py so the AI prompt receives a style hint per article, breaking the repetitive "1위 X vs Y — 비교" pattern that caused 50-62 similar_title failures/week.
 
 ## Key Implementation Details
 
-- **score_product** — simple substring matching against allowed keywords, normalized to `min(count / 2, 1.0)` using `RELEVANCE_CONFIG["default"]["min_keyword_matches"] = 2`
-- **score_products** — uses deferred import `from pipelines.curation.pipeline import CATEGORY_FILTERS` inside function body to avoid circular import at module level
-- **migrate_publish_log** — 5 separate `ALTER TABLE ADD COLUMN` calls, each wrapped in try/except `sqlite3.OperationalError` for idempotency
-- **weekly_offtopic_report** — queries `publish_log` for past 7 days, computes off-topic rate as percentage, returns formatted Korean Telegram message if rate > 20%, `None` otherwise
-- **All 9 functions** — docstring-only, no inline comments, matching project conventions
+- **TITLE_TEMPLATES** — 8 templates: comparison, ranking, toplist, buying_guide, budget, review_style, question_style, spec_style
+- **TitleTemplatePicker.pick()** — excludes template types used in the last 5 publications (from `get_recent_styles()`), then weighted random from remaining
+- **TitleTemplatePicker.render()** — fills {brand1}, {brand2}, {brand3}, {year}, {month}, {keyword}, {price_range} from product data
+- **TitleTemplatePicker.get_recent_styles()** — reads publish_log from curation.db, classifies each title via `_classify_title()` regex
+- **_classify_title()** — 8 regex patterns mapping title text to template types (returns "" for unmatched)
+- **writer.py integration** — `_build_system_prompt()` accepts optional `style_hint=""`; when provided, injects `[이번 발행 제목 스타일]` section with anti-repetition instruction. `_build_user_prompt()` accepts optional `price_range=""`. `generate_curation_article()` uses module-level `_tt_picker` to select/render style hint before building prompts.
 
 ## Deviations from Plan
 
@@ -43,43 +46,46 @@ None — plan executed exactly as written.
 ## Test Results
 
 ```
-tests/shared/test_relevance_scorer.py::TestScoreProduct::test_basic_match PASSED
-tests/shared/test_relevance_scorer.py::TestScoreProduct::test_multiple_matches PASSED
-tests/shared/test_relevance_scorer.py::TestScoreProduct::test_no_match PASSED
-tests/shared/test_relevance_scorer.py::TestScoreProduct::test_empty_name PASSED
-tests/shared/test_relevance_scorer.py::TestScoreProducts::test_aggregate PASSED
-tests/shared/test_relevance_scorer.py::TestGetThreshold::test_default PASSED
-tests/shared/test_relevance_scorer.py::TestGetThreshold::test_blog_override PASSED
-tests/shared/test_relevance_scorer.py::TestPassesGate::test_above_threshold PASSED
-tests/shared/test_relevance_scorer.py::TestPassesGate::test_below_threshold PASSED
-tests/shared/test_relevance_scorer.py::TestMigration::test_migrate_publish_log_idempotent PASSED
-tests/shared/test_relevance_scorer.py::TestLogPublishAudit::test_insert_and_select PASSED
-tests/shared/test_relevance_scorer.py::TestWeeklyReport::test_triggers_warning PASSED
-tests/shared/test_relevance_scorer.py::TestWeeklyReport::test_suppresses_below_threshold PASSED
-```
+# Template module verification:
+Picked: question_style
+Rendered: 노트북 고민된다면? 지금 사야 하는 BEST 5
+OK
 
-**13/13 passed**
+# writer.py verification:
+writer.py syntax OK
+Template picked for fitness-hugo: budget
+Prompt integration OK
+# Backward compatibility:
+- No style_hint → no [이번 발행 제목 스타일] section
+- Empty style_hint → no section
+- No price_range → no "상품 가격대" line
+```
 
 ## Verification
 
-- `python -c "import pipelines.curation.pipeline; print('Pipeline import OK')"` — Pipeline import OK
-- `migrate_publish_log('data/curation.db')` — `publish_log` schema now includes `avg_relevance_score`, `min_relevance_score`, `product_count`, `filtered_count`, `validation_passed`
+```bash
+# Task 1.1: Template module
+python3 -c "from shared.title_templates import TitleTemplatePicker, TITLE_TEMPLATES; p = TitleTemplatePicker(); k = p.pick(); r = p.render(k, {'brand1': '삼성', 'brand2': 'LG'}, keyword='노트북'); assert len(TITLE_TEMPLATES) >= 6"
+
+# Task 1.2: Prompt integration
+python3 -c "from pipelines.curation.writer import _build_system_prompt; prompt = _build_system_prompt('노트북', blog_id='laptop-hugo', style_hint='TOP 5 노트북'); assert 'TOP 5' in prompt; assert '최근 3일 내' in prompt; assert 'laptop-hugo' in prompt"
+```
 
 ## Self-Check: PASSED
 
-- [x] `shared/relevance_scorer.py` exists (321 lines, 9 functions)
-- [x] `tests/shared/test_relevance_scorer.py` exists (13 tests in 6 classes)
-- [x] Both commits exist in git log:
-  - `629f1c136` — feat(3-curation): create relevance_scorer module with all 9 functions and tests
-  - `10833ee1f` — feat(3-curation): add migrate_publish_log hook to pipeline.py
-- [x] `pipeline.py` modified with import + migration call
-- [x] Schema migration idempotent (dual-run test passed)
-- [x] Pipeline import succeeds (no circular import)
+- [x] `shared/title_templates.py` exists (211 lines, TitleTemplatePicker class + 8 templates + _classify_title)
+- [x] `pipelines/curation/writer.py` modified with title template integration
+- [x] Task 1.1 commit: `e6b65c5de` — feat(3-wave1): create shared/title_templates.py with TitleTemplatePicker
+- [x] Task 1.2 commit: `f9bd0bf5f` — feat(3-wave1): integrate title templates into writer.py
+- [x] Both verification commands pass
+- [x] Backward compatibility confirmed (no required args for existing callers)
+- [x] All 8 templates render without errors
+- [x] _classify_title correctly maps comparison/ranking/toplist/buying_guide/budget patterns
 
 ## Known Stubs
 
-None. All functions are fully implemented and tested. The weekly report message templates use hardcoded per-keyword avg scores placeholder text ("상세: per-keyword with avg scores") — this is intentional per the plan spec for Wave 1 and will be enhanced in Wave 2.
+None. TitleTemplatePicker is fully implemented. get_recent_styles() queries publish_log — will only start returning data after titles are published (expected behavior). Blog-specific overrides dict is empty by design for future use.
 
 ## Threat Flags
 
-No threat flags — module adds no new network endpoints, auth paths, or file access patterns beyond existing sqlite3 connections to `data/curation.db`.
+No threat flags — module adds no new network endpoints, auth paths, or file access patterns. get_recent_styles() connects to existing `curation.db` via sqlite3. No external API calls.
