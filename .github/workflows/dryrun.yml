@@ -1,0 +1,49 @@
+name: Daily Pipeline Dry-run Health Check
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 03:00 UTC
+  push:
+    branches: [ main ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  dryrun:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run pipeline dry-run
+        id: dryrun
+        run: |
+          set -e
+          OUTPUT=$(python scripts/pipeline_dryrun.py 2>&1)
+          echo "$OUTPUT"
+          # Save output to file for artifact
+          echo "$OUTPUT" > dryrun-output.txt
+          # Exit with the script's exit code (non-zero if unhealthy)
+          exit ${PIPESTATUS[0]}
+
+      - name: Upload dry-run output
+        if: always()  # Upload even on failure
+        uses: actions/upload-artifact@v4
+        with:
+          name: dryrun-output
+          path: dryrun-output.txt
+
+      - name: Add summary
+        if: always()
+        run: |
+          echo "### Dry-run Summary" >> $GITHUB_STEP_SUMMARY
+          cat dryrun-output.txt >> $GITHUB_STEP_SUMMARY
