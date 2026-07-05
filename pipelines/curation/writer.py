@@ -12,6 +12,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from shared.ai_writer import generate as ai_generate
+from shared.title_templates import TitleTemplatePicker
 
 ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
      crossorigin="anonymous"></script>
@@ -27,6 +28,8 @@ ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/
 </script>"""
 
 logger = logging.getLogger(__name__)
+
+_tt_picker = TitleTemplatePicker()
 
 # -- 금지어 목록 및 검증 --
 
@@ -202,11 +205,21 @@ def _build_product_block(products):
     return "\n".join(lines)
 
 
-def _build_system_prompt(keyword, blog_id=None) -> str:
+def _build_system_prompt(keyword, blog_id=None, style_hint="") -> str:
     year = datetime.now().year
     month = datetime.now().month
     extra = BLOG_EXTRA_RULES.get(blog_id or "", "")
     extra_block = f"\n\n{extra}" if extra else ""
+
+    extra_title_rules = ""
+    if style_hint:
+        extra_title_rules = f"""
+[이번 발행 제목 스타일]
+이번 글의 제목 스타일: {style_hint}
+참고용이며 정확히 따를 필요는 없지만, 최근 발행된 글들과 다른 구조로 작성해주세요.
+
+최근 3일 내 발행된 글과 중복되는 제목 구조는 피해주세요. 특히 '1위 X vs Y — ... 비교' 구조는 반복 사용하지 마세요.
+"""
 
     return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
 {year}년 {month}월 기준 "{keyword}" 관련 추천 상품 글을 작성합니다.
@@ -218,6 +231,7 @@ def _build_system_prompt(keyword, blog_id=None) -> str:
   * "1위 갤럭시북5 프로 vs LG그램 프로 — 사무용 노트북 {year} 비교"
   * "다이슨 V15 vs 삼성 비스포크 제트 — 무선청소기 실사용 리뷰"
 - 핵심 키워드가 제목 앞 15자 이내에 위치해야 합니다.
+{extra_title_rules}
 
 [본문 구조]
 1. **도입부 (2~3문장)**: 이 제품을 고를 때 겪는 구체적 고민. 공감하는 톤으로. "{year}년 {month}월 기준"을 명시하여 시의성 강조.
@@ -291,7 +305,7 @@ def _build_system_prompt(keyword, blog_id=None) -> str:
 - 전체 글이 2500자 미만이면 절대 안 됩니다.{extra_block}"""
 
 
-def _build_user_prompt(keyword, product_block) -> str:
+def _build_user_prompt(keyword, product_block, price_range="") -> str:
     # 상품명에서 브랜드/모델명 추출하여 제목 힌트 제공
     brand_hints = []
     for line in product_block.split("\n"):
@@ -304,8 +318,10 @@ def _build_user_prompt(keyword, product_block) -> str:
                 brand_hints.append(hint)
     brand_hint_str = ", ".join(brand_hints[:3])
 
+    price_line = f"\n상품 가격대: {price_range}" if price_range else ""
+
     return f"""키워드: {keyword}
-주요 브랜드/모델: {brand_hint_str}
+주요 브랜드/모델: {brand_hint_str}{price_line}
 
 위 브랜드/모델명 중 1~2개를 반드시 제목에 포함하세요.
 아래 상품 데이터를 기반으로 추천 큐레이션 글을 작성해주세요. 제공된 상품 수만큼만 소개하세요.
@@ -355,8 +371,41 @@ def generate_curation_article(keyword, products, blog_id=None):
         return None
 
     product_block = _build_product_block(products[:5])
-    system_prompt = _build_system_prompt(keyword, blog_id=blog_id)
-    user_prompt = _build_user_prompt(keyword, product_block)
+
+    # 제목 스타일 다양화 — 템플릿 기반 선택
+    template_type = None
+    style_hint = ""
+    price_range_str = ""
+    try:
+        recent_styles = _tt_picker.get_recent_styles(blog_id) if blog_id else []
+        template_type = _tt_picker.pick(used_templates=recent_styles)
+
+        # 상품 데이터에서 브랜드/가격대 추출
+        brand_data = {}
+        if products:
+            brands = []
+            for p in products[:3]:
+                b = p.get("brand", "") or p.get("maker", "") or ""
+                if b and b not in brands:
+                    brands.append(b)
+            for i, b in enumerate(brands, 1):
+                brand_data[f"brand{i}"] = b
+
+            prices = [p.get("product_price", 0) or 0 for p in products[:5]]
+            valid_prices = [p for p in prices if p > 0]
+            if valid_prices:
+                min_p = min(valid_prices)
+                max_p = max(valid_prices)
+                price_range_str = f"{min_p:,}원 ~ {max_p:,}원"
+                brand_data["price_range"] = f"{min_p // 10000}~{max_p // 10000}"
+
+        style_hint = _tt_picker.render(template_type, brand_data, keyword)
+        logger.info("[title_template] 선택: %s → %s…", template_type, style_hint[:60])
+    except Exception as e:
+        logger.warning("[title_template] 스타일 선택 오류: %s", e)
+
+    system_prompt = _build_system_prompt(keyword, blog_id=blog_id, style_hint=style_hint)
+    user_prompt = _build_user_prompt(keyword, product_block, price_range=price_range_str)
 
     # 글자수 미달 시 최대 2회 시도
     body = ""
@@ -391,6 +440,8 @@ def generate_curation_article(keyword, products, blog_id=None):
             break
     if not title:
         title = f"{keyword} 추천 TOP5 ({datetime.now().year}년)"
+    if template_type:
+        logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, title[:50])
 
     # 쿠팡 고지 문구 확인 및 추가
     disclosure = "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
