@@ -22,6 +22,7 @@ import requests as _requests
 from pipelines.curation.collector import collect_keyword, get_products
 from pipelines.curation.enricher import enrich_products
 from pipelines.curation.keywords import get_keywords
+from pipelines.curation.keyword_health import KeywordHealthStore
 from pipelines.curation.writer import generate_curation_article
 from shared.content_store import get_today_count
 from shared.image_handler import process_and_upload
@@ -101,6 +102,10 @@ def _init_db() -> None:
 _init_db()
 migrate_publish_log(str(DB_PATH))
 
+# ── Keyword health store ──
+health_store = KeywordHealthStore(str(DB_PATH))
+health_store.ensure_table()
+
 # ── Threshold-based alert checker ──
 _alert_checker = ThresholdChecker()
 _consecutive_failures: dict[str, int] = {}
@@ -142,9 +147,14 @@ def _select_keyword(blog_id):
     recent_cats = {_extract_category(r[0]) for r in recent_rows}
 
     available = [k for k in keywords if k not in used_set]
+    # 격리된 키워드 제외
+    available = [k for k in available if not health_store.is_quarantined(blog_id, k)]
     if not available:
         conn.close()
-        logger.warning(f"[{blog_id}] 모든 키워드 30일 내 사용 완료 — 발행 중단")
+        if len(keywords) > 0:
+            logger.warning(f"[{blog_id}] 모든 키워드 30일 내 사용 완료 또는 격리 중 — 발행 중단")
+        else:
+            logger.warning(f"[{blog_id}] 모든 키워드 30일 내 사용 완료 — 발행 중단")
         return None  # 강제 fallback 금지, 사용자 알림 대기
 
     cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
@@ -529,6 +539,13 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
     except Exception as e:
         logger.warning(f"[ledger] 실패 기록 오류: {e}")
 
+    # 키워드 건강 기록 (curation.db)
+    if keyword:
+        try:
+            health_store.record_failure(blog_id, keyword, stage)
+        except Exception as e:
+            logger.warning(f"[keyword_health] 기록 오류: {e}")
+
 
 def run(cfg):
     """Curation 파이프라인 메인 — dispatcher에서 호출"""
@@ -771,6 +788,11 @@ def _run_inner(cfg, blog_id, daily_quota):
         passed=True,
     )
     _record_products(blog_id, keyword, products[:5])
+    # 키워드 건강 — 성공 기록 (격리 해제)
+    try:
+        health_store.record_success(blog_id, keyword)
+    except Exception as e:
+        logger.warning(f"[keyword_health] 성공 기록 오류: {e}")
     logger.info(f"[{blog_id}] 발행 완료: {title}")
 
     return {
