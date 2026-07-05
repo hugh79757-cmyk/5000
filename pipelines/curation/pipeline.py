@@ -29,6 +29,7 @@ from shared.publisher import publish
 from shared.telegram_notifier import send_error as _tg_error
 from shared.validators import assert_korean_or_reject, sanitize_title
 from shared.relevance_scorer import migrate_publish_log, score_products, passes_gate
+from shared.alert_thresholds import ThresholdChecker
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +100,10 @@ def _init_db() -> None:
 
 _init_db()
 migrate_publish_log(str(DB_PATH))
+
+# ── Threshold-based alert checker ──
+_alert_checker = ThresholdChecker()
+_consecutive_failures: dict[str, int] = {}
 
 
 
@@ -264,7 +269,7 @@ CATEGORY_FILTERS = {
                      "사료", "간식", "캣타워", "스크래쳐", "하네스", "리드줄",
                      "배변", "화장실", "모래", "이동장", "켄넬", "방석",
                      "급식기", "정수기", "드라이룸", "샴푸", "치약",
-                     "유모차", "장난감", "노즈워크", "그루밍", "영양제"],
+                     "유모차", "노즈워크", "그루밍", "영양제"],
         "blocked": ["의류", "전자기기", "가전", "주방", "완구",
                      "생활용품", "출산/유아", "가구", "홈인테리어", "스포츠/레저", "패션"],
         "required": [],
@@ -538,11 +543,21 @@ def run(cfg):
 
     try:
         result = _run_inner(cfg, blog_id, daily_quota)
-        if not result.get("success"):
+
+        # 연속 실패 추적 + 임계값 알림
+        if result.get("success"):
+            _consecutive_failures[blog_id] = 0
+        else:
             reason = result.get("reason", "unknown")
             # 조용한 실패(할당량/중복)는 알림 제외, 나머지는 텔레그램 전송
             if reason not in ("quota_met", "already_running", "similar_title"):
                 _tg_error(blog_id, reason, f"[curation] 발행 실패: {reason}")
+
+            # 임계값 기반 추가 알림 (쿨다운, dry_run 지원)
+            if reason not in ("quota_met", "already_running"):
+                _consecutive_failures[blog_id] = _consecutive_failures.get(blog_id, 0) + 1
+                _alert_checker.maybe_alert(blog_id, reason, {"keyword": result.get("keyword", "")})
+
         return result
     finally:
         _release_lock(lock_file)
