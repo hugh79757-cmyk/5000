@@ -7,10 +7,10 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = "--cov=shared --cov-report=term-missing --cov-report=xml"
+addopts = "--cov=shared,pipelines/curation --cov-report=term-missing --cov-report=xml"
 
 [tool.coverage.run]
-source = ["shared"]
+source = ["shared", "pipelines/curation"]
 omit = ["*/tests/*", "*/__pycache__/*"]
 
 [tool.coverage.report]
