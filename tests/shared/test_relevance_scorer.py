@@ -124,8 +124,89 @@ class TestLogPublishAudit:
             os.unlink(path)
 
 
-class TestWeeklyReport:
-    def test_triggers_warning(self):
+ class TestWeeklyReport:
+     def test_triggers_warning(self):
+         from datetime import datetime, timezone
+         fd, path = tempfile.mkstemp(suffix=".db")
+         os.close(fd)
+         try:
+             conn = sqlite3.connect(path)
+             conn.execute(
+                 "CREATE TABLE publish_log (id INTEGER PRIMARY KEY AUTOINCREMENT, blog_id TEXT, keyword TEXT, title TEXT, slug TEXT, published_at TEXT)"
+             )
+             conn.commit()
+             conn.close()
+             migrate_publish_log(path)
+             now = datetime.now(timezone.utc).isoformat()
+             conn = sqlite3.connect(path)
+             for i in range(8):
+                 conn.execute(
+                     "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
+                     ("report-test", f"key{i}", f"Title {i}", f"slug-{i}", now, 0.9),
+                 )
+             for i in range(8, 11):
+                 conn.execute(
+                     "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
+                     ("report-test", f"key{i}", f"Title {i}", f"slug-{i}", now, 0.2),
+                 )
+             conn.commit()
+             conn.close()
+             msg = weekly_offtopic_report(path, "report-test")
+             assert msg is not None
+             assert "27.3%" in msg
+             assert "report-test" in msg
+         finally:
+             os.unlink(path)
+
+     def test_suppresses_below_threshold(self):
+         from datetime import datetime, timezone
+         fd, path = tempfile.mkstemp(suffix=".db")
+         os.close(fd)
+         try:
+             conn = sqlite3.connect(path)
+             conn.execute(
+                 "CREATE TABLE publish_log (id INTEGER PRIMARY KEY AUTOINCREMENT, blog_id TEXT, keyword TEXT, title TEXT, slug TEXT, published_at TEXT)"
+             )
+             conn.commit()
+             conn.close()
+             migrate_publish_log(path)
+             now = datetime.now(timezone.utc).isoformat()
+             conn = sqlite3.connect(path)
+             for i in range(9):
+                 conn.execute(
+                     "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
+                     ("quiet-test", f"key{i}", f"Title {i}", f"slug-{i}", now, 0.9),
+                 )
+             conn.execute(
+                 "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
+                 ("quiet-test", "key9", "Title 9", "slug-9", now, 0.2),
+             )
+             conn.commit()
+             conn.close()
+             msg = weekly_offtopic_report(path, "quiet-test")
+             assert msg is None
+         finally:
+             os.unlink(path)
+
+
+class TestGetLastWeekRange:
+    def test_returns_two_iso_strings(self):
+        start, end = get_last_week_range()
+        # Both should be valid ISO format strings
+        assert isinstance(start, str)
+        assert isinstance(end, str)
+        # End should be after start
+        from datetime import datetime
+        start_dt = datetime.fromisoformat(start)
+        end_dt = datetime.fromisoformat(end)
+        assert end_dt > start_dt
+        # Difference should be approximately 7 days (within a few seconds)
+        delta = end_dt - start_dt
+        assert abs(delta.days - 7) <= 1
+
+
+class TestRunAllWeeklyReports:
+    def test_aggregates_multiple_blogs(self):
         from datetime import datetime, timezone
         fd, path = tempfile.mkstemp(suffix=".db")
         os.close(fd)
@@ -139,51 +220,28 @@ class TestWeeklyReport:
             migrate_publish_log(path)
             now = datetime.now(timezone.utc).isoformat()
             conn = sqlite3.connect(path)
+            # blog1: high off-topic rate
             for i in range(8):
                 conn.execute(
                     "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
-                    ("report-test", f"key{i}", f"Title {i}", f"slug-{i}", now, 0.9),
+                    ("blog1", f"k{i}", f"T{i}", f"s{i}", now, 0.9),
                 )
             for i in range(8, 11):
                 conn.execute(
                     "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
-                    ("report-test", f"key{i}", f"Title {i}", f"slug-{i}", now, 0.2),
+                    ("blog1", f"k{i}", f"T{i}", f"s{i}", now, 0.2),
                 )
-            conn.commit()
-            conn.close()
-            msg = weekly_offtopic_report(path, "report-test")
-            assert msg is not None
-            assert "27.3%" in msg
-            assert "report-test" in msg
-        finally:
-            os.unlink(path)
-
-    def test_suppresses_below_threshold(self):
-        from datetime import datetime, timezone
-        fd, path = tempfile.mkstemp(suffix=".db")
-        os.close(fd)
-        try:
-            conn = sqlite3.connect(path)
-            conn.execute(
-                "CREATE TABLE publish_log (id INTEGER PRIMARY KEY AUTOINCREMENT, blog_id TEXT, keyword TEXT, title TEXT, slug TEXT, published_at TEXT)"
-            )
-            conn.commit()
-            conn.close()
-            migrate_publish_log(path)
-            now = datetime.now(timezone.utc).isoformat()
-            conn = sqlite3.connect(path)
-            for i in range(9):
+            # blog2: all good, should be suppressed
+            for i in range(10):
                 conn.execute(
                     "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
-                    ("quiet-test", f"key{i}", f"Title {i}", f"slug-{i}", now, 0.9),
+                    ("blog2", f"k{i}", f"T{i}", f"s{i}", now, 0.95),
                 )
-            conn.execute(
-                "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at, avg_relevance_score) VALUES (?,?,?,?,?,?)",
-                ("quiet-test", "key9", "Title 9", "slug-9", now, 0.2),
-            )
             conn.commit()
             conn.close()
-            msg = weekly_offtopic_report(path, "quiet-test")
-            assert msg is None
-        finally:
-            os.unlink(path)
+            msg = run_all_weekly_reports(path)
+            assert msg is not None
+            assert "blog1" in msg
+            assert "blog2" not in msg
+         ly:
+             os.unlink(path)
