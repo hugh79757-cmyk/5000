@@ -16,7 +16,7 @@ import yaml
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from shared.paths import FIVEK_ROOT, STAP_ROOT
+from shared.paths import FIVEK_ROOT, STAP_ROOT, DATA_DIR
 
 from dotenv import load_dotenv
 
@@ -669,6 +669,23 @@ def register_schedules():
 
     schedule.every().day.at("23:00").do(_run_quality_scan)
     schedule.every().day.at("23:50").do(daily_report)
+    job_count += 1
+
+    # CUAP weekly off-topic 리포트: 매주 월요일 10:00
+    DB_NAME = "curation.db"
+
+    def _run_weekly_offtopic_report() -> None:
+        try:
+            from shared.relevance_scorer import run_all_weekly_reports
+            from shared.telegram_notifier import send
+            report = run_all_weekly_reports(os.path.join(DATA_DIR, DB_NAME))
+            if report:
+                send(report)
+        except Exception as e:
+            logger.exception(f"Weekly off-topic report error: {e}")
+
+    schedule.every().monday.at("10:00").do(_run_weekly_offtopic_report)
+    logger.info("CUAP weekly off-topic report scheduled Monday at 10:00")
     job_count += 1
 
     return job_count

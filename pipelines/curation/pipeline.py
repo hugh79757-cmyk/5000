@@ -653,7 +653,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         if attempt == max_retries:
             logger.error(f"[{blog_id}] {max_retries}회 재시도 후 필터 실패: {keyword} ({len(products)}개)")
             _record_failure(blog_id, "irrelevant_products", f"{max_retries}회 재시도 후 필터 실패: {keyword}", keyword)
-            return {"success": False, "reason": "irrelevant_products"}
+            return {"success": False, "reason": "irrelevant_products", "keyword": keyword}
         logger.warning(f"[{blog_id}] 필터 후 상품 부족 ({len(products)}개), 대체 키워드 시도 ({attempt}/{max_retries})")
         # 해당 키워드 캐시 삭제
         try:
@@ -677,7 +677,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         if not fallback_kws:
             logger.error(f"[{blog_id}] 대체 키워드 없음 — 발행 중단")
             _record_failure(blog_id, "irrelevant_products", "대체 키워드 없음", keyword)
-            return {"success": False, "reason": "irrelevant_products"}
+            return {"success": False, "reason": "irrelevant_products", "keyword": keyword}
         keyword = fallback_kws[0]
         logger.info(f"[{blog_id}] 대체 키워드 사용 ({attempt}/{max_retries}): {keyword}")
         collect_keyword(keyword)
@@ -691,7 +691,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         if not passed:
             logger.warning(f"[{blog_id}] 관련성 점수 미달: {scores['avg']:.2f} < {scores['threshold']}")
             _record_failure(blog_id, "low_relevance", f"관련성 점수 {scores['avg']:.2f} < 임계값 {scores['threshold']}", keyword)
-            return {"success": False, "reason": "low_relevance"}
+            return {"success": False, "reason": "low_relevance", "keyword": keyword}
         logger.info(f"[{blog_id}] 관련성 점수: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
     except Exception as e:
         # Fail open: scoring exception should not block publication

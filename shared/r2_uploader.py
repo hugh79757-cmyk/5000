@@ -5,7 +5,10 @@ import boto3
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
+load_dotenv(os.path.expanduser("~/.env.common"))
+load_dotenv(
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
+)
 
 R2_ENDPOINT = os.getenv("R2_ENDPOINT")
 R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY_ID")
@@ -14,7 +17,9 @@ R2_BUCKET_DEFAULT = os.getenv("R2_BUCKET_NAME", "hotissue-images")
 
 BUCKET_PUBLIC_URLS = {
     "hotissue-images": "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev",
-    "senior-images":   os.getenv("SENIOR_R2_PUBLIC_URL", "https://pub-3f702c9170934a72bc62a5436c406aa6.r2.dev"),
+    "senior-images": os.getenv(
+        "SENIOR_R2_PUBLIC_URL", "https://pub-3f702c9170934a72bc62a5436c406aa6.r2.dev"
+    ),
 }
 
 

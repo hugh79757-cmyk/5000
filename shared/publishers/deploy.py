@@ -46,6 +46,7 @@ def deploy_site(site_path, cf_project) -> bool:
 
 def _deploy_site_inner(site_path, cf_project) -> bool:
     site = Path(site_path)
+    load_dotenv(os.path.expanduser("~/.env.common"))
     load_dotenv(os.path.join(FIVEK_ROOT, ".env"), override=True)
     _wrangler_env = os.environ.copy()
     _cf_token = os.getenv("CLOUDFLARE_API_TOKEN", "")

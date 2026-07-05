@@ -15,6 +15,7 @@ def get_r2_client():
         aws_secret_access_key=os.getenv("R2_SECRET_ACCESS_KEY"),
     )
 
+
 def process_and_upload(image_data, bucket=None, key_prefix="car-images") -> str:
     if bucket is None:
         bucket = os.getenv("R2_BUCKET", "hotissue-images")

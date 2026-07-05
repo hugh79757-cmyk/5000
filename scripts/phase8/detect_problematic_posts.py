@@ -102,6 +102,9 @@ def is_chinese_title(title):
     return has_cjk and hangul_count < 5
 
 
+BODY_BLOCKED_CACHE = {}
+
+
 def is_offtopic(title, tags, blocked_keywords):
     """True if title or tags contain any blocked keyword"""
     combined = title.lower()
@@ -113,13 +116,50 @@ def is_offtopic(title, tags, blocked_keywords):
     return None
 
 
-def scan_blog(blog_id):
+def get_body_content(filepath):
+    """Extract body content (after frontmatter) from index.md"""
+    with open(filepath, 'r', encoding='utf-8') as f:
+        content = f.read()
+    if not content.startswith('---'):
+        return content
+    parts = content.split('---', 2)
+    if len(parts) < 3:
+        return content
+    return parts[2].strip()
+
+
+def build_body_regex(blocked_keywords):
+    """Build compiled word-boundary regex for blocked keywords"""
+    key = tuple(blocked_keywords)
+    if key in BODY_BLOCKED_CACHE:
+        return BODY_BLOCKED_CACHE[key]
+    patterns = []
+    for kw in blocked_keywords:
+        patterns.append(f"(?<![가-힣]){re.escape(kw.lower())}(?![가-힣])")
+    regex = re.compile("|".join(patterns))
+    BODY_BLOCKED_CACHE[key] = regex
+    return regex
+
+
+def is_body_offtopic(body, blocked_keywords):
+    """Check body content using Korean word-boundary regex"""
+    if not body:
+        return None
+    regex = build_body_regex(blocked_keywords)
+    m = regex.search(body.lower())
+    if m:
+        return m.group()
+    return None
+
+
+def scan_blog(blog_id, scan_body=False):
     posts_dir = os.path.join(CUAP_ROOT, blog_id, "content", "posts")
     if not os.path.isdir(posts_dir):
         print(f"  [건너뜀] 디렉토리 없음: {posts_dir}")
-        return [], []
+        return [], [], []
     chinese = []
     offtopic = []
+    body_offtopic = []
     blocked = CATEGORY_FILTERS.get(blog_id, {}).get("blocked", [])
 
     for slug in sorted(os.listdir(posts_dir)):
@@ -152,33 +192,54 @@ def scan_blog(blog_id):
                 "path": index_path,
             })
 
-    return chinese, offtopic
+        if scan_body:
+            body = get_body_content(index_path)
+            body_reason = is_body_offtopic(body, blocked)
+            if body_reason:
+                body_offtopic.append({
+                    "blog": blog_id,
+                    "slug": slug,
+                    "title": title,
+                    "reason": body_reason,
+                    "path": index_path,
+                    "source": "body",
+                })
+
+    return chinese, offtopic, body_offtopic
 
 
 def main():
     parser = argparse.ArgumentParser(description="CUAP 문제 포스트 탐지 스크립트")
     parser.add_argument("--dry-run", action="store_true", default=True,
                         help="실행만 하고 삭제하지 않음 (기본값)")
+    parser.add_argument("--scan-body", action="store_true",
+                        help="본문 내용까지 word-boundary regex로 스캔")
     args = parser.parse_args()
 
     all_chinese = []
     all_offtopic = []
+    all_body = []
     blog_stats = {}
 
+    scan_mode = "제목+태그"
+    if args.scan_body:
+        scan_mode = "제목+태그+본문(word-boundary)"
+
     print("=" * 60)
-    print("CUAP Phase 8 문제 포스트 탐지 스캔")
+    print(f"CUAP 문제 포스트 탐지 스캔 (모드: {scan_mode})")
     print("=" * 60)
 
     for blog_id in BLOGS:
         print(f"\n🔍 [{blog_id}] 스캔 중...")
-        chinese, offtopic = scan_blog(blog_id)
+        chinese, offtopic, body = scan_blog(blog_id, scan_body=args.scan_body)
         all_chinese.extend(chinese)
         all_offtopic.extend(offtopic)
-        total = len(chinese) + len(offtopic)
+        all_body.extend(body)
+        total = len(chinese) + len(offtopic) + len(body)
         blog_stats[blog_id] = total
-        print(f"  중국어 제목: {len(chinese)}건, 오프토픽: {len(offtopic)}건, 총: {total}건")
+        print(f"  중국어: {len(chinese)}건, 오프토픽: {len(offtopic)}건, 본문: {len(body)}건, 총: {total}건")
 
-    # Deduplicate (post can be both chinese + offtopic)
+    # Deduplicate by (blog, slug) across all categories
     seen_slugs = set()
     unique_chinese = []
     for item in all_chinese:
@@ -194,15 +255,24 @@ def main():
             seen_slugs.add(key)
             unique_offtopic.append(item)
 
-    total_flagged = len(unique_chinese) + len(unique_offtopic)
+    unique_body = []
+    for item in all_body:
+        key = (item["blog"], item["slug"])
+        if key not in seen_slugs:
+            seen_slugs.add(key)
+            unique_body.append(item)
+
+    total_flagged = len(unique_chinese) + len(unique_offtopic) + len(unique_body)
 
     result = {
         "chinese": unique_chinese,
         "offtopic": unique_offtopic,
+        "body_offtopic": unique_body,
         "summary": {
             "total_flagged": total_flagged,
             "chinese": len(unique_chinese),
             "offtopic": len(unique_offtopic),
+            "body_offtopic": len(unique_body),
             "by_blog": blog_stats,
         },
     }
@@ -215,7 +285,8 @@ def main():
     print(f"\n{'=' * 60}")
     print(f"스캔 완료!")
     print(f"  중국어 제목: {len(unique_chinese)}건")
-    print(f"  오프토픽: {len(unique_offtopic)}건")
+    print(f"  오프토픽(제목/태그): {len(unique_offtopic)}건")
+    print(f"  오프토픽(본문): {len(unique_body)}건")
     print(f"  총 탐지: {total_flagged}건")
     print(f"  결과 저장: {output_path}")
     print(f"{'=' * 60}")

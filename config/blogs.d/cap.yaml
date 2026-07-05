@@ -133,7 +133,7 @@ blogs:
   theme: Blowfish
 
 - cf_project: rank-hugo
-  daily_quota: 5
+  daily_quota: 1
   domain: rank.informationhot.kr
   id: rank-hugo
   name: 자동차랭킹
@@ -144,17 +144,13 @@ blogs:
   repo: rank-hugo
   schedule:
     times:
-    - 07:22
-    - '10:22'
-    - '13:22'
-    - '16:22'
-    - '20:22'
+    - '07:22'
   site_path: /Users/twinssn/Projects/cap/rank-hugo
-  status: inactive
+  status: active
   theme: Blowfish
 
 - cf_project: pick-hugo
-  daily_quota: 5
+  daily_quota: 1
   domain: pick.informationhot.kr
   id: pick-hugo
   name: 내차찾기
@@ -165,11 +161,7 @@ blogs:
   repo: pick-hugo
   schedule:
     times:
-    - 07:24
-    - '10:24'
-    - '13:24'
-    - '16:24'
-    - '20:24'
+    - '07:24'
   site_path: /Users/twinssn/Projects/cap/pick-hugo
-  status: inactive
+  status: active
   theme: Blowfish

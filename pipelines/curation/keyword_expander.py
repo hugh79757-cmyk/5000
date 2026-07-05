@@ -267,6 +267,21 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100
 
     # 새 키워드 필터링
     added = [kw for kw in new_keywords if kw not in existing][:max_add]
+
+    # CATEGORY_FILTERS 기반 검증
+    try:
+        from pipelines.curation.keywords import validate_keyword
+        valid_added = []
+        for kw in added:
+            ok, reason = validate_keyword(kw, blog_id)
+            if ok:
+                valid_added.append(kw)
+            else:
+                print(f"[keywords.py] {blog_id}: 제외됨 '{kw}' — {reason}")
+        added = valid_added
+    except ImportError:
+        pass
+
     if not added:
         print(f"[keywords.py] {blog_id}: 추가할 신규 키워드 없음")
         return 0

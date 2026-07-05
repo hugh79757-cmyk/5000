@@ -4,10 +4,12 @@ import os
 import requests
 from dotenv import load_dotenv
 
-# 중앙 env 파일 로드
-load_dotenv("/Users/twinssn/.env.common")
-# 프로젝트 .env 파일도 로드 ( 덮어쓰기 가능)
-load_dotenv()
+# 프로젝트 .env 파일 로드 (우선)
+load_dotenv(
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
+)
+# 사용자 공통 env 파일 (폴백)
+load_dotenv(os.path.expanduser("~/.env.common"))
 
 logger = logging.getLogger(__name__)
 
@@ -21,11 +23,15 @@ def send(message, parse_mode="HTML") -> bool | None:
         logger.warning("Telegram credentials missing")
         return False
     try:
-        resp = requests.post(API_URL, json={
-            "chat_id": CHAT_ID,
-            "text": message,
-            "parse_mode": parse_mode,
-        }, timeout=10)
+        resp = requests.post(
+            API_URL,
+            json={
+                "chat_id": CHAT_ID,
+                "text": message,
+                "parse_mode": parse_mode,
+            },
+            timeout=10,
+        )
         if resp.status_code == 200:
             return True
         logger.warning("Telegram send failed: " + str(resp.status_code))
@@ -37,7 +43,12 @@ def send(message, parse_mode="HTML") -> bool | None:
 
 def send_error(blog_id, stage, error_msg):
     # 정상 동작인 quota 초과는 알림 불필요 (로그에만 기록)
-    _SILENT_REASONS = ["quota_met", "quota_exceeded", "daily_quota_exceeded", "daily_quota"]
+    _SILENT_REASONS = [
+        "quota_met",
+        "quota_exceeded",
+        "daily_quota_exceeded",
+        "daily_quota",
+    ]
     _err_lower = str(error_msg).lower()
     if any(reason in _err_lower for reason in _SILENT_REASONS):
         logger.info(f"[Silent] {blog_id}/{stage}: {error_msg}")
@@ -50,6 +61,7 @@ def send_error(blog_id, stage, error_msg):
         from pathlib import Path
 
         import yaml
+
         config_dir = Path(__file__).parent.parent / "config"
         all_blogs = []
         blogs_d = config_dir / "blogs.d"

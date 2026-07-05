@@ -379,6 +379,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     if not thumbnail_url:
         thumbnail_url = _extract_first_image(body_md)
+    thumbnail_url = sanitize_featureimage_url(thumbnail_url, max_len=250)
     if not thumbnail_url:
         _blog_id = blog_cfg.get("id", "")
         if "stock" in _blog_id:

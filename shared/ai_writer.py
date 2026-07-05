@@ -11,7 +11,9 @@ load_dotenv(os.path.expanduser("~/.env.common"))
 
 logger = logging.getLogger(__name__)
 
-CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
+CONFIG_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config"
+)
 
 
 def load_models_config():
@@ -56,7 +58,9 @@ MAX_RETRIES = 2
 TIER_ORDER = ["default", "fallback", "economy"]
 
 
-def generate(system_prompt, user_prompt, tier="default", temperature=None, max_tokens=None):
+def generate(
+    system_prompt, user_prompt, tier="default", temperature=None, max_tokens=None
+):
     """AI 글 생성 — DeepSeek 기본, MiMo 폴백, 중국어 검증 후 발행 차단"""
     config = load_models_config()
     providers = config["providers"]
@@ -79,7 +83,9 @@ def generate(system_prompt, user_prompt, tier="default", temperature=None, max_t
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            "temperature": temperature if temperature is not None else tier_config.get("temperature", 0.7),
+            "temperature": temperature
+            if temperature is not None
+            else tier_config.get("temperature", 0.7),
         }
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
@@ -102,7 +108,9 @@ def generate(system_prompt, user_prompt, tier="default", temperature=None, max_t
                 logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
                 continue
 
-            logger.info(f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)")
+            logger.info(
+                f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
+            )
             return {
                 "content": content,
                 "model": tier_config["model"],
@@ -131,19 +139,54 @@ def generate_car(prompt_text, data):
     if post_type in ("top5_rank", "persona_pick", "price_trend"):
         main_data = {k: v for k, v in data.items() if v is not None}
     else:
-        main_keys = ["model", "brand", "year", "trim", "base_price", "engine", "fuel_type",
-                     "fuel_efficiency", "displacement", "seats", "discount", "discount_conditions",
-                     "finance_rate", "finance_term_months", "monthly_payment_36", "monthly_payment_48",
-                     "monthly_payment_60", "annual_km", "tax_annual", "insurance_estimate",
-                     "annual_fuel_cost", "resale_1yr", "resale_2yr", "resale_3yr", "resale_rate_percent",
-                     "three_year_depreciation", "three_year_maintenance", "three_year_total_cost",
-                     "final_price", "trim_lineup", "ev_range_km", "ev_efficiency", "battery_capacity_kwh",
-                     "ev_charge_monthly_home", "ev_charge_monthly_slow", "ev_charge_monthly_fast",
-                     "ev_charge_annual_home", "ev_charge_annual_slow", "ev_charge_annual_fast",
-                     "ev_monthly_kwh", "fuel_price"]
+        main_keys = [
+            "model",
+            "brand",
+            "year",
+            "trim",
+            "base_price",
+            "engine",
+            "fuel_type",
+            "fuel_efficiency",
+            "displacement",
+            "seats",
+            "discount",
+            "discount_conditions",
+            "finance_rate",
+            "finance_term_months",
+            "monthly_payment_36",
+            "monthly_payment_48",
+            "monthly_payment_60",
+            "annual_km",
+            "tax_annual",
+            "insurance_estimate",
+            "annual_fuel_cost",
+            "resale_1yr",
+            "resale_2yr",
+            "resale_3yr",
+            "resale_rate_percent",
+            "three_year_depreciation",
+            "three_year_maintenance",
+            "three_year_total_cost",
+            "final_price",
+            "trim_lineup",
+            "ev_range_km",
+            "ev_efficiency",
+            "battery_capacity_kwh",
+            "ev_charge_monthly_home",
+            "ev_charge_monthly_slow",
+            "ev_charge_monthly_fast",
+            "ev_charge_annual_home",
+            "ev_charge_annual_slow",
+            "ev_charge_annual_fast",
+            "ev_monthly_kwh",
+            "fuel_price",
+        ]
         main_data = {k: data[k] for k in main_keys if k in data and data[k] is not None}
 
-    comp_data = {k: data[k] for k in data if k.startswith("competitor") and data[k] is not None}
+    comp_data = {
+        k: data[k] for k in data if k.startswith("competitor") and data[k] is not None
+    }
 
     data_block = "## 메인 차량 데이터\n"
     data_block += json.dumps(main_data, ensure_ascii=False, indent=2)
@@ -202,10 +245,21 @@ def generate_car(prompt_text, data):
         _lines = _body.split("\n")
         _out = []
         for _i, _ln in enumerate(_lines):
-            if _ln.startswith("|") and _i > 0 and _out and not _out[-1].startswith("|") and _out[-1].strip() != "":
+            if (
+                _ln.startswith("|")
+                and _i > 0
+                and _out
+                and not _out[-1].startswith("|")
+                and _out[-1].strip() != ""
+            ):
                 _out.append("")
             _out.append(_ln)
-            if _ln.startswith("|") and _i + 1 < len(_lines) and not _lines[_i + 1].startswith("|") and _lines[_i + 1].strip() != "":
+            if (
+                _ln.startswith("|")
+                and _i + 1 < len(_lines)
+                and not _lines[_i + 1].startswith("|")
+                and _lines[_i + 1].strip() != ""
+            ):
                 _out.append("")
         return "\n".join(_out)
     return None
