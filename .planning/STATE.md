@@ -6,15 +6,15 @@ status: active
 last_updated: "2026-07-01T22:00:00.000Z"
 progress:
   total_phases: 10
-  completed_phases: 9
-  total_plans: 24
-  completed_plans: 20
-  percent: 83
+  completed_phases: 10
+  total_plans: 33
+  completed_plans: 33
+  percent: 100
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — 8 phases done, Phase 8 pending (milestone v1.0 → v1.1)
+**Status:** v1.1 — All phases complete (milestone v1.0 → v1.1)
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -75,19 +75,22 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - ✓ im-not-ai ai-tell-taxonomy.md v2.0 기준 16개 패턴 추가 (S1×5, S2×11)
 - ✓ 기존 테스트 65/65 통과
 
-**Phase 8 — Content Cleanup (🔄 In Progress)**
+**Phase 8 — Content Cleanup (Complete ✓)**
 
 - ✓ 8-1: detection script (scripts/phase8/detect_problematic_posts.py)
-- ✓ 8-2: dry-run scan (43 offtopic posts flagged, 0 Chinese titles)
-- 🔲 8-3:批量 삭제 스크립트 (Wave 2)
-- 🔲 8-4: 검증 및 롤백 (Wave 2)
+- ✓ 8-2: dry-run scan (118 offtopic posts flagged, 0 Chinese titles)
+- ✓ 8-3: batch deletion script (scripts/phase8/delete_flagged_posts.py)
+- ✓ 8-4: verification script (scripts/phase8/verify_cleanup.py)
+- Note: Deletion script created but not executed (--dry-run mode). Run with --execute to actually delete posts.
 
-**Phase 10 — Blowfish Engagement Optimization (🔲 Planned)**
+**Phase 10 — Blowfish Engagement Optimization (Complete ✓)**
 
-- 🔲 10-01: P0 Post-processor — lead + figure shortcodes (Wave 1)
-- 🔲 10-02: P1 AI Prompt — alert + badge shortcode instructions (Wave 1)
-- 🔲 10-03: P2 Gallery + accordion post-processor + prompt (Wave 2)
-- 🔲 10-04: P3 Chart shortcode via embedded data comment (Wave 3)
+- ✓ 10-01: P0 Post-processor — lead + figure shortcodes (Wave 1)
+- ✓ 10-02: P1 AI Prompt — alert + badge shortcode instructions (Wave 1)
+- ✓ 10-03: P2 Gallery + accordion post-processor + prompt (Wave 2)
+- ✓ 10-04: P3 Chart shortcode via embedded data comment (Wave 3)
+- ✓ 10-05: AdSense 수동광고 RPM 최적화 (Wave 1)
+- Note: Implementation uses HTML approach instead of Blowfish shortcodes (shortcodes_enabled: false for travel-hugo)
 
 ## Progress
 
@@ -100,9 +103,9 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 | 5     | ✓      | 3/3   | 100%     |
 | 6     | ✓      | 10/10 | 100%     |
 | 7     | ✓      | 9/9   | 100%     |
-| 8     | 🔄     | 1/2   | 50%      |
+| 8     | ✓      | 4/4   | 100%     |
 | 9     | ✓      | 1/1   | 100%     |
-| 10    | 🔄     | 0/4   | 0%       |
+| 10    | ✓      | 5/5   | 100%     |
 
 ## Active Workspace
 
@@ -116,4 +119,10 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 - `.planning/phases/05-post-stabilization-enhancement/05-CONTEXT.md` — Phase 5 context
 
 ---
-*Last updated: 2026-07-04 after Phase 8 Plan 1 completion*
+*Last updated: 2026-07-07 after travel writer fixes commit*
+
+## Quick Tasks Completed
+
+| Date | Task | Commit | Files |
+|------|------|--------|-------|
+| 2026-07-07 | travel-writer-fixes — 마크다운 포맷 오류 이중 방어 (prompt 규칙 강화 + sanitize_markdown) | `3f230f929` | `config/prompts/travel.yaml`, `pipelines/travel/writer.py` |
