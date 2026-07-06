@@ -322,7 +322,7 @@ def _inject_naver_map(body_md, items, is_festival=False):
             url = "https://search.naver.com/search.naver?query=" + encoded
         else:
             url = "https://map.naver.com/v5/search/" + encoded
-        _btn_label = " 네이버에서 검색하기" if is_festival else " 네이버 지도에서 보기"
+        _btn_label = " 네이버에서 검색하기" if is_festival else " 지도 열기"
         _btn_cls = "naver-search-btn" if is_festival else "naver-map-btn"
         btn_html = '<a class="' + _btn_cls + '" href="' + url + '" target="_blank" rel="nofollow">' + title + _btn_label + "</a>"
         map_links.append((title, btn_html))
@@ -492,7 +492,7 @@ def _enrich_with_nearby_restaurants_only(data, html):
         card += '<strong class="nearby-card-name">' + name + "</strong>"
         if addr:
             card += '<span class="nearby-card-addr">' + addr + "</span>"
-        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도에서 보기</a>'
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도 열기</a>'
         card += "</div></div>"
         return card
 
@@ -545,7 +545,7 @@ def _enrich_with_nearby(data, html):
         card += '<strong class="nearby-card-name">' + name + "</strong>"
         if addr:
             card += '<span class="nearby-card-addr">' + addr + "</span>"
-        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도에서 보기</a>'
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도 열기</a>'
         card += "</div></div>"
         return card
 
@@ -868,6 +868,71 @@ def _enrich_title(title, data, display_region, theme, source_type, prompt_id="")
         if n:
             return re.sub(r"\s+", " ", new_title).strip()
     return title
+
+
+def sanitize_markdown(text: str, blog_id: str = "") -> str:
+    if not text:
+        return text
+
+    fixes = {"bold_unmatched": 0, "strike_unmatched": 0, "h1_removed": 0, "h1_demoted": 0}
+    import re as _re
+
+    _parts = text.split("**")
+    if len(_parts) > 1 and len(_parts) % 2 == 0:
+        if text.rstrip().endswith("**") and not text.rstrip().endswith("***"):
+            text = text.rstrip()[:-2]
+            fixes["bold_unmatched"] += 1
+        else:
+            last_pos = text.rfind("**")
+            if last_pos >= 0:
+                text = text[:last_pos] + text[last_pos + 2 :]
+                fixes["bold_unmatched"] += 1
+
+    _parts_s = text.split("~~")
+    if len(_parts_s) > 1 and len(_parts_s) % 2 == 0:
+        last_pos = text.rfind("~~")
+        if last_pos >= 0:
+            text = text[:last_pos] + text[last_pos + 2 :]
+            fixes["strike_unmatched"] += 1
+
+    _body_start = 0
+    _fm_end = text.find("---\n", 1)
+    if _fm_end > 0 and text.startswith("---"):
+        _body_start = _fm_end + 4
+
+    _body = text[_body_start:] if _body_start else text
+    _lines = _body.split("\n")
+    _new_lines = []
+    _title_text = ""
+
+    for _line in _lines:
+        _stripped = _line.strip()
+        if _stripped.startswith("# ") and not _stripped.startswith("## "):
+            _h1_content = _stripped[2:].strip()
+            if not _title_text:
+                _tm = _re.search(r'^title:\s*[\'"](.+?)[\'"]', text[:_body_start], _re.MULTILINE)
+                if _tm:
+                    _title_text = _tm.group(1)
+            if _title_text and (_h1_content == _title_text or _h1_content in _title_text or _title_text in _h1_content):
+                fixes["h1_removed"] += 1
+                continue
+            else:
+                _new_lines.append(_re.sub(r"^(\s*)# ", r"\1## ", _line))
+                fixes["h1_demoted"] += 1
+                continue
+        _new_lines.append(_line)
+
+    text = text[:_body_start] + "\n".join(_new_lines) if _body_start else "\n".join(_new_lines)
+
+    _total = sum(v for v in fixes.values())
+    if _total > 0:
+        _parts_log = []
+        for _key, _val in fixes.items():
+            if _val > 0:
+                _parts_log.append(f"rule={_key} count={_val}")
+        logger.warning("[sanitize] file=%s %s", blog_id or "unknown", " ".join(_parts_log))
+
+    return text
 
 
 def generate_content(data, blog_id="travel-hugo"):
@@ -1326,6 +1391,9 @@ def generate_content(data, blog_id="travel-hugo"):
     #     content = '> **이 포스팅은 ...** \n\n' + content
 
     title = _enrich_title(title, data, display_region, theme, source_type, prompt_id)
+
+    title = sanitize_markdown(title, blog_id=blog_id)
+    content = sanitize_markdown(content, blog_id=blog_id)
 
     return {
         "title": title,
