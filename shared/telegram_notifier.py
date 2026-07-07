@@ -2,14 +2,6 @@ import logging
 import os
 
 import requests
-from dotenv import load_dotenv
-
-# 프로젝트 .env 파일 로드 (우선)
-load_dotenv(
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env")
-)
-# 사용자 공통 env 파일 (폴백)
-load_dotenv(os.path.expanduser("~/.env.common"))
 
 logger = logging.getLogger(__name__)
 

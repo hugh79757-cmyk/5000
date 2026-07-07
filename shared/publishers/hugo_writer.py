@@ -20,6 +20,16 @@ def _sanitize_yaml_value(s, max_len=None):
 
 def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    # Convert inline markdown in frontmatter fields to HTML for proper rendering
+    title = _convert_inline_md_to_html(title)
+    description = _convert_inline_md_to_html(description) if description else ""
+    category = _convert_inline_md_to_html(category) if category else ""
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_list = [_convert_inline_md_to_html(t) for t in tag_list]
+    else:
+        tag_list = []
+    
     fm = "---\n"
     fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "date: " + date_str + "\n"
@@ -29,8 +39,7 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
     fm += 'slug: "' + slug + '"\n'
     if category:
         fm += 'categories: ["' + category + '"]\n'
-    if tags:
-        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+    if tag_list:
         fm += "tags: [" + ", ".join('"' + t + '"' for t in tag_list) + "]\n"
     if thumbnail_url:
         fm += 'image: "' + thumbnail_url + '"\n'
@@ -49,6 +58,16 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
 
 def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, description, is_draft=False):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    # Convert inline markdown in frontmatter fields to HTML for proper rendering
+    title = _convert_inline_md_to_html(title)
+    description = _convert_inline_md_to_html(description) if description else ""
+    category = _convert_inline_md_to_html(category) if category else ""
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_list = [_convert_inline_md_to_html(t) for t in tag_list]
+    else:
+        tag_list = []
+    
     fm = "---\n"
     fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "date: '" + date_str + "'\n"
@@ -56,8 +75,7 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
         fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
-    if tags:
-        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+    if tag_list:
         fm += "tags: " + str(tag_list) + "\n"
     if category:
         fm += "categories: ['" + category + "']\n"
@@ -73,6 +91,16 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
 
 def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    # Convert inline markdown in frontmatter fields to HTML for proper rendering
+    title = _convert_inline_md_to_html(title)
+    description = _convert_inline_md_to_html(description) if description else ""
+    category = _convert_inline_md_to_html(category) if category else ""
+    if tags:
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        tag_list = [_convert_inline_md_to_html(t) for t in tag_list]
+    else:
+        tag_list = []
+    
     fm = "---\n"
     fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "date: " + date_str + "\n"
@@ -82,8 +110,7 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     fm += 'slug: "' + slug + '"\n'
     if category:
         fm += "categories: " + str([category]) + "\n"
-    if tags:
-        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+    if tag_list:
         fm += "tags: " + str(tag_list) + "\n"
     if thumbnail_url:
         fm += "cover:\n"
@@ -121,19 +148,49 @@ def _clean_body(body_md):
     return body_md.strip()
 
 
+def _convert_inline_md_to_html(text: str) -> str:
+    """Convert markdown inline formatting to HTML inside raw HTML blocks.
+
+    Hugo's Goldmark does not process markdown inside raw HTML elements
+    (e.g. ``<p class="lead">``). This helper converts inline patterns
+    so they render properly even inside HTML wrappers.
+
+    Applied in order: strike > bold > italic > inline code > image > link.
+    """
+    import re as _re
+
+    # must process in order to avoid interference
+    # 1) ~~strike~~
+    text = _re.sub(r"~~(.+?)~~", r"<del>\1</del>", text)
+    # 2) **bold** (before single *)
+    text = _re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+    # 3) *italic* (only if not inside a word — avoid matching file_path or numbers)
+    text = _re.sub(r"(?<!\w)\*(?!\*)(.+?)(?<!\*)\*(?!\w)", r"<em>\1</em>", text)
+    # 4) `inline code`
+    text = _re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
+    return text
+
+
 def _apply_lead_shortcode(body_md: str) -> str:
-    if not body_md or body_md.strip().startswith("{{< lead >}}"):
-        return body_md
     if not body_md.strip():
         return body_md
+
+    if body_md.strip().startswith("<p class=\"lead\""):
+        # Body already has a lead block (from a previous run).
+        # Convert inline markdown inside existing HTML wrappers.
+        return _convert_inline_md_to_html(body_md)
+
     blocks = body_md.split("\n\n")
     for i, block in enumerate(blocks):
         stripped = block.strip()
         if not stripped:
             continue
-        if stripped.startswith(("# ", "## ", "### ", "{{<", "```", ">")):
+        if stripped.startswith(("# ", "## ", "### ", "{{<", "<p class", "```", ">")):
             continue
-        blocks[i] = f"{{{{< lead >}}}}\n{stripped}\n{{{{< /lead >}}}}"
+        # Convert inline markdown inside the lead block because Hugo
+        # does not process markdown inside raw HTML elements.
+        stripped = _convert_inline_md_to_html(stripped)
+        blocks[i] = f'<p class="lead">\n{stripped}\n</p>'
         break
     return "\n\n".join(blocks)
 
@@ -167,7 +224,8 @@ def _apply_figure_shortcode(body_md: str) -> str:
                             caption = next_line
                             i = j
                         break
-                result.append(f'{{{{< figure src="{url}" alt="{alt}" caption="{caption}" >}}}}')
+                escaped_caption = caption.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+                result.append(f'<figure><img src="{url}" alt="{alt}" /><figcaption>{escaped_caption}</figcaption></figure>')
                 i += 1
                 continue
         result.append(line)
@@ -176,23 +234,23 @@ def _apply_figure_shortcode(body_md: str) -> str:
 
 
 def _apply_gallery_shortcode(body_md: str) -> str:
-    """Wrap 2+ consecutive {{< figure >}} blocks in {{< gallery >}}"""
-    if "{{< figure " not in body_md:
+    """Wrap 2+ consecutive <figure> blocks in <div class=\"gallery\">"""
+    if "<figure>" not in body_md:
         return body_md
     lines = body_md.split("\n")
     result = []
     i = 0
     while i < len(lines):
-        if lines[i].strip().startswith("{{< figure "):
+        if lines[i].strip().startswith("<figure>"):
             fig_lines = [lines[i]]
             i += 1
-            while i < len(lines) and lines[i].strip().startswith("{{< figure "):
+            while i < len(lines) and lines[i].strip().startswith("<figure>"):
                 fig_lines.append(lines[i])
                 i += 1
             if len(fig_lines) >= 2:
-                result.append("{{< gallery >}}")
+                result.append('<div class="gallery">')
                 result.extend(fig_lines)
-                result.append("{{< /gallery >}}")
+                result.append('</div>')
             else:
                 result.extend(fig_lines)
             continue
@@ -216,16 +274,17 @@ def _apply_accordion_shortcode(body_md: str) -> str:
         is_h2 = stripped.startswith("## ") and not stripped.startswith("### ")
         if is_h2:
             if in_collapse:
-                buf.append("{{< /accordion >}}")
+                result.append('</details>')
                 result.extend(buf)
+                result.append('')
                 buf = []
                 in_collapse = False
             should_collapse = any(p in stripped for p in collapse_patterns)
             if should_collapse:
                 label = stripped.lstrip("#").strip()
                 in_collapse = True
-                buf.append(f'{{{{< accordion "{label}" >}}}}')
-                buf.append("")
+                result.append(f'<details><summary>{label}</summary>')
+                result.append('')
                 i += 1
                 continue
         if in_collapse:
@@ -234,13 +293,16 @@ def _apply_accordion_shortcode(body_md: str) -> str:
             result.append(line)
         i += 1
     if in_collapse:
-        buf.append("{{< /accordion >}}")
+        result.append('</details>')
         result.extend(buf)
     return "\n".join(result)
 
 
+_chart_idx = 0
+
 def _apply_chart_shortcode(body_md: str) -> str:
-    """Convert <!-- CHART: ... --> into {{< chart >}} bar chart"""
+    """Convert <!-- CHART: ... --> into inline chart HTML"""
+    global _chart_idx
     if "<!-- CHART:" not in body_md:
         return body_md
     import json, re
@@ -276,7 +338,13 @@ def _apply_chart_shortcode(body_md: str) -> str:
                         }
                     }
                 }, ensure_ascii=False)
-                result.append("{{< chart >}}" + cfg + "{{< /chart >}}")
+                _chart_idx += 1
+                cid = f"chart-{_chart_idx}"
+                result.append(
+                    f'<div class="chart"><canvas id="{cid}"></canvas>'
+                    f'<script>window.addEventListener("DOMContentLoaded",()=>{{'
+                    f'new Chart(document.getElementById("{cid}"),{cfg})}})</script></div>'
+                )
             except Exception:
                 pass
             continue
@@ -375,6 +443,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
         site_path = os.path.join(os.path.dirname(FIVEK_ROOT), blog_cfg.get("repo", ""))
+    body_md = _clean_body(body_md)
     description = _extract_description(body_md)
 
     if not thumbnail_url:
@@ -387,6 +456,10 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     if thumbnail_url and thumbnail_url.startswith("http://tong.visitkorea.or.kr"):
         thumbnail_url = thumbnail_url.replace("http://", "https://", 1)
+
+    # Convert inline markdown in title to HTML (for bold, strike, etc.)
+    # so it renders correctly in the frontmatter and page title
+    title = _convert_inline_md_to_html(title)
 
     if theme.lower() == "blowfish":
         fm, date_str = _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, description, is_draft=is_draft, blog_id=blog_cfg.get("id", ""))
@@ -412,6 +485,12 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         body_md = _apply_gallery_shortcode(body_md)
         body_md = _apply_chart_shortcode(body_md)
         body_md = _apply_accordion_shortcode(body_md)
+    # Convert inline markdown (**bold**, ~~strike~~, *italic*, `code`) to HTML
+    # globally — Hugo's Goldmark does not process markdown inside raw HTML
+    # elements (e.g. <figcaption>, <p> generated by shortcode functions, or
+    # AI output with mixed HTML+markdown).  Doing it here ensures readers
+    # never see raw ** or ~~ in the rendered page.
+    body_md = _convert_inline_md_to_html(body_md)
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags)
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md

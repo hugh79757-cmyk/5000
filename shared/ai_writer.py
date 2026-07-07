@@ -3,11 +3,10 @@ import os
 import re
 
 import yaml
-from dotenv import load_dotenv
 from openai import OpenAI
 
-load_dotenv()
-load_dotenv(os.path.expanduser("~/.env.common"))
+# Centralized env loading: .env.common first, then project .env (no override)
+from shared import env_loader  # noqa: F401
 
 logger = logging.getLogger(__name__)
 

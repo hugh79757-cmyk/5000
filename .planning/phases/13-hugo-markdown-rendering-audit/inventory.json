@@ -1,0 +1,326 @@
+[
+  {
+    "id": "rap-hugo",
+    "cf_project": "rap-hugo",
+    "repo": "rap-hugo",
+    "site_path": "/Users/twinssn/Projects/RAP/rap-hugo",
+    "domain": "apt.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "rap"
+  },
+  {
+    "id": "rap2-hugo",
+    "cf_project": "rap2-hugo",
+    "repo": "rap2-hugo",
+    "site_path": "/Users/twinssn/Projects/RAP/rap2-hugo",
+    "domain": "apply.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "rap"
+  },
+  {
+    "id": "rap3-hugo",
+    "cf_project": "rap3-hugo",
+    "repo": "rap3-hugo",
+    "site_path": "/Users/twinssn/Projects/RAP/rap3-hugo",
+    "domain": "tax.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "rap"
+  },
+  {
+    "id": "rap4-hugo",
+    "cf_project": "rap4-hugo",
+    "repo": "rap4-hugo",
+    "site_path": "/Users/twinssn/Projects/RAP/rap4-hugo",
+    "domain": "rent.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "rap"
+  },
+  {
+    "id": "rap5-hugo",
+    "cf_project": "rap5-hugo",
+    "repo": "rap5-hugo",
+    "site_path": "/Users/twinssn/Projects/RAP/rap5-hugo",
+    "domain": "brand.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "rap"
+  },
+  {
+    "id": "dividend-hugo",
+    "cf_project": "dividend-hugo",
+    "repo": "dividend-hugo",
+    "site_path": "/Users/twinssn/Projects/STAP/dividend-hugo",
+    "domain": "dividend.techpawz.com",
+    "theme": "blowfish",
+    "pipeline": "stock"
+  },
+  {
+    "id": "etf-hugo",
+    "cf_project": "etf-hugo",
+    "repo": "etf-hugo",
+    "site_path": "/Users/twinssn/Projects/STAP/etf-hugo",
+    "domain": "etf.techpawz.com",
+    "theme": "blowfish",
+    "pipeline": "stock"
+  },
+  {
+    "id": "finance-hugo",
+    "cf_project": "finance-hugo",
+    "repo": "finance-hugo",
+    "site_path": "/Users/twinssn/Projects/STAP/finance-hugo",
+    "domain": "finance.techpawz.com",
+    "theme": "blowfish",
+    "pipeline": "stock"
+  },
+  {
+    "id": "ipo-hugo",
+    "cf_project": "ipo-hugo",
+    "repo": "ipo-hugo",
+    "site_path": "/Users/twinssn/Projects/STAP/ipo-hugo",
+    "domain": "ipo.techpawz.com",
+    "theme": "blowfish",
+    "pipeline": "stock"
+  },
+  {
+    "id": "sector-hugo",
+    "cf_project": "sector-hugo",
+    "repo": "sector-hugo",
+    "site_path": "/Users/twinssn/Projects/STAP/sector-hugo",
+    "domain": "sector.techpawz.com",
+    "theme": "blowfish",
+    "pipeline": "stock"
+  },
+  {
+    "id": "stock-hugo",
+    "cf_project": "stock-informationhot",
+    "repo": "stock-blog",
+    "site_path": "/Users/twinssn/Projects/STAP/stock-hugo",
+    "domain": "stock.informationhot.kr",
+    "theme": "congo",
+    "pipeline": "stock"
+  },
+  {
+    "id": "appliance-hugo",
+    "cf_project": "appliance-hugo",
+    "repo": "appliance-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/appliance-hugo",
+    "domain": "appliance.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "baby-hugo",
+    "cf_project": "baby-hugo",
+    "repo": "baby-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/baby-hugo",
+    "domain": "baby.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "fitness-hugo",
+    "cf_project": "fitness-hugo",
+    "repo": "fitness-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/fitness-hugo",
+    "domain": "fitness.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "interior-hugo",
+    "cf_project": "interior-hugo",
+    "repo": "interior-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/interior-hugo",
+    "domain": "interior.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "laptop-hugo",
+    "cf_project": "laptop-hugo",
+    "repo": "laptop-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/laptop-hugo",
+    "domain": "laptop.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "health-hugo",
+    "cf_project": "health-hugo",
+    "repo": "health-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/health-hugo",
+    "domain": "health.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "pet-hugo",
+    "cf_project": "pet-hugo",
+    "repo": "pet-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/pet-hugo",
+    "domain": "pet.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "kitchen-hugo",
+    "cf_project": "kitchen-hugo",
+    "repo": "kitchen-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/kitchen-hugo",
+    "domain": "kitchen.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "beauty-hugo",
+    "cf_project": "beauty-hugo",
+    "repo": "beauty-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/beauty-hugo",
+    "domain": "beauty.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "camping-hugo",
+    "cf_project": "camping-hugo",
+    "repo": "camping-hugo",
+    "site_path": "/Users/twinssn/Projects/cuap/camping-hugo",
+    "domain": "camping.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "curation"
+  },
+  {
+    "id": "travel-hugo",
+    "cf_project": "travel-hugo",
+    "repo": "travel-hugo",
+    "site_path": "/Users/twinssn/Projects/TAP/travel-hugo",
+    "domain": "tour1.rotcha.kr",
+    "theme": "Blowfish",
+    "pipeline": "travel"
+  },
+  {
+    "id": "travel1-hugo",
+    "cf_project": "travel1-hugo",
+    "repo": "travel1-hugo",
+    "site_path": "/Users/twinssn/Projects/TAP/travel1-hugo",
+    "domain": "travel1.rotcha.kr",
+    "theme": "Blowfish",
+    "pipeline": "travel"
+  },
+  {
+    "id": "travel2-hugo",
+    "cf_project": "travel2-hugo",
+    "repo": "travel2-hugo",
+    "site_path": "/Users/twinssn/Projects/TAP/travel2-hugo",
+    "domain": "travel2.rotcha.kr",
+    "theme": "Blowfish",
+    "pipeline": "travel"
+  },
+  {
+    "id": "travel3-hugo",
+    "cf_project": "travel3-hugo",
+    "repo": "travel3-hugo",
+    "site_path": "/Users/twinssn/Projects/TAP/travel3-hugo",
+    "domain": "tour2.rotcha.kr",
+    "theme": "Blowfish",
+    "pipeline": "travel"
+  },
+  {
+    "id": "travel4-hugo",
+    "cf_project": "travel4-hugo",
+    "repo": "travel4-hugo",
+    "site_path": "/Users/twinssn/Projects/TAP/travel4-hugo",
+    "domain": "tour3.rotcha.kr",
+    "theme": "Blowfish",
+    "pipeline": "travel"
+  },
+  {
+    "id": "rotcha-blog",
+    "cf_project": "rotcha-blog",
+    "repo": null,
+    "site_path": "/Users/twinssn/Projects/rotcha-blog",
+    "domain": "rotcha.kr",
+    "theme": "N/A",
+    "pipeline": "unknown"
+  },
+  {
+    "id": "informationhot-hugo",
+    "cf_project": "informationhot-hugo",
+    "repo": null,
+    "site_path": "/Users/twinssn/Projects/informationhot-hugo",
+    "domain": "informationhot.kr",
+    "theme": "N/A",
+    "pipeline": "unknown"
+  },
+  {
+    "id": "techpawz-hugo",
+    "cf_project": "techpawz-hugo",
+    "repo": null,
+    "site_path": "/Users/twinssn/Projects/techpawz-hugo",
+    "domain": "techpawz.com",
+    "theme": "N/A",
+    "pipeline": "unknown"
+  },
+  {
+    "id": "biz-techpawz-hugo",
+    "cf_project": "biz-techpawz",
+    "repo": null,
+    "site_path": "/Users/twinssn/Projects/biz.techpawz-hugo",
+    "domain": "biz.techpawz.com",
+    "theme": "N/A",
+    "pipeline": "unknown"
+  },
+  {
+    "id": "issue-techpawz-hugo",
+    "cf_project": "issue-techpawz-hugo",
+    "repo": null,
+    "site_path": "/Users/twinssn/Projects/issue-techpawz-hugo",
+    "domain": "issue.techpawz.com",
+    "theme": "N/A",
+    "pipeline": "unknown"
+  },
+  {
+    "id": "senior-hugo",
+    "cf_project": "senior-hugo",
+    "repo": "senior-hugo",
+    "site_path": "/Users/twinssn/Projects/SEAP/senior-hugo",
+    "domain": "senior.informationhot.kr",
+    "theme": "blowfish",
+    "pipeline": "senior"
+  },
+  {
+    "id": "compare-hugo",
+    "cf_project": "compare-hugo",
+    "repo": "compare-hugo",
+    "site_path": "/Users/twinssn/Projects/cap/compare-hugo",
+    "domain": "compare.rotcha.kr",
+    "theme": "Blowfish",
+    "pipeline": "car"
+  },
+  {
+    "id": "hotissue-hugo",
+    "cf_project": "hotissue-hugo",
+    "repo": "hotissue-hugo",
+    "site_path": "/Users/twinssn/Projects/cap/hotissue-hugo",
+    "domain": "hotissue.rotcha.kr",
+    "theme": "PaperMod",
+    "pipeline": "car"
+  },
+  {
+    "id": "rank-hugo",
+    "cf_project": "rank-hugo",
+    "repo": "rank-hugo",
+    "site_path": "/Users/twinssn/Projects/cap/rank-hugo",
+    "domain": "rank.informationhot.kr",
+    "theme": "Blowfish",
+    "pipeline": "car"
+  },
+  {
+    "id": "pick-hugo",
+    "cf_project": "pick-hugo",
+    "repo": "pick-hugo",
+    "site_path": "/Users/twinssn/Projects/cap/pick-hugo",
+    "domain": "pick.informationhot.kr",
+    "theme": "Blowfish",
+    "pipeline": "car"
+  }
+]

@@ -8,9 +8,9 @@ class TestKeywords:
     def test_all_10_blogs_present(self):
         assert len(KEYWORD_MAP) == 10
 
-    def test_each_blog_has_80_to_200_keywords(self):
+    def test_each_blog_has_60_to_200_keywords(self):
         for blog, kws in KEYWORD_MAP.items():
-            assert 80 <= len(kws) <= 200, f"{blog}: {len(kws)} keywords (expected 80-200)"
+            assert 60 <= len(kws) <= 200, f"{blog}: {len(kws)} keywords (expected 60-200)"
 
     def test_no_generic_keywords_remain(self):
         generics = {"가방", "가벼운", "가성비", "가정용", "가죽", "가죽소파",

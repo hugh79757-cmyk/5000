@@ -45,7 +45,7 @@ class TestScoreProducts:
         assert abs(result["avg"] - 0.5) < 0.001
         assert result["min"] == 0.0
         assert result["blog_id"] == "laptop-hugo"
-        assert result["threshold"] == 0.85
+        assert result["threshold"] == 0.65
 
 
 class TestGetThreshold:

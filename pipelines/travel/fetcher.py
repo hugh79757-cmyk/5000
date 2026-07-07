@@ -127,6 +127,8 @@ def _filter_by_season(items, title_key="title"):
 
 def fetch_camping():
     from core.camping_data import get_camping_data, get_random_theme
+    from shared.content_store import is_place_used
+    
     theme_name, theme_conf = get_random_theme()
     logger.info("camping theme: " + theme_name)
     data = get_camping_data(theme_name, theme_conf=theme_conf)
@@ -134,6 +136,21 @@ def fetch_camping():
         data = get_camping_data("글램핑")
     if not data:
         return None
+    
+    # 미사용 아이템 우선 선택
+    items = data.get("items", [])
+    if items:
+        blog_id = "travel-hugo"  # Default blog
+        unused_items = [
+            it for it in items 
+            if not is_place_used(it.get("title", it.get("facltNm", "")).strip(), blog_id)
+        ]
+        if unused_items:
+            data["items"] = unused_items[:3]  # 최대 3개
+            logger.info(f"미사용 아이템 선택: {len(unused_items)}개 중 {len(data['items'])}개")
+        else:
+            logger.warning("모든 아이템이 사용됨, 기존 아이템 유지")
+    
     data["category"] = "캠핑"
     if not data.get("angle"):
         data["angle"] = theme_name
@@ -223,20 +240,25 @@ def fetch_festival(_is_retry=False):
 
     try:
         # 이미 발행된 축제 contentid 조회 (중복 방지)
+        # source_id는 쉼표로 구분된 여러 contentid를 포함할 수 있으므로 개별 분리
         published_ids = set()
         if os.path.exists(CONTENT_DB):
             cconn = sqlite3.connect(CONTENT_DB)
-            published_ids = {
-                r[0] for r in cconn.execute(
-                    "SELECT source_id FROM publish_ledger WHERE blog_id='travel1-hugo' AND source_id != ''"
-                ).fetchall()
-            }
+            for row in cconn.execute(
+                "SELECT source_id FROM publish_ledger WHERE blog_id='travel1-hugo' AND source_id != ''"
+            ).fetchall():
+                for cid in row[0].split(","):
+                    cid = cid.strip()
+                    if cid:
+                        published_ids.add(cid)
             # articles 테이블도 확인
-            published_ids.update(
-                r[0] for r in cconn.execute(
-                    "SELECT source_id FROM articles WHERE blog_id='travel1-hugo' AND source_id != ''"
-                ).fetchall()
-            )
+            for row in cconn.execute(
+                "SELECT source_id FROM articles WHERE blog_id='travel1-hugo' AND source_id != ''"
+            ).fetchall():
+                for cid in row[0].split(","):
+                    cid = cid.strip()
+                    if cid:
+                        published_ids.add(cid)
             cconn.close()
 
         conn = sqlite3.connect(DB_PATH)
@@ -1021,7 +1043,13 @@ def fetch_heritage():
         import sqlite3 as _sql
         from shared.db_paths import PUBLISH_LEDGER_DB
         _db = _sql.connect(PUBLISH_LEDGER_DB)
+        # articles 테이블 확인
         for row in _db.execute("SELECT source_id FROM articles WHERE blog_id='travel2-hugo' AND source_id != ''"):
+            for _cid in str(row[0]).split(","):
+                if _cid.strip():
+                    _published_cids.add(_cid.strip())
+        # publish_ledger 테이블도 확인
+        for row in _db.execute("SELECT source_id FROM publish_ledger WHERE blog_id='travel2-hugo' AND source_id != ''"):
             for _cid in str(row[0]).split(","):
                 if _cid.strip():
                     _published_cids.add(_cid.strip())

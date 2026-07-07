@@ -101,8 +101,9 @@ def validate_post_html(html: str, blog_id: str) -> dict:
                 issues.append({"severity": "WARNING", "check": "cta_html",
                                "msg": f"CTA가 HTML이 아닌 평문으로 {count}개 존재"})
 
-    # 2. {{}} 잔재
-    count = html.count("{{")
+    # 2. {{}} 잔재 (Hugo 단축코드 {{< ... >}} 는 제외)
+    clean = re.sub(r"\{\{<[\s\S]*?>}}", "", html)
+    count = clean.count("{{")
     if count > 0:
         issues.append({"severity": "WARNING", "check": "empty_template",
                        "msg": f"{{{{}}}} 빈 템플릿 {count}개 발견"})

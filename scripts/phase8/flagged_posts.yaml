@@ -1,24 +1,11 @@
 chinese: []
-offtopic: []
+offtopic:
+- blog: laptop-hugo
+  slug: 1위-스마트덕-vs-구즈파크-그램파우치-2026년-7월-실사용-비교
+  title: 1위 스마트덕 vs 구즈파크 — 그램파우치 2026년 7월 실사용 비교
+  reason: 파우치
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/1위-스마트덕-vs-구즈파크-그램파우치-2026년-7월-실사용-비교/index.md
 body_offtopic:
-- blog: laptop-hugo
-  slug: 1위-dk-면장갑-35g-vs-삼성-대용량-재생-잉크-2026년-6월-가성비-끝판왕
-  title: 1위 DK 면장갑 35g vs 삼성 대용량 재생 잉크 — 2026년 6월 가성비 끝판왕
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/1위-dk-면장갑-35g-vs-삼성-대용량-재생-잉크-2026년-6월-가성비-끝판왕/index.md
-  source: body
-- blog: laptop-hugo
-  slug: 1위-아이리버-아크릴-접이식-vs-노르잇-높이조절-각도조절-독서대-2026년-비교
-  title: 1위 아이리버 아크릴 접이식 vs 노르잇 높이조절 — 각도조절 독서대 2026년 비교
-  reason: 책상
-  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/1위-아이리버-아크릴-접이식-vs-노르잇-높이조절-각도조절-독서대-2026년-비교/index.md
-  source: body
-- blog: laptop-hugo
-  slug: 2026-가죽-원단-선택-비엘케미칼-인조가죽-vs-천연-양가죽-수선부터-공예까지-가이드
-  title: 2026 가죽 원단 선택, 비엘케미칼 인조가죽 vs 천연 양가죽 — 수선부터 공예까지 가이드
-  reason: 의자
-  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/2026-가죽-원단-선택-비엘케미칼-인조가죽-vs-천연-양가죽-수선부터-공예까지-가이드/index.md
-  source: body
 - blog: laptop-hugo
   slug: 50만원대-가성비-노트북-추천-lg-울트라-노트북-삼성-노트북3-nt301e5l
   title: '50만원대 가성비 노트북 추천: LG 울트라 노트북 & 삼성 노트북3 NT301E5L'
@@ -115,30 +102,6 @@ body_offtopic:
   reason: 서류가방
   path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/코딩용-노트북-추천-레노버-노트북-윈도우11과-삼성전자-갤럭시북5-프로-비교/index.md
   source: body
-- blog: laptop-hugo
-  slug: 코멧-우산-vs-크로비-돗자리-2026년-가벼운-필수템-5선
-  title: 코멧 우산 vs 크로비 돗자리 — 2026년 가벼운 필수템 5선
-  reason: 파우치
-  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/코멧-우산-vs-크로비-돗자리-2026년-가벼운-필수템-5선/index.md
-  source: body
-- blog: laptop-hugo
-  slug: 한경희생활과학-선풍기부터-kuahai-휴지통까지-가정용-필수템-2026년-7월-추천
-  title: 한경희생활과학 선풍기부터 KUAHAI 휴지통까지 — 가정용 필수템 2026년 7월 추천
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/한경희생활과학-선풍기부터-kuahai-휴지통까지-가정용-필수템-2026년-7월-추천/index.md
-  source: body
-- blog: appliance-hugo
-  slug: 1위-드리미-vs-틴도우-2026년-로봇청소기-올인원-비교-추천
-  title: 1위 드리미 vs 틴도우 — 2026년 로봇청소기 올인원 비교 추천
-  reason: 반려동물
-  path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/1위-드리미-vs-틴도우-2026년-로봇청소기-올인원-비교-추천/index.md
-  source: body
-- blog: appliance-hugo
-  slug: 1위-스테디셀러-초저소음-발터치-vs-대우-타이머-2026년-선풍기-추천
-  title: 1위 스테디셀러 초저소음 발터치 vs 대우 타이머 — 2026년 선풍기 추천
-  reason: 반려동물
-  path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/1위-스테디셀러-초저소음-발터치-vs-대우-타이머-2026년-선풍기-추천/index.md
-  source: body
 - blog: appliance-hugo
   slug: 1인가구-냉장고-추천-쿠잉전자-메탈-슬림-vs-lg전자-오브제컬렉션
   title: '1인가구 냉장고 추천: 쿠잉전자 메탈 슬림 vs LG전자 오브제컬렉션'
@@ -218,12 +181,6 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/믹서기-추천-테팔-블렌드포스-플러스-vs-필립스-미니-블렌더-가성비-최강-믹서기-비교/index.md
   source: body
 - blog: appliance-hugo
-  slug: 삼성-비스포크-ai-제트-무선청소기-2026년-최고의-선택
-  title: 삼성 비스포크 AI 제트 무선청소기 — 2026년 최고의 선택
-  reason: 반려동물
-  path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/삼성-비스포크-ai-제트-무선청소기-2026년-최고의-선택/index.md
-  source: body
-- blog: appliance-hugo
   slug: 삼성-에어드레서-미세먼지-필터-vs-온스테이-건조기시트-스타일러-2026-비교
   title: 삼성 에어드레서 미세먼지 필터 vs 온스테이 건조기시트 스타일러 — 2026 비교
   reason: 의류
@@ -296,10 +253,10 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/히트펌프-건조기-추천-하츠-몽그리-vs-마이디어-전기건조기-8kg/index.md
   source: body
 - blog: interior-hugo
-  slug: 2026년-6월-가죽소파-추천-바우미스트-루나-vs-도모디자인-아르티제-실사용-비교
-  title: '2026년 6월 가죽소파 추천: 바우미스트 루나 vs 도모디자인 아르티제, 실사용 비교'
+  slug: 2026년-7월-가죽쇼파-추천-파로마-올랜도b-vs-바우미스트-루나-36인용-비교
+  title: '2026년 7월 가죽쇼파 추천: 파로마 올랜도B vs 바우미스트 루나 — 3~6인용 비교'
   reason: 반려동물
-  path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/2026년-6월-가죽소파-추천-바우미스트-루나-vs-도모디자인-아르티제-실사용-비교/index.md
+  path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/2026년-7월-가죽쇼파-추천-파로마-올랜도b-vs-바우미스트-루나-36인용-비교/index.md
   source: body
 - blog: interior-hugo
   slug: 다용도-수납함-추천-소웰홈-패브릭-3단6문-vs-21세기트랜드-밀리오-저소음
@@ -326,22 +283,10 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/주방-선반-추천-가구레시피-조립식-스마트-vs-lime-kitchen-라임키친/index.md
   source: body
 - blog: interior-hugo
-  slug: 크로브-스트릿-크로스백-vs-덴코-데일리-백팩-2026년-데일리-가방-5선-비교
-  title: 크로브 스트릿 크로스백 vs 덴코 데일리 백팩 — 2026년 데일리 가방 5선 비교
-  reason: 패션
-  path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/크로브-스트릿-크로스백-vs-덴코-데일리-백팩-2026년-데일리-가방-5선-비교/index.md
-  source: body
-- blog: interior-hugo
   slug: 홈비-양문형-슬라이딩-vs-ckliving-특대형-플라스틱-플라스틱-수납함-추천
   title: 홈비 양문형 슬라이딩 vs CKLIVING 특대형 플라스틱 — 플라스틱 수납함 추천
   reason: 의류
   path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/홈비-양문형-슬라이딩-vs-ckliving-특대형-플라스틱-플라스틱-수납함-추천/index.md
-  source: body
-- blog: baby-hugo
-  slug: 1위-남자-세미와이드-샌드워싱-vs-차쿠-11-가을-남성-바지-2026-비교
-  title: 1위 남자 세미와이드 샌드워싱 vs 차쿠 1+1 — 가을 남성 바지 2026 비교
-  reason: 남성패션
-  path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/1위-남자-세미와이드-샌드워싱-vs-차쿠-11-가을-남성-바지-2026-비교/index.md
   source: body
 - blog: baby-hugo
   slug: 2026-가방-추천-크로브-스트릿-크로스백-vs-엔도르시-백팩-일상의-모든-순간을-위한-선택
@@ -354,12 +299,6 @@ body_offtopic:
   title: InLoop 도톰한 코너 vs MZ생활 2세대 에어쿠션 — 모서리 보호대 추천
   reason: 가구
   path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/inloop-도톰한-코너-vs-mz생활-2세대-에어쿠션-모서리-보호대-추천/index.md
-  source: body
-- blog: baby-hugo
-  slug: 도모디자인-아르티제-가죽-소파-vs-바우미스트-2026년-인기-리클라이너-비교
-  title: 도모디자인 아르티제 가죽 소파 vs 바우미스트 — 2026년 인기 리클라이너 비교
-  reason: 반려동물
-  path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/도모디자인-아르티제-가죽-소파-vs-바우미스트-2026년-인기-리클라이너-비교/index.md
   source: body
 - blog: baby-hugo
   slug: 라라비-점퍼루-vs-트리미고-전동-아기-바운서-2026년-추천-점퍼루-비교
@@ -518,12 +457,6 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/천연-양가죽-vs-초대형-인조가죽스티커-가죽공예-및-수선-필수-상품-2026-비교/index.md
   source: body
 - blog: baby-hugo
-  slug: 캐럿-골지-나시-vs-데이그린-골지-나시-2026년-7월-여름-필수-아이템-비교
-  title: 캐럿 골지 나시 vs 데이그린 골지 나시 — 2026년 7월 여름 필수 아이템 비교
-  reason: pet
-  path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/캐럿-골지-나시-vs-데이그린-골지-나시-2026년-7월-여름-필수-아이템-비교/index.md
-  source: body
-- blog: baby-hugo
   slug: 트리미고-전동-아기-바운서-vs-키저스-베베-플레이타임-점퍼루-추천-2026
   title: 트리미고 전동 아기 바운서 vs 키저스 베베 플레이타임 — 점퍼루 추천 2026
   reason: 장난감
@@ -541,96 +474,6 @@ body_offtopic:
   reason: 식품
   path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/흡착-그릇-추천-1위-리틀클라우드-자기주도-실리콘-vs-2위-잼먹-국내-제조-실리콘/index.md
   source: body
-- blog: fitness-hugo
-  slug: 1위-dk-면장갑-35g-vs-삼성-대용량-재생-잉크-2026년-7월-가성비-끝판왕-추천
-  title: 1위 DK 면장갑 35g vs 삼성 대용량 재생 잉크 — 2026년 7월 가성비 끝판왕 추천
-  reason: 식품
-  path: /Users/twinssn/Projects/CUAP/fitness-hugo/content/posts/1위-dk-면장갑-35g-vs-삼성-대용량-재생-잉크-2026년-7월-가성비-끝판왕-추천/index.md
-  source: body
-- blog: fitness-hugo
-  slug: 각도조절-거치대best5-홈플래닛-vs-코믈리-실사용-비교
-  title: 각도조절 거치대BEST5 — 홈플래닛 vs 코믈리 실사용 비교
-  reason: 교재
-  path: /Users/twinssn/Projects/CUAP/fitness-hugo/content/posts/각도조절-거치대best5-홈플래닛-vs-코믈리-실사용-비교/index.md
-  source: body
-- blog: fitness-hugo
-  slug: 크로브-스트릿-크로스백-vs-덴코-데일리-백팩-데일리-가방-2026-인기-비교
-  title: 크로브 스트릿 크로스백 vs 덴코 데일리 백팩 — 데일리 가방 2026 인기 비교
-  reason: 교재
-  path: /Users/twinssn/Projects/CUAP/fitness-hugo/content/posts/크로브-스트릿-크로스백-vs-덴코-데일리-백팩-데일리-가방-2026-인기-비교/index.md
-  source: body
-- blog: health-hugo
-  slug: 1위-스파클-무라벨-vs-일회용수저-생활-속-필수-개입템-2026년-6월-비교
-  title: 1위 스파클 무라벨 vs 일회용수저 — 생활 속 필수 개입템 2026년 6월 비교
-  reason: 식품
-  path: /Users/twinssn/Projects/CUAP/health-hugo/content/posts/1위-스파클-무라벨-vs-일회용수저-생활-속-필수-개입템-2026년-6월-비교/index.md
-  source: body
-- blog: health-hugo
-  slug: dk-면장갑-vs-삼성-대용량-재생-잉크-2026년-7월-가성비-필수템-5선
-  title: DK 면장갑 vs 삼성 대용량 재생 잉크 — 2026년 7월 가성비 필수템 5선
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/health-hugo/content/posts/dk-면장갑-vs-삼성-대용량-재생-잉크-2026년-7월-가성비-필수템-5선/index.md
-  source: body
-- blog: health-hugo
-  slug: mountainwter-스마트폰-led-귀이개-vs-한경희생활과학-선풍기-가정용-필수템-2026
-  title: MountainWter 스마트폰 LED 귀이개 vs 한경희생활과학 선풍기 — 가정용 필수템 2026
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/health-hugo/content/posts/mountainwter-스마트폰-led-귀이개-vs-한경희생활과학-선풍기-가정용-필수템-2026/index.md
-  source: body
-- blog: health-hugo
-  slug: 천연-양가죽-원단-vs-초대형-인조가죽스티커-2026년-수선공예-원단-비교
-  title: 천연 양가죽 원단 vs 초대형 인조가죽스티커 — 2026년 수선·공예 원단 비교
-  reason: 주방
-  path: /Users/twinssn/Projects/CUAP/health-hugo/content/posts/천연-양가죽-원단-vs-초대형-인조가죽스티커-2026년-수선공예-원단-비교/index.md
-  source: body
-- blog: pet-hugo
-  slug: 2026년-6월-가성비-끝판왕-dk-면장갑부터-삼성-재생잉크까지-실속템-5선
-  title: 2026년 6월 가성비 끝판왕! DK 면장갑부터 삼성 재생잉크까지 실속템 5선
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/2026년-6월-가성비-끝판왕-dk-면장갑부터-삼성-재생잉크까지-실속템-5선/index.md
-  source: body
-- blog: pet-hugo
-  slug: mountainwter-스마트폰-led-귀이개-vs-한경희생활과학-발터치-선풍기-가정용-필수템-2026
-  title: MountainWter 스마트폰 LED 귀이개 vs 한경희생활과학 발터치 선풍기 — 가정용 필수템 2026
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/mountainwter-스마트폰-led-귀이개-vs-한경희생활과학-발터치-선풍기-가정용-필수템-2026/index.md
-  source: body
-- blog: pet-hugo
-  slug: 가벼운-일상-필수템-코멧-우산-vs-크로비-피크닉-매트-2026-비교
-  title: 가벼운 일상 필수템 코멧 우산 vs 크로비 피크닉 매트 2026 비교
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/가벼운-일상-필수템-코멧-우산-vs-크로비-피크닉-매트-2026-비교/index.md
-  source: body
-- blog: pet-hugo
-  slug: 가죽소파-비교-바우미스트-루나-vs-도모디자인-아르티제-2026
-  title: 가죽소파 비교 — 바우미스트 루나 vs 도모디자인 아르티제 2026
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/가죽소파-비교-바우미스트-루나-vs-도모디자인-아르티제-2026/index.md
-  source: body
-- blog: pet-hugo
-  slug: 고양이-간식-추천-펫리서치-짜먹는-간식-vs-로얄-어드밴스-스틱-2026년-인기상품-비교
-  title: '고양이 간식 추천: 펫리서치 짜먹는 간식 vs 로얄 어드밴스 스틱, 2026년 인기상품 비교'
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/고양이-간식-추천-펫리서치-짜먹는-간식-vs-로얄-어드밴스-스틱-2026년-인기상품-비교/index.md
-  source: body
-- blog: pet-hugo
-  slug: 울팜-아삭-달달-vs-나물투데이-데친-우거지-국산-농산물-2026-총정리
-  title: 울팜 아삭 달달 vs 나물투데이 데친 우거지 — 국산 농산물 2026 총정리
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/울팜-아삭-달달-vs-나물투데이-데친-우거지-국산-농산물-2026-총정리/index.md
-  source: body
-- blog: pet-hugo
-  slug: 천연-양가죽-vs-인조가죽-스티커-2026년-원단수선재-총정리
-  title: '천연 양가죽 vs 인조가죽 스티커: 2026년 원단/수선재 총정리'
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/천연-양가죽-vs-인조가죽-스티커-2026년-원단수선재-총정리/index.md
-  source: body
-- blog: pet-hugo
-  slug: 칼마-플렉스-캔-vs-슈퍼포우-노즈워크-2026년-강아지-필수용품-비교
-  title: 칼마 플렉스 캔 vs 슈퍼포우 노즈워크 — 2026년 강아지 필수용품 비교
-  reason: 장난감
-  path: /Users/twinssn/Projects/CUAP/pet-hugo/content/posts/칼마-플렉스-캔-vs-슈퍼포우-노즈워크-2026년-강아지-필수용품-비교/index.md
-  source: body
 - blog: kitchen-hugo
   slug: 냉장고-정리-용기-추천-한누네-다용도-vs-엠엔피-밀폐용기
   title: 냉장고 정리 용기 추천 — 한누네 다용도 vs 엠엔피 밀폐용기
@@ -643,85 +486,25 @@ body_offtopic:
   reason: 식품
   path: /Users/twinssn/Projects/CUAP/kitchen-hugo/content/posts/통3중-냄비-추천-홈셰프-sro-vs-cooknest-실용적인-주방-필수템/index.md
   source: body
-- blog: kitchen-hugo
-  slug: 피셔프라이스-숨바꼭질-촉감놀이-vs-졸리베이비-꼬리책-생후-012개월-아기-발달-놀이-추천-2026
-  title: 피셔프라이스 숨바꼭질 촉감놀이 vs 졸리베이비 꼬리책 — 생후 0~12개월 아기 발달 놀이 추천 2026
-  reason: 장난감
-  path: /Users/twinssn/Projects/CUAP/kitchen-hugo/content/posts/피셔프라이스-숨바꼭질-촉감놀이-vs-졸리베이비-꼬리책-생후-012개월-아기-발달-놀이-추천-2026/index.md
-  source: body
-- blog: beauty-hugo
-  slug: 1위-스파클-무라벨-생수-vs-윈터볼-샤워볼-2026년-6월-일상-필수템-비교
-  title: 1위 스파클 무라벨 생수 vs 윈터볼 샤워볼 — 2026년 6월 일상 필수템 비교
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/1위-스파클-무라벨-생수-vs-윈터볼-샤워볼-2026년-6월-일상-필수템-비교/index.md
-  source: body
-- blog: beauty-hugo
-  slug: 1위-탐사-클래식-물티슈-vs-노스페이스-보레알리스2-가성비-추천-2026
-  title: 1위 탐사 클래식 물티슈 vs 노스페이스 보레알리스2 — 가성비 추천 2026
-  reason: 주방
-  path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/1위-탐사-클래식-물티슈-vs-노스페이스-보레알리스2-가성비-추천-2026/index.md
-  source: body
-- blog: beauty-hugo
-  slug: 2026-가벼운-간편필수품-비교-코멧-uv초경량우산-vs-크로비피크닉매트
-  title: '2026 가벼운 간편필수품 비교: 코멧 UV초경량우산 vs 크로비피크닉매트'
-  reason: 캠핑
-  path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/2026-가벼운-간편필수품-비교-코멧-uv초경량우산-vs-크로비피크닉매트/index.md
-  source: body
-- blog: beauty-hugo
-  slug: 각도조절-추천-top5-2026년
-  title: 각도조절 추천 TOP5 (2026년)
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/각도조절-추천-top5-2026년/index.md
-  source: body
-- blog: beauty-hugo
-  slug: 도모디자인-아르티제-vs-우아미-티앙-2026년-소형-거실-가죽소파-비교
-  title: 도모디자인 아르티제 vs 우아미 티앙 — 2026년 소형 거실 가죽소파 비교
-  reason: 반려동물
-  path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/도모디자인-아르티제-vs-우아미-티앙-2026년-소형-거실-가죽소파-비교/index.md
-  source: body
-- blog: beauty-hugo
-  slug: 울팜-아삭-달달-vs-울팜-창녕-깐마늘-2026년-6월-국산-채소마늘-베스트셀러-비교
-  title: 울팜 아삭 달달 vs 울팜 창녕 깐마늘 — 2026년 6월 국산 채소·마늘 베스트셀러 비교
-  reason: 가구
-  path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/울팜-아삭-달달-vs-울팜-창녕-깐마늘-2026년-6월-국산-채소마늘-베스트셀러-비교/index.md
-  source: body
 - blog: beauty-hugo
   slug: 천연-양가죽-vs-인조가죽스티커-2026년-원단보수용품-5선
   title: 천연 양가죽 vs 인조가죽스티커 — 2026년 원단·보수용품 5선
   reason: 가구
   path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/천연-양가죽-vs-인조가죽스티커-2026년-원단보수용품-5선/index.md
   source: body
-- blog: camping-hugo
-  slug: mountainwter-led-내시경-vs-한경희생활과학-선풍기-가정용-필수템-2026-비교
-  title: MountainWter LED 내시경 vs 한경희생활과학 선풍기 — 가정용 필수템 2026 비교
-  reason: 생활용품
-  path: /Users/twinssn/Projects/CUAP/camping-hugo/content/posts/mountainwter-led-내시경-vs-한경희생활과학-선풍기-가정용-필수템-2026-비교/index.md
-  source: body
-- blog: camping-hugo
-  slug: 캠핑-가방-추천-카르닉-캠핑-가방-vs-멀티백-캠핑-식기
-  title: 캠핑 가방 추천 — 카르닉 캠핑 가방 vs 멀티백 캠핑 식기
-  reason: 의류
-  path: /Users/twinssn/Projects/CUAP/camping-hugo/content/posts/캠핑-가방-추천-카르닉-캠핑-가방-vs-멀티백-캠핑-식기/index.md
-  source: body
-- blog: camping-hugo
-  slug: 피셔프라이스-vs-민티드-2026년-6개월-아기-생필품-추천
-  title: 피셔프라이스 vs 민티드 — 2026년 6개월 아기 생필품 추천
-  reason: 장난감
-  path: /Users/twinssn/Projects/CUAP/camping-hugo/content/posts/피셔프라이스-vs-민티드-2026년-6개월-아기-생필품-추천/index.md
-  source: body
 summary:
-  total_flagged: 118
+  total_flagged: 82
   chinese: 0
-  offtopic: 0
-  body_offtopic: 118
+  offtopic: 1
+  body_offtopic: 81
   by_blog:
-    laptop-hugo: 21
-    appliance-hugo: 28
-    interior-hugo: 7
-    baby-hugo: 34
-    fitness-hugo: 3
-    health-hugo: 4
-    pet-hugo: 8
-    kitchen-hugo: 3
-    beauty-hugo: 7
-    camping-hugo: 3
+    laptop-hugo: 18
+    appliance-hugo: 25
+    interior-hugo: 6
+    baby-hugo: 31
+    fitness-hugo: 0
+    health-hugo: 0
+    pet-hugo: 0
+    kitchen-hugo: 2
+    beauty-hugo: 1
+    camping-hugo: 0

@@ -5,12 +5,13 @@ from datetime import datetime, timedelta
 
 RELEVANCE_CONFIG: dict[str, dict] = {
     "default": {"threshold": 0.75, "min_keyword_matches": 2},
-    "laptop-hugo": {"threshold": 0.85},
+    "laptop-hugo": {"threshold": 0.65},
     "health-hugo": {"threshold": 0.65},
-    "baby-hugo": {"threshold": 0.85},
+    "baby-hugo": {"threshold": 0.70},
     "beauty-hugo": {"threshold": 0.55},
     "interior-hugo": {"threshold": 0.65},
     "camping-hugo": {"threshold": 0.65},
+    "kitchen-hugo": {"threshold": 0.65},
 }
 
 OFFTOPIC_THRESHOLD = 0.20

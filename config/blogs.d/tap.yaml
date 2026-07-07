@@ -4,7 +4,7 @@ blogs:
   pipeline: tap
   platform: blogger
   domain: travel.rotcha.kr
-  daily_quota: 10
+  daily_quota: 5
   schedule:
     times:
     - 06:00
@@ -19,7 +19,7 @@ blogs:
     - '11:00'
   status: active
 - cf_project: travel-hugo
-  daily_quota: 2
+  daily_quota: 3
   domain: tour1.rotcha.kr
   fetch_sources:
   - type: camping
@@ -43,7 +43,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel1-hugo
-  daily_quota: 2
+  daily_quota: 3
   domain: travel1.rotcha.kr
   fetch_sources:
   - type: festival
@@ -67,7 +67,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel2-hugo
-  daily_quota: 2
+  daily_quota: 3
   domain: travel2.rotcha.kr
   fetch_sources:
   - type: heritage
@@ -91,7 +91,7 @@ blogs:
   status: active
   theme: Blowfish
 - cf_project: travel3-hugo
-  daily_quota: 5
+  daily_quota: 3
   domain: tour2.rotcha.kr
   fetch_sources:
   - type: food
@@ -112,10 +112,10 @@ blogs:
     - '16:06'
     - '20:06'
   site_path: /Users/twinssn/Projects/TAP/travel3-hugo
-  status: inactive
+  status: active
   theme: Blowfish
 - cf_project: travel4-hugo
-  daily_quota: 2
+  daily_quota: 3
   domain: tour3.rotcha.kr
   fetch_sources:
   - type: course

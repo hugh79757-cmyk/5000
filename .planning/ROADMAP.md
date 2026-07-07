@@ -143,9 +143,31 @@
 
 ---
 
+## Phase 12: Content Enrichment & Dwell Time Optimization — TAP
+
+**Goal:** Increase travel blog content length by +50% and dwell time by +30% by leveraging unused API fields and adding new content sections
+**Mode:** mvp
+**Requirements:** Content quality, SEO, user engagement
+
+**Success Criteria:**
+1. Average content length ≥ 3,500 characters (from ~2,500)
+2. Average dwell time ≥ 3.5 minutes (from ~2.5 minutes)
+3. All 5 Hugo blogs build successfully
+4. Schema.org structured data validates
+5. Ad markers remain functional
+6. No increase in AI API cost > 20%
+
+**Plans:**
+1. **12-01** — API Data Enhancement: Expand camping/Durunubi field mappings
+2. **12-02** — AI Prompt Expansion: max_completion_tokens 7000 + new sections
+3. **12-03** — Content Post-Processing: Schema.org + FAQ extraction
+4. **12-04** — Verification: Build + quality validation
+
+---
+
 ## Configuration
 
-**Granularity:** Coarse (3 phases) + Fix (1 phase) + Enhancement (2 phases) + Optimization (1 phase)
+**Granularity:** Coarse (3 phases) + Fix (1 phase) + Enhancement (3 phases) + Optimization (1 phase)
 **Execution:** Parallel within phases
 **Mode:** Vertical MVP (each phase delivers end-to-end improvement)
 **Research:** Yes (before each phase)

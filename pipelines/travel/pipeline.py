@@ -256,12 +256,20 @@ def _run_single(target_blog_id, blog_cfg=None):
     ]
     if _place_names:
         _used_places = [n for n in _place_names if is_place_used(n, target_blog_id)]
-        if _used_places:
+        _source_type = data.get("source_type", "")
+        # 축제(festival)는 연간 반복 이벤트이므로 2건 이상 중복 시에만 거부
+        # 기타 소스(캠핑/맛집/문화유산/코스)는 1건이라도 중복 시 거부
+        _dup_threshold = 2 if _source_type == "festival" else 1
+        if len(_used_places) >= _dup_threshold:
             logger.warning(
                 f"{target_blog_id} 가게명 중복: {', '.join(_used_places)}"
-                f" (이미 발행된 가게 — used_places에서 감지)"
+                f" (이미 발행된 가게 — used_places에서 감지, {_dup_threshold}건 이상)"
             )
             return None
+        elif _used_places:
+            logger.info(
+                f"{target_blog_id} 가게명部分 중복 (허용): {', '.join(_used_places)}"
+            )
 
     result = generate_content(data, blog_id=target_blog_id)
     if not result:
@@ -340,13 +348,26 @@ def _run_single(target_blog_id, blog_cfg=None):
             register_images(article_id, target_blog_id, body_html)
         if article_id and body_md:
             register_images(article_id, target_blog_id, body_md)
-        # 장소 발행 이력 등록
-        place_names = [it.get("title", it.get("facltNm", "")).strip()
-                       for it in data.get("items", [])
-                       if it.get("title") or it.get("facltNm")]
+        # 장소 발행 이력 등록 — 기사 본문에 실제로 등장하는 장소만 등록
+        all_place_names = [it.get("title", it.get("facltNm", "")).strip()
+                           for it in data.get("items", [])
+                           if it.get("title") or it.get("facltNm")]
+        # body_md에서 장소명 매칭 필터링 (대소문자 무시, 공백 정규화)
+        _body_lower = (body_md or "").lower()
+        _body_normalized = _body_lower.replace(" ", "")
+        place_names = [
+            n for n in all_place_names
+            if n.lower().replace(" ", "") in _body_normalized
+            or n.split()[0] in (body_md or "")  # 시군구명 등 부분 매칭 허용
+        ]
+        # 매칭된 장소가 없으면 전체 등록 (fallback — AI가 이름을 바꾼 경우 대비)
+        if not place_names and all_place_names:
+            place_names = all_place_names
         if article_id and place_names:
             register_places(article_id, target_blog_id, place_names)
-            logger.info("장소 %d건 등록: %s", len(place_names), ", ".join(n[:10] for n in place_names))
+            logger.info("장소 %d건 등록 (전체 %d건 중): %s",
+                        len(place_names), len(all_place_names),
+                        ", ".join(n[:10] for n in place_names))
         # course_published 테이블에 코스 contentid 등록 (travel4-hugo 중복 방지)
         if data.get("source_type") == "course" and data.get("content_ids"):
             try:

@@ -2,13 +2,11 @@ import logging
 import os
 
 import boto3
-from dotenv import load_dotenv
+
+# Centralized env loading: .env.common first, then project .env (no override)
+from shared import env_loader  # noqa: F401
 
 logger = logging.getLogger(__name__)
-load_dotenv(os.path.expanduser("~/.env.common"))
-load_dotenv(
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"),
-)
 
 R2_ENDPOINT = os.getenv("R2_ENDPOINT")
 R2_ACCESS_KEY = os.getenv("R2_ACCESS_KEY_ID")

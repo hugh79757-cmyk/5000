@@ -255,12 +255,12 @@ def init_used_places() -> None:
     conn.close()
 
 
-def is_place_used(place_name, blog_id):
+def is_place_used(place_name, blog_id, ttl_days=30):
     conn = get_conn()
     init_used_places()
     row = conn.execute(
-        "SELECT 1 FROM used_places WHERE place_name=? AND blog_id=?",
-        (place_name, blog_id),
+        "SELECT 1 FROM used_places WHERE place_name=? AND blog_id=? AND published_at > datetime('now', ?)",
+        (place_name, blog_id, f'-{ttl_days} days'),
     ).fetchone()
     conn.close()
     return row is not None
