@@ -3,18 +3,18 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-07-01T22:00:00.000Z"
+last_updated: "2026-07-08T01:20:00.000Z"
 progress:
-  total_phases: 10
+  total_phases: 13
   completed_phases: 10
-  total_plans: 33
-  completed_plans: 33
-  percent: 100
+  total_plans: 48
+  completed_plans: 38
+  percent: 79
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — All phases complete (milestone v1.0 → v1.1)
+**Status:** v1.1 — Phase 13 Wave 1 완료, Phase 13 Wave 2~3 진행 중
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -29,68 +29,67 @@ progress:
 See: `.planning/PROJECT.md` (updated 2026-06-30)
 
 **Core value:** Pipelines run reliably with clear errors when they don't
-**Current focus:** Phase 10 — Blowfish Engagement Optimization
+**Current focus:** Phase 13 — Unified Dashboard (Flask + Chart.js)
 
 ## Current Phase
 
-**Phase 4 — TAP Publishing Stabilization (Complete ✓)**
+**Phase 13 — Unified Dashboard (Flask + Chart.js) — Wave 1 완료, Wave 2 진행 중**
 
-- ✓ Bug 1–5: CTA HTML 보존, 빈 템플릿 제거, 지도보기 평문, no_result backoff, 썸네일 복원
+**Phase Goal:** 단일 대시보드에서 5000(Hub: CUAP/TAP/STAP/RAP/SEAP/CAP/CAP/LAP/ETAP/GAP) + SAP(Sports) + aikorea24 + money-aikorea24 = **49개 자동블로그** 통합 모니터링
 
-**Phase 5 — Post-Stabilization Enhancement (Complete ✓)**
+**Architecture:** Flask + Chart.js (Jinja2 SSR, localhost:5050)
+**Total Tasks:** 15 (Wave 1: 7, Wave 2: 5, Wave 3: 4)
 
-- ✓ 05-01~03: 글 수동 복구, Blowfish 업그레이드, 모니터링 (post_validator, Telegram, cooldown)
+---
 
-**Phase 6 — Maintenance & Stabilization (Complete ✓)**
+### Phase 13 — Wave 1 (Data Collection) — **✅ 완료**
 
-- ✓ A: 39 backup/orphan 파일 삭제
-- ✓ C: pip 패키지 15개 업데이트
-- ✓ E: DB 경로 단일화, days=14 통일, title 파싱 fallback 제거
-- ✓ F: Hugo shortcode regex `\{\{(?![<%])` (DOTALL 제거)
-- ✓ H: humanizer meta leakage cleanup
-- ✓ I: sspark.ai CDN 차단 → R2 fallback
-- ✓ J: DESC 파싱 (`<!-- DESC:`)
-- ✓ G: area_codes validate_display_region()
-- ✓ B: launchd plist, log_aggregator, dispatcher validate_config()
-- ✓ D: @log_stage decorator, Telegram 3연속 실패 알림, metrics
-- ✓ 12/12 success criteria PASS, test_validators 34/34 pass
+| Task | Status | Notes |
+|------|--------|-------|
+| 1-1: analytics_collector.py | ✅ | GA4(7개 메트릭)/GSC(멀티계정)/AdSense/Bing 수집 |
+| 1-2: Flask Dashboard Skeleton | ✅ | app.py + routes/api.py + routes/pages.py + templates |
+| 1-3: Postgres/SQLite 스키마 | ✅ | analytics.db + stap_content.db 연동 |
+| 1-4: OAuth 토큰 자동 갱신 | ✅ | 3개 계정(GA4+GSC+AdSense) 통합 토큰 발급 |
+| 1-5: GSC 멀티 계정 수집 | ✅ | 3개 계정 순차 조회, 63개 사이트 성공 |
+| 1-6: AdSense 멀티 계정 수집 | ✅ | 3계정 / 257건 / $10.66 |
+| 1-7: SAP + aikorea24 + money 데이터 통합 | ✅ | 2,848건 stap_content.db 직접 삽입 |
 
-**Phase 7 — Testing & Content Enhancement (Complete ✓)**
+---
 
-- ✓ R8: test infrastructure (conftest_mocks, pyproject.toml)
-- ✓ R9: CI workflows (제거됨 — CI 미사용, GitHub push 안 함)
-- ✓ R10: post_validator readability + keyword coverage
-- ✓ B: 10 test migration to tests/
-- ✓ G1: _enrich_title keyword-first
-- ✓ G2: JSON-LD schema markup
-- ✓ G4: Travel blog internal linking (related cards)
-- ✓ G5: Practical info fields (13개) in AI prompt
-- ✓ 3 bugs fixed: _clean_body DOTALL, _build_schema_json tags type, pydantic-core version
-- ✓ 48/48 tests pass (validators + post_validator)
+### Phase 13 — Wave 2 (Dashboard UI) — **🔴 진행 중**
 
-**Phase 9 — AI-Tell Pattern Enrichment (Complete ✓)**
+| Task | Status | Notes |
+|------|--------|-------|
+| 2-1: Overview 페이지 | 🔴 | Stat cards + Trend charts (Chart.js) |
+| 2-2: Revenue 페이지 | 🔴 | Daily/RPM/CTR/by-domain |
+| 2-3: Traffic 페이지 | 🔴 | Sessions/Users/PV/Bounce/Engagement |
+| 2-4: Search 페이지 | 🔴 | GSC/Bing clicks/impressions/position |
+| 2-5: Site Health 페이지 | 🔴 | 7×7 그리드 + 필터 |
 
-- ✓ 09-01: humanizer.py `_SYSTEM_PROMPT` — B/E/H/I/J계열 신규 + A계열 보강
-- ✓ _SYSTEM_PROMPT 10대 카테고리(A~J) 전면 커버
-- ✓ im-not-ai ai-tell-taxonomy.md v2.0 기준 16개 패턴 추가 (S1×5, S2×11)
-- ✓ 기존 테스트 65/65 통과
+---
 
-**Phase 8 — Content Cleanup (Complete ✓)**
+### Wave 3 — External Site Integration + Operations — **🔴 대기 중**
 
-- ✓ 8-1: detection script (scripts/phase8/detect_problematic_posts.py)
-- ✓ 8-2: dry-run scan (118 offtopic posts flagged, 0 Chinese titles)
-- ✓ 8-3: batch deletion script (scripts/phase8/delete_flagged_posts.py)
-- ✓ 8-4: verification script (scripts/phase8/verify_cleanup.py)
-- Note: Deletion script created but not executed (--dry-run mode). Run with --execute to actually delete posts.
+| Task | Status | Notes |
+|------|--------|-------|
+| 3-1: SAP sync 자동화 | 🟡 | sync_sap.py → launchd 등록 |
+| 3-2: aikorea24 sync 자동화 | 🟡 | sync_aikorea24.py → launchd |
+| 3-3: money-aikorea24 sync | 🟡 | sync_money_aikorea24.py 보완 |
+| 3-3: launchd + Telegram 알림 | 🔴 | 알림 스크립트 구현 후 launchd 등록 |
+| 3-4: GSC 누락 사이트 등록 | 🔴 | biz.techpawz.com, issue.techpawz.com GSC 등록 |
 
-**Phase 10 — Blowfish Engagement Optimization (Complete ✓)**
+---
+
+### Phase 10 — Blowfish Engagement Optimization (Complete ✓)
 
 - ✓ 10-01: P0 Post-processor — lead + figure shortcodes (Wave 1)
 - ✓ 10-02: P1 AI Prompt — alert + badge shortcode instructions (Wave 1)
-- ✓ 10-03: P2 Gallery + accordion post-processor + prompt (Wave 2)
-- ✓ 10-04: P3 Chart shortcode via embedded data comment (Wave 3)
-- ✓ 10-05: AdSense 수동광고 RPM 최적화 (Wave 1)
+- ✓ 10-02: P2 Gallery + accordion post-processor + prompt (Wave 2)
+- ✓ 10-03: P3 Chart shortcode via embedded data comment (Wave 3)
+- ✓ 10-03: AdSense 수동광고 RPM 최적화 (Wave 1)
 - Note: Implementation uses HTML approach instead of Blowfish shortcodes (shortcodes_enabled: false for travel-hugo)
+
+---
 
 ## Progress
 
@@ -106,23 +105,18 @@ See: `.planning/PROJECT.md` (updated 2026-06-30)
 | 8     | ✓      | 4/4   | 100%     |
 | 9     | ✓      | 1/1   | 100%     |
 | 10    | ✓      | 5/5   | 100%     |
-
-## Active Workspace
-
-- `.planning/PROJECT.md` — Project context
-- `.planning/config.json` — Workflow configuration
-- `.planning/REQUIREMENTS.md` — 10 v1 requirements
-- `.planning/ROADMAP.md` — 5 phases
-- `.planning/codebase/` — Codebase map (7 documents)
-- `.planning/phases/01-foundation-test-tooling-infrastructure/01-CONTEXT.md` — Phase 1 context
-- `.planning/phases/04-tap-publishing-stabilization/04-CONTEXT.md` — Phase 4 context
-- `.planning/phases/05-post-stabilization-enhancement/05-CONTEXT.md` — Phase 5 context
+| 11    | 🔴     | 3/3   | 0%       |
+| 12    | ⬜     | 4/4   | 0%       |
+| 13    | 🟡     | 15/15 | 33%      |
 
 ---
-*Last updated: 2026-07-07 after travel writer fixes commit*
 
 ## Quick Tasks Completed
 
 | Date | Task | Commit | Files |
 |------|------|--------|-------|
+| 2026-07-08 | Phase 13 Wave 1 완료 — Unified Dashboard 통합 | `pending` | analytics_collector.py, app.py, routes/api.py, routes/pages.py, templates/, scripts/, staple_content.db |
 | 2026-07-07 | travel-writer-fixes — 마크다운 포맷 오류 이중 방어 (prompt 규칙 강화 + sanitize_markdown) | `3f230f929` | `config/prompts/travel.yaml`, `pipelines/travel/writer.py` |
+
+---
+*Last updated: 2026-07-08 after Phase 13 Wave 1 completion*
