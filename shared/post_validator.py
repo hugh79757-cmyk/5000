@@ -8,6 +8,13 @@ logger = logging.getLogger(__name__)
 # 검증 대상 블로그 그룹
 TAP_TRAVEL_BLOGS = {"travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"}
 
+# 큐레이션 블로그 그룹 (CTA 검증 대상)
+CURATION_BLOGS = {
+    "laptop-hugo", "baby-hugo", "appliance-hugo", "interior-hugo",
+    "health-hugo", "pet-hugo", "kitchen-hugo", "beauty-hugo",
+    "camping-hugo", "fitness-hugo",
+}
+
 
 def _readability_score(text: str) -> float:
     """Compute a simplified Korean readability score (0.0–1.0).
@@ -90,7 +97,7 @@ def validate_post_html(html: str, blog_id: str) -> dict:
     """
     issues = []
 
-    # 1. CTA 존재 여부 (travel 블로그만)
+    # 1. CTA 존재 여부 (travel 블로그)
     if blog_id in TAP_TRAVEL_BLOGS:
         if "cta-box" not in html and "cta_box" not in html:
             count = _count_cta_plain_text(html)
@@ -100,6 +107,14 @@ def validate_post_html(html: str, blog_id: str) -> dict:
             else:
                 issues.append({"severity": "WARNING", "check": "cta_html",
                                "msg": f"CTA가 HTML이 아닌 평문으로 {count}개 존재"})
+
+    # 1b. CTA 존재 여부 (큐레이션 블로그)
+    if blog_id in CURATION_BLOGS:
+        if "cta-box" not in html and "cta_box" not in html:
+            count = _count_cta_plain_text(html)
+            if count == 0:
+                issues.append({"severity": "WARNING", "check": "curation_cta",
+                               "msg": "큐레이션 CTA HTML 누락 (쿠팡 구매 유도 영역 없음)"})
 
     # 2. {{}} 잔재 (Hugo 단축코드 {{< ... >}} 는 제외)
     clean = re.sub(r"\{\{<[\s\S]*?>}}", "", html)
@@ -137,7 +152,7 @@ def validate_post_html(html: str, blog_id: str) -> dict:
     TECH_IDENTIFIERS = {
         'travel', 'travel1', 'travel2', 'travel3', 'travel4',
         'hugo', 'blogger', 'wordpress', 'tap', 'stap', 'cuap',
-        'rap', 'senior', 'stock', 'etf', 'dividend', 'sector', 'ipo', 'finance',
+        'rap', 'rap2', 'rap3', 'rap4', 'senior', 'stock', 'etf', 'dividend', 'sector', 'ipo', 'finance',
         'car', 'appliance', 'baby', 'fitness', 'interior', 'laptop', 'health',
         'pet', 'kitchen', 'beauty', 'camping', 'ev', 'compare', 'deal', 'guide', 'tco',
         'hotissue', 'info', 'rank', 'pick', 'kuta', 'gap', 'tvshow', 'ud',

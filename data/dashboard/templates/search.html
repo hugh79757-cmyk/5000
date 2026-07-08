@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}5000 Dashboard — Search{% endblock %}
+
+{% block content %}
+<h5 class="mb-3">Search Performance</h5>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Google Search Console (30d)</div>
+            <div class="card-body">
+                <canvas id="gscChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Bing (30d)</div>
+            <div class="card-body">
+                <canvas id="bingChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">GSC vs Bing Comparison (30d)</div>
+            <div class="card-body">
+                <canvas id="gscBingComparisonChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Blog Efficiency Scores (30d)</div>
+            <div class="card-body">
+                <canvas id="efficiencyChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>loadSearchPage();</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}5000 Dashboard — Revenue{% endblock %}
+
+{% block content %}
+<h5 class="mb-3">AdSense Revenue</h5>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Revenue by Domain (30d)</div>
+            <div class="card-body">
+                <canvas id="revenueDomainChart" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">RPM & CTR Trend (90d)</div>
+            <div class="card-body">
+                <canvas id="rpmTrendChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Weekly Comparison</div>
+            <div class="card-body">
+                <canvas id="weeklyComparisonChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>loadRevenuePage();</script>
+{% endblock %}

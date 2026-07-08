@@ -175,10 +175,8 @@ def _apply_lead_shortcode(body_md: str) -> str:
     if not body_md.strip():
         return body_md
 
-    if body_md.strip().startswith("<p class=\"lead\""):
-        # Body already has a lead block (from a previous run).
-        # Convert inline markdown inside existing HTML wrappers.
-        return _convert_inline_md_to_html(body_md)
+    if body_md.strip().startswith("{{< lead >}}"):
+        return body_md
 
     blocks = body_md.split("\n\n")
     for i, block in enumerate(blocks):
@@ -186,16 +184,15 @@ def _apply_lead_shortcode(body_md: str) -> str:
         if not stripped:
             continue
         if stripped.startswith(("# ", "## ", "### ", "{{<", "<p class", "```", ">")):
-            continue
-        # Convert inline markdown inside the lead block because Hugo
-        # does not process markdown inside raw HTML elements.
+            return body_md
         stripped = _convert_inline_md_to_html(stripped)
-        blocks[i] = f'<p class="lead">\n{stripped}\n</p>'
+        blocks[i] = f"{{{{< lead >}}}}\n{stripped}\n{{{{< /lead >}}}}"
         break
     return "\n\n".join(blocks)
 
 
 def _apply_figure_shortcode(body_md: str) -> str:
+    """Replace markdown images with {{< figure >}} shortcode."""
     if "![" not in body_md:
         return body_md
     lines = body_md.split("\n")
@@ -224,8 +221,8 @@ def _apply_figure_shortcode(body_md: str) -> str:
                             caption = next_line
                             i = j
                         break
-                escaped_caption = caption.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
-                result.append(f'<figure><img src="{url}" alt="{alt}" /><figcaption>{escaped_caption}</figcaption></figure>')
+                escaped_caption = caption.replace("&", "&").replace("<", "<").replace(">", ">").replace('"', '"')
+                result.append(f"{{{{< figure src=\"{url}\" alt=\"{alt}\" caption=\"{escaped_caption}\" >}}}}")
                 i += 1
                 continue
         result.append(line)
@@ -234,23 +231,32 @@ def _apply_figure_shortcode(body_md: str) -> str:
 
 
 def _apply_gallery_shortcode(body_md: str) -> str:
-    """Wrap 2+ consecutive <figure> blocks in <div class=\"gallery\">"""
-    if "<figure>" not in body_md:
+    """Wrap 2+ consecutive {{< figure >}} shortcodes in {{< gallery >}}."""
+    if "{{< figure" not in body_md:
         return body_md
+    if "{{< gallery" in body_md:
+        return body_md
+    
     lines = body_md.split("\n")
     result = []
     i = 0
     while i < len(lines):
-        if lines[i].strip().startswith("<figure>"):
+        if lines[i].strip().startswith("{{< figure"):
             fig_lines = [lines[i]]
             i += 1
-            while i < len(lines) and lines[i].strip().startswith("<figure>"):
-                fig_lines.append(lines[i])
-                i += 1
+            while i < len(lines):
+                s = lines[i].strip()
+                if s.startswith("{{< figure"):
+                    fig_lines.append(lines[i])
+                    i += 1
+                elif not s:
+                    i += 1
+                else:
+                    break
             if len(fig_lines) >= 2:
-                result.append('<div class="gallery">')
+                result.append("{{< gallery >}}")
                 result.extend(fig_lines)
-                result.append('</div>')
+                result.append("{{< /gallery >}}")
             else:
                 result.extend(fig_lines)
             continue
@@ -260,7 +266,10 @@ def _apply_gallery_shortcode(body_md: str) -> str:
 
 
 def _apply_accordion_shortcode(body_md: str) -> str:
-    """Wrap certain H2 sections (체크포인트, 준비사항) in {{< accordion >}}"""
+    """Wrap certain H2 sections (checkpoint, preparation) in {{< accordion >}}"""
+    if "{{< accordion" in body_md:
+        return body_md
+    
     lines = body_md.split("\n")
     result = []
     i = 0
@@ -274,16 +283,15 @@ def _apply_accordion_shortcode(body_md: str) -> str:
         is_h2 = stripped.startswith("## ") and not stripped.startswith("### ")
         if is_h2:
             if in_collapse:
-                result.append('</details>')
                 result.extend(buf)
+                result.append("{{< /accordion >}}")
                 result.append('')
                 buf = []
                 in_collapse = False
             should_collapse = any(p in stripped for p in collapse_patterns)
             if should_collapse:
-                label = stripped.lstrip("#").strip()
                 in_collapse = True
-                result.append(f'<details><summary>{label}</summary>')
+                result.append(f'{{{{< accordion >}}}}')
                 result.append('')
                 i += 1
                 continue
@@ -293,8 +301,8 @@ def _apply_accordion_shortcode(body_md: str) -> str:
             result.append(line)
         i += 1
     if in_collapse:
-        result.append('</details>')
         result.extend(buf)
+        result.append("{{< /accordion >}}")
     return "\n".join(result)
 
 

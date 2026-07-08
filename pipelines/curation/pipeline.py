@@ -539,11 +539,23 @@ def _title_is_duplicate(blog_id, title):
         stop_words = {
             # 기존
             "추천", "비교", "가성비", "인기", "순위", "정리", "선택", "소개", "vs", "년", "월", "위",
-            # 연도/월 (Tier 1)
-            "2024", "2025", "2026", "7월", "6월", "5월", "4월", "3월",
+# 연도/월 (Tier 1)
+        "2024", "2025", "2026", "2024년", "2025년", "2026년", "7월", "6월", "5월", "4월", "3월",
             # 범용 속성 (Tier 2)
             "1위", "2위", "대용량", "가정용", "프리미엄", "사무용", "저소음",
             "가벼운", "최고의", "필수템", "아이템", "다용도", "위한", "기준", "자동",
+            # 동물/펫 카테고리 (Tier 3 - pet-hugo 등)
+            "강아지", "고양이", "반려견", "반려묘", "펫", "애완",
+            # 제품 유형 (Tier 4)
+            "사료", "간식", "방석", "매트", "계단", "유모차", "쿨매트", "캣타워", "하우스", "장난감",
+            "목줄", "가슴줄", "리드줄", "배변패드", "샴푸", "브러시", "발톱깎이",
+            # 브랜드/시리즈 (Tier 5) - 공통 패턴
+            "TOP", "BEST", "순위", "비교", "선택", "이유", "엄선", "고민", "해결", "고르는", "법",
+            "최신", "가이드", "실제", "써본", "사람", "말하는", "실사용", "후기", "어떤", "게", "나을까",
+            "메모리폼", "에어네트", "노령견", "곡선형", "쾌적", "실속", "롤매트", "폴딩", "가수분해",
+            "그리니즈", "말티즈", "뉴트리나", "네스펫", "멍보스", "아스쿠", "마이펫닥터", "더독",
+            "슬로울리라이프", "EHEYCIGA", "몽제", "로하우스", "디팡", "BUNIO", "오해", "가지",
+            "바로잡기", "건강백서", "순", "인기", "추천", "이유", "기준", "바로잡기",
         }
         title_words -= stop_words
         if len(title_words) >= 3:
@@ -855,6 +867,33 @@ def _run_inner(cfg, blog_id, daily_quota):
     except Exception as e:
         logger.warning(f"[keyword_health] 성공 기록 오류: {e}")
     logger.info(f"[{blog_id}] 발행 완료: {title}")
+
+    # 품질 메트릭 기록
+    try:
+        from shared.quality_recorder import record_quality
+        from shared.post_validator import validate_post_html, _readability_score, _keyword_coverage
+        body_html = result.get("body_html", body_md)
+        body_text = re.sub(r"<[^>]+>", "", body_html)
+        body_text = re.sub(r"\s+", " ", body_text).strip()
+
+        readability = _readability_score(body_text)
+
+        issue_checks = {i["check"] for i in validate_post_html(body_html, blog_id).get("issues", [])}
+
+        metrics = {
+            "readability_score": readability,
+            "keyword_coverage_ratio": 0,
+            "content_length": len(body_md),
+            "paragraph_count": body_md.count("\n\n") + 1,
+            "has_cta": "cta_html" not in issue_checks and "curation_cta" not in issue_checks,
+            "has_og_image": bool(thumbnail_url),
+            "has_map_text": "map_text" in issue_checks,
+            "min_length_pass": "min_length" not in issue_checks,
+            "empty_template_count": sum(1 for i in validate_post_html(body_html, blog_id).get("issues", []) if i["check"] == "empty_template"),
+        }
+        record_quality(blog_id, slug, title, datetime.now().isoformat(), metrics)
+    except Exception as e:
+        logger.warning(f"[{blog_id}] 품질 메트릭 기록 실패: {e}")
 
     return {
         "success": True,

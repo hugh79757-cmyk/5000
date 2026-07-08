@@ -83,3 +83,31 @@ def send_error(blog_id, stage, error_msg):
 
 def send_daily_report(report_text):
     return send(report_text)
+
+
+def send_validation(blog_id: str, title: str, url: str, validation: dict):
+    """발행 후 HTML 검증 결과 전송 (문제 있을 때만)"""
+    if validation.get("passed", False):
+        return False
+    issues = validation.get("issues", [])
+    if not issues:
+        return False
+
+    text = "🔍 <b>발행 품질 검증 실패</b>\n"
+    text += f"<b>블로그:</b> {blog_id}\n"
+    text += f"<b>제목:</b> {title[:80]}\n"
+    if url:
+        text += f"<b>URL:</b> {url}\n"
+    for i in issues:
+        emoji = "🔴" if i["severity"] == "ERROR" else "🟡"
+        text += f"{emoji} <b>{i['check']}</b>: {i['msg']}\n"
+    return send(text)
+
+
+def send_no_result_alert(blog_id: str, failure_count: int):
+    """no_result 연속 실패 알림 (에스컬레이션)"""
+    text = "⚠️ <b>no_result 연속 실패</b>\n"
+    text += f"<b>블로그:</b> {blog_id}\n"
+    text += f"<b>연속 실패:</b> {failure_count}회\n"
+    text += "<b>조치:</b> 데이터 수집 파이프라인 점검 필요"
+    return send(text)

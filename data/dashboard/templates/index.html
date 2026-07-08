@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}5000 Dashboard — Overview{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4" id="statCards">
+    <div class="col-6 col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body text-center">
+                <div class="text-muted small">Total Posts</div>
+                <div class="fs-2 fw-bold text-light" id="statTotalPosts">—</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body text-center">
+                <div class="text-muted small">Today</div>
+                <div class="fs-2 fw-bold text-success" id="statTodayPosts">—</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body text-center">
+                <div class="text-muted small">Monthly Revenue</div>
+                <div class="fs-2 fw-bold text-warning" id="statRevenue">—</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card bg-dark border-secondary h-100">
+            <div class="card-body text-center">
+                <div class="text-muted small">Monthly Sessions</div>
+                <div class="fs-2 fw-bold text-info" id="statSessions">—</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Posts Trend (30d)</span>
+                <select class="form-select form-select-sm w-auto" id="postsGroup" onchange="loadPostsChart()">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+            <div class="card-body">
+                <canvas id="postsChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Revenue Trend (30d)</div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Top Blogs by Posts</div>
+            <div class="card-body">
+                <canvas id="topPostsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Site Health</div>
+            <div class="card-body" id="healthGrid">
+                <div class="text-center text-muted py-3">Loading...</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

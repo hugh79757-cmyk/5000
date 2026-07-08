@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}5000 Dashboard — Traffic{% endblock %}
+
+{% block content %}
+<h5 class="mb-3">GA4 Traffic</h5>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Sessions / Users / Page Views (30d)</div>
+            <div class="card-body">
+                <canvas id="trafficChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Traffic by Blog (30d)</div>
+            <div class="card-body">
+                <canvas id="trafficBlogChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-12">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Ad Revenue vs Traffic (30d)</div>
+            <div class="card-body">
+                <canvas id="adRevenueScatterChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>loadTrafficPage();</script>
+{% endblock %}

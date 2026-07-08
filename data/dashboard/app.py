@@ -22,6 +22,9 @@ app.config["DATA_DIR"] = str(DATA_DIR)
 app.config["CONTENT_DB"] = str(ARTICLES_DB)
 app.config["ANALYTICS_DB"] = os.path.join(DATA_DIR, "analytics.db")
 app.config["DASHBOARD_DIR"] = str(Path(__file__).parent)
+app.config["SAP_CACHE_DB"] = str(Path(__file__).parent / "data" / "sap_posts.db")
+app.config["AIKOREA24_CACHE_DB"] = str(Path(__file__).parent / "data" / "aikorea24_posts.db")
+app.config["MONEY_AIKOREA24_CACHE_DB"] = str(Path(__file__).parent / "data" / "money_aikorea24_posts.db")
 
 # ── Routes ──
 from routes.api import api_bp

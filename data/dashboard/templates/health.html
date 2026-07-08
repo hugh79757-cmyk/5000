@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}5000 Dashboard — Site Health{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Site Health — All 49 Sites</h5>
+    <span class="text-muted small" id="healthTimestamp">Checking...</span>
+</div>
+
+<div class="card bg-dark border-secondary mb-3">
+    <div class="card-body py-2">
+        <div class="d-flex gap-3 flex-wrap align-items-center">
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-light active" onclick="setHealthFilter('all')">All</button>
+                <button type="button" class="btn btn-outline-success" onclick="setHealthFilter('online')">Online</button>
+                <button type="button" class="btn btn-outline-danger" onclick="setHealthFilter('offline')">Offline</button>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Sort by: <span id="sortLabel">Status</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href="#" onclick="setHealthSort('status')">Status</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setHealthSort('response')">Response Time</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="setHealthSort('blog_id')">Blog ID</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-dark border-secondary">
+    <div class="card-body" id="healthGrid">
+        <div class="text-center text-muted py-5">Loading...</div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-12">
+        <div class="card bg-dark border-secondary">
+            <div class="card-header">Detailed Status</div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover table-sm mb-0" id="healthTable">
+                        <thead>
+                            <tr>
+                                <th>Blog ID</th>
+                                <th>Group</th>
+                                <th>URL</th>
+                                <th>Status</th>
+                                <th>Response (ms)</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function loadHealth() {
+    try {
+        const resp = await fetch('/api/health');
+        const data = await resp.json();
+
+        document.getElementById('healthTimestamp').textContent =
+            'Checked at ' + new Date().toLocaleString('ko-KR');
+
+        // Grid
+        const grid = document.getElementById('healthGrid');
+        const online = data.sites.filter(s => s.status === 200).length;
+        const offline = data.sites.filter(s => s.status !== 200).length;
+
+        let html = `<div class="mb-3 d-flex gap-3 flex-wrap">
+            <span class="badge bg-success">● ${online} Online</span>
+            <span class="badge bg-danger">● ${offline} Offline</span>
+            <span class="badge bg-secondary">${data.total} Total</span>
+        </div><div class="d-flex flex-wrap gap-1">`;
+
+        for (const site of data.sites) {
+            const cls = site.status === 200 ? 'bg-success' :
+                        site.status === 0 ? 'bg-danger' : 'bg-warning';
+            html += `<span class="${cls} rounded" style="width:14px;height:14px;"
+                      title="${site.blog_id}: ${site.status} (${site.response_ms}ms)"></span>`;
+        }
+        html += '</div>';
+        grid.innerHTML = html;
+
+        // Table
+        const tbody = document.querySelector('#healthTable tbody');
+        tbody.innerHTML = '';
+        for (const site of data.sites) {
+            const statusCls = site.status === 200 ? 'text-success' :
+                             site.status === 0 ? 'text-danger' : 'text-warning';
+            const row = `<tr>
+                <td><strong>${site.blog_id}</strong></td>
+                <td><span class="badge-group">${site.group}</span></td>
+                <td><a href="${site.url}" target="_blank" class="text-light small">${site.url}</a></td>
+                <td class="${statusCls} fw-bold">${site.status || 'ERR'}</td>
+                <td>${site.response_ms}</td>
+                <td class="text-danger small">${site.error || ''}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        }
+    } catch (e) {
+        document.getElementById('healthGrid').innerHTML =
+            `<div class="text-danger">Failed to load: ${e.message}</div>`;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    loadHealth();
+    setInterval(loadHealth, 30000);
+});
+</script>
+{% endblock %}

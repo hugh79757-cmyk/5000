@@ -87,6 +87,10 @@ STAP_PIPELINE_MAP = {
 _COOLDOWN_FILE = os.path.join(FIVEK_ROOT, "data", "cooldown.json")
 _COOLDOWN_MINUTES = 30
 
+# --- no_result 실패 횟수 추적 (에스컬레이션용) ---
+_FAILURE_COUNT_FILE = os.path.join(FIVEK_ROOT, "data", "failure_count.json")
+_ESCALATION_THRESHOLD = 3  # 3회 연속 실패 시 에스컬레이션 알림
+
 
 def _get_cooldowns() -> dict:
     try:
@@ -111,6 +115,31 @@ def _is_on_cooldown(blog_id: str) -> bool:
         return False
     elapsed = datetime.now() - datetime.fromisoformat(last)
     return elapsed < timedelta(minutes=_COOLDOWN_MINUTES)
+
+
+def _get_failure_counts() -> dict:
+    try:
+        with open(_FAILURE_COUNT_FILE) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def _increment_failure_count(blog_id: str) -> int:
+    counts = _get_failure_counts()
+    counts[blog_id] = counts.get(blog_id, 0) + 1
+    os.makedirs(os.path.dirname(_FAILURE_COUNT_FILE), exist_ok=True)
+    with open(_FAILURE_COUNT_FILE, "w") as f:
+        json.dump(counts, f)
+    return counts[blog_id]
+
+
+def _reset_failure_count(blog_id: str) -> None:
+    counts = _get_failure_counts()
+    if blog_id in counts:
+        del counts[blog_id]
+    with open(_FAILURE_COUNT_FILE, "w") as f:
+        json.dump(counts, f)
 
 
 def load_blogs():
@@ -610,7 +639,11 @@ def dispatch(blog_id):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
             # no_result/데이터부족 등은 텔레그램 전송 (침묵 방지)
             if reason in ("no_result", "no_data", "fetch_error", "no_content"):
-                _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음")
+                count = _increment_failure_count(blog_id)
+                _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음 (연속 {count}회)")
+                # 3회 연속 실패 시 에스컬레이션
+                if count >= 3:
+                    _tg_error(blog_id, "escalation", f"[{blog_id}] {count}회 연속 {reason} — 수동 점검 필요")
             elif reason in ("duplicate_slug", "duplicate_source_id"):
                 existing = result.get("existing_url", "")
                 dup_type = reason.replace("duplicate_", "")
@@ -619,12 +652,72 @@ def dispatch(blog_id):
                     f"기존글: {existing or 'slug 확인 필요'}\n"
                     f"조치: 데이터가 오래되어 동일 주제 반복 생성 중. "
                     f"pipelines/data_collector.py의 collect_all() 실행 필요")
+        else:
+            # 성공 시 실패 카운트 리셋
+            _reset_failure_count(blog_id)
     return result
+
+
+def _send_quality_report() -> None:
+    """발행 품질 주간 리포트 출력"""
+    import sqlite3
+    from datetime import datetime, timedelta
+
+    cutoff = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    conn = sqlite3.connect(str(LEDGER_DB))
+    
+    # 최근 7일간 발행 통계
+    rows = conn.execute(
+        "SELECT blog_id, status, created_at FROM publish_ledger WHERE DATE(created_at) >= ?",
+        (cutoff,)
+    ).fetchall()
+    
+    if not rows:
+        print("최근 7일간 발행 기록 없음")
+        conn.close()
+        return
+
+    total = len(rows)
+    success = sum(1 for r in rows if r[1] == "published")
+    failed = total - success
+    
+    # 블로그별 통계
+    blog_stats = {}
+    for blog_id, status, created_at in rows:
+        if blog_id not in blog_stats:
+            blog_stats[blog_id] = {"total": 0, "success": 0, "no_result": 0}
+        blog_stats[blog_id]["total"] += 1
+        if status == "published":
+            blog_stats[blog_id]["success"] += 1
+        elif status == "failed":
+            blog_stats[blog_id]["no_result"] += 1
+
+    print("=== 발행 품질 리포트 (최근 7일) ===")
+    print(f"총 발행: {total} | 성공: {success} | 실패: {failed}")
+    print()
+    print("블로그별 통계:")
+    for blog_id, stats in sorted(blog_stats.items()):
+        rate = (stats["success"] / stats["total"] * 100) if stats["total"] > 0 else 0
+        print(f"  {blog_id}: {stats['total']}건 (성공률 {rate:.1f}%, no_result {stats['no_result']}회)")
+    
+    # no_result 상위 5개
+    no_result_sorted = sorted(
+        [(b, s["no_result"]) for b, s in blog_stats.items() if s["no_result"] > 0],
+        key=lambda x: x[1], reverse=True
+    )[:5]
+    
+    if no_result_sorted:
+        print()
+        print("no_result 빈도 TOP 5:")
+        for blog_id, count in no_result_sorted:
+            print(f"  {blog_id}: {count}회")
+
+    conn.close()
 
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("usage: dispatcher.py <blog_id|report|init-db>")
+        print("usage: dispatcher.py <blog_id|report|init-db> [--quality]")
         sys.exit(1)
 
     cmd = sys.argv[1]
@@ -646,11 +739,14 @@ def main() -> None:
         return
 
     if cmd == "report":
-        try:
-            from shared.monitor import send_daily_report
-            send_daily_report()
-        except Exception as e:
-            print(f"Report failed: {e}")
+        if len(sys.argv) > 2 and sys.argv[2] == "--quality":
+            _send_quality_report()
+        else:
+            try:
+                from shared.monitor import send_daily_report
+                send_daily_report()
+            except Exception as e:
+                print(f"Report failed: {e}")
         return
 
     import json
