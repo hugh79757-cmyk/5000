@@ -133,7 +133,19 @@ def validate_post_html(html: str, blog_id: str) -> dict:
 
     # 7. Keyword coverage
     parts = re.split(r'[-_]', blog_id)
-    keywords = [p for p in parts if len(p) > 2]
+    # 기술 식별자 제외 (블로그 ID 구성요소 중 콘텐츠 키워드가 아닌 것)
+    TECH_IDENTIFIERS = {
+        'travel', 'travel1', 'travel2', 'travel3', 'travel4',
+        'hugo', 'blogger', 'wordpress', 'tap', 'stap', 'cuap',
+        'rap', 'senior', 'stock', 'etf', 'dividend', 'sector', 'ipo', 'finance',
+        'car', 'appliance', 'baby', 'fitness', 'interior', 'laptop', 'health',
+        'pet', 'kitchen', 'beauty', 'camping', 'ev', 'compare', 'deal', 'guide', 'tco',
+        'hotissue', 'info', 'rank', 'pick', 'kuta', 'gap', 'tvshow', 'ud',
+        'kboplayer', 'kboteam', 'kboschedule', 'proto', 'protostats', 'fstats', 'fsched', 'betguide', 'protoking',
+        'aikorea24', 'persona', 'money', 'sports', 'kbo',
+        'rotcha', 'techpawz', 'informationhot',
+    }
+    keywords = [p for p in parts if len(p) > 2 and p.lower() not in TECH_IDENTIFIERS]
     if 'travel' in blog_id.lower():
         keywords.extend(['여행', '맛집'])
     seen = set()

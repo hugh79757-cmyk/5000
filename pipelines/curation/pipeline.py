@@ -802,7 +802,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     if _title_is_duplicate(blog_id, title):
         logger.warning(f"[{blog_id}] 유사 제목 존재: {title}")
         _record_failure(blog_id, "similar_title", f"유사 제목 중복: {title}", keyword)
-        return {"success": False, "reason": "similar_title"}
+        return {"success": False, "reason": "similar_title", "keyword": keyword}
 
     # 발행
     # 태그 생성: 키워드 + 제목에서 브랜드명 추출
