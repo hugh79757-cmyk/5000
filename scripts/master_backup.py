@@ -10,7 +10,7 @@ master_backup.py — 통합 백업 스크립트 v2.1.0
 - v2.0.0: arcname에 slug 경로 포함 (복구 가능하도록 수정)
 - v2.1.0: 하드코딩 제거, yaml 자동 로드, site_path 대소문자 자동 보정
 """
-import sys, gzip, shutil, tarfile, logging, subprocess
+import os, sys, gzip, shutil, tarfile, logging, subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 

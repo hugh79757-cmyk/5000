@@ -22,7 +22,7 @@ def sync_sap():
     sap_conn = sqlite3.connect(str(SAP_DB))
     sap_conn.row_factory = sqlite3.Row
     rows = sap_conn.execute("""
-        SELECT domain as blog_id, title, date as created_at, 'published' as status
+        SELECT domain as blog_id, title, date as created_at, url, 'published' as status
         FROM publish_log
         WHERE date > datetime('now', '-90 days')
         ORDER BY date DESC

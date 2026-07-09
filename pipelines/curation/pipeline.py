@@ -816,6 +816,21 @@ def _run_inner(cfg, blog_id, daily_quota):
         _record_failure(blog_id, "similar_title", f"유사 제목 중복: {title}", keyword)
         return {"success": False, "reason": "similar_title", "keyword": keyword}
 
+    # 큐레이션 CTA fallback — AI가 CTA를 생성하지 않은 경우 자동 삽입
+    _HAS_CTA = "cta-box" in body_md or "cta_box" in body_md
+    if not _HAS_CTA:
+        _FALLBACK_CTA = (
+            '\n\n<div class="cta-box" style="background:#f8f9fa;padding:16px;border-radius:8px;'
+            'text-align:center;margin:24px 0">\n'
+            '<p style="font-size:16px;font-weight:700;margin:0 0 8px">💡 구매 팁</p>\n'
+            '<p style="font-size:14px;margin:0 0 12px;color:#555">'
+            '위 상품들의 가격은 변동될 수 있으니 최신 가격을 꼭 확인해보세요.<br>'
+            '아래 링크에서 자세한 정보와 후기를 확인할 수 있습니다.</p>\n'
+            '</div>'
+        )
+        body_md += _FALLBACK_CTA
+        logger.info(f"[{blog_id}] 큐레이션 CTA fallback 삽입")
+
     # 발행
     # 태그 생성: 키워드 + 제목에서 브랜드명 추출
     tag_set = set()

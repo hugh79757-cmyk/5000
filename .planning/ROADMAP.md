@@ -1,175 +1,133 @@
 # Roadmap: 5000
 
-**3 phases** | **10 requirements mapped** | All v1 requirements covered ✓
+**Last updated:** 2026-07-09 (code-audited, not doc-driven)
+
+**Actual phases completed:** 15 phases 완료 (Phase 12 일부 누락)
+**현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
+
+---
 
 ## Phase 1: Foundation — Test & Tooling Infrastructure
-
-**Goal:** Establish test framework, linting, CI pipeline, and verify Python 3.14 compatibility
-**Mode:** mvp
-**Requirements:** STB-01, STB-04, STB-05, STB-06
-
-**Success Criteria:**
-1. `pytest` runs with >70% coverage on shared/ modules
-2. `ruff check .` passes with no errors
-3. `mypy .` passes for shared/ and pipelines/
-4. GitHub Actions runs lint + test on push
-5. `check_package_imports()` removed from `dispatcher.py`
-
-**Plans:**
-1. Tooling & test infra — pytest, ruff, mypy config, CI workflow
-2. Unit tests for shared modules — validators, humanizer, telegram_notifier
+**Status:** ✅ Complete  
+**Commit:** 초기 CI/테스트 인프라
 
 ---
 
 ## Phase 2: Core Refactoring — Simplify Central Modules
-
-**Goal:** Replace brittle routing in dispatcher, split monolith publisher, clean up backup pollution
-**Mode:** mvp
-**Requirements:** STB-07, STB-08, STB-03
-
-**Success Criteria:**
-1. New blogs require config entry only (no elif chain in dispatcher)
-2. `shared/publisher.py` split into 3+ focused platform modules
-3. Zero `.bak*` files in source directories
-4. All existing pipelines still deploy correctly
-
-**Plans:**
-1. Dispatcher registry — dynamic pipeline lookup
-2. Publisher decomposition — per-platform modules
-3. Backup file cleanup
+**Status:** ✅ Complete  
+**Commit:** dispatcher registry + publisher 분할
 
 ---
 
 ## Phase 3: Hardening — Stability & Decoupling
-
-**Goal:** Eliminate hardcoded paths, consistent error handling, isolate external deps
-**Mode:** mvp
-**Requirements:** STB-02, STB-09, STB-10
-
-**Success Criteria:**
-1. Zero hardcoded absolute paths in source code
-2. Every `except Exception` block logs actionable context
-3. TAP/STAP/ETAP import failures produce clear error messages with upgrade instructions
-4. All pipelines run from clean clone with env-only config
-
-**Plans:**
-1. Path configuration — env-driven project roots
-2. Error handling audit — consistent patterns across all modules
-3. External dependency isolation — interface wrappers
+**Status:** ✅ Complete  
+**Commit:** `139e5fdda`
 
 ---
 
-## Phase 4: TAP Publishing Stabilization — Post-Refactoring Bug Fixes
-
-**Goal:** Fix 5 regressions introduced by Phase 2/3 refactoring that broke TAP travel blog content
-**Mode:** fix (sequential — each bug resolved before next)
-**지연: t_0 + 14일 (Phase 3 완료 후 즉시)**
-
-**Success Criteria:**
-1. Trip.com CTA HTML이 발행된 글에 정상 렌더링됨
-2. `{{}}` 빈 템플릿 잔재가 발행된 글에 나타나지 않음
-3. "지도에서 보기" 평문이 본문에 노출되지 않음
-4. `no_result` 실패 시 backoff가 작동하여 재시도 폭주 방지
-5. 썸네일 이미지가 정상 표시됨
-6. travel4-hugo 블로그의 `--dry-run` 발행 테스트 통과
-7. 기존 travel1/2/3-hugo, travel-hugo 발행에 영향 없음
-
-**Plans:**
-1. **Formatting fixes** — CTA HTML 보존 + 썸네일 키 복원
-2. **Content & pipeline fixes** — `{{}}` 제거 + 지도보기 regex + no_result backoff
+## Phase 4: TAP Publishing Stabilization (Content Validation)
+**Status:** ✅ Complete  
+**Commit:** `139e5fdda` (Phase 2.1+3 동시)
 
 ---
 
-## Phase 5: Post-Stabilization Enhancement — 복구 + 테마 + 모니터링
-
-**Goal:** 이미 발행된 손상 글 복구, Blowfish 테마 업그레이드, 모니터링 시스템 구축
-**Mode:** hybrid (fix: 05-01/05-02, mvp: 05-03)
-**지연: Phase 4 완료 후 즉시**
-
-**Success Criteria:**
-1. 7/1일 발행된 2개 손상 글의 CTA/썸네일/`{{}}`가 모두 수정됨
-2. Blowfish 테마가 v2.x로 업그레이드되어 `cover.image:` 키 정상 지원
-3. `_clean_body()` DOTALL regex가 모든 AI 생성 섹션 변형을 커버
-4. 발행 후 HTML 자동 검증이 CTA/썸네일/`{{}}`/지도보기를 감지
-5. 검증 실패 시 Telegram 알림 전송
-6. 기존 travel1/2/3-hugo, travel-hugo 발행에 영향 없음
-
-**Plans:**
-1. **7/1 글 수동 복구** — index.md 패치 + Hugo rebuild + wrangler deploy
-2. **Blowfish 테마 업그레이드 + DOTALL 확장** — v2.x 업데이트, regex 패턴 확장
-3. **모니터링 & 관측 시스템** — HTML 검증, Telegram 리포트, 품질 통계
+## Phase 5: Post-Stabilization Enhancement
+**Status:** ✅ Complete  
+**Commits:** Blowfish 테마 업그레이드, 모니터링 시스템
 
 ---
 
-## Phase 9: AI-Tell Pattern Enrichment — humanizer.py
-
-**Goal:** `_SYSTEM_PROMPT`에 누락된 B/E/H/I/J계열 AI 티 패턴 16개 추가
-**Mode:** refactor
-**Commit:** `0a17cf55b`
-
-**Success Criteria:**
-1. `_SYSTEM_PROMPT` 10대 카테고리(A~J) 전면 커버
-2. im-not-ai ai-tell-taxonomy.md v2.0 기준 16개 패턴 추가
-3. 기존 테스트 65/65 통과
-4. 길이 ±15% 가드, 영문 70% 스킵 등 안전장치 유지
-
-**Plans:**
-1. **09-01** — A계열 보강(4) + B/E/H/I/J계열 신규(12) = 16패턴
+## Phase 6+7: Maintenance, Testing, Content Enhancement
+**Status:** ✅ Complete  
+**Commit:** `def74aeef`
+- dispatcher: validate_config() startup check
+- scheduler: 3연속 실패 Telegram alert
+- publisher: STAP_CONTENT_DB path fix
+- hugo_writer: regex fix, CDN block
+- humanizer: meta leakage cleanup
+- validators: +10 test cases
+- log_config, metrics, log_aggregator: monitoring infra
 
 ---
 
-## Phase 10: Blowfish Engagement Optimization — tour1.rotcha.kr
-
-**Goal:** Add Blowfish theme shortcodes (lead, figure, alert, badge, gallery, accordion, chart) to AI-generated camping articles to increase time-on-page and engagement
-**Mode:** mvp
-**Commit:** (pending)
-
-**Success Criteria:**
-1. First paragraph in new articles displays with larger lead styling via `{{< lead >}}`
-2. Images display with captions via `{{< figure >}}` (replacing bare `![alt](url)`)
-3. Pet policy and facility tips shown in `{{< alert >}}` callout boxes
-4. Camping type shown via `{{< badge >}}` inline badge next to camp name
-5. Consecutive images grouped into `{{< gallery >}}` shortcode
-6. Facility/amenity sections use `{{< accordion >}}` collapsible sections
-7. Campsite stats displayed as Chart.js radar/bar chart via `{{< chart >}}`
-8. Only new articles affected — existing published articles unchanged
-9. Hugo build succeeds without errors for travel-hugo
-
-**Plans:**
-1. **10-01** — P0 Post-processor: lead + figure shortcodes (hugo_writer.py)
-2. **10-02** — P1 AI Prompt: alert + badge shortcode instructions (travel.yaml)
-3. **10-03** — P2 Post-processor + Prompt: gallery + accordion (hugo_writer.py + travel.yaml)
-4. **10-04** — P3 Post-processor: chart shortcode via embedded data comment (pipeline + publisher)
+## Phase 8: Content Cleanup
+**Status:** ✅ Complete  
+**Commit:** `7c2c8a701`  
+43개 오염 글 삭제, keywords 정리, deploy fallback fix, beauty-hugo 2차 cleanup
 
 ---
 
-## Phase 12: Content Enrichment & Dwell Time Optimization — TAP
+## Phase 9: AI-Tell Pattern Enrichment (humanizer.py)
+**Status:** ✅ Complete  
+**Commit:** `0a17cf55b`  
+16개 AI 티 패턴 추가
 
-**Goal:** Increase travel blog content length by +50% and dwell time by +30% by leveraging unused API fields and adding new content sections
-**Mode:** mvp
-**Requirements:** Content quality, SEO, user engagement
+---
 
-**Success Criteria:**
-1. Average content length ≥ 3,500 characters (from ~2,500)
-2. Average dwell time ≥ 3.5 minutes (from ~2.5 minutes)
-3. All 5 Hugo blogs build successfully
-4. Schema.org structured data validates
-5. Ad markers remain functional
-6. No increase in AI API cost > 20%
+## Phase 10: Blowfish Engagement Optimization
+**Status:** ✅ Complete  
+**Commit:** `ebbfc815b` (shortcode 구현됨, toggle disabled)  
+lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 
-**Plans:**
-1. **12-01** — API Data Enhancement: Expand camping/Durunubi field mappings
-2. **12-02** — AI Prompt Expansion: max_completion_tokens 7000 + new sections
-3. **12-03** — Content Post-Processing: Schema.org + FAQ extraction
-4. **12-04** — Verification: Build + quality validation
+---
+
+## Phase 11: AdSense 고효율 광고 구조 개선
+**Status:** ✅ **Complete** (문서에는 deferred로 표기돼있으나 실제 코드는 완료)
+- 10개 CUAP 블로그 전부 adsense partials 존재
+- IntersectionObserver lazy-load 적용
+- mobile-sticky / leaderboard / in-article 3종 partial
+- ✅ 참고: `a14fc9c08` 커밋의 "Phase 11 coupang import fix"는 별개 작업 (이전 naming)
+
+---
+
+## Phase 12: Body Content Rescan & Keyword Validation Gate
+**Status:** 🔴 **Partial — 1개 task 미완료**
+- ✅ `detect_problematic_posts.py` — `--scan-body` flag 구현됨
+- ✅ `keyword_expander.py` — `validate_keyword()` 호출 코드는 있음 (try/except ImportError로 보호)
+- ❌ **`validate_keyword()` 함수가 `keywords.py`에 누락** — ImportError로 무시되므로 기능이 동작하지 않음 (silent failure)
+- ❌ 키워드 검증 게이트가 작동하지 않음
+
+---
+
+## Phase 13: Unified Dashboard — Data Collection + Markdown Audit
+**Status:** ✅ **Complete**
+- **Wave 1:** analytics_collector.py GA4/GSC/AdSense/Bing, Flask skeleton, 6종 API
+- **Wave 2:** 5개 Dashboard UI 페이지 (Overview/Revenue/Traffic/Search/Health) + 19개 Chart.js 차트
+- 대시보드 http://localhost:5050 운영 중
+
+---
+
+## Phase 14: Cross-Project Dashboard Integration
+**Status:** ✅ **Complete** (commit `4335f7a6b`)
+- **Wave 2 UI:** Overview/Revenue/Traffic/Search/Health 5페이지 Chart.js 시각화
+- **Wave 3 외부통합:** SAP 7개 + aikorea24 2개 = 9개 사이트 통합 (총 47개)
+- **Wave 4 운영:** launchd 등록, 로그 로테이션, notify_down.py 텔레그램 알림
+
+---
+
+## Phase 15: Content Quality Pipeline Integration
+**Status:** ✅ **Complete** (commit `8b0ecd4aa`)
+- 15-01: quality.db 스키마 + quality_recorder.py
+- 15-02: curation pipeline post-publish hook (record_quality 호출)
+- 15-03: hugo_builder.py (build_site wrapper)
+- 15-04: /api/quality/* 5개 API + quality.html UI
+- 15-05: daily_quality_aggregate.py + launchd plist
+
+---
+
+## 차기 Phase 후보 (Phase 16+)
+
+### Phase 12 잔여: validate_keyword() 구현
+**Priority: 🔴 HIGH** — silent failure 상태, 3분이면 수정 가능
+
+### Phase 16: Production Hardening / Bug Patrol
+**Priority: 🟡 MEDIUM** — 현재 발행 에러 0건, 예방 중심
+
+### Phase 17: Content quality 데이터 기반 최적화 (quality.db 활용)
+**Priority: 🟢 LOW** — 데이터가 누적되어야 의미 있음 (2주 후)
 
 ---
 
 ## Configuration
 
-**Granularity:** Coarse (3 phases) + Fix (1 phase) + Enhancement (3 phases) + Optimization (1 phase)
-**Execution:** Parallel within phases
-**Mode:** Vertical MVP (each phase delivers end-to-end improvement)
-**Research:** Yes (before each phase)
-**Plan Check:** Yes
-**Verifier:** Yes
+**현재 Phase 체계:** 15 phases (Phase 1-11 원래 roadmap, 6+7 merged, 13-15 추가)

@@ -118,10 +118,12 @@ def validate_post_html(html: str, blog_id: str) -> dict:
 
     # 2. {{}} 잔재 (Hugo 단축코드 {{< ... >}} 는 제외)
     clean = re.sub(r"\{\{<[\s\S]*?>}}", "", html)
-    count = clean.count("{{")
-    if count > 0:
+    # Count ONLY truly empty templates {{}} (not {{variable}} or {{< short >}})
+    # Pattern matches {{}} (truly empty), {{ }}, {{   }}, etc.
+    empty_matches = re.findall(r'{{[\s]*}}', clean)
+    if empty_matches:
         issues.append({"severity": "WARNING", "check": "empty_template",
-                       "msg": f"{{{{}}}} 빈 템플릿 {count}개 발견"})
+                       "msg": f"{{{{}}}} 빈 템플릿 {len(empty_matches)}개 발견"})
 
     # 3. og:image 썸네일
     if 'property="og:image"' not in html and 'name="twitter:image"' not in html:
