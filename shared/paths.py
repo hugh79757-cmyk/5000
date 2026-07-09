@@ -40,6 +40,7 @@ TAP_ROOT = project_root("TAP") or os.path.join(FIVEK_ROOT, "..", "TAP")
 ETAP_ROOT = project_root("ETAP") or os.path.join(FIVEK_ROOT, "..", "ETAP")
 LAP_ROOT = project_root("LAP") or os.path.join(FIVEK_ROOT, "..", "LAP")
 CUAP_ROOT = project_root("CUAP") or os.path.join(FIVEK_ROOT, "..", "CUAP")
+RAP_ROOT = project_root("RAP") or os.path.join(FIVEK_ROOT, "..", "RAP")
 
 SHARED_THEMES = os.getenv("SHARED_THEMES_DIR") or "/Users/twinssn/Projects/shared-themes"
 LOGS_DIR = os.path.join(FIVEK_ROOT, "logs")

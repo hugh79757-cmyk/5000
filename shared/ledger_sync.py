@@ -1,4 +1,5 @@
 import logging
+import os
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -42,7 +43,7 @@ SOURCES = [
     },
     {
         "name":    "stap",
-        "db":      Path("/Users/twinssn/Projects/STAP/data/stap_content.db"),
+        "db":      Path(os.environ.get("STAP_ROOT", os.path.join(str(ROOT.parent), "STAP")), "data", "stap_content.db"),
         "sql":     "SELECT blog_id, title, slug, created_at, published_url FROM articles WHERE status='published'",
         "mapping": ("blog_id", "title", "slug", "published_at", "url"),
     },
@@ -60,7 +61,7 @@ SOURCES = [
     },
     {
         "name":    "tap",
-        "db":      Path("/Users/twinssn/Projects/TAP/tap.db"),
+        "db":      Path(os.environ.get("TAP_ROOT", os.path.join(str(ROOT.parent), "TAP")), "tap.db"),
         "sql":     "SELECT 'tap-hugo', post_title, '', published_at, post_url FROM publish_logs",
         "mapping": ("blog_id", "title", "slug", "published_at", "url"),
     },

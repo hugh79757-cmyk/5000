@@ -3,16 +3,16 @@ import subprocess
 import time
 import logging
 
-logger = logging.getLogger(__name__)
+from shared.paths import HUGO_PATH
 
-HUGO_BIN = "/opt/homebrew/bin/hugo"
+logger = logging.getLogger(__name__)
 
 
 def build_site(site_path: str, timeout: int = 300) -> dict:
     start = time.monotonic()
     try:
         result = subprocess.run(
-            [HUGO_BIN, "--source", site_path],
+            [HUGO_PATH, "--source", site_path],
             capture_output=True, text=True, timeout=timeout
         )
         elapsed_ms = int((time.monotonic() - start) * 1000)

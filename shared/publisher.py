@@ -27,7 +27,7 @@ def sanitize_featureimage_url(url, max_len=255):
     return url
 
 
-from shared.paths import STAP_ROOT as _STAP_ROOT, TAP_ROOT as _TAP_ROOT
+from shared.paths import HUGO_PATH, STAP_ROOT as _STAP_ROOT, TAP_ROOT as _TAP_ROOT
 STAP_ENTITY_DB = os.path.join(_STAP_ROOT, "data", "stap_entities.db")
 STAP_ENTITY_LINKER_PATH = os.path.join(_STAP_ROOT, "shared")
 STAP_BLOGS = {
@@ -117,11 +117,13 @@ from shared.publishers.hugo_writer import _validate_frontmatter
 
 
 def _clean_body(body_md):
-    """AI가 생성한 가짜 내부링크 제거"""
+    """AI가 생성한 가짜 내부링크 + {{}} 빈 템플릿 제거"""
     if not body_md:
         return ""
     import re
     body_md = re.sub(r"\n+##\s*(함께|관련|추천)\s*(읽어보기|읽을거리|글|포스트).*", "", body_md, flags=re.DOTALL)
+    body_md = re.sub(r"\{\{(?![<%/])[\s\S]*?\}\}", "", body_md)
+    body_md = re.sub(r"\{\{(?![<%/])", "", body_md)
     return body_md.rstrip()
 
 
@@ -394,12 +396,12 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         # ① 같은 블로그 동일 카테고리 최근 2개 (slug 정확 일치로 자기 자신 제외)
         import os as _os
         BLOG_SITE_PATHS = {
-            "stock-hugo":    "/Users/twinssn/Projects/STAP/stock-hugo",
-            "dividend-hugo": "/Users/twinssn/Projects/STAP/dividend-hugo",
-            "etf-hugo":      "/Users/twinssn/Projects/STAP/etf-hugo",
-            "sector-hugo":   "/Users/twinssn/Projects/STAP/sector-hugo",
-            "ipo-hugo":      "/Users/twinssn/Projects/STAP/ipo-hugo",
-            "finance-hugo":  "/Users/twinssn/Projects/STAP/finance-hugo",
+            "stock-hugo":    os.path.join(_STAP_ROOT, "stock-hugo"),
+            "dividend-hugo": os.path.join(_STAP_ROOT, "dividend-hugo"),
+            "etf-hugo":      os.path.join(_STAP_ROOT, "etf-hugo"),
+            "sector-hugo":   os.path.join(_STAP_ROOT, "sector-hugo"),
+            "ipo-hugo":      os.path.join(_STAP_ROOT, "ipo-hugo"),
+            "finance-hugo":  os.path.join(_STAP_ROOT, "finance-hugo"),
         }
         def _file_exists(bid, sl):
             site = BLOG_SITE_PATHS.get(bid, "")
@@ -548,7 +550,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     theme = blog_cfg.get("theme", "PaperMod")
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
-        site_path = os.path.join("/Users/twinssn/Projects", blog_cfg.get("repo", ""))
+        site_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", blog_cfg.get("repo", ""))
     description = _extract_description(body_md)
 
     if not thumbnail_url:
@@ -656,7 +658,7 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
     import os as _os2
 
     from dotenv import load_dotenv as _ldenv3
-    _ldenv3("/Users/twinssn/Projects/5000/.env", override=True)
+    _ldenv3(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
     _wrangler_env = _os2.environ.copy()
     _cf_token = _os2.getenv("CLOUDFLARE_API_TOKEN", "")
     _cf_account = _os2.getenv("CLOUDFLARE_ACCOUNT_ID", "")
@@ -674,7 +676,7 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
     # 로컬 themes/<테마>가 있으면 HUGO_THEMESDIR 설정 안 함 (로컬 우선)
     _hugo_toml = site / "hugo.toml"
     _hugo_theme = ""
-    _themes_dir = "/Users/twinssn/Projects/shared-themes"
+    _themes_dir = os.getenv("SHARED_THEMES_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "shared-themes"))
     if _hugo_toml.exists():
         try:
             import re as _toml_re
@@ -692,10 +694,10 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
     if not (_local_theme and _local_theme.is_dir()):
         _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
 
-    log_path = Path("/Users/twinssn/Projects/5000/logs/deploy.log")
+    log_path = Path(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs", "deploy.log"))
     with open(log_path, "a") as log_f:
         result = subprocess.run(
-            ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
+            [HUGO_PATH, "--gc", "--minify"],
             cwd=str(site), stdout=log_f, stderr=log_f,
                          env=_wrangler_env, timeout=120
         )
@@ -791,9 +793,54 @@ from shared.publishers.deploy import deploy_site, _deploy_site_inner  # noqa: E4
 from shared.post_validator import validate_post_html as _validate_post_html
 
 
-def _run_validation(site_path, slug, blog_id, title, result):
-    """발행 후 Hugo 출력 HTML을 읽어서 품질 검증"""
+def _inject_og_image(site_path, slug):
+    """Hugo 빌드 후 HTML에 og:image/twitter:image 메타 태그 주입
+
+    Blowfish 테마가 cover.image를 og:image로 출력하지 않으므로,
+    index.md의 frontmatter에서 이미지 URL을 읽어 HTML <head>에 삽입한다.
+    """
     import os
+    md_path = os.path.join(site_path, "content", "posts", slug, "index.md")
+    html_path = os.path.join(site_path, "public", "posts", slug, "index.html")
+    if not os.path.isfile(html_path) or not os.path.isfile(md_path):
+        return
+    try:
+        with open(md_path, encoding="utf-8") as f:
+            md = f.read()
+        # Extract image URL from frontmatter (cover.image, image, or featureimage)
+        img_url = ""
+        for pat in [r'cover:\s*\n\s+image:\s+"(.+)"', r'cover:\s*\n\s+image:\s+(.+)', r'image:\s+"(.+)"', r'image:\s+(.+)', r'featureimage:\s+"(.+)"']:
+            m = re.search(pat, md)
+            if m:
+                img_url = m.group(1).strip().strip('"')
+                if img_url:
+                    break
+        if not img_url:
+            return
+
+        with open(html_path, encoding="utf-8") as f:
+            html = f.read()
+
+        # Check if og:image already exists
+        if 'property="og:image"' in html:
+            return
+
+        meta = (
+            f'<meta property="og:image" content="{img_url}"/>\n'
+            f'<meta name="twitter:image" content="{img_url}"/>\n'
+            f'<meta name="twitter:card" content="summary_large_image"/>'
+        )
+        html = html.replace("</head>", f"{meta}\n</head>")
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(html)
+    except Exception as e:
+        logger.warning(f"[OGIMAGE] 주입 실패 (무시): {e}")
+
+
+def _run_validation(site_path, slug, blog_id, title, result):
+    """발행 후 Hugo 출력 HTML을 읽어서 og:image 주입 + 품질 검증"""
+    import os
+    _inject_og_image(site_path, slug)
     html_path = os.path.join(site_path, "public", "posts", slug, "index.html")
     if not os.path.isfile(html_path):
         logger.info(f"[VALIDATE] HTML 파일 없음 (건너뜀): {html_path}")

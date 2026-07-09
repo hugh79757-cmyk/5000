@@ -117,6 +117,28 @@ def _is_on_cooldown(blog_id: str) -> bool:
     return elapsed < timedelta(minutes=_COOLDOWN_MINUTES)
 
 
+def _set_daily_cooldown(blog_id: str) -> None:
+    """하루 종일 cooldown — 다음 날 00:00까지 발행 중단"""
+    cooldowns = _get_cooldowns()
+    now = datetime.now()
+    tomorrow = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    cooldowns[f"daily_{blog_id}"] = tomorrow.isoformat()
+    os.makedirs(os.path.dirname(_COOLDOWN_FILE), exist_ok=True)
+    with open(_COOLDOWN_FILE, "w") as f:
+        json.dump(cooldowns, f)
+
+
+def _is_on_daily_cooldown(blog_id: str) -> bool:
+    cooldowns = _get_cooldowns()
+    expiry = cooldowns.get(f"daily_{blog_id}")
+    if not expiry:
+        return False
+    try:
+        return datetime.now() < datetime.fromisoformat(expiry)
+    except (ValueError, TypeError):
+        return False
+
+
 def _get_failure_counts() -> dict:
     try:
         with open(_FAILURE_COUNT_FILE) as f:
@@ -380,7 +402,24 @@ def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):
     if pipeline == "stock":
         stap_name = STAP_PIPELINE_MAP.get(blog_id)
         if stap_name:
-            return _run_stap(stap_name, cfg)
+            stap_result = _run_stap(stap_name, cfg)
+            if stap_result and stap_result.get("success"):
+                try:
+                    from shared.quality_recorder import record_quality
+                    slug = stap_result.get("slug", "")
+                    title = stap_result.get("title", "")
+                    metrics = {
+                        "content_length": len(stap_result.get("body_md", "") or ""),
+                        "paragraph_count": (stap_result.get("body_md", "") or "").count("\n\n") + 1,
+                        "has_cta": bool(stap_result.get("cta_html")),
+                        "has_og_image": bool(stap_result.get("thumbnail_url")),
+                        "min_length_pass": len(stap_result.get("body_md", "") or "") >= 500,
+                        "empty_template_count": 0,
+                    }
+                    record_quality(blog_id, slug, title, datetime.now().isoformat(), metrics)
+                except Exception as _qe:
+                    logger.warning(f"[stock] 품질 메트릭 기록 실패 (비치명적): {_qe}")
+            return stap_result
         logger.error(f"STAP 매핑 없음: {blog_id}")
         return {"success": False, "reason": "unknown_stap_blog"}
 
@@ -604,6 +643,11 @@ def dispatch(blog_id):
         logger.info(f"[SKIP] {blog_id} cooldown ({_COOLDOWN_MINUTES}분) — 발행 건너뜀")
         _record_failure(blog_id, "no_result", f"cooldown {_COOLDOWN_MINUTES}분")
         return {"success": False, "reason": "no_result"}
+    # 일일 cooldown 체크 (IPO no_content 등)
+    if _is_on_daily_cooldown(blog_id):
+        logger.info(f"[SKIP] {blog_id} daily cooldown — 내일까지 발행 중단")
+        _record_failure(blog_id, "no_result", "daily cooldown (다음 날 재시작)")
+        return {"success": False, "reason": "no_result"}
 
     result = _run_pipeline(cfg)
 
@@ -639,19 +683,39 @@ def dispatch(blog_id):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
             # no_result/데이터부족 등은 텔레그램 전송 (침묵 방지)
             if reason in ("no_result", "no_data", "fetch_error", "no_content"):
-                count = _increment_failure_count(blog_id)
-                _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음 (연속 {count}회)")
-                # 3회 연속 실패 시 에스컬레이션
-                if count >= 3:
-                    _tg_error(blog_id, "escalation", f"[{blog_id}] {count}회 연속 {reason} — 수동 점검 필요")
+                # IPO 데이터가 없으면 하루 cooldown + 1회 알림 (재시도 없음)
+                if blog_id == "ipo-hugo" and reason == "no_content":
+                    _tg_error(blog_id, reason,
+                        f"[{blog_id}] IPO/증권신고서 데이터 없음 — 오늘 발행 중단\n"
+                        f"다음 데이터 갱신을 기다립니다 (내일 00:00 재시작)")
+                    _set_daily_cooldown(blog_id)
+                else:
+                    count = _increment_failure_count(blog_id)
+                    _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음 (연속 {count}회)")
+                    # 3회 연속 실패 시 에스컬레이션
+                    if count >= 3:
+                        _tg_error(blog_id, "escalation", f"[{blog_id}] {count}회 연속 {reason} — 수동 점검 필요")
             elif reason in ("duplicate_slug", "duplicate_source_id"):
                 existing = result.get("existing_url", "")
                 dup_type = reason.replace("duplicate_", "")
                 _tg_error(blog_id, reason,
                     f"[{blog_id}] 중복 발행 방지 — {dup_type} 중복\n"
                     f"기존글: {existing or 'slug 확인 필요'}\n"
-                    f"조치: 데이터가 오래되어 동일 주제 반복 생성 중. "
-                    f"pipelines/data_collector.py의 collect_all() 실행 필요")
+                    f"데이터 갱신을 위해 STAP collect_all() 자동 실행합니다.")
+                # STAP collect_all 자동 실행 (데이터 갱신)
+                try:
+                    _STAP_DIR = "/Users/twinssn/Projects/STAP"
+                    _stap_py = os.path.join(_STAP_DIR, "pipelines", "data_collector.py")
+                    if os.path.isfile(_stap_py):
+                        subprocess.Popen(
+                            [os.path.join(_STAP_DIR, ".venv", "bin", "python3"), _stap_py],
+                            cwd=_STAP_DIR,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                        )
+                        logger.info(f"[{blog_id}] STAP collect_all() 백그라운드 실행 시작")
+                except Exception as _e:
+                    logger.warning(f"[{blog_id}] STAP collect_all 실행 실패: {_e}")
         else:
             # 성공 시 실패 카운트 리셋
             _reset_failure_count(blog_id)

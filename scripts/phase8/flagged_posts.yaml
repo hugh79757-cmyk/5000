@@ -5,6 +5,26 @@ offtopic:
   title: 1위 스마트덕 vs 구즈파크 — 그램파우치 2026년 7월 실사용 비교
   reason: 파우치
   path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/1위-스마트덕-vs-구즈파크-그램파우치-2026년-7월-실사용-비교/index.md
+- blog: laptop-hugo
+  slug: 넥시-dp-14-vs-베리어-hdmi-21-고해상도-연결-케이블-첫인상과-실사용-느낌
+  title: 넥시 DP 1.4 vs 베리어 HDMI 2.1 — 고해상도 연결 케이블 첫인상과 실사용 느낌
+  reason: 케이블
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/넥시-dp-14-vs-베리어-hdmi-21-고해상도-연결-케이블-첫인상과-실사용-느낌/index.md
+- blog: laptop-hugo
+  slug: 데스크-고민된다면-claiks-전동책상-vs-sammu-날개형-내게-맞는-책상-찾기
+  title: 데스크 고민된다면? Claiks 전동책상 vs SAMMU 날개형 — 내게 맞는 책상 찾기
+  reason: 책상
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/데스크-고민된다면-claiks-전동책상-vs-sammu-날개형-내게-맞는-책상-찾기/index.md
+- blog: laptop-hugo
+  slug: 실제-써본-사람이-말하는-데스크탑-top-5-삼성피씨오브플레이어좋은컴퓨터
+  title: 실제 써본 사람이 말하는 데스크탑 TOP 5 — 삼성·피씨오브플레이어·좋은컴퓨터
+  reason: 데스크탑
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/실제-써본-사람이-말하는-데스크탑-top-5-삼성피씨오브플레이어좋은컴퓨터/index.md
+- blog: health-hugo
+  slug: 2026년-7월-스펙-비교-어바웃네이처-vs-주영엔에스-vs-하이퍼브레인-건강기능식품-3종-리얼-후기
+  title: '2026년 7월 스펙 비교: 어바웃네이처 vs 주영엔에스 vs 하이퍼브레인 — 건강기능식품 3종 리얼 후기'
+  reason: 식품
+  path: /Users/twinssn/Projects/CUAP/health-hugo/content/posts/2026년-7월-스펙-비교-어바웃네이처-vs-주영엔에스-vs-하이퍼브레인-건강기능식품-3종-리얼-후기/index.md
 body_offtopic:
 - blog: laptop-hugo
   slug: 50만원대-가성비-노트북-추천-lg-울트라-노트북-삼성-노트북3-nt301e5l
@@ -19,10 +39,34 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/hp-2025-victus-vs-레노버-2025-loq-게이밍-노트북-추천-2026/index.md
   source: body
 - blog: laptop-hugo
+  slug: hp-오멘-vs-왕가pc-게이밍컴퓨터-흔한-오해-3가지-2026년-기준-바로잡기
+  title: HP 오멘 vs 왕가PC — 게이밍컴퓨터 흔한 오해 3가지, 2026년 기준 바로잡기
+  reason: 데스크탑
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/hp-오멘-vs-왕가pc-게이밍컴퓨터-흔한-오해-3가지-2026년-기준-바로잡기/index.md
+  source: body
+- blog: laptop-hugo
+  slug: msi-사이보그-a15-vs-레노버-loq-2026년-게이밍-노트북-실전-추천
+  title: MSI 사이보그 A15 vs 레노버 LOQ — 2026년 게이밍 노트북 실전 추천
+  reason: 데스크탑
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/msi-사이보그-a15-vs-레노버-loq-2026년-게이밍-노트북-실전-추천/index.md
+  source: body
+- blog: laptop-hugo
+  slug: 갤럭시북5-프로-vs-갤럭시북6-울트라-2026년-7월-용도별-합격점-노트북-5선
+  title: 갤럭시북5 프로 vs 갤럭시북6 울트라 — 2026년 7월, 용도별 합격점 노트북 5선
+  reason: 마우스
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/갤럭시북5-프로-vs-갤럭시북6-울트라-2026년-7월-용도별-합격점-노트북-5선/index.md
+  source: body
+- blog: laptop-hugo
   slug: 게이밍-노트북-추천-top5-2026년
   title: 게이밍 노트북 추천 TOP5 (2026년)
   reason: 헤드셋
   path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/게이밍-노트북-추천-top5-2026년/index.md
+  source: body
+- blog: laptop-hugo
+  slug: 그램-고민된다면-지금-사야-하는-이유-lg-그램15부터-2026-ai까지
+  title: 그램 고민된다면? 지금 사야 하는 이유 — LG 그램15부터 2026 AI까지
+  reason: 중고
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/그램-고민된다면-지금-사야-하는-이유-lg-그램15부터-2026-ai까지/index.md
   source: body
 - blog: laptop-hugo
   slug: 노트북-추천-top5-2026년-3월
@@ -41,6 +85,12 @@ body_offtopic:
   title: '대학생 노트북 추천: LG전자 2026 그램북 AI vs 레노버 2025 씽크패드 비교'
   reason: 키보드
   path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/대학생-노트북-추천-lg전자-2026-그램북-ai-vs-레노버-2025-씽크패드-비교/index.md
+  source: body
+- blog: laptop-hugo
+  slug: 대화면-추천-베이직스-베이직탭-max-vs-로망티스메-14인치-2238만원-합격점-top-3
+  title: '대화면 추천: 베이직스 베이직탭 Max vs 로망티스메 14인치 — 22~38만원 합격점 TOP 3'
+  reason: 태블릿
+  path: /Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/대화면-추천-베이직스-베이직탭-max-vs-로망티스메-14인치-2238만원-합격점-top-3/index.md
   source: body
 - blog: laptop-hugo
   slug: 마이크-추천-top5-2026년
@@ -119,6 +169,12 @@ body_offtopic:
   title: '1인가구 에어프라이어 추천: 히커 2세대 디지털 vs 라이녹스 미니에어프라이어'
   reason: 반려동물
   path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/1인가구-에어프라이어-추천-히커-2세대-디지털-vs-라이녹스-미니에어프라이어/index.md
+  source: body
+- blog: appliance-hugo
+  slug: 2026년-7월-듀얼제습기-best-5-추천-langdoo-몽트라드-비교
+  title: 2026년 7월 듀얼제습기 BEST 5 추천 — LANGDOO, 몽트라드 비교
+  reason: 의류
+  path: /Users/twinssn/Projects/CUAP/appliance-hugo/content/posts/2026년-7월-듀얼제습기-best-5-추천-langdoo-몽트라드-비교/index.md
   source: body
 - blog: appliance-hugo
   slug: 4도어-냉장고-추천-t875mee111-1등급-lg-vs-tcl-814l
@@ -259,6 +315,12 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/2026년-7월-가죽쇼파-추천-파로마-올랜도b-vs-바우미스트-루나-36인용-비교/index.md
   source: body
 - blog: interior-hugo
+  slug: top-5-기숙사-yyt-침대-커튼과-대용량-포켓-오거나이저로-공간-활용-극대화
+  title: TOP 5 기숙사 — YYT 침대 커튼과 대용량 포켓 오거나이저로 공간 활용 극대화
+  reason: 화장품
+  path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/top-5-기숙사-yyt-침대-커튼과-대용량-포켓-오거나이저로-공간-활용-극대화/index.md
+  source: body
+- blog: interior-hugo
   slug: 다용도-수납함-추천-소웰홈-패브릭-3단6문-vs-21세기트랜드-밀리오-저소음
   title: '다용도 수납함 추천: 소웰홈 패브릭 3단6문 vs 21세기트랜드 밀리오 저소음'
   reason: 의류
@@ -283,6 +345,12 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/주방-선반-추천-가구레시피-조립식-스마트-vs-lime-kitchen-라임키친/index.md
   source: body
 - blog: interior-hugo
+  slug: 헤븐하임-이동식-사이드-테이블-vs-가구느낌-리버-책장-2026년-7월-가구-추천-top-5
+  title: 헤븐하임 이동식 사이드 테이블 vs 가구느낌 리버 책장 — 2026년 7월 가구 추천 TOP 5
+  reason: 가전
+  path: /Users/twinssn/Projects/CUAP/interior-hugo/content/posts/헤븐하임-이동식-사이드-테이블-vs-가구느낌-리버-책장-2026년-7월-가구-추천-top-5/index.md
+  source: body
+- blog: interior-hugo
   slug: 홈비-양문형-슬라이딩-vs-ckliving-특대형-플라스틱-플라스틱-수납함-추천
   title: 홈비 양문형 슬라이딩 vs CKLIVING 특대형 플라스틱 — 플라스틱 수납함 추천
   reason: 의류
@@ -299,6 +367,12 @@ body_offtopic:
   title: InLoop 도톰한 코너 vs MZ생활 2세대 에어쿠션 — 모서리 보호대 추천
   reason: 가구
   path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/inloop-도톰한-코너-vs-mz생활-2세대-에어쿠션-모서리-보호대-추천/index.md
+  source: body
+- blog: baby-hugo
+  slug: top-5-개월아기발달-투모로우-꼼물꼼물-아기체육관-투칸-유아용-정글-추천
+  title: TOP 5 개월아기발달 — 투모로우 꼼물꼼물 아기체육관 & 투칸 유아용 정글 추천
+  reason: 장난감
+  path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/top-5-개월아기발달-투모로우-꼼물꼼물-아기체육관-투칸-유아용-정글-추천/index.md
   source: body
 - blog: baby-hugo
   slug: 라라비-점퍼루-vs-트리미고-전동-아기-바운서-2026년-추천-점퍼루-비교
@@ -383,6 +457,12 @@ body_offtopic:
   title: 신생아 카시트 추천 에어보스 스위벨 회전형과 다이치 원픽스 360
   reason: 강아지
   path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/신생아-카시트-추천-에어보스-스위벨-회전형과-다이치-원픽스-360/index.md
+  source: body
+- blog: baby-hugo
+  slug: 실제-써본-사람이-말하는-국민육아템-top-5-아가방-딸랑이부터-코니스-에듀볼까지
+  title: 실제 써본 사람이 말하는 국민육아템 TOP 5 — 아가방 딸랑이부터 코니스 에듀볼까지
+  reason: 장난감
+  path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/실제-써본-사람이-말하는-국민육아템-top-5-아가방-딸랑이부터-코니스-에듀볼까지/index.md
   source: body
 - blog: baby-hugo
   slug: 아기-낙상방지-침대가드-추천-접이식-침대가드-낙상방지가드와-조립-필요없는-안전가드
@@ -475,10 +555,28 @@ body_offtopic:
   path: /Users/twinssn/Projects/CUAP/baby-hugo/content/posts/흡착-그릇-추천-1위-리틀클라우드-자기주도-실리콘-vs-2위-잼먹-국내-제조-실리콘/index.md
   source: body
 - blog: kitchen-hugo
+  slug: 글라스락-vs-네오플램-주방과-이유식까지-실속-밀폐용기-선택법
+  title: 글라스락 vs 네오플램 — 주방과 이유식까지 실속 밀폐용기 선택법
+  reason: 식품
+  path: /Users/twinssn/Projects/CUAP/kitchen-hugo/content/posts/글라스락-vs-네오플램-주방과-이유식까지-실속-밀폐용기-선택법/index.md
+  source: body
+- blog: kitchen-hugo
   slug: 냉장고-정리-용기-추천-한누네-다용도-vs-엠엔피-밀폐용기
   title: 냉장고 정리 용기 추천 — 한누네 다용도 vs 엠엔피 밀폐용기
   reason: 식품
   path: /Users/twinssn/Projects/CUAP/kitchen-hugo/content/posts/냉장고-정리-용기-추천-한누네-다용도-vs-엠엔피-밀폐용기/index.md
+  source: body
+- blog: kitchen-hugo
+  slug: 실바트-까리노-vs-테팔-티타늄-계란말이팬-어떤-게-나을까
+  title: 실바트 까리노 vs 테팔 티타늄 — 계란말이팬 어떤 게 나을까?
+  reason: 식품
+  path: /Users/twinssn/Projects/CUAP/kitchen-hugo/content/posts/실바트-까리노-vs-테팔-티타늄-계란말이팬-어떤-게-나을까/index.md
+  source: body
+- blog: kitchen-hugo
+  slug: 탐사-세라믹-vs-도루코-인덕션-뉴캐스트-실속-냄비-추천-top-5
+  title: 탐사 세라믹 vs 도루코 인덕션 뉴캐스트 — 실속 냄비 추천 TOP 5
+  reason: 식품
+  path: /Users/twinssn/Projects/CUAP/kitchen-hugo/content/posts/탐사-세라믹-vs-도루코-인덕션-뉴캐스트-실속-냄비-추천-top-5/index.md
   source: body
 - blog: kitchen-hugo
   slug: 통3중-냄비-추천-홈셰프-sro-vs-cooknest-실용적인-주방-필수템
@@ -492,19 +590,31 @@ body_offtopic:
   reason: 가구
   path: /Users/twinssn/Projects/CUAP/beauty-hugo/content/posts/천연-양가죽-vs-인조가죽스티커-2026년-원단보수용품-5선/index.md
   source: body
+- blog: camping-hugo
+  slug: 노마드-폴더블-멀티백-vs-3way-멀티백-캠핑-수납-해결사-고르는-법
+  title: 노마드 폴더블 멀티백 vs 3WAY 멀티백 — 캠핑 수납 해결사 고르는 법
+  reason: 의류
+  path: /Users/twinssn/Projects/CUAP/camping-hugo/content/posts/노마드-폴더블-멀티백-vs-3way-멀티백-캠핑-수납-해결사-고르는-법/index.md
+  source: body
+- blog: camping-hugo
+  slug: 로티캠프-컴포트-원터치-vs-모비딕-팝업-2026년-7월-best-5
+  title: 로티캠프 컴포트 원터치 vs 모비딕 팝업 — 2026년 7월 BEST 5
+  reason: 장난감
+  path: /Users/twinssn/Projects/CUAP/camping-hugo/content/posts/로티캠프-컴포트-원터치-vs-모비딕-팝업-2026년-7월-best-5/index.md
+  source: body
 summary:
-  total_flagged: 82
+  total_flagged: 101
   chinese: 0
-  offtopic: 1
-  body_offtopic: 81
+  offtopic: 5
+  body_offtopic: 96
   by_blog:
-    laptop-hugo: 18
-    appliance-hugo: 25
-    interior-hugo: 6
-    baby-hugo: 31
+    laptop-hugo: 29
+    appliance-hugo: 26
+    interior-hugo: 8
+    baby-hugo: 33
     fitness-hugo: 0
-    health-hugo: 0
+    health-hugo: 1
     pet-hugo: 0
-    kitchen-hugo: 2
+    kitchen-hugo: 5
     beauty-hugo: 1
-    camping-hugo: 0
+    camping-hugo: 2

@@ -137,7 +137,8 @@ def _clean_body(body_md):
         lambda m: m.group() if "{{<" in m.group() else "",
         body_md,
     )
-    body_md = re.sub(r"\{\{(?![<%])[^}]*\}\}", "", body_md)
+    # 짧은 닫힌 템플릿 {{}}만 제거 (유효한 템플릿 변수는 보존)
+    body_md = re.sub(r"\{\{[\s]*\}\}", "", body_md)
     # 외부 CDN 이미지 차단 → Cloudflare R2 fallback으로 대체
     body_md = re.sub(
         r"https?://[^/\s]*sspark\.genspark\.ai[^\s)]*",

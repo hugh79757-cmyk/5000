@@ -404,24 +404,38 @@ def run(cfg):
     blog_id = cfg["id"]
     result = _run_single(blog_id, blog_cfg=cfg)
 
+    # 발행 성공 시 품질 메트릭 기록 (Phase 16)
+    if result and result.get("success"):
+        try:
+            from shared.quality_recorder import record_quality
+            body_md = result.get("body_md", "")
+            body_html = result.get("body_html", body_md)
+            slug = result.get("slug", "")
+            title = result.get("title", "")
+            metrics = {
+                "content_length": len(body_md) if body_md else 0,
+                "paragraph_count": body_md.count("\n\n") + 1 if body_md else 0,
+                "has_cta": "cta_html" in (result.get("body_html", "") or ""),
+                "has_og_image": bool(result.get("thumbnail_url")),
+                "min_length_pass": len(body_md or "") >= 500,
+                "empty_template_count": 0,
+            }
+            record_quality(blog_id, slug, title, datetime.now().isoformat(), metrics)
+        except Exception as e:
+            logger.warning(f"[travel] 품질 메트릭 기록 실패 (비치명적): {e}")
+
     # 발행 후 섹션 인덱스 가드 (2026-05-01 추가)
     # content/posts/index.md 폭탄 방지 — 발견 시 로그 경고
     try:
-        import logging
         import subprocess
-        _logger = logging.getLogger(__name__)
         _guard = "/Users/twinssn/Projects/TAP/scripts/check_section_index.sh"
         _r = subprocess.run(["bash", _guard], capture_output=True, text=True, timeout=10)
         if _r.returncode != 0:
             _msg = "[GUARD] 섹션 인덱스 이상 감지: " + (_r.stdout or "") + " | " + (_r.stderr or "")
-            _logger.error(_msg)
+            logger.error(_msg)
         else:
-            _logger.info("[GUARD] " + (_r.stdout or "").strip())
+            logger.info("[GUARD] " + (_r.stdout or "").strip())
     except Exception as _e:
-        try:
-            import logging
-            logging.getLogger(__name__).warning("[GUARD] 점검 스크립트 실행 실패: " + str(_e))
-        except Exception:
-            pass
+        logger.warning("[GUARD] 점검 스크립트 실행 실패: " + str(_e))
 
     return result

@@ -7,8 +7,8 @@ import urllib.request
 from dotenv import load_dotenv
 
 # 중앙 env 파일 로드
-load_dotenv("/Users/twinssn/.env.common")
-load_dotenv()
+from shared.env_loader import load_env
+load_env()
 
 logger = logging.getLogger(__name__)
 

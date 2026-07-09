@@ -13,8 +13,9 @@ from shared.telegram_notifier import send_daily_report
 
 CONFIG_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config")
 
-TAP_DB = "/Users/twinssn/Projects/TAP/tap.db"
-LAP_LOG = "/Users/twinssn/Projects/LAP/data/publish_log.json"
+from shared.paths import TAP_ROOT, LAP_ROOT
+TAP_DB = os.path.join(TAP_ROOT, "tap.db")
+LAP_LOG = os.path.join(LAP_ROOT, "data", "publish_log.json")
 
 
 def load_active_blogs():
