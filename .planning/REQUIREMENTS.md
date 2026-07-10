@@ -9,7 +9,7 @@
 ### Stability
 
 - [x] **STB-01**: Central modules (validators, humanizer, telegram_notifier) have unit tests covering core logic
-- [ ] **STB-02**: Hardcoded absolute paths (`/Users/twinssn/...`) are replaced with env vars or config
+- [x] **STB-02**: Hardcoded absolute paths (`/Users/twinssn/...`) replaced — `shared/paths.py` 중앙화 (Phase 16-02)
 - [x] **STB-03**: All `.bak*` files cleaned from source directories; `.gitignore` covers all backup variants
 - [x] **STB-04**: ruff (linting) and mypy (type checking) configured and passing for all Python source
 - [x] **STB-05**: Python 3.14 compatibility verified — `check_package_imports()` removed from startup
@@ -26,7 +26,7 @@
 
 - [x] **STB-11**: Launchd plist for scheduler auto-restart on crash
 - [x] **STB-12**: Log aggregation and rotation (structlog 도입은 안 됐지만 log_aggregator 구현됨)
-- [ ] **STB-13**: Config schema validation for blogs.yaml and prompts.yaml
+- [x] **STB-13**: Config schema validation for blogs.yaml and prompts.yaml — `shared/config_validator.py` 생성 (Phase 16-03)
 
 ## Out of Scope
 
@@ -48,15 +48,15 @@
 | STB-07 | Phase 2 | ✅ Done | dispatcher registry pattern |
 | STB-08 | Phase 2 | ✅ Done | publisher 분할 완료 |
 | STB-03 | Phase 2 | ✅ Done | .bak cleanup |
-| STB-02 | Phase 3 | ❌ Open | 여전히 hardcoded path 존재 (`/Users/twinssn/...`) |
+| STB-02 | Phase 16 | ✅ Done | `shared/paths.py` 중앙화 (Phase 16-02) |
 | STB-09 | Phase 3 | ✅ Done | Error handling audit 완료 |
 | STB-10 | Phase 3 | ✅ Done | TAP/STAP/ETAP isolation |
 | STB-11 | Phase 6+7 | ✅ Done | launchd plist 등록 |
 | STB-12 | Phase 6+7 | ✅ Done | log_aggregator + metrics |
-| STB-13 | — | ❌ Open | Config validation 없음 |
+| STB-13 | Phase 16 | ✅ Done | `shared/config_validator.py` 생성 (Phase 16-03) |
 
 **Coverage:**
 - v1 requirements: 10 total
-- Complete: 7
-- Open: 2 (STB-02 hardcoded paths, STB-06 CI)
-- Partial: 1 (STB-13 config validation)
+- Complete: 8
+- Open: 1 (STB-06 CI — 의도적 제외)
+- Partial: 0 (STB-13 완료)

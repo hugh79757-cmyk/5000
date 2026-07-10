@@ -1,8 +1,8 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-07-09 (code-audited, not doc-driven)
+**Last updated:** 2026-07-09 (Phase 16 완료)
 
-**Actual phases completed:** 15 phases 완료 (Phase 12 일부 누락)
+**Actual phases completed:** 16 phases 완료
 **현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
 
 ---
@@ -81,11 +81,11 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 ---
 
 ## Phase 12: Body Content Rescan & Keyword Validation Gate
-**Status:** 🔴 **Partial — 1개 task 미완료**
+**Status:** ✅ **Complete** (commit `88d257e9f`)
 - ✅ `detect_problematic_posts.py` — `--scan-body` flag 구현됨
-- ✅ `keyword_expander.py` — `validate_keyword()` 호출 코드는 있음 (try/except ImportError로 보호)
-- ❌ **`validate_keyword()` 함수가 `keywords.py`에 누락** — ImportError로 무시되므로 기능이 동작하지 않음 (silent failure)
-- ❌ 키워드 검증 게이트가 작동하지 않음
+- ✅ `keyword_expander.py` — `validate_keyword()` 호출 코드 있음
+- ✅ `validate_keyword()` 함수 `keywords.py`에 추가 (circular import 방어 lazy import)
+- ✅ 키워드 검증 게이트 정상 작동
 
 ---
 
@@ -115,19 +115,70 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 
 ---
 
-## 차기 Phase 후보 (Phase 16+)
+## Phase 16: Production Hardening — 마무리 작업
+**Status:** ✅ **Complete** (commit `8502d232d`)
+- **16-01:** keywords.py circular import 확인 — lazy import 검증 통과
+- **16-02:** STB-02 Hardcoded `/Users/twinssn/...` paths 제거 — `shared/paths.py`로 중앙화
+- **16-03:** STB-13 Config schema validation — `shared/config_validator.py` 생성
+- **16-04:** Blowfish shortcode toggle — 이미 활성화됨 (default True) 확인
+- **16-05:** Pipeline hook travel/stock 확장 — quality_recorder.record_quality() 연결
+- **16-06:** `detect_problematic_posts.py --scan-body` 실행 (101건 탐지)
+- **16-07:** empty_template regex fix 검증 — `r"\{\}"`→`r"\{\{[\s]*\}\}"` PASS
+- **16-08:** Uncommitted changes 정리 — 2개 커밋 (Phase 16 + session artifacts)
 
-### Phase 12 잔여: validate_keyword() 구현
-**Priority: 🔴 HIGH** — silent failure 상태, 3분이면 수정 가능
+---
 
-### Phase 16: Production Hardening / Bug Patrol
-**Priority: 🟡 MEDIUM** — 현재 발행 에러 0건, 예방 중심
+## Phase 17: Content Quality Enhancement — 콘텐츠 품질 고도화
+**Status:** 🔴 **In Progress** (2026-07-09 시작)
 
-### Phase 17: Content quality 데이터 기반 최적화 (quality.db 활용)
+### Phase 17 목표
+기존 블로그 콘텐츠의 품질을 체계적으로 개선하여 사용자 만족도와 검색 유입을 향상
+
+### 작업 항목
+| 번호 | 작업 | 파이프라인 | 상태 | 우선순위 |
+|------|------|-----------|------|----------|
+| 17-01 | senior-hugo 제목 CTR 최적화 | SEAP | ⚪ 보류 (기존발행글 수정안함) | 🔴 높음 |
+| 17-02 | travel-hugo 실시간 정보 섹션 추가 | TAP | ✅ 완료 (3개 적용, 템플릿 확정) | 🔴 높음 |
+| 17-03 | dividend-hugo 유사 글 차별화 | STAP | ✅ 완료 (2개에 목적박스 추가) | 🟡 보통 |
+| 17-04 | dividend-hugo 기초재무분석 추가 | STAP | ✅ 완료 (2개에 진단표 추가) | 🟡 보통 |
+| 17-05 | 전체 블로그 출처 명시 강화 | All | ✅ 완료 (3개 적용, 템플릿 확정) | 🔴 높음 |
+
+### 상세 내용
+**17-01 senior-hugo 제목 개선** (CTR 3/10 → 8/10 목표)
+- Before: "60세 이상 고령자 고용지원금, 분기당 30만원 지원조건은?"
+- After: "고령자 고용지원금으로 인건비 30만원 절약하는 법 (신청서류·조건 총정리)"
+- 원칙: 관료적 표현 제거, 혜택 중심, 초보자 친화적
+
+**17-02 travel-hugo 실시간 정보 섹션**
+- 모든 기사 끝에 표준화된 블록 추가:
+  - 날씨 확인 링크 (기상청, 네이버 날씨)
+  - 예약 가능 여부 확인 (네이버 지도)
+  - 공지사항 확인 (해당 시설 공식 홈페이지)
+
+**17-03 dividend-hugo 글 차별화**
+- 유사한 top 10 글들을 목적별로 재분류:
+  - 고수익 추구형 (월배당 가능 고배당주)
+  - 안정성 우선형 (배당성향 30-70% 우량주)
+  - 성장 배당주 (배당 증가율 10% 이상)
+
+**17-04 dividend-hugo 기초재무분석**
+- 배당률·배당성향·부채비율·유비율·ROE 등 종합 진단표 추가
+- 출처: DART 전자공시, 한국거래소
+
+**17-05 출처 명시 강화**
+- 모든 지원금·혜택 관련 글에 공식 출처 링크 추가
+- 정부24, 한국거래소, 도로교통공단 등 신뢰할 수 있는 출처 명시
+- 할루시네이션 방지를 위한 팩트체크 원칙 적용
+
+---
+
+## Next (Phase 18+)
+
+### Phase 18: Content quality 데이터 기반 최적화 (quality.db 활용)
 **Priority: 🟢 LOW** — 데이터가 누적되어야 의미 있음 (2주 후)
 
 ---
 
 ## Configuration
 
-**현재 Phase 체계:** 15 phases (Phase 1-11 원래 roadmap, 6+7 merged, 13-15 추가)
+**현재 Phase 체계:** 17 phases (Phase 17 진행 중)

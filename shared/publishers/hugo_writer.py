@@ -223,7 +223,10 @@ def _apply_figure_shortcode(body_md: str) -> str:
                             i = j
                         break
                 escaped_caption = caption.replace("&", "&").replace("<", "<").replace(">", ">").replace('"', '"')
-                result.append(f"{{{{< figure src=\"{url}\" alt=\"{alt}\" caption=\"{escaped_caption}\" >}}}}")
+                if len(url) > 300:
+                    result.append(f"![{alt}]({url})")
+                else:
+                    result.append(f"{{{{< figure src=\"{url}\" alt=\"{alt}\" caption=\"{escaped_caption}\" >}}}}")
                 i += 1
                 continue
         result.append(line)
@@ -401,12 +404,15 @@ def _extract_description(body_md):
     _m = re.search(r"<!-- DESC:\s*(.+?)-->", body_md or "")
     if _m:
         return _m.group(1).strip()[:200]
-    clean = re.sub(r"<[^>]+>", "", body_md or "")
+    clean = body_md or ""
+    # Strip Hugo shortcodes FIRST to prevent {{< lead >}} → {{}} when HTML is stripped
+    clean = re.sub(r"\{\{<[^>]*?>}}", "", clean)
+    clean = re.sub(r"<[^>]+>", "", clean)
     clean = re.sub(r"\s+", " ", clean).strip()
     return clean[:200]
 
 
-def _build_schema_json(cfg, title, slug, body_md, category, tags):
+def _build_schema_json(cfg, title, slug, body_md, category, tags, description=None):
     schema_type = "Article"
     if category in ("맛집", "식당"):
         schema_type = "LocalBusiness"
@@ -418,7 +424,8 @@ def _build_schema_json(cfg, title, slug, body_md, category, tags):
     domain = cfg.get("domain", "")
     url = f"https://{domain}/posts/{slug}/" if domain else ""
 
-    description = _extract_description(body_md)
+    if description is None:
+        description = _extract_description(body_md)
     date_published = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
     author_name = cfg.get("name", domain)
 
@@ -500,7 +507,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # AI output with mixed HTML+markdown).  Doing it here ensures readers
     # never see raw ** or ~~ in the rendered page.
     body_md = _convert_inline_md_to_html(body_md)
-    schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags)
+    schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags, description=description)
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
 
