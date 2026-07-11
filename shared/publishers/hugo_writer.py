@@ -68,6 +68,9 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     else:
         tag_list = []
     
+    if thumbnail_url and not thumbnail_url.startswith(("http://", "https://")):
+        thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")
+    
     fm = "---\n"
     fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
     fm += "date: '" + date_str + "'\n"
@@ -101,6 +104,9 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
         tag_list = [_convert_inline_md_to_html(t) for t in tag_list]
     else:
         tag_list = []
+    
+    if thumbnail_url and not thumbnail_url.startswith(("http://", "https://")):
+        thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")
     
     fm = "---\n"
     fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
