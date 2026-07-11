@@ -82,6 +82,7 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     if thumbnail_url:
         fm += "cover:\n"
         fm += '  image: "' + thumbnail_url + '"\n'
+        fm += '  relative: true\n'
         fm += '  alt: "' + _sanitize_yaml_value(title) + '"\n'
         fm += "  hidden: false\n"
         fm += 'featureimage: "' + thumbnail_url + '"\n'
@@ -115,14 +116,17 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     if thumbnail_url:
         fm += "cover:\n"
         fm += '  image: "' + thumbnail_url + '"\n'
+        fm += '  relative: true\n'
         fm += 'featureimage: "' + thumbnail_url + '"\n'
     elif "stock" in blog_id:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
         fm += 'cover:\n  image: "' + _url + '"\n'
+        fm += '  relative: true\n'
         fm += 'featureimage: "' + _url + '"\n'
     else:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
         fm += 'cover:\n  image: "' + _url + '"\n'
+        fm += '  relative: true\n'
         fm += 'featureimage: "' + _url + '"\n'
     fm += "---\n"
     return fm, date_str
