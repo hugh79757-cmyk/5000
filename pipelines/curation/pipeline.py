@@ -834,11 +834,59 @@ def _run_inner(cfg, blog_id, daily_quota):
     if products and products[0].get("product_image"):
         thumbnail_url = _upload_thumbnail(products[0]["product_image"])
 
-    # 유사 제목 체크
-    if _title_is_duplicate(blog_id, title):
-        logger.warning(f"[{blog_id}] 유사 제목 존재: {title}")
+    # 유사 제목 체크 — 실패 시 최대 3회 fallback 키워드 재시도
+    _st_attempt = 0
+    _st_max = 3
+    while _title_is_duplicate(blog_id, title):
+        _st_attempt += 1
+        if _st_attempt > _st_max:
+            logger.warning(f"[{blog_id}] {_st_max}회 fallback 후에도 유사 제목 — 포기")
+            _record_failure(blog_id, "similar_title", f"유사 제목 중복 (fallback 소진): {title}", keyword)
+            return {"success": False, "reason": "similar_title", "keyword": keyword}
+
+        logger.warning(f"[{blog_id}] 유사 제목 존재: {title} — fallback 키워드 시도 ({_st_attempt}/{_st_max})")
         _record_failure(blog_id, "similar_title", f"유사 제목 중복: {title}", keyword)
-        return {"success": False, "reason": "similar_title", "keyword": keyword}
+        # fallback 키워드 선택
+        all_kws = get_keywords(blog_id)
+        _conn_st = sqlite3.connect(str(DB_PATH))
+        _used_st = _conn_st.execute(
+            "SELECT keyword FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
+            (blog_id,),
+        ).fetchall()
+        _conn_st.close()
+        _used_set = {r[0] for r in _used_st} | {keyword}
+        _fallback_kws = [k for k in all_kws if k not in _used_set]
+        # quarantine 제외
+        _fallback_kws = [k for k in _fallback_kws if not health_store.is_quarantined(blog_id, k)]
+        if not _fallback_kws:
+            logger.warning(f"[{blog_id}] fallback 키워드 없음 — 유사 제목 포기")
+            _record_failure(blog_id, "similar_title", "fallback 키워드 없음", keyword)
+            return {"success": False, "reason": "similar_title", "keyword": keyword}
+
+        keyword = _fallback_kws[0]
+        logger.info(f"[{blog_id}] fallback 키워드: {keyword}")
+        collect_keyword(keyword)
+        products = get_products(keyword, limit=10)
+        products = _filter_used_products(blog_id, products)
+        if len(products) < 3:
+            logger.warning(f"[{blog_id}] fallback 키워드 상품 부족 ({len(products)}개) — 다음 시도")
+            continue
+        # fallback 키워드로 AI 재생성
+        article = generate_curation_article(keyword, products, blog_id=blog_id)
+        if not article:
+            logger.warning(f"[{blog_id}] fallback AI 생성 실패 — 다음 시도")
+            continue
+        _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
+        if _lang_err:
+            logger.warning(f"[{blog_id}] fallback 언어 오류 — 다음 시도")
+            continue
+        title = sanitize_title(article["title"])
+        body_md = article["body_md"]
+        description = article.get("description", "")
+        if description:
+            body_md = f"<!-- DESC: {description} -->\n\n{body_md}"
+        slug = _make_slug(keyword)
+        # while 루프 재진입 → _title_is_duplicate 재검사
 
     # 큐레이션 CTA fallback — AI가 CTA를 생성하지 않은 경우 자동 삽입
     _HAS_CTA = "cta-box" in body_md or "cta_box" in body_md
