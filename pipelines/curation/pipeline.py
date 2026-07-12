@@ -553,7 +553,7 @@ def _title_is_duplicate(blog_id, title):
             ).strip()
             prev_norm = _re.sub(r"\s+", " ", prev_norm).strip()
             ratio = SequenceMatcher(None, normalized, prev_norm).ratio()
-            if ratio >= 0.8:
+            if ratio >= 0.85:
                 logger.info(f"[중복체크] 유사 제목: '{title[:30]}' ≈ '{prev_title[:30]}' ({ratio:.0%})")
                 found = True
                 break

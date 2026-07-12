@@ -73,7 +73,7 @@ BLOG_TEMPLATE_OVERRIDES: dict[str, dict] = {
     },
 }
 
-TEMPLATE_ROTATION_WINDOW = 10  # 같은 타입 N회 내 재사용 방지
+TEMPLATE_ROTATION_WINDOW = 15  # 같은 타입 N회 내 재사용 방지
 
 
 # ── 헬퍼: 제목 분류 ───────────────────────────────────────────────────

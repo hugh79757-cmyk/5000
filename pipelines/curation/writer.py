@@ -6,6 +6,7 @@
 import logging
 import os
 import re
+import sqlite3
 import sys
 from datetime import datetime
 
@@ -205,11 +206,19 @@ def _build_product_block(products):
     return "\n".join(lines)
 
 
-def _build_system_prompt(keyword, blog_id=None, style_hint="") -> str:
+def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=None) -> str:
     year = datetime.now().year
     month = datetime.now().month
     extra = BLOG_EXTRA_RULES.get(blog_id or "", "")
     extra_block = f"\n\n{extra}" if extra else ""
+
+    # 최근 발행 제목 목록을 프롬프트에 주입 (유사 제목 방지)
+    recent_block = ""
+    if recent_titles:
+        recent_block = "\n[피해야 할 제목 — 최근 발행된 글]"
+        for rt in recent_titles[-3:]:
+            recent_block += f"\n- {rt.strip()[:60]}"
+        recent_block += "\n위 제목들과 구조, 표현, 어조가 완전히 다르게 작성하세요.\n"
 
     extra_title_rules = ""
     if style_hint:
@@ -234,7 +243,7 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="") -> str:
 - 핵심 키워드가 제목 앞 15자 이내에 위치해야 합니다.
 - "1위 X vs Y — 가성비 비교" 구조는 절대 사용하지 마세요.
 - "가성비"라는 단어를 제목에 사용하지 마세요. 대신 "합격점", "실속", "가격 대비" 등의 표현을 사용하세요.
-{extra_title_rules}
+{extra_title_rules}{recent_block}
 
 [퍼널 구조 — AIDA 모델 적용]
 이 글은 단순 상품 나열이 아닌, 독자의 구매 여정을 설계하는 퍨널 글입니다.
@@ -416,13 +425,28 @@ def generate_curation_article(keyword, products, blog_id=None):
     except Exception as e:
         logger.warning("[title_template] 스타일 선택 오류: %s", e)
 
-    system_prompt = _build_system_prompt(keyword, blog_id=blog_id, style_hint=style_hint)
+    # 최근 발행 제목 수집 (유사 제목 방지용 프롬프트 주입)
+    recent_titles = []
+    if blog_id:
+        try:
+            _curation_db = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "data", "curation.db")
+            _cn = sqlite3.connect(str(_curation_db))
+            _rows = _cn.execute(
+                "SELECT title FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-3 days') ORDER BY published_at DESC",
+                (blog_id,),
+            ).fetchall()
+            _cn.close()
+            recent_titles = [r[0] for r in _rows if r[0]]
+        except Exception as _e:
+            logger.warning(f"[recent_titles] 수집 실패: {_e}")
+
+    system_prompt = _build_system_prompt(keyword, blog_id=blog_id, style_hint=style_hint, recent_titles=recent_titles)
     user_prompt = _build_user_prompt(keyword, product_block, price_range=price_range_str)
 
     # 글자수 미달 시 최대 2회 시도
     body = ""
     for attempt in range(2):
-        result = ai_generate(system_prompt, user_prompt)
+        result = ai_generate(system_prompt, user_prompt, temperature=0.85)
         if not result:
             logger.error(f"AI 생성 실패 (시도 {attempt+1}): {keyword}")
             continue
