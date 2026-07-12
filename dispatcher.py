@@ -692,9 +692,10 @@ def dispatch(blog_id):
                 else:
                     count = _increment_failure_count(blog_id)
                     _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음 (연속 {count}회)")
-                    # 3회 연속 실패 시 에스컬레이션
-                    if count >= 3:
-                        _tg_error(blog_id, "escalation", f"[{blog_id}] {count}회 연속 {reason} — 수동 점검 필요")
+                    if count >= _ESCALATION_THRESHOLD:
+                        _set_daily_cooldown(blog_id)
+                        _tg_error(blog_id, "escalation",
+                            f"[{blog_id}] {count}회 연속 {reason} — 오늘 발행 중단, 내일 00:00 재시작")
             elif reason in ("duplicate_slug", "duplicate_source_id"):
                 existing = result.get("existing_url", "")
                 dup_type = reason.replace("duplicate_", "")

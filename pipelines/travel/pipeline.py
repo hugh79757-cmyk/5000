@@ -208,68 +208,74 @@ def _run_single(target_blog_id, blog_cfg=None):
         logger.info(target_blog_id + " quota reached: " + str(current) + "/" + str(quota))
         return None
 
-    data = _fetch_for_blog(target_blog_id)
-    if not data:
-        logger.error("No data fetched for " + target_blog_id)
-        tg_error(target_blog_id, "data_fetch", "데이터 수집 실패 (fetcher 반환값 없음)")
-        return None
-
-    # ── source_id 기반 중복 발행 방지 ──
-    _content_ids = data.get("content_ids", [])
-    if _content_ids:
-        _sid = ",".join(_content_ids)
-        if _travel_source_exists(target_blog_id, _sid):
-            logger.warning(target_blog_id + " source_id 중복: " + _sid[:60])
+    _MAX_SIGUNGU_RETRIES = 5
+    for _attempt in range(1, _MAX_SIGUNGU_RETRIES + 1):
+        data = _fetch_for_blog(target_blog_id)
+        if not data:
+            logger.error("No data fetched for " + target_blog_id)
+            if _attempt == 1:
+                tg_error(target_blog_id, "data_fetch", "데이터 수집 실패 (fetcher 반환값 없음)")
             return None
-        # 개별 contentid도 체크 (복합 source_id 대응 — INSTR 부분검색)
-        for _cid in _content_ids:
-            if not _cid:
-                continue
-            try:
-                import sqlite3 as _sq
-                from shared.db_paths import PUBLISH_LEDGER_DB
-                _cn = _sq.connect(PUBLISH_LEDGER_DB)
-                _row = _cn.execute(
-                    "SELECT 1 FROM publish_ledger WHERE blog_id=? AND INSTR(',' || source_id || ',', ',' || ? || ',') > 0",
-                    (target_blog_id, _cid)
-                ).fetchone()
-                _cn.close()
-                if _row:
-                    logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
-                    return None
-            except Exception as _e:
-                logger.warning(f"개별 contentid 체크 오류: {_e}")
 
-    # ── 시군구 기반 주제 중복 발행 방지 (14일 룩백) ──
-    # festival 파이프라인은 제외 (축제는 시간 기반 자연 순환)
-    _source_type = data.get("source_type", "")
-    _sigungu = data.get("sigungu", "")
-    if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=14):
-        logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최근 14일 내 발행됨)")
-        return None
+        # ── source_id 기반 중복 발행 방지 ──
+        _content_ids = data.get("content_ids", [])
+        if _content_ids:
+            _sid = ",".join(_content_ids)
+            if _travel_source_exists(target_blog_id, _sid):
+                logger.warning(target_blog_id + " source_id 중복: " + _sid[:60])
+                return None
+            for _cid in _content_ids:
+                if not _cid:
+                    continue
+                try:
+                    import sqlite3 as _sq
+                    from shared.db_paths import PUBLISH_LEDGER_DB
+                    _cn = _sq.connect(PUBLISH_LEDGER_DB)
+                    _row = _cn.execute(
+                        "SELECT 1 FROM publish_ledger WHERE blog_id=? AND INSTR(',' || source_id || ',', ',' || ? || ',') > 0",
+                        (target_blog_id, _cid)
+                    ).fetchone()
+                    _cn.close()
+                    if _row:
+                        logger.warning(target_blog_id + " 개별 contentid 중복: " + _cid)
+                        return None
+                except Exception as _e:
+                    logger.warning(f"개별 contentid 체크 오류: {_e}")
 
-    # ── 가게명 기반 중복 발행 방지 (used_places ALL-TIME 체크) ──
-    _place_names = [
-        it.get("title", it.get("facltNm", "")).strip()
-        for it in data.get("items", [])
-        if it.get("title") or it.get("facltNm")
-    ]
-    if _place_names:
-        _used_places = [n for n in _place_names if is_place_used(n, target_blog_id)]
+        # ── 시군구 기반 주제 중복 발행 방지 + 재시도 ──
+        # 다른 시군구가 나올 때까지 최대 _MAX_SIGUNGU_RETRIES회 재시도
         _source_type = data.get("source_type", "")
-        # 축제(festival)는 연간 반복 이벤트이므로 2건 이상 중복 시에만 거부
-        # 기타 소스(캠핑/맛집/문화유산/코스)는 1건이라도 중복 시 거부
-        _dup_threshold = 2 if _source_type == "festival" else 1
-        if len(_used_places) >= _dup_threshold:
-            logger.warning(
-                f"{target_blog_id} 가게명 중복: {', '.join(_used_places)}"
-                f" (이미 발행된 가게 — used_places에서 감지, {_dup_threshold}건 이상)"
-            )
-            return None
-        elif _used_places:
-            logger.info(
-                f"{target_blog_id} 가게명部分 중복 (허용): {', '.join(_used_places)}"
-            )
+        _sigungu = data.get("sigungu", "")
+        if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=3):
+            if _attempt < _MAX_SIGUNGU_RETRIES:
+                logger.info(f"{target_blog_id} 시군구 중복: {_sigungu}, 재시도 {_attempt}/{_MAX_SIGUNGU_RETRIES}")
+                continue
+            else:
+                logger.warning(f"{target_blog_id} 시군구 중복: {_sigungu} (최대 재시도 {_MAX_SIGUNGU_RETRIES}회 초과)")
+                return None
+
+        # ── 가게명 기반 중복 발행 방지 (used_places ALL-TIME 체크) ──
+        _place_names = [
+            it.get("title", it.get("facltNm", "")).strip()
+            for it in data.get("items", [])
+            if it.get("title") or it.get("facltNm")
+        ]
+        if _place_names:
+            _used_places = [n for n in _place_names if is_place_used(n, target_blog_id)]
+            _dup_threshold = 2 if _source_type == "festival" else 1
+            if len(_used_places) >= _dup_threshold:
+                logger.warning(
+                    f"{target_blog_id} 가게명 중복: {', '.join(_used_places)}"
+                    f" (이미 발행된 가게 — used_places에서 감지, {_dup_threshold}건 이상)"
+                )
+                return None
+            elif _used_places:
+                logger.info(
+                    f"{target_blog_id} 가게명部分 중복 (허용): {', '.join(_used_places)}"
+                )
+
+        # 모든 체크 통과 → 루프 탈출
+        break
 
     result = generate_content(data, blog_id=target_blog_id)
     if not result:

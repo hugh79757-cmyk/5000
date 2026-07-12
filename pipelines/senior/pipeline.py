@@ -51,26 +51,26 @@ def _make_slug(title):
 
 
 def _make_thumbnail(cfg, article, topic_type, platform):
-    """썸네일 생성 — Hugo/Blogger 모두 R2 업로드 URL 반환"""
+    """썸네일 생성 — shared Playwright generator 사용"""
     try:
+        from shared.thumbnail_generator import generate_thumbnail
+
         import hashlib
         from datetime import datetime
-
-        from pipelines.senior.thumbnail import generate_senior_thumbnail
 
         title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
         slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
 
-        url = generate_senior_thumbnail(
+        url = generate_thumbnail(
+            site_id="senior",
+            slug=slug,
             title=article["title"],
             category=article.get("category", topic_type),
-            department=article.get("department", ""),
-            slug=slug,
         )
         if url:
-            logger.info(f"[SeniorThumb] R2 완료: {url}")
+            logger.info(f"[SeniorThumb] 생성 완료: {url}")
             return url
-        logger.warning("[SeniorThumb] R2 업로드 실패, 빈 값 반환")
+        logger.warning("[SeniorThumb] 생성 실패, 빈 값 반환")
     except Exception as e:
         logger.warning(f"Thumbnail failed: {e}")
     return ""

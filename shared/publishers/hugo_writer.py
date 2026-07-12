@@ -139,7 +139,7 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
 
 
 def _clean_body(body_md):
-    """Clean body markdown — AI 가짜 내부링크, 빈 템플릿, 과도한 개행 제거"""
+    """Clean body markdown — AI 가짜 내부링크, 빈 템플릿, 과도한 개행, 부적절한 H2 헤딩 제거"""
     if not body_md:
         return body_md
     body_md = re.sub(
@@ -147,14 +147,46 @@ def _clean_body(body_md):
         lambda m: m.group() if "{{<" in m.group() else "",
         body_md,
     )
-    # 짧은 닫힌 템플릿 {{}}만 제거 (유효한 템플릿 변수는 보존)
     body_md = re.sub(r"\{\{[\s]*\}\}", "", body_md)
-    # 외부 CDN 이미지 차단 → Cloudflare R2 fallback으로 대체
     body_md = re.sub(
         r"https?://[^/\s]*sspark\.genspark\.ai[^\s)]*",
         "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/placeholder.webp",
         body_md
     )
+
+    # ── 부적절한 H2 헤딩 검증/수정 ──
+    _ALLOWED_H2_PATTERNS = [
+        r"^[가-힣]+ 고를 때 확인할 포인트",
+        r"^한눈에 보는 비교표",
+        r"^[0-9]+위:",
+        r"^자주 묻는 질문",
+        r"^상황별 추천 정리",
+        r"^[가-힣]+ 추천$",
+        r"^비교$",
+        r"^장단점$",
+        r"^구매 가이드$",
+    ]
+    _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
+
+    def _fix_invalid_h2(match):
+        heading_text = match.group(1).strip()
+        if _ALLOWED_H2_RE.search(heading_text):
+            return match.group(0)
+        logger.warning(f"[H2-GUARD] 부적절한 H2 헤딩 감지 → bold 문단 변환: '{heading_text[:50]}'")
+        return f"\n\n<strong>{heading_text}</strong>\n\n"
+
+    body_md = re.sub(r"\n##\s+([^\n]+)", _fix_invalid_h2, body_md)
+    
+    # ── 긴 이미지 URL → 기본 썸네일 대체 (파일명 255자 제한 회피) ──
+    _DEFAULT_IMG = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
+    def _shorten_long_url(match):
+        alt, url = match.group(1), match.group(2)
+        if len(url) > 200:
+            logger.warning(f"[IMAGE-GUARD] 이미지 URL {len(url)}자 초과 → 기본 썸네일 대체")
+            return f"![{alt}]({_DEFAULT_IMG})"
+        return match.group(0)
+    body_md = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", _shorten_long_url, body_md)
+    
     body_md = re.sub(r"\n{3,}", "\n\n", body_md)
     return body_md.strip()
 
@@ -180,6 +212,30 @@ def _convert_inline_md_to_html(text: str) -> str:
     # 4) `inline code`
     text = _re.sub(r"`([^`]+)`", r"<code>\1</code>", text)
     return text
+
+
+def _fix_badge_shortcodes(body_md: str) -> str:
+    """Remove orphaned {{< /badge >}} closing tags that lack a matching {{< badge >}}.
+
+    AI sometimes generates {{< /badge >}} standalone (e.g. at end of a heading)
+    or uses {{< /badge >}} instead of {{< badge >}} as the opening tag.
+    Orphaned closing tags cause Hugo build failure with:
+      'shortcode "badge" does not evaluate .Inner, yet a closing tag was provided'
+    """
+    parts = re.split(r"(\{\{< /?badge >\}\})", body_md)
+    depth = 0
+    result: list[str] = []
+    for part in parts:
+        if part == "{{< badge >}}":
+            depth += 1
+            result.append(part)
+        elif part == "{{< /badge >}}":
+            if depth > 0:
+                depth -= 1
+                result.append(part)
+        else:
+            result.append(part)
+    return "".join(result)
 
 
 def _apply_lead_shortcode(body_md: str) -> str:
@@ -389,11 +445,11 @@ def _validate_frontmatter(fm_text):
         return False, str(e)
 
 
-def sanitize_featureimage_url(url, max_len=255):
+def sanitize_featureimage_url(url, max_len=200):
     if not url:
         return ""
     if len(url) > max_len:
-        logger.warning(f"[featureimage] URL이 {len(url)}자로 {max_len}자 초과")
+        logger.warning(f"[featureimage] URL이 {len(url)}자로 {max_len}자 초과 — 파일명 길이 제한 회피를 위해 기본 썸네일 사용")
         return ""
     return url
 
@@ -474,7 +530,11 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     if not thumbnail_url:
         thumbnail_url = _extract_first_image(body_md)
-    thumbnail_url = sanitize_featureimage_url(thumbnail_url, max_len=250)
+    
+    if thumbnail_url and not thumbnail_url.startswith(("http://", "https://")):
+        thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")
+    
+    thumbnail_url = sanitize_featureimage_url(thumbnail_url, max_len=500)
     if not thumbnail_url:
         _blog_id = blog_cfg.get("id", "")
         if "stock" in _blog_id:
@@ -505,6 +565,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         file_path = os.path.join(post_dir, date_prefix + "-" + slug + ".md")
 
     body_md = re.sub(r"<!-- DESC:.*?-->", "", body_md).strip()
+    body_md = _fix_badge_shortcodes(body_md)
     if blog_cfg.get("theme", "").lower() == "blowfish" and blog_cfg.get("shortcodes_enabled", True):
         body_md = _apply_lead_shortcode(body_md)
         body_md = _apply_figure_shortcode(body_md)

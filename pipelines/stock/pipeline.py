@@ -294,30 +294,23 @@ def _record_publish(conn, blog_id, disclosure) -> None:
     conn.commit()
 
 def _make_thumbnail(title, category, stock_code, corp_name):
-    """Pillow 썸네일 생성 후 R2 업로드, URL 반환"""
-    import tempfile
+    """shared Playwright generator로 썸네일 생성 후 URL 반환"""
     try:
-        from pipelines.stock.thumbnail import generate_stock_thumbnail
-        from shared.r2_uploader import upload_file
-
-        with tempfile.NamedTemporaryFile(suffix=".webp", delete=False) as tmp:
-            tmp_path = tmp.name
-
-        generate_stock_thumbnail(
-            title=title,
-            category=category,
-            stock_code=stock_code,
-            corp_name=corp_name,
-            output_path=tmp_path,
-        )
+        from shared.thumbnail_generator import generate_thumbnail
 
         import hashlib
         title_hash = hashlib.md5(title.encode()).hexdigest()[:10]
-        r2_key = f"stock-thumbnails/{datetime.now().strftime('%Y%m%d')}-{title_hash}.webp"
-        url = upload_file(tmp_path, r2_key, content_type="image/webp")
+        slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
 
-        os.remove(tmp_path)
-        return url
+        url = generate_thumbnail(
+            site_id="stock",
+            slug=slug,
+            title=title,
+            category=category,
+        )
+        if url:
+            return url
+        logger.warning("Stock 썸네일 생성 실패")
     except Exception as e:
         logger.warning(f"썸네일 생성 실패: {e}")
-        return None
+    return None

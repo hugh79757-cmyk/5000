@@ -9,9 +9,10 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "health-hugo": {"threshold": 0.65},
     "baby-hugo": {"threshold": 0.70},
     "beauty-hugo": {"threshold": 0.55},
-    "interior-hugo": {"threshold": 0.65},
+    "interior-hugo": {"threshold": 0.55},
     "camping-hugo": {"threshold": 0.65},
     "kitchen-hugo": {"threshold": 0.65},
+    "pet-hugo": {"threshold": 0.55},
 }
 
 OFFTOPIC_THRESHOLD = 0.20

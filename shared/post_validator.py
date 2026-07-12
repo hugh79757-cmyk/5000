@@ -154,7 +154,7 @@ def validate_post_html(html: str, blog_id: str) -> dict:
     TECH_IDENTIFIERS = {
         'travel', 'travel1', 'travel2', 'travel3', 'travel4',
         'hugo', 'blogger', 'wordpress', 'tap', 'stap', 'cuap',
-        'rap', 'rap2', 'rap3', 'rap4', 'senior', 'stock', 'etf', 'dividend', 'sector', 'ipo', 'finance',
+        'rap', 'rap2', 'rap3', 'rap4', 'rap5', 'senior', 'stock', 'etf', 'dividend', 'sector', 'ipo', 'finance',
         'car', 'appliance', 'baby', 'fitness', 'interior', 'laptop', 'health',
         'pet', 'kitchen', 'beauty', 'camping', 'ev', 'compare', 'deal', 'guide', 'tco',
         'hotissue', 'info', 'rank', 'pick', 'kuta', 'gap', 'tvshow', 'ud',

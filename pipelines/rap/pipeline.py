@@ -1,4 +1,5 @@
 """RAP (Real estate Auto Publisher) pipeline — RAP 전용 DB 사용"""
+import hashlib
 import logging
 import os
 import random
@@ -812,7 +813,7 @@ def run(blog_cfg):
         fetch_subscription_info,
         find_lawd_cd,
     )
-    from pipelines.rap.thumbnail import upload_thumbnail
+    from shared.thumbnail_generator import generate_thumbnail
     from pipelines.rap.writer import generate_subscription_article, generate_trade_article
     from shared.content_store import get_today_count, init_db
     from shared.publisher import publish
@@ -960,7 +961,14 @@ def run(blog_cfg):
 
     # 썸네일
     article["title"] = sanitize_title(article["title"])
-    thumb_url = upload_thumbnail(article["title"], article.get("category", "부동산"))
+    title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
+    slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
+    thumb_url = generate_thumbnail(
+        site_id="rap",
+        slug=slug,
+        title=article["title"],
+        category=article.get("category", "부동산"),
+    )
 
     # WordPress용 카테고리 ID
     wp_category = WP_CATEGORY_MAP.get(article.get("category", ""), 150)

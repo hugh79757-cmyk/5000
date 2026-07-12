@@ -245,7 +245,8 @@ CATEGORY_FILTERS = {
                      "모던", "북유럽", "미니멀", "빈티지", "클래식",
                      "거실", "침실", "욕실", "베란다", "사무실", "서재",
                      "원목", "철제", "유리", "대리석",
-                     "액자", "쿠션", "담요", "벽시계", "화병", "캔들", "식물", "스탠드"],
+                     "액자", "쿠션", "담요", "벽시계", "화병", "캔들", "식물", "스탠드",
+                     "다운라이트", "led등", "천장등", "다운라이트조명", "매입등"],
         "blocked": ["도서", "교재", "식품", "화장품", "의류", "패션",
                      "장난감", "완구",
                      "생활용품", "전자기기", "가전", "출산/유아", "반려동물",
@@ -320,9 +321,24 @@ CATEGORY_FILTERS = {
                      "미용", "클리퍼", "브러쉬", "발톱",
                      "관절", "눈물자국", "치석",
                      "야외", "이동가방", "캐리어",
-                     "의류", "넥카라", "인식표", "패드", "담요", "케이지", "울타리"],
-        "blocked": ["의류", "전자기기", "가전", "주방", "완구",
-                     "생활용품", "출산/유아", "가구", "홈인테리어", "스포츠/레저", "패션"],
+                     "의류", "넥카라", "인식표", "패드", "담요", "케이지", "울타리",
+                     "침대", "쿨매트", "계단", "우비",
+                     "칫솔", "덴탈껌", "구강",
+                     "동결건조", "화식", "수제간식", "유산균", "오메가3",
+                     "드라이기", "타월", "목욕", "귀세정제",
+                     "훈련", "클리커",
+                     "식기", "물그릇", "자동급수기", "분수",
+                     "안전벨트", "카시트", "크레이트",
+                     "보호대", "신발", "수영복", "구명조끼",
+                     "배변봉투", "배변판", "기저귀",
+                     "캣닢", "캣그라스", "캣휠", "터널", "해먹",
+                     "펫캠", "CCTV",
+                     "생일", "캠핑", "파티",
+                     "피부", "알러지", "헤어볼",
+                     "분유", "우유", "파우치", "츄르", "캔",
+                     "덴탈", "관리", "브랜드"],
+        "blocked": ["전자기기", "가전", "주방", "완구",
+                     "생활용품", "출산/유아", "가구", "홈인테리어", "스포츠/레저"],
         "required": [],
     },
     "kitchen-hugo": {
@@ -510,30 +526,38 @@ def _record_products(blog_id, keyword, products) -> None:
 
 
 def _title_is_duplicate(blog_id, title):
-    """publish_log에서 유사 제목 체크 (3일 이내, 다중 기준)"""
+    """publish_log에서 유사 제목 체크 (3일 이내, SequenceMatcher + 단어 겹침)"""
     import re as _re
+    from difflib import SequenceMatcher
     conn = sqlite3.connect(str(DB_PATH))
 
-    # 방법1: 핵심 20자 LIKE 비교
     normalized = _re.sub(
         r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|추천|비교|체크리스트|및|과|와|vs|VS|TOP[0-9]+|[0-9]{4}년?",
         "", title
     ).strip()
     normalized = _re.sub(r"\s+", " ", normalized).strip()
-    core = normalized[:20] if len(normalized) >= 20 else normalized[:12]
 
     found = False
-    if core and len(core) >= 5:
-        row = conn.execute(
+    if len(normalized) >= 5:
+        recent = conn.execute(
             """SELECT title FROM publish_log
-               WHERE blog_id=? AND title LIKE ? AND published_at > datetime('now', '-3 days')""",
-            (blog_id, "%" + core + "%"),
-        ).fetchone()
-        if row:
-            logger.info(f"[중복체크] 핵심어 일치: core='{core}' -> '{row[0][:40]}'")
-            found = True
+               WHERE blog_id=? AND published_at > datetime('now', '-3 days')""",
+            (blog_id,),
+        ).fetchall()
+        for (prev_title,) in recent:
+            if not prev_title:
+                continue
+            prev_norm = _re.sub(
+                r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|추천|비교|체크리스트|및|과|와|vs|VS|TOP[0-9]+|[0-9]{4}년?",
+                "", prev_title
+            ).strip()
+            prev_norm = _re.sub(r"\s+", " ", prev_norm).strip()
+            ratio = SequenceMatcher(None, normalized, prev_norm).ratio()
+            if ratio >= 0.8:
+                logger.info(f"[중복체크] 유사 제목: '{title[:30]}' ≈ '{prev_title[:30]}' ({ratio:.0%})")
+                found = True
+                break
 
-    # 방법2: 주요 단어 3개 이상 겹치면 중복
     if not found:
         title_words = set(_re.findall(r"[가-힣a-zA-Z0-9]{2,}", title))
         stop_words = {

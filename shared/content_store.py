@@ -1,9 +1,12 @@
+import logging
 import os
 import re
 import sqlite3
 from datetime import datetime
 
 from shared.db_paths import ARTICLES_DB
+
+logger = logging.getLogger(__name__)
 
 
 def get_conn():
@@ -226,17 +229,35 @@ def source_exists(blog_id, data_source, source_id):
 
 
 def title_similar_exists(blog_id, title):
+    """유사 제목 중복 체크 — SequenceMatcher 80% 임계값, 최근 14일 내 비교"""
     import re
+    from difflib import SequenceMatcher
+
     conn = get_conn()
-    # 숫자·조사 제거 후 핵심 키워드로 비교 (20자)
     _normalized = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", title).strip()
-    core = _normalized[:20] if len(_normalized) >= 20 else _normalized[:15]
-    row = conn.execute(
-        "SELECT 1 FROM articles WHERE blog_id=? AND title LIKE ?",
-        (blog_id, "%" + core + "%"),
-    ).fetchone()
+
+    # 최소 5자 미만이면 비교 불가 → 통과 허용
+    if len(_normalized) < 5:
+        conn.close()
+        return False
+
+    # 최근 14일 내 해당 블로그 글만 비교 (전체 비교 시 과도한 차단)
+    rows = conn.execute(
+        "SELECT title FROM articles WHERE blog_id=? AND status='published' AND created_at > datetime('now', '-14 days')",
+        (blog_id,),
+    ).fetchall()
     conn.close()
-    return row is not None
+
+    for (old_title,) in rows:
+        if not old_title:
+            continue
+        old_norm = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", old_title).strip()
+        ratio = SequenceMatcher(None, _normalized, old_norm).ratio()
+        if ratio >= 0.8:
+            logger.info(f"title_similar_exists: '{title[:30]}' ≈ '{old_title[:30]}' ({ratio:.0%})")
+            return True
+
+    return False
 
 def init_used_places() -> None:
     conn = get_conn()
