@@ -667,6 +667,7 @@ def dispatch(blog_id):
     # 성공/실패 기록
     if result.get("success"):
         _record_ledger(blog_id)
+        _reset_failure_count(blog_id)
         if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS:
             _build_and_deploy_central(blog_id)
         # STAP/Hugo 배포 실패 — success=True지만 배포는 실패한 경우
@@ -717,9 +718,6 @@ def dispatch(blog_id):
                         logger.info(f"[{blog_id}] STAP collect_all() 백그라운드 실행 시작")
                 except Exception as _e:
                     logger.warning(f"[{blog_id}] STAP collect_all 실행 실패: {_e}")
-        else:
-            # 성공 시 실패 카운트 리셋
-            _reset_failure_count(blog_id)
     return result
 
 

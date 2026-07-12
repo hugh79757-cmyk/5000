@@ -83,7 +83,7 @@ def run(blog_cfg):
     conn = sqlite3.connect(str(CAR_DB_PATH))
     conn.row_factory = sqlite3.Row
 
-    MAX_RETRY = 6
+    MAX_RETRY = 26
     topic = None
     data = None
     skip_ids = []
