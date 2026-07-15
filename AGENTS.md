@@ -481,6 +481,8 @@ ins.adsbygoogle {
 - [ ] Cloudflare Pages 도메인 바인딩 확인
 - [ ] Google AdSense 대시보드에 도메인 승인 완료 확인
 - [ ] AdSense 대시보드 Auto ads → Anchor ads ON
+- [ ] `extend-head.html`에 `adsbygoogle.js` 스크립트 **직접 확인** — 누락 시 `<ins>` 태그 초기화 안 됨 → 흰 박스 현상 발생 (참고: kitchen-hugo 20260715 트리아지)
+- [ ] `custom.css`에 `.ad-inarticle { min-height }` **절대 금지** — 광고 미게재 시 흰 빈 박스로 본문 밀려남
 <!-- GSD:adsense-end -->
 
 <!-- GSD:skills-start source:skills/ -->
@@ -488,6 +490,84 @@ ins.adsbygoogle {
 
 No project skills found. Add skills to any of: `.claude/skills/`, `.agents/skills/`, `.cursor/skills/`, `.github/skills/`, or `.codex/skills/` with a `SKILL.md` index file.
 <!-- GSD:skills-end -->
+
+<!-- GSD:deployment-start -->
+## Deployment Rules
+
+### 배포 방식 (중요)
+
+**절대 git push로 배포하지 말 것.** Cloudflare Pages의 git 연동 자동 빌드는 **월 500회 제한**이 있으며, git push할 때마다 1회씩 소진된다. 커밋/푸시는 단순한 형상 관리 용도로만 사용하고, 실제 배포는 반드시 wrangler 직접 업로드로 수행한다.
+
+### 배포는 반드시 dispatcher.py 사용
+
+**절대 수동으로 `wrangler pages deploy`나 `wrangler deploy`를 직접 실행하지 말 것.** `dispatcher.py`가 Worker/Pages 구분, `CLOUDFLARE_API_TOKEN` 제거, Hugo 빌드, 직렬화 락을 전부 처리한다.
+
+```bash
+# 단일 블로그 배포 (글 생성 + 발행 + 배포)
+python3 /Users/twinssn/Projects/5000/dispatcher.py {blog_id}
+```
+
+> ⚠️ dispatcher.py는 **글 생성 → 발행 → 배포**를 전부 수행한다. 배포만 필요한 경우가 아니라면 항상 dispatcher.py 사용.
+
+### 배포만 필요한 경우 — deploy.py
+
+이미 발행된 글의 최신 코드 변경사항만 배포하려면 `shared/publishers/deploy.py`의 `deploy_site()`를 사용한다. 단, 아래 순서를 반드시 따라야 한다:
+
+```bash
+# 1. OAuth profile 토큰 추출 (필수)
+export CLOUDFLARE_API_TOKEN=$(env -u CLOUDFLARE_API_TOKEN wrangler auth token 2>/dev/null | tail -1)
+
+# 2. Hugo 빌드
+hugo --gc --minify --source /path/to/site
+
+# 3. 배포
+python3 -c "
+import sys; sys.path.insert(0, '/Users/twinssn/Projects/5000')
+from shared.publishers.deploy import deploy_site
+deploy_site('/path/to/site', '{blog_id}')
+"
+```
+
+> ⚠️ `wrangler auth token`으로 토큰을 추출하지 않으면 Workers 블로그(WORKERS_BLOGS 6개) 배포 시 인증 오류가 발생한다.
+
+### dispatcher.py가 처리하는 작업
+1. **blog_id에 따라 Workers/Pages 자동 선택**
+   - WORKERS_BLOGS (6개: health, pet, kitchen, beauty, camping, baby) → `wrangler deploy --config wrangler.toml`
+   - 그 외 모든 Pages 블로그 → `wrangler pages deploy public --project-name={blog_id}`
+2. **`CLOUDFLARE_API_TOKEN` env var 제거** — wrangler auth profile(OAuth) 우선 적용
+3. **Hugo 빌드** — `hugo --gc --minify` 실행
+4. **직렬화 락** — `/tmp/wrangler_deploy.lock`으로 중복 배포 방지
+5. **배포 실패 시 로그 기록** — 자동 재시도 로직 없음, 실패 원인은 로그 확인
+
+### CLOUDFLARE_API_TOKEN 환경변수 문제
+
+**문제점:** OpenCode/Codex agent가 `CLOUDFLARE_API_TOKEN` 환경변수를 설정한다. 이 token이 wrangler auth profile(OAuth)보다 **우선 적용**되어 잘못된 계정으로 배포하거나 권한 오류가 발생한다.
+
+**해결:** 사용자 `.zshrc`에 `wrangler()` shell 함수가 정의되어 있어, 터미널에서 `wrangler` 실행 시 자동으로 `CLOUDFLARE_API_TOKEN`을 제거하고 OAuth profile을 사용한다. agent 환경에서는 이 함수를 사용할 수 없으므로 `dispatcher.py`를 통해 배포해야 한다 (`dispatcher.py`가 내부에서 token을 제거함).
+
+**Wrangler Workers 배포 인증:** Wrangler 4.x는 `wrangler deploy`(Worker)를 non-interactive 환경에서 실행하려면 반드시 `CLOUDFLARE_API_TOKEN`이 필요하다. OAuth profile로는 부족하다. Pages(`wrangler pages deploy`)는 OAuth profile로 가능하다.
+
+**토큰 갱신 명령어:**
+```bash
+# OAuth profile 재인증 (브라우저 열림)
+env -u CLOUDFLARE_API_TOKEN wrangler auth create hugh79757
+
+# OAuth profile의 토큰을 CLOUDFLARE_API_TOKEN으로 추출
+export CLOUDFLARE_API_TOKEN=$(env -u CLOUDFLARE_API_TOKEN wrangler auth token 2>/dev/null | tail -1)
+```
+
+### 중요 규칙
+1. **절대 수동 wrangler 명령어 금지** — Worker/Pages 구분이 꼬이고 env var 충돌 발생
+2. **`--commit-dirty=true` 사용 금지** — git commit 생성 → Cloudflare Pages 자동 빌드 트리거로 배포 횟수 이중 소진
+3. git push 후 Cloudflare Pages 대시보드에 **Skipped** 표시는 정상 (git 기반 빌드 비활성화)
+4. `CLOUDFLARE_API_TOKEN`이 설정되어 있으면 wrangler auth profile이 무시됨. 반드시 제거 후 실행.
+
+### 배포 확인
+```bash
+# Pages 프로젝트 배포 확인
+wrangler pages deployment list --project-name={blog_id}
+```
+<!-- GSD:deployment-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
