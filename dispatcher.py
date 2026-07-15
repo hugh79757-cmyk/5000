@@ -562,6 +562,11 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                 logger.error(f"[deploy] {blog_id} 락 대기 시간 초과 ({DEPLOY_LOCK_TIMEOUT}초)")
                 return False
 
+            # wrangler auth profile 우선 — CLOUDFLARE_API_TOKEN env var 해제
+            # (agent 세션에서 설정된 token이 profile보다 우선 적용됨)
+            deploy_env = {k: v for k, v in os.environ.items() if k != "CLOUDFLARE_API_TOKEN"}
+            deploy_env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+
             if blog_id in WORKERS_BLOGS:
                 r2 = subprocess.run(
                     [WRANGLER, "deploy",
@@ -569,7 +574,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                     cwd=str(site_path),
                     capture_output=True, text=True,
                     timeout=300,
-                    env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+                    env=deploy_env
                 )
             else:
                 r2 = subprocess.run(
@@ -580,7 +585,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                     cwd=str(site_path),
                     capture_output=True, text=True,
                     timeout=300,
-                    env={**os.environ, "PATH": "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"}
+                    env=deploy_env
                 )
         finally:
             try:

@@ -49,10 +49,10 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
     load_dotenv(os.path.expanduser("~/.env.common"))
     load_dotenv(os.path.join(FIVEK_ROOT, ".env"), override=True)
     _wrangler_env = os.environ.copy()
-    _cf_token = os.getenv("CLOUDFLARE_API_TOKEN", "")
+    # CLOUDFLARE_API_TOKEN 제거 — agent 세션에서 설정된 token이
+    # wrangler auth profile(OAuth)보다 우선 적용되어 배포 실패를 유발함
+    _wrangler_env.pop("CLOUDFLARE_API_TOKEN", None)
     _cf_account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
-    if _cf_token:
-        _wrangler_env["CLOUDFLARE_API_TOKEN"] = _cf_token
     if _cf_account:
         _wrangler_env["CLOUDFLARE_ACCOUNT_ID"] = _cf_account
     rogue = site / "content" / "posts" / "index.md"
