@@ -1,3 +1,13 @@
+"""여행/부동산 블로그용 쿠팡 파트너스 링크 생성
+
+⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 검색 API:   분당 50회 (search_products)
+- 링크생성:   분당 50회 (generate_affiliate_link = deeplink POST)
+- 전체 API:   분당 100회
+- 경고 3회 누적 → 이용제한 (재발생 시 추가 제재)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+"""
 import hashlib
 import hmac
 import logging

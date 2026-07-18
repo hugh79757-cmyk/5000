@@ -174,6 +174,15 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 ### Phase 18: Content quality 데이터 기반 최적화 (quality.db 활용)
 **Priority: 🟢 LOW** — 데이터가 누적되어야 의미 있음 (2주 후)
 
+### Phase 19: AdSense Publisher ID Standardization + Sticky Ad Removal
+**Priority: 🟡 MEDIUM** — 앵커광고 정상화, 도메인별 pub ID 최종 검증, mobile-sticky 제거
+
+### Phase 20: Hugo Build 안정화 (`--minify` 호환성 + badge shortcode)
+**Priority: 🟡 MEDIUM** — CUAP/TAP baseof.html dead code 제거, badge shortcode 호환성 수정
+
+### Phase 21: Funnel Automation — 퍼널 구조 자동화
+**Priority: 🔴 HIGH** — 블로그 간 퍼널 관계 정의, 퍼널 링크 자동 삽입, STAP entity_linker 버그 수정
+
 ---
 
 ## Configuration

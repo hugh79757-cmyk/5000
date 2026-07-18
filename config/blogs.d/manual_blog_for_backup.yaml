@@ -6,6 +6,7 @@ blogs:
   platform: hugo
   site_path: /Users/twinssn/Projects/rotcha-blog
   status: active
+  funnel_stage: landing
 
 - domain: informationhot.kr
   id: informationhot-hugo
@@ -14,6 +15,7 @@ blogs:
   platform: hugo
   site_path: /Users/twinssn/Projects/informationhot-hugo
   status: active
+  funnel_stage: landing
 
 - domain: techpawz.com
   id: techpawz-hugo
@@ -22,6 +24,7 @@ blogs:
   platform: hugo
   site_path: /Users/twinssn/Projects/techpawz-hugo
   status: active
+  funnel_stage: landing
 
 - domain: biz.techpawz.com
   id: biz-techpawz-hugo
@@ -30,6 +33,7 @@ blogs:
   platform: hugo
   site_path: /Users/twinssn/Projects/biz.techpawz-hugo
   status: active
+  funnel_stage: landing
 
 - domain: issue.techpawz.com
   id: issue-techpawz-hugo
@@ -38,3 +42,4 @@ blogs:
   platform: hugo
   site_path: /Users/twinssn/Projects/issue-techpawz-hugo
   status: active
+  funnel_stage: landing

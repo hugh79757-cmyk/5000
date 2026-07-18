@@ -19,6 +19,14 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/compare-hugo
   status: active
   theme: Blowfish
+  funnel_stage: bridge
+  depth_next:
+    - id: pick-hugo
+      topic: "비교 결과 내 조건에 맞는 차 찾기"
+  bridge_to:
+    - id: finance-hugo
+      topic: "비교한 차량 가격으로 적금 vs 차량 할부 비교"
+      bridge_context: "차량 구매 자금 마련 — 할부 금리와 적금 누적액 비교"
 - cf_project: deal-hugo
   daily_quota: 5
   domain: deal.rotcha.kr
@@ -111,6 +119,14 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/hotissue-hugo
   status: active
   theme: PaperMod
+  funnel_stage: landing
+  depth_next:
+    - id: compare-hugo
+      topic: "자동차 비교 분석"
+    - id: pick-hugo
+      topic: "내 예산에 맞는 차 찾기"
+    - id: rank-hugo
+      topic: "인기 차량 랭킹"
 - cf_project: tco-hugo
   daily_quota: 5
   domain: tco.rotcha.kr
@@ -131,7 +147,6 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/tco-hugo
   status: inactive
   theme: Blowfish
-
 - cf_project: rank-hugo
   daily_quota: 1
   domain: rank.informationhot.kr
@@ -148,7 +163,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/rank-hugo
   status: active
   theme: Blowfish
-
+  funnel_stage: landing
 - cf_project: pick-hugo
   daily_quota: 1
   domain: pick.informationhot.kr
@@ -165,3 +180,4 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/pick-hugo
   status: active
   theme: Blowfish
+  funnel_stage: monetize

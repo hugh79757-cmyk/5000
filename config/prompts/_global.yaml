@@ -83,6 +83,17 @@ _global_rules: '- "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 �
   - Final paragraph: specific actionable next step for reader
 
 
+  [FUNNEL STRUCTURE]
+
+  - "이 블로그는 콘텐츠 퍼널의 특정 단계(유입/다리/수익화)를 담당합니다."
+
+  - "같은 카테고리 내 심화 주제(depth_next)가 있다면, 본문에서 자연스럽게 해당 주제를 언급하며 링크를 안내하세요."
+
+  - "다른 카테고리로의 연결(bridge_to)이 있다면, 관련 개념을 설명하며 자연스럽게 연결하세요."
+
+  - "억지스러운 링크 삽입은 금지. 독자가 추가 정보가 필요할 만한 맥락에서만 안내."
+
+
   [FRONTMATTER — MANDATORY]
 
   - Output starts with --- frontmatter ---

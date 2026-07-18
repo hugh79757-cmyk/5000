@@ -42,6 +42,10 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel-hugo
   status: active
   theme: Blowfish
+  funnel_stage: landing
+  depth_next:
+    - id: travel4-hugo
+      topic: "캠핑 여행 코스 추천"
 - cf_project: travel1-hugo
   daily_quota: 3
   domain: travel1.rotcha.kr
@@ -66,6 +70,10 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel1-hugo
   status: active
   theme: Blowfish
+  funnel_stage: landing
+  depth_next:
+    - id: travel4-hugo
+      topic: "축제 연계 여행 코스"
 - cf_project: travel2-hugo
   daily_quota: 3
   domain: travel2.rotcha.kr
@@ -90,6 +98,10 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel2-hugo
   status: active
   theme: Blowfish
+  funnel_stage: landing
+  depth_next:
+    - id: travel4-hugo
+      topic: "문화유산 탐방 코스"
 - cf_project: travel3-hugo
   daily_quota: 3
   domain: tour2.rotcha.kr
@@ -114,6 +126,10 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel3-hugo
   status: active
   theme: Blowfish
+  funnel_stage: landing
+  depth_next:
+    - id: travel4-hugo
+      topic: "맛집 투어 코스"
 - cf_project: travel4-hugo
   daily_quota: 3
   domain: tour3.rotcha.kr
@@ -138,6 +154,7 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel4-hugo
   status: active
   theme: Blowfish
+  funnel_stage: bridge
 - blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
   daily_quota: 5
   domain: tv-show.informationhot.kr

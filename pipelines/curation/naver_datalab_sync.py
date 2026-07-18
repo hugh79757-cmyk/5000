@@ -242,7 +242,17 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], top_n: int = 50):
 # ════════════════════════════════════════════════════════════════════════════
 
 def bulk_collect_coupang(blog_id: str, keywords: list[str]):
-    """신규 키워드에 대해 쿠팡 상품 수집"""
+    """신규 키워드에 대해 쿠팡 상품 수집
+
+    ⚠️ 쿠팡 API RATE LIMIT 준수 (2026-07-16):
+      - 검색 API 분당 50회 제한 → 키워드당 2초 간격 (분당 30회)
+      - 10개 키워드마다 60초强制 휴식 (버스트 방지)
+      - 1회 최대 30개 키워드 제한
+    """
+    if len(keywords) > 30:
+        logger.warning(f"[{blog_id}] 키워드 {len(keywords)}개 → 30개로 제한 (버스트 방지)")
+        keywords = keywords[:30]
+
     sys.path.insert(0, str(BASE_DIR))
     from pipelines.curation.collector import collect_keyword, get_products
 
@@ -263,7 +273,12 @@ def bulk_collect_coupang(blog_id: str, keywords: list[str]):
         except Exception as e:
             logger.exception(f"  [{i:03d}] 💥 {kw}: {e}")
             fail += 1
-        time.sleep(0.4)
+        # 분당 50회 제한: 키워드당 2초 = 분당 30회 (안전마진)
+        time.sleep(2)
+        # 10개 키워드마다 60초强制 휴식 (쿠팡 분당 리밋 리셋 대비)
+        if i % 10 == 0 and i < len(keywords):
+            logger.info(f"[{blog_id}] 분당 한도 리셋 대기 60초... ({i}/{len(keywords)})")
+            time.sleep(60)
 
     logger.info(f"\n[{blog_id}] 수집 결과 — 성공:{ok} / 부족:{low} / 실패:{fail}")
     return ok, low, fail

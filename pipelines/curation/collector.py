@@ -2,7 +2,17 @@
 
 - 키워드별 상품 10개 수집
 - 캐시 유효기간 3일, 만료 시 재수집
-- Search API 시간당 10회 제한 준수
+
+⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재 확인)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 검색 API:      분당 50회 (search)
+- 리포트 API:    시간당 500회 (report)
+- 전체 API:      분당 100회 (total)
+- 링크생성:      분당 50회 (deeplink POST)
+- 경고 3회 누적 → 이용제한 (해제 후 재발생 시 추가 제재)
+
+이 파일 수정 시 반드시 위 제한을 준수할 것.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 import hashlib
 import hmac
@@ -120,7 +130,13 @@ def _generate_signature(method, url_path, query_string=""):
 
 
 def _check_rate_limit():
-    """시간당 8회 제한 + 쿠팡 서버 차단 시간 체크"""
+    """분당/시간당 이중 레이트 리미트 — 쿠팡 API 제한(분50/시500) 준수
+
+    ⚠️ 2026-07-16 쿠팡 파트너스 제재 이슈로 강화:
+      - 검색 API: 분당 50회 (여유분 20% → 분당 40회에서 컷)
+      - 전체 API: 분당 100회
+      - 시간당: 300회 제한 (안전마진)
+    """
     try:
         conn = sqlite3.connect(DB_PATH)
         conn.execute("CREATE TABLE IF NOT EXISTS api_call_log (id INTEGER PRIMARY KEY AUTOINCREMENT, called_at TEXT DEFAULT (datetime('now')))")
@@ -136,12 +152,25 @@ def _check_rate_limit():
                     return False
             except Exception:
                 pass
-        count = conn.execute(
+        # 분당 체크 (검색 API 분당 50회 → 안전마진 40회)
+        per_minute = conn.execute(
+            "SELECT COUNT(*) FROM api_call_log WHERE called_at > datetime('now', '-1 minute')"
+        ).fetchone()[0]
+        if per_minute >= 40:
+            logger.warning(f"[API_RATE] 분당 한도 도달: {per_minute}/40 — 일시 중단")
+            conn.close()
+            return False
+        # 시간당 체크 (안전마진 300회)
+        per_hour = conn.execute(
             "SELECT COUNT(*) FROM api_call_log WHERE called_at > datetime('now', '-1 hour')"
         ).fetchone()[0]
+        if per_hour >= 300:
+            logger.warning(f"[API_RATE] 시간당 한도 도달: {per_hour}/300 — 일시 중단")
+            conn.close()
+            return False
+        logger.info(f"[API_RATE] 분:{per_minute}/40  시:{per_hour}/300  ✅")
         conn.close()
-        logger.info(f"[API_RATE] 최근 1시간 호출: {count}/100")
-        return count < 100
+        return True
     except Exception:
         return True
 

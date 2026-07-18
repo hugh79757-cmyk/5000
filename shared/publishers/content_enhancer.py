@@ -176,3 +176,80 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         html += f'<a href="{url}" class="related-card">\n<span class="card-label">{label}</span>\n<span class="card-title">{title_text}</span>\n</a>\n'
     html += "</div>\n</div>\n"
     return html
+
+
+# ── Phase 21: Funnel Link Functions ──────────────────────────────────────
+
+
+def _resolve_funnel_post(target_blog_id, topic=""):
+    """Find a recent published post from target blog for funnel link.
+
+    Returns dict with title/url/blog_id or None if no post found.
+    """
+    try:
+        from shared.content_store import get_conn
+        conn = get_conn()
+        row = conn.execute(
+            "SELECT slug, title, published_url, blog_id FROM articles "
+            "WHERE blog_id=? AND status='published' AND published_url IS NOT NULL "
+            "ORDER BY created_at DESC LIMIT 1",
+            (target_blog_id,)
+        ).fetchone()
+        conn.close()
+        if row:
+            return {
+                "title": row["title"],
+                "url": row["published_url"],
+                "blog_id": row["blog_id"],
+                "slug": row["slug"],
+            }
+    except Exception as e:
+        logger.debug(f"[FUNNEL] _resolve_funnel_post failed for {target_blog_id}: {e}")
+    return None
+
+
+def _build_funnel_link_html(target_blog_id, source_blog_id, topic, funnel_type):
+    """Generate a single funnel link HTML with data tracking attributes.
+
+    Returns HTML string or None if target post cannot be resolved.
+    """
+    post = _resolve_funnel_post(target_blog_id, topic)
+    if not post:
+        logger.debug(f"[FUNNEL] skip {target_blog_id} → no published post found")
+        return None
+    import uuid
+    link_id = str(uuid.uuid4())[:8]
+    link_text = topic or post["title"]
+    return (
+        f'<a href="{post["url"]}" '
+        f'data-funnel-link '
+        f'data-source-blog="{source_blog_id}" '
+        f'data-target-blog="{target_blog_id}" '
+        f'data-funnel-type="{funnel_type}" '
+        f'data-funnel-id="{link_id}">'
+        f'{link_text}'
+        f'</a>'
+    )
+
+
+def _render_funnel_section(links):
+    """Wrap funnel links in a styled div section."""
+    items_html = "\n".join(
+        f'    <li>{link}</li>'
+        for link in links if link
+    )
+    if not items_html.strip():
+        return ""
+    return (
+        '<div class="funnel-links not-prose my-8 p-4 bg-gray-50 rounded-lg">\n'
+        '  <h3 class="text-lg font-semibold mb-2">함께 살펴보기</h3>\n'
+        '  <ul class="space-y-2">\n'
+        f'{items_html}\n'
+        '  </ul>\n'
+        '</div>'
+    )
+
+
+def _inject_funnel_links(body_md, blog_id, slug, blog_cfg):
+    logger.info("[FUNNEL] _inject_funnel_links is deprecated — card injection moved to hugo_writer.py Phase 22-C")
+    return body_md, 0

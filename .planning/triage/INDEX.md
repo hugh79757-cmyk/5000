@@ -1,5 +1,9 @@
 # Triage Index
 
+- 2026-07-18 | fix | cuap-image-webp-guard-fix | CUAP IMAGE-GUARD default-thumbnail.webp 버그 수정 + R2 이미지 624개 전량 WebP 변환 (97KB→9KB, 90% 감소)
+- 2026-07-16 | fix | coupang-api-rate-limit-restriction | 쿠팡 파트너스 API 검색 분당 50회 초과로 3회 경고 → 이용제한. _check_rate_limit() 분당 체크 추가 + bulk_collect burst 제어 + 모든 coupang 모듈 rate limit 주석
+- 2026-07-16 | config | cuap-publishing-stop | CUAP 분기 10개 블로그 발행 전면 중단 — status: active → inactive
+
 - 2026-07-13 | config | deepseek-chat-to-deepseek-v4-flash | default tier model `deepseek-chat` → `deepseek-v4-flash` (7/24 서비스 종료 대비)
 - 2026-07-11 | fix | kuta-hugo-broken-thumbnail | kuta-hugo 썸네일 깨짐 — featureimage가 WordPress 도메인 경로로 설정, R2에 썸네일 없음. batch_thumbnails.py로 생성+업로드 해결. 부수적 발견: blogsmith auto-publisher는 썸네일 자동 생성하나 5000 pipeline 발행 글은 수동 필요
 - 2026-07-10 | fix | dashboard-5050-flask-unavailable | 1.aikorea24.kr 터널 연결 불가 — Flask 앱 port 5050 미실행, launchd plist 등록

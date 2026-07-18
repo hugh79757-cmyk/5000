@@ -1,0 +1,3 @@
+[     824ms] [ERROR] Attestation check for Shared Storage on https://www.googleadservices.com failed. @ https://www.googleadservices.com/pagead/managed/js/activeview/current/reach_worklet.html:0
+[    3465ms] [LOG] Failed to read a named property 'document' from 'Window': Blocked a frame with origin "https://googleads.g.doubleclick.net" from accessing a cross-origin frame. @ https://choices.trustarc.com/get?name=pmw2.js:0
+[    3612ms] [LOG] Failed to read a named property 'document' from 'Window': Blocked a frame with origin "https://googleads.g.doubleclick.net" from accessing a cross-origin frame. @ https://choices.trustarc.com/get?name=pmw2.js:0

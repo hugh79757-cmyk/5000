@@ -1,9 +1,20 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# CUAP (Curation Auto Publisher) — 10개 상품 큐레이션 블로그
+# ⚠️ 현재 전부 inactive (2026-07-16, 운영 전략 변경)
+#
+# ⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재)
+# - 검색 API: 분당 50회 / 링크생성: 분당 50회 / 전체: 분당 100회
+# - 3회 경고 누적 → 이용제한 (재발생 시 추가 제재)
+# - 발행 간격: 블로그 간 10분 간격 유지 (동시 발행 시 40~60회 API 집중 방지)
+# - 재활성화 시 collector._check_rate_limit()이 분당 40회 컷오프
+# - 상세: .planning/triage/20260716--coupang-api-rate-limit-restriction.md
+# ═══════════════════════════════════════════════════════════════════════════════
 blogs:
 - id: appliance-hugo
   name: 가전제품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: appliance.informationhot.kr
   cf_project: appliance-hugo
@@ -23,7 +34,7 @@ blogs:
   name: 유아용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: baby.informationhot.kr
   cf_project: baby-hugo
@@ -43,7 +54,7 @@ blogs:
   name: 운동용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: fitness.informationhot.kr
   cf_project: fitness-hugo
@@ -63,7 +74,7 @@ blogs:
   name: 가구 인테리어 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: interior.informationhot.kr
   cf_project: interior-hugo
@@ -83,7 +94,7 @@ blogs:
   name: 노트북 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: laptop.informationhot.kr
   cf_project: laptop-hugo
@@ -103,7 +114,7 @@ blogs:
   name: 건강기능식품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: health.informationhot.kr
   cf_project: health-hugo
@@ -123,7 +134,7 @@ blogs:
   name: 반려동물용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: pet.informationhot.kr
   cf_project: pet-hugo
@@ -143,7 +154,7 @@ blogs:
   name: 주방용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: kitchen.informationhot.kr
   cf_project: kitchen-hugo
@@ -163,7 +174,7 @@ blogs:
   name: 뷰티/스킨케어 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: beauty.informationhot.kr
   cf_project: beauty-hugo
@@ -183,7 +194,7 @@ blogs:
   name: 캠핑/아웃도어 추천 가이드
   pipeline: curation
   platform: hugo
-  status: active
+  status: inactive
   daily_quota: 5
   domain: camping.informationhot.kr
   cf_project: camping-hugo

@@ -2,11 +2,20 @@ import json
 import logging
 import os
 import re
+import subprocess
+import uuid
 from datetime import datetime
 from pathlib import Path
 
-from shared.paths import FIVEK_ROOT
+from shared.paths import FIVEK_ROOT, HUGO_PATH
 logger = logging.getLogger(__name__)
+
+try:
+    from bs4 import BeautifulSoup
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+    logger.warning("[FUNNEL] BeautifulSoup not installed — funnel card injection disabled")
 
 
 def _sanitize_yaml_value(s, max_len=None):
@@ -138,7 +147,91 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     return fm, date_str
 
 
-def _clean_body(body_md):
+def _download_image_bytes(url: str) -> tuple[bytes, str] | None:
+    """Download image from URL, return (data, content_type) or None."""
+    try:
+        import httpx
+        resp = httpx.get(url, timeout=30, follow_redirects=True)
+        resp.raise_for_status()
+        ctype = resp.headers.get("content-type", "image/webp")
+        return resp.content, ctype
+    except Exception as e:
+        logger.warning(f"[IMAGE-DOWNLOAD] 다운로드 실패 ({url[:60]}...): {e}")
+        return None
+
+
+def _convert_to_webp(data: bytes, quality: int = 75) -> bytes | None:
+    """Convert image bytes to WebP format using Pillow. Returns WebP bytes or None."""
+    try:
+        from PIL import Image
+        import io
+        img = Image.open(io.BytesIO(data))
+        buf = io.BytesIO()
+        img.save(buf, format="WEBP", quality=quality, method=6)
+        return buf.getvalue()
+    except Exception as e:
+        logger.warning(f"[IMAGE-WEBP] WebP 변환 실패: {e}")
+        return None
+
+
+def _save_image_static(data: bytes, site_path: str, url_hash: str, ext: str = ".webp") -> str | None:
+    """Save image bytes to Hugo static/img/ directory, return relative URL."""
+    static_dir = os.path.join(site_path, "static", "img")
+    try:
+        os.makedirs(static_dir, exist_ok=True)
+    except OSError:
+        return None
+    filepath = os.path.join(static_dir, f"{url_hash}{ext}")
+    with open(filepath, "wb") as f:
+        f.write(data)
+    return f"/img/{url_hash}{ext}"
+
+
+def _upload_image_to_r2(url: str, site_path: str = "") -> str | None:
+    """Download image from long URL, upload to R2 with short hash name, return short URL.
+    
+    Primary: Upload to R2 → return R2 public URL.
+    Fallback: Save to Hugo static/img/ → return relative URL.
+    Returns None if both fail.
+    """
+    import hashlib
+    from shared.r2_uploader import file_exists, _public_url, upload_bytes
+
+    url_hash = hashlib.md5(url.encode()).hexdigest()[:16]
+    r2_key = f"curation-images/thumbnails/{url_hash}.webp"
+
+    # Skip if already in R2
+    if file_exists(r2_key):
+        return _public_url("hotissue-images", r2_key)
+
+    # Download image data
+    result = _download_image_bytes(url)
+    if result is None:
+        return None
+    data, _ = result
+
+    webp_data = _convert_to_webp(data, quality=75)
+    if webp_data is None:
+        webp_data = data
+
+    try:
+        r2_url = upload_bytes(webp_data, r2_key, content_type="image/webp")
+        if r2_url:
+            return r2_url
+    except Exception as e:
+        logger.warning(f"[IMAGE-UPLOAD] R2 업로드 실패 ({url[:60]}...): {e}")
+
+    # Fallback: Save to Hugo static/img/
+    if site_path:
+        local_url = _save_image_static(webp_data, site_path, url_hash, ext=".webp")
+        if local_url:
+            logger.info(f"[IMAGE-UPLOAD] 로컬 static 저장: {local_url}")
+            return local_url
+
+    return None
+
+
+def _clean_body(body_md, site_path=""):
     """Clean body markdown — AI 가짜 내부링크, 빈 템플릿, 과도한 개행, 부적절한 H2 헤딩 제거"""
     if not body_md:
         return body_md
@@ -177,13 +270,17 @@ def _clean_body(body_md):
 
     body_md = re.sub(r"\n##\s+([^\n]+)", _fix_invalid_h2, body_md)
     
-    # ── 긴 이미지 URL → 기본 썸네일 대체 (파일명 255자 제한 회피) ──
+    # ── 긴 이미지 URL → R2 업로드 + 짧은 URL 대체 (파일명 255자 제한 회피) ──
     _DEFAULT_IMG = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
     def _shorten_long_url(match):
         alt, url = match.group(1), match.group(2)
         if len(url) > 200:
-            logger.warning(f"[IMAGE-GUARD] 이미지 URL {len(url)}자 초과 → 기본 썸네일 대체")
-            return f"![{alt}]({_DEFAULT_IMG})"
+            r2_url = _upload_image_to_r2(url, site_path=site_path)
+            if r2_url:
+                logger.info(f"[IMAGE-GUARD] 긴 URL({len(url)}자) → R2 업로드 완료")
+                return f"![{alt}]({r2_url})"
+            logger.warning(f"[IMAGE-GUARD] 긴 URL({len(url)}자) R2/로컬 업로드 실패, 원본 유지")
+            return match.group(0)
         return match.group(0)
     body_md = re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", _shorten_long_url, body_md)
     
@@ -516,6 +613,244 @@ def _build_schema_json(cfg, title, slug, body_md, category, tags, description=No
     return '<script type="application/ld+json">\n' + json.dumps(schema, ensure_ascii=False, indent=2) + "\n</script>"
 
 
+def _resolve_funnel_card_post(target_blog_id):
+    try:
+        from shared.content_store import get_conn
+        conn = get_conn()
+        row = conn.execute(
+            "SELECT slug, title, published_url, blog_id, thumbnail_url FROM articles "
+            "WHERE blog_id=? AND status='published' AND published_url IS NOT NULL "
+            "ORDER BY created_at DESC LIMIT 1",
+            (target_blog_id,)
+        ).fetchone()
+        conn.close()
+        if row:
+            return {
+                "title": row["title"],
+                "url": row["published_url"],
+                "blog_id": row["blog_id"],
+                "slug": row["slug"],
+                "thumbnail_url": row.get("thumbnail_url") or "",
+            }
+    except Exception as e:
+        logger.debug(f"[FUNNEL] resolve post failed for {target_blog_id}: {e}")
+    return None
+
+
+def _build_funnel_card_html(post_info, funnel_type, source_blog_id):
+    if not post_info:
+        return None
+
+    link_id = str(uuid.uuid4())[:8]
+    target_blog_id = post_info.get("blog_id", "")
+    target_url = post_info.get("url", "")
+    target_title = post_info.get("title", "")
+    thumbnail = post_info.get("thumbnail_url", "")
+
+    label_text = "이 카테고리의 다음 글" if funnel_type == "depth" else "관련 카테고리 살펴보기"
+    cta_text = "계속 읽기 →" if funnel_type == "depth" else "살펴보기 →"
+
+    if thumbnail:
+        thumbnail = sanitize_featureimage_url(thumbnail, max_len=500)
+        thumb_html = f'<img class="funnel-card-thumb" src="{thumbnail}" alt="" loading="lazy">'
+    else:
+        thumb_html = '<div class="funnel-card-thumb funnel-card-thumb-placeholder"></div>'
+
+    return (
+        f'<div class="funnel-card funnel-{funnel_type} not-prose my-10" '
+        f'data-funnel-link data-source-blog="{source_blog_id}" '
+        f'data-target-blog="{target_blog_id}" '
+        f'data-funnel-type="{funnel_type}" '
+        f'data-funnel-id="{link_id}">'
+        f'<div class="funnel-card-inner">'
+        f'{thumb_html}'
+        f'<div class="funnel-card-body">'
+        f'<span class="funnel-card-label">{label_text}</span>'
+        f'<h4 class="funnel-card-title">{_convert_inline_md_to_html(target_title)}</h4>'
+        f'<a class="funnel-card-cta" href="{target_url}">{cta_text}</a>'
+        f'</div></div></div>'
+    )
+
+
+def _extract_keywords(text, top_n=10):
+    if not text:
+        return []
+
+    text = re.sub(r"<[^>]+>", "", text)
+    text = re.sub(r"[#*_`~\[\]()]", "", text)
+    tokens = text.lower().split()
+
+    ko_stop = {"이", "가", "은", "는", "을", "를", "의", "에", "에서", "와", "과", "도", "로",
+               "으로", "하다", "있다", "되다", "같다", "그", "이런", "저런", "어떤", "모든",
+               "통해", "대한", "위한", "때문", "아니", "등", "수", "것", "더", "매우", "정도",
+               "및", "또는", "그리고", "하지만", "그러나", "때", "안", "후", "전", "중", "경우"}
+    en_stop = {"the", "a", "an", "in", "of", "to", "is", "and", "or", "for", "on", "with",
+               "at", "by", "from", "as", "are", "was", "were", "been", "be", "has", "have",
+               "had", "do", "does", "did", "but", "not", "so", "if", "no", "up", "out", "it",
+               "its", "all", "this", "that", "these", "those"}
+
+    freq = {}
+    for t in tokens:
+        t = t.strip(".,;:!?\"'()-")
+        if len(t) < 2:
+            continue
+        if t in ko_stop or t in en_stop:
+            continue
+        freq[t] = freq.get(t, 0) + 1
+
+    sorted_words = sorted(freq.items(), key=lambda x: -x[1])
+    return [w for w, _ in sorted_words[:top_n]]
+
+
+def _keywords_overlap_check(src_keywords, tgt_keywords, threshold=0.15):
+    if not src_keywords or not tgt_keywords:
+        return True
+
+    src_set = set(src_keywords)
+    tgt_set = set(tgt_keywords)
+    intersection = src_set & tgt_set
+    union = src_set | tgt_set
+
+    if not union:
+        return True
+
+    overlap = len(intersection) / len(union)
+    return overlap >= threshold
+
+
+def _build_and_inject_funnel_cards(site_path, slug, blog_cfg, body_md=""):
+    if not BS4_AVAILABLE:
+        logger.warning("[FUNNEL] BeautifulSoup not installed — skipping card injection")
+        return
+
+    blog_id = blog_cfg.get("id", "")
+    depth_next = blog_cfg.get("depth_next") or []
+    bridge_to = blog_cfg.get("bridge_to") or []
+
+    if not depth_next and not bridge_to:
+        return
+
+    funnel_stage = blog_cfg.get("funnel_stage", "")
+    if funnel_stage == "landing":
+        if bridge_to:
+            logger.info(f"[FUNNEL] {blog_id} is landing stage — suppressing bridge_to cards")
+            bridge_to = []
+
+    try:
+        result = subprocess.run(
+            [HUGO_PATH, "--gc", "--minify"],
+            cwd=site_path,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        if result.returncode != 0:
+            stderr_tail = (result.stderr or "")[-500:]
+            logger.warning(f"[FUNNEL] Hugo build failed for {slug}: {stderr_tail}")
+            return
+    except Exception as e:
+        logger.warning(f"[FUNNEL] Hugo build error for {slug}: {e}")
+        return
+
+    html_path = os.path.join(site_path, "public", "posts", slug, "index.html")
+    if not os.path.exists(html_path):
+        logger.warning(f"[FUNNEL] Built HTML not found: {html_path}")
+        return
+
+    try:
+        with open(html_path, "r", encoding="utf-8") as f:
+            soup = BeautifulSoup(f.read(), "html.parser")
+    except Exception as e:
+        logger.warning(f"[FUNNEL] HTML parse error for {slug}: {e}")
+        return
+
+    container = soup.find("div", class_="post-content")
+    if not container:
+        container = soup.find("article")
+    if not container:
+        container = soup.find("main")
+    if not container:
+        logger.warning(f"[FUNNEL] Could not find article container in {html_path}")
+        return
+
+    src_keywords = _extract_keywords(body_md) if body_md else []
+
+    depth_injected = 0
+    for target in depth_next:
+        if target.get("id") == blog_id:
+            continue
+        post = _resolve_funnel_card_post(target["id"])
+        if not post:
+            logger.debug(f"[FUNNEL] depth skip {target['id']} — no published post")
+            continue
+        card_html = _build_funnel_card_html(post, "depth", blog_id)
+        if card_html:
+            try:
+                card_soup = BeautifulSoup(card_html, "html.parser")
+                container.append(card_soup)
+                depth_injected += 1
+            except Exception as e:
+                logger.warning(f"[FUNNEL] depth card append error: {e}")
+
+    bridge_injected = 0
+    if bridge_to:
+        paragraphs = container.find_all("p")
+        if paragraphs:
+            mid_idx = max(0, int(len(paragraphs) * 0.5))
+            for target in bridge_to:
+                if target.get("id") == blog_id:
+                    continue
+                post = _resolve_funnel_card_post(target["id"])
+                if not post:
+                    logger.debug(f"[FUNNEL] bridge skip {target['id']} — no published post")
+                    continue
+                if src_keywords:
+                    tgt_keywords = _extract_keywords(post.get("title", ""))
+                    if not _keywords_overlap_check(src_keywords, tgt_keywords):
+                        logger.debug(f"[FUNNEL] bridge skip {target['id']} — context mismatch")
+                        continue
+                card_html = _build_funnel_card_html(post, "bridge", blog_id)
+                if card_html:
+                    try:
+                        card_soup = BeautifulSoup(card_html, "html.parser")
+                        paragraphs[mid_idx].insert_after(card_soup)
+                        bridge_injected += 1
+                    except Exception as e:
+                        logger.warning(f"[FUNNEL] bridge card insert error: {e}")
+        else:
+            for target in bridge_to:
+                if target.get("id") == blog_id:
+                    continue
+                post = _resolve_funnel_card_post(target["id"])
+                if not post:
+                    continue
+                if src_keywords:
+                    tgt_keywords = _extract_keywords(post.get("title", ""))
+                    if not _keywords_overlap_check(src_keywords, tgt_keywords):
+                        logger.debug(f"[FUNNEL] bridge skip {target['id']} — context mismatch")
+                        continue
+                card_html = _build_funnel_card_html(post, "bridge", blog_id)
+                if card_html:
+                    try:
+                        card_soup = BeautifulSoup(card_html, "html.parser")
+                        container.append(card_soup)
+                        bridge_injected += 1
+                    except Exception:
+                        pass
+
+    if depth_injected > 0 or bridge_injected > 0:
+        try:
+            with open(html_path, "w", encoding="utf-8") as f:
+                f.write(str(soup))
+            logger.info(
+                f"[FUNNEL] {slug}: {depth_injected} depth + {bridge_injected} bridge cards injected"
+            )
+        except Exception as e:
+            logger.warning(f"[FUNNEL] Save error for {html_path}: {e}")
+    else:
+        logger.debug(f"[FUNNEL] {slug}: no cards to inject")
+
+
 def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
     if not slug or not str(slug).strip():
         logger.error(f"[PUBLISH] slug가 비어있어 발행 중단: title={title}")
@@ -525,7 +860,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
         site_path = os.path.join(os.path.dirname(FIVEK_ROOT), blog_cfg.get("repo", ""))
-    body_md = _clean_body(body_md)
+    body_md = _clean_body(body_md, site_path=site_path)
     description = _extract_description(body_md)
 
     if not thumbnail_url:
@@ -533,6 +868,12 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     
     if thumbnail_url and not thumbnail_url.startswith(("http://", "https://")):
         thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")
+    
+    # Long featureimage URL → R2 업로드 (파일명 255자 제한 회피)
+    if thumbnail_url and len(thumbnail_url) > 500:
+        r2_url = _upload_image_to_r2(thumbnail_url, site_path=site_path)
+        if r2_url:
+            thumbnail_url = r2_url
     
     thumbnail_url = sanitize_featureimage_url(thumbnail_url, max_len=500)
     if not thumbnail_url:
@@ -590,4 +931,10 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         f.write(content)
 
     logger.info(f"[PUBLISH] Hugo post written: {file_path}")
+
+    try:
+        _build_and_inject_funnel_cards(site_path, slug, blog_cfg, body_md)
+    except Exception as e:
+        logger.warning(f"[FUNNEL] Card injection failed for {slug}: {e}")
+
     return {"success": True, "file": file_path}

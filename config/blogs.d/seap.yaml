@@ -32,3 +32,4 @@ blogs:
   site_path: /Users/twinssn/Projects/SEAP/senior-hugo
   status: active
   theme: blowfish
+  funnel_stage: landing

@@ -4,6 +4,14 @@ TV-show 프로젝트의 coupang_api.py를 기반으로 자동차 블로그 전�
 고가 상품 우선 정렬 — 수수료 극대화.
 상품 관련성 필터 적용.
 링크: productId → coupang.com/vp/products/{id} → deeplink API → /a/ 단축링크
+
+⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 검색 API:   분당 50회 (search_products)
+- 링크생성:   분당 50회 (generate_affiliate_link = deeplink POST)
+- 전체 API:   분당 100회
+- 경고 3회 누적 → 이용제한 (재발생 시 추가 제재)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 import hashlib

@@ -2,6 +2,16 @@
 
 coupang_car.py를 기반으로 시니어 복지 카테고리 전용으로 구현.
 고가 상품 우선 정렬 — 수수료 극대화.
+
+⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- 검색 API:   분당 50회 (search_products)
+- 링크생성:   분당 50회 (generate_affiliate_link = deeplink POST)
+- 전체 API:   분당 100회
+- 경고 3회 누적 → 이용제한 (재발생 시 추가 제재)
+- 이 파일의 API 호출은 pipelines/curation/collector.py의
+  _check_rate_limit() 로깅을 공유하지 않으므로 분산 스케줄링에 주의
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 import hashlib

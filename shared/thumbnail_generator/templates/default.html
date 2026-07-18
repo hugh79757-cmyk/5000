@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 600px; height: 600px;
+    overflow: hidden;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .canvas {
+    width: 600px; height: 600px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Top colored block — exactly 50% */
+  .block-top {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 50%;
+    background: {{ accent }};
+    z-index: 0;
+  }
+
+  /* Bottom white block */
+  .block-bottom {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 50%;
+    background: #fff;
+    z-index: 0;
+  }
+
+  /* Horizon split line — subtle */
+  .split-line {
+    position: absolute;
+    top: 50%; left: 12%;
+    width: 76%; height: 1px;
+    background: rgba(0,0,0,0.07);
+    z-index: 1;
+  }
+
+  /* === TOP half — push content down near split line === */
+  .content-top {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 52px 20px 52px;
+    z-index: 2;
+  }
+
+  /* Category badge */
+  .cat-pill {
+    display: inline-block;
+    padding: 5px 14px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    background: {{ badge_bg }};
+    color: #fff;
+    align-self: flex-start;
+    margin-bottom: 10px;
+    border-radius: 2px;
+  }
+
+  /* Title on colored background — always white, year in yellow */
+  .title-top {
+    display: block;
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: #fff;
+    word-break: keep-all;
+    max-width: 90%;
+  }
+
+  .year-highlight {
+    color: #fde94e;
+    text-shadow: 0 0 10px rgba(253, 233, 78, 0.35);
+  }
+
+  /* === BOTTOM half — push content up near split line === */
+  .content-bot {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 16px 52px 0 52px;
+    z-index: 2;
+  }
+
+  /* Subtitle on white — accent color with depth */
+  .title-bot {
+    display: block;
+    font-size: {{ title2_size }}px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: {{ accent }};
+    opacity: 0.75;
+    word-break: keep-all;
+    max-width: 85%;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  /* Bottom brand */
+  .site-bar {
+    position: absolute;
+    bottom: 28px;
+    right: 52px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: #cbd5e1;
+    z-index: 2;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="block-top"></div>
+  <div class="block-bottom"></div>
+  <div class="split-line"></div>
+
+  <!-- TOP half: badge + main title (with year highlight) -->
+  <div class="content-top">
+    <div class="cat-pill">{{ category }}</div>
+    {% set title_with_year = title_line1 | replace("2026", '<span class="year-highlight">2026</span>') | replace("2025", '<span class="year-highlight">2025</span>') %}
+    <span class="title-top" style="font-size: {{ title1_size }}px;">{{ title_with_year | safe }}</span>
+  </div>
+
+  <!-- BOTTOM half: subtitle (only if multi-line) -->
+  {% if title_line2 %}
+  <div class="content-bot">
+    <span class="title-bot">{{ title_line2 }}</span>
+  </div>
+  {% endif %}
+
+  <div class="site-bar">{{ site_bar }}</div>
+</div>
+</body>
+</html>
