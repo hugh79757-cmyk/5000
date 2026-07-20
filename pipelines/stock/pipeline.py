@@ -141,7 +141,7 @@ def run(blog_cfg):
                 from datetime import datetime as _dt
                 _month = _dt.now().strftime("%Y년 %m월")
                 _seo_desc = f"{_corp} {_report} 핵심 분석. {_month} DART 공시 기준."
-                _body_d = article["body_md"]
+                _body_d = _inject_unsplash_body_images(article["body_md"], article.get("category", "stock"))
                 result = publish(
                     blog_id=blog_id,
                     title=article["title"],
@@ -246,7 +246,7 @@ def run(blog_cfg):
             from datetime import datetime as _dt2
             _month2 = _dt2.now().strftime("%Y년 %m월")
             _eg_desc = f"{article['title']} - {_month2} 기준 {article.get('category', '시장분석')}."
-            _body_eg = article["body_md"]
+            _body_eg = _inject_unsplash_body_images(article["body_md"], article.get("category", "stock"))
             result = publish(
                 blog_id=blog_id,
                 title=article["title"],
@@ -286,6 +286,39 @@ def _filter_unpublished(conn, blog_id, disclosures):
     return [d for d in disclosures if d.get("corp_code") not in published]
 
 
+def _inject_unsplash_body_images(body_md: str, keyword: str, max_images: int = 2) -> str:
+    """Inject 1-2 Unsplash image markdown lines into body_md at section breaks.
+    Falls back to original body on failure."""
+    if not body_md:
+        return body_md
+    try:
+        from pipelines.etap.image_fetcher import _search_unsplash
+        photos = _search_unsplash(keyword, per_page=3)
+        if not photos:
+            return body_md
+        urls = [p["url"] for p in photos[:max_images]]
+        lines = body_md.split("\n")
+        inserted = 0
+        for i, line in enumerate(lines):
+            if inserted >= len(urls):
+                break
+            if line.startswith("## ") and inserted == 0:
+                lines.insert(i + 1, "")
+                lines.insert(i + 2, f"![{keyword}]({urls[inserted]})")
+                lines.insert(i + 3, "")
+                inserted += 1
+                continue
+            if line.startswith("### "):
+                lines.insert(i + 1, "")
+                lines.insert(i + 2, f"![{keyword}]({urls[inserted]})")
+                lines.insert(i + 3, "")
+                inserted += 1
+        return "\n".join(lines)
+    except Exception as e:
+        logger.warning(f"[Stock] Unsplash body image injection failed: {e}")
+        return body_md
+
+
 def _record_publish(conn, blog_id, disclosure) -> None:
     conn.execute(
         "INSERT INTO publish_history (corp_code, stock_code, post_type, title, site_id) VALUES (?,?,?,?,?)",
@@ -294,15 +327,15 @@ def _record_publish(conn, blog_id, disclosure) -> None:
     conn.commit()
 
 def _make_thumbnail(title, category, stock_code, corp_name):
-    """shared Playwright generator로 썸네일 생성 후 URL 반환"""
+    """shared Playwright generator로 썸네일 생성 후 URL 반환 (Unsplash 배경 시도 → fallback)"""
     try:
-        from shared.thumbnail_generator import generate_thumbnail
+        from shared.thumbnail_generator import generate_image_thumbnail
 
         import hashlib
         title_hash = hashlib.md5(title.encode()).hexdigest()[:10]
         slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
 
-        url = generate_thumbnail(
+        url = generate_image_thumbnail(
             site_id="stock",
             slug=slug,
             title=title,

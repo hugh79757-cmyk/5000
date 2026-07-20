@@ -16,6 +16,7 @@ Pillow
 boto3
 jinja2>=3.1.0
 playwright>=1.40.0
+beautifulsoup4>=4.12.0  # ponytail: used by car/daily_refresh, stock/fetcher, diningcode_enricher
 
 ruff>=0.15.0
 mypy>=2.0.0

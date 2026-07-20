@@ -10,13 +10,6 @@ from pathlib import Path
 from shared.paths import FIVEK_ROOT, HUGO_PATH
 logger = logging.getLogger(__name__)
 
-try:
-    from bs4 import BeautifulSoup
-    BS4_AVAILABLE = True
-except ImportError:
-    BS4_AVAILABLE = False
-    logger.warning("[FUNNEL] BeautifulSoup not installed — funnel card injection disabled")
-
 
 def _sanitize_yaml_value(s, max_len=None):
     if s is None:
@@ -702,7 +695,9 @@ def _extract_keywords(text, top_n=10):
     return [w for w, _ in sorted_words[:top_n]]
 
 
-def _keywords_overlap_check(src_keywords, tgt_keywords, threshold=0.15):
+def _keywords_overlap_check(src_keywords, tgt_keywords, threshold=0.0):
+    # ponytail: threshold=0 disables broken Korean filter (no morpheme analyzer);
+    # install konlpy if precision needed
     if not src_keywords or not tgt_keywords:
         return True
 
@@ -718,64 +713,26 @@ def _keywords_overlap_check(src_keywords, tgt_keywords, threshold=0.15):
     return overlap >= threshold
 
 
-def _build_and_inject_funnel_cards(site_path, slug, blog_cfg, body_md=""):
-    if not BS4_AVAILABLE:
-        logger.warning("[FUNNEL] BeautifulSoup not installed — skipping card injection")
-        return
-
+def _build_funnel_cards_md(blog_cfg, body_md):
+    # ponytail: markdown-level injection. Hugo Goldmark passes raw HTML through,
+    # so cards embedded in .md survive batch publishes (Hugo rebuild no longer wipes them).
+    # Replaces v1 HTML-level injection which had double-build + batch-wipe bugs.
     blog_id = blog_cfg.get("id", "")
     depth_next = blog_cfg.get("depth_next") or []
     bridge_to = blog_cfg.get("bridge_to") or []
 
     if not depth_next and not bridge_to:
-        return
+        return body_md, (0, 0)
 
     funnel_stage = blog_cfg.get("funnel_stage", "")
-    if funnel_stage == "landing":
-        if bridge_to:
-            logger.info(f"[FUNNEL] {blog_id} is landing stage — suppressing bridge_to cards")
-            bridge_to = []
-
-    try:
-        result = subprocess.run(
-            [HUGO_PATH, "--gc", "--minify"],
-            cwd=site_path,
-            capture_output=True,
-            text=True,
-            timeout=120,
-        )
-        if result.returncode != 0:
-            stderr_tail = (result.stderr or "")[-500:]
-            logger.warning(f"[FUNNEL] Hugo build failed for {slug}: {stderr_tail}")
-            return
-    except Exception as e:
-        logger.warning(f"[FUNNEL] Hugo build error for {slug}: {e}")
-        return
-
-    html_path = os.path.join(site_path, "public", "posts", slug, "index.html")
-    if not os.path.exists(html_path):
-        logger.warning(f"[FUNNEL] Built HTML not found: {html_path}")
-        return
-
-    try:
-        with open(html_path, "r", encoding="utf-8") as f:
-            soup = BeautifulSoup(f.read(), "html.parser")
-    except Exception as e:
-        logger.warning(f"[FUNNEL] HTML parse error for {slug}: {e}")
-        return
-
-    container = soup.find("div", class_="post-content")
-    if not container:
-        container = soup.find("article")
-    if not container:
-        container = soup.find("main")
-    if not container:
-        logger.warning(f"[FUNNEL] Could not find article container in {html_path}")
-        return
+    if funnel_stage == "landing" and bridge_to:
+        logger.info(f"[FUNNEL] {blog_id} is landing stage — suppressing bridge_to cards")
+        bridge_to = []
 
     src_keywords = _extract_keywords(body_md) if body_md else []
+    depth_html_parts = []
+    bridge_html_parts = []
 
-    depth_injected = 0
     for target in depth_next:
         if target.get("id") == blog_id:
             continue
@@ -785,70 +742,42 @@ def _build_and_inject_funnel_cards(site_path, slug, blog_cfg, body_md=""):
             continue
         card_html = _build_funnel_card_html(post, "depth", blog_id)
         if card_html:
-            try:
-                card_soup = BeautifulSoup(card_html, "html.parser")
-                container.append(card_soup)
-                depth_injected += 1
-            except Exception as e:
-                logger.warning(f"[FUNNEL] depth card append error: {e}")
+            depth_html_parts.append(card_html)
 
-    bridge_injected = 0
-    if bridge_to:
-        paragraphs = container.find_all("p")
-        if paragraphs:
-            mid_idx = max(0, int(len(paragraphs) * 0.5))
-            for target in bridge_to:
-                if target.get("id") == blog_id:
-                    continue
-                post = _resolve_funnel_card_post(target["id"])
-                if not post:
-                    logger.debug(f"[FUNNEL] bridge skip {target['id']} — no published post")
-                    continue
-                if src_keywords:
-                    tgt_keywords = _extract_keywords(post.get("title", ""))
-                    if not _keywords_overlap_check(src_keywords, tgt_keywords):
-                        logger.debug(f"[FUNNEL] bridge skip {target['id']} — context mismatch")
-                        continue
-                card_html = _build_funnel_card_html(post, "bridge", blog_id)
-                if card_html:
-                    try:
-                        card_soup = BeautifulSoup(card_html, "html.parser")
-                        paragraphs[mid_idx].insert_after(card_soup)
-                        bridge_injected += 1
-                    except Exception as e:
-                        logger.warning(f"[FUNNEL] bridge card insert error: {e}")
-        else:
-            for target in bridge_to:
-                if target.get("id") == blog_id:
-                    continue
-                post = _resolve_funnel_card_post(target["id"])
-                if not post:
-                    continue
-                if src_keywords:
-                    tgt_keywords = _extract_keywords(post.get("title", ""))
-                    if not _keywords_overlap_check(src_keywords, tgt_keywords):
-                        logger.debug(f"[FUNNEL] bridge skip {target['id']} — context mismatch")
-                        continue
-                card_html = _build_funnel_card_html(post, "bridge", blog_id)
-                if card_html:
-                    try:
-                        card_soup = BeautifulSoup(card_html, "html.parser")
-                        container.append(card_soup)
-                        bridge_injected += 1
-                    except Exception:
-                        pass
+    for target in bridge_to:
+        if target.get("id") == blog_id:
+            continue
+        post = _resolve_funnel_card_post(target["id"])
+        if not post:
+            logger.debug(f"[FUNNEL] bridge skip {target['id']} — no published post")
+            continue
+        if src_keywords:
+            tgt_keywords = _extract_keywords(post.get("title", ""))
+            if not _keywords_overlap_check(src_keywords, tgt_keywords):
+                logger.debug(f"[FUNNEL] bridge skip {target['id']} — context mismatch")
+                continue
+        card_html = _build_funnel_card_html(post, "bridge", blog_id)
+        if card_html:
+            bridge_html_parts.append(card_html)
 
-    if depth_injected > 0 or bridge_injected > 0:
-        try:
-            with open(html_path, "w", encoding="utf-8") as f:
-                f.write(str(soup))
-            logger.info(
-                f"[FUNNEL] {slug}: {depth_injected} depth + {bridge_injected} bridge cards injected"
-            )
-        except Exception as e:
-            logger.warning(f"[FUNNEL] Save error for {html_path}: {e}")
-    else:
-        logger.debug(f"[FUNNEL] {slug}: no cards to inject")
+    if not depth_html_parts and not bridge_html_parts:
+        return body_md, (0, 0)
+
+    paragraphs = body_md.split("\n\n") if body_md else []
+    if bridge_html_parts and len(paragraphs) > 2:
+        mid_idx = max(1, int(len(paragraphs) * 0.5))
+        bridge_block = "\n\n".join(bridge_html_parts)
+        paragraphs.insert(mid_idx, bridge_block)
+        body_md = "\n\n".join(paragraphs)
+    elif bridge_html_parts:
+        body_md = body_md + "\n\n" + "\n\n".join(bridge_html_parts)
+
+    if depth_html_parts:
+        body_md = body_md + "\n\n" + "\n\n".join(depth_html_parts)
+
+    counts = (len(depth_html_parts), len(bridge_html_parts))
+    logger.info(f"[FUNNEL] cards injected: {counts[0]} depth + {counts[1]} bridge")
+    return body_md, counts
 
 
 def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
@@ -919,6 +848,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # AI output with mixed HTML+markdown).  Doing it here ensures readers
     # never see raw ** or ~~ in the rendered page.
     body_md = _convert_inline_md_to_html(body_md)
+    body_md, _funnel_counts = _build_funnel_cards_md(blog_cfg, body_md)
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags, description=description)
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
@@ -931,10 +861,5 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         f.write(content)
 
     logger.info(f"[PUBLISH] Hugo post written: {file_path}")
-
-    try:
-        _build_and_inject_funnel_cards(site_path, slug, blog_cfg, body_md)
-    except Exception as e:
-        logger.warning(f"[FUNNEL] Card injection failed for {slug}: {e}")
 
     return {"success": True, "file": file_path}

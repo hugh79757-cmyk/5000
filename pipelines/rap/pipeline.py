@@ -813,7 +813,7 @@ def run(blog_cfg):
         fetch_subscription_info,
         find_lawd_cd,
     )
-    from shared.thumbnail_generator import generate_thumbnail
+    from shared.thumbnail_generator import generate_image_thumbnail
     from pipelines.rap.writer import generate_subscription_article, generate_trade_article
     from shared.content_store import get_today_count, init_db
     from shared.publisher import publish
@@ -963,7 +963,7 @@ def run(blog_cfg):
     article["title"] = sanitize_title(article["title"])
     title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
     slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
-    thumb_url = generate_thumbnail(
+    thumb_url = generate_image_thumbnail(
         site_id="rap",
         slug=slug,
         title=article["title"],

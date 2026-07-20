@@ -51,9 +51,9 @@ def _make_slug(title):
 
 
 def _make_thumbnail(cfg, article, topic_type, platform):
-    """썸네일 생성 — shared Playwright generator 사용"""
+    """썸네일 생성 — shared Playwright generator 사용 (Unsplash 배경 시도 → fallback)"""
     try:
-        from shared.thumbnail_generator import generate_thumbnail
+        from shared.thumbnail_generator import generate_image_thumbnail
 
         import hashlib
         from datetime import datetime
@@ -61,7 +61,7 @@ def _make_thumbnail(cfg, article, topic_type, platform):
         title_hash = hashlib.md5(article["title"].encode()).hexdigest()[:10]
         slug = f"{datetime.now().strftime('%Y%m%d')}-{title_hash}"
 
-        url = generate_thumbnail(
+        url = generate_image_thumbnail(
             site_id="senior",
             slug=slug,
             title=article["title"],

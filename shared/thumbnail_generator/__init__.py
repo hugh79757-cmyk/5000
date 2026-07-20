@@ -15,7 +15,7 @@ Usage:
     print(url)  # R2 public URL
 """
 
-from shared.thumbnail_generator.generator import generate_thumbnail, generate_batch, split_title
+from shared.thumbnail_generator.generator import generate_image_thumbnail, generate_thumbnail, generate_batch, split_title
 from shared.thumbnail_generator.colors import (
     BLOG_PALETTES,
     get_blog_palette,
@@ -24,6 +24,7 @@ from shared.thumbnail_generator.colors import (
 )
 
 __all__ = [
+    "generate_image_thumbnail",
     "generate_thumbnail",
     "generate_batch",
     "split_title",

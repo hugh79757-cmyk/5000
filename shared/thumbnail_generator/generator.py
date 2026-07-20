@@ -147,6 +147,7 @@ def generate_thumbnail(
     upload: bool = True,
     template_name: str = "default.html",
     _page=None,
+    extra_context: dict | None = None,
 ) -> str:
     """
     Generate a blog thumbnail image and upload to R2.
@@ -160,6 +161,7 @@ def generate_thumbnail(
         upload: Whether to upload to R2
         template_name: HTML template file name in templates/
         _page: Internal — shared Playwright page for batch processing
+        extra_context: Additional template variables
 
     Returns:
         Public R2 URL (if upload=True) or local file path (if upload=False)
@@ -182,7 +184,7 @@ def generate_thumbnail(
         logger.warning(f"[ThumbGen] Template '{template_name}' not found, falling back to default.html")
         template = env.get_template("default.html")
 
-    html_content = template.render(
+    ctx = dict(
         accent=accent,
         title_line1=title_line1,
         title_line2=title_line2,
@@ -193,6 +195,9 @@ def generate_thumbnail(
         badge_bg=badge_bg,
         site_bar=site_bar,
     )
+    if extra_context:
+        ctx.update(extra_context)
+    html_content = template.render(ctx)
 
     # Write temporary HTML file
     tmp_html = _write_temp_html(slug, html_content, output_path)
@@ -313,6 +318,66 @@ def _cleanup_temp(tmp_html: str, output_path: str | None):
             os.remove(tmp_html)
         except Exception:
             pass
+
+
+def generate_image_thumbnail(
+    site_id: str,
+    slug: str,
+    title: str,
+    category: str = "",
+    output_path: str | None = None,
+    upload: bool = True,
+    _page=None,
+) -> str:
+    """
+    Generate a thumbnail with an Unsplash photo as background image.
+    Falls back to standard text-only generate_thumbnail() on any failure.
+
+    The function searches Unsplash for a photo matching the category,
+    resizes it, base64-encodes it as a data URI, and passes it to the
+    image.html template.
+    """
+    background_data_uri = None
+    try:
+        from pipelines.etap.image_fetcher import _search_unsplash
+        import base64
+        import io
+        import random
+
+        import httpx
+        from PIL import Image
+
+        photos = _search_unsplash(category or site_id, per_page=5)
+        if photos:
+            photo = random.choice(photos)
+            resp = httpx.get(photo["url"], timeout=15)
+            resp.raise_for_status()
+            img = Image.open(io.BytesIO(resp.content))
+            # Center-crop to 600x600 to keep data URI small
+            size = min(img.size)
+            left = (img.width - size) // 2
+            top = (img.height - size) // 2
+            img = img.crop((left, top, left + size, top + size)).resize((600, 600), Image.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, "WEBP", quality=75)
+            b64 = base64.b64encode(buf.getvalue()).decode()
+            background_data_uri = f"data:image/webp;base64,{b64}"
+    except Exception as e:
+        logger.warning(f"[ThumbGen] Unsplash search/process failed ({e}), falling back to text")
+
+    if background_data_uri:
+        return generate_thumbnail(
+            site_id=site_id, slug=slug, title=title, category=category,
+            output_path=output_path, upload=upload, _page=_page,
+            template_name="image.html",
+            extra_context={"background_data_uri": background_data_uri},
+        )
+
+    # Fallback
+    return generate_thumbnail(
+        site_id=site_id, slug=slug, title=title, category=category,
+        output_path=output_path, upload=upload, _page=_page,
+    )
 
 
 def generate_batch(

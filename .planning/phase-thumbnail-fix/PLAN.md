@@ -1,213 +1,172 @@
-# Phase: informationhot-hugo 썸네일 이미지 깨짐 재발방지
+# Phase: Thumbnail & Image Strategy — 통합 개선
 
-**Status:** In Progress
-**Start:** 2026-07-11
-**Priority:** 🔴 HIGH (Production Issue)
-**Owner:** Sisyphus
-
----
-
-## 🎯 Goal
-
-informationhot-hugo 사이트에서 발생한 **본문 페이지 커버 이미지 404 오류**의 근본 원인을 제거하고, 재발 방지 체계를 구축하여 모든 Hugo 사이트에서 동일한 문제가 발생하지 않도록 한다.
+**Status:** Research Complete — Plan Ready for Approval
+**Scope:** cover-image fix + STAP/RAP/SEAP 신규 썸네일 방식
+**TAP/CAP:** 제외 (현행 유지)
+**Priority:** HIGH
 
 ---
 
-## 🔍 Root Cause Analysis (RCA)
+## Part A — phase-thumbnail-fix: Cover Image 경로 수정
 
-### 문제 현상
-- ✅ **첫페이지(리스트)**: 썸네일 정상 표시
-- ❌ **본문 페이지**: 커버 이미지 404 오류 (깨진 이미지)
+### 현재 상태 분석
 
-### 근본 원인 3가지
+| Task | 내용 | 상태 |
+|------|------|------|
+| Task 01 | `single.html` → PaperMod `cover.html` partial 사용 | ❌ 미완료 (informationhot-hugo/layouts/_default/single.html 확인 필요) |
+| Task 02 | `cover.relative: true` 자동 추가 | ✅ **이미 완료** — `shared/publishers/hugo_writer.py` 3개 frontmatter builder 모두 `relative: true` 포함 |
+| Task 03 | `_redirects` 간섭 확인 | ❌ 확인 필요 |
 
-#### 1. `single.html` 커버 이미지 경로 처리 취약 (주원인)
-```html
-<!-- layouts/_default/single.html:30-36 (문제 코드) -->
-{{- if .Params.cover.image }}
-<figure class="entry-cover">
-  {{- $cover := .Params.cover }}
-  <img loading="lazy" src="{{ $cover.image }}" ...>  <!-- ❌ 상대경로 그대로 출력 -->
-</figure>
-{{- end }}
-```
-- **문제**: `$cover.image` = `"thumbnail.webp"` (raw frontmatter 값)
-- **결과**: 브라우저가 `/thumbnail.webp`(사이트 루트)로 요청 → **404 Not Found**
-- **정상 동작 이유**: Hugo가 page bundle을 빌드할 때 `public/posts/slug/thumbnail.webp`에 파일을 복사하기 때문에 **일부 경우** 정상 동작
+Task 02는 `shared/publishers/hugo_writer.py`의 `_build_frontmatter_papermod()`, `_build_frontmatter_blowfish()`, `_build_frontmatter_congo()`에 각각 `relative: true`가 이미 존재함. `shared/publisher.py:782`의 re-import로 인해 새 버전이 활성화됨.
 
-#### 2. `og:image` 메타태그 잘못된 경로
-```html
-<meta property="og:image" content="https://informationhot.kr/thumbnail.webp">
-```
-- **원인**: frontmatter에 `cover.relative: true` 누락 → `absURL("thumbnail.webp")`가 사이트 루트로 잘못 해석
-- **영향**: SNS 공유 시 썸네일 미노출
-
-#### 3. `_redirects` 간섭 가능성 (보조 원인)
-```yaml
-/posts/2025-07-* /posts/ 301
-```
-- **문제**: `*` glob 패턴이 `/posts/2025-07-*/thumbnail.webp`도 `/posts/`로 리디렉트
-- **영향**: 2025년 7월 이전 글들의 썸네일 접근 시 301 리디렉트 → 404
+### 남은 작업
+1. informationhot-hugo `single.html` 확인 — PaperMod `cover.html` partial을 사용하는지
+2. `_redirects`에서 이미지 경로 리디렉트 확인
 
 ---
 
-## 📋 Task Breakdown
+## Part B — STAP/RAP/SEAP 신규 썸네일 방식
 
-### 🔴 P0 - 즉시 조치 (5분 내 완료)
+### 기존 방식 (비활성화 대상)
 
-#### Task 01: `single.html` 수정 - PaperMod `cover.html` partial 사용
-- **File**: `/Users/twinssn/Projects/informationhot-hugo/layouts/_default/single.html`
-- **Line**: 30-36
-- **Action**: raw frontmatter 출력 → PaperMod `cover.html` partial 사용
-- **Expected**: Hugo의 `.Resources`를 통해 올바른 경로(`/posts/:slug/thumbnail.webp`) 자동 생성
+3개 파이프라인이 현재 동일한 `generate_thumbnail()` 사용:
+- **STAP stock**: `pipelines/stock/pipeline.py:296` `_make_thumbnail()` → `generate_thumbnail(site_id="stock")`
+- **RAP**: `pipelines/rap/pipeline.py:966` → `generate_thumbnail(site_id="rap")`
+- **SEAP senior**: `pipelines/senior/pipeline.py:53` `_make_thumbnail()` → `generate_thumbnail(site_id="senior")`
 
-```html
-<!-- BEFORE -->
-{{- if .Params.cover.image }}
-<figure class="entry-cover">
-  {{- $cover := .Params.cover }}
-  <img loading="lazy" src="{{ $cover.image }}" alt="{{ $cover.alt | default .Title }}" width="800" height="450" decoding="async">
-</figure>
-{{- end }}
+공통: Playwright HTML/CSS → 600x600 정사각형 → WebP → R2 업로드
+- 텍스트 기반 (title 2줄 분할 + category badge)
+- 블로그별 색상 팔레트 사용 (stock/rap/senior는 colors.py에 등록됨)
 
-<!-- AFTER -->
-{{- if .Params.cover.image }}
-  {{- partial "cover.html" (dict "cxt" . "IsSingle" true) }}
-{{- end }}
-```
+### 신규 방식 제안
 
-**Verification:**
-```bash
-cd /Users/twinssn/Projects/informationhot-hugo
-hugo --minify
-grep -r "src=\"/posts/.*thumbnail.webp\"" public/posts/ | head -5
-```
+`shared/thumbnail_generator`는 유지하되, **template 다양화**와 **인터넷 이미지 활용**:
+
+**Option 1 — 템플릿 업그레이드 (현재 인프라 활용)**
+- `default.html` 외에 분기별 템플릿 추가 (`stock.html`, `rap.html`, `senior.html`)
+- 각 분기 특성에 맞는 디자인: stock=차트/데이터 느낌, rap=아파트/건물, senior=부드러운 톤
+- 여전히 텍스트 기반, 하드코딩된 CSS
+
+**Option 2 — Unsplash 배경 이미지 활용 (추천)**
+- 기존 `generate_thumbnail()` 구조 유지
+- `image_fetcher.py` Unsplash 검색 로직 재사용
+- 카테고리 키워드로 Unsplash 검색 → 배경 이미지 설정
+- title 텍스트를 이미지 위에 오버레이
+- **장점**: 시각적 품질 대폭 향상, 각 포스트의 주제와 관련된 이미지
+
+**Option 3 — 하이브리드 (템플릿 + Unsplash fallback)**
+- 기본: Option 2 (Unsplash)
+- Unsplash 실패 시: Option 1 (분기별 템플릿 fallback)
+- API 키 없거나 rate limit 시에도 항상 썸네일 생성 보장
+
+### 비활성화 방법
+
+기존 `generate_thumbnail()` 호출을 신규 방식 함수 호출로 대체:
+
+**stock pipeline (STAP)**: `_make_thumbnail()` 내부 교체
+**rap pipeline**: `generate_thumbnail()` 호출 → `_make_new_thumbnail()` 호출로 교체
+**senior pipeline**: `_make_thumbnail()` 내부 교체
+
+### STAP 5개 비-stock 블로그 (dividend, etf, sector, ipo, finance)
+- 이들은 **STAP subprocess**로 실행됨 (`dispatcher.py:_run_stap()`)
+- 별도의 `pipeline.py`가 없음 (STAP 프로젝트 내부)
+- 이 블로그들의 썸네일은 **별도 계획** 필요 — 5000에서 직접 제어 불가
+- **제안**: 이번 스코프에서 제외
+
+### RAP/SEAP 블로그 설정
+- **RAP**: 4개 블로그 (rap-hugo, rap2~rap4) — 모두 동일 `pipeline.py` 사용
+- **SEAP**: senior-hugo — 단일 블로그
+- 두 분기 모두 5000 내부 파이프라인이므로 직접 제어 가능
+
+### colors.py 확장
+
+신규 방식 적용 전, 아래 블로그 팔레트 추가 필요:
+- STAP: dividend, etf, sector, ipo, finance, stock (stock만 등록됨, 나머지 5개 없음)
+- RAP: rap (등록됨)
+- SEAP: senior (등록됨)
+- RAP 각 category용 accent (rap2~rap4)
 
 ---
 
-### 🟡 P1 - 단기 조치 (1일 내 완료)
+## Part C — 본문 이미지 Unsplash 삽입 현황
 
-#### Task 02: `hugo_writer.py` 수정 - `cover.relative: true` 자동 추가
-- **File**: `/Users/twinssn/Projects/5000/shared/publishers/hugo_writer.py`
-- **Function**: `_build_frontmatter_papermod()`
-- **Action**: `cover.image` 설정 시 `cover.relative: true` 자동 추가
+### 현재 상태
 
+`pipelines/etap/image_fetcher.py`에 Unsplash 검색 로직 존재:
 ```python
-# BEFORE
-if thumbnail_url:
-    fm += "cover:\n"
-    fm += '  image: "' + thumbnail_url + '"\n'
-    fm += '  alt: "' + (alt_text or title) + '"\n'
-
-# AFTER
-if thumbnail_url:
-    fm += "cover:\n"
-    fm += '  image: "' + thumbnail_url + '"\n'
-    fm += '  relative: true\n'  # ← 추가
-    fm += '  alt: "' + (alt_text or title) + '"\n'
+UNSPLASH_ACCESS_KEY (env) → _search_unsplash(query) → 
+  url, thumb, credit, photographer, download_location
 ```
 
-**Expected:** 모든 신규 포스트에 `relative: true` 자동 설정
+**단, ETAP 전용** — STAP/RAP/SEAP/CUAP/TAP/CAP에서는 사용하지 않음.
+
+### 문제점
+
+| 항목 | 상태 |
+|------|------|
+| API 키 필요 | `UNSPLASH_ACCESS_KEY` 환경변수 — `.env.common`에 있는지 확인 필요 |
+| Rate limit | Free tier: 50 req/hour — STAP/RAP/SEAP 3개 분기에서만 사용 시 충분 |
+| Download tracking | `_trigger_unsplash_download()`로 API 정책 준수 — 구현됨 |
+| R2 캐싱 | ETAP은 R2에 업로드 후 사용 (`_upload_to_r2()`) — 중복 다운로드 방지 |
+| 저작권 표시 | Photo by [photographer] on Unsplash — ETAP에 구현됨 |
+| 검색 쿼리 | 카테고리/키워드 기반 — 신규 방식에서도 동일 로직 재사용 가능 |
+
+### 1~2장 본문 이미지 Unsplash 삽입
+- 기술적으로 문제 없음 (ETAP에서 이미 사용 중)
+- rate limit 고려: STAP/RAP/SEAP 합계 약 15~20 posts/day → 15~40 Unsplash 요청 → 50/h 제한 이내
+- 이미지 R2 캐싱으로 중복 요청 방지 필요
 
 ---
 
-#### Task 03: `_redirects` 파일 정리 (필요 시)
-- **File**: `/Users/twinssn/Projects/informationhot-hugo/static/_redirects`
-- **Action**: 이미지 파일 패턴이 리디렉트되지 않도록 확인
-- **Verification**: 2025년 7월 이전 글의 썸네일 접근 테스트
+## Part D — 차트 생성 현황
 
-```yaml
-# AS-IS: 이미지 요청도 /posts/로 리디렉트됨
-/posts/2025-07-* /posts/ 301
+### 현재 차트 생성 코드
 
-# TO-BE: 이미지 파일은 리디렉트 제외 (기존 규칙 유지, 영향 없음 확인)
-```
+`shared/publishers/hugo_writer.py:472` `_apply_chart_shortcode()`:
+- `<!-- CHART: [{...}, {...}] -->` shortcode → Chart.js `<canvas>` HTML 변환
+- **travel pipeline**만 사용 (`pipelines/travel/pipeline.py:315`)
+- 막대 차트 형태 (camping site counts 비교)
+- STAP(주식/금융)에서는 **차트 생성 안 함**
 
----
-
-### 🟢 P2 - 장기 조치 (1주 내 완료)
-
-#### Task 04: 정보탐 5000 pipeline 통합
-- **Action**: informationhot-hugo를 `blogs.d/informationhot-hugo.yaml`에 등록
-- **Expected**: 5000에서 모든 Hugo 사이트 통일 관리
-- **Benefit**: `hugo_writer.py` 수정이 자동 반영
-
-#### Task 05: 모니터링 자동화 (선택 사항)
-- **Action**: Cloudflare Pages 배포 후 자동으로 `thumbnail.webp` 접근 테스트
-- **Tool**: GitHub Actions 또는 Cloudflare Workers
-- **Expected**: 404 발생 시 자동 알림 (Telegram bot 연동)
+### STAP 차트 도입 검토
+- STAP stock pipeline: 재무 데이터 기반으로 Chart.js 차트 생성 가능
+- `_apply_chart_shortcode()`는 이미 구현되어 있음
+- 필요한 것: stock pipeline에서 `<!-- CHART: ... -->` shortcode를 body_md에 삽입하는 로직
+- **제안**: 이번 스코프에서 제외 (별도 phase)
 
 ---
 
-## ✅ Success Criteria
+## Part E — 실행 계획
 
-| # | Criteria | Verification Method | Status |
-|---|----------|---------------------|--------|
-| 1 | 모든 포스트의 커버 이미지가 정상 표시 | `curl -I https://informationhot.kr/posts/.../thumbnail.webp` → 200 OK | ⬜ |
-| 2 | `single.html`이 PaperMod `cover.html` partial 사용 | 코드 검토 | ⬜ |
-| 3 | `hugo_writer.py`가 `cover.relative: true` 자동 추가 | 코드 검토 | ⬜ |
-| 4 | SNS 공유 시 og:image 정상 노출 | Facebook Sharing Debugger 테스트 | ⬜ |
-| 5 | 기존 포스트 재빌드 후 모든 이미지 정상 | `hugo --minify` 후 배포 확인 | ⬜ |
+### Wave 1: Cover Image Fix
+- informationhot-hugo `single.html` → PaperMod `cover.html` partial 확인/수정
+- `_redirects` 이미지 경로 리디렉트 확인
+- 적용 사이트: informationhot-hugo (1차), 다른 Hugo 사이트로 확산
 
----
+### Wave 2: colors.py 확장
+- STAP 5개 블로그 팔레트 추가 (dividend, etf, sector, ipo, finance)
+- RAP category별 accent 추가 확인
 
-## 📁 Deliverables
+### Wave 3: STAP/RAP/SEAP 신규 썸네일 방식 적용
+- **Option 1 or 2 or 3 선택 필요**
+- 기존 `generate_thumbnail()` 호출을 신규 방식으로 교체
+- stock/rap/senior pipeline 내 thumbnail 함수 교체
 
-1. **PLAN.md** - 이 재발방지 플랜 문서
-2. **single.html** - 수정된 템플릿 파일
-3. **hugo_writer.py** - `cover.relative: true` 자동 추가 코드
-4. **VERIFICATION.md** - 검증 결과 기록
+### Wave 4: 본문 Unsplash 이미지 삽입 (선택)
+- STAP/RAP/SEAP에 1~2장 Unsplash 이미지 body_md 자동 삽입
+- `image_fetcher.py` 로직 재사용 또는 통합
 
----
-
-## 🔄 Verification Plan
-
-### Step 1: 로컬 빌드 테스트
-```bash
-cd /Users/twinssn/Projects/informationhot-hugo
-hugo --minify
-# public/posts/ 디렉토리에서 HTML 파일 확인
-```
-
-### Step 2: 커버 이미지 경로 검증
-```bash
-# 모든 포스트의 커버 이미지 src 속성 확인
-grep -r "src=\"/posts/.*thumbnail.webp\"" public/posts/ | wc -l
-# 예상: 모든 page bundle 포스트 수와 일치
-```
-
-### Step 3: 배포 후 라이브 테스트
-```bash
-# Cloudflare Pages 배포
-wrangler pages deploy public/
-# 썸네일 접근 테스트
-curl -I https://informationhot.kr/posts/2026-06-15-.../thumbnail.webp
-# 기대: HTTP/2 200
-```
+### Wave 5: 검증
+- R2 URL 정상 확인
+- 커버 이미지 경로 정상 확인
+- Unsplash rate limit 초과 없음 확인
 
 ---
 
-## 🚨 Risk Factors & Mitigations
+## 의사 결정 필요 항목
 
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| `single.html` 수정이 다른 테마와 충돌 | Low | Medium | PaperMod 테마만 사용 중이므로 안전 |
-| `hugo_writer.py` 수정이 기존 사이트 영향을 미침 | Low | High | 모든 Hugo 사이트가 동일한 패턴 사용 중 |
-| `_redirects` 수정이 다른 리디렉트 영향을 미침 | Medium | Low | 테스트 후 적용 |
-
----
-
-## 📝 Notes
-
-- **Page Bundle 구조**: Hugo의 page bundle은 `content/posts/slug/index.md` + `content/posts/slug/thumbnail.webp` 구조
-- **Hugo Resources**: `.Resources.GetMatch()` 또는 `.Resources.ByType()`을 통해 page bundle 리소스 접근
-- **PaperMod cover.html**: 테마의 `layouts/partials/cover.html`은 `.Resources`를 제대로 처리
-- **relative: true**: Hugo가 이미지 경로를 상대경로로 처리하도록 지시
-
----
-
-## 🔗 Related Documents
-
-- `.planning/.continue-here.md` - 초기 문제 분석 기록
-- `shared/publishers/hugo_writer.py` - Hugo 포스트 작성기
-- `informationhot-hugo/layouts/_default/single.html` - 문제 템플릿
+1. **신규 썸네일 방식**: Option 1 (템플릿) / Option 2 (Unsplash 배경) / Option 3 (하이브리드)?
+2. **STAP 5개 비-stock 블로그**: 이번 스코프 포함 또는 제외?
+3. **차트 생성**: Phase 22-c 완료 후 별도 phase로 진행?
+4. **본문 Unsplash 이미지**: 이번 스코프에 포함?
+5. **TAP/CAP**: 현행 유지 확인
