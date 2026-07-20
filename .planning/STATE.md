@@ -3,16 +3,16 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-07-12T12:00:00.000Z"
+last_updated: "2026-07-20T22:40:00.000Z"
 progress:
-  total_phases: 17
-  completed_phases: 17
+  total_phases: 25
+  completed_phases: 25
   percent: 100
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 17 완료, 운영 안정화 단계**
+**Status:** v1.1 — **Phase 25 완료 (CUAP 거미줄 엔티티 시스템), 운영 안정화 단계**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -55,6 +55,7 @@ progress:
 | 15 | Content Quality Pipeline Integration | ✅ | `8b0ecd4aa` |
 | 16 | Production Hardening — 마무리 작업 | ✅ | `8502d232d` |
 | 17 | Content Quality Enhancement — 콘텐츠 품질 고도화 | ✅ | 완료 (2026-07-12) |
+| 24 | CUAP 콘텐츠 품질 고도화 — 키워드 정리 + 타이틀 최적화 + 이미지 중복 방지 | ✅ | 완료 (2026-07-20) |
 
 ---
 
@@ -72,4 +73,30 @@ progress:
 
 ---
 
-*Last updated: 2026-07-11 kuta-hugo thumbnail fix triage 완료*
+## Phase 25: CUAP 거미줄 엔티티 시스템 (2026-07-20)
+
+**목표:** CUAP 10개 블로그 간 크로스 링크 시스템으로 사용자 순회 유도 + 광고 노출 기회 2~3x 증대
+
+**구현 내용:**
+- `shared/cuap_entity_linker.py` 신규 생성 (ETAP entity_linker.py 패턴 재사용, category 기반)
+  - `CROSS_GRAPH` (10개 블로그 고정 퍼널 경로), `BLOG_DOMAINS`, `ICONS`, `THEME_COLORS`
+  - `register_cuap_entity()`, `inject_cross_blog_links()`, `build_cross_sell_card()`, `build_funnel_header()`, `init_cuap_tables()`
+  - travel-en.db에 `cuap_entities` + `cuap_link_graph` 테이블 추가 (ETAP entity_links는 미수정)
+- `pipelines/curation/pipeline.py` 통합
+  - import + `init_cuap_tables()` (모듈 로드 시 1회)
+  - 발행 직전: `inject_cross_blog_links()` + `build_cross_sell_card()` + `build_funnel_header()` (fail-open)
+  - 발행 성공 후: `register_cuap_entity()` (다음 발행분 크로스 링크 대상)
+- Hugo 레이아웃 (10개 블로그)
+  - `layouts/partials/cuap-spider-links.html` 신규 (fallback: related.html)
+  - `layouts/_default/single.html` 라인 85: `related.html` → `cuap-spider-links.html`
+- `scripts/init_cuap_link_graph.py`, `scripts/register_sample_cuap_entities.py` (초기 데이터)
+
+**검증:**
+- T1 import PASS, T2 table PASS, T3/T4 AST PASS, T5/T6 Hugo partial PASS, T7 link_graph (60 entries/10 blogs) PASS, T8 entities (10/10 blogs) PASS, T9 integration PASS, T10 Hugo build PASS
+- appliance-hugo Hugo 빌드 성공 (에러 없음)
+
+**다음 단계:** 실제 CUAP 발행으로 크로스 링크 동작 확인 + 페이지뷰/광고 노출 모니터링
+
+---
+
+*Last updated: 2026-07-20 Phase 25 CUAP 거미줄 엔티티 시스템 완료*

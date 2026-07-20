@@ -7,6 +7,7 @@ import os
 import re
 import sqlite3
 import sys
+import hashlib
 from datetime import datetime
 from pathlib import Path
 
@@ -31,6 +32,19 @@ from shared.telegram_notifier import send_error as _tg_error
 from shared.validators import assert_korean_or_reject, sanitize_title
 from shared.relevance_scorer import migrate_publish_log, score_products, passes_gate
 from shared.alert_thresholds import ThresholdChecker
+from shared.cuap_entity_linker import (
+    inject_cross_blog_links,
+    build_cross_sell_card,
+    build_funnel_header,
+    init_cuap_tables,
+    register_cuap_entity,
+)
+
+# CUAP 거미줄 테이블 초기화 (한 번만)
+try:
+    init_cuap_tables()
+except Exception as _e:
+    logger.warning(f"[cuap] 테이블 초기화 실패 (fail-open): {_e}")
 
 logger = logging.getLogger(__name__)
 
@@ -184,12 +198,16 @@ def _select_keyword(blog_id):
     return None
 
 
-def _upload_thumbnail(image_url):
-    """쿠팡 상품 이미지를 R2에 업로드하여 썸네일로 사용"""
+def _upload_thumbnail(image_url, product_id=None):
+    """쿠팡 상품 이미지를 R2에 업로드하여 썸네일로 사용 — product_id 기반 해시로 고유 파일명"""
     try:
         resp = _requests.get(image_url, timeout=10)
         if resp.status_code == 200 and len(resp.content) > 1000:
-            return process_and_upload(resp.content, key_prefix="curation-images")
+            extra_tag = ""
+            if product_id:
+                id_hash = hashlib.md5(str(product_id).encode()).hexdigest()[:8]
+                extra_tag = f"hash/{id_hash}/"
+            return process_and_upload(resp.content, key_prefix=f"curation-images/{extra_tag}")
     except Exception as e:
         logger.warning(f"썸네일 업로드 실패: {e}")
     return ""
@@ -371,7 +389,12 @@ CATEGORY_FILTERS = {
                      "네일", "속눈썹", "눈썹", "남성화장품",
                      "비비크림", "선스틱", "립글로스", "아이섀도우"],
         "blocked": ["식품", "전자기기", "가전", "완구", "반려동물", "주방", "캠핑", "생활용품", "위생용품", "음료",
-                     "출산/유아", "스포츠/레저", "문구/오피스", "가구"],
+                     "출산/유아", "스포츠/레저", "문구/오피스", "가구",
+                     "가구", "인테리어", "소파", "침대", "책상", "의자",
+                     "노트북", "컴퓨터", "태블릿", "모니터",
+                     "냉장고", "세탁기", "건조기", "청소기",
+                     "공기청정기", "에어컨",
+                     "덤벨", "데스크", "운동", "헬스"],
         "required": [],
     },
     "camping-hugo": {
@@ -829,10 +852,13 @@ def _run_inner(cfg, blog_id, daily_quota):
             _record_failure(blog_id, "title_blocked", f"제목 blocked 키워드: {bw}", keyword)
             return {"success": False, "reason": "title_blocked"}
 
-    # 썸네일: 첫 번째 상품 이미지를 R2에 업로드
+    # 썸네일: 첫 번째 상품 이미지를 R2에 업로드 — product_id 해시 기반 고유 파일명
     thumbnail_url = ""
     if products and products[0].get("product_image"):
-        thumbnail_url = _upload_thumbnail(products[0]["product_image"])
+        thumbnail_url = _upload_thumbnail(
+            products[0]["product_image"],
+            product_id=products[0].get("product_id")
+        )
 
     # 유사 제목 체크 — 실패 시 최대 3회 fallback 키워드 재시도
     _st_attempt = 0
@@ -903,6 +929,19 @@ def _run_inner(cfg, blog_id, daily_quota):
         body_md += _FALLBACK_CTA
         logger.info(f"[{blog_id}] 큐레이션 CTA fallback 삽입")
 
+    # CUAP 거미줄 크로스 링크 삽입 (fail-open)
+    try:
+        body_md = inject_cross_blog_links(body_md, blog_id, max_links=3)
+        cross_card = build_cross_sell_card(blog_id, max_items=4)
+        if cross_card:
+            body_md += "\n\n" + cross_card
+        funnel = build_funnel_header(blog_id)
+        if funnel:
+            body_md = funnel + "\n\n" + body_md
+        logger.info(f"[{blog_id}] CUAP 거미줄 링크 삽입 완료")
+    except Exception as _e:
+        logger.warning(f"[{blog_id}] CUAP 거미줄 링크 삽입 실패 (fail-open): {_e}")
+
     # 발행
     # 태그 생성: 키워드 + 제목에서 브랜드명 추출
     tag_set = set()
@@ -954,6 +993,21 @@ def _run_inner(cfg, blog_id, daily_quota):
     except Exception as e:
         logger.warning(f"[keyword_health] 성공 기록 오류: {e}")
     logger.info(f"[{blog_id}] 발행 완료: {title}")
+
+    # CUAP 엔티티 등록 (fail-open) — 다음 발행분부터 크로스 링크 대상
+    try:
+        register_cuap_entity(
+            entity_type="category",
+            entity_name=keyword,
+            blog_id=blog_id,
+            post_slug=slug,
+            link_label=f"{keyword} 추천",
+            priority=50,
+            published=1,
+        )
+        logger.info(f"[{blog_id}] CUAP 엔티티 등록: {keyword}")
+    except Exception as _e:
+        logger.warning(f"[{blog_id}] CUAP 엔티티 등록 실패 (fail-open): {_e}")
 
     # 품질 메트릭 기록
     try:
