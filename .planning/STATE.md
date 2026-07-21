@@ -3,16 +3,16 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-07-20T22:40:00.000Z"
+last_updated: "2026-07-21T03:00:00.000Z"
 progress:
-  total_phases: 25
-  completed_phases: 25
+  total_phases: 28
+  completed_phases: 28
   percent: 100
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 25 완료 (CUAP 거미줄 엔티티 시스템), 운영 안정화 단계**
+**Status:** v1.1 — **Phase 28 완료 (CUAP Worker 404→500 Fix), 운영 안정화 단계**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -56,6 +56,7 @@ progress:
 | 16 | Production Hardening — 마무리 작업 | ✅ | `8502d232d` |
 | 17 | Content Quality Enhancement — 콘텐츠 품질 고도화 | ✅ | 완료 (2026-07-12) |
 | 24 | CUAP 콘텐츠 품질 고도화 — 키워드 정리 + 타이틀 최적화 + 이미지 중복 방지 | ✅ | 완료 (2026-07-20) |
+| 28 | CUAP Worker 404→500 Fix — 6개 Worker 블로그 missing-asset 500 → 404 | ✅ | 완료 (2026-07-21) |
 
 ---
 
@@ -99,4 +100,26 @@ progress:
 
 ---
 
-*Last updated: 2026-07-20 Phase 25 CUAP 거미줄 엔티티 시스템 완료*
+## Phase 28: CUAP Worker 404→500 Fix (2026-07-21)
+
+**목표:** CUAP Worker 블로그 6개(health, pet, kitchen, beauty, camping, baby)에서 missing-asset 접근 시 HTTP 500을 반환하는 버그를 수정하여, 정상 404 페이지(`not_found_handling = "404-page"`)가 반환되도록 함.
+
+**근본원인:**
+- `kitchen-hugo/src/index.js`(268-byte, md5 `d25a7783bfe509f593ff6e01f3054eab`)의 `catch` 블록이 missing asset을 무조건 `new Response('Error', { status: 500 })`로 변환.
+- 나머지 5개(health/pet/beauty/camping/baby)는 142-byte 공유본(md5 `3fece1c5b4b2fd725e8166968e7627df`, try/catch 없음)으로 정상 추정.
+
+**구현 내용:**
+- 6개 전체를 canonical worker로 통일(`ASSETS.fetch` 직접 반환 + `catch → 404`, never 500).
+- `md5` 일치 확인: 6개 전부 `5667ff889e7f951b5c4f98a94293a6b2` (kitchen의 buggy `d25a...eab` 소멸).
+- `deploy_site()`로 6개 Worker 블로그 순차 재배포 (CLOUDFLARE_API_TOKEN 제거 + OAuth profile `hugh79757`). 6/6 `True` 반환.
+
+**검증:**
+- 6/6 missing path → **404** (아님 500).
+- 6/6 real published post → **200** (regression guard 통과). pet 초기 typo slug로 404 나왔으나 built slug 재검증 200 (테스트 데이터 오류, worker 회귀 아님).
+- Cloudflare URL-encoding 307 redirect는 `-L` follow 시 200 정상 종착.
+
+**다음 단계:** 없음. Phase 27(카드 404) + Phase 28(worker 500)로 CUAP 404 계열 버그 클로즈.
+
+---
+
+*Last updated: 2026-07-21 Phase 28 CUAP Worker 404→500 Fix 완료*

@@ -1,8 +1,8 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-07-11
+**Last updated:** 2026-07-21
 
-**Actual phases completed:** 16 phases 완료
+**Actual phases completed:** 28 phases 완료
 **현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
 
 ---
@@ -183,8 +183,31 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 ### Phase 21: Funnel Automation — 퍼널 구조 자동화
 **Priority: 🔴 HIGH** — 블로그 간 퍼널 관계 정의, 퍼널 링크 자동 삽입, STAP entity_linker 버그 수정
 
+### Phase 27: CUAP Cross-Sell Card 404 Fix
+**Priority: 🔴 HIGH** — baby 블로그 하단 크로스셀 카드 `-rec` 404 (Phase 25 샘플 데이터 오염)
+**Status:** ✅ Complete (2026-07-21)
+- 근본원인: `cuap_entities`(travel-en.db) 29건 전부 Phase 25 테스트 데이터, 실제 발행 slug 0건. `register_cuap_entity()` 미호출.
+- 16개 발행 포스트에 `-rec` 404 URL 베이크됨. 실제 발행 글은 블로그별 68~260개 존재.
+- 수정: DB purge → filesystem 백필 → 16파일 URL 교체 → 재배포 → 라이브 200 검증.
+
 ---
+
+### Phase 28: CUAP Worker 404→500 Fix
+**Priority: 🔴 HIGH** — 6개 Worker 블로그(kitchen 포함)에서 missing-asset 접근 시 HTTP 500 반환 버그
+**Status:** ✅ Complete (2026-07-21)
+- 근본원인: `kitchen-hugo/src/index.js`(268-byte)의 `catch`가 missing asset을 무조건 500 "Error"로 변환. 나머지 5개는 142-byte 공유본(try/catch 없음, 정상).
+- 수정: 6개 전체를 canonical worker(`ASSETS.fetch` 직접 반환 + `catch → 404`, never 500)로 통일. md5 `5667ff889e7f951b5c4f98a94293a6b2` 일치.
+- 배포: `deploy_site()`로 6개 Worker 블로그 순차 재배포 (EXIT=0).
+- 검증: 6/6 missing path → 404 (아님 500), 6/6 real post → 200 (regression guard 통과).
+
+### Phase 29: CUAP 콘텐츠 오염 + 퍼널 카드 404 + 광고 공백 수정
+**Priority: 🔴 HIGH** — pet-hugo에 뷰티 글 발행, cuap_entities URL 불일치로 크로스셀 404, beauty-hugo 미배포로 광고 공백
+**Status:** ✅ Complete (2026-07-22)
+- **29-01:** `keywords.py` pet-hugo 키워드에서 `"관리"` 제거 + 문법 오류 수정 (콤마 누락 8건)
+- **29-02:** `cuap_entities` DB 오염 URL 27건 정리 (4건 삭제 + 23건 slug 업데이트)
+- **29-03:** beauty-hugo 재배포 → 라이브 200 확인
+- **29-04:** 광고 partial 검증 — `ca-pub-6677996696534146` + ad-slot `2195212287` 정상 로드 확인
 
 ## Configuration
 
-**현재 Phase 체계:** 17 phases (Phase 17 진행 중)
+**현재 Phase 체계:** 29 phases (Phase 29 진행 중)

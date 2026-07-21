@@ -1,0 +1,327 @@
+- generic [active] [ref=f19e1]:
+  - link "↓ 본문으로 건너뛰기" [ref=f19e3] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f19e4]:
+    - link "주방용품 추천 가이드" [ref=f19e5] [cursor=pointer]:
+      - /url: /
+    - generic [ref=f19e8]:
+      - button "Search" [ref=f19e9] [cursor=pointer]
+      - button "다크 모드로 전환" [ref=f19e13] [cursor=pointer]
+  - generic [ref=f19e22]:
+    - main [ref=f19e23]:
+      - generic [ref=f19e25]:
+        - generic [ref=f19e26]: 🍳
+        - heading "주방용품 추천 가이드" [level=1] [ref=f19e27]
+      - article [ref=f19e28]:
+        - generic [ref=f19e29]:
+          - heading "주방용품 추천 가이드" [level=1] [ref=f19e30]
+          - heading "주방용품 추천 전문" [level=2] [ref=f19e31]
+      - generic [ref=f19e32]:
+        - heading "최근 글" [level=2] [ref=f19e33]
+        - generic [ref=f19e34]:
+          - article [ref=f19e35]:
+            - generic [ref=f19e37]:
+              - link [ref=f19e39] [cursor=pointer]:
+                - /url: /posts/2026%EB%85%84-7%EC%9B%94-%EA%B7%B8%EB%A6%B4%EA%B0%80%EB%B0%A9-%EC%B6%94%EC%B2%9C-%EC%8A%A4%ED%85%8C%EC%B8%A0-%ED%95%8F%EB%B3%B4%EC%9D%B4%EC%BA%A0%ED%95%91%EB%AA%BD-%EC%B9%B4%EA%B3%A0-%EC%83%81%ED%99%A9%EB%B3%84-%EC%8B%A4%EC%86%8D-%EC%84%A0%ED%83%9D/
+                - 'heading "2026년 7월 그릴가방 추천: 스테츠 핏보이·캠핑몽 카고 — 상황별 실속 선택" [level=2] [ref=f19e40]'
+              - generic [ref=f19e41]:
+                - generic [ref=f19e42]:
+                  - time [ref=f19e43]: 2026년 7월 21일
+                  - generic [ref=f19e44]: ·
+                  - generic "읽는 시간" [ref=f19e45]: 1 분
+                - generic [ref=f19e46]:
+                  - link "추천" [ref=f19e47] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "캠핑몽" [ref=f19e50] [cursor=pointer]:
+                    - /url: /tags/%EC%BA%A0%ED%95%91%EB%AA%BD/
+                  - link "스테츠글로벌" [ref=f19e53] [cursor=pointer]:
+                    - /url: /tags/%EC%8A%A4%ED%85%8C%EC%B8%A0%EA%B8%80%EB%A1%9C%EB%B2%8C/
+                  - link "스테츠" [ref=f19e56] [cursor=pointer]:
+                    - /url: /tags/%EC%8A%A4%ED%85%8C%EC%B8%A0/
+                  - link "그릴가방" [ref=f19e59] [cursor=pointer]:
+                    - /url: /tags/%EA%B7%B8%EB%A6%B4%EA%B0%80%EB%B0%A9/
+              - generic [ref=f19e62]: 💡 다른 추천도 확인해보세요
+          - article [ref=f19e64]:
+            - generic [ref=f19e66]:
+              - link [ref=f19e68] [cursor=pointer]:
+                - /url: /posts/2026%EB%85%84-7%EC%9B%94-%EC%A3%BC%EB%AC%BC-%EB%83%84%EB%B9%84-%EC%B6%94%EC%B2%9C-%EC%97%90%EB%82%98%EB%A9%9C-%EC%A3%BC%EB%AC%BC%EC%A0%9C%EC%9D%B4%EB%B9%84%ED%99%88-%EB%AC%B4%EC%87%A0-%EA%B0%80%EA%B2%A9-%EB%8C%80%EB%B9%84-%EC%8B%A4%EC%86%8D-%EC%84%A0%ED%83%9D/
+                - 'heading "2026년 7월 주물 냄비 추천: 에나멜 주물·제이비홈 무쇠 — 가격 대비 실속 선택" [level=2] [ref=f19e69]'
+              - generic [ref=f19e70]:
+                - generic [ref=f19e71]:
+                  - time [ref=f19e72]: 2026년 7월 20일
+                  - generic [ref=f19e73]: ·
+                  - generic "읽는 시간" [ref=f19e74]: 5 분
+                - generic [ref=f19e75]:
+                  - link "추천" [ref=f19e76] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "추천" [ref=f19e79] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "주물 냄비 추천" [ref=f19e82] [cursor=pointer]:
+                    - /url: /tags/%EC%A3%BC%EB%AC%BC-%EB%83%84%EB%B9%84-%EC%B6%94%EC%B2%9C/
+                  - link "콕스타" [ref=f19e85] [cursor=pointer]:
+                    - /url: /tags/%EC%BD%95%EC%8A%A4%ED%83%80/
+                  - link "주물" [ref=f19e88] [cursor=pointer]:
+                    - /url: /tags/%EC%A3%BC%EB%AC%BC/
+                  - link "냄비" [ref=f19e91] [cursor=pointer]:
+                    - /url: /tags/%EB%83%84%EB%B9%84/
+              - generic [ref=f19e94]: 주물 냄비 하나 장만하려고 검색해보니 종류도 많고 가격도 제각각이라 고민되시죠? 2026년 7월, 인덕션 사용 가구가 늘면서 주물 냄비를 찾는 분들이 부쩍 많아졌습니다. 에나멜과 무쇠 중 어떤 소재가 나에게 맞을지, 또 크기는 어떻게 골라야 할지 막막한 경우가 많습니다. 2만 원대부터 5만 원대까지 가격 대비 만족도 높은 주물 냄비를 실제 요리 환경에 맞춰 비교해드립니다. 주물 냄비 고를 때 확인할 포인트 주물 냄비는 열 보존력이 뛰어나고 골고루 열이 전달되기 때문에 찌개, 국, 조림 요리에 이상적입니다. 하지만 제품마다 소재와 크기가 달라 처음 구매할 때 헷갈리기 쉽습니다.
+          - article [ref=f19e96]:
+            - generic [ref=f19e98]:
+              - link [ref=f19e100] [cursor=pointer]:
+                - /url: /posts/%EC%A0%9C%EC%9D%B4%EB%B9%84%ED%99%88-%EB%AC%B4%ED%81%AC-ih-vs-%EC%98%AC%EB%B9%84%EC%95%84-%EC%84%B8%EB%9D%BC%EB%AF%B9-%ED%94%8C%EB%A0%88%EC%9D%B4%ED%8A%B8%ED%8C%AC-%EC%84%B8%EB%9D%BC%EB%AF%B9-%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8C%AC-%EC%B6%94%EC%B2%9C-%EC%96%B4%EB%96%A4-%EA%B1%B8-%EA%B3%A8%EB%9D%BC%EC%95%BC-%ED%95%A0%EA%B9%8C/
+                - heading "제이비홈 무크 IH vs 올비아 세라믹 플레이트팬 — 세라믹 프라이팬 추천 어떤 걸 골라야 할까?" [level=2] [ref=f19e101]
+              - generic [ref=f19e102]:
+                - generic [ref=f19e103]:
+                  - time [ref=f19e104]: 2026년 7월 20일
+                  - generic [ref=f19e105]: ·
+                  - generic "읽는 시간" [ref=f19e106]: 6 분
+                - generic [ref=f19e107]:
+                  - link "추천" [ref=f19e108] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "세라믹" [ref=f19e111] [cursor=pointer]:
+                    - /url: /tags/%EC%84%B8%EB%9D%BC%EB%AF%B9/
+                  - link "세라믹 프라이팬 추천" [ref=f19e114] [cursor=pointer]:
+                    - /url: /tags/%EC%84%B8%EB%9D%BC%EB%AF%B9-%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8C%AC-%EC%B6%94%EC%B2%9C/
+                  - link "프라이팬" [ref=f19e117] [cursor=pointer]:
+                    - /url: /tags/%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8C%AC/
+                  - link "올비아" [ref=f19e120] [cursor=pointer]:
+                    - /url: /tags/%EC%98%AC%EB%B9%84%EC%95%84/
+                  - link "바첸" [ref=f19e123] [cursor=pointer]:
+                    - /url: /tags/%EB%B0%94%EC%B2%B8/
+                  - link "추천" [ref=f19e126] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+              - generic [ref=f19e129]: 2026년 7월 기준, 주방에서 코팅 벗겨짐 걱정 없이 오래 사용할 프라이팬을 찾고 계신가요? 세라믹 코팅 프라이팬은 불소 수지 코팅보다 내구성과 친환경성에서 주목받지만, 제품마다 형태와 가격 차이가 커서 선택이 쉽지 않습니다. 오늘은 실제 판매 순위와 가격을 바탕으로, 인덕션 사용이 가능한 세라믹 프라이팬 5종을 상황별로 비교해 드리겠습니다. 세라믹 프라이팬 고를 때 확인할 포인트 프라이팬을 고를 때 가장 먼저 확인해야 할 것은 코팅 방식과 열원 호환성입니다. 세라믹 코팅은 일반 테프론 대비 고온에 강하고 유해 물질 발생이 적지만, 제조 방식에 따라 내구성 차이가 있습니다. 특히 인덕션 레인지를 사용한다면 바닥이 철 재질로 되어 있는지 반드시 확인해야 합니다. 모든 세라믹 프라이팬이 인덕션에 대응하는 것은 아니며, 제품명에 ‘IH’ 또는 ‘인덕션 겸용’이라는 표시가 있어야 안심할 수 있습니다.
+          - article [ref=f19e131]:
+            - generic [ref=f19e133]:
+              - link [ref=f19e135] [cursor=pointer]:
+                - /url: /posts/2026%EB%85%84-7%EC%9B%94-%EC%8A%A4%ED%8E%99-%EB%B9%84%EA%B5%90-%ED%82%A4%EC%B9%9C%EC%95%84%ED%8A%B8-%EC%98%AC%EA%B0%80-vs-cookbuddy-%EC%9D%B4%EC%9C%A0%EC%8B%9D-%EB%83%84%EB%B9%84-%EC%8B%A4%EC%86%8D-%EC%8A%A4%ED%85%8C%EC%9D%B8%EB%A6%AC%EC%8A%A4-%EB%83%84%EB%B9%84-%EC%84%A0%ED%83%9D%EB%B2%95/
+                - 'heading "2026년 7월 스펙 비교: 키친아트 올가 vs CookBuddy 이유식 냄비 — 실속 스테인리스 냄비 선택법" [level=2] [ref=f19e136]'
+              - generic [ref=f19e137]:
+                - generic [ref=f19e138]:
+                  - time [ref=f19e139]: 2026년 7월 20일
+                  - generic [ref=f19e140]: ·
+                  - generic "읽는 시간" [ref=f19e141]: 6 분
+                - generic [ref=f19e142]:
+                  - link "추천" [ref=f19e143] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "스테인리스 냄비 추천" [ref=f19e146] [cursor=pointer]:
+                    - /url: /tags/%EC%8A%A4%ED%85%8C%EC%9D%B8%EB%A6%AC%EC%8A%A4-%EB%83%84%EB%B9%84-%EC%B6%94%EC%B2%9C/
+                  - link "냄비" [ref=f19e149] [cursor=pointer]:
+                    - /url: /tags/%EB%83%84%EB%B9%84/
+                  - link "추천" [ref=f19e152] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "스테인리스" [ref=f19e155] [cursor=pointer]:
+                    - /url: /tags/%EC%8A%A4%ED%85%8C%EC%9D%B8%EB%A6%AC%EC%8A%A4/
+                  - link "키친아트" [ref=f19e158] [cursor=pointer]:
+                    - /url: /tags/%ED%82%A4%EC%B9%9C%EC%95%84%ED%8A%B8/
+                  - link "클린슨" [ref=f19e161] [cursor=pointer]:
+                    - /url: /tags/%ED%81%B4%EB%A6%B0%EC%8A%A8/
+              - generic [ref=f19e164]: 스테인리스 냄비, 어떤 기준으로 골라야 할까? 7월 장마철이 다가오면서 집에서 국과 찌개를 끓이는 횟수가 늘고 있습니다. 하지만 인덕션을 새로 들였거나, 기존 코팅 냄비가 벗겨져 교체하려는 분들은 “스테인리스는 어떤 제품이 좋을까” 고민하게 되죠. 2026년 7월 현재 로켓배송으로 구매 가능한 스테인리스 냄비는 수십 종류인데, 크기 구성과 호환 열원, 가격대가 제각각이라 선택이 쉽지 않습니다. 특히 처음 스테인리스 냄비를 구매한다면, 용량 구성과 두께, 인덕션 사용 여부를 꼼꼼히 따져야 합니다. 스테인리스 냄비 고를 때 확인할 포인트
+          - article [ref=f19e166]:
+            - generic [ref=f19e168]:
+              - link [ref=f19e170] [cursor=pointer]:
+                - /url: /posts/moz-%EC%8A%A4%EC%9B%A8%EB%8D%B4-%ED%8F%AC%EC%8A%A4%EC%BD%94%EC%99%80-%EB%9F%B0%EC%B9%98%EB%B2%84%EC%8A%A4-%EC%A0%84%EA%B8%B0-%EB%B3%B4%EC%98%A8-2026%EB%85%84-7%EC%9B%94-%EB%B3%B4%EC%98%A8%EB%8F%84%EC%8B%9C%EB%9D%BD-%EC%8B%A4%EC%82%AC%EC%9A%A9-%EC%B6%94%EC%B2%9C/
+                - heading "MOZ 스웨덴 포스코와 런치버스 전기 보온 — 2026년 7월 보온도시락 실사용 추천" [level=2] [ref=f19e171]
+              - generic [ref=f19e172]:
+                - generic [ref=f19e173]:
+                  - time [ref=f19e174]: 2026년 7월 15일
+                  - generic [ref=f19e175]: ·
+                  - generic "읽는 시간" [ref=f19e176]: 6 분
+                - generic [ref=f19e177]:
+                  - link "추천" [ref=f19e178] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "코코리" [ref=f19e181] [cursor=pointer]:
+                    - /url: /tags/%EC%BD%94%EC%BD%94%EB%A6%AC/
+                  - link "보온도시락 추천" [ref=f19e184] [cursor=pointer]:
+                    - /url: /tags/%EB%B3%B4%EC%98%A8%EB%8F%84%EC%8B%9C%EB%9D%BD-%EC%B6%94%EC%B2%9C/
+                  - link "트윙고" [ref=f19e187] [cursor=pointer]:
+                    - /url: /tags/%ED%8A%B8%EC%9C%99%EA%B3%A0/
+                  - link "보온도시락" [ref=f19e190] [cursor=pointer]:
+                    - /url: /tags/%EB%B3%B4%EC%98%A8%EB%8F%84%EC%8B%9C%EB%9D%BD/
+                  - link "모즈" [ref=f19e193] [cursor=pointer]:
+                    - /url: /tags/%EB%AA%A8%EC%A6%88/
+                  - link "추천" [ref=f19e196] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+              - generic [ref=f19e199]: "출근길에 정성껏 싼 도시락, 점심이 되면 미지근해져서 실망한 적 있으신가요? 특히 여름철에는 보온이 더 중요해집니다. 2026년 7월 기준, 보온도시락을 고를 때는 단순히 따뜻함만이 아니라 소재의 안전성과 실용성까지 따져야 합니다. 전기 가열 방식인지, 진공 보온인지, 스테인리스 소재는 몇 종류인지에 따라 만족도가 확 달라집니다. 지금부터 실제로 사용해본 사람의 시각에서 가장 합격점을 줄 수 있는 제품들을 추천합니다. 보온도시락 고를 때 확인할 포인트 # 보온도시락을 선택할 때는 다음 세 가지를 꼭 확인해야 합니다."
+          - article [ref=f19e201]:
+            - generic [ref=f19e203]:
+              - link [ref=f19e205] [cursor=pointer]:
+                - /url: /posts/%ED%85%80%EB%B8%94%EB%9F%AC-%EC%B6%94%EC%B2%9C-%ED%9D%94%ED%95%9C-%EC%98%A4%ED%95%B4-3%EA%B0%80%EC%A7%80-%EB%B3%84%EC%9D%B4%EB%84%A4%EC%A7%91-vs-moz-%EC%8A%A4%EC%9B%A8%EB%8D%B4-2026%EB%85%84-%EA%B8%B0%EC%A4%80-%EB%B0%94%EB%A1%9C%EC%9E%A1%EA%B8%B0/
+                - heading "텀블러 추천 흔한 오해 3가지 — 별이네집 vs MOZ 스웨덴, 2026년 기준 바로잡기" [level=2] [ref=f19e206]
+              - generic [ref=f19e207]:
+                - generic [ref=f19e208]:
+                  - time [ref=f19e209]: 2026년 7월 15일
+                  - generic [ref=f19e210]: ·
+                  - generic "읽는 시간" [ref=f19e211]: 6 분
+                - generic [ref=f19e212]:
+                  - link "추천" [ref=f19e213] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "텀블러" [ref=f19e216] [cursor=pointer]:
+                    - /url: /tags/%ED%85%80%EB%B8%94%EB%9F%AC/
+                  - link "블라썸하우스" [ref=f19e219] [cursor=pointer]:
+                    - /url: /tags/%EB%B8%94%EB%9D%BC%EC%8D%B8%ED%95%98%EC%9A%B0%EC%8A%A4/
+                  - link "모즈" [ref=f19e222] [cursor=pointer]:
+                    - /url: /tags/%EB%AA%A8%EC%A6%88/
+                  - link "추천" [ref=f19e225] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "FASEN" [ref=f19e228] [cursor=pointer]:
+                    - /url: /tags/fasen/
+                  - link "텀블러 추천" [ref=f19e231] [cursor=pointer]:
+                    - /url: /tags/%ED%85%80%EB%B8%94%EB%9F%AC-%EC%B6%94%EC%B2%9C/
+              - generic [ref=f19e234]: "2026년 7월, 여름이 본격적으로 시작되면서 텀블러 하나쯤 새로 장만하려는 분들이 많습니다. 그런데 막상 구매하려고 알아보면 “비싸야 오래 간다”, “스테인리스면 다 똑같다”, “대용량은 무조건 무겁다” 같은 말들에 혼란스러워지기 마련입니다. 이 글에서는 실제 판매 데이터를 바탕으로 이런 오해를 하나씩 짚어보고, 2026년 현재 시점에서 합리적인 선택을 도와드리겠습니다. 텀블러 고를 때 확인할 포인트 # 텀블러 선택에서 가장 중요한 것은 소재, 용량, 보온 성능, 세척 편의성 이렇게 네 가지입니다."
+          - article [ref=f19e236]:
+            - generic [ref=f19e238]:
+              - link [ref=f19e240] [cursor=pointer]:
+                - /url: /posts/%EC%97%94%EC%97%90%ED%94%84%EB%9D%BD-%ED%8A%B8%EB%9D%BC%EC%9D%B4%ED%83%84%EB%B6%80%ED%84%B0-%EC%A7%91%EB%A7%88%ED%8A%B8-%EC%A7%84%EA%B3%B5%EC%9B%90%ED%84%B0%EC%B9%98%EA%B9%8C%EC%A7%80-%EB%B3%B4%EA%B4%80-%EC%9A%A9%EA%B8%B0-5%EC%A2%85-%EC%A7%81%EC%A0%91-%EA%B3%A8%EB%9D%BC%EB%B3%B8-%EC%9D%B4%EC%9C%A0/
+                - heading "엔에프락 트라이탄부터 집마트 진공원터치까지 — 보관 용기 5종 직접 골라본 이유" [level=2] [ref=f19e241]
+              - generic [ref=f19e242]:
+                - generic [ref=f19e243]:
+                  - time [ref=f19e244]: 2026년 7월 15일
+                  - generic [ref=f19e245]: ·
+                  - generic "읽는 시간" [ref=f19e246]: 5 분
+                - generic [ref=f19e247]:
+                  - link "추천" [ref=f19e248] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "용기" [ref=f19e251] [cursor=pointer]:
+                    - /url: /tags/%EC%9A%A9%EA%B8%B0/
+                  - link "데비마이어" [ref=f19e254] [cursor=pointer]:
+                    - /url: /tags/%EB%8D%B0%EB%B9%84%EB%A7%88%EC%9D%B4%EC%96%B4/
+                  - link "엔에프락" [ref=f19e257] [cursor=pointer]:
+                    - /url: /tags/%EC%97%94%EC%97%90%ED%94%84%EB%9D%BD/
+                  - link "추천" [ref=f19e260] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "보관" [ref=f19e263] [cursor=pointer]:
+                    - /url: /tags/%EB%B3%B4%EA%B4%80/
+                  - link "진공 보관 용기 추천" [ref=f19e266] [cursor=pointer]:
+                    - /url: /tags/%EC%A7%84%EA%B3%B5-%EB%B3%B4%EA%B4%80-%EC%9A%A9%EA%B8%B0-%EC%B6%94%EC%B2%9C/
+              - generic [ref=f19e269]: 2026년 7월, 장을 봐온 식재료를 어떻게 보관해야 오래 갈지 고민이신 분들 많으시죠. 밀폐용기를 사려고 검색해도 종류가 너무 많아서 어떤 제품이 내 상황에 맞을지 감이 안 잡히실 겁니다. 특히 진공 보관 용기는 신선도를 유지하는 핵심이지만, 가격대와 방식이 천차만별이라 선택이 어렵습니다. 실제 판매 순위와 사용자 반응을 바탕으로 5가지 제품을 꼼꼼히 비교해드립니다. 진공 보관 용기 고를 때 확인할 포인트 보관 용기를 고를 때 가장 먼저 따져야 할 것은 소재입니다. 유리 용기는 내용물이 보이고 위생적이지만 무겁고 깨질 위험이 있습니다. 반면 트라이탄이나 PP 소재는 가볍고 충격에 강하지만 투명도나 내열성에서 차이가 있습니다. 두 번째로 밀폐 방식을 봐야 합니다. 진공 원터치 방식은 간편하게 공기를 빼서 보관 기간을 늘려주지만, 전용 펌프가 필요하거나 손잡이 조작이 필요한 제품이 있습니다. 일반 밀폐용기보다 가격이 높지만 장기 보관이 필요한 음식에는 확실한 효과를 냅니다. 세 번째는 구성과 용량입니다. 15P 세트처럼 다양한 크기가 들어 있으면 여러 용도로 활용하기 좋지만, 필요한 크기만 골라서 사는 게 오히려 실용적일 수 있습니다. 마지막으로 로켓배송 가능 여부도 실수령 시간을 단축시키는 중요한 요소입니다. 이 기준을 가지고 제품들을 살펴보면 어떤 것이 내게 맞을지 훨씬 명확해집니다.
+          - article [ref=f19e271]:
+            - generic [ref=f19e273]:
+              - link [ref=f19e275] [cursor=pointer]:
+                - /url: /posts/%EB%A7%90%EB%9E%91%ED%95%8F-%ED%9C%98%EC%96%B4%EC%A7%80%EB%8A%94-%EB%83%89%EB%8F%99%EC%8B%A4-vs-%ED%95%98%EC%8B%9C%EB%AA%A8-%EC%B2%AD%EA%B2%B0-%ED%8A%B8%EB%A0%88%EC%9D%B4-%EB%83%89%EC%9E%A5%EA%B3%A0-%EC%A0%95%EB%A6%AC-%EC%9A%A9%EA%B8%B0-%EC%B2%AB%EC%9D%B8%EC%83%81%EA%B3%BC-%EC%8B%A4%EC%82%AC%EC%9A%A9-%EB%8A%90%EB%82%8C/
+                - heading "말랑핏 휘어지는 냉동실 vs 하시모 청결 트레이 — 냉장고 정리 용기 첫인상과 실사용 느낌" [level=2] [ref=f19e276]
+              - generic [ref=f19e277]:
+                - generic [ref=f19e278]:
+                  - time [ref=f19e279]: 2026년 7월 15일
+                  - generic [ref=f19e280]: ·
+                  - generic "읽는 시간" [ref=f19e281]: 5 분
+                - generic [ref=f19e282]:
+                  - link "추천" [ref=f19e283] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "냉장고" [ref=f19e286] [cursor=pointer]:
+                    - /url: /tags/%EB%83%89%EC%9E%A5%EA%B3%A0/
+                  - link "추천" [ref=f19e289] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "냉장고 정리 용기 추천" [ref=f19e292] [cursor=pointer]:
+                    - /url: /tags/%EB%83%89%EC%9E%A5%EA%B3%A0-%EC%A0%95%EB%A6%AC-%EC%9A%A9%EA%B8%B0-%EC%B6%94%EC%B2%9C/
+                  - link "정리" [ref=f19e295] [cursor=pointer]:
+                    - /url: /tags/%EC%A0%95%EB%A6%AC/
+                  - link "용기" [ref=f19e298] [cursor=pointer]:
+                    - /url: /tags/%EC%9A%A9%EA%B8%B0/
+              - generic [ref=f19e301]: 냉장고 문을 열었는데 비닐봉지가 여기저기 쏟아지고, 얼음처럼 언 채소가 어디 있는지 찾기 어려운 경험 있으신가요? 2026년 7월 기준, 냉장고 정리 용기를 고르는 기준도 다양해졌습니다. 휘어지는 실리콘 소재부터 깔끔한 트레이까지, 실제로 써보니 어떤 차이가 있는지 정리했습니다. 냉장고 정리 용기 고를 때 확인할 포인트 먼저 용기 선택 전에 확인해야 할 핵심 기준을 짚어보겠습니다. 첫째, 용량 조합이 생활 패턴에 맞는지 살펴야 합니다. 250ml 용기는 양념이나 소분용으로 적합하고, 600ml~900ml는 반찬 보관에, 1300ml 이상은 국이나 찌개를 한 끼씩 담기에 좋습니다. 다양한 크기가 세트로 구성되어 있으면 냉동실과 냉장실을 구분해 쓰기 편리합니다.
+          - article [ref=f19e303]:
+            - generic [ref=f19e305]:
+              - link [ref=f19e307] [cursor=pointer]:
+                - /url: /posts/%EC%8B%B1%ED%81%AC%EB%8C%80-%EC%A0%95%EB%A6%AC%ED%95%A8-%EC%B6%94%EC%B2%9C-%EB%A7%88%EC%B9%98-%EB%AF%B8%EB%93%9C%EC%84%BC%EC%B6%94%EB%A6%AC-%EC%8A%AC%EB%9D%BC%EC%9D%B4%EB%93%9C%EC%99%80-alemon-%ED%99%95%EC%9E%A5%ED%98%95%EC%9C%BC%EB%A1%9C-%ED%95%98%EB%B6%80%EC%9E%A5-%EB%AC%B8%EC%A0%9C-%ED%95%B4%EA%B2%B0/
+                - heading "싱크대 정리함 추천, 마치 미드센추리 슬라이드와 Alemon 확장형으로 하부장 문제 해결" [level=2] [ref=f19e308]
+              - generic [ref=f19e309]:
+                - generic [ref=f19e310]:
+                  - time [ref=f19e311]: 2026년 7월 15일
+                  - generic [ref=f19e312]: ·
+                  - generic "읽는 시간" [ref=f19e313]: 5 분
+                - generic [ref=f19e314]:
+                  - link "추천" [ref=f19e315] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "정리함" [ref=f19e318] [cursor=pointer]:
+                    - /url: /tags/%EC%A0%95%EB%A6%AC%ED%95%A8/
+                  - link "리빙엠" [ref=f19e321] [cursor=pointer]:
+                    - /url: /tags/%EB%A6%AC%EB%B9%99%EC%97%A0/
+                  - link "추천" [ref=f19e324] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "싱크대" [ref=f19e327] [cursor=pointer]:
+                    - /url: /tags/%EC%8B%B1%ED%81%AC%EB%8C%80/
+                  - link "싱크대 정리함 추천" [ref=f19e330] [cursor=pointer]:
+                    - /url: /tags/%EC%8B%B1%ED%81%AC%EB%8C%80-%EC%A0%95%EB%A6%AC%ED%95%A8-%EC%B6%94%EC%B2%9C/
+                  - link "팔공티앤씨" [ref=f19e333] [cursor=pointer]:
+                    - /url: /tags/%ED%8C%94%EA%B3%B5%ED%8B%B0%EC%95%A4%EC%94%A8/
+              - generic [ref=f19e336]: 2026년 7월 기준으로 싱크대 하부장 정리 때문에 고민이신가요? 냄비와 프라이팬이 쌓여서 하나 꺼내려면 다른 도구가 와르르 쏟아지고, 공간은 좁아서 원하는 물건을 찾느라 시간이 오래 걸리는 경험, 다들 있으실 겁니다. 오늘은 이런 고민을 해결해줄 싱크대 정리함 세 가지를 꼼꼼히 비교해 드립니다. 구매 전 꼭 확인해야 할 포인트를 먼저 살펴볼게요. 싱크대 정리함 고를 때 확인할 포인트 싱크대 하부장 정리함을 고를 때 가장 먼저 고려해야 할 것은 수납 공간의 형태와 크기입니다. 하부장마다 폭과 깊이가 다르기 때문에 확장형 제품이면 더 유연하게 대응할 수 있습니다. 두 번째는 슬라이딩 기능입니다. 일반적으로 서랍처럼 앞뒤로 움직이는 구조여야 뒤쪽에 있는 물건도 쉽게 꺼낼 수 있습니다. 세 번째는 소재입니다. 스테인리스는 물에 강하고 내구성이 좋지만 무게가 나가고, 철제는 가볍지만 녹에 주의해야 합니다. 마지막으로 가격 대비 활용도를 따져보세요. 1만 원대부터 3만 원대까지 다양하니, 하부장에서 어떤 도구를 주로 보관할지에 맞춰 선택하는 것이 좋습니다. 이 기준을 가지고 실제 제품들을 비교했습니다.
+          - article [ref=f19e338]:
+            - generic [ref=f19e340]:
+              - link [ref=f19e342] [cursor=pointer]:
+                - /url: /posts/%EC%8B%9D%EA%B8%B0%EA%B1%B4%EC%A1%B0%EB%8C%80-%EC%B6%94%EC%B2%9C-%EB%9D%BC%EC%9D%B4%ED%94%84%EB%A6%AC%EB%93%AC%EA%B3%BC-%EC%9C%84%EC%8B%9C%EC%84%A0-%EC%A4%91-%ED%95%A9%EA%B2%A9%EC%A0%90%EC%9D%84-%EC%B0%BE%EB%8B%A4/
+                - heading "식기건조대 추천, 라이프리듬과 위시선 중 합격점을 찾다" [level=2] [ref=f19e343]
+              - generic [ref=f19e344]:
+                - generic [ref=f19e345]:
+                  - time [ref=f19e346]: 2026년 7월 15일
+                  - generic [ref=f19e347]: ·
+                  - generic "읽는 시간" [ref=f19e348]: 6 분
+                - generic [ref=f19e349]:
+                  - link "추천" [ref=f19e350] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "식기건조대" [ref=f19e353] [cursor=pointer]:
+                    - /url: /tags/%EC%8B%9D%EA%B8%B0%EA%B1%B4%EC%A1%B0%EB%8C%80/
+                  - link "추천" [ref=f19e356] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "식기건조대 추천" [ref=f19e359] [cursor=pointer]:
+                    - /url: /tags/%EC%8B%9D%EA%B8%B0%EA%B1%B4%EC%A1%B0%EB%8C%80-%EC%B6%94%EC%B2%9C/
+              - generic [ref=f19e362]: "설거지를 끝내고 그릇을 건조대에 올려놓았는데 물기가 덜 빠져서 그릇이 물에 젖어 있거나, 건조대가 너무 작아 큰 냄비를 올릴 공간이 없는 경험, 한 번쯤 있으시죠? 2026년 7월 기준으로 시중에는 다양한 식기건조대가 출시되어 있어 내 주방 환경과 사용 패턴에 맞는 제품을 고르는 것이 점점 까다로워지고 있습니다. 실제 판매 순위와 가격을 바탕으로 라이프리듬, 위시선, Kdo 등 주요 제품을 꼼꼼히 살펴보며 내 상황에 딱 맞는 식기건조대를 찾아보겠습니다. 식기건조대 고를 때 확인할 포인트 # 식기건조대를 선택할 때 가장 먼저 고려해야 할 것은 자동 물빠짐 기능입니다. 물받이 트레이가 따로 있는 제품은 그릇에서 흘러내린 물을 별도로 비워야 하지만, 자동 배수 방식은 건조대 자체에 경사가 있어 물이 싱크대 쪽으로 흘러가도록 설계되어 위생적이고 관리가 편리합니다. 특히 라이프리듬과 위시선 제품은 이 기능을 핵심으로 내세우고 있습니다."
+          - article [ref=f19e364]:
+            - generic [ref=f19e366]:
+              - link [ref=f19e368] [cursor=pointer]:
+                - /url: /posts/munjjing%EA%B3%BC-%ED%81%B4%EB%A6%B0-%EB%82%B4%EC%97%B4%EC%9C%A0%EB%A6%AC-%EC%8B%A4%EC%A0%9C-%EC%8D%A8%EB%B3%B8-%EC%9C%A0%EB%A6%AC%EB%B0%80%ED%8F%90%EC%9A%A9%EA%B8%B0-%EC%B6%94%EC%B2%9C-top-5/
+                - heading "Munjjing과 클린 내열유리 — 실제 써본 유리밀폐용기 추천 TOP 5" [level=2] [ref=f19e369]
+              - generic [ref=f19e370]:
+                - generic [ref=f19e371]:
+                  - time [ref=f19e372]: 2026년 7월 14일
+                  - generic [ref=f19e373]: ·
+                  - generic "읽는 시간" [ref=f19e374]: 6 분
+                - generic [ref=f19e375]:
+                  - link "추천" [ref=f19e376] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "유리밀폐용기" [ref=f19e379] [cursor=pointer]:
+                    - /url: /tags/%EC%9C%A0%EB%A6%AC%EB%B0%80%ED%8F%90%EC%9A%A9%EA%B8%B0/
+                  - link "추천" [ref=f19e382] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "엔에프락" [ref=f19e385] [cursor=pointer]:
+                    - /url: /tags/%EC%97%94%EC%97%90%ED%94%84%EB%9D%BD/
+                  - link "유리밀폐용기 추천" [ref=f19e388] [cursor=pointer]:
+                    - /url: /tags/%EC%9C%A0%EB%A6%AC%EB%B0%80%ED%8F%90%EC%9A%A9%EA%B8%B0-%EC%B6%94%EC%B2%9C/
+                  - link "글라스락" [ref=f19e391] [cursor=pointer]:
+                    - /url: /tags/%EA%B8%80%EB%9D%BC%EC%8A%A4%EB%9D%BD/
+                  - link "삼광글라스" [ref=f19e394] [cursor=pointer]:
+                    - /url: /tags/%EC%82%BC%EA%B4%91%EA%B8%80%EB%9D%BC%EC%8A%A4/
+              - generic [ref=f19e397]: "주방에서 반찬 보관용기 고르다 보면 ‘유리 vs 플라스틱’ 고민이 끊이지 않습니다. 특히 2026년 7월 기준으로 전자레인지·오븐·냉동실까지 자유자재로 사용할 수 있는 내열유리 용기가 인기를 끌고 있습니다. 반찬을 한 번에 많이 만들어 냉장 보관하거나, 밥을 지어 냉동실에 소분해두는 분들이라면 안전한 재질과 적당한 크기 구성이 무엇보다 중요합니다. 유리밀폐용기 고를 때 확인할 포인트 # 1. 소재: 내열유리인지 확인하세요 # 일반 유리는 열충격에 깨질 위험이 있습니다. 반드시 ‘내열유리’ 또는 ‘내열강화유리’ 표기가 있는 제품을 선택하세요. 전자레인지와 오븐 사용이 가능한지도 제품 설명에서 꼭 확인해야 합니다."
+          - article [ref=f19e399]:
+            - generic [ref=f19e401]:
+              - link [ref=f19e403] [cursor=pointer]:
+                - /url: /posts/%ED%95%B4%ED%94%BC%EC%BD%9C-%EB%A7%A4%EC%8B%9C%EB%B8%8C-vs-%ED%85%8C%ED%8C%94-%ED%8B%B0%ED%83%80%EB%8A%84%EA%B3%A8%EB%93%9C-2026%EB%85%84-%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8C%AC-%EA%B3%A0%EB%A5%B4%EB%8A%94-%EB%B2%95/
+                - heading "해피콜 매시브 vs 테팔 티타늄골드 — 2026년 프라이팬 고르는 법" [level=2] [ref=f19e404]
+              - generic [ref=f19e405]:
+                - generic [ref=f19e406]:
+                  - time [ref=f19e407]: 2026년 7월 14일
+                  - generic [ref=f19e408]: ·
+                  - generic "읽는 시간" [ref=f19e409]: 6 분
+                - generic [ref=f19e410]:
+                  - link "추천" [ref=f19e411] [cursor=pointer]:
+                    - /url: /categories/%EC%B6%94%EC%B2%9C/
+                  - link "알텐바흐" [ref=f19e414] [cursor=pointer]:
+                    - /url: /tags/%EC%95%8C%ED%85%90%EB%B0%94%ED%9D%90/
+                  - link "추천" [ref=f19e417] [cursor=pointer]:
+                    - /url: /tags/%EC%B6%94%EC%B2%9C/
+                  - link "해피콜" [ref=f19e420] [cursor=pointer]:
+                    - /url: /tags/%ED%95%B4%ED%94%BC%EC%BD%9C/
+                  - link "보오든" [ref=f19e423] [cursor=pointer]:
+                    - /url: /tags/%EB%B3%B4%EC%98%A4%EB%93%A0/
+                  - link "프라이팬" [ref=f19e426] [cursor=pointer]:
+                    - /url: /tags/%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8C%AC/
+                  - link "프라이팬 추천" [ref=f19e429] [cursor=pointer]:
+                    - /url: /tags/%ED%94%84%EB%9D%BC%EC%9D%B4%ED%8C%AC-%EC%B6%94%EC%B2%9C/
+              - generic [ref=f19e432]: "주말마다 가족과 함께 요리하는 시간이 가장 행복하다는 분들, 또는 1인 가구로 혼자서 간편하게 한 끼를 해결하는 분들까지, 프라이팬 선택은 생각보다 까다롭습니다. “이번에 산 프라이팬이 자꾸 달라붙어요”, “인덕션에서도 쓸 수 있는 제품이 뭘까요”, “가격 대비 얼마나 오래 쓸 수 있을지 모르겠어요” 같은 고민을 하는 분들을 위해 2026년 7월 기준, 시중에서 검증된 프라이팬 5종을 엄선해 추천합니다. 프라이팬 고를 때 확인할 포인트 # 프라이팬을 고를 때는 크게 네 가지를 따져보는 것이 좋습니다."
+        - link [ref=f19e435] [cursor=pointer]:
+          - /url: /posts
+          - button "더 보기" [ref=f19e436]
+      - link "맨 위로 스크롤" [ref=f19e438] [cursor=pointer]:
+        - /url: "#the-top"
+        - text: ↑
+    - contentinfo [ref=f19e439]:
+      - paragraph [ref=f19e441]: © 2026 주방용품 추천 가이드

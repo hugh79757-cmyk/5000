@@ -189,7 +189,8 @@ def register_cuap_entity(entity_type, entity_name, blog_id, post_slug,
     if not domain:
         logger.warning(f"Unknown blog_id: {blog_id}")
         return
-    post_url = f"{domain}/{post_slug}/"
+    # CUAP 블로그 permalink은 /posts/<slug>/ 형식 (Blowfish 테마 기본)
+    post_url = f"{domain}/posts/{post_slug}/"
     conn = _get_db()
     try:
         conn.execute("""
