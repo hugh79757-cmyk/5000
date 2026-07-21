@@ -1,3 +1,4 @@
+- 2026-07-21 | fix | kitchen-hugo-blank-body-fadein-fix | kitchen-hugo 모바일 본문 공백: fade-in-section CSS+JS 제거로 해결
 # Triage Index
 
 - 2026-07-20 | fix | thumbnail-unsplash-image-background | Replace old text-only thumbnails with Unsplash photo background + title overlay for stock, rap, senior
