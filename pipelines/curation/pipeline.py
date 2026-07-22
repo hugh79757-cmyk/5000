@@ -996,6 +996,9 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     # CUAP 엔티티 등록 (fail-open) — 다음 발행분부터 크로스 링크 대상
     try:
+        # 2026-07-22: publish()가 실제로 사용한 slug를 result["url"]에서 추출
+        # _make_slug(keyword)는 publish() 내부 slugify(title)와 항상 다를 수 있음
+        _actual_slug = result.get("url", "").rstrip("/").split("/")[-1] if result.get("url") else slug
         # 추천추천 중복 방지: keyword가 이미 "추천"으로 끝나면 한 번만
         _link_label = keyword.strip() if keyword.strip().endswith("추천") else f"{keyword.strip()} 추천"
         _link_label = _link_label.strip() or "추천"
@@ -1003,7 +1006,7 @@ def _run_inner(cfg, blog_id, daily_quota):
             entity_type="category",
             entity_name=keyword,
             blog_id=blog_id,
-            post_slug=slug,
+            post_slug=_actual_slug,
             link_label=_link_label,
             priority=50,
             published=1,
