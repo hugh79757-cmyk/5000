@@ -15,12 +15,17 @@ logger = logging.getLogger(__name__)
 _AI_RESIDUES = ["다듬은 제목", "추천 제목", "```", "##", "title:", "제목 후보"]
 
 def sanitize_title(title: str) -> str:
-    """제목에서 마크다운 잔여물 제거 + 연속 중복 단어 제거 + 부분 중복 제거"""
+    """제목에서 마크다운 잔여물 제거 + 연속 중복 단어 제거 + 부분 중복 제거
+    + (Phase 7) 날짜 prefix 제거 + 특수문자 정규화 + 65자 소프트 트렁케이션"""
     if not title:
         return title
     t = title.strip()
     # 1) 마크다운 볼드/이탤릭 기호 제거
     t = t.replace("**", "").replace("__", "")
+    # 1b) (Phase 7) 날짜 prefix 제거: "2026년 7월" → 제거
+    t = re.sub(r"^\d{4}년\s*\d{1,2}월\s*", "", t)
+    # 1c) (Phase 7) 특수문자 정규화: em dash, en dash, middle dot, bullet, full-width colon
+    t = re.sub(r"[—–·•：]", "", t)
     # 2) 연속 동일 단어 제거: "청주시 청주시" → "청주시"
     words = t.split()
     deduped = []
@@ -57,7 +62,12 @@ def sanitize_title(title: str) -> str:
             final.append(w)
     t = " ".join(final)
     # 5) 공백 정리
-    return _re.sub(r"\s+", " ", t).strip()
+    t = _re.sub(r"\s+", " ", t).strip()
+    # 6) (Phase 7) 65자 소프트 트렁케이션 — word boundary 우선, 없으면 exact 65
+    if len(t) > 65:
+        truncated = t[:65].rsplit(" ", 1)
+        t = truncated[0] + "…" if len(truncated) > 1 else t[:65]
+    return t
 
 
 _MIN_TITLE_LEN = 10

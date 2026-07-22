@@ -37,6 +37,63 @@ class TestSanitizeTitle:
         result = sanitize_title("여행코스 3곳 코스 추천")
         assert "코스" not in result or len(result.split()) < 4
 
+    # ── Phase 7: Title Quality Improvement ──
+    def test_strips_date_prefix(self):
+        result = sanitize_title("2026년 7월 립밤 추천 BEST 5")
+        assert result == "립밤 추천 BEST 5", f"expected '립밤 추천 BEST 5', got {result!r}"
+
+    def test_removes_en_dash(self):
+        result = sanitize_title("립밤 추천 – 하루 종일 촉촉한 선택")
+        assert "–" not in result
+
+    def test_removes_em_dash(self):
+        result = sanitize_title("립밤 추천 — 하루 종일 촉촉한 선택")
+        assert "—" not in result
+
+    def test_removes_bullet(self):
+        result = sanitize_title("립밤•추천 BEST 5")
+        assert "•" not in result
+
+    def test_removes_fullwidth_colon(self):
+        result = sanitize_title("립밤 추천：BEST 5")
+        assert "：" not in result
+
+    def test_removes_middle_dot(self):
+        result = sanitize_title("TOP5 · 추천 순위")
+        assert "·" not in result
+
+    def test_preserves_regular_colon(self):
+        result = sanitize_title("비교 분석: TOP5 선정")
+        assert ":" in result
+
+    def test_preserves_regular_hyphen(self):
+        result = sanitize_title("A vs B - comparison")
+        assert "-" in result
+
+    def test_clean_title_unchanged_by_new_stages(self):
+        result = sanitize_title("립밤 추천 BEST 5")
+        assert result == "립밤 추천 BEST 5"
+
+    def test_combined_multi_issue(self):
+        result = sanitize_title("2026년 7월 제주도 렌트카·SUV 추천 – BEST 5 선정")
+        assert "제주도 렌트카" in result
+
+    def test_soft_truncation_at_word_boundary(self):
+        long_title = "가 나 다 라 마 바 사 아 자 차 카 타 파 하 " * 5
+        result = sanitize_title(long_title)
+        assert len(result) <= 66  # 65 + "…"
+        assert result.endswith("…"), f"expected ellipsis, got {result!r}"
+
+    def test_soft_truncation_no_space(self):
+        long_title = "가나다라마바사" * 12  # 84 chars, no spaces
+        result = sanitize_title(long_title)
+        assert len(result) == 65, f"expected 65 chars, got {len(result)}: {result!r}"
+        assert not result.endswith("…")
+
+    def test_preserves_short_title(self):
+        result = sanitize_title("립밤 추천 BEST 5")
+        assert result == "립밤 추천 BEST 5"
+
 
 class TestStripHtml:
     def test_removes_html_tags(self):
