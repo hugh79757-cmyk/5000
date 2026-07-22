@@ -804,19 +804,48 @@ def _run_inner(cfg, blog_id, daily_quota):
         products = get_products(keyword, limit=10)
         products = _filter_used_products(blog_id, products)
 
-    # ── 관련성 점수 검증 게이트 ──
-    try:
-        scores = score_products(products, blog_id)
-        passed, reason = passes_gate(scores)
-        if not passed:
-            logger.warning(f"[{blog_id}] 관련성 점수 미달: {scores['avg']:.2f} < {scores['threshold']}")
-            _record_failure(blog_id, "low_relevance", f"관련성 점수 {scores['avg']:.2f} < 임계값 {scores['threshold']}", keyword)
-            return {"success": False, "reason": "low_relevance", "keyword": keyword}
-        logger.info(f"[{blog_id}] 관련성 점수: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
-    except Exception as e:
-        # Fail open: scoring exception should not block publication
-        logger.warning(f"[{blog_id}] 관련성 점수 계산 실패 (fail-open): {e}")
-        scores = {"avg": 1.0, "min": 1.0, "scores": [], "blog_id": blog_id, "threshold": 1.0}
+    # ── 관련성 점수 검증 게이트 (3-retry fallback — Phase 10) ──
+    # Note: low_relevance previously had zero retry. Now mirrors irrelevant_products logic.
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
+        try:
+            scores = score_products(products, blog_id)
+            passed, reason = passes_gate(scores)
+            if passed:
+                logger.info(f"[{blog_id}] 관련성 점수: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
+                break
+            logger.warning(f"[{blog_id}] 관련성 점수 미달 ({attempt}/{max_retries}): avg={scores['avg']:.2f} < {scores['threshold']}")
+            if attempt == max_retries:
+                _record_failure(blog_id, "low_relevance", f"{max_retries}회 재시도 후 점수 미달: avg={scores['avg']:.2f}", keyword)
+                return {"success": False, "reason": "low_relevance", "keyword": keyword}
+            # Fallback: pick another keyword and retry
+            all_kws = get_keywords(blog_id)
+            used_conn = sqlite3.connect(str(DB_PATH))
+            used = used_conn.execute(
+                """SELECT keyword FROM publish_log
+                   WHERE blog_id=? AND published_at > datetime('now', '-7 days')""",
+                (blog_id,)
+            ).fetchall()
+            used_conn.close()
+            used_set = {r[0] for r in used} | {keyword}
+            fallback_kws = [k for k in all_kws if k not in used_set]
+            if not fallback_kws:
+                _record_failure(blog_id, "low_relevance", "대체 키워드 없음", keyword)
+                return {"success": False, "reason": "low_relevance", "keyword": keyword}
+            keyword = fallback_kws[0]
+            logger.info(f"[{blog_id}] low_relevance 대체 키워드 ({attempt}/{max_retries}): {keyword}")
+            collect_keyword(keyword)
+            products = get_products(keyword, limit=10)
+            products = _filter_used_products(blog_id, products)
+            products = _filter_irrelevant_products(blog_id, keyword, products)
+            if len(products) < 3:
+                logger.warning(f"[{blog_id}] 대체 키워드 상품 부족 ({len(products)}개), 다음 fallback 시도")
+                continue
+        except Exception as e:
+            # Fail open: scoring exception should not block publication
+            logger.warning(f"[{blog_id}] 관련성 점수 계산 실패 (fail-open): {e}")
+            scores = {"avg": 1.0, "min": 1.0, "scores": [], "blog_id": blog_id, "threshold": 1.0}
+            break
 
     # 상품 데이터 인리치 (스펙 파싱 + 네이버 brand)
     products = enrich_products(products, blog_id)
