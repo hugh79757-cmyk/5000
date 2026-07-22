@@ -404,7 +404,7 @@ def build_funnel_header(blog_id):
 
     return (
         f'<div style="margin:0 0 16px;padding:12px 16px;background:#f8fafc;'
-        f'border-left:4px solid {color};border-radius:8px">\n'
+        f'border-radius:8px">\n'
         f'<p style="margin:0 0 6px;font-size:13px;color:#6b7280">'
         f'💡 다른 추천도 확인해보세요</p>\n'
         f'<div style="display:flex;flex-wrap:wrap">' + "\n".join(items_html) +

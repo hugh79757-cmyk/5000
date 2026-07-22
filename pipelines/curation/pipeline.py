@@ -996,12 +996,15 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     # CUAP 엔티티 등록 (fail-open) — 다음 발행분부터 크로스 링크 대상
     try:
+        # 추천추천 중복 방지: keyword가 이미 "추천"으로 끝나면 한 번만
+        _link_label = keyword.strip() if keyword.strip().endswith("추천") else f"{keyword.strip()} 추천"
+        _link_label = _link_label.strip() or "추천"
         register_cuap_entity(
             entity_type="category",
             entity_name=keyword,
             blog_id=blog_id,
             post_slug=slug,
-            link_label=f"{keyword} 추천",
+            link_label=_link_label,
             priority=50,
             published=1,
         )
