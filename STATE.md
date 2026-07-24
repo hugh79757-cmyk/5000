@@ -23,6 +23,7 @@
 | Phase 29 CUAP Content Fix | ✅ Complete | keywords 정리 + cuap_entities URL 정리 + beauty-hugo 재배포 |
 | Phase 30 CUAP AdSense Std | ✅ Complete | informationhot.kr 17개 블로그 표준화, live 광고 확인 |
 | Phase 31 rotcha AdSense Std | ✅ Complete | rotcha.kr 6개 Blowfish 블로그 표준화, live 광고 확인 |
+| Phase 10-1 Publishing Failure Hardening | ✅ Complete | kitchen-hugo 가정용 차단 + adaptive threshold + deploy retry |
 
 ---
 
