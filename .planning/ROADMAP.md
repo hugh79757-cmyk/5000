@@ -1,8 +1,8 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-07-21
+**Last updated:** 2026-07-24
 
-**Actual phases completed:** 28 phases 완료
+**Actual phases completed:** 29 phases 완료
 **현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
 
 ---
@@ -210,7 +210,7 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 
 ## Configuration
 
-**현재 Phase 체계:** 32 phases (Phase 32 진행 중)
+**현재 Phase 체계:** 37 phases (Phase 32 완료, Phase 40~44 예정)
 
 ## Phase 32: TAP Scheduler Unload (Dual Scheduling Risk Removal)
 **Status:** ✅ Complete (2026-07-24)
@@ -221,3 +221,82 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 - 검증: TAP scheduler 목록 제거 확인, 5000 scheduler 생존 확인, 잔여 프로세스 없음
 
 ---
+
+## Milestone 2: 콘텐츠 품질 혁신 (Phase 40–44)
+
+**테마:** 6개 블로그(블로거1 + 휴고5) 본문 품질 개선 → 데이터/이미지/타이틀 검증 → 퍼널 연결성 확보 → 4개 블로그 확장 → 전수조사 마감
+
+**전략:** 캠핑 블로그 1개로 완성 → 5개 전체 확장 (리스크 최소화)
+
+---
+
+### Phase 40: 본문 품질 개선 (파일럿: 캠핑 1개)
+**Priority:** 🔴 HIGH
+**Cycle:** 조사 → 진단 → 수정 → 검증(dry-run)
+**Status:** ✅ Complete (2026-07-24)
+- **변경 파일:** `config/models.yaml`(default.temperature 0.7→0.85), `pipelines/travel/writer.py`(max_tokens=4800), `config/prompts/travel.yaml`(분량 3,500→3,000자, ANTI-HALLUCINATION 2줄 추가)
+- **40-01:** 현재 파라미터 확인 — temperature=0.7(하드코딩), max_tokens 미지정, 공통 모듈(`shared/ai_writer.py`) 통해 API 호출
+- **40-02:** A/B dry-run 비교 — A(0.7/4096)=2,675자 vs B(1.0/6000)=3,109자
+- **40-03:** 3개 파일 수정 완료 (models.yaml temperature 0.85, writer.py max_tokens=4800, prompts.yaml tour1_camping 개선)
+- **40-04:** 최종 dry-run 검증 — 3,228자, 예약처 환각 0건, 문장 온전함
+- **40-05:** 문서화 완료 (VERIFICATION.md, SUMMARY.md)
+- **핵심 성과:** "네이버 카페"/"전화 예매"/"OO공단 홈페이지" 등 지어낸 예약 창구 완전 제거
+- **VERIFICATION.md:** `.planning/phase-40-content-quality-pilot/VERIFICATION.md`
+
+---
+
+### Phase 41: 데이터·이미지·타이틀 로직 검증 (캠핑 1개)
+**Priority:** 🔴 HIGH
+**Cycle:** 조사 → 진단 → 수정 → 검증(dry-run)
+**Status:** 📋 Planned
+- **Scope:** 대표님 2번 항목 — 데이터는 정상으로 확인됨, 생성/누락/일치 여부 검증
+- **Sub-tasks:**
+  - 41-01: 썸네일(`thumbnail_url`) 생성/누락 여부 검증
+  - 41-02: 삽입이미지(`firstImageUrl`) 생성/누락 여부 검증
+  - 41-03: 타이틀 생성 로직(`TITLE_TEMPLATES` + xiaomimimo API 호출) 검증
+  - 41-04: 제목-본문 일치 여부 검증
+  - 41-05: 발견된 문제 수정 및 dry-run 재검증
+- **Acceptance:** 캠핑 블로그 dry-run 5건에서 thumbnail/firstImage/타이틀 모두 정상 생성, 제목과 본문 불일치 0건
+
+---
+
+### Phase 42: 퍼널(funnel) 설계 검증 (5개 블로그 연결)
+**Priority:** 🔴 HIGH
+**Cycle:** 진단 → 검증
+**Status:** 📋 Planned
+- **Scope:** 대표님 4번 항목 — 5개 블로그 간 크로스링크 연결성 확인
+- **Sub-tasks:**
+  - 42-01: 각 블로그 글 하단 크로스링크(관련글·nearby-card·"함께 읽어보기") 렌더링 검증
+  - 42-02: raw 텍스트 노출 없이 렌더링되는지 확인
+  - 42-03: 캠핑→코스→맛집 독자 흐름(funnel) 설계대로 도는지 검증
+  - 42-04: "크로스링크 raw 노출" 결함 정리 및 수정
+- **Acceptance:** 5개 블로그 전체에서 크로스링크가 깨짐 없이 연결, raw 텍스트 노출 0건
+
+---
+
+### Phase 43: 나머지 4개 블로그로 확장
+**Priority:** 🟡 MEDIUM
+**Cycle:** 조사 → 수정 → 검증(dry-run)
+**Status:** 📋 Planned
+- **Scope:** Phase 40~41 확정 패턴을 travel1(축제)·travel2(문화유산)·travel3(맛집)·travel4(코스)에 적용
+- **Sub-tasks:**
+  - 43-01: 각 주제별 데이터 필드 분석 (축제=입장료/기간, 맛집=메뉴/영업시간 등)
+  - 43-02: Phase 40 개선 패턴을 주제 특성에 맞게 각 프롬프트에 적용
+  - 43-03: 블로그별 dry-run 검증
+  - 43-04: 문제 발견 시 개별 수정
+- **Acceptance:** 4개 블로그 dry-run 각 5건 통과, 주제별 데이터 필드 정상 반영
+
+---
+
+### Phase 44: 전수조사 및 전체 수정
+**Priority:** 🟡 MEDIUM
+**Cycle:** 진단 → 수정 → 검증
+**Status:** 📋 Planned
+- **Scope:** 대표님 5번 항목 — 6개 블로그 전체 최종 품질 점검
+- **Sub-tasks:**
+  - 44-01: 최종 품질 기준 체크리스트 정의
+  - 44-02: 6개 블로그(블로거1 + 휴고5) 전체 전수 점검
+  - 44-03: 신규 발행이 개선 기준을 통과하는지 확인
+  - 44-04: 미달 항목 최종 수정
+  - 44-05: 마무리 및 커밋
+- **Acceptance:** 6개 블로그 전체 품질 기준 충족, 추가 수정 불필요

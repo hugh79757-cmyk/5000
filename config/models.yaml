@@ -1,7 +1,7 @@
 default:
   provider: deepseek
   model: deepseek-v4-flash
-  temperature: 0.7
+  temperature: 0.85
 
 fallback:
   provider: mimo

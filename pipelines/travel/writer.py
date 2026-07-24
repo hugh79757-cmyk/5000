@@ -1052,7 +1052,7 @@ def generate_content(data, blog_id="travel-hugo"):
         )
         user_prompt = name_constraint + user_prompt
 
-    result = ai_generate(system_prompt, user_prompt, tier="default")
+    result = ai_generate(system_prompt, user_prompt, tier="default", max_tokens=4800)
 
     if not result or not result.get("content"):
         logger.error("AI 생성 실패: prompt_id=%s", prompt_id)
