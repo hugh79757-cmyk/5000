@@ -2,7 +2,7 @@
 
 **Goal:** Eliminate the duplicate `tap-blogger` publish trigger by unload-disabling TAP's own launchd scheduler, leaving 5000 dispatcher as the sole publisher.
 
-**Mode:** execution-complete (retrospective — executed 2026-07-24)
+**Mode:** execution-complete
 
 ## Context
 
@@ -37,14 +37,14 @@ Fix scope is limited to launchd service state. No `.py`, `.env`, or DB changes w
 
 ## Verification Criteria
 
-| Criterion | Evidence | Status |
-|-----------|----------|--------|
-| TAP scheduler unloaded | `launchctl list` no longer shows `com.tap.scheduler` | verified |
-| 5000 scheduler alive | PID 787 present with exit 0 | verified |
-| No residual TAP processes | `ps aux` grep returned none | verified |
-| Backup exists | `.bak_20260724` file present, size 1085 | verified |
-| 5000 tap-blogger path intact | `tap.yaml` active + `_run_tap_subprocess` exists | verified |
-| No code/DB/env mutation | Only plist moved; no `.py`/`.env`/DB edits | verified |
+| Criterion | Source | Pass when |
+|-----------|--------|-----------|
+| TAP scheduler unloaded | `launchctl list` | `com.tap.scheduler` absent |
+| 5000 scheduler alive | `launchctl list` | PID 787 present with exit 0 |
+| No residual TAP processes | `ps aux` grep | zero matches |
+| Backup exists | filesystem | `.bak_20260724` present, size 1085 |
+| 5000 tap-blogger path intact | `tap.yaml` + `dispatcher.py` | active status + `_run_tap_subprocess` exists |
+| No code/DB/env mutation | filesystem/git | only plist moved; no `.py`/`.env`/DB edits |
 
 ## Rollback Procedure (documented, not executed)
 
