@@ -23,7 +23,7 @@ def load_models_config():
 def get_client(provider_name, providers):
     provider = providers[provider_name]
     api_key = os.getenv(provider["api_key_env"], "")
-    return OpenAI(api_key=api_key, base_url=provider["base_url"], timeout=60)
+    return OpenAI(api_key=api_key, base_url=provider["base_url"], timeout=300)
 
 
 def _is_chinese_content(text: str) -> bool:
@@ -89,39 +89,47 @@ def generate(
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
 
-        try:
-            client = get_client(tier_config["provider"], providers)
-            response = client.chat.completions.create(**kwargs)
-            content = response.choices[0].message.content
+        # Retry logic for API failures - 1 retry allowed
+        client = None
+        content = None
+        for retry_attempt in range(2):  # 1 initial attempt + 1 retry
+            try:
+                client = get_client(tier_config["provider"], providers)
+                response = client.chat.completions.create(**kwargs)
+                content = response.choices[0].message.content
+                break  # Success, exit retry loop
+            except Exception as e:
+                if retry_attempt == 0:  # First failure, retry once
+                    logger.warning(f"[ai_writer] {attempt_tier} API 요청 실패 (재시도 중): {e}")
+                    continue
+                else:  # Second failure, log and continue to next tier
+                    last_error = f"{attempt_tier}: {e}"
+                    logger.exception(f"[ai_writer] {last_error}")
+                    continue
 
-            if not content:
-                last_error = f"{attempt_tier}: 빈 응답"
-                logger.warning(f"[ai_writer] {last_error}")
-                continue
-
-            content = _clean_ai_output(content)
-
-            # 중국어 검증
-            if _is_chinese_content(content):
-                last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
-                logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
-                continue
-
-            logger.info(
-                f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
-            )
-            return {
-                "content": content,
-                "model": tier_config["model"],
-                "provider": tier_config["provider"],
-                "tier": attempt_tier,
-                "tokens_used": response.usage.total_tokens if response.usage else 0,
-            }
-
-        except Exception as e:
-            last_error = f"{attempt_tier}: {e}"
-            logger.exception(f"[ai_writer] {last_error}")
+        if not content:
+            last_error = f"{attempt_tier}: 빈 응답"
+            logger.warning(f"[ai_writer] {last_error}")
             continue
+
+        content = _clean_ai_output(content)
+
+        # 중국어 검증
+        if _is_chinese_content(content):
+            last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
+            logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
+            continue
+
+        logger.info(
+            f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
+        )
+        return {
+            "content": content,
+            "model": tier_config["model"],
+            "provider": tier_config["provider"],
+            "tier": attempt_tier,
+            "tokens_used": response.usage.total_tokens if response.usage else 0,
+        }
 
     # 모든 tier 실패
     msg = f"모든 LLM tier 실패: {last_error}"

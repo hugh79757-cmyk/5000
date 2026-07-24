@@ -1,0 +1,29 @@
+68a69,70
+>         if not isinstance(item, dict):
+>             continue
+562a565,566
+>                 if not isinstance(item, dict):
+>                     return False
+573c577
+<             with_img = [i for i in _mixed if i.get("firstimage")]
+---
+>             with_img = [i for i in _mixed if isinstance(i, dict) and i.get("firstimage")]
+575c579
+<             pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+---
+>             pool = [item for item in pool if isinstance(item, dict) and str(item.get("contentid", "")) not in _published_cids]
+585c589
+<             content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+---
+>             content_ids = [str(item.get("contentid", "")) for item in selected if isinstance(item, dict) and item.get("contentid")]
+636a641,642
+>                 if not isinstance(item, dict):
+>                     return False
+646c652
+<             with_img = [i for i in _mixed if i.get("firstimage")]
+---
+>             with_img = [i for i in _mixed if isinstance(i, dict) and i.get("firstimage")]
+657c663
+<             content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+---
+>             content_ids = [str(item.get("contentid", "")) for item in selected if isinstance(item, dict) and item.get("contentid")]
