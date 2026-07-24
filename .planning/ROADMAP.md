@@ -210,4 +210,14 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 
 ## Configuration
 
-**현재 Phase 체계:** 29 phases (Phase 29 진행 중)
+**현재 Phase 체계:** 32 phases (Phase 32 진행 중)
+
+## Phase 32: TAP Scheduler Unload (Dual Scheduling Risk Removal)
+**Status:** ✅ Complete (2026-07-24)
+- V-1 dual scheduling risk 해결: `com.tap.scheduler` 언로드 + plist 비활성화
+- `tap-blogger` 발행 주체를 5000 dispatcher로 일원화
+- 코드/DB/발행 로직 변경 없음, launchd 서비스 상태만 변경
+- 백업: `~/Library/LaunchAgents/com.tap.scheduler.plist.bak_20260724`
+- 검증: TAP scheduler 목록 제거 확인, 5000 scheduler 생존 확인, 잔여 프로세스 없음
+
+---
