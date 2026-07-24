@@ -66,6 +66,8 @@ def _adapt_korservice_items(items_raw):
     from core.naver_map import get_naver_map_link
     adapted = []
     for item in items_raw:
+        if not isinstance(item, dict):
+            continue
         title_val = item.get("title", "")
         import re as _re; title_val = _re.sub(r"202[0-4]", "2026", title_val)
         addr_val = item.get("addr1", item.get("baseAddr", ""))
@@ -560,6 +562,8 @@ def fetch_food():
             # 음식점 + 카페 혼합
             _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
             def _is_cafe(item):
+                if not isinstance(item, dict):
+                    return False
                 return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
             _restaurants = [i for i in items_raw if not _is_cafe(i)]
             _cafes = [i for i in items_raw if _is_cafe(i)]
@@ -570,9 +574,9 @@ def fetch_food():
             else:
                 _mixed = items_raw
 
-            with_img = [i for i in _mixed if i.get("firstimage")]
+            with_img = [i for i in _mixed if isinstance(i, dict) and i.get("firstimage")]
             pool = with_img if len(with_img) >= 3 else _mixed
-            pool = [item for item in pool if str(item.get("contentid", "")) not in _published_cids]
+            pool = [item for item in pool if isinstance(item, dict) and str(item.get("contentid", "")) not in _published_cids]
 
             if len(pool) < 3:
                 logger.info(f"food: {do_name} {sigungu_name} 중복 제외 후 {len(pool)}건 → 다음 시군구")
@@ -582,7 +586,7 @@ def fetch_food():
             selected = random.sample(pool, min(3, len(pool)))
             adapted = _adapt_korservice_items(selected)
             display = f"{do_name} {sigungu_name}"
-            content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+            content_ids = [str(item.get("contentid", "")) for item in selected if isinstance(item, dict) and item.get("contentid")]
 
             logger.info(f"food 선택: {do_name} {sigungu_name} {len(selected)}건")
             return {
@@ -634,6 +638,8 @@ def fetch_food():
                 continue
             _cafe_kw = {"카페", "cafe", "커피", "디저트", "베이커리", "빵집", "브런치", "펫카페", "애견카페"}
             def _is_cafe_fb(item):
+                if not isinstance(item, dict):
+                    return False
                 return any(kw in (item.get("title", "") or "").lower() for kw in _cafe_kw)
             _restaurants = [i for i in items_raw if not _is_cafe_fb(i)]
             _cafes = [i for i in items_raw if _is_cafe_fb(i)]
@@ -643,7 +649,7 @@ def fetch_food():
                 _mixed = _restaurants
             else:
                 _mixed = items_raw
-            with_img = [i for i in _mixed if i.get("firstimage")]
+            with_img = [i for i in _mixed if isinstance(i, dict) and i.get("firstimage")]
             pool = with_img if len(with_img) >= 2 else _mixed
             if len(pool) < 2:
                 if len(pool) == 1:
@@ -654,7 +660,7 @@ def fetch_food():
                 selected = random.sample(pool, min(2, len(pool)))
             adapted = _adapt_korservice_items(selected)
             display = f"{do_name} {sigungu_name}"
-            content_ids = [str(item.get("contentid", "")) for item in selected if item.get("contentid")]
+            content_ids = [str(item.get("contentid", "")) for item in selected if isinstance(item, dict) and item.get("contentid")]
             logger.info(f"food fallback 성공: {do_name} {sigungu_name} {len(selected)}건")
             return {
                 "items": adapted,
