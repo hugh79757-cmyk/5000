@@ -694,6 +694,39 @@ def _post_process(content):
     content = content.replace("만끽하며", "충분히 경험하며")
     content = content.replace("만끽할", "충분히 즐길")
 
+    # ── 이동시간 정보 제거 (course blog 전용 금지 규칙) ──
+    if getattr(_post_process, "_current_blog_id", "") == "travel4-hugo":
+        logger.info("Applying movement time filtering for course blog...")
+        
+        # 이동시간 관련 표현 제거 (더 포괄적인 패턴)
+        import re as _re
+        
+        movement_patterns = [
+            (r'차로\s*\d+\s*분', ""),    # "차로 30분"
+            (r'도보\s*\d+\s*분', ""),    # "도보 15분"  
+            (r'버스\s*\d+\s*분', ""),    # "버스 25분"
+            (r'지하철\s*\d+\s*분', ""),  # "지하철 20분"
+            (r'차로\s*\d+\s*시간', ""),  # "차로 2시간"
+            (r'도보\s*\d+\s*시간', ""),  # "도보 1시간"
+            (r'\d+\s*분\s*(걸어서|걸리다|소요|걸리며|걸립니다)', ""),  # "30분 걸려서", "소요 30분"
+            (r'\d+\s*시간\s*(걸어서|걸리다|소요|걸리며|걸립니다)', ""),  # "1시간 걸려서"
+            (r'걸어\s*\d+\s*분', ""),    # "걸어 20분"
+            (r'걸어\s*\d+\s*시간', ""),  # "걸어 1시간"
+            (r'(\b\d+\s*분)\b(?!\s*(먹다|기다리다|준비|요리|요리시간|조리|쉬다|휴식|식사|저녁|점심|아침))', ""),  # "30분" (음식/대기/활동 제외)
+            (r'(\b\d+\s*시간)\b(?!\s*(먹다|기다리다|참가|보내다|즐기다|체험|활동|프로그램|이벤트|참석|방문))', ""),   # "2시간" (활동 제외)
+        ]
+        
+        old_content = content
+        for pattern, replacement in movement_patterns:
+            content = _re.sub(pattern, replacement, content)
+        
+        # 최종 정리: 남아있는 숫자+분/시간 조합 제거 (이동시간으로만 해석될 수 있는 경우)
+        content = _re.sub(r'\b\d+\s*분\b', "", content)  # "30분" 등 모든 분 제거
+        content = _re.sub(r'\b\d+\s*시간\b', "", content)  # "2시간" 등 모든 시간 제거
+        
+        removed_count = len(_re.findall(r'\b\d+\s*(분|시간)\b', old_content)) - len(_re.findall(r'\b\d+\s*(분|시간)\b', content))
+        logger.info(f"Movement time filtering completed. Removed {removed_count} time expressions")
+
     # ── H2 없는 H3 가드: 첫 H3 위에 H2가 없으면 자동 삽입 ─────
     _lines = content.split("\n")
     _found_first_h2 = False
@@ -1343,20 +1376,32 @@ def generate_content(data, blog_id="travel-hugo"):
 - 당일치기 강화도 역사 코스 3곳 순서 정리
 """
 
-    title_result = ai_generate(
-        "블로그 제목 생성 전문가. 제목 1개만 출력.",
-        title_prompt,
-        tier="default",
-        temperature=0.85,
-        max_tokens=80
-    )
-
-    if title_result and title_result.get("content"):
+    # Enhanced title generation with fallback mechanism
+    import time
+    start_time = time.time()
+    title_result = None
+    
+    # Try AI generation with timeout protection
+    try:
+        title_result = ai_generate(
+            "블로그 제목 생성 전문가. 제목 1개만 출력.",
+            title_prompt,
+            tier="default",
+            temperature=0.6
+        )
+    except Exception as e:
+        logger.warning(f"AI title generation failed: {e}")
+        title_result = None
+    
+    # Check if AI generation succeeded and result is valid
+    if title_result and title_result.get("content") and len(title_result.get("content", "").strip()) > 0:
         generated_title = title_result["content"].strip().strip('"').strip("'").strip()
         generated_title = re.sub(r"^(제목[:\s]*|Title[:\s]*)", "", generated_title).strip()
+        
         # "1곳" 어색한 제목 보정
         if "1곳" in generated_title:
             generated_title = generated_title.replace(" 1곳", "").replace("1곳 ", "")
+        
         if len(generated_title) > 5:
             import random as _r
             import re as _re
@@ -1380,6 +1425,10 @@ def generate_content(data, blog_id="travel-hugo"):
             if display_region and len(display_region) >= 2 and display_region not in generated_title:
                 generated_title = fallback_title
             title = generated_title
+    else:
+        # AI generation failed, use fallback title
+        logger.info(f"AI title generation failed or returned empty content. Using fallback title: {fallback_title}")
+        title = fallback_title
 
     validated_region = validate_display_region(display_region)
     if display_region and not validated_region:
