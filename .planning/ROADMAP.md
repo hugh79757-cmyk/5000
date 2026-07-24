@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-07-24
 
-**Actual phases completed:** 29 phases 완료
+**Actual phases completed:** 31 phases 완료
 **현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
 
 ---
@@ -248,29 +248,30 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 ### Phase 41: 데이터·이미지·타이틀 로직 검증 (캠핑 1개)
 **Priority:** 🔴 HIGH
 **Cycle:** 조사 → 진단 → 수정 → 검증(dry-run)
-**Status:** 📋 Planned
-- **Scope:** 대표님 2번 항목 — 데이터는 정상으로 확인됨, 생성/누락/일치 여부 검증
-- **Sub-tasks:**
-  - 41-01: 썸네일(`thumbnail_url`) 생성/누락 여부 검증
-  - 41-02: 삽입이미지(`firstImageUrl`) 생성/누락 여부 검증
-  - 41-03: 타이틀 생성 로직(`TITLE_TEMPLATES` + xiaomimimo API 호출) 검증
-  - 41-04: 제목-본문 일치 여부 검증
-  - 41-05: 발견된 문제 수정 및 dry-run 재검증
-- **Acceptance:** 캠핑 블로그 dry-run 5건에서 thumbnail/firstImage/타이틀 모두 정상 생성, 제목과 본문 불일치 0건
+**Status:** ✅ Complete (2026-07-24)
+- **결론:** 결함 0건, 수정 불필요. 모든 영역 정상 동작 확인
+- **41-01:** 썸네일 — `generate_content()` 미반환, Hugo 기본 fallback 사용 (의도된 설계)
+- **41-02:** 본문 이미지 — `_inject_images()` 정상, 중복 이미지 스킵 설계 의도 확인
+- **41-03:** 타이틀 — TITLE_TEMPLATES + MiMo API 정상, 제목 숫자(2곳)와 items_count(2) 일치
+- **41-04:** 제목-본문 일치 — 지역명·장소명 일치 확인, 코드 검증 미구현 (프롬프트 의존)
+- **41-05:** 수정 불필요 — 검증만으로 종료
+- **이월 리스크:** 제목-본문 일치 코드 검증 미구현 → 향후 리스크
+- **RESEARCH.md:** `.planning/phase-41-data-image-title-validation/RESEARCH.md`
+- **VERIFICATION.md:** `.planning/phase-41-data-image-title-validation/VERIFICATION.md`
 
 ---
 
 ### Phase 42: 퍼널(funnel) 설계 검증 (5개 블로그 연결)
 **Priority:** 🔴 HIGH
 **Cycle:** 진단 → 검증
-**Status:** 📋 Planned
-- **Scope:** 대표님 4번 항목 — 5개 블로그 간 크로스링크 연결성 확인
-- **Sub-tasks:**
-  - 42-01: 각 블로그 글 하단 크로스링크(관련글·nearby-card·"함께 읽어보기") 렌더링 검증
-  - 42-02: raw 텍스트 노출 없이 렌더링되는지 확인
-  - 42-03: 캠핑→코스→맛집 독자 흐름(funnel) 설계대로 도는지 검증
-  - 42-04: "크로스링크 raw 노출" 결함 정리 및 수정
-- **Acceptance:** 5개 블로그 전체에서 크로스링크가 깨짐 없이 연결, raw 텍스트 노출 0건
+**Status:** ✅ Complete (2026-07-24)
+- **결론:** 렌더링 결함 0건, 퍼널 단방향 구조는 의도된 설계로 확정
+- **42-01:** 크로스링크 3종(shortcode/nearby-card/funnel-card) 전수 검증 → 모두 정상 렌더링
+- **42-02:** raw 텍스트 노출 0건 — `{{< article >}}` shortcode 정상, div HTML balance 0
+- **42-03:** 퍼널 단방향(4개 landing → 코스) 확인. bridge_to 전부 미설계. Blogger 퍼널 미적용
+- **42-04:** "크로스링크 raw 노출" 결함 — 실재하지 않음 확인. 구두로 우려된 내용이었음
+- **이월 리스크:** 퍼널 양방향/상호순환 미구현, Blogger 퍼널 미적용 → 트래픽 증가 후 재검토
+- **VERIFICATION.md:** `.planning/phase-42-funnel-validation/VERIFICATION.md`
 
 ---
 
