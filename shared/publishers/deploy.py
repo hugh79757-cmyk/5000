@@ -12,6 +12,30 @@ from shared.paths import FIVEK_ROOT, SHARED_THEMES, HUGO_PATH, WRANGLER_PATH
 logger = logging.getLogger(__name__)
 
 
+def _pre_deploy_validate(site: Path) -> None:
+    """배포 전 기본 검증 (Phase 10-1)"""
+    index_file = site / "public" / "index.html"
+    if not index_file.exists():
+        raise Exception("Hugo build produced empty site: public/index.html not found")
+
+
+def _run_hugo_build(site: Path, env: dict, log_path: Path) -> bool:
+    """Hugo 빌드 재시도 포함 실행 (Phase 10-1)"""
+    for build_attempt in range(2):
+        with open(log_path, "a") as log_f:
+            result = subprocess.run(
+                [HUGO_PATH, "--gc", "--minify"],
+                cwd=str(site), stdout=log_f, stderr=log_f,
+                env=env, timeout=120
+            )
+        if result.returncode == 0:
+            return True
+        if build_attempt < 1:
+            time.sleep(5)
+            print(f"[deploy] {site.name} Hugo build 재시도 {build_attempt + 1}/2")
+    return False
+
+
 def deploy_site(site_path, cf_project) -> bool:
     Path(site_path)
     import fcntl as _fl
@@ -79,17 +103,9 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
         _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
 
     log_path = Path(os.path.join(FIVEK_ROOT, "logs", "deploy.log"))
-    with open(log_path, "a") as log_f:
-        result = subprocess.run(
-            [HUGO_PATH, "--gc", "--minify"],
-            cwd=str(site), stdout=log_f, stderr=log_f,
-            env=_wrangler_env, timeout=120
-        )
-    if result.returncode != 0:
+    if not _run_hugo_build(site, _wrangler_env, log_path):
         raise Exception("Hugo build failed: see deploy.log")
-    index_file = site / "public" / "index.html"
-    if not index_file.exists():
-        raise Exception("Hugo build produced empty site: public/index.html not found")
+    _pre_deploy_validate(site)
 
     wf = site / "wrangler.toml"
     use_workers = wf.exists() and "[assets]" in wf.read_text()
@@ -117,37 +133,37 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
         except subprocess.TimeoutExpired:
             msg = f"Wrangler deploy timed out ({_deploy_timeout}s)"
             raise Exception(msg)
+    # Wrangler deploy 재시도 (지수 백오프) — Phase 10-1
     if result.returncode != 0:
-        err_text = (result.stderr or "").lower()
-        if "fetch failed" in err_text or "fetch error" in err_text or "network" in err_text:
-            for attempt in range(2):
-                time.sleep(10 * (attempt + 1))
-                print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 (network error)")
-                with open(log_path, "a") as log_f:
-                    try:
-                        if use_workers:
-                            result = subprocess.run(
-[WRANGLER_PATH, "deploy",
-                                 "--config", str(wf)],
-                                cwd=str(site), stdout=log_f, stderr=log_f,
-                                env=_wrangler_env, timeout=_deploy_timeout
-                            )
-                        else:
-                            result = subprocess.run(
-                                [WRANGLER_PATH, "pages", "deploy", "./public",
-                                 "--project-name=" + cf_project,
-                                 "--branch=main",
-                                 "--commit-dirty=true",
-                                 "--commit-message=deploy-" + time.strftime("%Y%m%d%H%M%S")],
-                                cwd=str(site), stdout=log_f, stderr=log_f,
-                                env=_wrangler_env, timeout=_deploy_timeout
-                            )
-                    except subprocess.TimeoutExpired:
-                        print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 timeout ({_deploy_timeout}s)")
-                        continue
-                if result.returncode == 0:
-                    print(f"[deploy] {site.name} 재시도 성공")
-                    break
+        for deploy_attempt in range(2):
+            sleep_secs = 10 * (deploy_attempt + 1)
+            print(f"[deploy] {site.name} 재시도 {deploy_attempt + 1}/2 ({sleep_secs}s 대기)")
+            time.sleep(sleep_secs)
+            with open(log_path, "a") as log_f:
+                try:
+                    if use_workers:
+                        result = subprocess.run(
+                            [WRANGLER_PATH, "deploy",
+                             "--config", str(wf)],
+                            cwd=str(site), stdout=log_f, stderr=log_f,
+                            env=_wrangler_env, timeout=_deploy_timeout
+                        )
+                    else:
+                        result = subprocess.run(
+                            [WRANGLER_PATH, "pages", "deploy", "./public",
+                             "--project-name=" + cf_project,
+                             "--branch=main",
+                             "--commit-dirty=true",
+                             "--commit-message=deploy-" + time.strftime("%Y%m%d%H%M%S")],
+                            cwd=str(site), stdout=log_f, stderr=log_f,
+                            env=_wrangler_env, timeout=_deploy_timeout
+                        )
+                except subprocess.TimeoutExpired:
+                    print(f"[deploy] {site.name} 재시도 {deploy_attempt + 1}/2 timeout ({_deploy_timeout}s)")
+                    continue
+            if result.returncode == 0:
+                print(f"[deploy] {site.name} 재시도 성공")
+                break
         if result.returncode != 0:
             raise Exception("Wrangler deploy failed: see deploy.log")
     return True

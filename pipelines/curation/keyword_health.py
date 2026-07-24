@@ -114,13 +114,19 @@ class KeywordHealthStore:
         })
         failure_history = failure_history[-10:]
 
-        # 지수 백오프 계산
-        # consecutive_failures=1 → BACKOFF_HOURS[0] (1h)
-        # consecutive_failures=2 → BACKOFF_HOURS[1] (4h)
-        # consecutive_failures=5+ → BACKOFF_HOURS[4] (720h = 30d)
-        backoff_index = min(consecutive_failures - 1, len(BACKOFF_HOURS) - 1)
-        backoff_hours = BACKOFF_HOURS[backoff_index]
-        quarantined_until = (now + timedelta(hours=backoff_hours)).isoformat()
+        # low_relevance 가중치 — 관련성 미달은 재발 위험이 높으므로 +1 추가
+        if reason == "low_relevance":
+            consecutive_failures += 1
+
+        # permanent-ish quarantine:
+        # - low_relevance 3회 이상 → 90일 격리
+        # - 전체 실패 5회 이상 → 90일 격리
+        if (reason == "low_relevance" and consecutive_failures >= 3) or consecutive_failures >= 5:
+            quarantined_until = (now + timedelta(days=90)).isoformat()
+        else:
+            backoff_index = min(consecutive_failures - 1, len(BACKOFF_HOURS) - 1)
+            backoff_hours = BACKOFF_HOURS[backoff_index]
+            quarantined_until = (now + timedelta(hours=backoff_hours)).isoformat()
 
         # 격리 상한선 확인 (새로 격리되는 키워드만 체크)
         # 이미 격리 중인 키워드는 갱신만 수행
@@ -219,6 +225,19 @@ class KeywordHealthStore:
             ).fetchall()
         conn.close()
         return [dict(r) for r in rows]
+
+    def get_recent_failed_keywords(self, blog_id: str, reason: str, days: int = 14) -> list[str]:
+        """최근 N일 내 특정 사유로 실패한 키워드 목록 반환"""
+        now = datetime.now().isoformat()
+        conn = self._get_conn()
+        rows = conn.execute(
+            "SELECT keyword FROM keyword_health"
+            " WHERE blog_id=? AND last_failure_reason=?"
+            " AND last_failure_at > datetime(?, ?)",
+            (blog_id, reason, now, f"-{days} days"),
+        ).fetchall()
+        conn.close()
+        return [r[0] for r in rows]
 
     def get_health_summary(self, blog_id: str) -> dict:
         """블로그 키워드 건강 요약

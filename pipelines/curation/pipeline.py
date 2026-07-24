@@ -163,6 +163,12 @@ def _select_keyword(blog_id):
     available = [k for k in keywords if k not in used_set]
     # 격리된 키워드 제외
     available = [k for k in available if not health_store.is_quarantined(blog_id, k)]
+    # 최근 14일 내 low_relevance 실패 키워드 제외 (Phase 10-1 pre-collect gate)
+    try:
+        low_relevance_failed = health_store.get_recent_failed_keywords(blog_id, "low_relevance", days=14)
+        available = [k for k in available if k not in set(low_relevance_failed)]
+    except Exception:
+        pass
     if not available:
         conn.close()
         if len(keywords) > 0:
@@ -372,7 +378,8 @@ CATEGORY_FILTERS = {
                      "밀폐용기", "진공", "보온병", "런치박스", "반찬통",
                      "뒤집개", "국자", "스테인리스", "세라믹", "실리콘"],
         "blocked": ["패션", "의류", "반려동물", "완구", "장난감", "건강식품", "영양제",
-                     "생활용품", "가전디지털", "출산/유아", "스포츠/레저", "식품"],
+                     "생활용품", "가전디지털", "출산/유아", "스포츠/레저", "식품",
+                     "가정용"],
         "required": [],
     },
     "beauty-hugo": {
@@ -660,11 +667,23 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
         logger.warning(f"[ledger] 실패 기록 오류: {e}")
 
     # 키워드 건강 기록 (curation.db)
+    consecutive = 0
     if keyword:
         try:
             health_store.record_failure(blog_id, keyword, stage)
+            row = health_store._get_row(blog_id, keyword)
+            if row:
+                consecutive = row.get("consecutive_failures", 0)
         except Exception as e:
             logger.warning(f"[keyword_health] 기록 오류: {e}")
+    
+    # 연속 3회 이상 실패 시 Telegram 알림 (Phase 10-1)
+    if consecutive >= 3:
+        try:
+            from shared.telegram_notifier import send_error as _tg_error
+            _tg_error(blog_id, stage, f"연속 {consecutive}회 실패: {error_msg} ({keyword})")
+        except Exception as e:
+            logger.warning(f"[telegram] 알림 전송 오류: {e}")
 
 
 def run(cfg):
@@ -810,6 +829,12 @@ def _run_inner(cfg, blog_id, daily_quota):
     for attempt in range(1, max_retries + 1):
         try:
             scores = score_products(products, blog_id)
+            # adaptive threshold 적용 (Phase 10-1) — 최근 성공 평균 기반으로 과도한 탈락 방지
+            try:
+                from shared.relevance_scorer import get_adaptive_threshold
+                scores["threshold"] = get_adaptive_threshold(DB_PATH, blog_id, scores["threshold"])
+            except Exception:
+                pass
             passed, reason = passes_gate(scores)
             if passed:
                 logger.info(f"[{blog_id}] 관련성 점수: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
@@ -818,7 +843,7 @@ def _run_inner(cfg, blog_id, daily_quota):
             if attempt == max_retries:
                 _record_failure(blog_id, "low_relevance", f"{max_retries}회 재시도 후 점수 미달: avg={scores['avg']:.2f}", keyword)
                 return {"success": False, "reason": "low_relevance", "keyword": keyword}
-            # Fallback: pick another keyword and retry
+            # Fallback: pick another keyword and retry (category-aware — Phase 10-1)
             all_kws = get_keywords(blog_id)
             used_conn = sqlite3.connect(str(DB_PATH))
             used = used_conn.execute(
@@ -829,10 +854,19 @@ def _run_inner(cfg, blog_id, daily_quota):
             used_conn.close()
             used_set = {r[0] for r in used} | {keyword}
             fallback_kws = [k for k in all_kws if k not in used_set]
-            if not fallback_kws:
+            fallback_kws = [k for k in fallback_kws if not health_store.is_quarantined(blog_id, k)]
+            
+            # Category-aware fallback: 실패 키워드와 다른 카테고리 우선
+            failed_cat = _extract_category(keyword)
+            cat_fallback = [k for k in fallback_kws if _extract_category(k) != failed_cat]
+            
+            if cat_fallback:
+                keyword = cat_fallback[0]
+            elif fallback_kws:
+                keyword = fallback_kws[0]
+            else:
                 _record_failure(blog_id, "low_relevance", "대체 키워드 없음", keyword)
                 return {"success": False, "reason": "low_relevance", "keyword": keyword}
-            keyword = fallback_kws[0]
             logger.info(f"[{blog_id}] low_relevance 대체 키워드 ({attempt}/{max_retries}): {keyword}")
             collect_keyword(keyword)
             products = get_products(keyword, limit=10)

@@ -46,6 +46,37 @@ def get_threshold(blog_id: str) -> float:
     return RELEVANCE_CONFIG.get(blog_id, {}).get("threshold", 0.75)
 
 
+def _get_recent_avg_score(db_path: str, blog_id: str, limit: int = 10) -> float | None:
+    conn = sqlite3.connect(db_path)
+    rows = conn.execute(
+        "SELECT avg_relevance_score FROM publish_log"
+        " WHERE blog_id=? AND validation_passed=1"
+        " ORDER BY published_at DESC LIMIT ?",
+        (blog_id, limit),
+    ).fetchall()
+    conn.close()
+    if not rows:
+        return None
+    scores = [r[0] for r in rows if r[0] is not None]
+    if not scores:
+        return None
+    return sum(scores) / len(scores)
+
+
+def get_adaptive_threshold(db_path: str, blog_id: str, base_threshold: float | None = None) -> float:
+    """최근 성공 글의 평균 점수를 기반으로 임계값을 동적으로 조정
+
+    - 최근 10개 성공 글의 평균 점수가 있으면 base_threshold와 평균*0.95 중 낮은 값 사용
+    - 없으면 base_threshold 그대로 반환
+    """
+    if base_threshold is None:
+        base_threshold = get_threshold(blog_id)
+    recent_avg = _get_recent_avg_score(db_path, blog_id, limit=10)
+    if recent_avg is None:
+        return base_threshold
+    return min(base_threshold, recent_avg * 0.95)
+
+
 def passes_gate(scores: dict) -> tuple[bool, str]:
     if scores["avg"] >= scores["threshold"]:
         return (True, "")
