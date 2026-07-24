@@ -1,7 +1,7 @@
 # State File — Resume Status
 
-**Generated:** 2026-07-09 08:30 KST (code-audited)
-**Session:** Production hardening — empty_template fix verification
+**Generated:** 2026-07-24 10:00 KST (verification + completion docs)
+**Session:** Phase 30/31 AdSense standardization verification + commit
 
 ---
 
@@ -11,11 +11,18 @@
 |-------|--------|---------------|
 | Phase 1-10 | ✅ Complete | git history + 코드 존재 |
 | Phase 6+7 | ✅ Complete (merged) | `def74aeef` |
-| Phase 11 AdSense | ✅ **Complete** | 10개 CUAP 블로그 전부 adsense partials + IntersectionObserver |
-| Phase 12 Body Rescan | 🔴 **Partial** | `--scan-body` OK, **`validate_keyword()` 누락** → silent failure |
+| Phase 11 AdSense | ✅ Complete | 10개 CUAP 블로그 전부 adsense partials + IntersectionObserver |
+| Phase 12 Body Rescan | 🔴 Partial | `--scan-body` OK, **`validate_keyword()` 누락** → silent failure |
 | Phase 13 Dashboard | ✅ Complete | http://localhost:5050, 6종 API, 5개 UI 페이지 |
 | Phase 14 Cross-Project | ✅ Complete | SAP 7 + aikorea24 2 = 47개 통합, launchd |
 | Phase 15 Quality Pipe | ✅ Complete | quality_recorder, hugo_builder, API+UI, daily_aggregate |
+| Phase 22-C Funnel Cards | ✅ Complete | `.planning/phase-22-c` SUMMARY + CSS deploy |
+| Phase 25 CUAP Spider Entity | ✅ Complete | 거미줄 엔티티 시스템, cross-blog linking + funnel + cross-sell |
+| Phase 26 CUAP Auto Ads | ✅ Complete | `.continue-here.md` handoff 기록 |
+| Phase 28 Worker 404 Fix | ✅ Complete | 6개 Worker 블로그 src/index.js canonical 통일 |
+| Phase 29 CUAP Content Fix | ✅ Complete | keywords 정리 + cuap_entities URL 정리 + beauty-hugo 재배포 |
+| Phase 30 CUAP AdSense Std | ✅ Complete | informationhot.kr 17개 블로그 표준화, live 광고 확인 |
+| Phase 31 rotcha AdSense Std | ✅ Complete | rotcha.kr 6개 Blowfish 블로그 표준화, live 광고 확인 |
 
 ---
 

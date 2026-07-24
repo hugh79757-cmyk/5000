@@ -395,10 +395,18 @@ Agent 세션에서 `CLOUDFLARE_API_TOKEN`이 설정되면 wrangler가 profile을
 2. 신규 프로젝트 경로 추가 시 `wrangler auth activate hugh79757 <path>`로 바인딩 추가
 3. profile 관리 시 `env -u CLOUDFLARE_API_TOKEN wrangler auth ...` 사용 (agent 세션에서)
 4. 상세: `aikorea24 AGENTS.md` Section "Cloudflare Auth Profile", `aikorea24 .planning/triage/20260714--wrangler-auth-profile-setup.md`
+5. **`~/.env.common` 로드 시 `CLOUDFLARE_API_TOKEN` 반드시 제외** — `export $(grep -v '^#' ~/.env.common | grep -v 'CLOUDFLARE_API_TOKEN' | xargs)` 사용
    
    <!-- GSD:incidents-end -->
 
 <!-- GSD:adsense-start -->
+
+## ⚠️ AdSense 설정 — 완전한 Blowfish 표준 가이드
+
+**Living Document**: `ADSENSE-GUIDE.md` (5000 루트)
+모든 AdSense 코딩/설정 작업은 이 파일을 먼저 읽을 것.
+
+---
 
 ## AdSense Publisher ID Mapping
 
@@ -549,8 +557,9 @@ ins.adsbygoogle {
 - [ ] Cloudflare Pages 도메인 바인딩 확인
 - [ ] Google AdSense 대시보드에 도메인 승인 완료 확인
 - [ ] AdSense 대시보드 Auto ads → Anchor ads ON
-  
-  <!-- GSD:adsense-end -->
+- [ ] Blowfish 테마 사용 블로그: `showTableOfContents = false` 설정 (목차 비활성화 필수 — sticky TOC 레이아웃이 AdSense fluid/in-article 광고 렌더링과 충돌하여 모든 광고 unfilled 발생)
+
+<!-- GSD:adsense-end -->
 
 <!-- GSD:skills-start source:skills/ -->
 
