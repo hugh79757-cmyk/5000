@@ -80,6 +80,14 @@
 - Optimize for English-speaking audience
 - Cross-language content linking and SEO optimization
 
+### Phase 47 — Hugo 템플릿 회귀 방어 로직 설계 📋 **PLANNED**
+**Goal**: Hugo single.html 템플릿 수정 시 기능 소실(Hero, TOC, 관련글, 차트 등)을 방지하는 방어 로직 설계 및 구현  
+**Key Tasks**:
+- ADSENSE-GUIDE.md 분석 및 stock-hugo 템플릿 현황 파악
+- 블로그별 템플릿 변경 이력 감사
+- integrity-checker 범위 및 통합 방식 결정
+- AGENTS.md Section 4 규칙 준수 강제화 방안
+
 ## Current Blog Portfolio
 
 | Blog ID | Type | Status | Phase Added | Quality Score | Verification |
