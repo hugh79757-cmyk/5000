@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-07-25T15:46:15.795002",
+  "phase": 44,
+  "total_blogs": 6,
+  "total_posts": 3007,
+  "by_blog": {
+    "travel-hugo": {
+      "total": 643,
+      "PASS": 0,
+      "FAIL": 640,
+      "NEEDS_REVIEW": 3,
+      "pass_rate": 0.0
+    },
+    "travel1-hugo": {
+      "total": 463,
+      "PASS": 0,
+      "FAIL": 463,
+      "NEEDS_REVIEW": 0,
+      "pass_rate": 0.0
+    },
+    "travel2-hugo": {
+      "total": 599,
+      "PASS": 5,
+      "FAIL": 493,
+      "NEEDS_REVIEW": 101,
+      "pass_rate": 0.8347245409015025
+    },
+    "travel3-hugo": {
+      "total": 653,
+      "PASS": 0,
+      "FAIL": 606,
+      "NEEDS_REVIEW": 47,
+      "pass_rate": 0.0
+    },
+    "travel4-hugo": {
+      "total": 649,
+      "PASS": 0,
+      "FAIL": 649,
+      "NEEDS_REVIEW": 0,
+      "pass_rate": 0.0
+    },
+    "blogger1": {
+      "total": 0,
+      "PASS": 0,
+      "FAIL": 0,
+      "NEEDS_REVIEW": 0,
+      "pass_rate": 0
+    }
+  },
+  "by_status": {
+    "PASS": 5,
+    "FAIL": 2851,
+    "NEEDS_REVIEW": 151
+  },
+  "overall_pass_rate": 0.16627868307283006
+}

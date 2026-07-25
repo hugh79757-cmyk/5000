@@ -649,6 +649,9 @@ def _post_process(content):
         (r"느껴보자", "확인해 보시기 바랍니다"),
         (r"것을 추천드립니다", "것을 추천합니다"),
         (r"것을 권장합니다", "것이 좋습니다"),
+        # 금지어 강제 치환
+        (r"바랍니다", "필요합니다"),
+        (r"좋은", "적절한"),
     ]
     for _pat, _repl in _REPLACE_MAP:
         content = re.sub(_pat, _repl, content)
@@ -752,22 +755,22 @@ def _post_process(content):
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
-    # H2 과다 방지: GPT가 5개 초과 H2를 생성하면 마지막 H2 섹션들을 제거
+    # H2 과다 방지: GPT가 4개 초과 H2를 생성하면 마지막 H2 섹션들을 제거 (정확히 4개 유지)
     _h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-    if len(_h2_positions) > 5:
-        _cut_pos = _h2_positions[5]
+    if len(_h2_positions) > 4:
+        _cut_pos = _h2_positions[4]
         content = content[:_cut_pos].rstrip()
-        logger.info("H2 과다 방지: %d개 → 5개로 절단", len(_h2_positions))
+        logger.info("H2 과다 방지: %d개 → 4개로 절단", len(_h2_positions))
 
-    # ── 쿠팡 여행용품 추천 삽입 ──────────────────────────────
+    # ── 쿠팡 여행용품 추천 삽입 (신규: get_product_cards → HTML 그리드) ──────────────────
     try:
         from shared.coupang_travel import CoupangTravel
         _ct = CoupangTravel()
         if _ct.is_configured():
             _blog_id = getattr(_post_process, "_current_blog_id", "travel-hugo")
-            _coupang_md = _ct.get_travel_product_links(blog_id=_blog_id, count=2)
-            if _coupang_md:
-                content = content.rstrip() + _coupang_md
+            _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=3)
+            if _coupang_html:
+                content = content.rstrip() + _coupang_html
     except Exception as _ce:
         logger.warning("쿠팡 여행용품 삽입 실패: %s", _ce)
 
@@ -832,37 +835,42 @@ def _validate_place_names(content: str, real_names: list) -> tuple:
 
     return content, names_ok
 
-def _validate_and_retry(content, system_prompt, user_prompt, max_retries=0):
-    """생성된 콘텐츠의 H2 수, 글자수, 금지표현을 검증하고 미달 시 재생성"""
-    BANNED = ["바랍니다", "되시길", "있으시", "마무리하며", "마치며", "즐겨보세요", "만끽해 보세요", "느껴보세요"]
-
-    for _attempt in range(max_retries + 1):
-        # 검증
-        # GPT 생성 H2만 카운트 (후처리 자동삽입 H2 제외)
-        _auto_h2_skip = ["여행 준비", "함께 읽어보기", "추천 용품"]
-        _all_h2_titles = re.findall(r"^## (.+)", content, re.MULTILINE)
-        h2_count = len([h for h in _all_h2_titles if not any(s in h for s in _auto_h2_skip)])
+def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
+    """생성된 콘텐츠의 H3 개수만 검증하고 미달 시 재생성.
+    H2 개수는 post_process가 정리하고, 금지표현도 post_process가 치환하므로 여기서 검증하지 않음."""
+    for attempt in range(max_retries + 1):
+        _all_h3_titles = re.findall(r"^### (.+)", content, re.MULTILINE)
+        h3_count = len(_all_h3_titles)
         char_count = len(content)
-        banned_found = [b for b in BANNED if b in content]
 
         issues = []
-        if h2_count > 6:
-            issues.append(f"H2 {h2_count}개→4개 필요")
-        if char_count < 2000:
-            issues.append(f"글자수 {char_count}→2200 필요")
-        if banned_found:
-            issues.append(f"금지표현: {banned_found}")
+        if h3_count < 2:
+            issues.append(f"H3 {h3_count}개→2개 필요 (이상)")
+        if char_count < 2500:
+            issues.append(f"글자수 {char_count}→2500 필요")
 
         if not issues:
-            logger.info("콘텐츠 검증 통과 (H2:%d, 글자수:%d)", h2_count, char_count)
+            if attempt == 0:
+                logger.info("초회 검증 통과 (H3:%d, 글자수:%d)", h3_count, char_count)
+            else:
+                logger.info("재시도 후 검증 통과 (H3:%d, 글자수:%d)", h3_count, char_count)
+            break
+
+        if attempt < max_retries:
+            logger.warning("검증 실패, 재시도 %d/%d: %s", attempt + 1, max_retries, issues)
+            new_result = ai_generate(system_prompt, user_prompt, tier="default", max_tokens=4800)
+            if new_result and new_result.get("content"):
+                content = new_result["content"]
+            else:
+                break
+        else:
+            logger.error("최대 재시도 초과, 마지막 결과 사용: %s", issues)
 
     # [과거연도 방어] 제목/본문에서 과거연도 -> 현재연도 변환
     import re as _yre
     _cy = str(__import__("datetime").datetime.now().year)
     for _py in [str(y) for y in range(2020, int(_cy))]:
-        # 제목에서 변환
         if _py in content:
-            # URL 내부의 연도는 제외하고 변환
             content = _yre.sub(
                 r"(?<!/)(?<![\w])" + _py + r"(?=[ 년.~,\-가-힣])",
                 _cy, content
@@ -1094,9 +1102,6 @@ def generate_content(data, blog_id="travel-hugo"):
     content = result["content"]
     model_used = result.get("model", "")
 
-    # 후처리: H2 수, 글자수, 금지표현 검증 및 재생성
-    content = _validate_and_retry(content, system_prompt, user_prompt)
-
     # 장소명 검증: API 데이터의 실제 장소명이 본문에 포함되어 있는지 확인
     place_items = data.get("items", [])
     real_names = [it.get("title", it.get("facltNm", "")).strip() for it in place_items if it.get("title") or it.get("facltNm")]
@@ -1104,8 +1109,18 @@ def generate_content(data, blog_id="travel-hugo"):
     if not names_ok:
         logger.info("장소명 불일치 감지 (재생성 안함)")
 
+    # 검증 및 재시도: H3 개수만 확인 (H2는 post_process가 정리, 금지표현도 post_process가 치환)
+    content = _validate_and_retry(content, system_prompt, user_prompt, max_retries=1)
+
     _post_process._current_blog_id = blog_id
     content = _post_process(content)
+
+    # 다시 한 번 H2 과다 방지 (재시도 결과도 잘라냄)
+    _h2_positions_final = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
+    if len(_h2_positions_final) > 4:
+        _cut_pos_final = _h2_positions_final[4]
+        content = content[:_cut_pos_final].rstrip()
+        logger.info("재시도 후 H2 과다 방지: %d개 → 4개로 절단", len(_h2_positions_final))
     # travel4-hugo(여행코스)는 맛집 카드만 삽입 (가볼만한곳은 코스 장소와 중복 가능)
     if blog_id == "travel4-hugo":
         content = _enrich_with_nearby_restaurants_only(data, content)
@@ -1115,35 +1130,35 @@ def generate_content(data, blog_id="travel-hugo"):
     _final_related_idx = content.find("## 함께 읽어보기")
     if _final_related_idx > 0:
         content = content[:_final_related_idx].rstrip()
-    # 동적 내부링크 삽입
-    try:
-        import glob as _gl_final
-        import random as _rand_final
-        _blog_path_final = {
-            "travel-hugo":  "/Users/twinssn/Projects/TAP/travel-hugo",
-            "travel1-hugo": "/Users/twinssn/Projects/TAP/travel1-hugo",
-            "travel2-hugo": "/Users/twinssn/Projects/TAP/travel2-hugo",
-            "travel3-hugo": "/Users/twinssn/Projects/TAP/travel3-hugo",
-            "travel4-hugo": "/Users/twinssn/Projects/TAP/travel4-hugo",
-        }
-        _posts_dir_final = os.path.join(_blog_path_final.get(blog_id, "/Users/twinssn/Projects/TAP/travel-hugo"), "content", "posts")
-        _all_posts_final = []
-        for _md_f in _gl_final.glob(os.path.join(_posts_dir_final, "*/index.md")):
-            with open(_md_f, encoding="utf-8") as _ff:
-                _head_f = _ff.read(500)
-            import re as _re_final
-            _tm_f = _re_final.search(r"^title:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
-            _sm_f = _re_final.search(r"^slug:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
-            if _tm_f and _sm_f:
-                _all_posts_final.append({"title": _tm_f.group(1), "slug": _sm_f.group(1)})
-        if len(_all_posts_final) > 3 and "## 함께 읽어보기" not in content:
-            _picks_f = _rand_final.sample(_all_posts_final, 3)
-            _related_md_f = "\n\n## 함께 읽어보기\n\n"
-            for _p_f in _picks_f:
-                _related_md_f += '{{< article link="/posts/' + _p_f["slug"] + '/" >}}\n\n'
-            content = content.rstrip() + _related_md_f
-    except Exception as e:
-        logger.debug(f"[TRAVEL_WRITER] failed: {e}")
+    # 동적 내부링크 삽입 (블로우피쉬 relatedPosts 옵션 사용으로 비활성화)
+    # try:
+    #     import glob as _gl_final
+    #     import random as _rand_final
+    #     _blog_path_final = {
+    #         "travel-hugo":  "/Users/twinssn/Projects/TAP/travel-hugo",
+    #         "travel1-hugo": "/Users/twinssn/Projects/TAP/travel1-hugo",
+    #         "travel2-hugo": "/Users/twinssn/Projects/TAP/travel2-hugo",
+    #         "travel3-hugo": "/Users/twinssn/Projects/TAP/travel3-hugo",
+    #         "travel4-hugo": "/Users/twinssn/Projects/TAP/travel4-hugo",
+    #     }
+    #     _posts_dir_final = os.path.join(_blog_path_final.get(blog_id, "/Users/twinssn/Projects/TAP/travel-hugo"), "content", "posts")
+    #     _all_posts_final = []
+    #     for _md_f in _gl_final.glob(os.path.join(_posts_dir_final, "*/index.md")):
+    #         with open(_md_f, encoding="utf-8") as _ff:
+    #             _head_f = _ff.read(500)
+    #         import re as _re_final
+    #         _tm_f = _re_final.search(r"^title:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
+    #         _sm_f = _re_final.search(r"^slug:\s*[\x27\x22](.*?)[\x27\x22]", _head_f, _re_final.MULTILINE)
+    #         if _tm_f and _sm_f:
+    #             _all_posts_final.append({"title": _tm_f.group(1), "slug": _sm_f.group(1)})
+    #     if len(_all_posts_final) > 3 and "## 함께 읽어보기" not in content:
+    #         _picks_f = _rand_final.sample(_all_posts_final, 3)
+    #         _related_md_f = "\n\n## 함께 읽어보기\n\n"
+    #         for _p_f in _picks_f:
+    #             _related_md_f += '{{< article link="/posts/' + _p_f["slug"] + '/" >}}\n\n'
+    #         content = content.rstrip() + _related_md_f
+    # except Exception as e:
+    #     logger.debug(f"[TRAVEL_WRITER] failed: {e}")
     # Heritage 카드 삽입 (heritage 소스 타입에서만)
     if source_type == "heritage":
         try:

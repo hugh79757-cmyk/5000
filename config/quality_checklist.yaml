@@ -1,0 +1,310 @@
+# Phase 44 Quality Checklist — 6개 블로그 통합 품질 기준
+# 사용: scripts/verify_quality.py --config config/quality_checklist.yaml
+
+version: "44.1"
+updated: "2026-07-25"
+description: "Phase 40~43 확립 기준 통합 + 블로그별 특화 기준"
+
+# ─────────────────────────────────────────────────────────────
+# 전역 기본 기준 (모든 블로그 공통)
+# ─────────────────────────────────────────────────────────────
+global_criteria:
+  min_body_length: 2500              # 본문 최소 길이 (문자 수)
+  title_generation_success_rate: 1.0 # 타이틀 생성 성공률 (100%)
+  hallucination_tolerance: 0         # 환각 허용 건수 (0건)
+  empty_field_mentions: 0            # 빈/0값 필드 언급 허용 (0건)
+  title_body_consistency: true       # 타이틀-본문 숫자 일치 필수
+
+  # 구조 기준
+  structure:
+    min_h2: 3
+    max_h2: 4
+    min_h3: 3
+    max_h3: 4
+    min_sentences_per_h3: 6
+
+# 금지어 (전역 공통 - 블로그별 추가 가능)
+  global_forbidden_words:
+    - "추천드립니다"
+    - "인기가 많습니다"
+    - "맛있는"
+    - "좋은"
+    - "훌륭한"
+    - "최고의"
+
+# ─────────────────────────────────────────────────────────────
+# 블로그별 특화 기준
+# ─────────────────────────────────────────────────────────────
+blogs:
+
+  # travel-hugo: 캠핑/아웃도어
+  travel-hugo:
+    name: "캠핑/아웃도어"
+    type: "hugo"
+    path: "/Users/twinssn/Projects/TAP/travel-hugo/content/posts"
+    pipeline: "travel"
+    fetcher: "fetch_camping"
+    prompt_id: "tour1_camping"
+    
+    # 필수 키워드 (캠핑 핵심 용어 6개 중 최소 3개 포함)
+    required_keywords_any:
+      - "텐트"
+      - "타프"
+      - "침낭"
+      - "랜턴"
+      - "버너"
+      - "코펠"
+    min_required_keywords: 3
+    
+    # 필수 데이터 필드 (API 제공 시)
+    required_data_fields:
+      - "gnrlSiteCo"      # 일반야영장 수
+      - "glampSiteCo"     # 글램핑 사이트 수
+      - "caravSiteCo"     # 카라반 사이트 수
+      - "toiletCo"        # 화장실 수
+      - "swrmCo"          # 샤워실 수
+    
+    # 브랜드 키워드 (최소 1개)
+    brand_keywords_any:
+      - "스노우피크"
+      - "콜맨"
+      - "코베아"
+      - "블랙야크"
+      - "노스페이스"
+    min_brand_keywords: 1
+
+    # 금지어 (전역 + 추가)
+    forbidden_words:
+      - "추천드립니다"
+      - "인기가 많습니다"
+      - "맛있는"
+      - "훌륭한"
+      - "최고의"
+
+    # 이동시간 패턴 (캠핑은 없음)
+    forbidden_movement_patterns: []
+
+  # travel1-hugo: 축제/행사
+  travel1-hugo:
+    name: "축제/행사"
+    type: "hugo"
+    path: "/Users/twinssn/Projects/TAP/travel1-hugo/content/posts"
+    pipeline: "travel"
+    fetcher: "fetch_festival"
+    prompt_id: "travel1_festival"
+    
+    # 필수 데이터 필드
+    required_data_fields:
+      - "eventstartdate"    # 시작일
+      - "eventenddate"      # 종료일
+      - "eventplace"        # 장소
+      - "addr1"             # 주소
+    
+    # 필수 본문 포함 항목
+    required_body_elements:
+      - "운영시간"
+      - "위치"
+      - "기간"
+    
+    # 금지어 (전역 + 축제 특화)
+    forbidden_words:
+      - "추천드립니다"
+      - "인기가 많습니다"
+      - "맛있는"
+      - "훌륭한"
+      - "최고의"
+      - "방문객"
+      - "주차장"
+      - "주차장보유"
+      - "주차가능"
+    
+    # 금지 패턴 (환각성)
+    forbidden_patterns:
+      - "네이버 카페"
+      - "전화 예매"
+      - "공단 홈페이지"
+      - "예약 창구"
+      - "공식 예약"
+
+  # travel2-hugo: 문화유산/유적지
+  travel2-hugo:
+    name: "문화유산/유적지"
+    type: "hugo"
+    path: "/Users/twinssn/Projects/TAP/travel2-hugo/content/posts"
+    pipeline: "travel"
+    fetcher: "fetch_heritage"
+    prompt_id: "travel2_heritage"
+    
+    # 필수 연결 키워드 (공통 맥락 단어 중 최소 2개)
+    required_context_words_any:
+      - "시대"
+      - "종목"
+      - "양식"
+      - "비교"
+      - "대조"
+      - "공통"
+      - "반면"
+    min_context_words: 2
+    
+    # 필수 구조: 3곳 이상 문화유산 소개
+    min_heritage_sites: 3
+    
+    # 금지어
+    forbidden_words:
+      - "추천드립니다"
+      - "인기가 많습니다"
+      - "맛있는"
+      - "훌륭한"
+      - "최고의"
+
+  # travel3-hugo: 맛집/식당
+  travel3-hugo:
+    name: "맛집/식당"
+    type: "hugo"
+    path: "/Users/twinssn/Projects/TAP/travel3-hugo/content/posts"
+    pipeline: "travel"
+    fetcher: "fetch_food"
+    prompt_id: "tour2_food"
+    
+    # 금지어 34개 (Phase 43에서 검증된 리스트) - "좋은" 제거
+    forbidden_words:
+      - "추천드립니다"
+      - "인기가 많습니다"
+      - "맛있는"
+      - "훌륭한"
+      - "최고의"
+      - "강추"
+      - "강력추천"
+      - "무조건"
+      - "필수코스"
+      - "인생맛집"
+      - "찐맛집"
+      - "대박"
+      - "진심"
+      - "진짜"
+      - "완전"
+      - "진짜로"
+      - "절대"
+      - "무조건가야함"
+      - "후회없음"
+      - "인생메뉴"
+      - "찐"
+      - "갓성비"
+      - "혜자"
+      - "가성비끝판왕"
+      - "가성비최고"
+      - "줄서서먹는"
+      - "웨이팅"
+      - "대기필수"
+      - "예약필수"
+      - "품절대란"
+    
+    # 가격 포맷 검증: "~만원대" 금지, 정확한 가격 또는 "원" 단위 권장
+    price_format_check: true
+    forbidden_price_patterns:
+      - "~만원대"
+      - "만원대"
+      - "만 원대"
+    
+    # 필수 데이터 필드
+    required_data_fields:
+      - "menu"       # 메뉴명
+      - "price"      # 가격
+    
+    # 필수 본문 포함 항목
+    required_body_elements:
+      - "메뉴"
+      - "가격"
+
+  # travel4-hugo: 여행코스/일정
+  travel4-hugo:
+    name: "여행코스/일정"
+    type: "hugo"
+    path: "/Users/twinssn/Projects/TAP/travel4-hugo/content/posts"
+    pipeline: "travel"
+    fetcher: "fetch_course"
+    prompt_id: "tour3_course"
+    
+    # 이동시간 금지 패턴 (절대 금지)
+    forbidden_movement_patterns:
+      - "도보\\s*\\d+"
+      - "차로\\s*\\d+"
+      - "걸어\\s*\\d+"
+      - "\\d+\\s*분\\s*(걸어|걸리|소요)"
+      - "\\d+\\s*시간\\s*(걸어|걸리|소요)"
+      - "\\b\\d+\\s*분\\b"      # 독립적인 "30분" 등
+      - "\\b\\d+\\s*시간\\b"    # 독립적인 "2시간" 등
+    
+    # 코스명 패턴: "N코스: xxx" 또는 "N일차: xxx"
+    course_name_pattern: "^\\d+[코스일차][:：]\\s*.+"
+    min_course_sections: 3
+    
+    # 금지어
+    forbidden_words:
+      - "추천드립니다"
+      - "인기가 많습니다"
+      - "맛있는"
+      - "훌륭한"
+      - "최고의"
+    
+    # 대체 문구 권장 (이동시간 대신)
+    recommended_replacement: "교통 정보는 공식 사이트 참조"
+
+  # blogger1: 종합/일반 (Blogger 플랫폼)
+  blogger1:
+    name: "종합/일반 (Blogger)"
+    type: "blogger"
+    path: ""  # 별도 확인 필요 - GCP Blogger API 또는 로컬 미러
+    pipeline: "blogger"
+    fetcher: ""  # 확인 필요
+    prompt_id: ""  # 확인 필요
+    
+    # 기준: 대표님 5번 항목 상세 수신 후 보완
+    # 임시: 전역 기준만 적용
+    use_global_only: true
+    
+    forbidden_words:
+      - "추천드립니다"
+      - "인기가 많습니다"
+      - "맛있는"
+      - "훌륭한"
+      - "최고의"
+
+# ─────────────────────────────────────────────────────────────
+# 검증 실행 설정
+# ─────────────────────────────────────────────────────────────
+execution:
+  # dry-run 설정
+  dry_run:
+    enabled: true
+    iterations_per_blog: 3    # 블로그당 3회 생성 테스트
+    timeout_seconds: 300      # API 호출 타임아웃
+    retry_on_failure: 1       # 실패 시 1회 재시도
+  
+  # 전수조사 설정
+  full_audit:
+    enabled: true
+    sample_mode: false        # false = 전체 포스트 검사
+    max_posts_per_blog: 0     # 0 = 제한 없음
+    parallel_workers: 4       # 병렬 처리 워커 수
+  
+  # 출력 설정
+  output:
+    report_path: ".planning/phase-44-full-audit/QUALITY-AUDIT-REPORT.md"
+    summary_path: ".planning/phase-44-full-audit/AUDIT-SUMMARY.json"
+    verbose: true
+    include_passed: true      # PASS 항목도 리포트에 포함
+
+# ─────────────────────────────────────────────────────────────
+# 메타데이터
+# ─────────────────────────────────────────────────────────────
+metadata:
+  phase: 44
+  created_by: "Phase 44 Planning"
+  based_on_phases: [40, 41, 42, 43]
+  notes: |
+    - Phase 40: 본문 품질 개선 (캠핑 파일럿) - temperature 0.85, max_tokens 4800, ANTI-HALLUCINATION
+    - Phase 41: 데이터/이미지/타이틀 검증 - 결함 0건
+    - Phase 42: 퍼널 검증 - 렌더링 결함 0건, 단방향 구조 확정
+    - Phase 43: 4개 블로그 확장 - 100% PASS (travel4 재평가 PASS)
+    - Phase 44: 6개 블로그 전수조사 + 신규 발행 검증 + 최종 수정
