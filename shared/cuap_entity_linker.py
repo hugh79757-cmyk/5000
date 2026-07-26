@@ -339,10 +339,7 @@ def build_cross_sell_card(blog_id, max_items=4):
             label = row["link_label"] or row["entity_name"]
             url = row["post_url"]
             items_html.append(
-                f'<a href="{url}" style="display:inline-flex;align-items:center;gap:6px;'
-                f'padding:8px 14px;background:#f0f7ff;border:1px solid #d0e3ff;'
-                f'border-radius:8px;text-decoration:none;color:#1a56db;font-size:14px;'
-                f'margin:4px">{icon} {label}</a>'
+                f'<a href="{url}" class="cross-sell-card__link">{icon} {label}</a>'
             )
     except Exception as e:
         logger.exception(f"build_cross_sell_card failed: {e}")
@@ -359,11 +356,10 @@ def build_cross_sell_card(blog_id, max_items=4):
         )
 
     return (
-        f'\n<div style="margin:20px 0;padding:16px;background:#fafbfc;'
-        f'border-radius:12px;border:1px solid #e8ecf0">\n'
-        f'<p style="margin:0 0 10px;font-weight:600;font-size:15px;color:#374151">'
+        f'\n<div class="cross-sell-card">\n'
+        f'<p class="cross-sell-card__title">'
         f'🛍️ 이런 상품도 좋아하실 거예요</p>\n'
-        f'<div style="display:flex;flex-wrap:wrap;gap:4px">\n'
+        f'<div class="cross-sell-card__links">\n'
         + "\n".join(items_html) +
         "\n</div>\n</div>\n"
     )
@@ -403,19 +399,17 @@ def build_funnel_header(blog_id):
         label = row["link_label"] or row["entity_name"]
         url = row["post_url"]
         items_html.append(
-            f'<a href="{url}" style="display:inline-flex;align-items:center;gap:4px;'
-            f'text-decoration:none;color:{color};font-weight:600;font-size:14px;'
-            f'margin-right:12px">{icon} {label}</a>'
+            f'<a href="{url}" class="funnel-header__link" style="color:{color}">'
+            f'{icon} {label}</a>'
         )
 
     if not items_html:
         return ""
 
     return (
-        f'<div style="margin:0 0 16px;padding:12px 16px;background:#f8fafc;'
-        f'border-radius:8px">\n'
-        f'<p style="margin:0 0 6px;font-size:13px;color:#6b7280">'
+        f'<div class="funnel-header">\n'
+        f'<p class="funnel-header__label">'
         f'💡 다른 추천도 확인해보세요</p>\n'
-        f'<div style="display:flex;flex-wrap:wrap">' + "\n".join(items_html) +
+        f'<div class="funnel-header__links">' + "\n".join(items_html) +
         "\n</div>\n</div>\n\n"
     )
