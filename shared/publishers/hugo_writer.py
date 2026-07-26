@@ -12,12 +12,44 @@ logger = logging.getLogger(__name__)
 
 
 def _sanitize_yaml_value(s, max_len=None):
+    """Sanitize a string value for YAML frontmatter output.
+
+    Returns a *pre-quoted* YAML string value (with surrounding quotes).
+    Callers must NOT add their own quotes.
+
+    Strategy:
+    - If value has no single quotes → wrap in single quotes (no escape processing)
+    - If value has single quotes → wrap in double quotes with \\ and \" escaping
+    - Strip trailing/leading backslash artifacts that could break YAML quoting
+    """
     if s is None:
-        return ""
+        return "''"
     s = str(s)
     if max_len:
         s = s[:max_len]
-    return s.replace("\\", "\\\\").replace('"', '\\"')
+    # Strip trailing backslash artifacts (up to 3 levels)
+    for _ in range(3):
+        if not s:
+            break
+        if s.endswith('\\') and not s.endswith('\\\\'):
+            s = s[:-1]
+        else:
+            break
+    # Strip leading backslash artifacts (up to 3 levels)
+    for _ in range(3):
+        if not s:
+            break
+        if s.startswith('\\') and not s.startswith('\\\\'):
+            s = s[1:]
+        else:
+            break
+    # Use single-quoted YAML when safe (no escape processing by YAML parser)
+    if "'" in s:
+        # Fall back to double-quoted with safe escaping
+        escaped = s.replace("\\", "\\\\").replace('"', '\\"')
+        return f'"{escaped}"'
+    else:
+        return f"'{s}'"
 
 
 def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
@@ -33,27 +65,28 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
         tag_list = []
     
     fm = "---\n"
-    fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
+    # _sanitize_yaml_value() returns pre-quoted values, callers must NOT add quotes
+    fm += 'title: ' + _sanitize_yaml_value(title) + '\n'
     fm += "date: " + date_str + "\n"
     fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
-        fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
-    fm += 'slug: "' + slug + '"\n'
+        fm += 'description: ' + _sanitize_yaml_value(description, max_len=200) + '\n'
+    fm += 'slug: ' + _sanitize_yaml_value(slug) + '\n'
     if category:
-        fm += 'categories: ["' + category + '"]\n'
+        fm += 'categories: [' + _sanitize_yaml_value(category) + ']\n'
     if tag_list:
-        fm += "tags: [" + ", ".join('"' + t + '"' for t in tag_list) + "]\n"
+        fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
     if thumbnail_url:
-        fm += 'image: "' + thumbnail_url + '"\n'
-        fm += 'featureimage: "' + thumbnail_url + '"\n'
+        fm += 'image: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     elif "stock" in blog_id:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
-        fm += 'image: "' + _url + '"\n'
-        fm += 'featureimage: "' + _url + '"\n'
+        fm += 'image: ' + _sanitize_yaml_value(_url) + '\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
     else:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
-        fm += 'image: "' + _url + '"\n'
-        fm += 'featureimage: "' + _url + '"\n'
+        fm += 'image: ' + _sanitize_yaml_value(_url) + '\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
     fm += "---\n"
     return fm, date_str
 
@@ -74,23 +107,24 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
         thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")
     
     fm = "---\n"
-    fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
+    # _sanitize_yaml_value() returns pre-quoted values, callers must NOT add quotes
+    fm += 'title: ' + _sanitize_yaml_value(title) + '\n'
     fm += "date: '" + date_str + "'\n"
-    fm += "slug: '" + slug + "'\n"
+    fm += 'slug: ' + _sanitize_yaml_value(slug) + '\n'
     fm += f"draft: {'true' if is_draft else 'false'}\n"
     if description:
-        fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
+        fm += 'description: ' + _sanitize_yaml_value(description, max_len=200) + '\n'
     if tag_list:
-        fm += "tags: " + str(tag_list) + "\n"
+        fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
     if category:
         fm += "categories: ['" + category + "']\n"
     if thumbnail_url:
         fm += "cover:\n"
-        fm += '  image: "' + thumbnail_url + '"\n'
+        fm += '  image: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
         fm += '  relative: true\n'
-        fm += '  alt: "' + _sanitize_yaml_value(title) + '"\n'
+        fm += '  alt: ' + _sanitize_yaml_value(title) + '\n'
         fm += "  hidden: false\n"
-        fm += 'featureimage: "' + thumbnail_url + '"\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     fm += "---\n\n"
     return fm, date_str
 
@@ -111,31 +145,34 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
         thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")
     
     fm = "---\n"
-    fm += 'title: "' + _sanitize_yaml_value(title) + '"\n'
+    # _sanitize_yaml_value() returns pre-quoted values, callers must NOT add quotes
+    fm += 'title: ' + _sanitize_yaml_value(title) + '\n'
     fm += "date: " + date_str + "\n"
     fm += "draft: " + str(is_draft).lower() + "\n"
     if description:
-        fm += 'description: "' + _sanitize_yaml_value(description, max_len=200) + '"\n'
-    fm += 'slug: "' + slug + '"\n'
+        fm += 'description: ' + _sanitize_yaml_value(description, max_len=200) + '\n'
+    fm += 'slug: ' + _sanitize_yaml_value(slug) + '\n'
     if category:
-        fm += "categories: " + str([category]) + "\n"
+        fm += 'categories: [' + _sanitize_yaml_value(category) + ']\n'
     if tag_list:
-        fm += "tags: " + str(tag_list) + "\n"
+        fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
     if thumbnail_url:
         fm += "cover:\n"
-        fm += '  image: "' + thumbnail_url + '"\n'
+        fm += '  image: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
         fm += '  relative: true\n'
-        fm += 'featureimage: "' + thumbnail_url + '"\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     elif "stock" in blog_id:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
-        fm += 'cover:\n  image: "' + _url + '"\n'
+        fm += "cover:\n"
+        fm += '  image: ' + _sanitize_yaml_value(_url) + '\n'
         fm += '  relative: true\n'
-        fm += 'featureimage: "' + _url + '"\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
     else:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
-        fm += 'cover:\n  image: "' + _url + '"\n'
+        fm += "cover:\n"
+        fm += '  image: ' + _sanitize_yaml_value(_url) + '\n'
         fm += '  relative: true\n'
-        fm += 'featureimage: "' + _url + '"\n'
+        fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
     fm += "---\n"
     return fm, date_str
 
@@ -855,7 +892,8 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     _ok, _err = _validate_frontmatter(fm)
     if not _ok:
-        logger.warning(f"[PUBLISH] Invalid front matter: {_err}")
+        logger.error(f"[PUBLISH] Invalid front matter — write blocked: {_err}")
+        return {"success": False, "error": f"invalid_frontmatter: {_err}"}
 
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(content)
