@@ -334,3 +334,18 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 ---
 
 ## Phase 46: (Reserved)
+
+---
+
+## Phase 49: Cross-link Creation Bug Fundamental Fix
+**Priority:** 🔴 HIGH
+**Cycle:** fix → batch → verify
+**Status:** 📋 Planned
+- **Problem:** CUAP cross-link URLs use wrong slug (`20260726-{keyword}`) instead of actual on-disk slug (`slugify(title)` format), causing 404 on all 4 cross-links. Root cause: `hugo_writer._write_hugo_post()` returns no `"url"` key, so entity registration falls back to keyword-based slug.
+- **Root Cause:** Import override at `publisher.py:762-770` replaces publisher.py's `_write_hugo_post()` (which returns URL) with `hugo_writer._write_hugo_post()` (which doesn't).
+- **Scope:** `shared/publishers/hugo_writer.py`, `pipelines/curation/pipeline.py`, `shared/cuap_entity_linker.py`, batch fix scripts
+- **Sub-tasks:**
+  - 49-01: Add `"url"` key to `hugo_writer._write_hugo_post()` return + defensive file-path slug fallback in pipeline.py
+  - 49-02: Batch fix cuap_entities DB wrong slugs + baked cross-link cards in content/posts/
+- **Acceptance:** Health blog cholesterol post 4 cross-links all HTTP 200; 5+ CUAP blogs verified; Hugo build 0 errors
+- **Dependencies:** Phase 48 compat — do not touch frontmatter builder functions
