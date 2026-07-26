@@ -900,4 +900,6 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     logger.info(f"[PUBLISH] Hugo post written: {file_path}")
 
-    return {"success": True, "file": file_path}
+    domain = blog_cfg.get("domain", "")
+    expected_url = f"https://{domain}/posts/{slug}/"
+    return {"success": True, "file": file_path, "url": expected_url}

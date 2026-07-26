@@ -1059,9 +1059,20 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     # CUAP 엔티티 등록 (fail-open) — 다음 발행분부터 크로스 링크 대상
     try:
-        # 2026-07-22: publish()가 실제로 사용한 slug를 result["url"]에서 추출
-        # _make_slug(keyword)는 publish() 내부 slugify(title)와 항상 다를 수 있음
-        _actual_slug = result.get("url", "").rstrip("/").split("/")[-1] if result.get("url") else slug
+        # 2026-07-26: result["url"] (hugo_writer._write_hugo_post) > result["file"] (on-disk path) > _make_slug(keyword)
+        if result.get("url"):
+            _actual_slug = result["url"].rstrip("/").split("/")[-1]
+        elif result.get("file"):
+            # result["file"] = "/path/to/content/posts/{slug}/index.md" or "/path/to/content/posts/{date}-{slug}.md"
+            _file_slug = Path(result["file"]).parent.name
+            # PaperMod format: file_path = posts/{date}-{slug}.md → extract from filename
+            if not _file_slug or _file_slug == "posts":
+                _file_slug = Path(result["file"]).stem
+                if "-" in _file_slug:
+                    _file_slug = _file_slug.split("-", 1)[1] if _file_slug.split("-", 1)[0].isdigit() else _file_slug
+            _actual_slug = _file_slug
+        else:
+            _actual_slug = slug
         # 추천추천 중복 방지: keyword가 이미 "추천"으로 끝나면 한 번만
         _link_label = keyword.strip() if keyword.strip().endswith("추천") else f"{keyword.strip()} 추천"
         _link_label = _link_label.strip() or "추천"

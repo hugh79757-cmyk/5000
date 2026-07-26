@@ -330,6 +330,10 @@ def build_cross_sell_card(blog_id, max_items=4):
                 LIMIT 1
             """, (target,)).fetchone()
             if not row:
+                logger.warning(
+                    f"[cross-sell] No published entity for target={target} "
+                    f"in card for blog={blog_id}"
+                )
                 continue
             icon = ICONS.get(target, "🔗")
             label = row["link_label"] or row["entity_name"]
@@ -348,6 +352,11 @@ def build_cross_sell_card(blog_id, max_items=4):
 
     if not items_html:
         return ""
+
+    if len(items_html) < max_items:
+        logger.warning(
+            f"[cross-sell] Only {len(items_html)}/{max_items} links for blog={blog_id}"
+        )
 
     return (
         f'\n<div style="margin:20px 0;padding:16px;background:#fafbfc;'
