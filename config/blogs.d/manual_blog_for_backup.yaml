@@ -7,6 +7,7 @@ blogs:
   site_path: /Users/twinssn/Projects/rotcha-blog
   status: active
   funnel_stage: landing
+  managed_by: mde2
 
 - domain: informationhot.kr
   id: informationhot-hugo
@@ -16,6 +17,7 @@ blogs:
   site_path: /Users/twinssn/Projects/informationhot-hugo
   status: active
   funnel_stage: landing
+  managed_by: mde2
 
 - domain: techpawz.com
   id: techpawz-hugo
@@ -25,6 +27,7 @@ blogs:
   site_path: /Users/twinssn/Projects/techpawz-hugo
   status: active
   funnel_stage: landing
+  managed_by: mde2
 
 - domain: biz.techpawz.com
   id: biz-techpawz-hugo
@@ -34,6 +37,7 @@ blogs:
   site_path: /Users/twinssn/Projects/biz.techpawz-hugo
   status: active
   funnel_stage: landing
+  managed_by: mde2
 
 - domain: issue.techpawz.com
   id: issue-techpawz-hugo
@@ -43,3 +47,4 @@ blogs:
   site_path: /Users/twinssn/Projects/issue-techpawz-hugo
   status: active
   funnel_stage: landing
+  managed_by: mde2

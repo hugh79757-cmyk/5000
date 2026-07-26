@@ -1,22 +1,17 @@
 blogs:
 - id: tap-blogger
   name: travel.rotcha.kr (Blogger)
-  pipeline: tap
+  pipeline: travel
   platform: blogger
   domain: travel.rotcha.kr
-  daily_quota: 5
+  daily_quota: 3
+  blogger_blog_id: "835513737064071192"
+  managed_by: pipeline
   schedule:
     times:
     - 06:00
-    - 08:00
-    - '10:00'
-    - '12:00'
-    - '14:00'
-    - '16:00'
-    - '18:00'
-    - '20:00'
-    - '22:00'
-    - '11:00'
+    - 10:00
+    - 14:00
   status: active
 - cf_project: travel-hugo
   daily_quota: 3
@@ -42,6 +37,7 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: landing
   depth_next:
     - id: travel4-hugo
@@ -70,6 +66,7 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel1-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: landing
   depth_next:
     - id: travel4-hugo
@@ -98,6 +95,7 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel2-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: landing
   depth_next:
     - id: travel4-hugo
@@ -126,6 +124,7 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel3-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: landing
   depth_next:
     - id: travel4-hugo
@@ -154,6 +153,7 @@ blogs:
   site_path: /Users/twinssn/Projects/TAP/travel4-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: bridge
 - blog_id_env: BLOGGER_RESTAURANT_BLOG_ID
   daily_quota: 5
@@ -167,6 +167,7 @@ blogs:
   name: tv-show 맛집블로그
   pipeline: travel
   platform: blogger
+  managed_by: pipeline
   schedule:
     times:
     - 07:36
@@ -187,6 +188,7 @@ blogs:
   name: ud 레시피블로그
   pipeline: travel
   platform: blogger
+  managed_by: pipeline
   schedule:
     times:
     - 07:38

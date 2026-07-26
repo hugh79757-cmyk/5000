@@ -26,8 +26,11 @@
 ### Constraints
 
 - **Tech stack**: Python 3.14, Hugo, Cloudflare Pages/Workers/R2, SQLite — must keep these
+
 - **Deployment**: macOS host with `launchd`; Cloudflare Pages for hosting
+
 - **Pipelines must keep running**: Refactoring cannot block daily content publication
+
 - **Single developer**: Changes must be incremental, not all-or-nothing
   
   <!-- GSD:project-end -->
@@ -52,26 +55,43 @@
 ### Python Dependencies (`requirements.txt`)
 
 - **`openai>=1.30.0`** — GPT model API for content generation (`shared/ai_writer.py`)
+
 - **`google-api-python-client>=2.130.0`** — Google Blogger API v3 (`shared/blogger_publisher.py`)
+
 - **`google-auth-oauthlib>=1.2.0`** — Blogger OAuth flow
+
 - **`httpx>=0.27.0`** — HTTP client for API calls
+
 - **`pyyaml>=6.0.1`** — YAML config parsing
+
 - **`markdownify>=0.13.1`** — HTML→Markdown conversion
+
 - **`markdown>=3.6`** — Markdown→HTML conversion
+
 - **`apscheduler>=3.10.4`** — Advanced scheduling (available but `schedule` is used in prod)
+
 - **`schedule>=1.2.0`** — Simple cron-like scheduler (`scheduler.py`)
+
 - **`python-dotenv>=1.0.1`** — Environment variable loading
+
 - **`python-frontmatter>=1.1.0`** — YAML frontmatter parsing
+
 - **`requests>=2.32.0`** — HTTP requests (legacy, superseded by httpx in newer code)
+
 - **`Pillow`** — Image processing (`shared/image_handler.py`)
+
 - **`boto3`** — AWS SDK v3 / Cloudflare R2 S3-compatible API (`shared/r2_uploader.py`)
   
   ### Node.js Dev Dependencies (`package.json`)
+
 - **`postcss@^8.4.35`** + **`postcss-cli@^11.0.0`** — CSS post-processing
+
 - **`@fullhuman/postcss-purgecss@^6.0.0`** — CSS size optimization
+
 - **`autoprefixer@^10.4.17`** — CSS vendor prefixing
   
   ### Hugo Theme
+
 - **PaperMod** — Hugo theme for `rotcha.kr` (`hugo.toml:5`)
   
   ## Infrastructure & Hosting
@@ -147,12 +167,19 @@
 ## Python Style
 
 - **snake_case** for all functions, variables, file names
+
 - **PascalCase** for classes (rarely used — most code is module-level functions)
+
 - **UPPER_CASE** for constants, env var names
+
 - **Type hints**: Partial adoption — some files use `typing` annotations, many don't
+
 - **Docstrings**: Some modules have module-level docstrings (`"""..."""`), inline comments are sparse
+
 - **Line length**: Not enforced — varies widely (some lines exceed 120 chars in `dispatcher.py`)
+
 - **F-strings**: Preferred over `%` formatting or `.format()`
+
 - **Imports**: Standard library → third-party → local, separated by blank lines
   
   ## Code Organization
@@ -162,25 +189,37 @@
   ### Pipeline Pattern
   
   ### Error Handling
+
 - **try/except** everywhere — external calls always wrapped
+
 - **Graceful degradation**: On failure, log error + continue; never crash the pipeline
+
 - **`_tg_error()`**: Critical failures sent to Telegram
+
 - **`logger.error/fatal`**: Pipeline errors logged at module level
+
 - **`sys.exit(1)`**: Only on catastrophic startup failures (import checks)
   
   ### Configuration Loading
   
   ## Naming Conventions
+
 - **Blog IDs**: `{category}-hugo` for Hugo sites, `{category}-blogger` for Blogger
+
 - **Pipeline names**: Short acronyms (`etap`, `gap`, `rap`, `car`)
+
 - **Config keys**: `snake_case` in YAML (`daily_quota`, `site_path`)
+
 - **SQLite DB files**: `{pipeline}.db` (e.g., `car.db`, `rap.db`)
+
 - **Lock files**: `data/.lock_{blog_id}` for pipeline concurrency
+
 - **Private functions**: `_leading_underscore` for module-internal functions
   
   ## Configuration Conventions
   
   ### `blogs.d/*.yaml` Blog Definition
+
 - id: rap-hugo
   
   ### `prompts.yaml` Structure
@@ -190,10 +229,15 @@
   ## Deployment Pattern
   
   ## Version Control
+
 - **Branch**: `main` — single branch development
+
 - **Commit style**: Concise, no conventional commits format observed
+
 - **`.gitignore`**: Aggressive — `.bak*`, `.venv/`, `__pycache__/`, `.env`, `api_keys.yaml`, `.db` files
+
 - **Themes**: `themes/` is gitignored (git submodule or manual install)
+
 - **Resources**: `resources/` is gitignored (Hugo cache)
   
   ## Shell/PATH Dependencies
@@ -248,12 +292,17 @@
 ### Cross-Blog Entity Linking
 
 - `shared/entity_linker.py` injects internal links across blogs
+
 - TAP entity manager provides card-style cross-references for travel blogs
+
 - ETAP pipelines inject product cards, AdSense blocks, cross-sell blocks
   
   ### Monitoring Flow
+
 - `shared/monitor.py`: Daily publish counts per blog
+
 - `shared/daily_report.py`: Cross-project aggregation (TAP, LAP, etc.)
+
 - `shared/ledger_sync.py`: Syncs publish logs from pipeline DBs to central `content.db`
   
   ## Entry Points
@@ -267,13 +316,21 @@
   | `functions/_middleware.js`   | Pages middleware                               | Cloudflare Pages HTTP   |
   
   ## Key Design Decisions
+
 - **중앙 컨트롤**: 5000이 모든 파이프라인(brand)을 통합 관리
+
 - **SQLite per pipeline**: No central DB system — each pipeline owns its data
+
 - **Subprocess isolation**: STAP/TAP run as isolated subprocesses with dedicated venvs
+
 - **Layered config**: `blogs.yaml` + `blogs.d/*.yaml` merged at runtime
+
 - **File-system deploys**: Hugo sites are written to `content/posts/{slug}/index.md` then built
+
 - **Deploy serialization**: `flock()` lock at `/tmp/wrangler_deploy.lock` prevents concurrent wrangler deploys
+
 - **YAML-driven scheduling**: Blog schedules defined in YAML, not code
+
 - **Graceful degradation**: All external API calls wrapped in try/except — failures log but don't crash the pipeline
   
   <!-- GSD:architecture-end -->
@@ -392,9 +449,13 @@ Agent 세션에서 `CLOUDFLARE_API_TOKEN`이 설정되면 wrangler가 profile을
 ### 중요 규칙
 
 1. **절대 `CLOUDFLARE_API_TOKEN`를 wrangler subprocess에 전달하지 말 것** — profile이 무시됨
+
 2. 신규 프로젝트 경로 추가 시 `wrangler auth activate hugh79757 <path>`로 바인딩 추가
+
 3. profile 관리 시 `env -u CLOUDFLARE_API_TOKEN wrangler auth ...` 사용 (agent 세션에서)
+
 4. 상세: `aikorea24 AGENTS.md` Section "Cloudflare Auth Profile", `aikorea24 .planning/triage/20260714--wrangler-auth-profile-setup.md`
+
 5. **`~/.env.common` 로드 시 `CLOUDFLARE_API_TOKEN` 반드시 제외** — `export $(grep -v '^#' ~/.env.common | grep -v 'CLOUDFLARE_API_TOKEN' | xargs)` 사용
    
    <!-- GSD:incidents-end -->
@@ -498,25 +559,31 @@ wrangler pages deployment list --project-name={blog_id}
 > **Incident:** gsd-planner가 28분간 빈 응답만 반환하며 스턱. session 메시지 2개(프롬프트 + 빈 응답), transcript 0건으로 작업이 전혀 진행되지 않았음. 9분 체크에서 이미 이 패턴이었으나 즉시 취소하지 못해 시간 낭비.
 
 ### 1. 9분 룰 — 최초 체크에서 즉시 취소
+
 Subagent 실행 후 **5~10분** 시점에 `session_info()`로 상태 확인:
+
 - **session 메시지가 2개(프롬프트 + 빈 응답)뿐이고 transcript 0건이면 → 즉시 취소**
 - 정상 subagent는 5~10분 내 최소 5~10회 tool call transcript가 쌓여야 함
 - transcript가 없으면 일을 한 게 아님 (조용한 실패)
 - 취소 후 직접 처리 또는 재시도
 
 ### 2. delegate vs 직접 판단 — 단순 작업은 직접
+
 Subagent에 위임하기 전 스스로 판단:
+
 - **단순 포매팅, 문서 작성, 이미 수집된 데이터 정리** → 직접 작성 (subagent 필요 없음)
 - **새로운 탐색, 대규모 grep, 구조 분석** → subagent 위임 적합
 - **판단 기준**: "이 작업에 내가 이미 필요한 모든 데이터를 가지고 있는가?" → Yes면 직접, No면 subagent
 
 ### 3. 체크 주기 — 5분 단위 transcript 확인
+
 - 폴링 주기: 30초가 아니라 **5분 단위**
 - 체크 포인트: `session_read(session_id, limit=5)`로 **transcript에 새로운 tool call이 있는지만 확인**
 - 5분마다 확인해도 동일한 빈 상태면 → 즉시 취소
 - 5분이면 subagent가 최소 하나의 유의미한 tool call을 수행할 충분한 시간
 
 ### Cheatsheet
+
 ```
 1. subagent 실행 후 5분 대기
 2. session_info() → messages > 2? transcript > 0? 
@@ -552,3 +619,5 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 > This section is managed by `generate-claude-profile` -- do not edit manually.
 
 <!-- GSD:profile-end -->
+
+코드 수정 요청은 일반 채팅 구현으로 즉시 처리하지 않는다. - 단일·작은 수정: `/gsd-quick` - 기존 UI, 광고, SEO, 템플릿, 수익 로직에 영향: `/gsd-quick --validate` - 다수 파일, 구조 변경, 요구사항 불명확: Phase workflow 사용 `/gsd-quick`에서도 대상 파일 전체 덮어쓰기와 계획 밖의 기존 기능 삭제는 금지한다.

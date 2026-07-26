@@ -21,6 +21,7 @@ blogs:
   repo: appliance-hugo
   site_path: /Users/twinssn/Projects/cuap/appliance-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 07:50
@@ -41,6 +42,7 @@ blogs:
   repo: baby-hugo
   site_path: /Users/twinssn/Projects/cuap/baby-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 08:10
@@ -61,6 +63,7 @@ blogs:
   repo: fitness-hugo
   site_path: /Users/twinssn/Projects/cuap/fitness-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 08:20
@@ -81,6 +84,7 @@ blogs:
   repo: interior-hugo
   site_path: /Users/twinssn/Projects/cuap/interior-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 08:00
@@ -101,6 +105,7 @@ blogs:
   repo: laptop-hugo
   site_path: /Users/twinssn/Projects/cuap/laptop-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 07:40
@@ -121,6 +126,7 @@ blogs:
   repo: health-hugo
   site_path: /Users/twinssn/Projects/cuap/health-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 07:30
@@ -141,6 +147,7 @@ blogs:
   repo: pet-hugo
   site_path: /Users/twinssn/Projects/cuap/pet-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 07:00
@@ -161,6 +168,7 @@ blogs:
   repo: kitchen-hugo
   site_path: /Users/twinssn/Projects/cuap/kitchen-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 08:30
@@ -181,6 +189,7 @@ blogs:
   repo: beauty-hugo
   site_path: /Users/twinssn/Projects/cuap/beauty-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 08:40
@@ -201,6 +210,7 @@ blogs:
   repo: camping-hugo
   site_path: /Users/twinssn/Projects/cuap/camping-hugo
   theme: blowfish
+  managed_by: mde2
   schedule:
     times:
     - 07:10

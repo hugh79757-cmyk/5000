@@ -71,6 +71,7 @@ BLOG_PROMPT_MAP = {
     "travel3-hugo": {"korservice": "tour2_food", "food": "tour2_food"},
     "travel4-hugo": {"korservice": "tour3_course", "course": "tour3_course"},
     "tvshow-blogger": {"korservice": "tour2_food", "food": "tour2_food", "course": "tour3_course"},
+    "tap-blogger": {"camping": "tour1_camping", "heritage": "travel2_heritage", "festival": "travel1_festival"},
 }
 
 
@@ -85,6 +86,7 @@ def _select_prompt_id(blog_id, source_type, item_count=None):
         "tvshow-blogger": "tour2_food",
         "ud-blogger": "tour2_food",
         "kuta-wordpress": "tour2_food",
+        "tap-blogger": "tour1_camping",
     }
     base = blog_map.get(source_type, _DEFAULT_PROMPT.get(blog_id, "tour1_camping"))
     # travel2-hugo heritage: 심층(1곳) vs 묶기(2~3곳) 프롬프트 분기

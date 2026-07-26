@@ -6,6 +6,7 @@ blogs:
   name: 시니어 복지 혜택 정보
   pipeline: senior
   platform: blogger
+  managed_by: pipeline
   schedule:
     times:
     - 08:10
@@ -22,6 +23,7 @@ blogs:
   pipeline: senior
   platform: hugo
   repo: senior-hugo
+  managed_by: pipeline
   schedule:
     times:
     - 07:34

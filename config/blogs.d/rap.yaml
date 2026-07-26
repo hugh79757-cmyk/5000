@@ -10,6 +10,7 @@ blogs:
   repo: rap-hugo
   site_path: /Users/twinssn/Projects/RAP/rap-hugo
   theme: blowfish
+  managed_by: pipeline
   schedule:
     times:
     - 07:50
@@ -36,6 +37,7 @@ blogs:
   repo: rap2-hugo
   site_path: /Users/twinssn/Projects/RAP/rap2-hugo
   theme: blowfish
+  managed_by: pipeline
   schedule:
     times:
     - 08:10
@@ -59,6 +61,7 @@ blogs:
   repo: rap3-hugo
   site_path: /Users/twinssn/Projects/RAP/rap3-hugo
   theme: blowfish
+  managed_by: pipeline
   schedule:
     times:
     - 08:30
@@ -85,6 +88,7 @@ blogs:
   repo: rap4-hugo
   site_path: /Users/twinssn/Projects/RAP/rap4-hugo
   theme: blowfish
+  managed_by: pipeline
   schedule:
     times:
     - 08:50
@@ -108,6 +112,7 @@ blogs:
   repo: rap5-hugo
   site_path: /Users/twinssn/Projects/RAP/rap5-hugo
   theme: blowfish
+  managed_by: pipeline
   schedule:
     times:
     - 09:10

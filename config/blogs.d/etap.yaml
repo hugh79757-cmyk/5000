@@ -4,6 +4,7 @@ blogs:
   name: Adventure Travel Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: adventure.techpawz.com
@@ -23,6 +24,7 @@ blogs:
   name: Airlines Reviews
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: airlines.techpawz.com
@@ -44,6 +46,7 @@ blogs:
   name: Airports Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: airports.techpawz.com
@@ -66,6 +69,7 @@ blogs:
   name: Bus Routes Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: bus.techpawz.com
@@ -86,6 +90,7 @@ blogs:
   name: Cruise Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: cruise.techpawz.com
@@ -106,6 +111,7 @@ blogs:
   name: Culture & Arts Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: culture.techpawz.com
@@ -126,6 +132,7 @@ blogs:
   name: Day Trips Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: daytrips.techpawz.com
@@ -146,6 +153,7 @@ blogs:
   name: Travel Deals Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: deals.techpawz.com
@@ -166,6 +174,7 @@ blogs:
   name: Dining Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: dining.techpawz.com
@@ -185,6 +194,7 @@ blogs:
   name: eSIM Plans
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: esim.techpawz.com
@@ -207,6 +217,7 @@ blogs:
   name: Eurail Pass Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: eurail.techpawz.com
@@ -227,6 +238,7 @@ blogs:
   name: Ferry Routes Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: ferry.techpawz.com
@@ -246,6 +258,7 @@ blogs:
   name: Flights Deals
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: flights.techpawz.com
@@ -268,6 +281,7 @@ blogs:
   name: Food Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: foodtour.techpawz.com
@@ -287,6 +301,7 @@ blogs:
   name: Michelin Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: michelin.techpawz.com
@@ -309,6 +324,7 @@ blogs:
   name: Multi-Day Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: multiday.techpawz.com
@@ -329,6 +345,7 @@ blogs:
   name: Nature & Adventure Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: nature.techpawz.com
@@ -349,6 +366,7 @@ blogs:
   name: Photo Tour Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: phototour.techpawz.com
@@ -380,6 +398,7 @@ blogs:
     - '16:30'
     - '20:30'
   site_path: /Users/twinssn/Projects/ETAP/tour-hugo
+  managed_by: pipeline
   status: inactive
   theme: blowfish
   language: en
@@ -390,6 +409,7 @@ blogs:
   name: Tours Activities
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: tours.techpawz.com
@@ -411,6 +431,7 @@ blogs:
   name: Trains Bus Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: trains.techpawz.com
@@ -433,6 +454,7 @@ blogs:
   name: Airport Transfers Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: transfers.techpawz.com
@@ -452,6 +474,7 @@ blogs:
   name: Visa Requirements
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: visa.techpawz.com
@@ -474,6 +497,7 @@ blogs:
   name: Visa-Free Travel Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: visafree.techpawz.com
@@ -494,6 +518,7 @@ blogs:
   name: Walking Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: walking.techpawz.com
@@ -514,6 +539,7 @@ blogs:
   name: Water Sports Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: watersports.techpawz.com
@@ -535,6 +561,7 @@ blogs:
   name: Luxury Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: luxury.techpawz.com
@@ -556,6 +583,7 @@ blogs:
   name: City Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: citytours.techpawz.com
@@ -577,6 +605,7 @@ blogs:
   name: Water Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: watertours.techpawz.com
@@ -598,6 +627,7 @@ blogs:
   name: Hiking and Biking Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: hiking.techpawz.com
@@ -619,6 +649,7 @@ blogs:
   name: Escape Rooms Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: escape.techpawz.com
@@ -640,6 +671,7 @@ blogs:
   name: Extreme Sports Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: extreme.techpawz.com
@@ -661,6 +693,7 @@ blogs:
   name: Nightlife Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: nightlife.techpawz.com
@@ -682,6 +715,7 @@ blogs:
   name: Ghost Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: ghost.techpawz.com
@@ -703,6 +737,7 @@ blogs:
   name: Layover Tours Guide
   pipeline: etap
   platform: hugo
+  managed_by: pipeline
   status: inactive
   daily_quota: 5
   domain: layover.techpawz.com

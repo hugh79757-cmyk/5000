@@ -166,6 +166,11 @@ BLOG_FETCH_MAP = {
     "travel4-hugo": [
         (fetch_course, 1.0),
     ],
+    "tap-blogger": [
+        (fetch_camping, 0.4),
+        (fetch_heritage, 0.4),
+        (fetch_festival, 0.2),
+    ],
 }
 
 

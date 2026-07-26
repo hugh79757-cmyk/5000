@@ -19,6 +19,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/compare-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: bridge
   depth_next:
     - id: pick-hugo
@@ -47,6 +48,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/deal-hugo
   status: inactive
   theme: Blowfish
+  managed_by: pipeline
 - cf_project: ev-hugo
   daily_quota: 5
   domain: ev.rotcha.kr
@@ -67,6 +69,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/ev-hugo
   status: inactive
   theme: Blowfish
+  managed_by: pipeline
 - cf_project: guide-hugo
   daily_quota: 5
   domain: guide.rotcha.kr
@@ -87,6 +90,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/guide-hugo
   status: inactive
   theme: Blowfish
+  managed_by: pipeline
 - cf_project: hotissue-hugo
   daily_quota: 5
   domain: hotissue.rotcha.kr
@@ -119,6 +123,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/hotissue-hugo
   status: active
   theme: PaperMod
+  managed_by: pipeline
   funnel_stage: landing
   depth_next:
     - id: compare-hugo
@@ -147,6 +152,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/tco-hugo
   status: inactive
   theme: Blowfish
+  managed_by: pipeline
 - cf_project: rank-hugo
   daily_quota: 1
   domain: rank.informationhot.kr
@@ -163,6 +169,7 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/rank-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: landing
 - cf_project: pick-hugo
   daily_quota: 1
@@ -180,4 +187,5 @@ blogs:
   site_path: /Users/twinssn/Projects/cap/pick-hugo
   status: active
   theme: Blowfish
+  managed_by: pipeline
   funnel_stage: monetize

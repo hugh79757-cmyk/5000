@@ -312,3 +312,25 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
   - 기존 발행글(3007개)은 Phase 40~43 개선 이전 작성 → 품질 미달 당연
   - 신규 dry-run 생성글은 Phase 40~43 개선사항 반영돼 대부분 통과
   - 남은 이슈: "좋은" 전역 금지어 추가, H2 3-4개/H3 3개 구조 강제, 브랜드 키워드 1개 강제, travel4 코스명 패턴 "N코스:" 강제
+
+---
+
+## Phase 45: TAP Blog Meta-Response Detection & Prevention
+**Priority:** 🔴 HIGH
+**Cycle:** 조사 → 수정 → 검증
+**Status:** 📋 Planned
+- **Problem:** TAP 블로거(travel.rotcha.kr)가 AI 메타 응답("죄송합니다. 이미 작성했습니다...")을 실제 여행 콘텐츠 대신 발행
+- **Root Cause:** 1) 프롬프트에 대화형 응답 금지 명시 안됨, 2) 검증기가 메타 응답 탐지 못함, 3) 재시도 로직 없음
+- **Scope:** TAP core 모듈 (core/validators.py, core/ai_writer.py, app.py)
+- **Sub-tasks:**
+  - 45-01: core/validators.py에 메타 응답 탐지 패턴 10개+ 추가
+  - 45-02: core/ai_writer.py 시스템 프롬프트에 안티-메타 규칙 강화
+  - 45-03: ai_writer.generate_full_content()에 재시도 로직 (최대 2회)
+  - 45-04: app.py 파이프라인 레벨 재시도 + 텔레그램 알림
+  - 45-05: 드라이런 검증 (카테고리별 10회, 총 30회) + 회귀 테스트
+- **Acceptance:** 드라이런 30회 중 메타 응답 0건, 검증 통과율 100%, 기존 100개 포스트 false-positive 0건
+- **Dependencies:** Phase 44 품질 기준 완료 후 적용 권장
+
+---
+
+## Phase 46: (Reserved)

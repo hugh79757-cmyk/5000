@@ -1,5 +1,6 @@
 # Triage Index
 
+- 2026-07-26 | fix | tap-meta-response-block-fix | TAP 블로거 메타 응답("죄송합니다. 이미 작성했습니다") 발행 차단 — 4계층 방어(프롬프트/검증기/AI라이터/파이프라인) 구현
 - 2026-07-22 | fix | adsense-5sites-standardize | 5개 Hugo 블로그 AdSense 설정 지침서 기준 통일 (rotcha/techpawz/kuta/biz/issue)
 - 2026-07-22 | fix | hugo-ad-sense-settings-overhaul | 휴고 블로그 광고 설정 전면 정리 — rotcha.kr lazy-load→즉시 로드 전환 + 5.informationhot-hugo 광고 인프라 신규 구축. 테크포우즈 표준 도출
 - 2026-07-21 | fix | kitchen-hugo-blank-body-fadein-fix | kitchen-hugo 모바일 본문 공백: fade-in-section CSS+JS 제거로 해결
