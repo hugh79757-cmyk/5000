@@ -149,8 +149,54 @@ BANNED_REPLACEMENTS = {
 }
 
 
+def _fix_repeated_image_urls(body_md):
+    """Detect and fix image URLs with token repetition patterns (LLM stutter).
+
+    LLMs sometimes repeat trailing tokens in image URLs (e.g.,
+    'gLozv0gLozv0gLozv0gLozv0...'). This function detects such repetition
+    and strips all repeating content from the URL.
+
+    Detection: substring of length 4+ repeating 5+ times consecutively.
+    """
+    if not body_md:
+        return body_md
+
+    def _has_repeated_pattern(url, min_repeat_len=4, min_repeats=5):
+        url_str = url.rstrip("/")
+        url_len = len(url_str)
+        for sub_len in range(min_repeat_len, min(50, url_len // min_repeats + 1)):
+            for start in range(url_len - sub_len * min_repeats + 1):
+                sub = url_str[start:start + sub_len]
+                count = 0
+                pos = start
+                while pos + sub_len <= url_len and url_str[pos:pos + sub_len] == sub:
+                    count += 1
+                    pos += sub_len
+                if count >= min_repeats:
+                    return sub, count, start
+        return None
+
+    def _fix_url(match):
+        alt, url = match.group(1), match.group(2)
+        result = _has_repeated_pattern(url)
+        if result:
+            sub, count, pos = result
+            clean_url = url[:pos]
+            logger.warning(
+                f"[URL-REPEAT] Image URL has repeated pattern '{sub}' x{count} "
+                f"({len(url)} chars → {len(clean_url)} chars): "
+                f"{url[:80]}... → {clean_url[:80]}..."
+            )
+            return f"![{alt}]({clean_url})"
+        return match.group(0)
+
+    return re.sub(r"!\[([^\]]*)\]\(([^)]+)\)", _fix_url, body_md)
+
+
 def _sanitize_body(body):
-    """금지어 치환 + 스펙부족 메타문구 제거"""
+    """금지어 치환 + 스펙부족 메타문구 제거 + URL 토큰 반복 수정"""
+    # ── URL 토큰 반복(repetition) 버그 수정: LLM이 생성한 비정상 URL 정리 ──
+    body = _fix_repeated_image_urls(body)
     for phrase, replacement in BANNED_REPLACEMENTS.items():
         if phrase in body:
             body = body.replace(phrase, replacement)
