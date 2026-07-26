@@ -192,34 +192,22 @@ def _extract_first_image(body_md):
 def _extract_description(body_md):
     """본문에서 SEO용 description 추출 — DESC 주석 우선"""
     import re as _desc_re
-    _m = _desc_re.search(r"<!-- DESC: (.+?) -->", body_md)
+    if not body_md:
+        return ""
+    # 1. DESC 주석에서 추출 (유연한 공백 허용)
+    _m = _desc_re.search(r"<!-- DESC:\s*(.+?)\s*-->", body_md)
     if _m:
         return _m.group(1).strip()[:160]
-    # 기존 로직 (아래에서 본문 기반 추출 — DESC 주석 우선, 없으면 본문 기반"""
-    import re as _re
-    _desc_match = _re.search(r"<!-- DESC: (.+?) -->", body_md)
-    if _desc_match:
-        return _desc_match.group(1).strip()[:160]
-    lines = []
-    for line in body_md.split("\n"):
-        line = line.strip()
-        if not line:
-            continue
-        if line.startswith(("#", ">", "!", "---", "<!--", "|", "<")):
-            continue
-        clean = re.sub(r"\*\*|\[([^\]]+)\]\([^)]*\)", r"\1", line)
-        if len(clean) > 20:
-            lines.append(clean)
-        if len(lines) >= 3:
-            break
-    if not lines:
-        return ""
-    # 첫 문장이 아닌 2~3번째 문장에서 핵심 수치 포함 문장 우선
-    for line in lines[1:]:
-        if any(c.isdigit() for c in line):
-            return line[:160]
-    # 수치 문장 없으면 첫 문장 축약
-    return lines[0][:160]
+    # 2. 본문에서 요약 생성 (첫 3문장)
+    clean = body_md
+    clean = _desc_re.sub(r"\{\{<[^>]*?>}}", "", clean)
+    clean = _desc_re.sub(r"<[^>]+>", "", clean)
+    clean = _desc_re.sub(r"\s+", " ", clean).strip()
+    sentences = _desc_re.split(r'[.!?]\s+', clean)
+    summary = " ".join(sentences[:3]).strip()
+    if len(summary) > 160:
+        summary = summary[:157] + "..."
+    return summary
 
 def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, description, is_draft=False, blog_id=""):
     date_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
@@ -388,6 +376,7 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         return result[:4]
 
     cards = []
+    cross_found = []  # ← 함수 초기에 선언 (L476의 if block 제거)
 
     try:
         conn = _sq.connect(STAP_CONTENT_DB)
@@ -475,8 +464,6 @@ def _inject_related_cards(body_md, blog_id, slug, title, category):
         keywords = _extract_keywords(title)
 
         cross_blogs = [b for b in BLOG_DOMAINS if b != blog_id]
-        if not cross_found:
-            cross_found = []
         for kw in keywords:
             if len(cross_found) >= 2:
                 break

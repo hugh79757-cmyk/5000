@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import time
 
 import yaml
 from openai import OpenAI
@@ -13,6 +14,12 @@ logger = logging.getLogger(__name__)
 CONFIG_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config"
 )
+
+
+# Circuit breaker state (module level)
+_circuit_state = {"failures": 0, "open_until": 0.0}
+CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
+CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
 
 def load_models_config():
@@ -51,16 +58,26 @@ def _clean_ai_output(text: str) -> str:
 
 
 # 재시도 횟수 (글쓰기별)
-MAX_RETRIES = 2
+MAX_RETRIES = 3
 
 # 전체 tier 순서: default → fallback → economy
 TIER_ORDER = ["default", "fallback", "economy"]
+
+# Circuit breaker 설정
+CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
+CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
 
 def generate(
     system_prompt, user_prompt, tier="default", temperature=None, max_tokens=None
 ):
-    """AI 글 생성 — DeepSeek 기본, MiMo 폴백, 중국어 검증 후 발행 차단"""
+    """AI 글 생성 — DeepSeek 기본, MiMo 폴백, 중국어 검증 후 발행 차단
+    
+    Resilience features:
+    - Exponential backoff retry (1s, 2s, 4s) per tier
+    - Circuit breaker (10 consecutive failures → 5 min block)
+    - Tier fallback on persistent failures
+    """
     config = load_models_config()
     providers = config["providers"]
 
@@ -74,6 +91,12 @@ def generate(
 
     last_error = None
     for attempt_tier in attempted_tiers:
+        # Circuit breaker check
+        if _circuit_state["open_until"] > time.time():
+            logger.warning("[ai_writer] Circuit breaker OPEN — 5분 대기")
+            time.sleep(60)
+            continue
+
         tier_config = config[attempt_tier]
 
         kwargs = {
@@ -89,47 +112,49 @@ def generate(
         if max_tokens is not None:
             kwargs["max_tokens"] = max_tokens
 
-        # Retry logic for API failures - 1 retry allowed
-        client = None
-        content = None
-        for retry_attempt in range(2):  # 1 initial attempt + 1 retry
+        # Exponential backoff retry per tier
+        for attempt in range(MAX_RETRIES):
             try:
                 client = get_client(tier_config["provider"], providers)
                 response = client.chat.completions.create(**kwargs)
                 content = response.choices[0].message.content
-                break  # Success, exit retry loop
+                
+                # 성공 → circuit breaker 리셋
+                _circuit_state["failures"] = 0
+                _circuit_state["open_until"] = 0.0
+
+                if not content:
+                    last_error = f"{attempt_tier}: 빈 응답"
+                    logger.warning(f"[ai_writer] {last_error}")
+                    continue
+
+                content = _clean_ai_output(content)
+
+                # 중국어 검증
+                if _is_chinese_content(content):
+                    last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
+                    logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
+                    continue
+
+                logger.info(
+                    f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
+                )
+                return {
+                    "content": content,
+                    "model": tier_config["model"],
+                    "provider": tier_config["provider"],
+                    "tier": attempt_tier,
+                    "tokens_used": response.usage.total_tokens if response.usage else 0,
+                }
             except Exception as e:
-                if retry_attempt == 0:  # First failure, retry once
-                    logger.warning(f"[ai_writer] {attempt_tier} API 요청 실패 (재시도 중): {e}")
-                    continue
-                else:  # Second failure, log and continue to next tier
-                    last_error = f"{attempt_tier}: {e}"
-                    logger.exception(f"[ai_writer] {last_error}")
-                    continue
-
-        if not content:
-            last_error = f"{attempt_tier}: 빈 응답"
-            logger.warning(f"[ai_writer] {last_error}")
-            continue
-
-        content = _clean_ai_output(content)
-
-        # 중국어 검증
-        if _is_chinese_content(content):
-            last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
-            logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
-            continue
-
-        logger.info(
-            f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
-        )
-        return {
-            "content": content,
-            "model": tier_config["model"],
-            "provider": tier_config["provider"],
-            "tier": attempt_tier,
-            "tokens_used": response.usage.total_tokens if response.usage else 0,
-        }
+                _circuit_state["failures"] += 1
+                if _circuit_state["failures"] >= CIRCUIT_BREAKER_THRESHOLD:
+                    _circuit_state["open_until"] = time.time() + CIRCUIT_BREAKER_RESET_SEC
+                    logger.critical(f"[ai_writer] Circuit breaker OPEN: {_circuit_state['failures']} failures")
+                wait = (2 ** attempt) * 1.0  # 1s, 2s, 4s
+                logger.warning(f"[ai_writer] Retry {attempt+1}/{MAX_RETRIES} after {wait}s: {e}")
+                time.sleep(wait)
+                continue
 
     # 모든 tier 실패
     msg = f"모든 LLM tier 실패: {last_error}"
