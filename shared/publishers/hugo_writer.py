@@ -604,15 +604,25 @@ def _apply_chart_shortcode(body_md: str) -> str:
 
 
 def _validate_frontmatter(fm_text):
-    """간단한 front matter 문법 검증"""
+    """간단한 front matter 문법 검증 — 정규식으로 여는/closing --- 분리 (description 내 --- 무시)"""
     if not fm_text or "---" not in fm_text:
         return False, "no front matter"
     try:
         import yaml
-        parts = fm_text.split("---")
-        if len(parts) < 2:
-            return False, "invalid yaml"
-        yaml.safe_load(parts[1])
+        # ^---\\n 으로 시작하는 여는 marker 확인
+        if not re.match(r"^---\s*\n", fm_text):
+            return False, "front matter does not start with ---"
+        # \\n---\\n 또는 \\n---$ 패턴으로 closing marker 찾기 (줄 끝의 --- 만 매칭)
+        # split(\"---\")와 달리 값 안의 --- 를 무시함
+        m = re.search(r"\n---\s*$", fm_text, re.MULTILINE)
+        if not m:
+            return False, "no closing front matter ---"
+        fm_body = fm_text[4:m.start()].strip()
+        if not fm_body:
+            return False, "empty front matter"
+        parsed = yaml.safe_load(fm_body)
+        if not isinstance(parsed, dict):
+            return False, "front matter is not a dict"
         return True, ""
     except Exception as e:
         return False, str(e)
@@ -642,13 +652,30 @@ def _extract_first_image(body_md):
 def _extract_description(body_md):
     _m = re.search(r"<!-- DESC:\s*(.+?)-->", body_md or "")
     if _m:
-        return _m.group(1).strip()[:200]
-    clean = body_md or ""
-    # Strip Hugo shortcodes FIRST to prevent {{< lead >}} → {{}} when HTML is stripped
-    clean = re.sub(r"\{\{<[^>]*?>}}", "", clean)
-    clean = re.sub(r"<[^>]+>", "", clean)
-    clean = re.sub(r"\s+", " ", clean).strip()
-    return clean[:200]
+        desc = _m.group(1).strip()
+    else:
+        clean = body_md or ""
+        # Strip Hugo shortcodes FIRST to prevent {{< lead >}} → {{}} when HTML is stripped
+        clean = re.sub(r"\{\{<[^>]*?>}}", "", clean)
+        clean = re.sub(r"<[^>]+>", "", clean)
+        clean = re.sub(r"\s+", " ", clean).strip()
+        desc = clean
+    
+    # Truncate at word boundary (max 200 chars, but don't cut words)
+    if len(desc) <= 200:
+        # Even if <= 200, check if it ends mid-word (no trailing space/punctuation)
+        if len(desc) == 200 and desc and desc[-1].isalnum():
+            # Ends with alphanumeric - likely mid-word, find last space
+            last_space = desc.rfind(' ')
+            if last_space > 100:
+                return desc[:last_space].rstrip() + '...'
+        return desc
+    
+    truncated = desc[:200]
+    last_space = truncated.rfind(' ')
+    if last_space > 100:  # Only use word boundary if we don't lose too much
+        return truncated[:last_space].rstrip() + '...'
+    return truncated + '...'
 
 
 def _build_schema_json(cfg, title, slug, body_md, category, tags, description=None):
