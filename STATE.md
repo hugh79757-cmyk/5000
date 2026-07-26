@@ -1,7 +1,7 @@
 # State File — Resume Status
 
-**Generated:** 2026-07-24 23:50 KST (Phase 43 completion + food fetch fix)
-**Session:** Phase 43 Blog expansion verification + food fetch bug fix
+**Generated:** 2026-07-26 16:30 KST (Phase 49 CUAP Cross-link Bugfix completion)
+**Session:** Phase 49 CUAP Cross-link Bugfix — Wave 1 (root cause) + Wave 2 (batch fix)
 
 ---
 
@@ -25,6 +25,7 @@
 | Phase 31 rotcha AdSense Std | ✅ Complete | rotcha.kr 6개 Blowfish 블로그 표준화, live 광고 확인 |
 | Phase 10-1 Publishing Failure Hardening | ✅ Complete | kitchen-hugo 가정용 차단 + adaptive threshold + deploy retry |
 | Phase 43 Blog Expansion | ✅ Complete | 4개 블로그 제목 로직 복구 + food fetch str 버그 수정 |
+| Phase 49 CUAP Cross-link Bugfix | ✅ Complete | Wave 1: url return + file-based slug fallback + sparse card warning. Wave 2: 14 wrong-slug entities deleted, 143 baked cross-link hrefs fixed across 38 files/10 blogs |
 
 ---
 
@@ -36,6 +37,15 @@
 | STATE.md | Phase 11-12 = deferred (틀림) | ✅ 본 문서로 수정 |
 | SESSION_STATUS.md | Phase 11 blocker 3개 (이미 해결됨) | 아래 업데이트 |
 | REQUIREMENTS.md | 모든 status = Pending (10개 전부) | 아래 업데이트 |
+
+---
+
+## Recently Completed (Phase 49)
+
+| Wave | Description | Key Files |
+|------|-------------|-----------|
+| 49-01 Root Cause Fix | Added `"url"` return key in `_write_hugo_post()`; 3-tier slug fallback in pipeline; sparse card warning in entity_linker | `hugo_writer.py`, `pipeline.py`, `cuap_entity_linker.py` |
+| 49-02 Batch Fix | Deleted 14 wrong-slug entities (`fix_cuap_entity_slugs.py`); fixed 143 baked cross-link hrefs across 38 files/10 blogs (`fix_baked_crosslink_cards.py`) | `fix_cuap_entity_slugs.py`, `fix_baked_crosslink_cards.py` |
 
 ---
 
@@ -61,34 +71,24 @@
 
 ---
 
-## uncommitted changes (작업 중)
+## uncommitted changes (작업 중 — Phase 49 이후)
 
 ```
-M data/dashboard/scripts/sync_sap_to_dashboard.py  (SAP sync fix)
-M dispatcher.py                                     (STAP auto-collect + IPO cooldown)
-M pipelines/curation/keywords.py                    (keyword cleanup)
-M pipelines/curation/pipeline.py                    (CTA fallback)
-M scripts/master_backup.py                          (import os fix)
-M shared/post_validator.py                          (empty_template regex fix)
-M shared/publisher.py                               (og:image inject)
-M shared/publishers/hugo_writer.py                  (empty_template regex fix)
+M STATE.md                                           (Phase 49 completion update)
 ```
 
-(7 files modified, 1 pending from today's session)
+(1 file modified — all Phase 49 production changes committed)
 
 ---
 
 ## 추천 Next Action
 
-### 🔴 IMMEDIATE (3분)
-- Phase 12: `keywords.py`에 `validate_keyword()` 함수 추가
-
-### 🟡 이번 세션
-- Phase 16 계획 수립 (Production Hardening — Phase 1-15에서 발견된 사소한 미비점 정리)
-- Phase 43 실제 발행 적용 여부 결정 (개선된 프롬프트/파라미터)
-
-### 🟢 다음 세션
+### 🟡 이번/다음 세션
+- Phase 12: `keywords.py`에 `validate_keyword()` 함수 추가 (3분)
+- Phase 16 계획 수립 (Production Hardening)
 - Phase 10 toggle 활성화 검토 (shortcode가 이미 구현돼 있음)
+
+### 🟢 향후 고려
 - Phase 15 pipeline hook을 travel/stock까지 확장
 - travel3-hugo 본문 길이(2212자) 소폭 미달 모니터링 및 최적화
 
