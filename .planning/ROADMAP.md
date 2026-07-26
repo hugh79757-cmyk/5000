@@ -341,11 +341,36 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 **Priority:** 🔴 HIGH
 **Cycle:** fix → batch → verify
 **Status:** 📋 Planned
-- **Problem:** CUAP cross-link URLs use wrong slug (`20260726-{keyword}`) instead of actual on-disk slug (`slugify(title)` format), causing 404 on all 4 cross-links. Root cause: `hugo_writer._write_hugo_post()` returns no `"url"` key, so entity registration falls back to keyword-based slug.
-- **Root Cause:** Import override at `publisher.py:762-770` replaces publisher.py's `_write_hugo_post()` (which returns URL) with `hugo_writer._write_hugo_post()` (which doesn't).
-- **Scope:** `shared/publishers/hugo_writer.py`, `pipelines/curation/pipeline.py`, `shared/cuap_entity_linker.py`, batch fix scripts
+
+---
+
+## Phase 50: CTA Button Center — CSS 표준화 + 인라인 스타일 마이그레이션
+**Priority:** 🟡 MEDIUM
+**Cycle:** css → python → batch → build → deploy
+**Status:** ✅ Complete
+- **Goal:** 10 CUAP 블로그 CTA 버튼 중앙 정렬, cross-sell/funnel/cta-box CSS 클래스 표준화, 인라인 스타일 → CSS 클래스 마이그레이션
+- **Scope:** `cuap/*/assets/css/custom.css` (10개), `shared/cuap_entity_linker.py`, `pipelines/curation/pipeline.py`, `scripts/fix_cta_links.py`
 - **Sub-tasks:**
-  - 49-01: Add `"url"` key to `hugo_writer._write_hugo_post()` return + defensive file-path slug fallback in pipeline.py
-  - 49-02: Batch fix cuap_entities DB wrong slugs + baked cross-link cards in content/posts/
-- **Acceptance:** Health blog cholesterol post 4 cross-links all HTTP 200; 5+ CUAP blogs verified; Hugo build 0 errors
-- **Dependencies:** Phase 48 compat — do not touch frontmatter builder functions
+  - 50-01: CSS 클래스 정의 (btn-price-check 중앙 정렬 + cross-sell/funnel/cta-box)
+  - 50-02: 인라인 스타일 → CSS 클래스 마이그레이션 (cuap_entity_linker.py)
+  - 50-03: CTA fallback CSS 클래스 + markdown CTA post-processing (pipeline.py)
+  - 50-04: 기존 포스트 CTA 일괄 변환 스크립트 (scripts/fix_cta_links.py)
+  - 50-05: Hugo 빌드 + 배포 (10개 블로그 0 에러)
+- **Acceptance:** 10/10 CSS 완료, AST 3/3 OK, 10/10 빌드 0 에러, 10/10 배포 성공, 라이브 URL 200
+- **Dependencies:** None
+
+---
+
+## Phase 51: Image URL Token Repetition Bug Fix
+**Priority:** 🔴 HIGH
+**Cycle:** scan → fix → pipeline → script → verify
+**Status:** ✅ Complete
+- **Goal:** Detect and fix LLM-generated image URLs with token repetition (e.g., `gLozv0gLozv0gLozv0...` x hundreds)
+- **Scope:** `shared/publishers/hugo_writer.py`, `pipelines/curation/writer.py`, `scripts/fix_repeated_image_urls.py`
+- **Sub-tasks:**
+  - 51-01: 25개 Hugo 블로그(6000+ 포스트) 전수 스캔 → 1건 감염(health-hugo, 10888자 URL)
+  - 51-02: 감염 파일 수정 (반복 패턴 제거 + HTTP HEAD 200 확인)
+  - 51-03: `_fix_repeated_image_urls()` — 4자+ 5회+ 반복 패턴 감지/정리 함수, `_clean_body()` 및 `_sanitize_body()`에 통합
+  - 51-04: `scripts/fix_repeated_image_urls.py` — --dry-run/--blogs/--backup-dir 지원
+  - 51-05: 63/63 기존 테스트 통과 확인
+- **Acceptance:** 전수 스캔 0건, 파이프라인 신규 생성 URL 0건, 63/63 테스트 통과
