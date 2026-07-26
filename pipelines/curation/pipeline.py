@@ -977,20 +977,30 @@ def _run_inner(cfg, blog_id, daily_quota):
         slug = _make_slug(keyword)
         # while 루프 재진입 → _title_is_duplicate 재검사
 
+    # 큐레이션 CTA markdown 링크 → HTML 버튼 변환
+    # 재정의: AI 생성 마크다운 CTA 링크를 HTML 버튼으로 변환
+    def fix_markdown_cta_links(body_md: str) -> str:
+        """AI가 생성한 markdown CTA 링크를 HTML 버튼으로 변환."""
+        # Coupang affiliate 링크만 대상
+        CTA_PATTERN = r'\[([^\]]+)\]\((https?://(?:link\.coupang\.com|www\.coupang\.com)[^)]+)\)'
+        replacement = r'<div style="text-align:center;margin:1.5rem 0"><a class="btn-price-check" href="\2">🛒 \1</a></div>'
+        return re.sub(CTA_PATTERN, replacement, body_md)
+
     # 큐레이션 CTA fallback — AI가 CTA를 생성하지 않은 경우 자동 삽입
     _HAS_CTA = "cta-box" in body_md or "cta_box" in body_md
     if not _HAS_CTA:
         _FALLBACK_CTA = (
-            '\n\n<div class="cta-box" style="background:#f8f9fa;padding:16px;border-radius:8px;'
-            'text-align:center;margin:24px 0">\n'
-            '<p style="font-size:16px;font-weight:700;margin:0 0 8px">💡 구매 팁</p>\n'
-            '<p style="font-size:14px;margin:0 0 12px;color:#555">'
-            '위 상품들의 가격은 변동될 수 있으니 최신 가격을 꼭 확인해보세요.<br>'
+            '\n\n<div class="cta-box">\n'
+            '<p>💡 구매 팁</p>\n'
+            '<p>위 상품들의 가격은 변동될 수 있으니 최신 가격을 꼭 확인해보세요.<br>'
             '아래 링크에서 자세한 정보와 후기를 확인할 수 있습니다.</p>\n'
             '</div>'
         )
         body_md += _FALLBACK_CTA
         logger.info(f"[{blog_id}] 큐레이션 CTA fallback 삽입")
+
+    # CTA markdown → HTML post-processing
+    body_md = fix_markdown_cta_links(body_md)
 
     # CUAP 거미줄 크로스 링크 삽입 (fail-open)
     try:
