@@ -5,14 +5,14 @@ milestone_name: milestone
 status: active
 last_updated: "2026-07-21T03:00:00.000Z"
 progress:
-  total_phases: 28
-  completed_phases: 28
+  total_phases: 29
+  completed_phases: 29
   percent: 100
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 28 완료 (CUAP Worker 404→500 Fix), 운영 안정화 단계**
+**Status:** v1.1 — **Phase 50 완료 (CTA Button Center), 운영 안정화 단계**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -57,6 +57,7 @@ progress:
 | 17 | Content Quality Enhancement — 콘텐츠 품질 고도화 | ✅ | 완료 (2026-07-12) |
 | 24 | CUAP 콘텐츠 품질 고도화 — 키워드 정리 + 타이틀 최적화 + 이미지 중복 방지 | ✅ | 완료 (2026-07-20) |
 | 28 | CUAP Worker 404→500 Fix — 6개 Worker 블로그 missing-asset 500 → 404 | ✅ | 완료 (2026-07-21) |
+| 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
 
 ---
 
@@ -122,4 +123,23 @@ progress:
 
 ---
 
-*Last updated: 2026-07-21 Phase 28 CUAP Worker 404→500 Fix 완료*
+## Phase 50: CTA Button Center (2026-07-26)
+
+**목표:** 10개 CUAP 블로그 CTA 버튼 중앙 정렬 + cross-sell/funnel/cta-box CSS 클래스 표준화 + 인라인 스타일 마이그레이션
+
+**구현 내용:**
+- 10개 CUAP custom.css: btn-price-check 중앙 정렬(display:table + margin:auto) + cross-sell-card/funnel-header/cta-box 클래스 추가 (다크모드 포함)
+- cuap_entity_linker.py: build_cross_sell_card() 모든 인라인 스타일 → CSS 클래스, build_funnel_header() color 외 전부 CSS 클래스
+- pipeline.py: CTA fallback 인라인 스타일 → .cta-box CSS 클래스 + fix_markdown_cta_links() post-processing 함수
+- scripts/fix_cta_links.py: 기존 포스트 markdown CTA 링크 → HTML 버튼 일괄 변환 스크립트 (dry-run, --blog, .bak, SHA256)
+
+**검증:**
+- T1 10/10 custom.css: cross-sell-card/funnel-header/cta-box ✅, btn-price-check centered ✅
+- T2 AST OK — cuap_entity_linker.py 0 errors ✅
+- T3 AST OK — pipeline.py CTA fallback inline-free ✅, fix_markdown_cta_links() ✅
+- T4 AST OK — fix_cta_links.py dry-run 검증 (392 files, URL params 보존) ✅
+- T5 10/10 Hugo build 0 errors ✅, 10/10 deploy ✅, live URL 200 ✅
+
+---
+
+*Last updated: 2026-07-26 Phase 50 CTA Button Center 완료*
