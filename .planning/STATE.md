@@ -148,14 +148,20 @@ progress:
 
 **목표:** 36개 Blowfish 블로그를 techpawz-hugo 표준(v1.1)으로 통일하고, Hugo 테마 업그레이드에 대응 가능한 구조로 전환
 
-**Wave 1 진행 중:** extend-head.html 단순화 (35개 블로그 수정 완료)
-- 35개 블로그의 extend-head.html을 adsense 즉시 로드만 유지하도록 표준화
-- GA4 ID 27개 추출 완료 (Wave 2용)
-- biz-techpawz-hugo 디렉토리 누락으로 스킵
-- pet-hugo는 이미 표준 코드 적용됨
+**Wave 1 완료:** extend-head.html 단순화 (35개 블로그 수정 완료)
+**Wave 2 완료:** extend_head.html 신규 생성 (26개 블로그)
+**Wave 3 완료:** (이전 완료)
+**Wave 4 완료:** single.html 정비 (22개 블로그)
+- 4-1: Description lead 제거 — 11개 블로그 (CUAP 9 + kuta-hugo + biz-techpawz-hugo)
+  - pet-hugo는 이미 제거되어 스킵
+- 4-2: H2 분할 인젝션 추가 — 11개 블로그 (STAP 5 + TAP 5 + issue-techpawz-hugo)
+  - finance-hugo: header in-article 제거 + H2 split 추가
+  - dividend/etf/sector/ipo-hugo: header in-article 제거 + H2 split 추가
+  - travel/travel1-4-hugo: H2 split 추가 (header in-article 유지)
+  - issue-techpawz-hugo: content-div in-article 제거 + H2 split 추가
 
-**다음 단계:** Wave 2 — extend_head.html 신규 생성 (26개)
+**다음 단계:** Wave 5
 
 ---
 
-*Last updated: 2026-07-28 Phase 52 Wave 1 extend-head.html 단순화 완료*
+*Last updated: 2026-07-28 Phase 52 Wave 4 single.html 정비 완료 (22개 블로그, 22 커밋)*
