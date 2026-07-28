@@ -1,8 +1,8 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-07-24
+**Last updated:** 2026-07-28
 
-**Actual phases completed:** 31 phases 완료
+**Actual phases completed:** 32 phases 완료 (Phase 52 Wave 1 진행 중)
 **현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
 
 ---
@@ -374,3 +374,24 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
   - 51-04: `scripts/fix_repeated_image_urls.py` — --dry-run/--blogs/--backup-dir 지원
   - 51-05: 63/63 기존 테스트 통과 확인
 - **Acceptance:** 전수 스캔 0건, 파이프라인 신규 생성 URL 0건, 63/63 테스트 통과
+
+---
+
+## Phase 52: Blowfish 블로그 표준화 + 테마 업그레이드 대응
+**Priority:** 🔴 HIGH
+**Cycle:** survey → standardize → build → deploy → verify
+**Status:** 🔄 Wave 1 진행 중
+- **Goal:** 36개 Blowfish 블로그를 techpawz-hugo 표준(v1.1)으로 통일, Hugo 테마 업그레이드에 대응 가능한 구조로 전환
+- **Scope:** CUAP 10개 + CAP 7개 + STAP 5개 + TAP 5개 + RAP 4개 + SEAP 1개 + 개별 4개 = 36개 블로그
+- **Sub-tasks:**
+  - 52-01: extend-head.html 단순화 — 36개 블로그 adsense only (GA4/lazy-load 제거) ✅ (35개 수정 완료, 1개 스킵)
+  - 52-02: extend_head.html 신규 생성 — 26개 블로그 (CUAP 10개 제외)
+  - 52-03: baseof.html 삭제 — 30개 블로그 (테마 기본 사용)
+  - 52-04: single.html 정비 — Description lead 제거(12개) + H2 분할 인젝션(11개)
+  - 52-05: ad partial 정비 — overflow:hidden, push script 위치, 하드코딩→템플릿 변수
+  - 52-06: Hugo 빌드 + 배포 — 36개 블로그 0 에러
+- **Acceptance:** 36개 블로그 표준화 완료, Hugo 빌드 0 에러, 배포 성공, 라이브 광고 노출 확인
+- **Dependencies:** `Blowfish-Hugo-테마-업그레이드-표준-지침서.md` v1.1, `ADSENSE-GUIDE.md`
+- **Documents:**
+  - `.planning/phase-52-blowfish-standardization/RESEARCH.md` — 전수 조사 분석
+  - `.planning/phase-52-blowfish-standardization/PLAN.md` — 6-wave 실행 계획

@@ -3,11 +3,11 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-07-21T03:00:00.000Z"
+last_updated: "2026-07-28T15:08:26Z"
 progress:
-  total_phases: 29
+  total_phases: 30
   completed_phases: 29
-  percent: 100
+  percent: 97
 ---
 
 # Project State: 5000
@@ -58,6 +58,7 @@ progress:
 | 24 | CUAP 콘텐츠 품질 고도화 — 키워드 정리 + 타이틀 최적화 + 이미지 중복 방지 | ✅ | 완료 (2026-07-20) |
 | 28 | CUAP Worker 404→500 Fix — 6개 Worker 블로그 missing-asset 500 → 404 | ✅ | 완료 (2026-07-21) |
 | 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
+| 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
 
 ---
 
@@ -143,4 +144,18 @@ progress:
 
 ---
 
-*Last updated: 2026-07-26 Phase 50 CTA Button Center 완료*
+## Phase 52: Blowfish 블로그 표준화 + 테마 업그레이드 대응 (2026-07-28)
+
+**목표:** 36개 Blowfish 블로그를 techpawz-hugo 표준(v1.1)으로 통일하고, Hugo 테마 업그레이드에 대응 가능한 구조로 전환
+
+**Wave 1 진행 중:** extend-head.html 단순화 (35개 블로그 수정 완료)
+- 35개 블로그의 extend-head.html을 adsense 즉시 로드만 유지하도록 표준화
+- GA4 ID 27개 추출 완료 (Wave 2용)
+- biz-techpawz-hugo 디렉토리 누락으로 스킵
+- pet-hugo는 이미 표준 코드 적용됨
+
+**다음 단계:** Wave 2 — extend_head.html 신규 생성 (26개)
+
+---
+
+*Last updated: 2026-07-28 Phase 52 Wave 1 extend-head.html 단순화 완료*
