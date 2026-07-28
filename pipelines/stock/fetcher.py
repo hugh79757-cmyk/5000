@@ -161,11 +161,13 @@ def fetch_etf_daily(top_n=10):
     url = "https://finance.naver.com/api/sise/etfItemList.nhn"
     # DB 캐시 먼저 확인
     cached = _get_etf_from_db()
-    if cached:
+    items = None
+    items_from_db = False
+    if cached and len(cached) >= 5:  # 5개 이상이면 사용 (10→5 완화)
         items_from_db = True
         items = cached
     else:
-        items_from_db = False
+        # API 시도
         try:
             resp = _req.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
             resp.raise_for_status()
@@ -177,11 +179,22 @@ def fetch_etf_daily(top_n=10):
                 logging.getLogger(__name__).info(f"ETF {saved}건 DB 캐시 저장")
         except Exception as e:
             import logging
-            logging.getLogger(__name__).exception(f"ETF fetch 실패: {e}")
-            return None
-
+            logging.getLogger(__name__).warning(f"ETF API 실패, DB 캐시 사용: {e}")
+            # DB에 캐시가 있으면 사용 (개수 무관)
+            if cached:
+                items_from_db = True
+                items = cached
+    
+    # 둘 다 없으면 최소 구조 반환 (기사 생성은 가능하게)
     if not items:
-        return None
+        return {
+            "gainers": [],
+            "losers": [],
+            "volume_top": [],
+            "total_count": 0,
+            "source": "naver_finance_etf_api_unavailable",
+            "note": "실시간 데이터 수신 불가 - 전략/방법론 중심 작성 필요",
+        }
 
     # DB캐시와 API 응답 키 통일
     if items_from_db:
@@ -265,7 +278,7 @@ def fetch_dividend_ranking(top_n=10):
                 except (ValueError, TypeError):
                     continue
         if not result:
-            return None
+            return {"rankings": [], "total_count": 0, "source": "ksd_seibro_unavailable", "note": "배당 데이터 수신 불가 - 방법론 중심 작성 필요"}
         saved = _save_dividend_to_db(result)
         import logging
         logging.getLogger(__name__).info(f"배당 {saved}건 DB 캐시 저장")
@@ -278,7 +291,7 @@ def fetch_dividend_ranking(top_n=10):
     except Exception as e:
         import logging
         logging.getLogger(__name__).exception(f"KSD 배당순위 fetch 실패: {e}")
-        return None
+        return {"rankings": [], "total_count": 0, "source": "ksd_seibro_error", "note": "배당 데이터 수신 불가 - 방법론 중심 작성 필요"}
 
 
 def _save_etf_to_db(items):
@@ -313,7 +326,7 @@ def _get_etf_from_db():
     conn.row_factory = sqlite3.Row
     rows = conn.execute("SELECT * FROM etf_daily WHERE date=? ORDER BY change_rate DESC", (today,)).fetchall()
     conn.close()
-    if len(rows) < 10:
+    if not rows:
         return None
     return [dict(r) for r in rows]
 
@@ -350,7 +363,7 @@ def _get_dividend_from_db():
     conn.row_factory = sqlite3.Row
     rows = conn.execute("SELECT * FROM dividend_ranking WHERE date=? ORDER BY rank", (today,)).fetchall()
     conn.close()
-    if len(rows) < 5:
+    if not rows:
         return None
     return [dict(r) for r in rows]
 

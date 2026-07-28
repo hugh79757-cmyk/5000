@@ -862,6 +862,36 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
 
     slug = slugify(title)
 
+    # ── 중복 발행 방지 (source_id + slug 기반) ──
+    from shared.content_store import source_exists, get_conn as _get_conn
+
+    if source_id and source_exists(blog_id, data_source, source_id):
+        return {
+            "success": False,
+            "reason": "duplicate_source_id",
+            "blog_id": blog_id,
+            "source_id": source_id,
+        }
+    _conn = _get_conn()
+    _dup = _conn.execute(
+        "SELECT id, published_url FROM articles WHERE blog_id=? AND slug=? AND status='published' LIMIT 1",
+        (blog_id, slug),
+    ).fetchone()
+    _conn.close()
+    if _dup:
+        existing_url = (
+            _dup[1] if _dup[1] and not _dup[1].startswith("pending://") else ""
+        )
+        if existing_url:
+            return {
+                "success": False,
+                "reason": "duplicate_slug",
+                "blog_id": blog_id,
+                "slug": slug,
+                "existing_url": existing_url,
+            }
+    # ── 중복 방지 끝 ──
+
     # ✅ humanize 단계 (2026-06-12 추가) — 한국어 파이프라인 전용
     _KO_PIPELINES = {"rap", "rap2", "rap3", "rap4", "rap5",
                      "travel", "travel1", "travel2", "travel3", "travel4",

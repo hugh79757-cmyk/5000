@@ -1014,7 +1014,7 @@ def run(blog_cfg):
         is_draft=article.get("is_draft", False),
         tags=article.get("tags", ""),
         data_source=data_source,
-        source_id=keyword,
+        source_id=f"{keyword}_{datetime.now().strftime('%Y%m%d')}",
         model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
         thumbnail_url=thumb_url,
         wp_category=wp_category,
