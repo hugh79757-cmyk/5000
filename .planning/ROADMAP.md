@@ -395,3 +395,139 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 - **Documents:**
   - `.planning/phase-52-blowfish-standardization/RESEARCH.md` — 전수 조사 분석
   - `.planning/phase-52-blowfish-standardization/PLAN.md` — 6-wave 실행 계획
+
+
+---
+
+## Phase 53: Complete Phase 52 Wave 6: Build and Deploy
+**Status:** 📋 Planned
+
+### 6-1. 그룹별 Hugo 빌드 검증
+
+| 순서 | 그룹 | 수 | 비고 |
+|------|------|----|------|
+| 1 | CUAP (Workers) | 10 | Start building sites … 
+hugo v0.160.1+extended+withdeploy darwin/arm64 BuildDate=2026-04-08T14:02:42Z VendorInfo=Homebrew
+
+
+                  │  KO  
+──────────────────┼──────
+ Pages            │ 1111 
+ Paginator pages  │    0 
+ Non-page files   │   54 
+ Static files     │   15 
+ Processed images │    0 
+ Aliases          │ 5052 
+ Cleaned          │    0 
+
+Total in 1087 ms + 
+ ⛅️ wrangler 4.110.0
+──────────────────── |
+| 2 | CAP (Pages) | 7 | Start building sites … 
+hugo v0.160.1+extended+withdeploy darwin/arm64 BuildDate=2026-04-08T14:02:42Z VendorInfo=Homebrew
+
+
+                  │  KO  
+──────────────────┼──────
+ Pages            │ 1111 
+ Paginator pages  │    0 
+ Non-page files   │   54 
+ Static files     │   15 
+ Processed images │    0 
+ Aliases          │ 5052 
+ Cleaned          │    0 
+
+Total in 870 ms + 
+ ⛅️ wrangler 4.110.0
+──────────────────── |
+| 3 | STAP (Pages) | 5 | Start building sites … 
+hugo v0.160.1+extended+withdeploy darwin/arm64 BuildDate=2026-04-08T14:02:42Z VendorInfo=Homebrew
+
+
+                  │  KO  
+──────────────────┼──────
+ Pages            │ 1111 
+ Paginator pages  │    0 
+ Non-page files   │   54 
+ Static files     │   15 
+ Processed images │    0 
+ Aliases          │ 5052 
+ Cleaned          │    0 
+
+Total in 866 ms + 
+ ⛅️ wrangler 4.110.0
+──────────────────── |
+| 4 | TAP (Pages) | 5 | Start building sites … 
+hugo v0.160.1+extended+withdeploy darwin/arm64 BuildDate=2026-04-08T14:02:42Z VendorInfo=Homebrew
+
+
+                  │  KO  
+──────────────────┼──────
+ Pages            │ 1111 
+ Paginator pages  │    0 
+ Non-page files   │   54 
+ Static files     │   15 
+ Processed images │    0 
+ Aliases          │ 5052 
+ Cleaned          │    0 
+
+Total in 848 ms + 
+ ⛅️ wrangler 4.110.0
+──────────────────── |
+| 5 | RAP (Pages) | 4 | Start building sites … 
+hugo v0.160.1+extended+withdeploy darwin/arm64 BuildDate=2026-04-08T14:02:42Z VendorInfo=Homebrew
+
+
+                  │  KO  
+──────────────────┼──────
+ Pages            │ 1111 
+ Paginator pages  │    0 
+ Non-page files   │   54 
+ Static files     │   15 
+ Processed images │    0 
+ Aliases          │ 5052 
+ Cleaned          │    0 
+
+Total in 913 ms + 
+ ⛅️ wrangler 4.110.0
+──────────────────── |
+| 6 | SEAP + 개별 (Pages) | 5 | Start building sites … 
+hugo v0.160.1+extended+withdeploy darwin/arm64 BuildDate=2026-04-08T14:02:42Z VendorInfo=Homebrew
+
+
+                  │  KO  
+──────────────────┼──────
+ Pages            │ 1111 
+ Paginator pages  │    0 
+ Non-page files   │   54 
+ Static files     │   15 
+ Processed images │    0 
+ Aliases          │ 5052 
+ Cleaned          │    0 
+
+Total in 898 ms + 
+ ⛅️ wrangler 4.110.0
+──────────────────── |
+
+### 6-2. 배포 후 검증
+
+- 각 블로그 라이브 URL HTTP 200 확인
+- adsbygoogle.js 로드 확인 (개발자 도구 Network 탭)
+- top 광고 + in-article 광고 노출 확인
+- 모바일 레이아웃 오버플로 확인
+
+---
+
+## Acceptance Criteria
+
+- [ ] 36개 블로그 extend-head.html: adsense 즉시 로드만 (GA4/lazy-load 없음)
+- [ ] 36개 블로그 extend_head.html: GA4 + 모바일 보정 CSS 포함
+- [ ] 30개 블로그 baseof.html: 삭제 완료 (테마 기본 사용)
+- [ ] 12개 블로그 single.html: Description lead 제거
+- [ ] 11개 블로그 single.html: H2 분할 인젝션 추가
+- [ ] 36개 블로그 ad partials: overflow:hidden;min-height:100px 적용
+- [ ] 36개 블로그 Hugo 빌드 0 에러
+- [ ] 36개 블로그 배포 성공
+- [ ] 라이브 사이트 광고 노출 확인
+
+
