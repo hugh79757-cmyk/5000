@@ -241,13 +241,18 @@ def _build_subscription_reference(keyword, subscriptions):
     """청약 공고 데이터를 참고자료 블록으로 변환 (실제 DB 스키마 반영)"""
     from datetime import datetime
     month = datetime.now().strftime("%Y년 %m월")
-    lines = [f"## 키워드: {keyword}", f"기준: {month}", f"총 공고: {len(subscriptions)}건\n"]
+
+    # --- 표시할 공고 목록 (최대 15건, 최종 출력 순서 기준) ---
+    _display = subscriptions[:15]
+    _count = len(_display)
+
+    lines = [f"## 키워드: {keyword}", f"기준: {month}", f"총 공고: {_count}건\n"]
 
     # 마크다운 표 헤더
     lines.append("| 번호 | 공고명 | 유형 | 지역 | 접수기간 | 상태 |")
     lines.append("|------|--------|------|------|----------|------|")
 
-    for i, s in enumerate(subscriptions[:15], 1):
+    for i, s in enumerate(_display, 1):
         pan_nm = s.get("pan_nm", "미상")
         pan_type = s.get("pan_type", "미상")
         region_nm = s.get("region_nm", "미상")
@@ -260,7 +265,7 @@ def _build_subscription_reference(keyword, subscriptions):
 
     # 상세 정보 블록
     lines.append("\n### 공고 상세 정보")
-    for i, s in enumerate(subscriptions[:15], 1):
+    for i, s in enumerate(_display, 1):
         pan_nm = s.get("pan_nm", "미상")
         pan_type = s.get("pan_type", "미상")
         region_nm = s.get("region_nm", "미상")
