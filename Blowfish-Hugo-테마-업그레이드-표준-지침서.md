@@ -1,8 +1,8 @@
-# Blowfish Hugo 테마 업그레이드 표준 지침서 v1.1
+# Blowfish Hugo 테마 업그레이드 표준 지침서 v1.2
 
 > **작성일**: 2026-07-28
-> **최종 갱신**: 2026-07-28
-> **기반**: techpawz-hugo (techpawz.com) — pet-hugo 검증 완료 설정 기반
+> **최종 갱신**: 2026-07-30
+> **기반**: issue-techpawz-hugo (issue.techpawz.com) — 광고 완벽 노출 검증 완료
 > **적용 대상**: 모든 Blowfish 테마 사용 Hugo 블로그
 
 ---
@@ -137,21 +137,23 @@
 ### 3.4 `layouts/partials/adsense/top.html` (H1 직전 — Display 슬롯)
 
 ```html
-<div class="ad-top not-prose my-4" style="overflow:hidden;max-width:100%;min-height:100px">
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="{{ .Site.Params.advertisement.adsense }}"
-       data-ad-slot="{{ .Site.Params.advertisement.topSlot }}"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
+<div style="overflow:hidden;min-height:100px;">
+<div class="ad-top not-prose my-4">
+<ins class="adsbygoogle"
+     style="display:block"
+     data-ad-client="{{ site.Params.advertisement.adsense }}"
+     data-ad-slot="{{ site.Params.advertisement.topSlot }}"
+     data-ad-format="auto"
+     data-full-width-responsive="true"></ins>
 </div>
 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+</div>
 ```
 
 - `data-ad-format="auto"` — Display 광고 (타이틀 상단)
 - `not-prose` — Blowfish prose 스타일 비활성화
-- `overflow:hidden;min-height:100px` — 인라인 스타일로 CLS 방지
-- `<script>`는 `<div>` **바깥** (div 닫은 후 push 호출)
+- 바깥 `<div style="overflow:hidden;min-height:100px;">` — CLS 방지 래퍼
+- `<script>`는 안쪽 `<div>` **바깥** (div 닫은 후 push 호출)
 
 ---
 
@@ -159,18 +161,19 @@
 
 ```html
 <div class="ad-inarticle not-prose my-8" style="overflow:hidden;max-width:100%;min-height:100px">
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="{{ .Site.Params.advertisement.adsense }}"
-       data-ad-slot="{{ .Site.Params.advertisement.inArticleSlot }}"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
+<ins class="adsbygoogle"
+     style="display:block; text-align:center;"
+     data-ad-layout="in-article"
+     data-ad-format="fluid"
+     data-ad-client="{{ site.Params.advertisement.adsense }}"
+     data-ad-slot="{{ site.Params.advertisement.inArticleSlot }}"></ins>
 </div>
 <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
 ```
 
-- `data-ad-format="auto"` — AdSense가 포맷 자동 선택
+- `data-ad-format="fluid"` + `data-ad-layout="in-article"` — AdSense가 본문 맞춤형 광고 자동 선택
 - `my-8` — top 슬롯(`my-4`)보다 상하 마진 넓음
+- `text-align:center` — 인라인 스타일로 중앙 정렬
 - 본문 분할 인젝션에서 동일 태그가 2~3회 반복 삽입됨
 
 > **금지**: 숨김 placeholder div (`display:none`) 사용 금지. 항상 표준 `<ins>` 태그 사용.
@@ -188,19 +191,13 @@
       {{ if .Params.showBreadcrumbs | default (site.Params.article.showBreadcrumbs | default false) }}
         {{ partial "breadcrumbs.html" . }}
       {{ end }}
-
-      {{/* ===== 1. H1 직전 광고 (Display) ===== */}}
       {{ partial "adsense/top.html" . }}
-
       <h1 class="mt-0 text-4xl font-extrabold text-neutral-900 dark:text-neutral">
         {{ .Title | emojify }}
       </h1>
-
-      {{/* ===== Description(lead) 제거 — 광고 레이아웃 방해 방지 ===== */}}
-
-      {{/* ===== 2. in-article 광고 ===== */}}
-      {{ partial "adsense/in-article.html" . }}
-
+      <div class="mt-1 mb-6 text-base text-neutral-500 dark:text-neutral-400 print:hidden">
+        {{ partial "article-meta/basic.html" (dict "context" . "scope" "single") }}
+      </div>
       {{ if not (.Params.showAuthorBottom | default (site.Params.article.showAuthorBottom | default false)) }}
         {{ template "SingleAuthor" . }}
       {{ end }}
@@ -209,6 +206,7 @@
     {{/* Body — 본문 분할 인젝션 */}}
     <section class="flex flex-col max-w-full mt-0 prose dark:prose-invert lg:flex-row">
       <div class="min-w-0 min-h-0 max-w-fit">
+        {{ partial "series/series.html" . }}
         <div class="article-content max-w-prose mb-20">
 
           {{ $content := .Content }}
@@ -257,9 +255,9 @@
 
 | 조건 | in-article 삽입 횟수 | 위치 |
 |------|---------------------|------|
-| H2 있음, 800자 미만 | 2회 | lead 뒤 + 1번째 H2 뒤 |
-| H2 있음, 800자 이상 | 3회 | lead 뒤 + 1번째 H2 뒤 + 3번째 H2 뒤 |
-| H2 없음 | 1회 | lead 뒤 (첫 `</p>` 위치) |
+| H2 있음, 800자 미만 | 2회 | 첫 본문 + 1번째 H2 뒤 |
+| H2 있음, 800자 이상 | 3회 | 첫 본문 + 1번째 H2 뒤 + 3번째 H2 뒤 |
+| H2 없음 | 1회 | 첫 `</p>` 위치 |
 
 ---
 
@@ -318,7 +316,7 @@ html.dark ins.adsbygoogle {
 | `topSlot` (타이틀 상단) | **Display** | AdSense 대시보드 → 광고 단위 → **디스플레이 광고** |
 | `inArticleSlot` (본문 분할) | **Display** | AdSense 대시보드 → 광고 단위 → **디스플레이 광고** |
 
-> **동일 슬롯 ID 재사용 허용.** (techpawz: top/in-article 둘 다 `6685009950`, pet: 둘 다 `2195212287`)
+> **동일 슬롯 ID 재사용 허용.** (issue: top/in-article 둘 다 `6685009950`)
 > 광고는 정상 노출됨. 리포팅 분리가 필요하면 별도 발급.
 
 ---
@@ -330,16 +328,18 @@ html.dark ins.adsbygoogle {
 ```
 ┌─ [H1 직전: top 광고]
 │  H1 (제목)
-│  [in-article 광고] ← lead 제거됨
+│  article-meta
 │  ─── 본문 시작 ───
 │  <p>첫 번째 문단...</p>
-│  [첫 </p> 뒤: in-article 광고]  ← 2번째 삽입
+│  [첫 </p> 뒤: in-article 광고]  ← 1번째 삽입
 │  <p>이 문단부터...</p>
 │  <h2>첫 번째 소제목</h2>
+│  [첫 번째 H2 뒤: in-article 광고]  ← 2번째 삽입
 │  <p>내용...</p>
 │  <h2>두 번째 소제목</h2>
 │  <p>내용...</p>
 │  <h2>세 번째 소제목</h2>         ← 800자 이상일 때만 in-article 광고 삽입
+│  [세 번째 H2 뒤: in-article 광고]  ← 3번째 삽입
 │  <p>내용...</p>
 └─ 끝
 ```
@@ -349,7 +349,7 @@ html.dark ins.adsbygoogle {
 ```
 ┌─ [H1 직전: top 광고]
 │  H1 (제목)
-│  [in-article 광고] ← lead 제거됨
+│  article-meta
 │  ─── 본문 시작 ───
 │  <p>첫 문단...</p>
 │  [첫 </p> 뒤: in-article 광고]  ← 1회만 삽입
@@ -420,9 +420,10 @@ html.dark ins.adsbygoogle {
 |------|------|----------|
 | 1.0 | 2026-07-28 | 최초 작성 (techpawz-hugo 수정 경험 기반) |
 | 1.1 | 2026-07-28 | techpawz-hugo + pet-hugo 검증 기반 전면 개정 — Description 제거, baseof.html 커스텀 금지, JS placeholder 로직 금지, 서버사이드 H2 분할 인젝션 표준화 |
+| 1.2 | 2026-07-30 | issue-techpawz-hugo 기준으로 갱신 — in-article 포맷을 `fluid`+`in-article`으로 변경, top.html 래퍼 div 추가, 하드코딩 금지 명시 |
 
 ---
 
 **관련 문서**:
-- `/Users/twinssn/Projects/5000/ADSENSE-GUIDE.md` — 광고 슬롯 상세 가이드 (pet-hugo 기반)
+- `/Users/twinssn/Projects/5000/ADSENSE-GUIDE.md` — 광고 슬롯 상세 가이드 (issue-techpawz-hugo 기반)
 - `5000/Blowfish-Hugo-테마-업그레이드-표준-지침서.md` — 이 문서
