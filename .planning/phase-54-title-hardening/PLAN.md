@@ -30,6 +30,35 @@
 
 ---
 
+## Root-Cause 조사 반영 (2026-08-01, 회귀 경로 확정)
+
+> 조사 목적: publish_log 81건 템플릿 제목(`{keyword} 추천 TOP5 (2026년)`, 2026-07-24~08-01, 10개 blog)의 정확한 코드 경로 확정 → 수정 지점 라인 고정.
+
+**결론 1 — 81건 경로: 게이트 "부재"였지 "우회"가 아님 (회귀는 이미 차단됨)**
+- 81건 전부 커밋 `9d2f5725e`(게이트 도입, 2026-08-01 20:00:55 +0700 = 13:00:55 UTC) **이전** 발행.
+- 경로: LLM H1 누락 → 구 `writer.py:538-539` 하드코딩 fallback `f"{keyword} 추천 TOP5 ({datetime.now().year}년)"` → 당시 pipeline에 `_title_gate` **없음** → 그대로 publish_log 기록.
+- 가설 배제 근거:
+  - (a) title_templates 직접 경로 아님 — `_tt_picker.render()`(writer.py:579) 결과는 `style_hint`(프롬프트 힌트)로만 사용, title 직접 대입 없음 (`grep -n "_tt_picker\|render("`로 확인).
+  - (b) `_validate_title` 호출 후 fallback 아님 — 게이트 도입 전 revision엔 `_validate_title` 자체가 존재하지 않음 (`git show 9d2f5725e^:pipelines/curation/writer.py`에서 fallback(538-539)만 존재, 검증 헬퍼 없음).
+  - (c) `_validate_title` 버그 아님 — regex `추천\s*TOP\s*\d+`는 공백 포함 "TOP 5"도 포착.
+- 실증 검증: 게이트 커밋 이후 `title LIKE '%추천 TOP5 (2026년)%' AND published_at >= '2026-08-01T13:00:55'` → **0건** (sqlite3 data/curation.db, [검증됨]).
+- 함정 기록: `published_at`은 `T` 구분자 ISO 문자열이므로 `>= '2026-08-01 20:00:00'`(공백) 비교는 오동작(30건 오검출). 비교 시 반드시 `T` 형식 사용.
+
+**결론 2 — 잔여 보강 지점 (선택적, defense-in-depth): `writer.py:633-637` H1 추출 성공 경로**
+- 현재 H1 추출 **성공** 시 `_validate_title` 미경유 → writer 단독 호출 시 템플릿 H1(`# {keyword} 추천 TOP5 (2026년)`)이 통과됨.
+- 실제 파이프라인은 pipeline `_title_gate`(pipeline.py:697, 호출부 921/1001)가 최종 차단 → **현재 구조로는 발행 차단 확인됨** (게이트 커밋 후 0건이 실증).
+- 보강 시 지점: `writer.py:633-637`에서 `# ` 매칭 직후 `if not _validate_title(title): title = _regenerate_title(keyword, blog_id)` 추가.
+
+**결론 3 — 검증 재사용**: 기존 `_validate_title`(writer.py:461-476)을 그대로 재사용 — H1 추출 경로 전용 신규 검증 불필요.
+
+| 지점 | 라인 | 수정 여부 |
+|---|---|---|
+| H1 성공 경로 검증 (선택 보강) | `writer.py:633-637` | `# ` 매칭 직후 `_validate_title` 호출, 실패 시 `_regenerate_title` 진입 |
+| 검증 헬퍼 | `writer.py:461-476` | 기존 재사용 — 변경 불필요 |
+| pipeline 게이트 | `pipeline.py:697 / 921 / 1001` | 이미 존재 — 변경 불필요 |
+
+---
+
 ## Task Breakdown
 
 > 구분 표기: **[PRODUCTION CODE]** = 검증 대상 코드 수정, **[TEST CODE]** = 검증 수단 추가.
