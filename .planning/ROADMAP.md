@@ -531,3 +531,18 @@ Total in 898 ms +
 - [ ] 라이브 사이트 광고 노출 확인
 
 
+
+---
+
+## Phase 54: Curation Title Generation Hardening (제목 생성 하드코딩 fallback 제거)
+**Status:** 📋 PLANNED (2026-08-01, 리넘버: 기존 "Phase 49" 표기 — `.planning/phase-49-crosslink-bugfix`와 번호 충돌로 54로 변경. 51/52/53 이미 점유)
+**Plan:** `.planning/phase-54-title-hardening/PLAN.md`
+**Context:** Phase 43이 "Title Generation Fix"로 COMPLETED 표기되었으나 fallback 로직 미수정 → 재발 (publish_log "추천 TOP5 (연도년)" 패턴 134건 누적, 2026-08-01 발행분 5건 연속)
+**Goal:** 하드코딩 fallback(`{keyword} 추천 TOP5 (연도년)`) 제거 + H1 출력 형식 강제 + CoT/프롬프트 누출 차단 + 회귀 테스트 — 신규 발행 제목 템플릿 패턴 0건 (fail-closed)
+**Key Tasks:**
+- writer.py:538-539 하드코딩 fallback 제거 → H1 누락 시 제목 전용 재생성 루프 (템플릿 패턴 검증 + CoT 거부 + max 2 retry, 실패 시 발행 중단)
+- writer.py `_build_system_prompt`에 H1 출력 형식 지시 + CoT/프롬프트 누출 금지 추가
+- writer.py description 추출 `_extract_description()` 헬퍼 분리 (CoT 첫 문장 거부)
+- pipeline.py 큐레이션 발행 전 제목 게이트 (thin wrapper, 기존 TITLE_BLOCKED 위, dict 반환 하위 호환)
+- 회귀 테스트: publish_log 신규 기록에 템플릿 패턴(`추천\s*TOP\s*\d+`, `BEST\s*\d+`, `\(\d{4}년\)$`) 0건 검증
+**Follow-up candidate:** keyword metadata enrichment (RESEARCH 4.5) — Phase 54에서 스코프 제외, 별도 phase로 이연

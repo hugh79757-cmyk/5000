@@ -3,7 +3,7 @@
 ## Phase Status Overview
 
 **Current Status**: Phase 48 Completed (Hugo frontmatter generation fix)
-**Next Phase**: Phase 45 (API Cost Optimization)  
+**Next Phase**: Phase 54 (Curation Title Generation Hardening)  
 
 ---
 
@@ -106,6 +106,17 @@
 - 블로그별 템플릿 변경 이력 감사
 - integrity-checker 범위 및 통합 방식 결정
 - AGENTS.md Section 4 규칙 준수 강제화 방안
+
+### Phase 54 — Curation Title Generation Hardening 🚧 **PLANNED**
+**Goal**: 큐레이션 파이프라인의 하드코딩 fallback 제목(`{keyword} 추천 TOP5 (연도년)`) 제거 + H1 출력 형식 강제 + CoT 누출 차단 + 회귀 테스트  
+**Context**: Phase 43은 "Title Generation Fix"로 COMPLETED 표기되었으나 fallback 버그가 재발함 (publish_log id=1980 외 다수, 2026-08-01 발행분 5건 연속 "추천 TOP5" 패턴 — 134건 누적). 본 phase는 그 gap을 닫고 회귀 커버리지를 추가함. (2026-08-01 리넘버: 기존 "Phase 49" 표기는 `.planning/phase-49-crosslink-bugfix`(실행 완료)와 번호 충돌하여 54로 변경 — `.planning/ROADMAP.md` 기준 51(Image URL Token)/52(Blowfish)/53(Complete 52) 점유)  
+**Key Tasks**:
+- writer.py:538-539 하드코딩 fallback 제거 → H1 누락 시 제목 전용 재생성 루프 (템플릿 패턴 검증 + CoT 거부 + max 2 retry)
+- writer.py:255 `_build_system_prompt`에 H1 출력 형식 지시 + CoT/프롬프트 누출 금지 추가
+- writer.py:552-560 description 추출을 `_extract_description()` 헬퍼로 분리 (CoT 첫 문장 거부)
+- pipeline.py 큐레이션 발행 전 제목 게이트 (thin wrapper, 기존 dict 반환 호환)
+- 회귀 테스트: publish_log에 fallback 템플릿 패턴이 title로 기록되지 않는지 검사
+**Follow-up candidate:** keyword metadata enrichment (RESEARCH 4.5) — Phase 54에서 스코프 제외, 별도 phase로 이연
 
 ## Current Blog Portfolio
 
