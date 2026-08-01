@@ -306,10 +306,18 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - 긴 제목(55자 초과)은 모바일 화면에서 잘리고 SEO 키워드가 분산됩니다.
 {extra_title_rules}{recent_block}
 
-[출력 형식 규칙 — 가장 중요]
-- 응답의 맨 첫 줄에 반드시 '# ' 마크다운 H1 제목을 작성할 것. 제목 앞에 사고 과정이나 검토 문구를 쓰지 말고, 첫 줄은 "# 제목" 형태로 시작하세요.
-- 나열형 템플릿 제목 금지: "{{키워드}} 추천 TOP N (연도년)" 형태의 단순 나열형 제목은 작성하지 마세요.
-- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~", "제목 예시를 만들어보자~" 형태의 문장을 제목이나 본문에 출력하지 마세요. 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
+[출력 형식 규칙 — 가장 중요, 반드시 준수]
+응답의 구조는 아래 4단계를 정확히 따르세요:
+
+1. 첫 번째 줄은 반드시 '# ' 로 시작하는 H1 제목이어야 합니다.
+   - 예: "# 2026년 8월 네덜란드산 산양유 단백질 추천 — 구매 가이드"
+   - H1 제목 앞에 아무 텍스트도 쓰지 마세요. 첫 글자가 반드시 '#' 여야 합니다.
+2. H1 제목 다음에 빈 줄을 한 칸 넣습니다.
+3. 빈 줄 다음에 본문 첫 문단이 시작됩니다.
+4. H1 제목 없이 본문을 시작하지 마세요. '# ' 없는 상태로 글을 시작하면 응답 전체가 무효 처리됩니다.
+
+- 나열형 템플릿 제목 금지: "{{키워드}} 추천 TOP N (연도년)" 형태의 단순 나열형 제목은 작성하지 마세요. (예: "네덜란드 추천 TOP5 (2026년)" 금지)
+- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~", "제목 예시를 만들어보자~", "제품은 총 N개~" 형태의 문장을 제목이나 본문에 출력하지 마세요. 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
 
 [퍼널 구조 — AIDA 모델 적용]
 이 글은 단순 상품 나열이 아닌, 독자의 구매 여정을 설계하는 퍨널 글입니다.
@@ -628,6 +636,12 @@ def generate_curation_article(keyword, products, blog_id=None):
         line = line.strip()
         if line.startswith("# "):
             title = line.lstrip("# ").strip()
+            # 백스톱: H1이 있어도 템플릿/CoT 패턴이면 재생성 (fail-closed 유지)
+            if not _validate_title(title):
+                title = _regenerate_title(keyword, blog_id)
+                if not title:
+                    title_generation_failed = True
+                    logger.warning(f"[title] H1 템플릿 패턴 + 재생성 2회 실패: {keyword} — 발행 차단 마커 반환")
             body = body.replace(line, "", 1).strip()
             break
     if not title:
