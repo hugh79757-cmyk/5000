@@ -434,6 +434,13 @@ TITLE_BLOCKED = {
     "fitness-hugo": [],
 }
 
+# 템플릿 제목 패턴 (fallback/LLM 재생성물 검증) — writer._validate_title과 동일 3종 (연도-접두 ^\d{4}년 제외)
+TITLE_TEMPLATE_PATTERNS = [
+    re.compile(r"추천\s*TOP\s*\d+", re.I),
+    re.compile(r"\(\d{4}년\)$"),
+    re.compile(r"BEST\s*\d+", re.I),
+]
+
 # 제목 문맥 확인용 allowed 키워드 (blocked 키워드가 있어도 allowed 키워드가 제목에 있으면 차단 스킵)
 ALLOWED_PRODUCT = {
     "camping-hugo": {"allowed": ["텐트", "캠핑", "침낭", "랜턴", "야영", "등산"]},
@@ -686,6 +693,25 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
             logger.warning(f"[telegram] 알림 전송 오류: {e}")
 
 
+def _title_gate(blog_id: str, keyword: str, article: dict):
+    """발행 전 제목 품질 게이트 — 템플릿/재생성 실패 제목 차단 (thin wrapper).
+
+    Returns:
+        (title, None) — 통과 (title은 article["title"] 그대로)
+        (None, {"success": False, "reason": "title_blocked"}) — 차단
+    """
+    article = article or {}
+    title = article.get("title", "")
+    if article.get("title_generation_failed") or not title:
+        _record_failure(blog_id, "title_regenerate_failed", f"제목 재생성 실패 (2회 소진): {keyword}", keyword)
+        return None, {"success": False, "reason": "title_blocked"}
+    for pat in TITLE_TEMPLATE_PATTERNS:
+        if pat.search(title):
+            _record_failure(blog_id, "title_blocked", f"템플릿 제목 패턴: {title}", keyword)
+            return None, {"success": False, "reason": "title_blocked"}
+    return title, None
+
+
 def run(cfg):
     """Curation 파이프라인 메인 — dispatcher에서 호출"""
     blog_id = cfg.get("id", "")
@@ -890,6 +916,11 @@ def _run_inner(cfg, blog_id, daily_quota):
         _record_failure(blog_id, "write_error", "AI 글 생성 실패", keyword)
         return {"success": False, "reason": "write_error"}
 
+    # 제목 품질 게이트 — 템플릿/재생성 실패 제목 차단 (fail-closed, 언어 검증 이전)
+    _gated_title, _gate_err = _title_gate(blog_id, keyword, article)
+    if _gate_err is not None:
+        return _gate_err
+
     # 언어 검증 — 중국어 생성 차단
     _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
     if _lang_err:
@@ -964,6 +995,11 @@ def _run_inner(cfg, blog_id, daily_quota):
         article = generate_curation_article(keyword, products, blog_id=blog_id)
         if not article:
             logger.warning(f"[{blog_id}] fallback AI 생성 실패 — 다음 시도")
+            continue
+        # 제목 품질 게이트 — 실패 시 다음 fallback 키워드 진행 (_record_failure는 wrapper 내부 처리)
+        _gated_title, _gate_err = _title_gate(blog_id, keyword, article)
+        if _gate_err is not None:
+            logger.warning(f"[{blog_id}] fallback 제목 게이트 차단 — 다음 시도")
             continue
         _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
         if _lang_err:

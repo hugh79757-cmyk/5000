@@ -306,6 +306,11 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - 긴 제목(55자 초과)은 모바일 화면에서 잘리고 SEO 키워드가 분산됩니다.
 {extra_title_rules}{recent_block}
 
+[출력 형식 규칙 — 가장 중요]
+- 응답의 맨 첫 줄에 반드시 '# ' 마크다운 H1 제목을 작성할 것. 제목 앞에 사고 과정이나 검토 문구를 쓰지 말고, 첫 줄은 "# 제목" 형태로 시작하세요.
+- 나열형 템플릿 제목 금지: "{{키워드}} 추천 TOP N (연도년)" 형태의 단순 나열형 제목은 작성하지 마세요.
+- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~", "제목 예시를 만들어보자~" 형태의 문장을 제목이나 본문에 출력하지 마세요. 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
+
 [퍼널 구조 — AIDA 모델 적용]
 이 글은 단순 상품 나열이 아닌, 독자의 구매 여정을 설계하는 퍨널 글입니다.
 
@@ -446,6 +451,96 @@ def _insert_adsense(body):
     return "\n".join(result)
 
 
+_TITLE_TEMPLATE_PATTERNS = [
+    re.compile(r"추천\s*TOP\s*\d+", re.I),
+    re.compile(r"\(\d{4}년\)$"),
+    re.compile(r"BEST\s*\d+", re.I),
+]
+
+
+def _validate_title(title):
+    """제목 수용 조건 검증 — False면 재생성/차단 대상.
+
+    - 길이 10~60자
+    - CoT 마커 미포함: "우선", "사용자 요청"
+    - 템플릿 패턴 미포함: 추천 TOP N / (연도년)$ / BEST N
+    - 주의: ^\\d{4}년(연도-접두)은 거부하지 않음 (제목 규칙 1이 연도-접두를 지시)
+    """
+    if not title:
+        return False
+    title = title.strip()
+    if not (10 <= len(title) <= 60):
+        return False
+    if "우선" in title or "사용자 요청" in title:
+        return False
+    for pat in _TITLE_TEMPLATE_PATTERNS:
+        if pat.search(title):
+            return False
+    return True
+
+
+def _regenerate_title(keyword, blog_id=None, max_attempts=2):
+    """H1 누락 시 제목 전용 재생성 — 최대 max_attempts회, 실패 시 None (fail-closed).
+
+    전용 프롬프트(본문 작성 프롬프트 재사용 금지)로 제목 한 줄만 요청하고,
+    ai_generate는 tier="economy" 고정 파라미터로 호출한다 (결정 2).
+    RuntimeError(전 tier 실패)도 무효로 취급해 재시도한다 (MINOR-4).
+    """
+    system_prompt = (
+        "당신은 상품 큐레이션 블로그 제목 작성 전문가입니다. 반드시 한국어로 작성하세요.\n"
+        "아래 키워드에 대한 블로그 글 제목을 한 줄만 출력하세요.\n"
+        "제목 앞에 '# ' 마크다운 H1 마커를 붙이세요.\n"
+        "검토 문구, 사고 과정, 설명은 출력하지 마세요.\n"
+        '나열형 템플릿 제목("{keyword} 추천 TOP N (연도년)" 형태)은 금지합니다.\n'
+        "제목 길이는 10~60자로 작성하세요."
+    )
+    user_prompt = f"키워드: {keyword}\n\n제목 한 줄만 출력하세요."
+    for attempt in range(max_attempts):
+        try:
+            result = ai_generate(system_prompt, user_prompt, tier="economy", temperature=0.5, max_tokens=200)
+        except RuntimeError as e:
+            logger.warning(f"[title_regenerate] LLM 실패 (RuntimeError, 시도 {attempt+1}): {keyword} — {e}")
+            continue
+        text = result if isinstance(result, str) else result.get("content", "")
+        if not text:
+            continue
+        first_line = text.strip().split("\n")[0].strip()
+        if first_line.startswith("# "):
+            first_line = first_line.lstrip("# ").strip()
+        if _validate_title(first_line):
+            return first_line
+        logger.warning(f"[title_regenerate] 무효 제목 (시도 {attempt+1}): {keyword} → {first_line[:60]}")
+    logger.warning(f"[title_regenerate] {max_attempts}회 모두 실패: {keyword}")
+    return None
+
+
+def _extract_description(body, title, keyword):
+    """본문에서 CoT/마커 줄을 제외한 첫 의미 문단 추출 (meta description용).
+
+    - 빈 줄 / '#'·'!'·'[' 시작 줄 제외 (기존 동작 유지)
+    - CoT/검토 마커 줄 제외: '우선' 시작, '사용자 요청' 포함, '제목 규칙'/'제목 예시' 시작
+    - 누적 길이 >= 20자 되는 지점에서 첫 문단 확정 (문단 시작 '우선' 금지)
+    - ~150자 트렁케이션 (기존 160자 → 결정 5 기준 150자)
+    - 문단을 못 찾으면 키워드 기반 최후 fallback
+    """
+    desc_lines = []
+    for line in (body or "").split("\n"):
+        line = line.strip()
+        if not line or line.startswith(("#", "!", "[")):
+            continue
+        if line.startswith("우선") or "사용자 요청" in line:
+            continue
+        if line.startswith("제목 규칙") or line.startswith("제목 예시"):
+            continue
+        desc_lines.append(line)
+        if len("".join(desc_lines)) >= 20:
+            break
+    paragraph = " ".join(desc_lines).strip()
+    if not paragraph or paragraph.startswith("우선"):
+        return f"{keyword} 관련 상품 비교와 선택 가이드를 제공합니다."
+    return paragraph[:150]
+
+
 def generate_curation_article(keyword, products, blog_id=None):
     """키워드 + 상품 5개 → 큐레이션 글 생성, dict 반환"""
     if not products or len(products) < 3:
@@ -507,7 +602,7 @@ def generate_curation_article(keyword, products, blog_id=None):
     # 글자수 미달 시 최대 2회 시도
     body = ""
     for attempt in range(2):
-        result = ai_generate(system_prompt, user_prompt, temperature=0.85)
+        result = ai_generate(system_prompt, user_prompt, temperature=0.85, max_tokens=6000)
         if not result:
             logger.error(f"AI 생성 실패 (시도 {attempt+1}): {keyword}")
             continue
@@ -536,9 +631,17 @@ def generate_curation_article(keyword, products, blog_id=None):
             body = body.replace(line, "", 1).strip()
             break
     if not title:
-        title = f"{keyword} 추천 TOP5 ({datetime.now().year}년)"
+        # H1 누락 → 제목 전용 재생성 (fail-closed: 템플릿 대체 금지, 실패 시 차단 마커)
+        title = _regenerate_title(keyword, blog_id)
+        if not title:
+            title_generation_failed = True
+            logger.warning(f"[title] H1 누락 + 재생성 2회 실패: {keyword} — 발행 차단 마커 반환")
+        else:
+            title_generation_failed = False
+    else:
+        title_generation_failed = False
     if template_type:
-        logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, title[:50])
+        logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, (title or "")[:50])
 
     # 쿠팡 고지 문구 확인 및 추가
     disclosure = "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
@@ -548,21 +651,17 @@ def generate_curation_article(keyword, products, blog_id=None):
     # 애드센스 광고 삽입 (single.html 템플릿에서 처리 — 본문 raw HTML 삽입 시 Hugo 빌드 오류)
     # body = _insert_adsense(body)
 
-    # description: 본문 첫 2문장 추출
-    desc_lines = []
-    for line in body.split("\n"):
-        line = line.strip()
-        if not line or line.startswith(("#", "!", "[")):
-            continue
-        desc_lines.append(line)
-        if len("".join(desc_lines)) > 80:
-            break
-    description = " ".join(desc_lines)[:160]
+    # description: 본문에서 CoT/마커 줄 제외 첫 의미 문단 추출
+    description = _extract_description(body, title or "", keyword)
 
-    return {
-        "title": title,
+    result = {
+        "title": title or "",
         "body_md": body,
         "keyword": keyword,
         "product_count": min(len(products), 5),
         "description": description,
     }
+    if title_generation_failed:
+        result["title"] = ""
+        result["title_generation_failed"] = True
+    return result
