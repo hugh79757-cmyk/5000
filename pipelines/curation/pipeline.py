@@ -1190,7 +1190,8 @@ def _run_inner(cfg, blog_id, daily_quota):
                 tag_set.add(bv)
     tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
 
-    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
+    is_draft = article.get("is_draft", False)
+    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url, is_draft=is_draft)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")
         _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
