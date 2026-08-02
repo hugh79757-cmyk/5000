@@ -194,7 +194,7 @@ def _fix_repeated_image_urls(body_md):
 
 
 def _sanitize_body(body):
-    """금지어 치환 + 스펙부족 메타문구 제거 + URL 토큰 반복 수정"""
+    """금지어 치환 + 스펙부족 메타문구 제거 + URL 토큰 반복 수정 + CoT/프롬프트 지시문 필터"""
     # ── URL 토큰 반복(repetition) 버그 수정: LLM이 생성한 비정상 URL 정리 ──
     body = _fix_repeated_image_urls(body)
     for phrase, replacement in BANNED_REPLACEMENTS.items():
@@ -210,6 +210,23 @@ def _sanitize_body(body):
     body = re.sub(r"[-*]*\s*구매\s*포인트\s*[:：]\s*", "", body)
     # "만족도가 높은" 반복 제거
     body = re.sub(r"[^.\n]*만족도가\s*높[은다][^.\n]*\.?\s*", "", body)
+    # ── CoT/프롬프트 지시문 필터 (작성 계획 접두사만 매치, 정상 리뷰 표현 보존) ──
+    # 작성 계획/사고 과정 문구 제거
+    cot_patterns = [
+        r"^우선\s.*$",
+        r".*사용자\s*요청.*$",
+        r"^제목\s*규칙.*$",
+        r"^제목\s*예시.*$",
+        r"^제품\s*데이터를\s*살펴보면.*$",
+        r"^이제\s*글의\s*구조를\s*생각해보자.*$",
+        r"^이제\s*글을\s*작성해?보자.*$",
+        r"^순위를\s*매겨보자.*$",
+        r"^가격을\s*비교해보자.*$",
+        r"^이제\s*작성\s*시작하?겠다.*$",
+        r"^이제\s*서론에서\s*제품\s*나열을\s*시작하자.*$",
+    ]
+    for pat in cot_patterns:
+        body = re.sub(pat, "", body, flags=re.MULTILINE)
     # 빈 줄 정리
     body = re.sub(r"\n{3,}", "\n\n", body)
     return body.strip()
@@ -312,12 +329,13 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 1. 첫 번째 줄은 반드시 '# ' 로 시작하는 H1 제목이어야 합니다.
    - 예: "# 2026년 8월 네덜란드산 산양유 단백질 추천 — 구매 가이드"
    - H1 제목 앞에 아무 텍스트도 쓰지 마세요. 첫 글자가 반드시 '#' 여야 합니다.
+   - **응답의 맨 첫 줄에 반드시 '# ' 마크다운 H1 제목을 작성할 것** — H1 누락 시 재생성 루프가 발동되므로 이를 1차 방어로 차단.
 2. H1 제목 다음에 빈 줄을 한 칸 넣습니다.
 3. 빈 줄 다음에 본문 첫 문단이 시작됩니다.
 4. H1 제목 없이 본문을 시작하지 마세요. '# ' 없는 상태로 글을 시작하면 응답 전체가 무효 처리됩니다.
 
 - 나열형 템플릿 제목 금지: "{{키워드}} 추천 TOP N (연도년)" 형태의 단순 나열형 제목은 작성하지 마세요. (예: "네덜란드 추천 TOP5 (2026년)" 금지)
-- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~", "제목 예시를 만들어보자~", "제품은 총 N개~" 형태의 문장을 제목이나 본문에 출력하지 마세요. 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
+- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~", "제목 예시를 만들어보자~", "제품 데이터를 살펴보면", "이제 글의 구조를 생각해보자", "이제 글을 작성해보자", "제품은 총 N개~" 형태의 문장을 제목이나 본문에 출력하지 마세요. 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
 
 [퍼널 구조 — AIDA 모델 적용]
 이 글은 단순 상품 나열이 아닌, 독자의 구매 여정을 설계하는 퍨널 글입니다.
@@ -522,11 +540,63 @@ def _regenerate_title(keyword, blog_id=None, max_attempts=2):
     return None
 
 
+# CoT body 판정을 위한 임계값 상수 (모듈 레벨로 분리해 튜닝 용이)
+_COT_ENGLISH_RATIO_THRESHOLD = 0.30
+_COT_WRITING_INSTRUCTION_MIN_MATCHES = 3
+_COT_MARKER_MIN_MATCHES = 1
+
+
+def _is_cot_body(body):
+    """본문이 CoT/프롬프트 지시문인지 판정.
+
+    - 영어 문장 비율 > 30% (LLM CoT는 영어 지시문 다량 포함)
+    - 프롬프트 지시문 키워드 다수 매치: "AIDA", "퍼널", "H2", "H3", "비교표",
+      "자주 묻는 질문", "상황별 추천", "도입부", "선택 가이드", "FAQ",
+      "장점", "아쉬운 점", "CTA" 등 글쓰기 지시어 3개 이상
+    - CoT 마커("우선", "사용자 요청", "제목 규칙", "제목 예시") 포함
+    - 위 3개 조건 중 2개 이상 충족 시 CoT로 판정
+    """
+    if not body:
+        return False
+    text = body.strip()
+    total_chars = len(text)
+    if total_chars == 0:
+        return False
+
+    # 1) 영어 문자 비율
+    english_chars = sum(1 for c in text if c.isascii() and c.isalpha())
+    english_ratio = english_chars / total_chars
+
+    # 2) 글쓰기 지시어 키워드 매치 수
+    writing_instruction_keywords = [
+        "AIDA", "퍼널", "H2", "H3", "비교표", "자주 묻는 질문",
+        "상황별 추천", "도입부", "선택 가이드", "FAQ",
+        "장점", "아쉬운 점", "CTA"
+    ]
+    writing_matches = sum(1 for kw in writing_instruction_keywords if kw in text)
+
+    # 3) CoT 마커 매치
+    cot_markers = ["우선", "사용자 요청", "제목 규칙", "제목 예시"]
+    cot_matches = sum(1 for m in cot_markers if m in text)
+
+    # 판정: 3개 조건 중 2개 이상 충족
+    conditions_met = 0
+    if english_ratio > _COT_ENGLISH_RATIO_THRESHOLD:
+        conditions_met += 1
+    if writing_matches >= _COT_WRITING_INSTRUCTION_MIN_MATCHES:
+        conditions_met += 1
+    if cot_matches >= _COT_MARKER_MIN_MATCHES:
+        conditions_met += 1
+
+    return conditions_met >= 2
+
+
 def _extract_description(body, title, keyword):
     """본문에서 CoT/마커 줄을 제외한 첫 의미 문단 추출 (meta description용).
 
     - 빈 줄 / '#'·'!'·'[' 시작 줄 제외 (기존 동작 유지)
-    - CoT/검토 마커 줄 제외: '우선' 시작, '사용자 요청' 포함, '제목 규칙'/'제목 예시' 시작
+    - CoT/검토 마커 줄 제외: '우선' 시작, '사용자 요청' 포함, '제목 규칙'/'제목 예시' 시작,
+      '제품 데이터를 살펴보면', '이제 글의 구조', '이제 글을 작성' 등 작성 계획 문구
     - 누적 길이 >= 20자 되는 지점에서 첫 문단 확정 (문단 시작 '우선' 금지)
     - ~150자 트렁케이션 (기존 160자 → 결정 5 기준 150자)
     - 문단을 못 찾으면 키워드 기반 최후 fallback
@@ -539,6 +609,8 @@ def _extract_description(body, title, keyword):
         if line.startswith("우선") or "사용자 요청" in line:
             continue
         if line.startswith("제목 규칙") or line.startswith("제목 예시"):
+            continue
+        if line.startswith("제품 데이터를 살펴보면") or line.startswith("이제 글의 구조") or line.startswith("이제 글을 작성"):
             continue
         desc_lines.append(line)
         if len("".join(desc_lines)) >= 20:
@@ -609,6 +681,7 @@ def generate_curation_article(keyword, products, blog_id=None):
 
     # 글자수 미달 시 최대 2회 시도
     body = ""
+    cot_body_detected = False
     for attempt in range(2):
         result = ai_generate(system_prompt, user_prompt, temperature=0.85, max_tokens=6000)
         if not result:
@@ -617,6 +690,13 @@ def generate_curation_article(keyword, products, blog_id=None):
 
         body = result if isinstance(result, str) else result.get("content", "")
         if not body:
+            continue
+
+        # CoT/프롬프트 지시문 본문 감지 — 즉시 재시도 (sanitization 전에 검사)
+        if _is_cot_body(body):
+            cot_body_detected = True
+            logger.warning(f"[cot_body] CoT 본문 감지 (시도 {attempt+1}): {keyword} — 재시도")
+            body = ""
             continue
 
         # 금지어 치환 + 메타문구 제거
@@ -629,6 +709,12 @@ def generate_curation_article(keyword, products, blog_id=None):
     if not body or len(body) < 800:
         logger.error(f"최종 생성 결과 부족: {keyword} ({len(body)}자)")
         return None
+
+    # CoT 본문 재생성 실패 검사 — 2회 시도 후에도 CoT 본문이면 차단
+    body_regeneration_failed = False
+    if cot_body_detected and not body:
+        body_regeneration_failed = True
+        logger.warning(f"[cot_body] CoT 본문 재생성 실패: {keyword} — 발행 차단")
 
     # 제목 추출: 첫 번째 # 헤딩 또는 첫 줄
     title = ""
@@ -678,4 +764,7 @@ def generate_curation_article(keyword, products, blog_id=None):
     if title_generation_failed:
         result["title"] = ""
         result["title_generation_failed"] = True
+    if body_regeneration_failed:
+        result["body_regeneration_failed"] = True
+        result["is_draft"] = True
     return result
