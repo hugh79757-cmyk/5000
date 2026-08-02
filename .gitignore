@@ -21,6 +21,8 @@ nomad_writer.py.bak
 data/*.db
 data/*.db.bak*
 data/*.deprecated
+data/cooldown.json
+data/failure_count.json
 static/images/posts/.wrangler/
 
 # DB backups & temp files
@@ -66,6 +68,9 @@ hugo_stats.json
 
 .DS_Store
 **/.DS_Store
+
+# Coverage
+.coverage
 
 # 하이픈 bak 변형 (2026-05-01 보강)
 *-bak
