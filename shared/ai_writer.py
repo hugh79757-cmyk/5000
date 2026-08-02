@@ -57,11 +57,41 @@ def _clean_ai_output(text: str) -> str:
     return text.strip()
 
 
+# BUG-001: 잘림(truncation) 시그니처 — JSON/구조가 연속될 의도로 끝나면 중간 절단으로 판정
+TRUNCATION_SIGNATURES = {",", ":", "{", "[", '"', "\\"}
+TRUNCATION_MAX_TOKENS_CAP = 32000
+
+
+def _is_truncated(content: str, finish_reason=None) -> bool:
+    """응답이 max_tokens 등으로 중간에 잘렸는지 판정.
+
+    - finish_reason == "length": API가 토큰 상한으로 강제 종료 (가장 확실한 신호)
+    - 마지막 문자가 `,:{"[` 또는 백슬래시: JSON/구조가 계속 이어질 의도로 끝남 (절단 징후)
+    - `{`/`[`로 시작하면 JSON 의도 — 닫는 괄호가 부족하면 중간 절단으로 판정
+      (reasoning_content 등에서 문자열 도중 잘린 BUG-001 재현 케이스 대응)
+    """
+    if finish_reason == "length":
+        return True
+    if not content:
+        return False
+    stripped = content.strip()
+    if not stripped:
+        return False
+    if stripped[-1] in TRUNCATION_SIGNATURES:
+        return True
+    # JSON 의도 판정: 여는 괄호로 시작했으면 닫는 괄호가 같아야 정상 종결
+    if stripped.startswith("{") and stripped.count("{") > stripped.count("}"):
+        return True
+    if stripped.startswith("[") and stripped.count("[") > stripped.count("]"):
+        return True
+    return False
+
+
 # 재시도 횟수 (글쓰기별)
 MAX_RETRIES = 3
 
-# 전체 tier 순서: default → fallback → economy
-TIER_ORDER = ["default", "fallback", "economy"]
+# 전체 tier 순서: default → fallback1~3 → economy (gpt-4o-mini 제거, 무료 모델 우선)
+TIER_ORDER = ["default", "fallback1", "fallback2", "fallback3", "economy"]
 
 # Circuit breaker 설정
 CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
@@ -108,16 +138,31 @@ def generate(
             "temperature": temperature
             if temperature is not None
             else tier_config.get("temperature", 0.7),
+            "max_tokens": max_tokens
+            if max_tokens is not None
+            else tier_config.get("max_tokens", 4000),
         }
-        if max_tokens is not None:
-            kwargs["max_tokens"] = max_tokens
 
         # Exponential backoff retry per tier
         for attempt in range(MAX_RETRIES):
             try:
                 client = get_client(tier_config["provider"], providers)
+                if client is None:
+                    last_error = f"{attempt_tier}: API 키 없음 — 다음 tier로 폴백"
+                    logger.warning(f"[ai_writer] {last_error}")
+                    break  # Skip to next tier
                 response = client.chat.completions.create(**kwargs)
-                content = response.choices[0].message.content
+                choice = response.choices[0]
+                message = choice.message
+                content = message.content
+                finish_reason = getattr(choice, "finish_reason", None)
+                
+                # reasoning 모델(step-3.7-flash 등) 대응: content가 비어있으면 reasoning_content에서 추출
+                if not content:
+                    reasoning = getattr(message, 'reasoning_content', None)
+                    if reasoning:
+                        content = reasoning
+                        logger.info(f"[ai_writer] reasoning_content에서 추출: {attempt_tier}")
                 
                 # 성공 → circuit breaker 리셋
                 _circuit_state["failures"] = 0
@@ -125,6 +170,19 @@ def generate(
 
                 if not content:
                     last_error = f"{attempt_tier}: 빈 응답"
+                    logger.warning(f"[ai_writer] {last_error}")
+                    continue
+
+                # BUG-001: 잘린 조각을 결과로 쓰지 않고 max_tokens를 증분해 재요청 (유한: MAX_RETRIES만큼)
+                if _is_truncated(content, finish_reason):
+                    kwargs["max_tokens"] = min(
+                        int(kwargs["max_tokens"] or 4000) * 2 + 512,
+                        TRUNCATION_MAX_TOKENS_CAP,
+                    )
+                    last_error = (
+                        f"{attempt_tier}: 응답 절단 감지 (finish_reason={finish_reason}, "
+                        f"len={len(content)}) — max_tokens {kwargs['max_tokens']}로 재시도"
+                    )
                     logger.warning(f"[ai_writer] {last_error}")
                     continue
 
