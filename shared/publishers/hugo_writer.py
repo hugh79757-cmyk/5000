@@ -733,7 +733,7 @@ def _resolve_funnel_card_post(target_blog_id):
                 "url": row["published_url"],
                 "blog_id": row["blog_id"],
                 "slug": row["slug"],
-                "thumbnail_url": row.get("thumbnail_url") or "",
+                "thumbnail_url": (row["thumbnail_url"] if "thumbnail_url" in row.keys() else "") or "",
             }
     except Exception as e:
         logger.debug(f"[FUNNEL] resolve post failed for {target_blog_id}: {e}")
