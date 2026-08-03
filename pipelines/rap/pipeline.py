@@ -121,6 +121,21 @@ def _pick_keyword(blog_id):
         except Exception:
             pass  # publish_log 테이블 없으면 스킵
 
+        # Q-D: 최근 발행 단지 제외 (중복 방지) — 발견② 연동
+        try:
+            if blog_id in ("rap-hugo", "rap3-hugo", "rap4-hugo", "rap5-hugo"):
+                recent_complexes = {r[0] for r in rap_conn.execute(
+                    "SELECT DISTINCT data_key FROM publish_log "
+                    "WHERE blog_id=? AND published_at >= datetime('now', '-30 days') "
+                    "AND data_key LIKE '%실거래가%' OR data_key LIKE '%전세%' OR data_key LIKE '%월세%'",
+                    (blog_id,)
+                ).fetchall()}
+                # 키워드에서 단지명 추출하여 최근 발행 단지 제외
+                rows = [(kw, cat) for kw, cat in rows 
+                        if not any(complex_name in kw for complex_name in recent_complexes)]
+        except Exception:
+            pass  # 에러 시 건너뜀
+
         if not rows:
             logger.warning(f"{blog_id}: 사용 가능한 부동산 키워드 없음")
             return None, None
