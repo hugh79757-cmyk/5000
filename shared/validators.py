@@ -121,7 +121,7 @@ def _get_recent_titles(blog_id: str, hours: int = _DUP_HOURS) -> list:
         since = (datetime.now() - timedelta(hours=hours)).isoformat()
         conn = sqlite3.connect(_DB_PATH)
         cur = conn.execute(
-            "SELECT title, keyword FROM publish_ledger "
+            "SELECT title FROM publish_ledger "
             "WHERE blog_id = ? AND created_at >= ? ORDER BY created_at DESC",
             (blog_id, since),
         )
