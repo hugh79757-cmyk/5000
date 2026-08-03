@@ -78,8 +78,15 @@ BLOG_EXTRA_RULES = {
 - 복용 대상(연령, 성별, 건강 상태)을 구체적인 생활 장면으로 서술할 것.
 - 섭취 방법(1일 몇 회, 몇 정)을 반드시 포함할 것.
 - 비교표에 반드시 주요 성분, 함량, 캡슐/정 수, 가격 컬럼을 포함할 것.
-- 효능 과장 문구 절대 금지. "도움이 될 수 있습니다" 수준의 표현 사용.
 - 로켓배송 상품이 없는 경우 CTA에서 로켓배송 언급 금지.
+[국내 표시광고 규칙 준수 — 건강기능식품 효능 표현]
+- 질병의 치료·예방·개선을 단정하는 표현 절대 금지.
+  금지 예시: "혈액 순환에 도움을 줍니다", "기억력이 향상됩니다", "면역력이 강화됩니다",
+  "혈행 개선에 좋습니다", "스트레스 완화에 효과적입니다", "피부에 탄력을 더해줍니다"
+- 허용 표현 수준: "식약처 인증 원료를 함유하고 있습니다", "주요 성분 OOO를 포함하고 있습니다",
+  "XX에 관심 있는 분들에게 적합한 제품입니다", "성분표를 확인하여 본인에게 맞는 제품을 선택하세요"
+- 건강기능식품 관련 표현은 반드시 "식약처 인증", "기능성 원료" 등 인증 기반 표현만 사용.
+- 의학적 효과 단정, 신체 기능 개선 약속, 질병 관련 표현 일절 금지.
 """,
     "pet-hugo": """
 [pet-hugo 전용 규칙]
@@ -105,6 +112,15 @@ BLOG_EXTRA_RULES = {
 - 구체적인 뷰티 루틴 장면으로 추천 서술.
   예: "출근 전 5분 루틴을 원하는 직장인이라면 올인원 수분크림이 단계를 줄여줍니다"
 - 로켓배송 상품이 없는 경우 CTA에서 로켓배송 언급 금지.
+[국내 표시광고 규칙 준수 — 화장품 효능 표현]
+- 화장품은 의약품이 아니므로 효능·효과를 단정하는 표현 절대 금지.
+  금지 예시: "피부를 환하게 정돈해 줍니다", "피부에 탄력을 더해줍니다",
+  "활력을 더하고", "수분을 공급해 피부가 개선됩니다", "피부가 좋아집니다"
+- 허용 표현 수준: "OO 성분을 함유하고 있습니다", "피부 타입에 따른 선택이 가능합니다",
+  "성분표를 확인하여 본인 피부에 맞는 제품을 선택하세요",
+  "사용감(질감, 흡수력)에 대한 설명은 가능하나 효과 단정은 금지"
+- 화장품 관련 표현은 성분 함량, 사용감, 질감 묘사 위주로 작성.
+- 피부 개선·탄력·환기·활력 등 효과 약속 표현 일절 금지.
 """,
     "camping-hugo": """
 [camping-hugo 전용 규칙]
@@ -194,7 +210,7 @@ def _fix_repeated_image_urls(body_md):
 
 
 def _sanitize_body(body):
-    """금지어 치환 + 스펙부족 메타문구 제거 + URL 토큰 반복 수정"""
+    """금지어 치환 + 스펙부족 메타문구 제거 + URL 토큰 반복 수정 + CoT/프롬프트 지시문 필터"""
     # ── URL 토큰 반복(repetition) 버그 수정: LLM이 생성한 비정상 URL 정리 ──
     body = _fix_repeated_image_urls(body)
     for phrase, replacement in BANNED_REPLACEMENTS.items():
@@ -210,6 +226,23 @@ def _sanitize_body(body):
     body = re.sub(r"[-*]*\s*구매\s*포인트\s*[:：]\s*", "", body)
     # "만족도가 높은" 반복 제거
     body = re.sub(r"[^.\n]*만족도가\s*높[은다][^.\n]*\.?\s*", "", body)
+    # ── CoT/프롬프트 지시문 필터 (작성 계획 접두사만 매치, 정상 리뷰 표현 보존) ──
+    # 작성 계획/사고 과정 문구 제거
+    cot_patterns = [
+        r"^우선\s.*$",
+        r".*사용자\s*요청.*$",
+        r"^제목\s*규칙.*$",
+        r"^제목\s*예시.*$",
+        r"^제품\s*데이터를\s*살펴보면.*$",
+        r"^이제\s*글의\s*구조를\s*생각해보자.*$",
+        r"^이제\s*글을\s*작성해?보자.*$",
+        r"^순위를\s*매겨보자.*$",
+        r"^가격을\s*비교해보자.*$",
+        r"^이제\s*작성\s*시작하?겠다.*$",
+        r"^이제\s*서론에서\s*제품\s*나열을\s*시작하자.*$",
+    ]
+    for pat in cot_patterns:
+        body = re.sub(pat, "", body, flags=re.MULTILINE)
     # 빈 줄 정리
     body = re.sub(r"\n{3,}", "\n\n", body)
     return body.strip()
@@ -304,6 +337,20 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - "{keyword} 추천 TOP5 (연도년)" 같은 통짜 포맷은 사용하지 마세요. 구체적 제품명·브랜드·혜택을 제목에 직접 넣으세요.
 {extra_title_rules}{recent_block}
 
+[출력 형식 규칙 — 가장 중요, 반드시 준수]
+응답의 구조는 아래 4단계를 정확히 따르세요:
+
+1. 첫 번째 줄은 반드시 '# ' 로 시작하는 H1 제목이어야 합니다.
+   - 예: "# 2026년 8월 네덜란드산 산양유 단백질 추천 — 구매 가이드"
+   - H1 제목 앞에 아무 텍스트도 쓰지 마세요. 첫 글자가 반드시 '#' 여야 합니다.
+   - **응답의 맨 첫 줄에 반드시 '# ' 마크다운 H1 제목을 작성할 것** — H1 누락 시 재생성 루프가 발동되므로 이를 1차 방어로 차단.
+2. H1 제목 다음에 빈 줄을 한 칸 넣습니다.
+3. 빈 줄 다음에 본문 첫 문단이 시작됩니다.
+4. H1 제목 없이 본문을 시작하지 마세요. '# ' 없는 상태로 글을 시작하면 응답 전체가 무효 처리됩니다.
+
+- 나열형 템플릿 제목 금지: "{{키워드}} 추천 TOP N (연도년)" 형태의 단순 나열형 제목은 작성하지 마세요. (예: "네덜란드 추천 TOP5 (2026년)" 금지)
+- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~", "제목 예시를 만들어보자~", "제품 데이터를 살펴보면", "이제 글의 구조를 생각해보자", "이제 글을 작성해보자", "제품은 총 N개~" 형태의 문장을 제목이나 본문에 출력하지 마세요. 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
+
 [퍼널 구조 — AIDA 모델 적용]
 이 글은 단순 상품 나열이 아닌, 독자의 구매 여정을 설계하는 퍨널 글입니다.
 
@@ -343,7 +390,7 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
    - H2 소제목: "자주 묻는 질문"
    - 구매 전 망설임을 해소하는 질문 3~5개를 H3 (###)로 배치
    - 각 질문에 2~3문장 답변
-   - "배송은 얼마나 걸리나요?", "AS는 되나요?", "실제 사용해보니 어떤가요?" 같은 실제 구매 고민으로 작성
+   - "배송은 얼마나 걸리나요?", "AS는 되나요?", "성분이 어떤 역할을 하나요?" 같은 객관적 구매 고민으로 작성
    - 각 질문은 H3(### )로 시작. 마커 ###는 줄 시작에 한 번만 사용 (### ###처럼 중복 금지)
 
 6. **상황별 추천 — Action (행동 유도) (H2)**:
@@ -371,6 +418,14 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - "이번 포스팅에서는", "이번 글에서는" 표현
 - "스펙 정보가 부족", "스펙 정보가 없", "무게 범위가 불확실" 등 메타 문구
 - "아쉬운 점: 스펙 정보가 부족" 같은 스펙 미상 언급. 모르면 해당 항목을 생략할 것
+[1인칭 경험 주장 금지 — 매우 중요]
+- "저도", "저는", "내가", "직접 사용", "실제 사용", "실사용", "써보니", "사용해보니",
+  "써본", "경험했", "느꼈", "만족스러웠", "체험" 등 1인칭 경험/체험 주장 표현 절대 금지.
+- 이 규칙은 모든 블로그(hugo)에 공통 적용됩니다.
+- 대신 상품 데이터(스펙, 가격, 배송, 리뷰 수치)와 구체적 생활 장면으로 서술하세요.
+  예시 (O): "1.4kg 무게는 강의실과 도서관을 오가는 대학생에게 큰 장점입니다"
+  예시 (X): "실제 사용해보니 1.4kg 무게가 정말 가볍습니다"
+- 3인칭 정보 서술 강제: 제품에 대한 설명은 항상 객관적 서술로 작성할 것.
 
 [상품 필터 규칙 — 반드시 준수]
 - 키워드와 명백히 무관한 상품은 소개하지 마세요.
@@ -442,6 +497,150 @@ def _insert_adsense(body):
             ad_inserted["h2"] = True
 
     return "\n".join(result)
+
+
+_TITLE_TEMPLATE_PATTERNS = [
+    re.compile(r"추천\s*TOP\s*\d+", re.I),
+    re.compile(r"\(\d{4}년\)$"),
+    re.compile(r"BEST\s*\d+", re.I),
+]
+
+
+def _validate_title(title):
+    """제목 수용 조건 검증 — False면 재생성/차단 대상.
+
+    - 길이 10~60자
+    - CoT 마커 미포함: "우선", "사용자 요청"
+    - 템플릿 패턴 미포함: 추천 TOP N / (연도년)$ / BEST N
+    - 주의: ^\\d{4}년(연도-접두)은 거부하지 않음 (제목 규칙 1이 연도-접두를 지시)
+    """
+    if not title:
+        return False
+    title = title.strip()
+    if not (10 <= len(title) <= 60):
+        return False
+    if "우선" in title or "사용자 요청" in title:
+        return False
+    for pat in _TITLE_TEMPLATE_PATTERNS:
+        if pat.search(title):
+            return False
+    return True
+
+
+def _regenerate_title(keyword, blog_id=None, max_attempts=2):
+    """H1 누락 시 제목 전용 재생성 — 최대 max_attempts회, 실패 시 None (fail-closed).
+
+    전용 프롬프트(본문 작성 프롬프트 재사용 금지)로 제목 한 줄만 요청하고,
+    ai_generate는 tier="economy" 고정 파라미터로 호출한다 (결정 2).
+    RuntimeError(전 tier 실패)도 무효로 취급해 재시도한다 (MINOR-4).
+    """
+    system_prompt = (
+        "당신은 상품 큐레이션 블로그 제목 작성 전문가입니다. 반드시 한국어로 작성하세요.\n"
+        "아래 키워드에 대한 블로그 글 제목을 한 줄만 출력하세요.\n"
+        "제목 앞에 '# ' 마크다운 H1 마커를 붙이세요.\n"
+        "검토 문구, 사고 과정, 설명은 출력하지 마세요.\n"
+        '나열형 템플릿 제목("{keyword} 추천 TOP N (연도년)" 형태)은 금지합니다.\n'
+        "제목 길이는 10~60자로 작성하세요."
+    )
+    user_prompt = f"키워드: {keyword}\n\n제목 한 줄만 출력하세요."
+    for attempt in range(max_attempts):
+        try:
+            result = ai_generate(system_prompt, user_prompt, tier="economy", temperature=0.5, max_tokens=200)
+        except RuntimeError as e:
+            logger.warning(f"[title_regenerate] LLM 실패 (RuntimeError, 시도 {attempt+1}): {keyword} — {e}")
+            continue
+        text = result if isinstance(result, str) else result.get("content", "")
+        if not text:
+            continue
+        first_line = text.strip().split("\n")[0].strip()
+        if first_line.startswith("# "):
+            first_line = first_line.lstrip("# ").strip()
+        if _validate_title(first_line):
+            return first_line
+        logger.warning(f"[title_regenerate] 무효 제목 (시도 {attempt+1}): {keyword} → {first_line[:60]}")
+    logger.warning(f"[title_regenerate] {max_attempts}회 모두 실패: {keyword}")
+    return None
+
+
+# CoT body 판정을 위한 임계값 상수 (모듈 레벨로 분리해 튜닝 용이)
+_COT_ENGLISH_RATIO_THRESHOLD = 0.30
+_COT_WRITING_INSTRUCTION_MIN_MATCHES = 3
+_COT_MARKER_MIN_MATCHES = 1
+
+
+def _is_cot_body(body):
+    """본문이 CoT/프롬프트 지시문인지 판정.
+
+    - 영어 문장 비율 > 30% (LLM CoT는 영어 지시문 다량 포함)
+    - 프롬프트 지시문 키워드 다수 매치: "AIDA", "퍼널", "H2", "H3", "비교표",
+      "자주 묻는 질문", "상황별 추천", "도입부", "선택 가이드", "FAQ",
+      "장점", "아쉬운 점", "CTA" 등 글쓰기 지시어 3개 이상
+    - CoT 마커("우선", "사용자 요청", "제목 규칙", "제목 예시") 포함
+    - 위 3개 조건 중 2개 이상 충족 시 CoT로 판정
+    """
+    if not body:
+        return False
+    text = body.strip()
+    total_chars = len(text)
+    if total_chars == 0:
+        return False
+
+    # 1) 영어 문자 비율
+    english_chars = sum(1 for c in text if c.isascii() and c.isalpha())
+    english_ratio = english_chars / total_chars
+
+    # 2) 글쓰기 지시어 키워드 매치 수
+    writing_instruction_keywords = [
+        "AIDA", "퍼널", "H2", "H3", "비교표", "자주 묻는 질문",
+        "상황별 추천", "도입부", "선택 가이드", "FAQ",
+        "장점", "아쉬운 점", "CTA"
+    ]
+    writing_matches = sum(1 for kw in writing_instruction_keywords if kw in text)
+
+    # 3) CoT 마커 매치
+    cot_markers = ["우선", "사용자 요청", "제목 규칙", "제목 예시"]
+    cot_matches = sum(1 for m in cot_markers if m in text)
+
+    # 판정: 3개 조건 중 2개 이상 충족
+    conditions_met = 0
+    if english_ratio > _COT_ENGLISH_RATIO_THRESHOLD:
+        conditions_met += 1
+    if writing_matches >= _COT_WRITING_INSTRUCTION_MIN_MATCHES:
+        conditions_met += 1
+    if cot_matches >= _COT_MARKER_MIN_MATCHES:
+        conditions_met += 1
+
+    return conditions_met >= 2
+
+
+def _extract_description(body, title, keyword):
+    """본문에서 CoT/마커 줄을 제외한 첫 의미 문단 추출 (meta description용).
+
+    - 빈 줄 / '#'·'!'·'[' 시작 줄 제외 (기존 동작 유지)
+    - CoT/검토 마커 줄 제외: '우선' 시작, '사용자 요청' 포함, '제목 규칙'/'제목 예시' 시작,
+      '제품 데이터를 살펴보면', '이제 글의 구조', '이제 글을 작성' 등 작성 계획 문구
+    - 누적 길이 >= 20자 되는 지점에서 첫 문단 확정 (문단 시작 '우선' 금지)
+    - ~150자 트렁케이션 (기존 160자 → 결정 5 기준 150자)
+    - 문단을 못 찾으면 키워드 기반 최후 fallback
+    """
+    desc_lines = []
+    for line in (body or "").split("\n"):
+        line = line.strip()
+        if not line or line.startswith(("#", "!", "[")):
+            continue
+        if line.startswith("우선") or "사용자 요청" in line:
+            continue
+        if line.startswith("제목 규칙") or line.startswith("제목 예시"):
+            continue
+        if line.startswith("제품 데이터를 살펴보면") or line.startswith("이제 글의 구조") or line.startswith("이제 글을 작성"):
+            continue
+        desc_lines.append(line)
+        if len("".join(desc_lines)) >= 20:
+            break
+    paragraph = " ".join(desc_lines).strip()
+    if not paragraph or paragraph.startswith("우선"):
+        return f"{keyword} 관련 상품 비교와 선택 가이드를 제공합니다."
+    return paragraph[:150]
 
 
 def generate_curation_article(keyword, products, blog_id=None):
@@ -516,6 +715,13 @@ def generate_curation_article(keyword, products, blog_id=None):
         if not body:
             continue
 
+        # CoT/프롬프트 지시문 본문 감지 — 즉시 재시도 (sanitization 전에 검사)
+        if _is_cot_body(body):
+            cot_body_detected = True
+            logger.warning(f"[cot_body] CoT 본문 감지 (시도 {attempt+1}): {keyword} — 재시도")
+            body = ""
+            continue
+
         # 금지어 치환 + 메타문구 제거
         body = _sanitize_body(body)
 
@@ -527,12 +733,24 @@ def generate_curation_article(keyword, products, blog_id=None):
         logger.error(f"최종 생성 결과 부족: {keyword} ({len(body)}자)")
         return None
 
+    # CoT 본문 재생성 실패 검사 — 2회 시도 후에도 CoT 본문이면 차단
+    body_regeneration_failed = False
+    if cot_body_detected and not body:
+        body_regeneration_failed = True
+        logger.warning(f"[cot_body] CoT 본문 재생성 실패: {keyword} — 발행 차단")
+
     # 제목 추출: 첫 번째 # 헤딩 또는 첫 줄
     title = ""
     for line in body.split("\n"):
         line = line.strip()
         if line.startswith("# "):
             title = line.lstrip("# ").strip()
+            # 백스톱: H1이 있어도 템플릿/CoT 패턴이면 재생성 (fail-closed 유지)
+            if not _validate_title(title):
+                title = _regenerate_title(keyword, blog_id)
+                if not title:
+                    title_generation_failed = True
+                    logger.warning(f"[title] H1 템플릿 패턴 + 재생성 2회 실패: {keyword} — 발행 차단 마커 반환")
             body = body.replace(line, "", 1).strip()
             break
     if not title:
@@ -557,7 +775,7 @@ def generate_curation_article(keyword, products, blog_id=None):
             title = f"{keyword} 추천 · {_now.year}년 {_now.month}월"
             logger.warning(f"[title-fallback] blog_id={blog_id} keyword={keyword} pick 실패 → 최후 폴백 사용: {title}")
     if template_type:
-        logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, title[:50])
+        logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, (title or "")[:50])
 
     # 쿠팡 고지 문구 확인 및 추가
     disclosure = "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
@@ -567,21 +785,20 @@ def generate_curation_article(keyword, products, blog_id=None):
     # 애드센스 광고 삽입 (single.html 템플릿에서 처리 — 본문 raw HTML 삽입 시 Hugo 빌드 오류)
     # body = _insert_adsense(body)
 
-    # description: 본문 첫 2문장 추출
-    desc_lines = []
-    for line in body.split("\n"):
-        line = line.strip()
-        if not line or line.startswith(("#", "!", "[")):
-            continue
-        desc_lines.append(line)
-        if len("".join(desc_lines)) > 80:
-            break
-    description = " ".join(desc_lines)[:160]
+    # description: 본문에서 CoT/마커 줄 제외 첫 의미 문단 추출
+    description = _extract_description(body, title or "", keyword)
 
-    return {
-        "title": title,
+    result = {
+        "title": title or "",
         "body_md": body,
         "keyword": keyword,
         "product_count": min(len(products), 5),
         "description": description,
     }
+    if title_generation_failed:
+        result["title"] = ""
+        result["title_generation_failed"] = True
+    if body_regeneration_failed:
+        result["body_regeneration_failed"] = True
+        result["is_draft"] = True
+    return result

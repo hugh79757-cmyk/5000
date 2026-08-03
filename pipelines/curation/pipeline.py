@@ -434,10 +434,49 @@ TITLE_BLOCKED = {
     "fitness-hugo": [],
 }
 
+<<<<<<< HEAD
 # 하드 차단 카테고리 — 상품명 allowed 여부와 무관하게 무조건 차단
 # 단, 자기 주제 블로그는 예외 (예: pet-hugo는 반려동물 상품 허용)
 HARD_BLOCK = {"반려동물", "펫", "pet", "dog", "cat", "강아지", "고양이"}
 HARD_BLOCK_EXCEPTIONS = {"pet-hugo"}  # 자기 주제 키워드는 면제
+=======
+# 템플릿 제목 패턴 (fallback/LLM 재생성물 검증) — writer._validate_title과 동일 3종 (연도-접두 ^\d{4}년 제외)
+TITLE_TEMPLATE_PATTERNS = [
+    re.compile(r"추천\s*TOP\s*\d+", re.I),
+    re.compile(r"\(\d{4}년\)$"),
+    re.compile(r"BEST\s*\d+", re.I),
+]
+
+# ── 전체 아티팩트 품질 게이트용 패턴 (Task 4) ──
+# CoT body/description 마커
+COT_BODY_PATTERNS = [
+    re.compile(r"우선\s"),
+    re.compile(r"사용자\s*요청"),
+    re.compile(r"제목\s*규칙"),
+    re.compile(r"제목\s*예시"),
+    re.compile(r"이제\s*글"),
+    re.compile(r"이제\s*작성"),
+    re.compile(r"제품\s*데이터"),
+    re.compile(r"글의\s*구조"),
+]
+
+# 글쓰기 지시어 키워드 (본문에서 3개 이상 매치 시 신호)
+WRITING_INSTRUCTION_PATTERNS = [
+    re.compile(r"AIDA"),
+    re.compile(r"퍼널"),
+    re.compile(r"H2"),
+    re.compile(r"H3"),
+    re.compile(r"비교표"),
+    re.compile(r"자주\s*묻는\s*질문"),
+    re.compile(r"상황별\s*추천"),
+    re.compile(r"도입부"),
+    re.compile(r"선택\s*가이드"),
+    re.compile(r"FAQ"),
+    re.compile(r"장점"),
+    re.compile(r"아쉬운\s*점"),
+    re.compile(r"CTA"),
+]
+>>>>>>> fix/rap-subscription-backfill
 
 # 제목 문맥 확인용 allowed 키워드 (blocked 키워드가 있어도 allowed 키워드가 제목에 있으면 차단 스킵)
 ALLOWED_PRODUCT = {
@@ -701,6 +740,100 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
             logger.warning(f"[telegram] 알림 전송 오류: {e}")
 
 
+def _title_gate(blog_id: str, keyword: str, article: dict):
+    """발행 전 제목 품질 게이트 — 템플릿/재생성 실패 제목 차단 (thin wrapper).
+
+    Returns:
+        (title, None) — 통과 (title은 article["title"] 그대로)
+        (None, {"success": False, "reason": "title_blocked"}) — 차단
+    """
+    article = article or {}
+    title = article.get("title", "")
+    if article.get("title_generation_failed") or not title:
+        _record_failure(blog_id, "title_regenerate_failed", f"제목 재생성 실패 (2회 소진): {keyword}", keyword)
+        return None, {"success": False, "reason": "title_blocked"}
+    for pat in TITLE_TEMPLATE_PATTERNS:
+        if pat.search(title):
+            _record_failure(blog_id, "title_blocked", f"템플릿 제목 패턴: {title}", keyword)
+            return None, {"success": False, "reason": "title_blocked"}
+    return title, None
+
+
+def _content_quality_gate(blog_id: str, keyword: str, article: dict):
+    """발행 전 전체 아티팩트 품질 게이트 — title + description + body 종합 검증.
+
+    신호 5종:
+    1) title 템플릿 패턴 (TITLE_TEMPLATE_PATTERNS)
+    2) description CoT 마커 ("우선", "사용자 요청", "제목 규칙", "제목 예시")
+    3) body 영어 문장 비율 > 30%
+    4) body 글쓰기 지시어 3개 이상 (WRITING_INSTRUCTION_PATTERNS)
+    5) body CoT 마커 2개 이상 (COT_BODY_PATTERNS)
+
+    판정:
+    - 신호 2개 이상 충족 시 fail-closed 차단
+    - 예외: 신호 3+4+5 모두 충족(명백한 CoT body) → 즉시 차단 (신호 수 무관)
+    - 단일 신호는 오탐 가능성 있어 통과
+
+    Returns:
+        (article, None) — 통과
+        (None, {"success": False, "reason": "content_quality_gate"}) — 차단
+    """
+    article = article or {}
+    title = article.get("title", "") or ""
+    description = article.get("description", "") or ""
+    body = article.get("body_md", "") or ""
+
+    signals_met = []
+    signal_details = []
+
+    # 신호 1: title 템플릿 패턴
+    if any(pat.search(title) for pat in TITLE_TEMPLATE_PATTERNS):
+        signals_met.append(1)
+        signal_details.append("title_template")
+
+    # 신호 2: description CoT 마커
+    desc_cot_markers = ["우선", "사용자 요청", "제목 규칙", "제목 예시"]
+    if any(marker in description for marker in desc_cot_markers):
+        signals_met.append(2)
+        signal_details.append("desc_cot")
+
+    # 신호 3: body 영어 문장 비율 > 30%
+    if body:
+        total_chars = len(body)
+        if total_chars > 0:
+            english_chars = sum(1 for c in body if c.isascii() and c.isalpha())
+            english_ratio = english_chars / total_chars
+            if english_ratio > 0.30:
+                signals_met.append(3)
+                signal_details.append(f"body_english_ratio={english_ratio:.2f}")
+
+    # 신호 4: body 글쓰기 지시어 3개 이상
+    writing_matches = sum(1 for pat in WRITING_INSTRUCTION_PATTERNS if pat.search(body))
+    if writing_matches >= 3:
+        signals_met.append(4)
+        signal_details.append(f"writing_instructions={writing_matches}")
+
+    # 신호 5: body CoT 마커 2개 이상
+    cot_body_matches = sum(1 for pat in COT_BODY_PATTERNS if pat.search(body))
+    if cot_body_matches >= 2:
+        signals_met.append(5)
+        signal_details.append(f"cot_body={cot_body_matches}")
+
+    # 판정
+    # 명백한 CoT body (신호 3+4+5 모두) → 즉시 차단
+    if all(s in signals_met for s in (3, 4, 5)):
+        _record_failure(blog_id, "content_quality_gate", f"명백한 CoT body 차단: {signal_details}", keyword)
+        return None, {"success": False, "reason": "content_quality_gate"}
+
+    # 일반: 2개 이상 신호 충족 시 차단
+    if len(signals_met) >= 2:
+        _record_failure(blog_id, "content_quality_gate", f"콘텐츠 품질 게이트 차단: 신호 {signal_details}", keyword)
+        return None, {"success": False, "reason": "content_quality_gate"}
+
+    # 단일 신호 또는 신호 없음 → 통과
+    return article, None
+
+
 def run(cfg):
     """Curation 파이프라인 메인 — dispatcher에서 호출"""
     blog_id = cfg.get("id", "")
@@ -923,6 +1056,16 @@ def _run_inner(cfg, blog_id, daily_quota):
         _record_failure(blog_id, "write_error", "AI 글 생성 실패", keyword)
         return {"success": False, "reason": "write_error"}
 
+    # 제목 품질 게이트 — 템플릿/재생성 실패 제목 차단 (fail-closed, 언어 검증 이전)
+    _gated_title, _gate_err = _title_gate(blog_id, keyword, article)
+    if _gate_err is not None:
+        return _gate_err
+
+    # 전체 아티팩트 품질 게이트 — title + description + body 종합 검증 (Task 4)
+    _gated_article, _content_err = _content_quality_gate(blog_id, keyword, article)
+    if _content_err is not None:
+        return _content_err
+
     # 언어 검증 — 중국어 생성 차단
     _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
     if _lang_err:
@@ -997,6 +1140,11 @@ def _run_inner(cfg, blog_id, daily_quota):
         article = generate_curation_article(keyword, products, blog_id=blog_id)
         if not article:
             logger.warning(f"[{blog_id}] fallback AI 생성 실패 — 다음 시도")
+            continue
+        # 제목 품질 게이트 — 실패 시 다음 fallback 키워드 진행 (_record_failure는 wrapper 내부 처리)
+        _gated_title, _gate_err = _title_gate(blog_id, keyword, article)
+        if _gate_err is not None:
+            logger.warning(f"[{blog_id}] fallback 제목 게이트 차단 — 다음 시도")
             continue
         _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
         if _lang_err:
@@ -1077,7 +1225,7 @@ def _run_inner(cfg, blog_id, daily_quota):
                 tag_set.add(bv)
     tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
 
-    is_draft = cfg.get("force_draft", False) or article.get("is_draft", False)
+is_draft = cfg.get("force_draft", False) or article.get("is_draft", False)
     result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url, is_draft=is_draft)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")

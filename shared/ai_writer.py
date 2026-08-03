@@ -143,7 +143,11 @@ def generate(
             "temperature": temperature
             if temperature is not None
             else tier_config.get("temperature", 0.7),
+<<<<<<< HEAD
             "max_tokens": max_tokens if max_tokens is not None else tier_config.get("max_tokens", 4000),
+=======
+            "max_tokens": max_tokens if max_tokens is not None else tier_config.get("max_tokens", 4000),
+>>>>>>> fix/rap-subscription-backfill
         }
 
         # Exponential backoff retry per tier
@@ -151,13 +155,21 @@ def generate(
         for attempt in range(MAX_RETRIES):
             try:
                 client = get_client(tier_config["provider"], providers)
+                if client is None:
+                    last_error = f"{attempt_tier}: API 키 없음 — 다음 tier로 폴백"
+                    logger.warning(f"[ai_writer] {last_error}")
+                    break  # Skip to next tier
                 response = client.chat.completions.create(**kwargs)
                 choice = response.choices[0]
                 message = choice.message
                 content = message.content
                 finish_reason = getattr(choice, "finish_reason", None)
                 
+<<<<<<< HEAD
                 # (B) reasoning 모델 대응: content가 비어있으면 reasoning_content에서 추출
+=======
+                # (B) reasoning 모델 대응: content가 비어있으면 reasoning_content에서 추출
+>>>>>>> fix/rap-subscription-backfill
                 if not content:
                     reasoning = getattr(message, 'reasoning_content', None)
                     if reasoning:
@@ -179,6 +191,19 @@ def generate(
                     # max_tokens 증분 재시도 (유한: MAX_RETRIES만큼)
                     kwargs["max_tokens"] = min(
                         int(kwargs.get("max_tokens", 4000)) * 2 + 512,
+                        TRUNCATION_MAX_TOKENS_CAP,
+                    )
+                    last_error = (
+                        f"{attempt_tier}: 응답 절단 감지 (finish_reason={finish_reason}, "
+                        f"len={len(content)}) — max_tokens {kwargs['max_tokens']}로 재시도"
+                    )
+                    logger.warning(f"[ai_writer] {last_error}")
+                    continue
+
+                # BUG-001: 잘린 조각을 결과로 쓰지 않고 max_tokens를 증분해 재요청 (유한: MAX_RETRIES만큼)
+                if _is_truncated(content, finish_reason):
+                    kwargs["max_tokens"] = min(
+                        int(kwargs["max_tokens"] or 4000) * 2 + 512,
                         TRUNCATION_MAX_TOKENS_CAP,
                     )
                     last_error = (

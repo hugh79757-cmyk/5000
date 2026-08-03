@@ -3,7 +3,7 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-07-28T15:08:26Z"
+last_updated: "2026-08-01T19:20:00Z"
 progress:
   total_phases: 30
   completed_phases: 29
@@ -57,6 +57,7 @@ progress:
 | 17 | Content Quality Enhancement — 콘텐츠 품질 고도화 | ✅ | 완료 (2026-07-12) |
 | 24 | CUAP 콘텐츠 품질 고도화 — 키워드 정리 + 타이틀 최적화 + 이미지 중복 방지 | ✅ | 완료 (2026-07-20) |
 | 28 | CUAP Worker 404→500 Fix — 6개 Worker 블로그 missing-asset 500 → 404 | ✅ | 완료 (2026-07-21) |
+| 49 | CUAP Cross-link Bugfix — 크로스링크 slug 불일치 근본 수정 + 전수 배치 수정 | ✅ | `4b33b43fd` + `1b249d615` (2026-07-26) |
 | 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
 | 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
 
@@ -125,6 +126,38 @@ progress:
 
 ---
 
+## Phase 49: CUAP Cross-link Bugfix (2026-07-26, 재검증 2026-08-01)
+
+**목표:** 크로스링크 slug 불일치(404) 근본 수정 + 기존 bake된 잘못된 링크 전수 수정
+
+**근본원인:** `publisher.py`가 `hugo_writer._write_hugo_post()`로 override되며
+`_write_hugo_post()`가 `"url"` 키를 반환하지 않아 `pipeline.py:1064`의 `result.get("url")`이
+항상 None → `_make_slug(keyword)`의 `20260726-{keyword}` 형식 date-prefixed slug가
+fallback으로 사용 → 모든 크로스링크 404.
+
+**Wave 1 (커밋 `4b33b43fd`)** — 근본 수정:
+- `hugo_writer.py`: `_write_hugo_post()` return에 `"url"` 키 추가 (`"file"` 보존, additive)
+- `pipeline.py`: slug 추출 3-tier fallback (`result["url"]` > `result["file"]` > keyword)
+- `cuap_entity_linker.py`: `build_cross_sell_card()` 희소 엔티티 경고 로깅
+
+**Wave 2 (커밋 `1b249d615`)** — 배치 수정:
+- `fix_cuap_entity_slugs.py`: date-prefixed 잘못된 slug 엔티티 14건 삭제 (9개 블로그)
+- `fix_baked_crosslink_cards.py`: bake된 크로스링크 href 143건 수정 (38개 파일/10개 블로그)
+
+**49-B (커밋 `045ff37d1`)** — 전수 검증 + 잔여 404 수정:
+- `scan_all_crosslinks.py`: 3,076개 포스트 / 9,840개 크로스링크 전수 스캔
+- `fix_remaining_crosslinks.py`: 잔여 404 85건 수정 (일반 70 + trailing-slash 15)
+- 최종 정상률 **9,840/9,840 (0건 404)**, Hugo 빌드 10/10 블로그 0 에러
+
+**2026-08-01 추가 정리:** `published=0` phantom 엔티티 10건(잘못된 date-prefixed slug,
+on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-191632.json`.
+`cuap_entities` 474→464행, 잘못된 slug 0건.
+
+**검증:** health 콜레스테롤 포스트 4개 크로스링크 on-disk 일치 (fitness/kitchen/baby/beauty).
+플랜 산출물: `49-01-SUMMARY.md`, `49-02-SUMMARY.md` (`.planning/phases/49-crosslink-bugfix/`).
+
+---
+
 ## Phase 50: CTA Button Center (2026-07-26)
 
 **목표:** 10개 CUAP 블로그 CTA 버튼 중앙 정렬 + cross-sell/funnel/cta-box CSS 클래스 표준화 + 인라인 스타일 마이그레이션
@@ -164,4 +197,4 @@ progress:
 
 ---
 
-*Last updated: 2026-07-28 Phase 52 Wave 4 single.html 정비 완료 (22개 블로그, 22 커밋)*
+*Last updated: 2026-08-01 Phase 49 Cross-link Bugfix 재검증 완료 (SUMMARY + STATE 정리, phantom 10건 정리)*

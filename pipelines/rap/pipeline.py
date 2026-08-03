@@ -500,12 +500,103 @@ def _fetch_trades_from_db(lawd_cd, keyword, months=3, blog_id=None):
         logger.exception(f"DB trades 조회 실패: {e}")
         return []
 
+def normalize_reference_table(body_md):
+    """GPT 생성 본문에서 청약 공고 표의 번호를 1부터 순차 재부여하고
+    '총 N건' 문구를 실제 표 행수와 일치시킨다.
+
+    결정론적 안전망 역할 — 프롬프트 지침이 실패해도 최종 출력이
+    항상 올바른 표 번호를 가지도록 보장한다.
+    실패해도 예외를 던지지 않고 원본을 그대로 반환한다.
+    """
+    import re as _re
+
+    # 패턴 1: 청약 공고 표(헤더 "번호 | 공고명 | 유형 | 지역 | 접수기간 | 상태")
+    _TABLE_HEADER_PATTERN = _re.compile(
+        r'^\|\s*번호\s*\|\s*공고명\s*\|\s*유형\s*\|\s*지역\s*\|\s*접수기간\s*\|\s*상태\s*\|$',
+        _re.MULTILINE
+    )
+
+    _match = _TABLE_HEADER_PATTERN.search(body_md)
+    if not _match:
+        logger.info("normalize_reference_table: 표 패턴 미검출 — 스킵")
+        return body_md
+
+    # 표 헤더 라인/구분선/데이터 행 추출
+    lines = body_md.split("\n")
+    header_idx = _match.start()
+    header_line_num = body_md[:header_idx].count("\n")
+
+    # 헤더 다음에 구분선 있는지 확인
+    if header_line_num + 1 >= len(lines):
+        logger.warning("normalize_reference_table: 구분선 행 없음 — 스킵")
+        return body_md
+
+    sep_line = lines[header_line_num + 1]
+    if not _re.match(r'^\|[\|\-:\s]+\|$', sep_line):
+        logger.warning("normalize_reference_table: 구분선 없음 — 스킵")
+        return body_md
+
+    # 데이터 행 수집 (빈 줄 또는 비-파이프 라인 나올 때까지)
+    data_start = header_line_num + 2
+    data_end = data_start
+    while data_end < len(lines):
+        stripped = lines[data_end].strip()
+        if not stripped.startswith("|"):
+            break
+        # 헤더 아닌 실제 데이터 행만 (번호 없는 행도 포함)
+        data_end += 1
+
+    data_rows = lines[data_start:data_end]
+    if not data_rows:
+        logger.info("normalize_reference_table: 데이터 행 없음 — 스킵")
+        return body_md
+
+    old_count = len(data_rows)
+
+    # (a) 각 데이터 행의 첫 번째 셀(번호)을 1부터 순차 교체
+    new_rows = []
+    for idx, row in enumerate(data_rows, 1):
+        # "| N | ..." → "| idx | ..."
+        parts = row.split("|")
+        if len(parts) >= 2:
+            # 첫 번째 셀을 idx로 교체
+            parts[1] = f" {idx} "
+            new_rows.append("|".join(parts))
+        else:
+            new_rows.append(row)
+
+    # lines의 해당 부분 교체
+    lines[data_start:data_end] = new_rows
+
+    # (b) "총 N건" / "총 N건의 공고가 확인되는데" 패턴 찾아 교체
+    new_body = "\n".join(lines[:data_end]) + "\n" + "\n".join(lines[data_end:])
+    # 실제 데이터 행 수 (헤더/구분선 제외)
+    actual_row_count = len(new_rows)
+
+    # 패턴: "총 N건의 공고" 또는 "총 N건" (N은 숫자)
+    _COUNT_PATTERN = _re.compile(r'총\s+(\d{1,4})\s*건(?:\S*)?')
+    def _replace_count(m):
+        return m.group(0).replace(m.group(1), str(actual_row_count), 1)
+
+    new_body, _sub_count = _COUNT_PATTERN.subn(_replace_count, new_body)
+
+    logger.info(
+        f"normalize_reference_table: {old_count}행 → {actual_row_count}행 번호 재부여, "
+        f"'총 N건' {_sub_count}건 치환 완료"
+    )
+    return new_body
+
+
 def _post_process(body_md, blog_id, keyword):
     # 금지어 자동 치환
     body_md = body_md.replace("특히 ", "").replace("특히, ", "")
     body_md = body_md.replace("특히,", "").replace("  ", " ")
 
     """발행 전 후처리: 금지표현 제거 + 면책조항 + 쿠팡 + 내부링크"""
+
+    # 0-0. GPT 생성 표 번호 정규화 (결정론적 안전망)
+    body_md = normalize_reference_table(body_md)
+
     import glob as _gl2
     import random as _rand2
     import re as _re
@@ -950,6 +1041,10 @@ def run(blog_cfg):
 
         article = generate_subscription_article(keyword, subs)
         data_source = "rap_db_subscription"
+
+        # ── 표 번호 정규화 (GPT 생성 표 교정 — 결정론적 안전망) ──
+        if article and article.get("body_md"):
+            article["body_md"] = normalize_reference_table(article["body_md"])
 
     if not article:
         return {"success": False, "reason": "write_failed"}

@@ -241,13 +241,18 @@ def _build_subscription_reference(keyword, subscriptions):
     """청약 공고 데이터를 참고자료 블록으로 변환 (실제 DB 스키마 반영)"""
     from datetime import datetime
     month = datetime.now().strftime("%Y년 %m월")
-    lines = [f"## 키워드: {keyword}", f"기준: {month}", f"총 공고: {len(subscriptions)}건\n"]
+
+    # --- 표시할 공고 목록 (최대 15건, 최종 출력 순서 기준) ---
+    _display = subscriptions[:15]
+    _count = len(_display)
+
+    lines = [f"## 키워드: {keyword}", f"기준: {month}", f"총 공고: {_count}건\n"]
 
     # 마크다운 표 헤더
     lines.append("| 번호 | 공고명 | 유형 | 지역 | 접수기간 | 상태 |")
     lines.append("|------|--------|------|------|----------|------|")
 
-    for i, s in enumerate(subscriptions[:15], 1):
+    for i, s in enumerate(_display, 1):
         pan_nm = s.get("pan_nm", "미상")
         pan_type = s.get("pan_type", "미상")
         region_nm = s.get("region_nm", "미상")
@@ -260,7 +265,7 @@ def _build_subscription_reference(keyword, subscriptions):
 
     # 상세 정보 블록
     lines.append("\n### 공고 상세 정보")
-    for i, s in enumerate(subscriptions[:15], 1):
+    for i, s in enumerate(_display, 1):
         pan_nm = s.get("pan_nm", "미상")
         pan_type = s.get("pan_type", "미상")
         region_nm = s.get("region_nm", "미상")
@@ -698,6 +703,14 @@ def generate_subscription_article(keyword, subscriptions):
 - 구분선은 반드시 --- (하이픈 3개 이상)만 사용. –(en-dash), —(em-dash) 사용 금지
 - 표 바로 앞 줄은 반드시 빈 줄(엔터 한 줄)을 넣으세요
 - 표의 모든 행은 반드시 각각 별도 줄에 작성 (한 줄로 압축 금지)
+- [중요] 표에 포함할 항목을 선택한 경우, 반드시 1번부터 순차적으로
+  번호를 다시 매기세요. 예: 원본 참고자료에 1~15번이 있어도 실제로
+  표에 포함시킨 항목이 4개면 번호는 1,2,3,4가 되어야 합니다.
+- [중요] 본문에서 "총 N건"이라고 언급할 때 N은 실제 표에 포함된
+  행의 개수와 정확히 일치해야 합니다. 표 밖의 전체 공고 수가
+  아님에 주의하세요.
+  ※ 위 두 규칙은 최종 출력물의 정확성을 위한 필수 사항이며,
+  시스템 후처리(normalize_reference_table)에서 2차 교정합니다.
 
 [제목]
 - SEO 최적화 한국어, 반드시 32자 이내 (절대 35자 초과 금지)
