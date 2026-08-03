@@ -1027,7 +1027,10 @@ def run(blog_cfg):
         try:
             rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=30)
             rap_conn.execute(
-                "INSERT OR IGNORE INTO publish_log (blog_id, data_type, data_key, title) VALUES (?,?,?,?)",
+                "INSERT INTO publish_log (blog_id, data_type, data_key, title, published_at) "
+                "VALUES (?,?,?,?, datetime('now')) "
+                "ON CONFLICT(blog_id, data_key) DO UPDATE SET "
+                "title=excluded.title, published_at=datetime('now')",
                 (blog_id, strategy, keyword, article["title"])
             )
             rap_conn.commit()
