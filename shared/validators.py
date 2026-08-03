@@ -12,7 +12,9 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 # ── 상수 ──
-_AI_RESIDUES = ["다듬은 제목", "추천 제목", "```", "##", "title:", "제목 후보"]
+_AI_RESIDUES = ["다듬은 제목", "추천 제목", "```", "##", "title:", "제목 후보",
+                "1단계에서", "2단계에서", "3단계에서", "4단계에서",
+                "정리하면 다음과 같습니다", "핵심 요약을", "다음과 같습니다"]
 
 def sanitize_title(title: str) -> str:
     """제목에서 마크다운 잔여물 제거 + 연속 중복 단어 제거 + 부분 중복 제거
