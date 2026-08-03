@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 TITLE_TEMPLATES: dict[str, str] = {
     "comparison": "{brand1} vs {brand2} — {keyword} 어떤 게 나을까?",
     "ranking": "{keyword} BEST 5 — {year}년 {month}월 엄선",
-    "toplist": "TOP 5 {keyword} — 선택한 이유와 후기",
+    "toplist": "TOP 5 {keyword} — 선택한 이유와 특징",
     "buying_guide": "{keyword} 고르는 법: {year}년 최신 가이드",
     "budget": "{keyword} 추천: {price_range}만원 이하 합격점 TOP 5",
-    "review_style": "실제 써본 사람이 말하는 {keyword} TOP 5",
+    "review_style": "상품 데이터로 비교하는 {keyword} TOP 5",
     "question_style": "{keyword} 고민된다면? 지금 사야 하는 이유",
     "spec_style": "{year}년 {month}월 스펙 비교: {brand1} vs {brand2} vs {brand3}",
     "myth_busting": "{keyword} 흔한 오해 3가지 — {year}년 기준 바로잡기",
-    "new_release": "최근 출시 {keyword} {brand1} — 첫인상과 실사용 느낌",
+    "new_release": "최근 출시 {keyword} {brand1} — 첫인상과 주요 특징",
     "situation_based": "{keyword} 어떤 걸 골라야 할까? 상황별 추천",
 }
 
@@ -32,39 +32,39 @@ TITLE_TEMPLATES: dict[str, str] = {
 
 BLOG_TEMPLATE_OVERRIDES: dict[str, dict] = {
     "interior-hugo": {
-        "preferred_templates": ["buying_guide", "budget", "question_style", "review_style", "toplist"],
+        "preferred_templates": ["buying_guide", "budget", "question_style", "toplist"],
         "avoid_templates": ["comparison"],
     },
     "kitchen-hugo": {
-        "preferred_templates": ["question_style", "budget", "review_style", "toplist", "buying_guide"],
+        "preferred_templates": ["question_style", "budget", "toplist", "buying_guide"],
         "avoid_templates": ["comparison"],
     },
     "camping-hugo": {
-        "preferred_templates": ["toplist", "buying_guide", "budget", "question_style", "review_style"],
+        "preferred_templates": ["toplist", "buying_guide", "budget", "question_style"],
         "avoid_templates": ["ranking", "comparison"],
     },
     "appliance-hugo": {
-        "preferred_templates": ["review_style", "buying_guide", "question_style", "myth_busting"],
+        "preferred_templates": ["buying_guide", "question_style", "myth_busting"],
         "avoid_templates": ["ranking"],
     },
     "health-hugo": {
-        "preferred_templates": ["buying_guide", "budget", "question_style", "review_style", "toplist"],
+        "preferred_templates": ["buying_guide", "budget", "question_style", "toplist"],
         "avoid_templates": ["comparison"],
     },
     "beauty-hugo": {
-        "preferred_templates": ["buying_guide", "budget", "review_style", "spec_style", "question_style"],
+        "preferred_templates": ["buying_guide", "budget", "spec_style", "question_style"],
         "avoid_templates": [],
     },
     "baby-hugo": {
-        "preferred_templates": ["buying_guide", "question_style", "review_style", "situation_based", "toplist"],
+        "preferred_templates": ["buying_guide", "question_style", "situation_based", "toplist"],
         "avoid_templates": ["comparison"],
     },
     "pet-hugo": {
-        "preferred_templates": ["review_style", "question_style", "situation_based", "toplist", "buying_guide"],
+        "preferred_templates": ["question_style", "situation_based", "toplist", "buying_guide"],
         "avoid_templates": ["comparison"],
     },
     "fitness-hugo": {
-        "preferred_templates": ["review_style", "question_style", "buying_guide", "myth_busting", "new_release"],
+        "preferred_templates": ["question_style", "buying_guide", "myth_busting", "new_release"],
         "avoid_templates": [],
     },
     "laptop-hugo": {
@@ -111,7 +111,7 @@ def _classify_title(title: str) -> str:
     if re.search(r"고르는\s*법|최신\s*가이드", title):
         return "buying_guide"
     # review_style: 실제 구매자 or 리뷰
-    if re.search(r"실제.*써본|실제.*구매|리뷰", title):
+    if re.search(r"리뷰", title):
         return "review_style"
     # question_style: 고민 or ? 또는 의문문 패턴
     if re.search(r"고민|다면\?|까\?|어떻게", title):
