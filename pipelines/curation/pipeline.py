@@ -456,17 +456,26 @@ def _filter_irrelevant_products(blog_id, keyword, products):
         cat = p.get("category_name", "").lower()
         combined = name + " " + cat
 
-        # 상품명이 allowed 키워드를 포함하면 카테고리 blocked 무시 (context-aware)
+        # 하드 차단 카테고리 — 상품명 allowed 여부와 무관하게 무조건 차단
+        HARD_BLOCK = {"반려동물", "펫", "pet", "dog", "cat", "강아지", "고양이"}
+        cat_hard_blocked = any(hb in cat for hb in HARD_BLOCK)
+
+        # 상품명이 allowed 키워드를 포함하면 일반 차단 무시 (context-aware)
+        # 단, 하드 차단은 예외 없이 적용
         name_has_allowed = any(aw in name for aw in allowed)
 
         # 차단 키워드 — category_name + product_name 모두 확인
         is_blocked = False
-        for bw in blocked:
-            bw_lower = bw.lower()
-            if (bw_lower in cat and not name_has_allowed) or (bw_lower in name and not name_has_allowed):
-                logger.info(f"[필터] 차단: '{p.get('product_name', '')[:40]}' (차단어: {bw}, 대상: {'카테고리' if bw_lower in cat else '상품명'})")
-                is_blocked = True
-                break
+        if cat_hard_blocked:
+            logger.info(f"[필터] 하드차단: '{p.get('product_name', '')[:40]}' (카테고리: {cat[:30]})")
+            is_blocked = True
+        else:
+            for bw in blocked:
+                bw_lower = bw.lower()
+                if (bw_lower in cat and not name_has_allowed) or (bw_lower in name and not name_has_allowed):
+                    logger.info(f"[필터] 차단: '{p.get('product_name', '')[:40]}' (차단어: {bw}, 대상: {'카테고리' if bw_lower in cat else '상품명'})")
+                    is_blocked = True
+                    break
         if is_blocked:
             continue
 
@@ -835,6 +844,21 @@ def _run_inner(cfg, blog_id, daily_quota):
                 scores["threshold"] = get_adaptive_threshold(DB_PATH, blog_id, scores["threshold"])
             except Exception:
                 pass
+            # 개별 상품 drop — 임계값 미달 상품 제거 후 평균 재산출
+            threshold = scores["threshold"]
+            paired = list(zip(products, scores["scores"]))
+            dropped_individual = [(p, s) for p, s in paired if s < threshold]
+            passed_individual = [(p, s) for p, s in paired if s >= threshold]
+            if dropped_individual:
+                for p, s in dropped_individual:
+                    logger.info(f"[{blog_id}] 개별 drop: '{p.get('product_name', '')[:30]}' (score={s:.2f} < {threshold})")
+                if len(passed_individual) >= 3:
+                    products = [p for p, _ in passed_individual]
+                    scores["scores"] = [s for _, s in passed_individual]
+                    scores["avg"] = sum(scores["scores"]) / len(scores["scores"])
+                    scores["min"] = min(scores["scores"])
+                else:
+                    logger.warning(f"[{blog_id}] 개별 drop 후 상품 부족 ({len(passed_individual)}개 < 3)")
             passed, reason = passes_gate(scores)
             if passed:
                 logger.info(f"[{blog_id}] 관련성 점수: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
@@ -1044,7 +1068,8 @@ def _run_inner(cfg, blog_id, daily_quota):
                 tag_set.add(bv)
     tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
 
-    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url)
+    is_draft = cfg.get("force_draft", False) or article.get("is_draft", False)
+    result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url, is_draft=is_draft)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")
         _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
