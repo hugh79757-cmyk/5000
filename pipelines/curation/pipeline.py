@@ -434,6 +434,11 @@ TITLE_BLOCKED = {
     "fitness-hugo": [],
 }
 
+# 하드 차단 카테고리 — 상품명 allowed 여부와 무관하게 무조건 차단
+# 단, 자기 주제 블로그는 예외 (예: pet-hugo는 반려동물 상품 허용)
+HARD_BLOCK = {"반려동물", "펫", "pet", "dog", "cat", "강아지", "고양이"}
+HARD_BLOCK_EXCEPTIONS = {"pet-hugo"}  # 자기 주제 키워드는 면제
+
 # 제목 문맥 확인용 allowed 키워드 (blocked 키워드가 있어도 allowed 키워드가 제목에 있으면 차단 스킵)
 ALLOWED_PRODUCT = {
     "camping-hugo": {"allowed": ["텐트", "캠핑", "침낭", "랜턴", "야영", "등산"]},
@@ -456,12 +461,13 @@ def _filter_irrelevant_products(blog_id, keyword, products):
         cat = p.get("category_name", "").lower()
         combined = name + " " + cat
 
-        # 하드 차단 카테고리 — 상품명 allowed 여부와 무관하게 무조건 차단
-        HARD_BLOCK = {"반려동물", "펫", "pet", "dog", "cat", "강아지", "고양이"}
-        cat_hard_blocked = any(hb in cat for hb in HARD_BLOCK)
+        # 하드 차단 — 예외 블로그(pet-hugo 등)는 면제
+        cat_hard_blocked = False
+        if blog_id not in HARD_BLOCK_EXCEPTIONS:
+            cat_hard_blocked = any(hb in cat for hb in HARD_BLOCK)
 
         # 상품명이 allowed 키워드를 포함하면 일반 차단 무시 (context-aware)
-        # 단, 하드 차단은 예외 없이 적용
+        # 단, 하드 차단은 예외 블로그가 아닌 한 적용
         name_has_allowed = any(aw in name for aw in allowed)
 
         # 차단 키워드 — category_name + product_name 모두 확인
