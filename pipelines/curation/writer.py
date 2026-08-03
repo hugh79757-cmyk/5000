@@ -301,6 +301,7 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - 제목 길이는 25~55자로 작성하세요 (공백 포함). 65자를 초과하지 않아야 합니다.
 - 짧은 제목(25자 미만)은 구체성이 부족해 보일 수 있습니다.
 - 긴 제목(55자 초과)은 모바일 화면에서 잘리고 SEO 키워드가 분산됩니다.
+- "{keyword} 추천 TOP5 (연도년)" 같은 통짜 포맷은 사용하지 마세요. 구체적 제품명·브랜드·혜택을 제목에 직접 넣으세요.
 {extra_title_rules}{recent_block}
 
 [퍼널 구조 — AIDA 모델 적용]
@@ -535,7 +536,8 @@ def generate_curation_article(keyword, products, blog_id=None):
             body = body.replace(line, "", 1).strip()
             break
     if not title:
-        # 폴백 제목: pick()으로 안전한 템플릿 시도, 실패 시 기본 형식 + slug 식별자
+        # 계층적 안전 폴백: pick() → 날짜 조합 (옛 TOP5 포맷 사용 금지)
+        _FALLBACK_FRAME = ["실사용", "후기", "느낌", "써본", "리뷰"]
         try:
             _fb_template = _tt_picker.pick(used_templates=[], blog_id=blog_id)
             if _fb_template:
@@ -545,12 +547,15 @@ def generate_curation_article(keyword, products, blog_id=None):
                     if _b:
                         _fb_brand["brand1"] = _b
                 _fb_title = _tt_picker.render(_fb_template, _fb_brand, keyword)
-                if _fb_title and len(_fb_title) >= 10:
+                if _fb_title and len(_fb_title) >= 10 and not any(f in _fb_title for f in _FALLBACK_FRAME):
                     title = _fb_title
-        except Exception:
-            pass
+        except Exception as _e:
+            logger.warning(f"[title-fallback] pick() 예외: blog_id={blog_id} keyword={keyword} err={_e}")
         if not title:
-            title = f"{keyword} 추천 TOP5 ({datetime.now().year}년)"
+            # 최후 폴백: "{keyword} 추천 · YYYY년 M월" — 옛 TOP5 포맷 금지
+            _now = datetime.now()
+            title = f"{keyword} 추천 · {_now.year}년 {_now.month}월"
+            logger.warning(f"[title-fallback] blog_id={blog_id} keyword={keyword} pick 실패 → 최후 폴백 사용: {title}")
     if template_type:
         logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, title[:50])
 

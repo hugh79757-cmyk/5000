@@ -204,7 +204,8 @@ class TitleTemplatePicker:
         now = datetime.now()
         template = TITLE_TEMPLATES.get(template_key)
         if not template:
-            return f"{keyword} 추천 TOP 5"
+            _now = datetime.now()
+            return f"{keyword} 추천 · {_now.strftime('%Y-%m-%d')}"
 
         context = {
             "brand1": brand_data.get("brand1", ""),
@@ -219,7 +220,8 @@ class TitleTemplatePicker:
             return template.format(**context)
         except KeyError:
             # 혹시라도 누락된 변수 대비
-            return f"{keyword} 추천 TOP 5"
+            _now = datetime.now()
+            return f"{keyword} 추천 · {_now.strftime('%Y-%m-%d')}"
 
     def get_recent_styles(self, blog_id: str, count: int = 5) -> list[str]:
         """publish_log 에서 최근 N개 제목 조회 → 템플릿 타입 분류
