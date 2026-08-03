@@ -236,7 +236,7 @@ class TitleTemplatePicker:
             cursor = conn.execute(
                 "SELECT title FROM publish_log "
                 "WHERE blog_id = ? AND title IS NOT NULL AND title != '' "
-                "ORDER BY created_at DESC LIMIT ?",
+                "ORDER BY published_at DESC LIMIT ?",
                 (blog_id, count),
             )
             for row in cursor.fetchall():
