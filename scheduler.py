@@ -731,6 +731,13 @@ def _track_publish_result(blog_id: str, success: bool) -> None:
             _tg(f"{blog_id} 연속 {count}회 실패", f"scheduler — {count} consecutive failures")
         except Exception as _e:
             logger.warning(f"Telegram alert failed: {_e}")
+        # alert_thresholds 배선 — reason별 임계값/쿨다운 알림
+        try:
+            from shared.alert_thresholds import ThresholdChecker
+            checker = ThresholdChecker()
+            checker.maybe_alert(blog_id, "consecutive_failures", {"consecutive_failures": count})
+        except Exception as _ae:
+            logger.debug(f"alert_thresholds 호출 실패 (non-fatal): {_ae}")
         _CONSECUTIVE_FAILURES[blog_id] = 0  # 알림 발송 후 카운터 리셋
 
 
