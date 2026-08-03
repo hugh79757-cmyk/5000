@@ -531,3 +531,45 @@ Total in 898 ms +
 - [ ] 라이브 사이트 광고 노출 확인
 
 
+
+---
+
+## Phase 54: Curation Title Generation Hardening (제목 생성 하드코딩 fallback 제거)
+**Status:** 📋 PLANNED (2026-08-01, 리넘버: 기존 "Phase 49" 표기 — `.planning/phase-49-crosslink-bugfix`와 번호 충돌로 54로 변경. 51/52/53 이미 점유)
+**Plan:** `.planning/phase-54-title-hardening/PLAN.md`
+**Context:** Phase 43이 "Title Generation Fix"로 COMPLETED 표기되었으나 fallback 로직 미수정 → 재발 (publish_log "추천 TOP5 (연도년)" 패턴 134건 누적, 2026-08-01 발행분 5건 연속)
+**Goal:** 하드코딩 fallback(`{keyword} 추천 TOP5 (연도년)`) 제거 + H1 출력 형식 강제 + CoT/프롬프트 누출 차단 + 회귀 테스트 — 신규 발행 제목 템플릿 패턴 0건 (fail-closed)
+**Key Tasks:**
+- writer.py:538-539 하드코딩 fallback 제거 → H1 누락 시 제목 전용 재생성 루프 (템플릿 패턴 검증 + CoT 거부 + max 2 retry, 실패 시 발행 중단)
+- writer.py `_build_system_prompt`에 H1 출력 형식 지시 + CoT/프롬프트 누출 금지 추가
+- writer.py description 추출 `_extract_description()` 헬퍼 분리 (CoT 첫 문장 거부)
+- pipeline.py 큐레이션 발행 전 제목 게이트 (thin wrapper, 기존 TITLE_BLOCKED 위, dict 반환 하위 호환)
+- 회귀 테스트: publish_log 신규 기록에 템플릿 패턴(`추천\s*TOP\s*\d+`, `BEST\s*\d+`, `\(\d{4}년\)$`) 0건 검증
+**Follow-up candidate:** keyword metadata enrichment (RESEARCH 4.5) — Phase 54에서 스코프 제외, 별도 phase로 이연
+
+---
+
+## Phase 55: Curation Content Quality Diagnostics (큐레이션 콘텐츠 품질 진단)
+**Status:** 📋 PLANNED (2026-08-02, Phase 54 완료 후 잔존 품질 문제 조사)
+**Context:** Phase 54로 CoT/프롬프트 노출은 차단되었으나, 경험 허위 주장(30%), 소스 불명 수치(30%), 건강 효능 단정(20%) 등 3가지 잔존 품질 문제 발견. 10개 블로그 표본에서 최소 1개 위반 70%.
+**Goal:** 프롬프트 실태 분석 + 품질 문제 측정 + 개선 지렛대 제안 (read-only, 코드/프롬프트 변경 없음)
+**Key Tasks:**
+- 프롬프트(_build_system_prompt, BLOG_EXTRA_RULES) 품질 관련 지시 분석
+- 10개 블로그 발행 글 표본에서 Q1(경험 주장), Q2(소스 불명), Q3(효능 단정), Q4(반복 H2), Q5(CoT) 측정
+- 개선 지렛대 5개 제안: A(1인칭 금지), B(효능 금지), C(소스 인용), D(템플릿 다양화), E(후처리 필터)
+**Deliverable:** `.planning/phase-55-curation-quality-diagnostics/CONTEXT.md`
+**Follow-up candidate:** Phase 56으로 지렛대 B(효능 금지) + A(1인칭 금지) 실제实施 검토
+
+---
+
+## Phase 56: CUAP 키워드 정리 + 임계값 완충 → kitchen/beauty 재활성화
+**Status:** ✅ Complete (2026-08-03)
+**Plan:** `.planning/phase-56-cuap-keyword-threshold/PLAN.md`
+**Commits:** `2ca280808` (키워드 정리 + 완충 수정), `daedef5b1` (재활성화)
+**Result:** kitchen/beauty [정상화 통과], active 유지
+**Key Changes:**
+- kitchen-hugo: 중국어/혼합어 키워드 70개 제거 (핵심 62개 유지)
+- beauty-hugo: 비주제 키워드 100개 제거 (핵심 42개 유지)
+- alert_thresholds.py: maybe_alert()에 연속 횟수 확인 추가
+- pipeline.py: consecutive_failures를 maybe_alert()에 전달
+- cuap.yaml: kitchen-hugo, beauty-hugo → active + force_draft:true
