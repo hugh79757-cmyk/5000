@@ -501,12 +501,14 @@ def generate_curation_article(keyword, products, blog_id=None):
     system_prompt = _build_system_prompt(keyword, blog_id=blog_id, style_hint=style_hint, recent_titles=recent_titles)
     user_prompt = _build_user_prompt(keyword, product_block, price_range=price_range_str)
 
-    # 글자수 미달 시 최대 2회 시도
+    # 글자수 미달 시 최대 3회 시도 (2→3 확대, 시도별 temperature 변화)
     body = ""
-    for attempt in range(2):
-        result = ai_generate(system_prompt, user_prompt, temperature=0.85)
+    _temps = [0.85, 0.95, 0.75]  # 시도별 다양화
+    for attempt in range(3):
+        _temp = _temps[attempt] if attempt < len(_temps) else 0.85
+        result = ai_generate(system_prompt, user_prompt, temperature=_temp)
         if not result:
-            logger.error(f"AI 생성 실패 (시도 {attempt+1}): {keyword}")
+            logger.error(f"AI 생성 실패 (시도 {attempt+1}/3): {keyword}")
             continue
 
         body = result if isinstance(result, str) else result.get("content", "")
@@ -518,7 +520,7 @@ def generate_curation_article(keyword, products, blog_id=None):
 
         if len(body) >= 1800:
             break
-        logger.warning(f"글자수 미달 (시도 {attempt+1}): {keyword} ({len(body)}자)")
+        logger.warning(f"글자수 미달 (시도 {attempt+1}/3): {keyword} ({len(body)}자)")
 
     if not body or len(body) < 800:
         logger.error(f"최종 생성 결과 부족: {keyword} ({len(body)}자)")
@@ -533,7 +535,22 @@ def generate_curation_article(keyword, products, blog_id=None):
             body = body.replace(line, "", 1).strip()
             break
     if not title:
-        title = f"{keyword} 추천 TOP5 ({datetime.now().year}년)"
+        # 폴백 제목: pick()으로 안전한 템플릿 시도, 실패 시 기본 형식 + slug 식별자
+        try:
+            _fb_template = _tt_picker.pick(used_templates=[], blog_id=blog_id)
+            if _fb_template:
+                _fb_brand = {}
+                if products:
+                    _b = products[0].get("brand", "") or products[0].get("maker", "")
+                    if _b:
+                        _fb_brand["brand1"] = _b
+                _fb_title = _tt_picker.render(_fb_template, _fb_brand, keyword)
+                if _fb_title and len(_fb_title) >= 10:
+                    title = _fb_title
+        except Exception:
+            pass
+        if not title:
+            title = f"{keyword} 추천 TOP5 ({datetime.now().year}년)"
     if template_type:
         logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, title[:50])
 
