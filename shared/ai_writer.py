@@ -142,9 +142,8 @@ def generate(
             "temperature": temperature
             if temperature is not None
             else tier_config.get("temperature", 0.7),
+            "max_tokens": max_tokens if max_tokens is not None else tier_config.get("max_tokens", 4000),
         }
-        if max_tokens is not None:
-            kwargs["max_tokens"] = max_tokens
 
         # Exponential backoff retry per tier
         for attempt in range(MAX_RETRIES):
