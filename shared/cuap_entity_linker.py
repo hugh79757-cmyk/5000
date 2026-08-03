@@ -298,40 +298,90 @@ def inject_cross_blog_links(content, blog_id, max_links=3):
     return result
 
 
+# ── cross-sell 차단 블로그 (CoT 미해결 또는 오염 블로그) ──
+BLOCKED_CROSS_SELL_BLOGS = {"fitness-hugo", "laptop-hugo"}
+
+# ── 후기·실사용 프레임 slug 필터 ──
+_REVIEW_FRAME_PATTERNS = ["실사용", "후기", "느낌", "써본", "리뷰"]
+
+# ── fallback용 안전 블로그 (우선순위) ──
+_SAFE_FALLBACK_BLOGS = [
+    "kitchen-hugo", "baby-hugo", "beauty-hugo",
+    "camping-hugo", "appliance-hugo", "interior-hugo",
+]
+
+
+def _is_review_frame_slug(slug: str) -> bool:
+    """slug에 후기·실사용 프레임 문자열이 포함되어 있는지 판정."""
+    return any(p in slug for p in _REVIEW_FRAME_PATTERNS)
+
+
 def _target_blogs(blog_id, max_targets=4):
-    """CROSS_GRAPH에서 대상 블로그 목록 반환 (primary → secondary 순)."""
+    """CROSS_GRAPH에서 대상 블로그 목록 반환 (primary → secondary 순).
+
+    BLOCKED_CROSS_SELL_BLOGS 에 해당하는 블로그는 제외.
+    """
     graph = CROSS_GRAPH.get(blog_id, {})
     targets = list(graph.get("primary", []))
     for t in graph.get("secondary", []):
         if t not in targets:
             targets.append(t)
-    return targets[:max_targets]
+    return [t for t in targets if t not in BLOCKED_CROSS_SELL_BLOGS][:max_targets]
+
+
+def _pick_safe_entity(conn, blog_id, max_candidates=5):
+    """안전한 엔티티(후기 프레임 미포함)를 선택. 없으면 None 반환."""
+    rows = conn.execute("""
+        SELECT entity_name, post_url, link_label, post_slug
+        FROM cuap_entities
+        WHERE published = 1 AND blog_id = ?
+        ORDER BY priority DESC, rowid DESC
+        LIMIT ?
+    """, (blog_id, max_candidates)).fetchall()
+    for r in rows:
+        if not _is_review_frame_slug(r["post_slug"] or ""):
+            return r
+    return None
+
+
+def _fallback_blog(blog_id, used_blogs, max_candidates=5):
+    """blocked/필터된 블로그 대체: 안전 블로그에서 첫 번째 엔티티 반환."""
+    for fb in _SAFE_FALLBACK_BLOGS:
+        if fb == blog_id or fb in used_blogs:
+            continue
+        conn = _get_db()
+        try:
+            row = _pick_safe_entity(conn, fb, max_candidates)
+            if row:
+                return fb, row
+        finally:
+            conn.close()
+    return None, None
 
 
 def build_cross_sell_card(blog_id, max_items=4):
     """크로스셀 카드 HTML 생성. 본문 하단에 삽입.
 
     CROSS_GRAPH 기반으로 타 블로그 최신 발행 글을 카드로 노출.
-    대상 엔티티가 없으면 빈 문자열 반환.
+    - BLOCKED_CROSS_SELL_BLOGS 차단
+    - 후기·실사용 프레임 slug 필터
+    - 부족 시 안전 블로그로 fallback
     """
     conn = _get_db()
     try:
-        targets = _target_blogs(blog_id, max_items)
+        targets = _target_blogs(blog_id, max_items + 2)  # 여유분 확보
         if not targets:
             return ""
 
         items_html = []
+        used_blogs = set()
         for target in targets:
-            row = conn.execute("""
-                SELECT entity_name, post_url, link_label
-                FROM cuap_entities
-                WHERE published = 1 AND blog_id = ?
-                ORDER BY priority DESC, rowid DESC
-                LIMIT 1
-            """, (target,)).fetchone()
+            if len(items_html) >= max_items:
+                break
+            row = _pick_safe_entity(conn, target)
             if not row:
                 logger.warning(
-                    f"[cross-sell] No published entity for target={target} "
+                    f"[cross-sell] No safe entity for target={target} "
                     f"in card for blog={blog_id}"
                 )
                 continue
@@ -341,6 +391,21 @@ def build_cross_sell_card(blog_id, max_items=4):
             items_html.append(
                 f'<a href="{url}" class="cross-sell-card__link">{icon} {label}</a>'
             )
+            used_blogs.add(target)
+
+        # fallback: 부족하면 안전 블로그로 채우기
+        while len(items_html) < max_items:
+            fb_blog, fb_row = _fallback_blog(blog_id, used_blogs)
+            if not fb_row:
+                break
+            icon = ICONS.get(fb_blog, "🔗")
+            label = fb_row["link_label"] or fb_row["entity_name"]
+            url = fb_row["post_url"]
+            items_html.append(
+                f'<a href="{url}" class="cross-sell-card__link">{icon} {label}</a>'
+            )
+            used_blogs.add(fb_blog)
+            logger.info(f"[cross-sell] fallback: {blog_id} → {fb_blog}")
     except Exception as e:
         logger.exception(f"build_cross_sell_card failed: {e}")
         return ""
@@ -368,32 +433,33 @@ def build_cross_sell_card(blog_id, max_items=4):
 def build_funnel_header(blog_id):
     """퍼널 헤더 HTML 생성. 본문 상단에 삽입.
 
-    CROSS_GRAPH primary 연결 기반으로 카테고리 유도 링크 3개 노출.
-    대상이 없으면 빈 문자열 반환.
+    CROSS_GRAPH primary 연결 기반으로 카테고리 유도 링크 노출.
+    - BLOCKED_CROSS_SELL_BLOGS 차단
+    - 후기·실사용 프레임 slug 필터
+    - 부족 시 안전 블로그로 fallback (최대 3개)
     """
     graph = CROSS_GRAPH.get(blog_id, {})
-    primaries = graph.get("primary", [])[:3]
+    primaries = graph.get("primary", [])
     if not primaries:
         return ""
 
     color = THEME_COLORS.get(blog_id, "#1a56db")
     items_html = []
+    used_blogs = set()
+
     for target in primaries:
+        if len(items_html) >= 3:
+            break
+        if target in BLOCKED_CROSS_SELL_BLOGS:
+            logger.info(f"[funnel] excluded: {target} (blocked blog)")
+            continue
         conn = _get_db()
         try:
-            row = conn.execute("""
-                SELECT entity_name, post_url, link_label
-                FROM cuap_entities
-                WHERE published = 1 AND blog_id = ?
-                ORDER BY priority DESC, rowid DESC
-                LIMIT 1
-            """, (target,)).fetchone()
-        except Exception as e:
-            logger.exception(f"build_funnel_header query failed: {e}")
-            row = None
+            row = _pick_safe_entity(conn, target)
         finally:
             conn.close()
         if not row:
+            logger.info(f"[funnel] no safe entity for {target}")
             continue
         icon = ICONS.get(target, "🔗")
         label = row["link_label"] or row["entity_name"]
@@ -402,6 +468,22 @@ def build_funnel_header(blog_id):
             f'<a href="{url}" class="funnel-header__link" style="color:{color}">'
             f'{icon} {label}</a>'
         )
+        used_blogs.add(target)
+
+    # fallback: 3개 미달 시 안전 블로그로 채우기
+    while len(items_html) < 3:
+        fb_blog, fb_row = _fallback_blog(blog_id, used_blogs)
+        if not fb_row:
+            break
+        icon = ICONS.get(fb_blog, "🔗")
+        label = fb_row["link_label"] or fb_row["entity_name"]
+        url = fb_row["post_url"]
+        items_html.append(
+            f'<a href="{url}" class="funnel-header__link" style="color:{color}">'
+            f'{icon} {label}</a>'
+        )
+        used_blogs.add(fb_blog)
+        logger.info(f"[funnel] fallback: {blog_id} → {fb_blog}")
 
     if not items_html:
         return ""
