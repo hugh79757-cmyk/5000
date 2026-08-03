@@ -172,6 +172,20 @@ def generate(
                     logger.warning(f"[ai_writer] {last_error}")
                     continue
 
+                # (A) 트렁케이션 게이트: finish_reason='length' 또는 구조 절단 시 재시도
+                if _is_truncated(content, finish_reason):
+                    # max_tokens 증분 재시도 (유한: MAX_RETRIES만큼)
+                    kwargs["max_tokens"] = min(
+                        int(kwargs.get("max_tokens", 4000)) * 2 + 512,
+                        TRUNCATION_MAX_TOKENS_CAP,
+                    )
+                    last_error = (
+                        f"{attempt_tier}: 응답 절단 감지 (finish_reason={finish_reason}, "
+                        f"len={len(content)}) — max_tokens {kwargs['max_tokens']}로 재시도"
+                    )
+                    logger.warning(f"[ai_writer] {last_error}")
+                    continue
+
                 content = _clean_ai_output(content)
 
                 # 중국어 검증
