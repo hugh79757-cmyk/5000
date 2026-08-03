@@ -97,6 +97,10 @@ def generate(
             time.sleep(60)
             continue
 
+        # tier 키 존재 방어 — models.yaml에 없는 tier(예: branch의 fallback1)는 skip
+        if attempt_tier not in config:
+            logger.warning(f"[ai_writer] tier '{attempt_tier}'가 models.yaml에 없음 — skip")
+            continue
         tier_config = config[attempt_tier]
 
         kwargs = {
