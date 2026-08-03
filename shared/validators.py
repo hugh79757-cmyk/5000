@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 # ── 상수 ──
-_AI_RESIDUES = ["다듬은 제목", "추천 제목", "```", "##", "title:", "제목 후보",
+_AI_RESIDUES = ["다듬은 제목", "추천 제목", "title:", "제목 후보",
                 "1단계에서", "2단계에서", "3단계에서", "4단계에서",
                 "정리하면 다음과 같습니다", "핵심 요약을", "다음과 같습니다"]
 
@@ -127,7 +127,7 @@ def _get_recent_titles(blog_id: str, hours: int = _DUP_HOURS) -> list:
             "WHERE blog_id = ? AND created_at >= ? ORDER BY created_at DESC",
             (blog_id, since),
         )
-        rows = cur.fetchall()
+        rows = [(r[0], "") for r in cur.fetchall()]
         conn.close()
         return rows
     except Exception as e:
@@ -322,6 +322,12 @@ def validate_post(
     plain = _strip_html(html_content)
     if len(plain) < _MIN_BODY_CHARS:
         issues.append(f"본문 부족 ({len(plain)}자 < {_MIN_BODY_CHARS}자)")
+
+    # ── 2b. 본문 CoT/추론 노출 검사 ──
+    for res in _AI_RESIDUES:
+        if res in plain:
+            issues.append(f'본문 CoT/잔여물 감지: "{res}"')
+            break
 
     # ── 3. 유사 제목 중복 (72h) ──
     recent = _get_recent_titles(blog_id, _DUP_HOURS)
