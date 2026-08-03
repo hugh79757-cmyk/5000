@@ -457,7 +457,7 @@ def generate_curation_article(keyword, products, blog_id=None):
     price_range_str = ""
     try:
         recent_styles = _tt_picker.get_recent_styles(blog_id) if blog_id else []
-        template_type = _tt_picker.pick(used_templates=recent_styles)
+        template_type = _tt_picker.pick(used_templates=recent_styles, blog_id=blog_id)
 
         # 상품 데이터에서 브랜드/가격대 추출
         brand_data = {}

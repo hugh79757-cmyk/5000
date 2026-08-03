@@ -144,11 +144,12 @@ class TitleTemplatePicker:
 
     # ── 공개 메서드 ─────────────────────────────────────────────────
 
-    def pick(self, used_templates: list[str] | None = None) -> str:
+    def pick(self, used_templates: list[str] | None = None, blog_id: str | None = None) -> str:
         """템플릿 타입 하나를 가중치 랜덤 선택
 
         Args:
             used_templates: 최근 N회 사용된 템플릿 타입 목록 (회피 대상)
+            blog_id: 블로그 ID (BLOG_TEMPLATE_OVERRIDES 조회용, None이면 self.blog_id 사용)
 
         Returns:
             TITLE_TEMPLATES 의 키
@@ -157,7 +158,8 @@ class TitleTemplatePicker:
             used_templates = []
 
         # 블로그별 선호/회피 적용
-        override = BLOG_TEMPLATE_OVERRIDES.get(self.blog_id, {})
+        effective_blog_id = blog_id if blog_id is not None else self.blog_id
+        override = BLOG_TEMPLATE_OVERRIDES.get(effective_blog_id, {})
         preferred = override.get("preferred_templates", list(TITLE_TEMPLATES.keys()))
         avoid = override.get("avoid_templates", [])
 
