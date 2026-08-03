@@ -151,14 +151,24 @@ def generate(
             try:
                 client = get_client(tier_config["provider"], providers)
                 response = client.chat.completions.create(**kwargs)
-                content = response.choices[0].message.content
+                choice = response.choices[0]
+                message = choice.message
+                content = message.content
+                finish_reason = getattr(choice, "finish_reason", None)
+                
+                # (B) reasoning 모델 대응: content가 비어있으면 reasoning_content에서 추출
+                if not content:
+                    reasoning = getattr(message, 'reasoning_content', None)
+                    if reasoning:
+                        content = reasoning
+                        logger.info(f"[ai_writer] reasoning_content에서 추출: {attempt_tier}")
                 
                 # 성공 → circuit breaker 리셋
                 _circuit_state["failures"] = 0
                 _circuit_state["open_until"] = 0.0
 
                 if not content:
-                    last_error = f"{attempt_tier}: 빈 응답"
+                    last_error = f"{attempt_tier}: 빈 응답 (reasoning_content도 없음)"
                     logger.warning(f"[ai_writer] {last_error}")
                     continue
 
