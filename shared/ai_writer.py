@@ -120,6 +120,7 @@ def generate(
     attempted_tiers = TIER_ORDER[start_idx:]
 
     last_error = None
+    any_truncation_failed = False  # 전 tier 걸친 트렁케이션 실패 추적
     for attempt_tier in attempted_tiers:
         # Circuit breaker check
         if _circuit_state["open_until"] > time.time():
@@ -146,6 +147,7 @@ def generate(
         }
 
         # Exponential backoff retry per tier
+        tier_truncation_failed = False  # 현재 tier 내 트렁케이션 실패
         for attempt in range(MAX_RETRIES):
             try:
                 client = get_client(tier_config["provider"], providers)
@@ -173,6 +175,7 @@ def generate(
 
                 # (A) 트렁케이션 게이트: finish_reason='length' 또는 구조 절단 시 재시도
                 if _is_truncated(content, finish_reason):
+                    tier_truncation_failed = True
                     # max_tokens 증분 재시도 (유한: MAX_RETRIES만큼)
                     kwargs["max_tokens"] = min(
                         int(kwargs.get("max_tokens", 4000)) * 2 + 512,
@@ -202,6 +205,7 @@ def generate(
                     "provider": tier_config["provider"],
                     "tier": attempt_tier,
                     "tokens_used": response.usage.total_tokens if response.usage else 0,
+                    "is_draft": False,
                 }
             except Exception as e:
                 _circuit_state["failures"] += 1
@@ -213,7 +217,29 @@ def generate(
                 time.sleep(wait)
                 continue
 
+        # 현재 tier에서 MAX_RETRIES 소진
+        if tier_truncation_failed:
+            # 절단으로 인한 재시도 소진 → 다음 tier로 폴백
+            logger.warning(f"[ai_writer] {attempt_tier}: 트렁케이션 재시도 소진 ({MAX_RETRIES}회) — 다음 tier 폴백")
+            continue
+        else:
+            # 절단 아닌 다른 사유로 재시도 소진 → 다음 tier 폴백
+            logger.warning(f"[ai_writer] {attempt_tier}: 재시도 {MAX_RETRIES}회 소진 — 다음 tier 폴백")
+            continue
+
     # 모든 tier 실패
+    # 트렁케이션으로 인한 전 tier 소진 시: draft 강등 반환 (안전 종료)
+    if "절단" in (last_error or "") or "truncat" in (last_error or "").lower():
+        logger.warning(f"[ai_writer] 전 tier 트렁케이션 소진 — draft 강등으로 안전 종료")
+        return {
+            "content": last_error or "트렁케이션으로 인한 생성 실패",
+            "model": "truncation-failed",
+            "provider": "none",
+            "tier": "none",
+            "tokens_used": 0,
+            "is_draft": True,
+            "truncation_failed": True,
+        }
     msg = f"모든 LLM tier 실패: {last_error}"
     raise RuntimeError(msg)
 
