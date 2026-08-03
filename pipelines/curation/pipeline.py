@@ -721,7 +721,10 @@ def run(cfg):
             # 임계값 기반 추가 알림 (쿨다운, dry_run 지원)
             if reason not in ("quota_met", "already_running"):
                 _consecutive_failures[blog_id] = _consecutive_failures.get(blog_id, 0) + 1
-                _alert_checker.maybe_alert(blog_id, reason, {"keyword": result.get("keyword", "")})
+                _alert_checker.maybe_alert(blog_id, reason, {
+                    "keyword": result.get("keyword", ""),
+                    "consecutive_failures": _consecutive_failures[blog_id],
+                })
 
         return result
     finally:

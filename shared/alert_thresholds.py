@@ -102,15 +102,27 @@ class ThresholdChecker:
             blog_id: Blog identifier (e.g., 'pet-hugo').
             reason: Failure reason string (e.g., 'irrelevant_products').
             context: Optional dict with additional context for the alert message.
+                     Must include 'consecutive_failures' int for threshold check.
 
         Returns:
             Alert message string if alert was sent (or would have been sent
-            in dry_run mode), or None if suppressed (disabled, cooldown active).
+            in dry_run mode), or None if suppressed (disabled, cooldown active,
+            or consecutive count below threshold).
         """
         config = self.get_config(blog_id)
 
         if not config.get("enabled", True):
             logger.debug(f"[alert_threshold] 알림 비활성화: {blog_id}/{reason}")
+            return None
+
+        # 연속 횟수 확인 (새로 추가)
+        consecutive = context.get("consecutive_failures", 0) if context else 0
+        threshold = config.get("consecutive_failures", 3)
+        if consecutive < threshold:
+            logger.debug(
+                f"[alert_threshold] 연속 {consecutive}회 < 임계값 {threshold}: "
+                f"{blog_id}/{reason}"
+            )
             return None
 
         if self._in_cooldown(blog_id):
@@ -125,7 +137,7 @@ class ThresholdChecker:
             return None
 
         # Build alert message
-        message = f"[임계값 초과] {blog_id}: {reason}"
+        message = f"[임계값 초과] {blog_id}: {reason} (연속 {consecutive}회)"
         if context:
             ctx_str = ", ".join(f"{k}={v}" for k, v in context.items())
             message += f" ({ctx_str})"
