@@ -23,7 +23,20 @@ def score_product(product_name: str, category_name: str, allowed_keywords: list[
     combined = (product_name + " " + category_name).lower()
     count = sum(1 for kw in allowed_keywords if kw.lower() in combined)
     min_matches = RELEVANCE_CONFIG["default"]["min_keyword_matches"]
-    return min(count / min_matches, 1.0)
+    score = min(count / min_matches, 1.0)
+    # brand 키워드 보너스 — 브랜드명이 product_name에 있으면 +0.15
+    BRAND_KEYWORDS = {
+        "lg", "삼성", "samsung", "samsung electronics",
+        "레노버", "lenovo", "asus", "에이수스", "hp", "dell", "델",
+        "msi", "apple", "애플", "맥북", "macbook",
+        "그램", "gram", "갤럭시북", "galaxy book",
+        "씽크패드", "thinkpad", "비보북", "vivobook", "젠북", "zenbook",
+        "오멘", "omen", "빅터스", "victus", "프레데터", "predator",
+    }
+    name_lower = product_name.lower()
+    if any(b in name_lower for b in BRAND_KEYWORDS):
+        score = min(score + 0.15, 1.0)
+    return score
 
 
 def score_products(products: list[dict], blog_id: str) -> dict:
