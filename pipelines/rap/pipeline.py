@@ -111,7 +111,8 @@ def _pick_keyword(blog_id):
         try:
             rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=30) if db_path != RAP_DB_PATH else conn
             published = {r[0] for r in rap_conn.execute(
-                "SELECT data_key FROM publish_log WHERE blog_id=? AND published_at > datetime('now', '-7 days')",
+                "SELECT data_key FROM publish_log "
+                "WHERE blog_id=? AND published_at >= datetime('now', '-7 days')",
                 (blog_id,)
             ).fetchall()}
             if db_path != RAP_DB_PATH:
