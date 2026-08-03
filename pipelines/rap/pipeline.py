@@ -587,6 +587,69 @@ def normalize_reference_table(body_md):
     return new_body
 
 
+def _validate_numbers_against_table(body_md: str) -> list:
+    """
+    Q-C: 본문 수치(평균/최고/최저) vs 표 값 교차검증.
+    불일치 시 이슈 리스트 반환 (자동정정 금지, draft 강등용 마커용).
+    """
+    import re
+    issues = []
+    
+    # 1. 본문에서 평균/최고/최저 추출 (만원 단위)
+    body_avgs = re.findall(r'평균[^0-9]*([0-9,]+)만원', body_md)
+    body_maxs = re.findall(r'최고[^0-9]*([0-9,]+)만원', body_md)
+    body_mins = re.findall(r'최저[^0-9]*([0-9,]+)만원', body_md)
+    
+    # 2. 표에서 숫자 추출 (만원 단위 이상만)
+    table_nums = []
+    for line in body_md.split('\n'):
+        if '|' in line and ('---' not in line):
+            # 표 행에서 숫자 추출
+            nums = re.findall(r'\|\s*([0-9,]+)\s*\|', line)
+            for n in nums:
+                try:
+                    val = int(n.replace(',', ''))
+                    if val > 1000:  # 만원 단위 이상만 (가격/면적 등 제외)
+                        table_nums.append(val)
+                except:
+                    pass
+    
+    if not table_nums:
+        return issues
+    
+    table_min = min(table_nums)
+    table_max = max(table_nums)
+    
+    # 3. 본문 평균 vs 표 범위 검증
+    for avg_str in body_avgs[:3]:  # 최대 3개만 체크
+        try:
+            body_avg = int(avg_str.replace(',', ''))
+            if body_avg < table_min or body_avg > table_max:
+                issues.append(f"본문 평균({body_avg:,}) 표범위밖({table_min:,}~{table_max:,})")
+        except:
+            pass
+    
+    # 4. 본문 최고가 vs 표 최댓값 검증
+    for max_str in body_maxs[:3]:
+        try:
+            body_max = int(max_str.replace(',', ''))
+            if body_max != max(body_nums) if (body_nums := [n for n in table_nums if n > 100000]) else body_max != max(table_nums):
+                issues.append(f"본문 최고({body_max:,}) 표최고와 불일치({max(table_nums):,})")
+        except:
+            pass
+    
+    # 5. 본문 최저가 vs 표 최솟값 검증
+    for min_str in body_mins[:3]:
+        try:
+            body_min = int(min_str.replace(',', ''))
+            if body_min != min(table_nums):
+                issues.append(f"본문 최저({body_min:,}) 표최저와 불일치({min(table_nums):,})")
+        except:
+            pass
+    
+    return issues
+
+
 def _post_process(body_md, blog_id, keyword):
     # 금지어 자동 치환
     body_md = body_md.replace("특히 ", "").replace("특히, ", "")
@@ -869,6 +932,14 @@ def _post_process(body_md, blog_id, keyword):
     _all_parts = "".join(parts)
     if "쿠팡 파트너스" not in _all_parts:
         parts.append("\n\n> 이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.")
+
+    # Q-C: 수치 모순 교차검증 게이트 (본문 수치 vs 표값 대조)
+    _numeric_issues = _validate_numbers_against_table(body_md)
+    if _numeric_issues:
+        # 수치 모순 발견 시 draft 강등 마커 삽입 (자동정정 금지, 사람 검토 필요)
+        _mismatch_marker = "<!-- NUMERIC_MISMATCH: " + "; ".join(_numeric_issues) + " -->"
+        parts.append(_mismatch_marker)
+        logger.warning(f"[NumericGuard] 수치 모순 감지 → draft 강등: {_numeric_issues}")
 
     return body_md + "".join(parts)
 
