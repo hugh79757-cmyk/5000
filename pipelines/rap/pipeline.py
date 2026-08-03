@@ -989,7 +989,7 @@ def run(blog_cfg):
     article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
     # ── 발행 전 검증 ──
-    _is_draft = False
+    _is_draft = cfg.get("force_draft", False) or False
     try:
         from shared.validators import validate_post as _validate
         _val_ctx = {
