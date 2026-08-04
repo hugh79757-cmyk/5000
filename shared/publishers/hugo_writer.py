@@ -325,15 +325,20 @@ def _clean_body(body_md, site_path=""):
 
     # ── 부적절한 H2 헤딩 검증/수정 ──
     _ALLOWED_H2_PATTERNS = [
-        r"^[가-힣]+ 고를 때 확인할 포인트",
-        r"^한눈에 보는 비교표",
-        r"^[0-9]+위:",
-        r"^자주 묻는 질문",
-        r"^상황별 추천 정리",
-        r"^[가-힣]+ 추천$",
+        r"고를 때 확인할 포인트",
+        r"한눈에 보는 비교표",
+        r"[0-9]+위:",
+        r"자주 묻는 질문",
+        r"상황별 추천 정리",
+        r"추천",
         r"^비교$",
         r"^장단점$",
         r"^구매 가이드$",
+        # RAP(청약/임대/토지/상가) 섹션 허용
+        r"^[0-9]+\.\s",            # "1. ", "2. " 번호형 섹션
+        r"입주 자격", r"신청\s*절차", r"신청\s*방법", r"필요\s*서류",
+        r"자격\s*요건", r"당첨", r"주의사항", r"핵심\s*요약",
+        r"공고", r"활용\s*팁", r"입찰", r"계약", r"함께 읽으면 좋은 글",
     ]
     _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
 
@@ -656,8 +661,18 @@ def _extract_description(body_md):
     else:
         clean = body_md or ""
         # Strip Hugo shortcodes FIRST to prevent {{< lead >}} → {{}} when HTML is stripped
+        # {{< lead >}}...{{< /lead >}} 블록 통째 제거 (퍼널 링크 텍스트 유입 방지)
+        clean = re.sub(r"\{\{<\s*lead\s*>}}.*?\{\{<\s*/lead\s*>}}", "", clean, flags=re.DOTALL)
         clean = re.sub(r"\{\{<[^>]*?>}}", "", clean)
         clean = re.sub(r"<[^>]+>", "", clean)
+        # 표가 시작되기 전까지만 사용 (파이프 행 제거)
+        clean = re.split(r"\n\s*\|", clean)[0]
+        # 마크다운 기호 제거: 헤딩(#), 볼드/이탤릭(*), 링크, 인용(>), 리스트(-)
+        clean = re.sub(r"^#{1,6}\s*", "", clean, flags=re.MULTILINE)  # 헤딩
+        clean = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", clean)      # 링크 → 텍스트
+        clean = re.sub(r"[*_`>#|]+", "", clean)                        # 잔여 기호
+        clean = re.sub(r"[\U0001F000-\U0001FAFF\U00002600-\U000027BF\U0001F1E6-\U0001F1FF\u2190-\u21FF\u2B00-\u2BFF]", "", clean)  # 이모지 제거
+        clean = re.sub(r"^\s*[-]\s+", "", clean, flags=re.MULTILINE)  # 리스트 불릿
         clean = re.sub(r"\s+", " ", clean).strip()
         desc = clean
     
