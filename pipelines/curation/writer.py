@@ -322,26 +322,31 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 2. [제품A] vs [제품B] — [비교 포인트]
    예: "헤라 블랙 쿠션 vs 샵한현재 마스터 핏 — 커버력 비교"
 
-3. [대상]을 위한 [제품 유형] 총정리 — [가격대/혜택]
-   예: "민감성 피부를 위한 클렌저 총정리 — 1만원대 합격 TOP 5"
+3. [대상]을 위한 [제품 유형] — [가격대/혜택]
+   예: "민감성 피부를 위한 클렌저 — 1만원대 합격 TOP 5"
 
 [제목 필수 요소]
 - 제품명 또는 브랜드명 1~2개 포함
-- "추천", "비교", "총정리" 중 1개 포함
-- 구체적 수치 또는 혜택 포함 (예: "1만원대", "3주 사용", "TOP 5")
 - "가성비" 사용 금지 → "합격점", "실속", "가격 대비" 사용
 - 핵심 키워드가 제목 앞 15자 이내에 위치해야 합니다.
-- 제목 길이는 25~55자로 작성하세요 (공백 포함). 65자를 초과하지 않아야 합니다.
-- 짧은 제목(25자 미만)은 구체성이 부족해 보일 수 있습니다.
-- 긴 제목(55자 초과)은 모바일 화면에서 잘리고 SEO 키워드가 분산됩니다.
+- 제목 길이는 35자 이내로 작성하세요 (공백 포함).
 - "{keyword} 추천 TOP5 (연도년)" 같은 통짜 포맷은 사용하지 마세요. 구체적 제품명·브랜드·혜택을 제목에 직접 넣으세요.
+- **검색니즈 키워드 필수**: 사람들이 실제 검색하는 구체적 단어(제품 특성·용도·대상)를 최소 1개 반드시 포함하세요.
+  예: 프라이팬 → "인덕션", "코팅 오래가는"; 선풍기 → "저소음", "BLDC"; 안마의자 → "가정용", "무중력"
+- **추상·감성 수식어 금지**: "요리 즐거움을 더하는", "실속 있는 선택", "행복한 일상" 같은 검색 유입이 안 되는 추상 표현은 사용하지 마세요.
+- **뻔한 어미 금지**: "추천 가이드", "선택 가이드", "구매 가이드", "고르는 법", "총정리", "선택지 N종"으로 끝내지 마세요. 어미는 매번 다르게 작성하세요.
+- **괄호 () 절대 금지**: 괄호 대신 하이픈(-)을 사용하세요. 구분이 필요하면 "제품A - 제품B" 형태로 작성.
+- 좋은 예: "인덕션 프라이팬 코팅 오래가는 TOP 5 - 삼성"
+- 좋은 예: "저소음 BLDC 선풍기 추천 - 가정용 에어컨 대안"
+- 나쁜 예: "2026년 인덕션 프라이팬 추천 가이드 (베스트 5)" ← 괄호 + 뻔한 어미
+- 나쁜 예: "민감성 피부 클렌저 총정리 (선택지 3종)" ← 괄호 + 뻔한 어미
 {extra_title_rules}{recent_block}
 
 [출력 형식 규칙 — 가장 중요, 반드시 준수]
 응답의 구조는 아래 4단계를 정확히 따르세요:
 
 1. 첫 번째 줄은 반드시 '# ' 로 시작하는 H1 제목이어야 합니다.
-   - 예: "# 2026년 8월 네덜란드산 산양유 단백질 추천 — 구매 가이드"
+   - 예: "# 2026년 8월 네덜란드산 산양유 단백질 추천 - 유당분해 99%"
    - H1 제목 앞에 아무 텍스트도 쓰지 마세요. 첫 글자가 반드시 '#' 여야 합니다.
    - **응답의 맨 첫 줄에 반드시 '# ' 마크다운 H1 제목을 작성할 것** — H1 누락 시 재생성 루프가 발동되므로 이를 1차 방어로 차단.
 2. H1 제목 다음에 빈 줄을 한 칸 넣습니다.
@@ -503,23 +508,45 @@ _TITLE_TEMPLATE_PATTERNS = [
     re.compile(r"추천\s*TOP\s*\d+", re.I),
     re.compile(r"\(\d{4}년\)$"),
     re.compile(r"BEST\s*\d+", re.I),
+    # 뻔한 어미 차단 패턴
+    re.compile(r"(추천|선택|구매)\s*가이드$"),
+    re.compile(r"고르는\s*법$"),
+    re.compile(r"총정리$"),
+    re.compile(r"선택지(\s*\d+종)?$"),
 ]
+
+
+def sanitize_title(title):
+    """제목 후처리 - 괄호 () 금지, 필요 시 하이픈(-)으로 대체 (RAP writer 동일)"""
+    if not title:
+        return title
+    t = title.strip()
+    t = re.sub(r"\s*[\(（]\s*", " - ", t)
+    t = re.sub(r"\s*[\)）]\s*", " ", t)
+    t = re.sub(r"\s{2,}", " ", t)
+    t = re.sub(r"(\s*-\s*)+$", "", t)
+    t = re.sub(r"^(\s*-\s*)+", "", t)
+    return t.strip()
 
 
 def _validate_title(title):
     """제목 수용 조건 검증 — False면 재생성/차단 대상.
 
-    - 길이 10~60자
+    - 길이 10~35자
     - CoT 마커 미포함: "우선", "사용자 요청"
-    - 템플릿 패턴 미포함: 추천 TOP N / (연도년)$ / BEST N
+    - 괄호 (, ), 전각 （, ） 미포함
+    - 템플릿 패턴 미포함: 추천 TOP N / (연도년)$ / BEST N / 뻔한 어미
     - 주의: ^\\d{4}년(연도-접두)은 거부하지 않음 (제목 규칙 1이 연도-접두를 지시)
     """
     if not title:
         return False
     title = title.strip()
-    if not (10 <= len(title) <= 60):
+    if not (10 <= len(title) <= 35):
         return False
     if "우선" in title or "사용자 요청" in title:
+        return False
+    # 괄호 절대 금지
+    if re.search(r"[()（）]", title):
         return False
     for pat in _TITLE_TEMPLATE_PATTERNS:
         if pat.search(title):
@@ -540,7 +567,11 @@ def _regenerate_title(keyword, blog_id=None, max_attempts=2):
         "제목 앞에 '# ' 마크다운 H1 마커를 붙이세요.\n"
         "검토 문구, 사고 과정, 설명은 출력하지 마세요.\n"
         '나열형 템플릿 제목("{keyword} 추천 TOP N (연도년)" 형태)은 금지합니다.\n'
-        "제목 길이는 10~60자로 작성하세요."
+        "제목 길이는 35자 이내로 작성하세요.\n"
+        "괄호 (), 전각 （）는 절대 사용하지 마세요. 구분은 하이픈(-)을 사용하세요.\n"
+        "사람들이 실제 검색하는 구체적 단어(제품 특성·용도·대상)를 최소 1개 포함하세요.\n"
+        "추상·감성 수식어('요리 즐거움', '실속 있는 선택')는 금지합니다.\n"
+        '"추천 가이드", "선택 가이드", "구매 가이드", "고르는 법", "총정리", "선택지 N종"으로 끝내지 마세요.'
     )
     user_prompt = f"키워드: {keyword}\n\n제목 한 줄만 출력하세요."
     for attempt in range(max_attempts):
@@ -556,7 +587,7 @@ def _regenerate_title(keyword, blog_id=None, max_attempts=2):
         if first_line.startswith("# "):
             first_line = first_line.lstrip("# ").strip()
         if _validate_title(first_line):
-            return first_line
+            return sanitize_title(first_line)
         logger.warning(f"[title_regenerate] 무효 제목 (시도 {attempt+1}): {keyword} → {first_line[:60]}")
     logger.warning(f"[title_regenerate] {max_attempts}회 모두 실패: {keyword}")
     return None
@@ -789,6 +820,9 @@ def generate_curation_article(keyword, products, blog_id=None):
 
     # description: 본문에서 CoT/마커 줄 제외 첫 의미 문단 추출
     description = _extract_description(body, title or "", keyword)
+
+    # 제목 최종 후처리: 괄호 → 하이픈 (LLM이 괄호를 뱉어도 발행물엔 괄호 없음)
+    title = sanitize_title(title)
 
     result = {
         "title": title or "",

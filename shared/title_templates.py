@@ -18,10 +18,10 @@ TITLE_TEMPLATES: dict[str, str] = {
     "comparison": "{brand1} vs {brand2} — {keyword} 어떤 게 나을까?",
     "ranking": "{keyword} BEST 5 — {year}년 {month}월 엄선",
     "toplist": "TOP 5 {keyword} — 선택한 이유와 특징",
-    "buying_guide": "{keyword} 고르는 법: {year}년 최신 가이드",
+    "buying_guide": "{keyword} — {year}년 최신 스펙과 가격 비교",
     "budget": "{keyword} 추천: {price_range}만원 이하 합격점 TOP 5",
     "review_style": "상품 데이터로 비교하는 {keyword} TOP 5",
-    "question_style": "{keyword} 고민된다면? 지금 사야 하는 이유",
+    "question_style": "{keyword} 고민된다면? 검색니즈별 실속 선정",
     "spec_style": "{year}년 {month}월 스펙 비교: {brand1} vs {brand2} vs {brand3}",
     "myth_busting": "{keyword} 흔한 오해 3가지 — {year}년 기준 바로잡기",
     "new_release": "최근 출시 {keyword} {brand1} — 첫인상과 주요 특징",
@@ -107,8 +107,8 @@ def _classify_title(title: str) -> str:
     # budget: 가격대 + 만원
     if re.search(r"\d+만원", title) and re.search(r"이하|미만|이상", title):
         return "budget"
-    # buying_guide: 고르는 법 or 가이드
-    if re.search(r"고르는\s*법|최신\s*가이드", title):
+    # buying_guide: 스펙 비교 or 가격 비교 (updated from old "고르는 법/최신 가이드")
+    if re.search(r"스펙과\s*가격\s*비교|최신\s*스펙", title):
         return "buying_guide"
     # review_style: 실제 구매자 or 리뷰
     if re.search(r"리뷰", title):
