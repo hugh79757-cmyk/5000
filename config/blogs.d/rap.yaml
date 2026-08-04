@@ -3,8 +3,9 @@ blogs:
   name: 부동산 시세 청약 분석
   pipeline: rap
   platform: hugo
-  status: active
-  daily_quota: 5
+  status: paused
+  daily_quota: 10
+  force_draft: true
   domain: apt.informationhot.kr
   cf_project: rap-hugo
   repo: rap-hugo
@@ -20,18 +21,19 @@ blogs:
     - '20:50'
   funnel_stage: landing
   depth_next:
-    - id: rap3-hugo
-      topic: "취득세와 양도세 계산 방법"
-    - id: rap4-hugo
-      topic: "전세 보증금과 월세 시세"
-    - id: rap2-hugo
-      topic: "청약 일정과 조건 확인"
+  - id: rap3-hugo
+    topic: 취득세와 양도세 계산 방법
+  - id: rap4-hugo
+    topic: 전세 보증금과 월세 시세
+  - id: rap2-hugo
+    topic: 청약 일정과 조건 확인
 - id: rap2-hugo
   name: 청약 알리미
   pipeline: rap
   platform: hugo
-  status: active
-  daily_quota: 5
+  status: paused
+  daily_quota: 10
+  force_draft: true
   domain: apply.informationhot.kr
   cf_project: rap2-hugo
   repo: rap2-hugo
@@ -47,15 +49,16 @@ blogs:
     - '21:10'
   funnel_stage: bridge
   bridge_to:
-    - id: finance-hugo
-      topic: "청약 전 금융 준비 방법"
-      bridge_context: "청약저축과 주택담보대출 연계 전략"
+  - id: finance-hugo
+    topic: 청약 전 금융 준비 방법
+    bridge_context: 청약저축과 주택담보대출 연계 전략
 - id: rap3-hugo
   name: 부동산 세금 가이드
   pipeline: rap
   platform: hugo
-  status: active
-  daily_quota: 5
+  status: paused
+  daily_quota: 10
+  force_draft: true
   domain: tax.informationhot.kr
   cf_project: rap3-hugo
   repo: rap3-hugo
@@ -71,18 +74,19 @@ blogs:
     - '21:30'
   funnel_stage: bridge
   depth_next:
-    - id: rap4-hugo
-      topic: "임대 비용과 세금 관계"
+  - id: rap4-hugo
+    topic: 임대 비용과 세금 관계
   bridge_to:
-    - id: finance-hugo
-      topic: "취득세 vs 대출 이자 비교"
-      bridge_context: "부동산 세금 납부와 주택담보대출 금리 비교"
+  - id: finance-hugo
+    topic: 취득세 vs 대출 이자 비교
+    bridge_context: 부동산 세금 납부와 주택담보대출 금리 비교
 - id: rap4-hugo
   name: 전세월세 리포트
   pipeline: rap
   platform: hugo
-  status: active
-  daily_quota: 5
+  status: paused
+  daily_quota: 10
+  force_draft: true
   domain: rent.informationhot.kr
   cf_project: rap4-hugo
   repo: rap4-hugo
@@ -98,15 +102,16 @@ blogs:
     - '21:50'
   funnel_stage: bridge
   bridge_to:
-    - id: finance-hugo
-      topic: "전세대출 금리 비교"
-      bridge_context: "전세자금대출 조건과 금리 확인"
+  - id: finance-hugo
+    topic: 전세대출 금리 비교
+    bridge_context: 전세자금대출 조건과 금리 확인
 - id: rap5-hugo
   name: 브랜드 아파트 백과
   pipeline: rap
   platform: hugo
-  status: active
-  daily_quota: 5
+  status: paused
+  daily_quota: 10
+  force_draft: true
   domain: brand.informationhot.kr
   cf_project: rap5-hugo
   repo: rap5-hugo
@@ -122,7 +127,7 @@ blogs:
     - '22:10'
   funnel_stage: landing
   depth_next:
-    - id: rap-hugo
-      topic: "아파트 브랜드별 시세"
-    - id: rap2-hugo
-      topic: "브랜드 아파트 청약 정보"
+  - id: rap-hugo
+    topic: 아파트 브랜드별 시세
+  - id: rap2-hugo
+    topic: 브랜드 아파트 청약 정보

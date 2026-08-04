@@ -702,7 +702,7 @@ def _post_process(body_md, blog_id, keyword):
             _top_links = "**함께 읽으면 좋은 글**\n"
             for p in _top_picks:
                 _top_links += f'- [{p["title"]}](/posts/{p["slug"]}/)\n'
-            body_md = _top_links + "\n---\n\n" + body_md
+            # body_md = _top_links + "\n---\n\n" + body_md  # 하단 관련글과 중복 → 비활성화
             logger.info("내부링크 상단 삽입 완료")
     except Exception as e:
         logger.warning(f"내부링크 상단 삽입 실패: {e}")
@@ -1076,7 +1076,7 @@ def run(blog_cfg):
                     _subs_rows = _sc.execute(
                         f"SELECT pan_nm, pan_type, region_nm, pan_start, pan_end, pan_status, detail_url "
                         f"FROM subscriptions WHERE region_nm IN ({_placeholders}) "
-                        f"ORDER BY pan_start DESC LIMIT 15",
+                        f"AND pan_status IN ('공고중','접수중','정정공고중') AND pan_end!='' AND pan_end IS NOT NULL AND date(replace(pan_end,'.','-')) >= date('now') ORDER BY date(replace(pan_end,'.','-')) ASC LIMIT 15",
                         _region_tokens
                     ).fetchall()
                 else:
@@ -1084,7 +1084,7 @@ def run(blog_cfg):
                     _subs_rows = _sc.execute(
                         "SELECT pan_nm, pan_type, region_nm, pan_start, pan_end, pan_status, detail_url "
                         "FROM subscriptions WHERE pan_nm LIKE ? "
-                        "ORDER BY pan_start DESC LIMIT 15",
+                        "AND pan_status IN ('공고중','접수중','정정공고중') AND pan_end!='' AND pan_end IS NOT NULL AND date(replace(pan_end,'.','-')) >= date('now') ORDER BY date(replace(pan_end,'.','-')) ASC LIMIT 15",
                         (f"%{keyword[:4]}%",)
                     ).fetchall()
                 _sc.close()
@@ -1170,7 +1170,7 @@ def run(blog_cfg):
     article["body_md"] = _post_process(article["body_md"], blog_id, keyword)
 
     # ── 발행 전 검증 ──
-    _is_draft = cfg.get("force_draft", False) or False
+    _is_draft = blog_cfg.get("force_draft", False) or False
     try:
         from shared.validators import validate_post as _validate
         _val_ctx = {
@@ -1197,7 +1197,7 @@ def run(blog_cfg):
         tags=article.get("tags", ""),
         data_source=data_source,
         source_id=f"{keyword}_{datetime.now().strftime('%Y%m%d')}",
-        model=os.getenv("OPENAI_MODEL", "mimo-v2.5"),
+        model=article.get("model", "auto"),
         thumbnail_url=thumb_url,
         wp_category=wp_category,
     )

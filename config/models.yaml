@@ -1,18 +1,94 @@
+tier_order:
+- gemini-3.1-flash-lite
+- gemini-3.5-flash-lite
+- gemini-2.5-flash
+- gemini-3.5-flash
+- groq-llama
+- groq-qwen
+- groq-gpt120b
+- groq-gpt20b
+- cerebras-gemma
+- cerebras-glm
+- zen-deepseek-free
+- nvidia-nemotron
+- nvidia-step
+- zen-mimo-free
+- zen-bigpickle
+- zhipu-glm
+- default
 default:
   provider: deepseek
   model: deepseek-v4-flash
   temperature: 0.85
-
-fallback:
-  provider: mimo
-  model: mimo-v2.5
-  temperature: 0.7
-
-economy:
-  provider: mimo
-  model: mimo-v2.5
-  temperature: 0.7
-
+groq-llama:
+  provider: groq
+  model: llama-3.3-70b-versatile
+  temperature: 0.85
+groq-qwen:
+  provider: groq
+  model: qwen/qwen3.6-27b
+  temperature: 0.85
+  reasoning_effort: none
+groq-gpt120b:
+  provider: groq
+  model: openai/gpt-oss-120b
+  temperature: 0.85
+groq-gpt20b:
+  provider: groq
+  model: openai/gpt-oss-20b
+  temperature: 0.85
+cerebras-glm:
+  provider: cerebras
+  model: zai-glm-4.7
+  temperature: 0.85
+  reasoning_effort: none
+cerebras-gemma:
+  provider: cerebras
+  model: gemma-4-31b
+  temperature: 0.85
+zhipu-glm:
+  provider: zhipu
+  model: glm-4.5-flash
+  temperature: 0.85
+nvidia-step:
+  provider: nvidia
+  model: stepfun-ai/step-3.7-flash
+  temperature: 0.85
+  extra_body:
+    chat_template_kwargs:
+      thinking: false
+nvidia-nemotron:
+  provider: nvidia
+  model: nvidia/nemotron-3-ultra-550b-a55b
+  temperature: 0.85
+gemini-3.5-flash:
+  provider: google
+  model: gemini-3.5-flash
+  temperature: 0.85
+gemini-3.5-flash-lite:
+  provider: google
+  model: gemini-3.5-flash-lite
+  temperature: 0.85
+gemini-3.1-flash-lite:
+  provider: google
+  model: gemini-3.1-flash-lite
+  temperature: 0.85
+gemini-2.5-flash:
+  provider: google
+  model: gemini-2.5-flash
+  temperature: 0.85
+zen-bigpickle:
+  provider: opencode-zen
+  model: big-pickle
+  temperature: 0.85
+zen-deepseek-free:
+  provider: opencode-zen
+  model: deepseek-v4-flash-free
+  temperature: 0.85
+zen-mimo-free:
+  provider: opencode-zen
+  model: mimo-v2.5-free
+  temperature: 0.85
 providers:
   openai:
     api_key_env: OPENAI_API_KEY
@@ -23,9 +99,24 @@ providers:
   clova:
     api_key_env: CLOVA_API_KEY
     base_url: https://clovastudio.stream.ntruss.com
-  mimo:
-    api_key_env: MIMO_API_KEY
-    base_url: https://api.xiaomimimo.com/v1
   deepseek:
     api_key_env: DEEPSEEK_API_TOKEN
     base_url: https://api.deepseek.com/v1
+  groq:
+    api_key_env: GROQ_API_KEY
+    base_url: https://api.groq.com/openai/v1
+  cerebras:
+    api_key_env: CEREBRAS_API_KEY
+    base_url: https://api.cerebras.ai/v1
+  zhipu:
+    api_key_env: ZHIPU_API_KEY
+    base_url: https://open.bigmodel.cn/api/paas/v4
+  nvidia:
+    api_key_env: NVIDIA_API_KEY
+    base_url: https://integrate.api.nvidia.com/v1
+  google:
+    api_key_env: GOOGLE_API_KEY
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+  opencode-zen:
+    api_key_env: OPENCODE_ZEN_API_TOKEN
+    base_url: https://opencode.ai/zen/v1

@@ -30,7 +30,7 @@ def load_models_config():
 def get_client(provider_name, providers):
     provider = providers[provider_name]
     api_key = os.getenv(provider["api_key_env"], "")
-    return OpenAI(api_key=api_key, base_url=provider["base_url"], timeout=300)
+    return OpenAI(api_key=api_key, base_url=provider["base_url"], timeout=30)
 
 
 def _is_chinese_content(text: str) -> bool:
@@ -90,8 +90,13 @@ def _is_truncated(content: str, finish_reason=None) -> bool:
 # 재시도 횟수 (글쓰기별)
 MAX_RETRIES = 3
 
-# 전체 tier 순서: default → fallback → economy
-TIER_ORDER = ["default", "fallback", "economy"]
+# 기본 tier 순서 (models.yaml의 tier_order가 있으면 그걸 사용)
+_DEFAULT_TIER_ORDER = ['zen-mimo-free', 'zen-deepseek-free', 'zen-bigpickle', 'groq-llama', 'groq-qwen', 'groq-gpt120b', 'groq-gpt20b', 'cerebras-gemma', 'cerebras-glm', 'zhipu-glm', 'nvidia-nemotron', 'nvidia-step', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-3.5-flash', 'default']
+
+
+def _get_tier_order(config):
+    """models.yaml의 tier_order가 있으면 사용, 없으면 기본값"""
+    return config.get("tier_order", _DEFAULT_TIER_ORDER)
 
 # Circuit breaker 설정
 CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
@@ -110,13 +115,14 @@ def generate(
     """
     config = load_models_config()
     providers = config["providers"]
+    TIER_ORDER = _get_tier_order(config)
 
     # tier 유효성 검증
     if tier not in TIER_ORDER:
-        tier = "default"
+        tier = TIER_ORDER[0]
 
-    # tier 순서대로 시도
-    start_idx = TIER_ORDER.index(tier)
+    # "default"는 체인 처음부터, 그 외는 지정 tier부터
+    start_idx = 0 if tier == "default" else TIER_ORDER.index(tier)
     attempted_tiers = TIER_ORDER[start_idx:]
 
     last_error = None
@@ -143,12 +149,14 @@ def generate(
             "temperature": temperature
             if temperature is not None
             else tier_config.get("temperature", 0.7),
-<<<<<<< HEAD
             "max_tokens": max_tokens if max_tokens is not None else tier_config.get("max_tokens", 4000),
-=======
-            "max_tokens": max_tokens if max_tokens is not None else tier_config.get("max_tokens", 4000),
->>>>>>> fix/rap-subscription-backfill
         }
+
+        # thinking 모델 비활성화 옵션
+        if tier_config.get("reasoning_effort") is not None:
+            kwargs["reasoning_effort"] = tier_config["reasoning_effort"]
+        if tier_config.get("extra_body") is not None:
+            kwargs["extra_body"] = tier_config["extra_body"]
 
         # Exponential backoff retry per tier
         tier_truncation_failed = False  # 현재 tier 내 트렁케이션 실패
@@ -165,11 +173,7 @@ def generate(
                 content = message.content
                 finish_reason = getattr(choice, "finish_reason", None)
                 
-<<<<<<< HEAD
                 # (B) reasoning 모델 대응: content가 비어있으면 reasoning_content에서 추출
-=======
-                # (B) reasoning 모델 대응: content가 비어있으면 reasoning_content에서 추출
->>>>>>> fix/rap-subscription-backfill
                 if not content:
                     reasoning = getattr(message, 'reasoning_content', None)
                     if reasoning:
