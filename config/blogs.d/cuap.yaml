@@ -1,13 +1,9 @@
 # ═══════════════════════════════════════════════════════════════════════════════
-# CUAP (Curation Auto Publisher) — 10개 상품 큐레이션 블로그
-# ⚠️ 현재 전부 inactive (2026-07-16, 운영 전략 변경)
-#
+# CUAP (Curation Auto Publisher) — 상품 큐레이션 블로그
 # ⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재)
-# - 검색 API: 분당 50회 / 링크생성: 분당 50회 / 전체: 분당 100회
-# - 3회 경고 누적 → 이용제한 (재발생 시 추가 제재)
-# - 발행 간격: 블로그 간 10분 간격 유지 (동시 발행 시 40~60회 API 집중 방지)
-# - 재활성화 시 collector._check_rate_limit()이 분당 40회 컷오프
-# - 상세: .planning/triage/20260716--coupang-api-rate-limit-restriction.md
+# - 검색/링크생성 각 분당 50회, 전체 분당 100회 / 3회 경고 → 이용제한
+# - 블로그 간 10분 간격 유지, collector._check_rate_limit() 분당 40회 컷오프
+# - 신규 5개(massage/car/homeappliance/golf/bike)는 status:paused, quota:1로 시작
 # ═══════════════════════════════════════════════════════════════════════════════
 blogs:
 - id: appliance-hugo
@@ -221,4 +217,99 @@ blogs:
     - '16:10'
     - '20:10'
   gsc_site: https://camping.informationhot.kr/
+  ga4_property: ''
+- id: massage-hugo
+  name: 안마의자 헬스케어가전 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 1
+  domain: massage.informationhot.kr
+  cf_project: massage-hugo
+  repo: massage-hugo
+  site_path: /Users/twinssn/Projects/cuap/massage-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - 07:20
+    - '13:20'
+    - '19:20'
+  gsc_site: https://massage.informationhot.kr/
+  ga4_property: ''
+- id: car-hugo
+  name: 자동차용품 전자기기 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 1
+  domain: car.informationhot.kr
+  cf_project: car-hugo
+  repo: car-hugo
+  site_path: /Users/twinssn/Projects/cuap/car-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - 07:30
+    - '13:30'
+    - '19:30'
+  gsc_site: https://car.informationhot.kr/
+  ga4_property: ''
+- id: homeappliance-hugo
+  name: 프리미엄 대형가전 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 1
+  domain: homeappliance.informationhot.kr
+  cf_project: homeappliance-hugo
+  repo: homeappliance-hugo
+  site_path: /Users/twinssn/Projects/cuap/homeappliance-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - 08:20
+    - '14:20'
+    - '20:20'
+  gsc_site: https://homeappliance.informationhot.kr/
+  ga4_property: ''
+- id: golf-hugo
+  name: 골프용품 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 1
+  domain: golf.informationhot.kr
+  cf_project: golf-hugo
+  repo: golf-hugo
+  site_path: /Users/twinssn/Projects/cuap/golf-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - 08:30
+    - '14:30'
+    - '20:30'
+  gsc_site: https://golf.informationhot.kr/
+  ga4_property: ''
+- id: bike-hugo
+  name: 전기자전거 자전거 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 1
+  domain: bike.informationhot.kr
+  cf_project: bike-hugo
+  repo: bike-hugo
+  site_path: /Users/twinssn/Projects/cuap/bike-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - 09:20
+    - '15:20'
+    - '21:20'
+  gsc_site: https://bike.informationhot.kr/
   ga4_property: ''

@@ -43,6 +43,11 @@ BLOG_DOMAINS = {
     "kitchen-hugo":   "https://kitchen.informationhot.kr",
     "beauty-hugo":    "https://beauty.informationhot.kr",
     "camping-hugo":   "https://camping.informationhot.kr",
+    "massage-hugo":      "https://massage.informationhot.kr",
+    "car-hugo":          "https://car.informationhot.kr",
+    "homeappliance-hugo":"https://homeappliance.informationhot.kr",
+    "golf-hugo":         "https://golf.informationhot.kr",
+    "bike-hugo":         "https://bike.informationhot.kr",
 }
 
 # 블로그별 아이콘
