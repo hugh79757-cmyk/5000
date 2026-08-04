@@ -49,7 +49,7 @@ blogs:
     - '16:22'
     - '20:22'
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
-  status: active
+  status: paused
   theme: congo
   funnel_stage: bridge
   managed_by: pipeline
@@ -77,7 +77,7 @@ blogs:
     - '16:24'
     - '20:24'
   site_path: /Users/twinssn/Projects/STAP/dividend-hugo
-  status: active
+  status: paused
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
@@ -103,7 +103,7 @@ blogs:
     - '16:26'
     - '20:26'
   site_path: /Users/twinssn/Projects/STAP/etf-hugo
-  status: active
+  status: paused
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
@@ -129,7 +129,7 @@ blogs:
     - '16:28'
     - '20:28'
   site_path: /Users/twinssn/Projects/STAP/sector-hugo
-  status: active
+  status: paused
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
@@ -146,7 +146,7 @@ blogs:
   name: IPO·공모주 분석
   pipeline: stock
   platform: hugo
-  status: active
+  status: paused
   repo: ipo-hugo
   schedule:
     times:
