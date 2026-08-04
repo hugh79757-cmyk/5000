@@ -27,9 +27,6 @@ blogs:
   site_path: /Users/twinssn/Projects/STAP/finance-hugo
   funnel_stage: landing
   managed_by: pipeline
-  depth_next:
-    - id: stock-hugo
-      topic: "적금 금리와 주식 수익률 비교"
 
 # ── Stage 2: Bridge — 주식 진입 ──
 # 주식 분석 — 금융 기초에서 주식 투자로 확장
