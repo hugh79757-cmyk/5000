@@ -528,6 +528,11 @@ WORKERS_BLOGS = {
     "beauty-hugo",
     "camping-hugo",
     "baby-hugo",
+    "massage-hugo",
+    "car-hugo",
+    "homeappliance-hugo",
+    "golf-hugo",
+    "bike-hugo",
 }
 
 DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
