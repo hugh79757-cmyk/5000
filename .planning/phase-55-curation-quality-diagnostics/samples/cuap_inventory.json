@@ -1,0 +1,90 @@
+{
+  "blogs": [
+    {
+      "blog": "appliance-hugo",
+      "total": 465,
+      "draft_true": 8,
+      "draft_false": 457,
+      "live": 457,
+      "platform": "Pages"
+    },
+    {
+      "blog": "baby-hugo",
+      "total": 428,
+      "draft_true": 9,
+      "draft_false": 419,
+      "live": 419,
+      "platform": "Workers"
+    },
+    {
+      "blog": "beauty-hugo",
+      "total": 281,
+      "draft_true": 9,
+      "draft_false": 272,
+      "live": 272,
+      "platform": "Workers"
+    },
+    {
+      "blog": "camping-hugo",
+      "total": 237,
+      "draft_true": 10,
+      "draft_false": 227,
+      "live": 227,
+      "platform": "Workers"
+    },
+    {
+      "blog": "fitness-hugo",
+      "total": 450,
+      "draft_true": 9,
+      "draft_false": 441,
+      "live": 441,
+      "platform": "Pages"
+    },
+    {
+      "blog": "health-hugo",
+      "total": 257,
+      "draft_true": 12,
+      "draft_false": 245,
+      "live": 245,
+      "platform": "Workers"
+    },
+    {
+      "blog": "interior-hugo",
+      "total": 565,
+      "draft_true": 14,
+      "draft_false": 551,
+      "live": 551,
+      "platform": "Pages"
+    },
+    {
+      "blog": "kitchen-hugo",
+      "total": 263,
+      "draft_true": 15,
+      "draft_false": 248,
+      "live": 248,
+      "platform": "Workers"
+    },
+    {
+      "blog": "laptop-hugo",
+      "total": 238,
+      "draft_true": 23,
+      "draft_false": 215,
+      "live": 215,
+      "platform": "Pages"
+    },
+    {
+      "blog": "pet-hugo",
+      "total": 193,
+      "draft_true": 16,
+      "draft_false": 177,
+      "live": 177,
+      "platform": "Workers"
+    }
+  ],
+  "summary": {
+    "total": 3377,
+    "draft_true": 125,
+    "draft_false": 3252,
+    "live": 3252
+  }
+}

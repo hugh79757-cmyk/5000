@@ -141,6 +141,23 @@
   | **Viator Affiliate**  | SQLite + URL param injection         | Travel product affiliate links (`pipelines/etap/pipeline.py`) |
   | **Coupang Partners**  | REST (via API)                       | Affiliate product data (`shared/coupang_senior.py`, etc.)     |
   
+  ### LLM Fallback Chain (글쓰기 모델 폴백)
+  
+  `shared/ai_writer.py` → `config/models.yaml`의 `tier_order`를 따라 16개 무료 모델을 순차 시도하고, 전부 실패 시에만 유료 DeepSeek V4 Flash를 호출.
+  
+  | 순서 | 모델 | 프로바이더 | 비고 |
+  |------|------|-----------|------|
+  | 1-4 | Gemini 3.1/3.5 flash-lite, 2.5/3.5 flash | Google | 무료 |
+  | 5-8 | Llama 3.3 70B, Qwen3.6 27B, GPT-OSS 120B/20B | Groq | 무료, Qwen은 thinking OFF |
+  | 9-10 | Gemma 4 31B, GLM 4.7 | Cerebras | 무료, GLM은 thinking OFF |
+  | 11 | DeepSeek V4 Flash Free | OpenCode Zen | 무료 |
+  | 12-13 | Nemotron 3 Ultra 550B, Step 3.7 Flash | NVIDIA NIM | 무료, Step은 thinking OFF |
+  | 14-15 | MiMo V2.5 Free, Big Pickle | OpenCode Zen | 무료 |
+  | 16 | GLM 4.5 Flash | Zhipu AI | 무료 |
+  | **17** | **DeepSeek V4 Flash** | **DeepSeek** | **★ 유료 — 최후 수단** |
+  
+  상세: `LLM_FALLBACK_CHAIN.md`
+  
   ## Configuration System
   
   | File             | Purpose                                                        |

@@ -1,0 +1,142 @@
+---
+title: "트루스오브뷰티 갈락토씨씨 vs 닥터트wen티 갈락비타 갈락토미세스 토너 2026 비교"
+slug: "teuluseu-obeubyuti-gallagto-ssi-ssi-vs-dagteoteuwenti-gallagbita-gallagtomiseseu-toner-2026-compare"
+date: "2026-06-24T21:42:18+09:00"
+draft: "false"
+description: "피부결이 거칠고 칙칙해 보일 때 가장 먼저 손이 가는 것이 토너입니다. 특히 갈락토미세스 성분은 발효 여과물로 피부결 정돈에"
+tags: []
+categories: []
+featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/curation-images/2026/06/24/4d58365c.webp"
+
+
+---
+
+<div style="margin:0 0 16px;padding:12px 16px;background:#f8fafc;border-radius:8px">
+<p style="margin:0 0 6px;font-size:13px;color:#6b7280">💡 다른 추천도 확인해보세요</p>
+<div style="display:flex;flex-wrap:wrap"><a href="https://appliance.informationhot.kr/posts/대성쎌틱듀플렉스-1등급-제습기-추천-19l20l-실속-선택-가이드-2026년-7월/" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:#db2777;font-weight:600;font-size:14px;margin-right:12px">🔌 1등급 제습기 추천</a>
+<a href="https://camping.informationhot.kr/posts/캠핑-칼-추천-로니베이msmultiverse-2026년-7월-실속-선택-가이드/" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:#db2777;font-weight:600;font-size:14px;margin-right:12px">⛺ 캠핑 칼 추천</a>
+</div>
+</div>
+
+
+
+피부결이 거칠고 칙칙해 보일 때 가장 먼저 손이 가는 것이 토너입니다. 특히 갈락토미세스 성분은 발효 여과물로 피부결 정돈에 도움을 줘서 최근 뷰티 커뮤니티에서 꾸준히 화제입니다. 2026년 6월 기준으로 쿠팡에서 갈락토미세스 토너를 검색하면 수십 개 제품이 쏟아지는데, 어떤 제품이 피부 타입과 예산에 맞는지 한눈에 파악하기 어렵습니다.  인기 상품 5종을 비교하여 자신에게 꼭 맞는 갈락토미세스 토너를 찾는 데 도움을 드리겠습니다.
+
+## 갈락토미세스 토너 고를 때 확인할 포인트
+
+갈락토미세스 토너를 선택할 때 가장 먼저 확인해야 할 것은 <strong>주요 성분의 종류와 농도</strong>입니다. 갈락토미세스 발효 용해물(여과물)은 피부결 개선과 결광에 도움을 주는 대표 성분으로, 제품명에 "갈락토미세스"가 포함되어 있더라도 실제 함유 비율이 다를 수 있으므로 성분표를 꼼꼼히 확인하는 것이 좋습니다. 또한 갈락토미세스 외에 히알루론산, 비타민C, 나이아신아마이드 등 어떤 보조 성분이 함께 들어있는지 확인하면 자신의 피부 고민에 맞는 제품을 고르는 데 도움이 됩니다.
+
+두 번째로 중요한 것은 <strong>피부 타입별 적합성</strong>입니다. 갈락토미세스 토너는 대부분 모든 피부 타입에 사용 가능하지만, 추가 성분에 따라 지성피부에는 산뜻한 제형이, 건성피부에는 수분감이 풍부한 에센스 타입이 더 잘 맞을 수 있습니다. 민감성피부의 경우 자극이 적은 저자극 포뮬러를 선택하는 것이 바람직합니다.
+
+세 번째 기준은 <strong>용량 대비 가격(가성비)</strong>입니다. 100ml당 가격으로 환산하면 가격 차이를 명확히 파악할 수 있습니다. 같은 갈락토미세스 토너라도 1ml당 50원대부터 190원대까지 가격 차이가 크기 때문에, 매일 사용하는 제품인 만큼 장기적 사용 비용을 고려해야 합니다. 마지막으로 <strong>용기 타입과 휴대성</strong>도 중요한데, 소용량 멀티팩은旅行이나 출장 시 파우치에 넣어 휴대하기 편하고 위생적으로 사용할 수 있습니다.
+
+## 한눈에 보는 비교표
+
+| 제품 | 피부 타입 | 주요 성분 | 용량 | 가격 | 1ml당 가격 |
+|---|---|---|---|---|---|
+| 트루스오브뷰티 갈락토씨씨 결 토너 | 모든 피부 | 갈락토미세스 발효 용해물 | 250ml | 22,800원 | 약 91원 |
+| 더랩바이블랑두 올리고 히알루론산 딥 토너 | 건성/복합성 | 올리고 히알루론산 저분자 | 300ml | 19,900원 | 약 66원 |
+| 프랑스와즈 갈락토미세스 스킨토너 | 모든 피부 | 갈락토미세스 발효 여과물 | 285ml(95ml×3) | 34,800원 | 약 122원 |
+| 엑소프록실 갈락토미세스 엑소좀 쌀뜨물 에센스 | 민감성/건성 | 갈락토미세스 엑소좀, 쌀뜨물 에센스 | 300ml(150ml×2) | 57,100원 | 약 190원 |
+| 닥터트wen티 갈락비타 씨 토너 | 모든 피부 | 갈락토미세스, 비타민C, 나이아신아마이드 | 200ml | 9,900원 | 약 49원 |
+
+---
+
+## 1위: 닥터트wen티 갈락비타 씨 토너 — 만원 이하 가성비 갈락토미세스 토너
+
+![닥터트wen티 갈락비타 씨 토너](https://ads-partners.coupang.com/image1/dshnRgKEVYym7CtZdhR4jAyzb_kA0ytWX0GdfG-Y5ZZ2CGsg2ZvoeSCgZ_4XDk64PB3Rrmu3RzMoMnqbxGwfOK_FmapVgvoq_R9PNPFGRbf9LPxQYatVSfm-u5K3W5wsMclasxZst5ohtJba9uNoKlmcdFOy63feZ_gx2pE6eYvHlm54TL0sHjdq33QnLuqCd7YcD9whVepLlQ_pZH5lwQ-S1FTGcuvB2vTaTjXqjMRKAiC5V75-Vnwt8WbHPK1zKKSGXD7-LLTznWmszPZLFL0nbMpRLbdLddRHsnwboTJ9RStcwURGDuBZ37ujSx6kUe1ubGU=)
+
+닥터트wen티 듀얼덤 갈락비타 씨 토너는 갈락토미세스 발효 용해물과 함께 영국산 비타민C, 나이아신아마이드가 함유된 미백 기능성 토너입니다. 가격은 9,900원으로 1ml당 약 49원 수준에 불과하며, 2026년 6월 기준 쿠팡순위 6위를 기록하고 있습니다. 용량은 200ml이고 로켓배송이 가능합니다.
+
+가장 큰 장점은 가격 대비 성분 구성입니다. 만원 이하의 가격으로 갈락토미세스, 비타민C, 나이아신아마이드라는 미백 3종 세트를 경험할 수 있습니다. 아쉬운 점은 200ml로 대용량 제품에 비해 한 달 반 정도 사용하면 새로 구매해야 한다는 점입니다.
+
+출근 준비 시간이 촉박한 직장인이 아침 세안 후 화장솜에 한 번 덜어 피부결을 정돈하면 비타민C 성분이 피부톤을 밝게 하는 데 도움을 줄 수 있습니다. 세안 후 첫 단계에서 사용하면 다음 단계의 세럼이나 크림 흡수율도 높아집니다. 로켓배송으로 빠르게 받아볼 수 있어, 미백 기능성 스킨케어를 부담 없이 시작해보고 싶은 20~30대에게 적합합니다. [쿠팡에서 최저가 확인하기](https://link.coupang.com/re/AFFSDP?lptag=AF9686293&pageKey=7014815731&itemId=17252285012&vendorItemId=95364776678&traceid=V0-153-921a5930968d1bad&clickBeacon=f12e79b0-6eef-11f1-b434-a1b28c2997b8%7E3&requestid=20260623194024713115817212&token=31850C%7CMIXED)
+
+---
+
+## 2위: 더랩바이블랑두 올리고 히알루론산 딥 토너 — 대용량 수분 토너
+
+![더랩바이블랑두 올리고 히알루론산 딥 토너](https://ads-partners.coupang.com/image1/fHsxNSrCh_hc_He_fON-2DE5MtPUPu-cAPd39g9asn4boPYH5m6IhdLQK_DJwvvXgnLzCkVQjwoQZkTRoEpulIhtJgK20hG_wFxQsG_heF1HDp2cU5wCSiCrcpiXDChrsJR6S8mZncRZshqTnAkRd4siEVUwBETGTnn-BAHMXyp6XXnFkHPXMBc2ENqrrhfGVfTD2ejJ9-1qiDqOi0BVSbyx53SLpjIww8DjSZk9wqcQpujz8MeijmVpx3UGUalJZ-KX6rQSI_9SHmQJonqHzoRAuRyb9NTXxNA=)
+
+더랩바이블랑두 올리고 히알루론산 저분자 딥 토너는 저분자 히알루론산을 주성분으로 하여 피부 깊숙한 곳까지 수분을 전달하는 데 초점을 맞춘 제품입니다. 가격은 19,900원, 용량은 300ml이며 1ml당 약 66원으로 가성비가 뛰어납니다. 2026년 6월 기준 쿠팡순위 3위, 로켓배송 가능합니다.
+
+장점은 300ml 대용량임에도 2만원을 넘지 않는 합리적인 가격과 저분자 히アルロン산의 빠른 흡수력입니다. 다만 갈락토미세스 성분이 아닌 히알루론산 중심 제품이라, 피부결 정.untracked 갈락토미세스 효과를 기대하기는 어렵습니다.
+
+저녁 샤워 후 세안이 끝나면 화장솜에 넉넉히 적셔 얼굴에 1분 정도 올려두면 수분 팩 효과를 느낄 수 있습니다. 속당김이 심한 건성피부나 에어컨이 가동되는 사무실에서 피부가 당기는 직장인에게 잘 맞습니다. 300ml 대용량은 혼자 쓰기에는 2~3개월은 충분하고, 로켓배송으로 빠르게 받아볼 수 있습니다. [쿠팡에서 최저가 확인하기](https://link.coupang.com/re/AFFSDP?lptag=AF9686293&pageKey=7426781694&itemId=23986939347&vendorItemId=87718261856&traceid=V0-153-8077ba41acef8f24&clickBeacon=f12e79b0-6eef-11f1-9369-d42d94b8e3db%7E3&requestid=20260623194024713115817212&token=31850C%7CMIXED)
+
+---
+
+## 3위: 트루스오브뷰티 갈락토씨씨 결 토너 — 갈락토미세스 본연의 결 개선
+
+![트루스오브뷰티 갈락토씨씨 결 토너](https://ads-partners.coupang.com/image1/Omvt7AIRJ0aHwnT0OpKFOlaugTJEYkZxf6wU1dj68nJqOEo1a3jfEZdawIrgPfY9dvfBovr2bT6F7BiGcqUgDCVp4DIN8F9Bf6KANqz4ZdHBBKnRTHaV_AXJSSi6SnRIMAFO8DbAqWuK9XE1pDEisg223gtuoXRQRybAORCOywqhHcjsMXYYSxDK5r4QNjKP8eGTCN8lxtr91bEUQnfRumMUwCB92oDIsM39DiukOxP1nov7VgjhskRRbCtOHpbR4-VwLSNl-vtqUaTa10tf8NzrdJy2rlxHM3j5k8WEamDqarmQdb1Oa72CAA==)
+
+트루스오브뷰티 갈락토씨씨 결 토너는 갈락토미세스 발효 용해물을 핵심 성분으로 하여 피부결 개선과 결광에 집중한 제품입니다. 가격은 22,800원, 용량은 250ml이며 1ml당 약 91원입니다. 2026년 6월 기준 쿠팡순위 2위로 꾸준한 인기를 보유하고 있고, 로켓배송이 가능합니다.
+
+장점은 순수하게 갈락토미세스 발효 성분에 집중한 포뮬러로, 피부결이 거칠고 정돈이 안 되는 피부에 직접적인 도움이 될 수 있다는 점입니다. 아쉬운 점은 같은 갈락토미세스 라인 중에서는 1ml당 가격이 살짝 높은 편이라는 점입니다.
+
+화장을 하기 전 메이크업 베이스 단계에서 이 토너로 피부결을 깔끔하게 정돈하면 파운데이션이 매끄럽게 발리고 들뜸이 줄어듭니다. 갈락토미세스의 결 개선 효과를 직접 경험해보고 싶은 20~30대에게 추천합니다. 리뷰 평점이 높고 누적 판매량도 많은 편이라 첫 갈락토미세스 토너 입문용으로 무난합니다. [쿠팡에서 최저가 확인하기](https://link.coupang.com/re/AFFSDP?lptag=AF9686293&pageKey=8746525538&itemId=25423071424&vendorItemId=95453227735&traceid=V0-153-dfd76dfd60d664ce&clickBeacon=f12e79b0-6eef-11f1-bd47-d66387707e8c%7E3&requestid=20260623194024713115817212&token=31850C%7CMIXED)
+
+---
+
+## 4위: 프랑스와즈 갈락토미세스 스킨토너 — 소용량 멀티팩 여행용
+
+![프랑스와즈 갈락토미세스 스킨토너](https://ads-partners.coupang.com/image1/rv5q_ICUxx1OUfsWrlz6TONvHDRaN-lzFjWllGFn3MoJuYDAPAC6JcSFgG5CIB9rZQESsupkEQHxq-e56Ru7PYE-zcfUTC6C2myzSuIHx_e11ZJTVtAMN9eJsPlEV2hliuvtrjXd-cM7-08Ua2ex4DAt6KakjpDWmphqvwEx5mBP2a2CpyJG_j-cSz_P-g_1cuIEfsMh-WQV0SxIBakUi2_KxjnyKFdtfUacHz5lFa_2-miVdobamDe90t0rL0cbjGdKxVCsECpkyu2BV9PS25Too7HqVxbsmfGnmEmiSGsioqs-AX0=)
+
+프랑스와즈 갈락토미세스 스킨토너는 95ml 소용량 3개입으로 총 285ml이며, 갈락토미세스 발효 여과물을 주성분으로 합니다. 가격은 34,800원으로 1ml당 약 122원 수준입니다. 2026년 6월 기준 쿠팡순위 4위, 로켓배송 가능합니다.
+
+장점은 소용량 3개 구성으로 위생적이면서도 기내 반입이 가능한 점입니다. 1개를 먼저 개봉하고 나머지는 밀봉 상태로 보관하면 오래도록 신선하게 사용할 수 있습니다. 다만 1ml당 단가가 다른 제품에 비해 높은 편이라 장기적으로 매일 사용하기에는 비용 부담이 있을 수 있습니다.
+
+출장이나 여행이 잦은 직장인이 파우치에 넣어두면 호텔 객실에서도 귀찮음 없이 스킨케어 루틴을 이어갈 수 있습니다. 특히 갈락토미세스 성분으로 피부결을 관리하고 싶으면서도 대용량을 한꺼번에 쓰기 부담스러운 분들에게 잘 맞습니다. [쿠팡에서 최저가 확인하기](https://link.coupang.com/re/AFFSDP?lptag=AF9686293&pageKey=6091255655&itemId=11357233536&vendorItemId=95597264609&traceid=V0-153-702d15d8d81284b6&clickBeacon=f12e79b0-6eef-11f1-bde2-28582e3006fc%7E3&requestid=20260623194024713115817212&token=31850C%7CMIXED)
+
+---
+
+## 5위: 엑소프록실 갈락토미세스 엑소좀 쌀뜨물 에센스 토너 — 프리미엄 엑소좀 테크놀로지
+
+![엑소프록실 갈락토미세스 엑소좀 쌀뜨물 에센스 토너](https://ads-partners.coupang.com/image1/d-imXcA8efeNbX0hd4E0YkT0VKn5YSFAQcoNNl2B6hhTbVtzDdyWTutzEQhQjmckMHeBeag1vqfIDDJWsDSwRcLeN1elyUnrHvQ1_ir1rf4yXrE4btrhv4i89qZJgWm9OLwdo6mhiVCs4KmiZp1TistbOOCnBPQzv2SQ1h3Qa5KeefATRhu4gwCPW0AIlfA4jg_soK8hWT_Aygme1XuOqisYv1g7gyzgEPIfs7XrrvIn4e9Li3ieIX8bL30cCas1TSBAvqdqC1iN6WWVhZ6LzeAnCR0Clg9lV9S1Qw8t5UYNBRtlfQxasDbm)
+
+엑소프록실 갈락토미세스 엑소좀 쌀뜨물 에센스 토너는 갈락토미세스 엑소좀과 쌀뜨물 에센스를 결합한 프리미엄 라인입니다. 150ml 2개입으로 총 300ml이며, 가격은 57,100원(1ml당 약 190원)입니다. 2026년 6월 기준 쿠팡순위 5위, 로켓배송 가능합니다.
+
+장점은 엑소좀 기술을 적용하여 유효 성분의 피부 침투력을 높였다는 점과 쌀뜨물 에센스가 추가적인 영양과 진정 효과를 더한다는 것입니다. 아쉬운 점은 가격이 5만원을 넘는 프리미엄 라인이라 부담스러울 수 있다는 점입니다.
+
+주말 저녁에 여유를 갖고 스킨케어를 즐기는 분이라면, 세안 후 토너를 화장솜에 적셔 얼굴에 잠시 올려두는 팩 방식으로 사용하면 엑소좀과 쌀뜨물 성분이 피부에 충분히 스며드는 경험을 할 수 있습니다. 민감성피부나 건성피부이면서 프리미엄 성분의 효과를 직접 느껴보고 싶은 분들에게 추천합니다. [쿠팡에서 최저가 확인하기](https://link.coupang.com/re/AFFSDP?lptag=AF9686293&pageKey=9086784997&itemId=26699437519&vendorItemId=94173609285&traceid=V0-153-af58651cf22d7a60&clickBeacon=f12e79b0-6eef-11f1-b434-a1b28c2997b8%7E3&requestid=20260623194024713115817212&token=31850C%7CMIXED)
+
+---
+
+## 자주 묻는 질문
+
+### 갈락토미세스 토너는 피부에 자극이 없나요?
+
+갈락토미세스는 발효 여과물로, 일반적으로 AHA·BHA 같은 각질 제거 산류보다 자극이 적은 성분입니다. 다만 제조 방식과 배합 농도에 따라 제품마다 촉감과 자극도가 다를 수 있으므로, 처음 사용하는 제품은 손등이나 귀 뒤쪽에 소량 테스트 후 사용하는 것이 안전합니다. 민감성피부라면 성분표에서 알코올(에탄올)이나 인공 향료 여부를 추가로 확인하면 좋습니다.
+
+### 갈락토미세스 토너는 몇 번 레이어링해도 되나요?
+
+건성피부의 경우 손바닥에 토너를 덜어 얼굴에 2~3차례 두드려 흡수시키는 '7스킨법' 같은 레이어링 루틴을 적용할 수 있습니다. 다만 갈락토미세스 토너가 너무 많은 층으로 쌓이면 겉에서 끈적임이 남을 수 있으므로, 2~3번 정도가 적당합니다. 지성피부라면 화장솜에 충분히 적셔 닦아내는 '패드 토너' 방식이 더 산뜻합니다.
+
+### 아침에 사용해도 되나요? 데이 토너로 괜찮은가요?
+
+갈락토미세스 발효 성분은 자외선에 직접적으로 영향을 받는 성분은 아니어서 아침 사용이 가능합니다. 다만 추가 성분이 비타민C나 AHA 등일 경우 자외선 차단제를 꼭 발라주는 것이 좋습니다. 아침 루틴에서는 산뜻하게 마무리되는 제형을 선택하면 세안 후 피부결을 빠르게 정돈하고 메이크업으로 넘어갈 수 있습니다.
+
+### 갈락토미세스 토너와 일반 토너의 차이가 뭔가요?
+
+일반 토너는 세안 후 피부 pH를 균형 있게 맞추고 잔여물을 제거하는 데 주된 목적이 있는 반면, 갈락토미세스 토너는 발효 여과물을 통해 피부결 개선과 결광까지 동시에 노린다는 점이 다릅니다. 즉 세정 후 토닝 단계에서 한 단계 더 업그레이드되는 효과를 기대할 수 있습니다. 갈락토미세스 성분이 피부 장벽을 탄탄하게 하는 데 도움을 준다는 연구 결과도 있어, 장기적으로 피부결 변화를 느끼고 싶은 분들에게 적합합니다.
+
+### 보관법이 따로 있나요?
+
+갈락토미세스는 발효 성분이므로 직사광선을 피해 서늘한 곳에 보관하는 것이 좋습니다. 화장대나 선반 위에 두되, 욕실 내 높은 습도나 온도 변화가 심한 곳은 피하는 것이 좋습니다. 개봉 후에는 6개월 이내에 사용하는 것이 성분 안정성을 유지하는 데 도움이 됩니다.
+
+## 상황별 추천 정리
+
+출근 전 5분 루틴으로 화장솜에 토너 한 번 닦아내면 메이크업이 매끄럽게 받는 직장인이라면, 갈락토미세스 성분의 결 개선 효과를 바로 느끼고 싶은 분에게 <strong>트루스오브뷰티 갈락토씨씨 결 토너</strong>가 알맞습니다. 만원 이하 예산으로 미백 기능성 스킨케어를 시작해보고 싶은 대학생이나 사회초년생이라면 <strong>닥터트wen티 갈락비타 씨 토너</strong>를 우선 고려하세요. 에어컨 바람에 피부가 자주 당기는 사무실 근무자이면서 대용량을 원한다면 <strong>더랩바이블랑두 올리고 히알루론산 딥 토너</strong>가 300ml로 오래 사용할 수 있고, 출장이나 여행이 잦아 파우치에 넣을 소용량을 찾는 분은 <strong>프랑스와즈 갈락토미세스 스킨토너</strong>의 3개입 구성이 위생적이고 편리합니다. 주말 저녁 스킨케어에 시간을 들여 프리미엄 성분을 경험하고 싶은 분이라면 <strong>엑소프록실 갈락토미세스 엑소좀 쌀뜨물 에센스 토너</strong>를 눈여겨보세요. 소개한 전 제품이 로켓배송을 지원하므로 빠른 수령이 가능합니다.
+
+이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+
+
+<div style="margin:20px 0;padding:16px;background:#fafbfc;border-radius:12px;border:1px solid #e8ecf0">
+<p style="margin:0 0 10px;font-weight:600;font-size:15px;color:#374151">🛍️ 이런 상품도 좋아하실 거예요</p>
+<div style="display:flex;flex-wrap:wrap;gap:4px">
+<a href="https://appliance.informationhot.kr/posts/대성쎌틱듀플렉스-1등급-제습기-추천-19l20l-실속-선택-가이드-2026년-7월/" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f0f7ff;border:1px solid #d0e3ff;border-radius:8px;text-decoration:none;color:#1a56db;font-size:14px;margin:4px">🔌 1등급 제습기 추천</a>
+<a href="https://camping.informationhot.kr/posts/캠핑-칼-추천-로니베이msmultiverse-2026년-7월-실속-선택-가이드/" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f0f7ff;border:1px solid #d0e3ff;border-radius:8px;text-decoration:none;color:#1a56db;font-size:14px;margin:4px">⛺ 캠핑 칼 추천</a>
+<a href="https://interior.informationhot.kr/posts/2cheung-bed-recommend-illu-illu-kojiseukandi-a-simon-14man-wondaebuteo-73man-wondae-kkaji-practical-compare/" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f0f7ff;border:1px solid #d0e3ff;border-radius:8px;text-decoration:none;color:#1a56db;font-size:14px;margin:4px">🛋️ 2층 침대 추천</a>
+<a href="https://health.informationhot.kr/posts/ppyeo-geongang-supplement-recommend-insake-eo-teunteunhan-chi-a-vs-ssiseupang-jointpalpal-peulleoseu/" style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f0f7ff;border:1px solid #d0e3ff;border-radius:8px;text-decoration:none;color:#1a56db;font-size:14px;margin:4px">🍎 뼈 건강 영양제 추천</a>
+</div>
+</div>
