@@ -23,6 +23,24 @@ import requests as _requests
 from pipelines.curation.collector import collect_keyword, get_products
 from pipelines.curation.enricher import enrich_products
 from pipelines.curation.keywords import get_keywords
+from pipelines.curation.writer import _TITLE_TEMPLATE_PATTERNS as TITLE_TEMPLATE_PATTERNS
+
+# CoT/지시문 유출 감지용 패턴 (정상 본문 오탐 방지: 소제목·리뷰 단어 제외)
+WRITING_INSTRUCTION_PATTERNS = [
+    re.compile(r"AIDA", re.I),
+    re.compile(r"퍼널"),
+    re.compile(r"H[23]\s*헤딩"),
+    re.compile(r"(다음|아래|출력)\s*형식"),
+    re.compile(r"작성(하세요|해\s*주세요|하라)"),
+    re.compile(r"프롬프트|지시\s*사항"),
+]
+COT_BODY_PATTERNS = [
+    re.compile(r"사용자\s*요청"),
+    re.compile(r"제목\s*(규칙|예시)"),
+    re.compile(r"Here'?s\b", re.I),
+    re.compile(r"다음은\s*요청하신"),
+    re.compile(r"먼저\s*.*을\s*분석"),
+]
 from pipelines.curation.keyword_health import KeywordHealthStore
 from pipelines.curation.writer import generate_curation_article
 from shared.content_store import get_today_count
@@ -434,49 +452,10 @@ TITLE_BLOCKED = {
     "fitness-hugo": [],
 }
 
-<<<<<<< HEAD
 # 하드 차단 카테고리 — 상품명 allowed 여부와 무관하게 무조건 차단
 # 단, 자기 주제 블로그는 예외 (예: pet-hugo는 반려동물 상품 허용)
 HARD_BLOCK = {"반려동물", "펫", "pet", "dog", "cat", "강아지", "고양이"}
 HARD_BLOCK_EXCEPTIONS = {"pet-hugo"}  # 자기 주제 키워드는 면제
-=======
-# 템플릿 제목 패턴 (fallback/LLM 재생성물 검증) — writer._validate_title과 동일 3종 (연도-접두 ^\d{4}년 제외)
-TITLE_TEMPLATE_PATTERNS = [
-    re.compile(r"추천\s*TOP\s*\d+", re.I),
-    re.compile(r"\(\d{4}년\)$"),
-    re.compile(r"BEST\s*\d+", re.I),
-]
-
-# ── 전체 아티팩트 품질 게이트용 패턴 (Task 4) ──
-# CoT body/description 마커
-COT_BODY_PATTERNS = [
-    re.compile(r"우선\s"),
-    re.compile(r"사용자\s*요청"),
-    re.compile(r"제목\s*규칙"),
-    re.compile(r"제목\s*예시"),
-    re.compile(r"이제\s*글"),
-    re.compile(r"이제\s*작성"),
-    re.compile(r"제품\s*데이터"),
-    re.compile(r"글의\s*구조"),
-]
-
-# 글쓰기 지시어 키워드 (본문에서 3개 이상 매치 시 신호)
-WRITING_INSTRUCTION_PATTERNS = [
-    re.compile(r"AIDA"),
-    re.compile(r"퍼널"),
-    re.compile(r"H2"),
-    re.compile(r"H3"),
-    re.compile(r"비교표"),
-    re.compile(r"자주\s*묻는\s*질문"),
-    re.compile(r"상황별\s*추천"),
-    re.compile(r"도입부"),
-    re.compile(r"선택\s*가이드"),
-    re.compile(r"FAQ"),
-    re.compile(r"장점"),
-    re.compile(r"아쉬운\s*점"),
-    re.compile(r"CTA"),
-]
->>>>>>> fix/rap-subscription-backfill
 
 # 제목 문맥 확인용 allowed 키워드 (blocked 키워드가 있어도 allowed 키워드가 제목에 있으면 차단 스킵)
 ALLOWED_PRODUCT = {
@@ -792,7 +771,7 @@ def _content_quality_gate(blog_id: str, keyword: str, article: dict):
         signal_details.append("title_template")
 
     # 신호 2: description CoT 마커
-    desc_cot_markers = ["우선", "사용자 요청", "제목 규칙", "제목 예시"]
+    desc_cot_markers = ["사용자 요청", "제목 규칙는", "제목 예시:"]
     if any(marker in description for marker in desc_cot_markers):
         signals_met.append(2)
         signal_details.append("desc_cot")
@@ -1225,7 +1204,7 @@ def _run_inner(cfg, blog_id, daily_quota):
                 tag_set.add(bv)
     tags_str = ",".join(list(tag_set)[:6])  # 최대 6개
 
-is_draft = cfg.get("force_draft", False) or article.get("is_draft", False)
+    is_draft = cfg.get("force_draft", False) or article.get("is_draft", False)
     result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url, is_draft=is_draft)
     if not result or not result.get("success"):
         logger.error(f"[{blog_id}] 발행 실패: {title}")

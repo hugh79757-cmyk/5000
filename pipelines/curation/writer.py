@@ -591,14 +591,14 @@ def _is_cot_body(body):
 
     # 2) 글쓰기 지시어 키워드 매치 수
     writing_instruction_keywords = [
-        "AIDA", "퍼널", "H2", "H3", "비교표", "자주 묻는 질문",
-        "상황별 추천", "도입부", "선택 가이드", "FAQ",
-        "장점", "아쉬운 점", "CTA"
+        "AIDA", "퍼널", "CTA", "H2 헤딩", "H3 헤딩",
+        "다음 형식", "아래 형식", "작성하세요", "작성해주세요",
+        "출력 형식", "프롬프트", "지시사항",
     ]
     writing_matches = sum(1 for kw in writing_instruction_keywords if kw in text)
 
     # 3) CoT 마커 매치
-    cot_markers = ["우선", "사용자 요청", "제목 규칙", "제목 예시"]
+    cot_markers = ["사용자 요청", "제목 규칙는", "제목 예시:", "Here is", "Here's", "다음은 요청하신"]
     cot_matches = sum(1 for m in cot_markers if m in text)
 
     # 판정: 3개 조건 중 2개 이상 충족
@@ -703,6 +703,7 @@ def generate_curation_article(keyword, products, blog_id=None):
 
     # 글자수 미달 시 최대 3회 시도 (2→3 확대, 시도별 temperature 변화)
     body = ""
+    cot_body_detected = False
     _temps = [0.85, 0.95, 0.75]  # 시도별 다양화
     for attempt in range(3):
         _temp = _temps[attempt] if attempt < len(_temps) else 0.85
@@ -740,6 +741,7 @@ def generate_curation_article(keyword, products, blog_id=None):
         logger.warning(f"[cot_body] CoT 본문 재생성 실패: {keyword} — 발행 차단")
 
     # 제목 추출: 첫 번째 # 헤딩 또는 첫 줄
+    title_generation_failed = False
     title = ""
     for line in body.split("\n"):
         line = line.strip()
