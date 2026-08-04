@@ -3,7 +3,7 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-01T19:20:00Z"
+last_updated: "2026-08-05T00:40:00Z"
 progress:
   total_phases: 30
   completed_phases: 29
@@ -67,6 +67,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-05 | cuap 15개 블로그중 오늘 만든 5개 블로그가 클라우드 플레어 설정이 완료가 안됐다. 배포까지 완료해줘. (massage/car/homeappliance/golf/bike-hugo custom domain 바인딩 + 배포, WORKERS_BLOGS 추가) | `633678a40` + CUAP `9712f78`, `59f3647` |
 | 2026-07-26 | Fix _validate_frontmatter split("---") regression — description 내 markdown table separator(---)로 YAML 파싱 실패 → regex 기반 분리로 수정 (rap3/4/5 발행 실패 5건 원인 해결) | `4bda255f6` |
 | 2026-07-11 | kuta-hugo 썸네일 깨짐 수정 — batch_thumbnails.py 실행, R2 업로드 확인. blogsmith auto-publisher 썸네일 자동 생성 여부 조사 완료 (gradient overlay 방식, 5000 pipeline 발행 글은 수동 필요) | `완료` |
 | 2026-07-10 | Phase 17 — senior-hugo 제목 7개 최적화 (17-01), travel-hugo 실시간 정보 20개 추가 (17-02), dividend-hugo 제목+목적박스 (17-03), senior-hugo 출처 394개 표준화 (17-05), travel-hugo 출처 22개+dividend 면책 2개 (17-05) | `진행 중` |
