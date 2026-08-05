@@ -1,0 +1,444 @@
+{
+  "compare-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 3490,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 3203,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "deal-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2968,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 2108,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "ev-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2697,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 2616,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "guide-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2660,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 2383,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "hotissue-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2775,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 3185,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "tco-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2327,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 2485,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "rank-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2637,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 2552,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "pick-hugo": {
+    "pipeline": "car",
+    "posts": [
+      {
+        "post": 1,
+        "title": "(제목 없음)",
+        "body_len": 2040,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "(제목 없음)",
+        "body_len": 2243,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "travel-hugo": {
+    "pipeline": "travel",
+    "posts": [
+      {
+        "post": 1,
+        "title": "전국 캠핑 충남 태안 바다뷰 캠핑장 추 시설과 예약 정보 정리",
+        "body_len": 4624,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "전국 캠핑 충남 태안 바다뷰 캠핑장 추 시설과 예약 정보 정리",
+        "body_len": 4504,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "travel1-hugo": {
+    "pipeline": "travel",
+    "posts": [
+      {
+        "post": 1,
+        "title": "전국 여름 축제 보령 머드축제 포함 가볼 만한 곳 3곳 추천",
+        "body_len": 6180,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "전국 여름 축제 추천 보령 머드축제 등 가볼 만한 곳 3곳 정리",
+        "body_len": 6860,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "travel2-hugo": {
+    "pipeline": "travel",
+    "posts": [
+      {
+        "post": 1,
+        "title": "경주 역사유적 탐방 — 신라 탐방 가이드, 역사와 볼거리 총정리",
+        "body_len": 7517,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "경주 역사유적 탐방 — 신라이 여행로 지정된 이유와 역사",
+        "body_len": 7368,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "travel3-hugo": {
+    "pipeline": "travel",
+    "posts": [
+      {
+        "post": 1,
+        "title": "여행 중 들르기 좋은 전국 맛집 여행 1곳",
+        "body_len": 4184,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "현지인만 아는 전국 맛집 여행 1곳 총정리",
+        "body_len": 4171,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  },
+  "travel4-hugo": {
+    "pipeline": "travel",
+    "posts": [
+      {
+        "post": 1,
+        "title": "전국 여행 여행코스 제주 올레길 코스 추천 — 과 제주 올레길 코스 추천 — 포함 정리",
+        "body_len": 5528,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      },
+      {
+        "post": 2,
+        "title": "전국 여행 제주 올레길 코스 추천 — 부터 제주 올레길 코스 추천 — 까지 코스 정리",
+        "body_len": 6421,
+        "passed": true,
+        "findings": [],
+        "checks": {
+          "multilingual_leak": true,
+          "thinking_tag": true,
+          "instruction_leak": true,
+          "grammar_break": true,
+          "valid_structure": true
+        }
+      }
+    ],
+    "all_passed": true
+  }
+}
