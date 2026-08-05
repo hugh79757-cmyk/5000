@@ -1,0 +1,5964 @@
+{
+  "description": "전수 감사 로그 — 589 고유 위험 (blog, keyword) 쌍 전체에 대한 제거/유지 결정",
+  "created_at": "2026-08-05",
+  "engine": "scripts/apply_keyword_removals.py",
+  "total_unique_risk_pairs": 589,
+  "action_summary": {
+    "REMOVE_A": 256,
+    "REMOVE_B0": 82,
+    "REMOVE_B1": 39,
+    "KEEP_B1": 84,
+    "KEEP_C": 126,
+    "SKIP_ARTIFACT": 2
+  },
+  "duplicates": [
+    [
+      "baby-hugo",
+      "교구",
+      2
+    ],
+    [
+      "baby-hugo",
+      "꼬꼬맘",
+      2
+    ],
+    [
+      "baby-hugo",
+      "내츄럴마미",
+      2
+    ],
+    [
+      "baby-hugo",
+      "네이쳐러브메",
+      2
+    ],
+    [
+      "baby-hugo",
+      "는장난감",
+      2
+    ],
+    [
+      "baby-hugo",
+      "산후조리원 용품 추천",
+      2
+    ],
+    [
+      "baby-hugo",
+      "임산부 복대 추천",
+      2
+    ],
+    [
+      "baby-hugo",
+      "임산부 필수품 추천",
+      2
+    ],
+    [
+      "beauty-hugo",
+      "바디 스크럽 추천",
+      2
+    ],
+    [
+      "beauty-hugo",
+      "프라이머 추천",
+      2
+    ],
+    [
+      "fitness-hugo",
+      "논슬립",
+      2
+    ],
+    [
+      "fitness-hugo",
+      "다이어트",
+      2
+    ]
+  ],
+  "artifacts": [
+    {
+      "blog": "baby-hugo",
+      "keyword": "노트북가을",
+      "action": "SKIP_ARTIFACT",
+      "reason": "B0 분류였으나 소스 토큰 '\"노트북가을\"' 부재 — 455-456행 쉼표 누락 결합 아티팩트. 구성 토큰('노트북'/'가을')은 위험 셋에 독립 미포함(검증됨). KEYWORD_MAP에 유지, 하드 게이트 261이 흡수. 향후 포맷 정리 항목."
+    },
+    {
+      "blog": "baby-hugo",
+      "keyword": "귀체온계카시트",
+      "action": "SKIP_ARTIFACT",
+      "reason": "B1 검토 결과 REMOVE 결정이나 소스 토큰 '\"귀체온계카시트\"' 부재 — 397-398행 쉼표 누락 결합 아티팩트. 구성 토큰('귀체온계'/'카시트')은 위험 셋에 독립 미포함(검증됨). KEYWORD_MAP에 유지, 하드 게이트 261이 흡수. 향후 포맷 정리 항목."
+    }
+  ],
+  "per_blog_pre_post": {
+    "appliance-hugo": {
+      "pre": 353,
+      "post": 309,
+      "removed_occurrences": 44
+    },
+    "baby-hugo": {
+      "pre": 374,
+      "post": 322,
+      "removed_occurrences": 52
+    },
+    "beauty-hugo": {
+      "pre": 211,
+      "post": 205,
+      "removed_occurrences": 6
+    },
+    "bike-hugo": {
+      "pre": 12,
+      "post": 12,
+      "removed_occurrences": 0
+    },
+    "camping-hugo": {
+      "pre": 248,
+      "post": 172,
+      "removed_occurrences": 76
+    },
+    "car-hugo": {
+      "pre": 12,
+      "post": 12,
+      "removed_occurrences": 0
+    },
+    "fitness-hugo": {
+      "pre": 253,
+      "post": 216,
+      "removed_occurrences": 37
+    },
+    "golf-hugo": {
+      "pre": 12,
+      "post": 12,
+      "removed_occurrences": 0
+    },
+    "health-hugo": {
+      "pre": 245,
+      "post": 198,
+      "removed_occurrences": 47
+    },
+    "homeappliance-hugo": {
+      "pre": 12,
+      "post": 12,
+      "removed_occurrences": 0
+    },
+    "interior-hugo": {
+      "pre": 268,
+      "post": 199,
+      "removed_occurrences": 69
+    },
+    "kitchen-hugo": {
+      "pre": 173,
+      "post": 172,
+      "removed_occurrences": 1
+    },
+    "laptop-hugo": {
+      "pre": 256,
+      "post": 253,
+      "removed_occurrences": 3
+    },
+    "massage-hugo": {
+      "pre": 12,
+      "post": 12,
+      "removed_occurrences": 0
+    },
+    "pet-hugo": {
+      "pre": 541,
+      "post": 495,
+      "removed_occurrences": 46
+    }
+  },
+  "rows": [
+    {
+      "blog_id": "massage-hugo",
+      "keyword": "두피마사지기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.55,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "massage-hugo",
+      "keyword": "마사지쿠션",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.62,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "car-hugo",
+      "keyword": "차량용청소기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "car-hugo",
+      "keyword": "타이어공기주입기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.6,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "골프드라이버",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.17,
+      "on_ratio": 0.38,
+      "sample": [
+        "혼마 혼마 투어월드 TW757 S 드라이버 남성용",
+        "코브라골프 남성용 다크스피드 X 드라이버",
+        "(캘러웨이코리아정품) 2025년 엘리트 ELYTE 드라이버 (남성)"
+      ]
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "아이언세트",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.15,
+      "on_ratio": 0.38,
+      "sample": [
+        "테일러메이드 2024년 SIM2 MAX 경량스틸 아이언 8종 세트 KBS MT 85",
+        "[브리지스톤] V300 9세대 스틸아이언 8개 아이언",
+        "[캘러웨이코리아정품] 로그ST PRO 스틸아이언 6i"
+      ]
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "골프거리측정기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.56,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "골프백",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.27,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "골프의류",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.52,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "골프클럽",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "golf-hugo",
+      "keyword": "퍼터",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.6,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "bike-hugo",
+      "keyword": "자전거헬멧",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.29,
+      "on_ratio": 0.43,
+      "sample": [
+        "로우락 어반 헬멧 UB-5861",
+        "애몰라이트 자전거 헬멧 04 후미등",
+        "애몰라이트 헬멧 AMH-01-25"
+      ]
+    },
+    {
+      "blog_id": "bike-hugo",
+      "keyword": "MTB자전거",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.56,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "bike-hugo",
+      "keyword": "자전거거치대",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.55,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "bike-hugo",
+      "keyword": "자전거라이트",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "bike-hugo",
+      "keyword": "자전거자물쇠",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.35,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "bike-hugo",
+      "keyword": "하이브리드자전거",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.57,
+      "on_ratio": 0.71,
+      "sample": []
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "프레데터",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "AMD라이젠5",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.35,
+      "on_ratio": 0.38,
+      "sample": [
+        "AMD 라이젠7-5세대 7800X3D (라파엘) (멀티팩 정품)",
+        "AMD 라이젠5-5세대 7400F (라파엘) (멀티팩 정품)",
+        "AMD 라이젠 5 레이븐 릿지 CPU 2400G"
+      ]
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "로그",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.04,
+      "on_ratio": 0.12,
+      "sample": [
+        "로그피트니스  베이직 줄넘기 와이어 크로스핏 줄넘기",
+        "EDSR 다이빙 로그북 / 스쿠버다이빙용품 / (주)브랜트",
+        "로그 피트니스 크로스핏 손목보호대스웨커"
+      ]
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "맥미니",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.37,
+      "on_ratio": 0.38,
+      "sample": [
+        "2020 맥미니 M1",
+        "Apple 맥 미니 M4칩",
+        "BOSGAME 미니피씨 AMD Ryzen7 7730U 16GB DDR4 1T SSD WIN 11 Pro 미니 PC, WiFi6, BT5.2,듀얼2.5G LAN, 트리플 디스플레이, P4 ultra, WIN11 Pro, 1TB, 16GB, Black"
+      ]
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "맥북허브",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.16,
+      "on_ratio": 0.38,
+      "sample": [
+        "코드웨이 8포트 USB C타입 노트북 멀티허브",
+        "UGREEN 유그린 Uno 6포트 USB 3.2 C타입 멀티 허브 삼성덱스 맥북 호환| 10Gbps | HDMI2.0 4K60Hz | PD100W | 스마트 상태 이모티콘 표시",
+        "홈플래닛 8포트 USB3.0 유선랜 멀티허브 DEX미러링 HUB8C-Y"
+      ]
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "투인원",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.08,
+      "on_ratio": 0.12,
+      "sample": [
+        "언더아머 스트레치우븐 쿼터 투인원쇼츠 2IN1 반바지 남성 검정반바지",
+        "에이치핏 투인원 일체형 레깅스 반바지 2종세트",
+        "나이키 플렉스 2 IN 1 검정 쇼츠 투인원 반바지"
+      ]
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "SSD1TB",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.48,
+      "on_ratio": 0.82,
+      "sample": []
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "SSD512GB",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.47,
+      "on_ratio": 0.92,
+      "sample": []
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "keyword": "인텔코어i5",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.31,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": " 미니电炉 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "IH压力밥솥 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "condenser烘干机 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "gas烘干机 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "heat pump烘干机 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "inking machine 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "万象料理기 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "保温垫 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "保温杯推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "半自动 inkjet printer 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "压力밥솥 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "少油 air fryer",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "手持挂烫机 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "挂烫机 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "普通压力밥솥 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "烘干机 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "熨斗 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "移动式 에어컨 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "空气fryer",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "空气质量 가전",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.07,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "라치마被誉为",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "생화물处理기 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "요리서推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "죽솥推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "쿠첸压力밥솥 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "쿠쿠压力밥솥 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "inking machine",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "감사",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "고구마",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "그레이지",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "극세사",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "글라스",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "냄새제거",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.04,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "네이처",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "니켈",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.08,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "니켈골드",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.02,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "단품",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "데님",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "두꺼운",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "쏘플레이트 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": " contact 그릴 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.17,
+      "on_ratio": 0.25,
+      "sample": [
+        "먼지 커버 플라스틱 컴퓨터 팬 4/5/6/7/8/9/12CM 그릴 AC/ 팬용 방진 네트 케이스 3개",
+        "인체공학적 손잡이가 있는 다용도 조리 집게로 화상을 방지하고 주방 사용과 호환되는 안전 그릴 집게를 개선합니다.",
+        "제과골목 acuba아쿠바 비접촉식 적외선 온도계 CS-305"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "걸레",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.11,
+      "on_ratio": 0.12,
+      "sample": [
+        "크레안 세차 타월 손걸레 극세사 청소용 걸레 30x40cm",
+        "데이즈마켓 경편 바둑 초극세사 걸레 40 x 60 cm",
+        "코멧 물걸레 청소기 세척 탈수통 + 밀대봉 + 극세사 걸레 4개입"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "극세사패드",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.11,
+      "on_ratio": 0.12,
+      "sample": [
+        "아망떼 소울메이트 장모 극세사 침대패드",
+        "타카타카 소프티 극세사 고정밴딩 누빔침대패드",
+        "물걸레청소기 전기종 호환 극세사 걸레 회색 22cm"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "노블",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.24,
+      "on_ratio": 0.12,
+      "sample": [
+        "노블 헤어 컬러 피부에 묻지 않는 순하고 냄새 적은 새치 염색약 150ml 블랙",
+        "노블오카리나 알토C 전국 음악 선생님 추천 / Noble Ocarina AC/ 교육용 오카리나",
+        "노블 CLPP 단백질 트리트먼트 극손상모 케어 열손상 컬러모발 회복 대용량"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "돌체구스토 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.28,
+      "on_ratio": 0.25,
+      "sample": [
+        "돌체구스토 지니오S 캡슐 커피머신 스타벅스 앳홈 팩, 1161, 쉐어모카",
+        "돌체구스토 스타벅스 하우스 블렌드 캡슐커피",
+        "돌체구스토 아이스 아메리카노 캡슐커피"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "두피케어",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "닥터포헤어 딥 클렌징 두피 스케일러",
+        "그로우어스 씨솔트 테라피 두피 스케일러 250g + 30g 세트",
+        "우디브 저자극 식물성 두피 토너 100ml 두피 가려움 붉은기 뾰루지 각질 개선 토닉"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "보온매트 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.09,
+      "on_ratio": 0.12,
+      "sample": [
+        "BEST 상품 프리옴 푸드워머 접이식 보온 패드",
+        "맘앤마음 셀프시공 유아 롤매트",
+        "프라임 보온매트 카페트 발코니 PE 롤 단열 베란다"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "유기산 가습기 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.29,
+      "on_ratio": 0.43,
+      "sample": [
+        "Fowod 3.5L 대용량가습기 3중 분무 무소음 초음파 가습기, 흰색",
+        "세스코마이랩 다목적 욕실세정제",
+        "세스코 마이랩 다목적 욕실세정제 500ml 욕실 화장실 청소 세제 물때제거"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "제모기",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "F4. ★ 1인 입장권",
+        "HUTT 창문 로봇청소기 자동 분수 초강흡입력 +리필걸레세트",
+        "닥스 악세서리 라이트 버킹엄 나일론 크로스백 DCBA6E851BK"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "취사도구 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.12,
+      "on_ratio": 0.25,
+      "sample": [
+        "쿠첸 6인용 압력 고무패킹 CRT-RPS0691W",
+        "AURURA 냄비 세트 5종 IH 인덕션 냄비 후라이팬 세트 라면냄비, 1세트, 20/26cm후라이팬 +18cm라면냄비+뚜껑/손잡이, 크림화이트",
+        "OYEAH 5종 세트다기능 탈착식 손잡이 냄비 세트, 흰색 5종세트 1개, 5종세트, 1개"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "카페리터 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.15,
+      "on_ratio": 0.25,
+      "sample": [
+        "맥널티커피 복숭아 아이스티 제로, 1.5L, 12개",
+        "카페리라 카라멜 쿠키",
+        "감성 용돈 박스 선물 현금 보관 이벤트 카메라 모양 깜짝 서프라이즈 선물함 박스"
+      ]
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "dawoo 정수기 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.45,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "면도기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.39,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "물걸레",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.33,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "식기세척기 바구니",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.58,
+      "on_ratio": 0.83,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "식기세척기 세제",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "에스프레소",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "에어프라이기 쿡북",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "에어프라이기 필터",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "자동차 공기청정기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.56,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "펌기 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.19,
+      "on_ratio": 0.92,
+      "sample": []
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "keyword": "화분가습기 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.35,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": " bar table 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": " breakfast table 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "LED化妆台镜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "LED灯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "TV Cabinet 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.23,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "书柜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "低柜 TV Cabinet 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.23,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "全身镜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "化妆台 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "化妆台镜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "卷帘 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "吊灯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "吊篮架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "圆形化妆台镜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "地毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "墙角 Shelf 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "壁挂 Shelf 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "壁挂花盆架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "壁灯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "夏凉被 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "多功能沙发床 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "多层植物架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "婴儿毛毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "孕妇枕 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "室内植物架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "对小户型沙发 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "小块地毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "展示柜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "户外鞋架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "抱枕 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "挂墙镜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "挂钟 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "收纳盒 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "旋转 TV Cabinet 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.23,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "旋转镜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "旋转鞋架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "毛毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "玻璃柜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "珊瑚绒毛毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "电动窗帘 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "百叶窗 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "窗帘轨道 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "简易床 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "简易鞋架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "纤维被 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "纸巾盒 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "羊绒毛毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "羽绒枕 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "羽绒被 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "腰枕 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "花盆架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "落地灯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "被子 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "装饰柜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "记忆枕 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "走廊地毯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "转角沙发 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "阅读灯 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.11,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "鞋架 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "风景画 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "首饰盒 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "香薰盒 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.21,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "고등",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "과외",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "내추럴",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "넓은",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "네오",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.03,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "누아",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "강의실",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "루리앤파크튼튼안내판M",
+        "제제데코 안내판 화이트판 18cm",
+        "쁘띠팬시 아크릴표지판 F3532"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "갤럭시원단",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.07,
+      "on_ratio": 0.12,
+      "sample": [
+        "단비 다이어리 케이스-갤럭시 S26/ S26+ 플러스 울트라/기종선택",
+        "갤럭시S23플러스 (S916) 카투소 오플 천연소가죽 플립 다이어리 케이스",
+        "잭팟 힙 SF 다이어리 갤럭시S26플러스용 케이스/이중지갑형/넉넉한내부카드수납공간/앞뒤카드포켓/카드분실방지패드/스트랩줄포함"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "고등학생",
+      "action": "KEEP_B1",
+      "reason_code": "DEMOGRAPHIC_MATCH",
+      "avg": 0.05,
+      "on_ratio": 0.12,
+      "sample": [
+        "이지몰 귀여운 곰돌이 인형 필통 펜 파우치",
+        "2026년 오투 고등 통합과학 1",
+        "2025 매쓰 디렉터의 개념 끝장내기"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "구스다운",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.12,
+      "on_ratio": 0.12,
+      "sample": [
+        "뉴발란스 남녀공용 UNI 뉴보이 구스다운 숏 푸퍼 패딩점퍼",
+        "뉴발란스 남녀공용 UNI 뉴보이 아웃포켓 구스다운 점퍼",
+        "[한정특가] Cozy Aura 호텔 거위털 구스 다운 겨울 이불"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "누아젤",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.2,
+      "on_ratio": 0.25,
+      "sample": [
+        "미니 원목 이젤 액자 받침대 사진 받침대 접시진열대+커머스커낵트Shop",
+        "미니 원목 이젤 액자 받침대 사진 접시진열대",
+        "스틸시리즈 Qck Large 게이밍 마우스 패드"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "뉴트",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.12,
+      "on_ratio": 0.12,
+      "sample": [
+        "뉴트리코어 멀티비타민 미네랄",
+        "뉴트리코어 마그네슘",
+        "뉴트리코스트 L 글루타민"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "늘다섯",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "소형 아이박스 1단 스모그 다용도 소품 데스크 플라스틱 수납함 수납 아이디어 작은 정리함",
+        "다꾸용 원형 롤 동그라미 스티커 복숭아 캐리어스티커",
+        "SMN 노즈업 코집게 콧대높이기 코뽕 코 교정기 콧볼 축소"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "다이닝",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.25,
+      "sample": [
+        "HEIT 여름용 대나무 매트, 거실 다용도실 다이닝룸 시원한 방석",
+        "[로켓프레시] 6다이닝 이베리코 생활속의 갈비살 200g + 항정살 200g 선물세트 3호 (냉동)",
+        "흑백접시 스톱접시 요리사 그릇 다이닝접시"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "두꺼운",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.18,
+      "on_ratio": 0.25,
+      "sample": [
+        "다패킹 두꺼운 대형 PE 김장비닐 유아용품 이삿짐 정리 김장 봉투",
+        "마분지 300g",
+        "정철물 두껍고 질긴 특대형 김장봉투 100 x 120"
+      ]
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "도어포함",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.38,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "interior-hugo",
+      "keyword": "창문 쿠션 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "低速煉推薦",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "婴儿护肤霜 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "婴儿护臀膏 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "婴儿按摩油 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "婴儿浴巾 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "婴儿爬行垫 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "婴幼儿牙刷 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "幼儿零嘴推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "물티슈随身携推薦",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 shampoo 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 반찬推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 버킷햇 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 볼池 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 분유盒 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.28,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 수유ケ알推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 쿠션推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기诞生通知推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기防蚊推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기驱虫喷雾推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "간호",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "겨드랑이",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "겨울",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "고객직접설치",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "고래",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "고막",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "골지",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "구강",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "긴팔",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "깊은",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "남양유업",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "네모",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "네이처메이드",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "네이쳐러브메",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "노리개",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "노이즈",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "노이즈캔슬링",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "노트북가을",
+      "action": "SKIP_ARTIFACT",
+      "reason_code": "SKIP_ARTIFACT",
+      "avg": 0.08,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "녹십자",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "논슬립",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "돌잔치 풍선 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "백일 사진 backdrop 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "쌀과자 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "초상화 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "가정용체온계",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "바른닥터 비접촉 적외선 온도계",
+        "공정브릿지 비접촉식 적외선 온도계 FNT010"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "간식통",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.25,
+      "sample": [
+        "릴팡 유아용 밀폐 원형 스텐 도시락",
+        "베이비앤아이 크림 스낵컵",
+        "락앤락 투고 투웨이 용기 2단 일반도시락 870ml"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "개월아기장난",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.15,
+      "on_ratio": 0.25,
+      "sample": [
+        "아가플러스 필릴리 피리 핸들 뿅망치 2종 세트",
+        "리틀그립 유아용 흡착 회전 스피너 딸랑이 3종",
+        "뽀로로 팡팡 마이크"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "교구",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.12,
+      "sample": [
+        "스틱 모양 맞추기  /칼라스틱 색설압자 치매예방놀이 시지각 인지치료 부모님선물 공간배치",
+        "[활동북제공] 자석식 초등 분수 수학 교구/ 원형분수 사각분수세트 분수놀이",
+        "키젤로 유아 두뇌 트레이닝 테트리스 게임"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "귀체온계 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.0,
+      "sample": [
+        "에너자이저 알카라인 AA 건전지",
+        "[스탠다드]",
+        "세브란스에이투 전용목장 단백우유"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "귀체온계카시트",
+      "action": "SKIP_ARTIFACT",
+      "reason_code": "SKIP_ARTIFACT",
+      "avg": 0.05,
+      "on_ratio": 0.12,
+      "sample": [
+        "나우푸드 데일리 비츠 멀티비타민 & 미네랄 타블렛, 100정, 2개",
+        "맘스럽 울트라 퍼퓸 캡슐세제16gX100개입 [8배 초고농축 세제원액 국내생산 프리미엄 3in1 대용량 실내건조형], 1개, 100개입",
+        "아띠래빗 유아용 안심 미끄럼방지 5구 깊은 식판, 아이보리, 단품, 1개"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "남아",
+      "action": "KEEP_B1",
+      "reason_code": "DEMOGRAPHIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.38,
+      "sample": [
+        "마리앤모리 아동용 크루 빈티지카 티셔츠",
+        "Arbe 남아용 버피 상의 + 하의 세트",
+        "롤리트리 아동용 UV차단 아쿠아 메쉬 플랩캡"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "내복",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "씨엘스토리 남성용 초극세사 기모내의",
+        "피어니스트 여성용 슬림핏 극세사 내의 상하의 세트",
+        "비브삭 여성 내복 기모 발열내의 상하 세트"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "내의",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "아디다스 남성용 데일리 웜웨어 상하의 세트",
+        "경량 발열내의 세트 2color / 겨울내복",
+        "미스터핫 남성 발열 기모내의 1+1 세트"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "내츄럴마미",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.33,
+      "on_ratio": 0.38,
+      "sample": [
+        "약사 설계 임산부 비타민D 2000IU",
+        "피퍼스탠다드 파인애플 발효액 섬유얼룩 제거제",
+        "티타늄 코팅 전문가용 6 in 1 안전 라운드 팁, 반려견, 고양이 및 기타 동물용 헤비 듀티 펫 그루밍 가위 포함 스테인리스강 개 그루밍 가위"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "노래하는",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "커들반 노래하는 리틀 퍼피 작동인형",
+        "블루래빗 아기와 놀아주는 구스파파 멜로디완구",
+        "바나나 봉봉 사운드북:랄랄라 노래하는 아이스크림"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "놀아",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "[최고품질, 당일발송] 로블록스 레인보우 프렌즈 블루 그린 퍼플 오렌지 핑크 레드 인형 스티커 사은품증정",
+        "펫츠루트 카샤카샤 핸디헌터",
+        "이지핏 아일랜드 홈바 식탁의자커버 바체어 바텐 빠 의자 리폼 천갈이 덮개"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "놀이",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "대한민국 대표 간식도전! 진짜 편의점 접기:",
+        "후크룰렛 해적룰렛게임 대",
+        "뜯어만들기: 올스타 포켓몬"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "는장난감",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.22,
+      "on_ratio": 0.12,
+      "sample": [
+        "1000 스네이크큐브 1개 색상랜덤발송",
+        "어린이용 전동 고카트 접이식 전기 카트 휴대용",
+        "피그미다람쥐사육장 아크릴 투명 하우스 대형 햄스터 친칠라"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "백일 상자 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.21,
+      "on_ratio": 0.29,
+      "sample": [
+        "지엠팜 더폴릭포마미 활성엽산 100일분 임산부 엽산 100캡슐 (50캡슐2 박스)",
+        "왕관 돌반지 케이스 선물 포장 상자 백일 반지 보관함",
+        "고함량 활력 에너지 비타민b 활성비타민 플러스 식약청인증 휘게라이프"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "산후조리원 용품 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.4,
+      "sample": [
+        "해피레이 성인용 기저귀 (10매x30팩) 산부인과 산후조리원 요양원",
+        "집쏙 PC 병원용 죽그릇 후식볼 뚜껑 투명 국산찬기 산후조리원",
+        "HAROO 벽걸이 에어컨 바람막이 커튼"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 명함 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "엣지 파스텔 귀돌이 세로명함 깔끔한 심플 고급 디자인 제작 맞춤제작 명함출력 인쇄, 퍼플",
+        "아트사인 쇼케이스(단면 100x150) A1015 POP꽂이",
+        "가방 남자명함지갑 반지갑 여성가방 카드지갑 명함지갑"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 손자국 도장 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.12,
+      "sample": [
+        "DIY액자 인테리어 손도장 추억 교구 투명 핸드프린트",
+        "DIY액자 인테리어 손도장 추억 교구 투명 핸드프린트",
+        "스마트 원목 침대 협탁 옆 미니 사이드 테이블"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 치약 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.0,
+      "sample": [
+        "에너자이저 알카라인 AA 건전지",
+        "[스탠다드]",
+        "세브란스에이투 전용목장 단백우유"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기블록",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.05,
+      "on_ratio": 0.0,
+      "sample": [
+        "옥스포드 EQ플러스 블럭 EQ2033 284p",
+        "마이리틀타이거 씨 월드 블록",
+        "옥스포드 베베 동물퍼즐 디럭스 BB1342 56p"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "임산부 필수품 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.22,
+      "on_ratio": 0.12,
+      "sample": [
+        "원터치 반원형 모기장 침대모기장 텐트형 모기장 지퍼타입 방충망 텐트(열면 사용 가능하며, 모기 방지 필수품입니다)",
+        "요가매트 20mm NBR 두꺼운 필라테스 홈트 운동",
+        "레드선셋 에바 푹신한 무소음 조리원 층간소음 실내화 거실화 슬리퍼"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "체온계",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "국내생산 비접촉 적외선 온도측정기 대경테크 발열체크 1초측정",
+        "공정브릿지 비접촉식 적외선 온도계 FNT010"
+      ]
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "꼬꼬맘",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "로션",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "멸균기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "보행기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.39,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기 한복 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.35,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "아기밥솥 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.38,
+      "on_ratio": 0.83,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "이유식 제조기 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.39,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "임산부",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.38,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "임산부 복대 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "임산부 잡지 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.41,
+      "on_ratio": 0.82,
+      "sample": []
+    },
+    {
+      "blog_id": "baby-hugo",
+      "keyword": "임신 선물이벤트 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.45,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": " PT器具 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "体能训练 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "健身包 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "健身服装 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "复合维生素推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "左旋肉碱推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "支链氨基酸推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "无氧运动 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "氨基酸补给推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "氮泵推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "篮球鞋 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "肌肉增长 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "肌酸推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "能量饮料推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "脂肪燃烧 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "蛋白棒推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "训练服 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "训练鞋 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "谷氨酰胺推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "足球鞋 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "跑步服 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "运动内衣 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "运动水壶 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "运动背包 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "运动鞋 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "锌镁推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "防水包 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "预锻炼推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "鱼油推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "운동器具 세트 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.19,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "근성장련 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "라텍스 장갑 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "합판 바닥매트 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "rubber 바닥매트 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.16,
+      "on_ratio": 0.29,
+      "sample": [
+        "리즈라이너 램 프로마스터 시티 2015-2022 모델 없음 바닥 매트 3D 커스텀 핏 러버 카 측정 라이너 모두 무취 미끄럼 방지 TPE 앞면 검은색",
+        "고무판 흑고무판 1M 길이 방진고무 바닥매트 맨홀덮개 하수구덮개 소음방지",
+        "카맵 쏘울부스터EV전기차 고무 트렁크매트 방수"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "괄약근",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "타포 400만 화소 QHD 주야간 감시 스마트 WiFi 홈 CCTV 실외용, Tapo C320WS, 1개",
+        "부케가르니 딥 클린 초고농축 캡슐 세제, 100개입, 2개",
+        "삼진어묵 오동통 모듬어묵 + 스프, 700g, 1개"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "기능성티셔츠",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "기능성 반팔티 쿨티 3P 티셔츠",
+        "아이더 반팔티 남성 1+1+1 기능성 냉감 쿨링 여름 티셔츠 3팩",
+        "5장 모던프로 스포츠 기능성 드라이 라운드 반팔 티셔츠"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "넓은",
+      "action": "REMOVE_B1",
+      "reason_code": "GENERIC",
+      "avg": 0.25,
+      "on_ratio": 0.38,
+      "sample": [
+        "오뚜기옛날 중국식18mm 넓은당면",
+        "네이처플랙스 UV차단 자유자재 와이어 챙넓은 얼굴소멸 버킷햇 사파리모자",
+        "여리진 여성용 숏/롱기장 완벽 뱃살 커버! 넓은 밴드 와이드 투웨이 조거/와이드핏 바지 팬츠 트레이닝 빅사이즈까지"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "레저",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "☆종일 종합이용권 1인",
+        "1. [골드2시즌] 캐리비안베이 종일권(~8/30)",
+        "종일권 남자 1인권"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "명상 쿠션 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "세레니트 명상 방석 108배 절 전용",
+        "티류으스 명상 방석 요가 좌석 쿠션 인체공학 디자인 장시간 앉아도 무너지지 않는 단단한 지지력 편안한 자세 유지 Z0407",
+        "므스브공방 108배방석 목화솜 대형 린넨 쿠션 70x110"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "스포츠브라",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.03,
+      "on_ratio": 0.0,
+      "sample": [
+        "[서울/삼성] ★8/1★ 씨라이프코엑스아쿠아리움 1인권",
+        "HUTT 창문 로봇청소기 자동 분수 초강흡입력 +리필걸레세트, DDC56",
+        "2+1 출시하자마자 1위 퓨어그램 모공이별 딥클렌징폼 제주 그린티 저자극 폼클렌징 120ml, 3개"
+      ]
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "글루타민",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.61,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "논슬립",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.51,
+      "on_ratio": 0.92,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "다이어트",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.25,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "릴렉스",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.43,
+      "on_ratio": 0.86,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "마사지건",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.83,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "쉐이커",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.6,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "스포츠 마케팅 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "케이블",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.52,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "크레아틴 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "트레이닝",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.63,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "keyword": "회복",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.33,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": " GABA推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": " Mobility营养推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "carb阻断推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "、骨疏松预防推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "一变通畅推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "中性脂肪减少推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "儿童オメガ3推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "儿童综合维生素推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "儿童钙推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "儿童铁推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "元気な老後推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "功能性 건강식품 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.31,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "寿元营养推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "巴西蘑菇추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "的红參 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "螺旋藻推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "가자민산推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "리놀레익애씨드推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "마그네슘제 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "망간推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.08,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "메탄올推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "몰리브덴推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "변비解消推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "비타민C 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "비타민E 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "비타민K 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "아슈아贡 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "아연제 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "엽산 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "오메가7 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "장的运动推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "철분제 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "체중조절 찐떡궁합推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "칼슘제 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "코큐텐推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "폐경期 영양제",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "블랙박추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "세렌자추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "식이섬유 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "유황추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.06,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "인삼 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "키토산 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "트랜스파렌트 산 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "호박씨추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "건강하게",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.17,
+      "on_ratio": 0.38,
+      "sample": [
+        "[더건강하게] 장요근 스트레칭 근막이완 허리 마사지기 도구",
+        "농사친구 해남 무농약 햇 무화과 껍질채 먹는 당일수확 산지직송",
+        "바이엘 베로카 15정x3개 (45정)/발포비타민B"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "대웅제약",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.29,
+      "on_ratio": 0.29,
+      "sample": [
+        "[식물성 멜라토닌+테아닌] 대웅제약 에너씨슬 회복샷 (타트체리맛) 식약청 인증 HACCP 인증",
+        "대웅제약 에너씨슬 집중샷",
+        "[1타 4피!] 대웅제약 에너씨슬 플래티넘 밀크씨슬 (간건강+ 콜레스테롤 + 혈당 + 혈압 관리)"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "더리얼",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "하림펫푸드 어덜트 강아지 더리얼 그레인프리 오븐베이크드 건식사료",
+        "하림펫푸드 어덜트 강아지 더리얼 그레인프리 오븐베이크드 건식사료",
+        "하림펫푸드 어덜트 강아지 더리얼 그레인프리 크런치 건식사료"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "두뇌 건강 영양제 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.17,
+      "on_ratio": 0.25,
+      "sample": [
+        "서울대위바이옴 두뇌엔 닥터PS 70 포스파티딜세린 30p, 60g, 3개",
+        "뉴트리디데이 프리미엄 포스파티딜세린",
+        "보령 메가 브레인 포스파티딜세린 징코 13.5g"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "라즈베리",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "[로켓프레시] 이안 라즈베리 (냉동)",
+        "뉴뜨레 냉동 라즈베리",
+        "냉동 라즈베리"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "마늘 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.14,
+      "on_ratio": 0.12,
+      "sample": [
+        "국내산 26년 햇 깐마늘 갈릭803 창녕 대서마늘, 1개, 1kg(중)",
+        "국내산 깐마늘",
+        "조양FNG HACCP인증 국산 다진마늘"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "무농약 건강식품",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.12,
+      "sample": [
+        "Bgr 국산 압착 납작 귀리 오트밀 350g",
+        "두레생협 국산 무농약 마가루 (200g) 마 분말 파우더",
+        "자연이 키운 무농약 노지 블루베리 생과 신선직송 3kg 상(14~16mm)"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "불면증 영양제 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.17,
+      "on_ratio": 0.12,
+      "sample": [
+        "밸러니티 5mg 식물성 멜라토닌 테아닌 트립토판 15g",
+        "뉴트리올데이 올데이굿나잇 식물성 멜라토닌 5mg 함유 18g",
+        "뉴트리정 식물성 멜라토닌 5mg 함유"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "수삼 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.12,
+      "on_ratio": 0.12,
+      "sample": [
+        "[실속형] 풍기인삼 업소용 삼계탕용 백숙용  세척인삼 무료배송  300g/ 500g/ 1kg (50~60뿌리) 삼영인삼사",
+        "풍기인삼 6~5년근 최상품 황수삼 304g부터 1004g 산지직송 세척수삼 신선배송 건강선물 삼영인삼사",
+        "금산 인삼 수삼 삼계삼 소삼계 삼계탕용 20뿌리 내외 (세척), 1세트, 300g"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "시스테인 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.08,
+      "on_ratio": 0.17,
+      "sample": [
+        "뉴트리코스트 L-시스테인 1000mg 캡슐 120정 3병",
+        "솔가 L-시스테인 500mg 베지터블 캡슐",
+        "나우 푸드 엘-시스테인 500mg"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "알리신 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.12,
+      "on_ratio": 0.25,
+      "sample": [
+        "나우푸드 갈릭 오일 1500mg 소프트젤",
+        "라이프익스텐션 옵티마이즈드 갈릭 베지테리안 캡슐",
+        "알리맥스 알리신 추출물 180mg 30캡슐 마늘 구근 Allisure Allicin"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "엘시스추천",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.17,
+      "on_ratio": 0.17,
+      "sample": [
+        "명일방주 아크나이츠 뮤엘시스 에이야퍄들라 배게 쿠션 방석 인테리어 장식품 38종",
+        "크린톡",
+        "미루나무 국내생산 봄 가을 조거 트레이닝바지 트레이닝복 츄리닝바지 스판조거트레이닝바지(아이오)"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "영지버섯 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.38,
+      "sample": [
+        "국내산100% 영지버섯(홍영지)",
+        "건강중심 국내산 영지버섯 슬라이스",
+        "프리미엄 영지버섯 포자 추출물 면역력 증진 피로 개선 부모님 선물 중년 건강 영양제, 2개, 100회분 2개"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "우울증 영양제 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.35,
+      "on_ratio": 0.38,
+      "sample": [
+        "힐린 세라토판 L 트립토판 500mg 세로토닌 전구체, 3박스, 60정",
+        "불안장애 우울증 호흡곤란 마비정 손 발 떨림 약 영양제",
+        "이포에이 아미노리젠 코어 테아닌 & 트립토판 아미노산"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "집중력 영양제 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.12,
+      "sample": [
+        "힐린 딥포커스 천연 L-도파 벨벳콩 티로신 1000mg, 6개, 60정",
+        "뉴로포커스 콘타드 정 마인드 솔루션, 30정, 3박스",
+        "대웅생명과학 일타비책 공부 집중력 젤리 테아닌 L-아르지닌 타우린 공먹젤"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "코스맥스 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.17,
+      "on_ratio": 0.38,
+      "sample": [
+        "닥터키즈 세라케어샴푸 (런칭특가) 50%한정판매,유아,키즈,패밀리전용 저자극샴푸,피부테스트 0.00저자극,전성분 EWG그린등급,(주)코스맥스,풍성한거품,순한세정,수분유지,모발윤기",
+        "AHC 바이탈 골든 콜라겐 크림",
+        "이지듀 멜라 비 토닝 기미 앰플 쿠션 미니 8g"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "태반추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.22,
+      "on_ratio": 0.25,
+      "sample": [
+        "이너랩 로얄 뷰티 플라센타",
+        "[유지인pick!] 미녀의 콜라겐 양태반 360포 (2.5g x 30포 x 12Box)(직)",
+        "광동 플라센 생기원 플러스 골드(20ml x 30병) 돈태반 최신제품 쇼핑백포함"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "특수 목적 건강식품",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.22,
+      "on_ratio": 0.25,
+      "sample": [
+        "단지, 소고기:의사도 30년 동안 고치지 못했던 자가면역질환을 소고기는 어떻게 1년만에 고칠 수 있었을까",
+        "건강식품 보조식품 꾸지뽕 차 티백 50티백 KS",
+        "KGS금강 주름없는 링클프리 라이즈3D 단열벽지"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "폴리코사놀 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.07,
+      "on_ratio": 0.14,
+      "sample": [
+        "나우푸드 폴리코사놀 20mg 베지 캡슐",
+        "[정품] 플러스케어 폴리코사놀 117.6mg 1일 식약청 인증 해썹",
+        "VITALLEAF 더 폴리코사놀 플러스 600mg 식약청인증 대용량"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "흰삼 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.14,
+      "on_ratio": 0.29,
+      "sample": [
+        "문고리 위의 WUIVIUT 문 코트 선반 욕실 간이 주방용 옷걸이 3 후크 두께 1-34인치",
+        "악세사리 악마뿔 삼에스 오토바이헬멧악마뿔 오토바이헬멧장식",
+        "6년근 풍기 인삼 세척 수삼 인삼 황삼 풍기인삼시장 한보인삼사, 1개, 750g"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "히알루론산 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.15,
+      "on_ratio": 0.38,
+      "sample": [
+        "기타 [최신상시즌3]웰라쥬 리얼 히알루로닉 캡슐 30개입 1박스+앰플1병, 1개",
+        "프랑스와즈 고분자 히알루론산 원액",
+        "나우푸드 히알루로닉 애시드 더블 스트렝스 100mg 베지 캡슐"
+      ]
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": " folate recommendation",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "LDL콜레스테롤 감소",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.38,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "감기 예방 영양제 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.21,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "고순도",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.28,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "구미",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.24,
+      "on_ratio": 0.94,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "기억력",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.38,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "뉴네이처",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.46,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "닥터브라이언",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.46,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "데이팩",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.62,
+      "on_ratio": 0.5,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "배변촉진 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "비오틴 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.62,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "비타민B군 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.56,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "비타민D3 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.56,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "소화효소 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.45,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "스테미나 영양제 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.36,
+      "on_ratio": 0.82,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "여성 종합비타민 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.61,
+      "on_ratio": 0.78,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "역류성 식도염 영양제",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.45,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "오메가3 DHA 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.62,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "장누수 예방 영양제",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.62,
+      "on_ratio": 0.5,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "전립선 건강 영양제 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.5,
+      "sample": []
+    },
+    {
+      "blog_id": "health-hugo",
+      "keyword": "크레아틴 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.55,
+      "on_ratio": 0.91,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "自動猫砂盆推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.15,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지 눈的保护",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지オメガ3",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지ライフジャケット",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지冻干零食",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지抓板",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.4,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지栅栏",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.35,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지牙齿零食",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.25,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지物그릇自动化",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지祭祖用品",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.45,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지自动喂食器",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.15,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지自动饮水机",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.4,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지防晒衣",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지鹿角",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이冒险用品",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이冻干零食",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.16,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이抓板",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.35,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이智能玩具",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이栅栏",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.35,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이牙齿零食",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.25,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이祭祖用品",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.35,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이自动喂食器",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이自动饮水机",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이蝴蝶结",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.07,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이防晒衣",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이鹿角",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이눈的保护",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이물그릇自动化",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.15,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물 防寒用品",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물智能厕所",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.4,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물智能喂水器",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물智能喂食器",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물民宿",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.2,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물涼爽옷",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.45,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물监控",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "펫캠 양방향通话",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "간식",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.25,
+      "on_ratio": 0.38,
+      "sample": [
+        "돌 스위티오 바나나",
+        "달콤바삭 찹쌀 누룽지",
+        "딱딱하지않은 말랑촉촉 까망 쏙다리 오징어다리 납작다리술안주"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지 구충제",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.28,
+      "on_ratio": 0.38,
+      "sample": [
+        "24시간 고양이 육아 대백과:질병 심리 생활 입양 노령묘 케어법까지 모두 알려주는",
+        "고양이 질병의 모든 것:",
+        "염증 해방:병 없이 오래 사는 사람들의 비밀"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "강아지 진드기 예방",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.17,
+      "on_ratio": 0.25,
+      "sample": [
+        "강아지 해충방지 클립 4종세트",
+        "비아파 디메치케어 스파이더 도그 (유통기한2026년12월30일)",
+        "쏘아베 산책전에 스프레이 120ml 진드기 아웃"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "개입",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.11,
+      "on_ratio": 0.38,
+      "sample": [
+        "[로켓프레시] 다조은 비파괴당도선별 샤인머스켓",
+        "서울우유 짜먹는 요구르트 짜요짜요 포도",
+        "서울우유 짜먹는 요구르트 짜요짜요 딸기"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "건강",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.18,
+      "on_ratio": 0.12,
+      "sample": [
+        "유기농마루 정품 유기농 양배추환 50p",
+        "메가도스 비타민C 3000mg",
+        "레모나 상큼한 비타민C 30포"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "귀리",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.21,
+      "on_ratio": 0.43,
+      "sample": [
+        "두보식품 국내산 무농약 귀리쌀",
+        "두보식품 국산 강진 귀리쌀",
+        "현대농산 수입 귀리"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "네이쳐스",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.07,
+      "on_ratio": 0.14,
+      "sample": [
+        "네이처스에어스펀지 오리지널 USA 탈취제 본품",
+        "Nature's Way 얼라이브! 맥스 3 데일리 멀티-비타민 타블렛",
+        "Nature's Way 얼라이브! 맥스 3 데일리 멀티-비타민 타블렛"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "다이어트",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.25,
+      "on_ratio": 0.25,
+      "sample": [
+        "국물까지 다먹어도 79kcal 바로먹는 발효곤약 냉모밀",
+        "밸러니티 체지방감소엔 슬림핏 다이어트 가르시니아 HCA1200 76.5g",
+        "한끼통살 주먹밥 10종 맛보기 세트 (혼합)"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "닭고기",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.15,
+      "on_ratio": 0.25,
+      "sample": [
+        "올품 닭볶음탕용 닭고기 (냉장)",
+        "[로켓프레시] 순살 닭다리살 조각정육 (냉동)",
+        "하림 자연실록 무항생제 인증 닭 안심 (냉장)"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "더힐스",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.1,
+      "on_ratio": 0.25,
+      "sample": [
+        "아트푸드 동결건조 딸기 딸기칩",
+        "귤탐 당도선별 11brix 감귤 세트",
+        "힐스랩 콤부차 복숭아, 5g, 15개입 분말스틱"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물 해외여행",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "더블룸",
+        "더블룸",
+        "슈페리어 스튜디오"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물 호텔",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.1,
+      "on_ratio": 0.0,
+      "sample": [
+        "더블룸 - 공용 욕실",
+        "더블룸",
+        "더블룸"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "솔리드골드",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.15,
+      "on_ratio": 0.25,
+      "sample": [
+        "14K골드필드부자재 크림프커버(1개) 2mm 3mm 3.2mm 4mm",
+        "10pcs 5.08mm IDE 커넥터 4 핀 D 모양 웨이퍼 스트레이트 직각 PCB 솔더 몰 렉스 빅 4P ATX 전원 소켓",
+        "자동넥타이_GA8010 솔리드 골드 엘로우 60644ea 1(PC)"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "아임스",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.05,
+      "on_ratio": 0.12,
+      "sample": [
+        "대웅제약 대웅 코큐텐 100mg 60캡슐",
+        "절여도 무르지 않는 아삭한 대상가을무 김장무 씨앗 1200립 바람들이 동공발생 저항성 종자",
+        "머니마니추천샵 쇼케이스(단면) 10개입 탁상액자"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "카나가와",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.11,
+      "on_ratio": 0.12,
+      "sample": [
+        "카나가와 Kanagawa 미싱실 GX 60수 3000m 53번색",
+        "전철 일본가챠키링 지하철 역 일본 성지순례 기념품 열쇠고리",
+        "Kanagawa 카나가와 미싱실 GX 100번수 10000m 키나리"
+      ]
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이 구충제",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.42,
+      "on_ratio": 0.83,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "고양이 양말 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.25,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "논슬립",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.43,
+      "on_ratio": 0.83,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "닭가슴살",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.25,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "닭안심",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.29,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "도움",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.3,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "라이프스타일",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.27,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "반려동물 향수",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.38,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "유니챠름",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "pet-hugo",
+      "keyword": "이노베이트",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.35,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "조리",
+      "action": "REMOVE_B1",
+      "reason_code": "OFF_TOPIC",
+      "avg": 0.11,
+      "on_ratio": 0.25,
+      "sample": [
+        "이더커머스 1+1 논슬립 푹신한 EVA 쪼리",
+        "미로드 남여공용 웨이브 발편한 아치 EVA 쿠션 슬리퍼 쪼리",
+        "나이키 슬리퍼 쪼리 마리나 슬라이드 플립플랍 남여공용 여름 아쿠아 커플 신발 with VIVAJS"
+      ]
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "가위",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.52,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "라이스",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.25,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "세제",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "에어프라이어",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.52,
+      "on_ratio": 0.95,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "와플",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "전기압력솥 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.85,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "전기포트",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.33,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "착즙기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.62,
+      "on_ratio": 0.75,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "케이크",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "keyword": "토스터",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.56,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "글루타치온",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "대웅제약",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "왁싱 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "핸드마사지 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "그린티",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.09,
+      "on_ratio": 0.12,
+      "sample": [
+        "베티나르디 녹차 삼각티백",
+        "토니모리 더 촉촉 그린티 수분 2종 세트",
+        "루카스나인 시그니처 그린티라떼"
+      ]
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "나이아신",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.33,
+      "on_ratio": 0.33,
+      "sample": [
+        "나우푸드 나이아신아마이드 500mg 캡슐",
+        "디오디너리 나이아신아마이드 징크 에센스",
+        "더마팩토리 나이아신아마이드 20% 세럼"
+      ]
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "리프팅",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.32,
+      "on_ratio": 0.38,
+      "sample": [
+        "약손명가헬스케어 작은얼굴관리 골기프로그램 밴드",
+        "리프팅 테이프 얼굴 리프팅테이프 40P",
+        "MIFAN V라인 무선 LED진동 페이셜마사지기 EMS 고주파마사지기 리프팅 얼굴 마사지기"
+      ]
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "제모 크림 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "라비킷 유아용 와이드 이탈방지 경추베개, 화이트",
+        "옹골찬 GAP 경산 천도복숭아, 2kg, 1개",
+        "[경기] 양평 양떼목장 ★특가★"
+      ]
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "탈모샴푸 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.15,
+      "on_ratio": 0.25,
+      "sample": [
+        "페이퍼플레인키즈 아동 장화 키즈 레인부츠 남아 여아 유아 주니어 초등 어린이 신발 핸들",
+        "동서가구 이즈 카이 LED 1단 3서랍 수납침대 프레임 + 본넬 양면 매트리스 세트 방문설치",
+        "[로켓프레시] 농협안심한우 숙성등심 1등급 구이용 (냉장)"
+      ]
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "토니크 추천",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.09,
+      "on_ratio": 0.12,
+      "sample": [
+        "토니모리 스네일 토너 촉촉보습 저자극 토너, 140ml, 5개",
+        "토니크 Toniiq 알파 GPC 600mg 120캡슐",
+        "토니크 글루타치온 울트라 하이 퓨리티 1000mg 240캡슐 글루타티온"
+      ]
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "각질제거제 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.55,
+      "on_ratio": 0.91,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "립 라이너 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "립 앤 아이 리무버 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.83,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "메이크업 픽서 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "바디 스크럽 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "바디 오일 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.22,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "발톱 정리 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "벨벳 틴트 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "염색약 셀프 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "프라이머 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.55,
+      "on_ratio": 0.91,
+      "sample": []
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "keyword": "핸드솝 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.82,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": " спиртовой горелка 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "LED조명推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "air mattress推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "cooler bag推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "food cooler推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "heat pack推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "アイゼン推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "中级 Camping推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "初级 Camping推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "暖宝宝推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "炭火推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "等산杖 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "等산백推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "轻量化 Camping 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "进阶 Camping推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "速干衣推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "가을 Camping 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "간소화된 Gear推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "간이조명推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "간이카봇推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "매트리스 inflator 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "매트리스 repair kit 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "바베큐 그릴推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "방수바지推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "방풍外套推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "배낭카봇推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "선喷雾 추천",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "손전등推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "숯推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "숲 Camping推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "침낭大人用推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "침낭孩童用推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "침낭超值推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "카봇推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캠핑 의자折叠 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캠핑 테이블折叠 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캠핑基础装备推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캠핑照明推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캠핑카봇推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "쿨러 hard cooler推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "쿨러 wheel 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.5,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "크ампоинг 推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "텐트的氛围灯推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "텐트维修工具推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "통기성 옷推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "헤드랜턴推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "호수 Camping推荐",
+      "action": "REMOVE_A",
+      "reason_code": "A_FOREIGN_RE",
+      "avg": 0.3,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "공원",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "난방",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "내열",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "누벅",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.01,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "다목적",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "돔형",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "등받이",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "디링크",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "라운지",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "러기지 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "레더",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "리클라이너",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "리터",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "리퍼",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.09,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "머그컵 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "멀티끈",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.1,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "물의병 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "선글라스 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.05,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "선크림 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.04,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "스니커즈 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.08,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "양말 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "조리도구 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캐미솔 추천",
+      "action": "REMOVE_B0",
+      "reason_code": "B0_NO_ALLOWED",
+      "avg": 0.0,
+      "on_ratio": null,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "가스",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.22,
+      "on_ratio": 0.25,
+      "sample": [
+        "탐사X맥스부탄 휴대용 가스버너 + 케이스 포함",
+        "별이네파티 일회용 헬륨가스 30개용",
+        "캡스톤 휴대용 가스렌지 CS-2000 /  샌드베이지"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "감성",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.2,
+      "on_ratio": 0.38,
+      "sample": [
+        "16컬러 무선 리모컨 픽셀 LED 랜턴 벽 무드등 충전식",
+        "레나에너지 빈티지 우드 무드등",
+        "도이도이 Y2K 감성 휴대용 C타입 MP3 8GB"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "난로",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.38,
+      "sample": [
+        "포첸 2단 쿼츠 히터",
+        "홈플래닛 전기히터",
+        "신일 오방향 전기히터 고급형 오방난로 가정용 사무실 난방기 절전형"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "난방기",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.12,
+      "on_ratio": 0.25,
+      "sample": [
+        "홈플래닛 PTC 타워 리모컨 온풍기",
+        "포첸 2단 쿼츠 히터",
+        "삼성전자 스탠드 냉난방기 냉온풍기 15평형 18평형 23평형 30평형 36평형 40평형 모음"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "난방기구",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.38,
+      "sample": [
+        "신일 미니 석영관 전기히터",
+        "홈플래닛 리모컨 컨벡션 히터",
+        "루베크 오방난로 오방향 전기 히터 난방기구 스토브 사무실 가정용 전열기 RU-505HM"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "더블",
+      "action": "REMOVE_B1",
+      "reason_code": "GENERIC",
+      "avg": 0.21,
+      "on_ratio": 0.43,
+      "sample": [
+        "파스텔 매트리스 커버/매트리스 커버/퀸 매트리스 커버/매트리스 커버",
+        "더블러드 올인원 혈관 혈압 혈당 혈행 콜레스테롤 케어 관리 영양제",
+        "Roomxyd 냉감패드 쿨잠 쿨매트 여름 쿨링 냉패드 아이스 침대패드"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "듀얼",
+      "action": "REMOVE_B1",
+      "reason_code": "GENERIC",
+      "avg": 0.03,
+      "on_ratio": 0.12,
+      "sample": [
+        "조아애드 톡4 EV 듀얼 시크릿 주차번호판",
+        "투쿨포스쿨 듀얼 컨투어 스틱",
+        "헤미션 고중량 듀얼 모니터암 인체공학 홀/클램프 타입 겸용  ARM002"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "등급",
+      "action": "REMOVE_B1",
+      "reason_code": "GENERIC",
+      "avg": 0.06,
+      "on_ratio": 0.12,
+      "sample": [
+        "레아하브 아쿠아스핀 미니스프링쿨러 점적기",
+        "찰떡픽스 무타공 접착식 후크 15개",
+        "[VITAZEN] 비타젠 오비엑스 코어컷 레몬밤 Ob-X"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "레저",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.0,
+      "on_ratio": 0.0,
+      "sample": [
+        "☆종일 종합이용권 1인",
+        "1. [골드2시즌] 캐리비안베이 종일권(~8/30)",
+        "종일권 남자 1인권"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "레토",
+      "action": "REMOVE_B1",
+      "reason_code": "BRAND_FRAGMENT",
+      "avg": 0.2,
+      "on_ratio": 0.38,
+      "sample": [
+        "레토 무선 갓 LED 스탠드 무드등",
+        "레토 자동 센서 스마트 종량제 휴지통 22L LLT-A01",
+        "레토 강아지 플라워 당근밭 담요 매트 노즈위크 장난감"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "로티",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.25,
+      "on_ratio": 0.25,
+      "sample": [
+        "[로켓프레시] 랜시 파라타 PLAIN (냉동)",
+        "냉동 스프링홈 로띠파라타 플레인 325g Roti Paratha plain",
+        "로티캠프 내장 에어펌프 캠핑 휴대용 자충 오토펌프 에어매트"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "모기향 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.07,
+      "on_ratio": 0.14,
+      "sample": [
+        "킬파프 파워 리퀴드 모기약 45일 리필액 29mL, 10개",
+        "해피홈 파워매트S 리필 78p + 코드형 훈증기 세트, 4개",
+        "홈키파 모기향 50p"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "물놀이용품 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.05,
+      "on_ratio": 0.12,
+      "sample": [
+        "쟈니베어 휴대용 대형 그란데 비치타월 140 x 70 cm",
+        "그린핑거 물놀이 유아 선크림 워터프루프 SPF50+ PA++++",
+        "마이리틀타이거 뜰채 낚시 놀이"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "물통 필터 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.11,
+      "on_ratio": 0.12,
+      "sample": [
+        "브리타 막스트라 호환 오아세 프로쉬 정수기 필터, 3개, 브리타 호환 프로쉬 필터",
+        "브리타 정수기 필터 6개입 한국형 필터 고품질 천연 코코넛 활성탄 정수 막스트라 호환, 1세트, 6개입(본품1개+필터6개)",
+        "미세플라스틱 없애주는 생수필터 리얼워터 (3+2팩)=5개"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "바람막이 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.25,
+      "sample": [
+        "오프앤 남자 두줄 사선 트랙 하이넥 집업 오버핏 바람막이 자켓",
+        "COSYEVNO 봄가을 방수 바람막이 양면 커플 캐주얼 재킷 남녀",
+        "민트스쿨 남녀공용 방수 바람막이 등산 간절기 점퍼 커플자켓 6266s"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "방한용품 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.38,
+      "sample": [
+        "알래스카 발핫팩",
+        "인콘트로 멜란지 후드넥워머",
+        "한솔템 프리미엄 겨울 방한 넥워머 1+1"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "보온병 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.18,
+      "on_ratio": 0.25,
+      "sample": [
+        "써모스 뉴 데일리 원터치 텀블러",
+        "모멘 그랜드 워터저그 대용량 텀블러 캠핑물통 수통 아이스팟, 블랙, 1개, 2L",
+        "내셔널지오그래픽 에어터치 이중 스테인리스 스틸 텀블러"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "접이식테이블",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.05,
+      "on_ratio": 0.12,
+      "sample": [
+        "하루꿈 접이식 테이블 높이조절 원목 책상 식탁 다용도 원룸 거실 주방 간이 홈 테이블",
+        "MANTU 다용도 휴대용 경량 접이식 테이블",
+        "코멧 홈 다용도 접이식 좌식 600 테이블"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "캠핑 신발 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.25,
+      "on_ratio": 0.38,
+      "sample": [
+        "더보누르 족저근막 리커버리 아치 샌들 무중력 쿠션 슬리퍼",
+        "더보누르 남성 족저근막 무중력 쿠션 리커버리 아치 샌들 슬리퍼",
+        "콜맨 4계절 코르크 캠핑화 6가지 칼라"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "케터핀 추천",
+      "action": "REMOVE_B1",
+      "reason_code": "GARBLED",
+      "avg": 0.14,
+      "on_ratio": 0.12,
+      "sample": [
+        "헤비 듀티 웨이트 스택 핀-웨이트블럭 보조기구 핀, 1개, 검은색",
+        "휴대용 공구함 툴박스 및 시스템 수지 System 모듈러 케터 롤 검은색 상자 롤링 소형",
+        "ETEK EK101 2 핀 타입 구리 버스바, 크로스 섹션 10mm 12way MCB 커넥터, 버스바 연결 차단기, 빗질 단자, 1P 63A"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "키친세트 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.1,
+      "on_ratio": 0.25,
+      "sample": [
+        "H HNMA HN 원목 손잡이 실리콘 주방용품 세트 수납통 포함 코팅팬 안전 요리도구 비철 프로모션 여름 대형 할인 패션 위크 조리도구 실리콘, 1세트, 화이트, 8종",
+        "DAMDA 모노라인 키친툴+거치대 9종 세트, 1세트, 화이트, ver.01",
+        "바겐슈타이거 에델 실리콘 키친툴 4종 세트"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "테팔 추천",
+      "action": "KEEP_B1",
+      "reason_code": "UNCERTAIN",
+      "avg": 0.04,
+      "on_ratio": 0.12,
+      "sample": [
+        "테팔 인덕션 티타늄 엑셀런스 프라이팬, 20cm, 1개",
+        "해피콜 매시브 다이아몬드 IH 프라이팬 4종세트, 1개, 28cm",
+        "테팔 티타늄 1X 심플쿡 프라이팬"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "해먹",
+      "action": "REMOVE_B1",
+      "reason_code": "NO_MATCH",
+      "avg": 0.03,
+      "on_ratio": 0.0,
+      "sample": [
+        "[김포] 호텔 마리나베이 코리아★오늘만이가격★와우회원 최대40%할인 초특가★룸UP상품 추가 판매중★",
+        "[평창] [본사직영] 휘닉스 리조트 평창, 숙박세일페스타 쿠폰 사용가능!",
+        "종가 포기김치, 2.3kg, 1개"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "후드 바람막이 추천",
+      "action": "KEEP_B1",
+      "reason_code": "TOPIC_MATCH",
+      "avg": 0.2,
+      "on_ratio": 0.38,
+      "sample": [
+        "남녀공용 초경량 자외선차단 바람막이 자켓 여름용 방풍 후드 집업 커플 아웃도어 등산 캠핑 점퍼",
+        "헤드 남녀공용 베이직 긴팔 후드 집업 바람막이",
+        "오프앤 남자 두줄 사선 트랙 하이넥 집업 오버핏 바람막이 자켓"
+      ]
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "강철",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "글러브",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "글로브",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.4,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "기능성 양말 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.29,
+      "on_ratio": 0.95,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "노스페이스",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.35,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "리얼그립",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.31,
+      "on_ratio": 0.88,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "매트리스",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "모자",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "모자 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.45,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "스노우슈 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.45,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "스노클링용품 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "식기",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.25,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "식기 세트 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.41,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "우비",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "자외선차단 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.25,
+      "on_ratio": 0.9,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "정리함",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.28,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "쿨러",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.44,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "쿨링타월 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.33,
+      "on_ratio": 0.8,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "트레일 러닝화 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.2,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "핫팩 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.33,
+      "on_ratio": 0.89,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "헤드밴드 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    },
+    {
+      "blog_id": "camping-hugo",
+      "keyword": "헤어밴드 추천",
+      "action": "KEEP_C",
+      "reason_code": "C_ON_RATIO_HIGH",
+      "avg": 0.5,
+      "on_ratio": 1.0,
+      "sample": []
+    }
+  ]
+}
