@@ -18,6 +18,7 @@ import hashlib
 import hmac
 import logging
 import os
+import re
 import sqlite3
 import sys
 from datetime import datetime, timedelta
@@ -29,8 +30,22 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from dotenv import load_dotenv
 
 load_dotenv("/Users/twinssn/Projects/5000/.env")
-
 logger = logging.getLogger(__name__)
+
+# ── CJK 패턴 (한중일 한자 + 가나) ──
+CJK_PATTERN = re.compile(r'[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF]')
+
+# CJK 감지는 shared 단일소스(has_cjk) 사용 — 소스단은 원본을 변형하지 않는다.
+from shared.validators import has_cjk
+
+def flag_cjk(text: str) -> bool:
+    """상품명 등 외부 텍스트의 CJK 포함 여부만 관측(원본 불변).
+    치환/삭제는 하지 않는다 — 의미 파괴(파편·오역)를 막기 위해,
+    실제 정제는 writer의 제목 검증/재생성(4관문)이 담당한다."""
+    return has_cjk(text)
+
+
+
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "curation.db")
 BASE_URL = "https://api-gateway.coupang.com"
@@ -273,6 +288,9 @@ def collect_keyword(keyword) -> bool:
     conn = sqlite3.connect(DB_PATH)
     now = datetime.now().isoformat()
     for p in products:
+        # (a) 소스 단계: 원본 보존 + CJK 포함 여부만 관측(변형 금지)
+        if flag_cjk(p["productName"]):
+            logger.info(f"[CJK감지] 상품명에 CJK 포함(원본 유지): {p['productName'][:60]}")
         conn.execute(
             """INSERT OR REPLACE INTO products
                (keyword, product_id, product_name, product_price, product_image,

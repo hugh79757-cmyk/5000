@@ -2,8 +2,13 @@
 import logging
 import os
 import re
+import sys
 
 import requests
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from pipelines.curation.collector import flag_cjk
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +151,10 @@ def enrich_products(products, blog_id):
     """상품 리스트에 스펙 + 브랜드 정보 추가"""
     for p in products:
         name = p.get("product_name", "")
+        
+        # (a) 인리치 단계: 원본 보존 + CJK 포함 여부만 관측(변형 금지)
+        if flag_cjk(name):
+            logger.info(f"[CJK감지] 인리치 상품명에 CJK 포함(원본 유지): {name[:60]}")
 
         # 1) 상품명 정규식 파싱
         p["parsed_specs"] = _parse_specs_from_name(name, blog_id)
