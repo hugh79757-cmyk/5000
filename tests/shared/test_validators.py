@@ -155,7 +155,14 @@ class TestAssertKoreanOrReject:
     def test_chinese_content_returns_error(self):
         result = assert_korean_or_reject("中文标题", "这是一个中文文本", "test-blog")
         assert result is not None
-        assert "Chinese" in result
+        # (2026) 제목 CJK 게이트가 먼저 걸림 → "CJK in title" 반환
+        assert "CJK" in result or "Chinese" in result
+
+    def test_cjk_title_with_korean_body_rejected(self):
+        # 희석 구멍 회귀 방지: 제목 CJK + 긴 한국어 본문이어도 reject 되어야 함
+        result = assert_korean_or_reject("智能玩具 추천", "한국어 본문입니다. " * 30, "test-blog")
+        assert result is not None
+        assert "CJK" in result
 
     def test_mixed_korean_english_accepts(self):
         result = assert_korean_or_reject("서울 맛집 best 5", "서울의 맛집 top 5를 소개합니다", "test-blog")

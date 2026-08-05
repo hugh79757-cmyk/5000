@@ -13,6 +13,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from shared.ai_writer import generate as ai_generate
+from shared.validators import has_cjk
 from shared.title_templates import TitleTemplatePicker
 
 ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
@@ -547,6 +548,9 @@ def _validate_title(title):
         return False
     # 괄호 절대 금지
     if re.search(r"[()（）]", title):
+        return False
+    # (2026) CJK(한중일 한자/가나) 포함 시 거부 → 재생성 트리거
+    if has_cjk(title):
         return False
     for pat in _TITLE_TEMPLATE_PATTERNS:
         if pat.search(title):

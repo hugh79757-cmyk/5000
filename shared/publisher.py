@@ -77,9 +77,18 @@ def get_blog_config(blog_id):
 
 
 def slugify(text):
-    text = re.sub(r"[^\w\s가-힣-]", "", text)
-    text = re.sub(r"[\s]+", "-", text.strip())
-    return text.lower()[:80]
+    # (2026) 화이트리스트: 한글, 영숫자(ASCII), 공백, 하이픈만 허용.
+    # 기존 \w 는 유니코드 한자를 포함해 CJK가 slug에 남던 문제 → 아래로 교체.
+    original = text or ""
+    t = re.sub(r"[^0-9A-Za-z가-힣\s-]", "", original)
+    t = re.sub(r"[\s]+", "-", t.strip())
+    t = re.sub(r"-{2,}", "-", t).strip("-")
+    slug = t.lower()[:80]
+    # (2026) 빈 slug 폴백 — 원본 text 기반 해시로 충돌 방지 (빈문자 해시 금지).
+    if not slug:
+        import hashlib
+        slug = "post-" + hashlib.md5(original.encode("utf-8")).hexdigest()[:8]
+    return slug
 
 
 # ===== 2026-05-01: front matter sanitize / 검증 헬퍼 =====

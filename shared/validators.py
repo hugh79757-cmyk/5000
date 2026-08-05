@@ -16,6 +16,22 @@ _AI_RESIDUES = ["다듬은 제목", "추천 제목", "title:", "제목 후보",
                 "1단계에서", "2단계에서", "3단계에서", "4단계에서",
                 "정리하면 다음과 같습니다", "핵심 요약을", "다음과 같습니다"]
 
+# ===== CJK 단일소스 (2026) : collector/writer/publisher 공통 import 대상 =====
+CJK_CHARS = re.compile(r'[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF]')
+
+def has_cjk(text: str) -> bool:
+    """한중일 한자/가나 포함 여부. 한글(가-힣)은 CJK로 보지 않는다."""
+    if not text:
+        return False
+    return bool(CJK_CHARS.search(text))
+
+def cjk_chars(text: str):
+    """텍스트 내 CJK 문자 목록 (진단/로깅용)."""
+    if not text:
+        return []
+    return CJK_CHARS.findall(text)
+
+
 def sanitize_title(title: str) -> str:
     """제목에서 마크다운 잔여물 제거 + 연속 중복 단어 제거 + 부분 중복 제거
     + (Phase 7) 날짜 prefix 제거 + 특수문자 정규화 + 65자 소프트 트렁케이션"""
@@ -182,7 +198,11 @@ def is_korean_content(text: str, min_hangul_ratio: float = 0.5) -> bool:
 
 
 def assert_korean_or_reject(title: str, body_md: str, blog_id: str) -> str | None:
-    """한국어 비율 검증 — 기준 미달 시 오류 메시지 반환"""
+    """한국어 비율 검증 — 기준 미달 시 오류 메시지 반환.
+    (2026) 제목 단독 CJK 검사 선행 — 본문 희석으로 뚫리던 구멍 차단."""
+    if has_cjk(title):
+        logger.warning(f"[lang] 제목 CJK 감지: {blog_id} — 제목={title[:40]} cjk={cjk_chars(title)}")
+        return f"CJK in title: {title[:40]}"
     if not is_korean_content(title + body_md, min_hangul_ratio=0.5):
         logger.warning(f"[lang] 중국어 감지: {blog_id} — 제목={title[:40]}")
         return f"Chinese content detected: {title[:40]}"
