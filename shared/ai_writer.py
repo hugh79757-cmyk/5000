@@ -274,7 +274,7 @@ def generate(
 
 
 def generate_car(prompt_text, data):
-    """자동차 전문 글 생성 — DeepSeek 기본, 중국어 검증"""
+    """자동차 전문 글 생성 — DeepSeek 기본, 중국어 검증, 오염 방어"""
     import json
     from datetime import datetime
 
@@ -363,7 +363,7 @@ def generate_car(prompt_text, data):
 - H3 사용 금지. 모든 소제목은 H2(##)만 사용하세요.
 - 글을 절대 일찍 끝내지 마세요. 마지막 H2 섹션도 5문장 이상으로 작성하세요.
 
-## 공통 강화 규칙 (모든 글 필수 적용)
+## 공통 강화 규칙 (모든 글 필수 적용):
 
 ### 도입부
 - 첫 문장은 반드시 독자의 현실적 고민 또는 구체적 상황으로 시작하라.
@@ -385,6 +385,53 @@ def generate_car(prompt_text, data):
     result = generate(system_prompt, user_prompt, tier="default")
     if result and result.get("content"):
         _body = result["content"]
+        
+        # 오염 방어: AI 응답 파싱 및 검증
+        try:
+            from shared.ai_response_parser import parse_ai_response
+            parse_result = parse_ai_response(_body)
+            
+            # 사고과정 누수 시 발행 차단
+            if parse_result['has_thinking_leak']:
+                logger.error(f"[ai_writer] 사고과정 누수로 인한 발행 차단: {parse_result['leak_pattern']}")
+                raise RuntimeError(f"사고과정 누수 감지: {parse_result['leak_pattern']}")
+            
+            # 폴백 사용 시 사유 로깅
+            if parse_result['is_fallback']:
+                logger.warning(f"[ai_writer] 폴백 응답 사용됨: {parse_result['title'] is None}")
+                if not parse_result['title']:
+                    logger.warning("[ai_writer] 명시적 제목 추출 실패 - H1 대체 시도")
+            
+            _title = parse_result['title']
+            _body = parse_result['body']
+            
+        except ImportError:
+            logger.warning("[ai_writer] ai_response_parser 미설치 - 기존 로직으로 진행")
+            # 표 전후 빈 줄 보장 (Hugo Goldmark 호환)
+            _lines = _body.split("\n")
+            _out = []
+            for _i, _ln in enumerate(_lines):
+                if (
+                    _ln.startswith("|")
+                    and _i > 0
+                    and _out
+                    and not _out[-1].startswith("|")
+                    and _out[-1].strip() != ""
+                ):
+                    _out.append("")
+                _out.append(_ln)
+                if (
+                    _ln.startswith("|")
+                    and _i + 1 < len(_lines)
+                    and not _lines[_i + 1].startswith("|")
+                    and _lines[_i + 1].strip() != ""
+                ):
+                    _out.append("")
+            return "\n".join(_out)
+        except Exception as e:
+            logger.error(f"[ai_writer] 응답 파싱 중 오류: {e}")
+            raise
+        
         # 표 전후 빈 줄 보장 (Hugo Goldmark 호환)
         _lines = _body.split("\n")
         _out = []

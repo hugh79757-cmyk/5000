@@ -121,7 +121,7 @@ blogs:
     - '16:10'
     - '20:10'
   site_path: /Users/twinssn/Projects/cap/hotissue-hugo
-  status: active
+  status: paused
   theme: PaperMod
   managed_by: pipeline
   funnel_stage: landing
