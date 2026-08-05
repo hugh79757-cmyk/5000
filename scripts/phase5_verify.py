@@ -101,6 +101,11 @@ def scan_content(title, body):
             m = regex.search(full_text)
             if m:
                 findings.append({"pattern": pname, "context": m.group()[:50]})
+        elif pname == "ko_thinking":
+            # 전체 본문 검사 (500자 이후 마커 누수 방지)
+            m = regex.search(full_text)
+            if m:
+                findings.append({"pattern": pname, "context": m.group()[:80]})
         else:
             m = regex.search(full_text[:500])
             if m:
