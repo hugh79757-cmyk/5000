@@ -1,87 +1,41 @@
-.env
-config/api_keys.yaml
-data/content.db
-data/content.db-journal
-__pycache__/
+```gitignore
+# Compiled Python files
 *.pyc
-.venv/
-node_modules
-*.bak
-.aider*
-credentials.json
-blogger_token.pickle
-*.pickle
+__pycache__/
+
+# Database files
 *.db
-public/
-static/images/
-logs/
-rankingoneto-1-1/
-*.deprecated
-nomad_writer.py.bak
-data/*.db
-data/*.db.bak*
-data/*.deprecated
-data/cooldown.json
-data/failure_count.json
-static/images/posts/.wrangler/
 
-# DB backups & temp files
-data/backups/
-data/*.db-shm
-data/*.db-wal
-data/*.db-journal
-data/*.empty_*
-data/*.m4_before_*
-**/*.bak_*
-themes/
-resources/
-hugo_stats.json
-# pipelines/ — 하위 민감파일만 개별 지정
+# Environment files
+.env
+.env.local
+*.env.*
 
-# ===== 2026-05-01 보완: 경로 무관 + 모든 bak 변형 =====
-# 비밀파일 (모든 하위 경로)
-**/client_secret*.json
-**/*token*.json
-**/*token*.pickle
-**/credentials*.json
-**/api_keys.yaml
-**/api_keys.yml
+# Dependencies
+.venv/
+venv/
+node_modules/
 
-# 백업파일 변형 전부
-*.bak*
-*bak2
-*bak3
-*bak4
-*bak5
-*_bak
-*.fix_bak
-*.final_bak
-*.v1_bak
-*.move
-*.new
-*.pre_*
-*.tone_bak
-*_phase*
+# Logs and temp files
+*.log
+*.tmp
+*.swp
 
-.DS_Store
-**/.DS_Store
+# Editors
+.vscode/
+.idea/
 
-.DS_Store
-**/.DS_Store
-
-# Coverage
+# Coverage reports
+coverage/
+htmlcov/
 .coverage
 
-# 하이픈 bak 변형 (2026-05-01 보강)
-*-bak
-*-bak[0-9]
-*.dedup-bak
-*.feat-bak
-*.topic-bak
-*.ev-bak
-*.ev[0-9]-bak
-*.map-bak
-*.map[0-9]-bak
-.wrangler/
-.DS_Store
-content/.DS_Store
+# Build directories
+dist/
+build/
+target/
+
+# Python cache
+.mypy_cache/
+.pytest_cache/
+```
