@@ -67,6 +67,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-05 | golf-hugo/bike-hugo no_keyword 발행 실패 해소 — golf/bike 키워드 24개 수동 수집(products ≥3건) + 스케줄러 재시작(PID 54024→12380, auto_collector 2985개 로드) + scheduler.py catchup/register 시각 파싱 방어 가드 (tap-blogger YAML sexagesimal 600/840 크래시 차단) | `2871c889c`, `64a9874a9` |
 | 2026-08-05 | cuap 15개 블로그중 오늘 만든 5개 블로그가 클라우드 플레어 설정이 완료가 안됐다. 배포까지 완료해줘. (massage/car/homeappliance/golf/bike-hugo custom domain 바인딩 + 배포, WORKERS_BLOGS 추가) | `633678a40` + CUAP `9712f78`, `59f3647` |
 | 2026-07-26 | Fix _validate_frontmatter split("---") regression — description 내 markdown table separator(---)로 YAML 파싱 실패 → regex 기반 분리로 수정 (rap3/4/5 발행 실패 5건 원인 해결) | `4bda255f6` |
 | 2026-07-11 | kuta-hugo 썸네일 깨짐 수정 — batch_thumbnails.py 실행, R2 업로드 확인. blogsmith auto-publisher 썸네일 자동 생성 여부 조사 완료 (gradient overlay 방식, 5000 pipeline 발행 글은 수동 필요) | `완료` |
@@ -198,4 +199,4 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-01 Phase 49 Cross-link Bugfix 재검증 완료 (SUMMARY + STATE 정리, phantom 10건 정리)*
+*Last updated: 2026-08-05 - Completed quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*
