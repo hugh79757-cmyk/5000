@@ -20,7 +20,7 @@ PATTERNS = {
     },
     # 2. 영어 사고과정 누수
     "en_thinking": {
-        "regex": r"(?:^|\n)\s*(?:The user has provided|Let me re-?[Rr]ead|Wait,|we need to|Let me|I should|Actually,|First,)\b",
+        "regex": r"(?:^|\n)\s*(?:The user (?:has provided|wants me|said|is asking)|Let me re-?[Rr]ead|Wait,|we need to|Let me (?:write|check|look|verify|start|create)|I should (?:write|check|note|add)|Actually,|First,)\b",
         "lang": "en", "severity": "high"
     },
     # 3. 중국어/일본어 누수 — 간체 키워드
@@ -129,6 +129,26 @@ def scan_file(filepath):
                 })
             # ko_thinking: 전체 본문 검사 (500자 이후 마커 누수 방지)
             if pname == "ko_thinking":
+                if re.search(regex, content):
+                    m = re.search(regex, content)
+                    findings.append({
+                        "pattern": pname,
+                        "lang": lang,
+                        "severity": severity,
+                        "context": m.group()[:100] if m else ""
+                    })
+            # en_thinking: 전체 본문 검사 (500자 이후 영어 누수 방지)
+            if pname == "en_thinking":
+                if re.search(regex, content):
+                    m = re.search(regex, content)
+                    findings.append({
+                        "pattern": pname,
+                        "lang": lang,
+                        "severity": severity,
+                        "context": m.group()[:100] if m else ""
+                    })
+            # prompt_instruction_leak: 전체 본문 검사 (500자 이후 지시문 누수 방지)
+            if pname == "prompt_instruction_leak":
                 if re.search(regex, content):
                     m = re.search(regex, content)
                     findings.append({
