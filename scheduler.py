@@ -626,6 +626,15 @@ def register_schedules():
         blog_id = blog["id"]
         times = blog.get("schedule", {}).get("times", [])
         for t in times:
+            parts = str(t).split(":")
+            if len(parts) != 2:
+                logger.warning(f"SCHEDULE: 잘못된 스케줄 시각 무시 — {blog_id} time={t!r}")
+                continue
+            try:
+                h, m = map(int, parts)
+            except ValueError:
+                logger.warning(f"SCHEDULE: 잘못된 스케줄 시각 무시 — {blog_id} time={t!r}")
+                continue
             schedule.every().day.at(t).do(queue_publish, blog_id)
             job_count += 1
 
