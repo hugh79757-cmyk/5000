@@ -127,6 +127,16 @@ def scan_file(filepath):
                     "severity": severity,
                     "context": m.group()[:100] if m else body_start[:100]
                 })
+            # ko_thinking: 전체 본문 검사 (500자 이후 마커 누수 방지)
+            if pname == "ko_thinking":
+                if re.search(regex, content):
+                    m = re.search(regex, content)
+                    findings.append({
+                        "pattern": pname,
+                        "lang": lang,
+                        "severity": severity,
+                        "context": m.group()[:100] if m else ""
+                    })
             # cjk_line_leak: 전체 본문에서 라인별 검사 (빠르게)
             if pname == "cjk_line_leak":
                 for line in lines:
