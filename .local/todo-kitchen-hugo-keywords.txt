@@ -1,0 +1,10 @@
+[목표] /Users/twinssn/Projects/5000/data/curation.db 에서 kitchen-hugo 블로그의 keyword pool 확인
+[상태] 보류 — sqlite3 명령 실행 권한이 거부되었으므로 read-only 방식으로 대체 조사 필요
+[조사 방법]
+  - 데이터베이스 파일 직접 바이너리/텍스트 열람
+  - SQLite 파일 포맷 확인(헤더, B-tree 페이지)으로 keywords 테이블 레코드 탐색
+[출력 형식]
+  - keyword, is_active 컬럼
+  - blog_id = 'kitchen-hugo'
+  - ORDER BY keyword
+  - 한 줄당 한 개 키워드 + 상태

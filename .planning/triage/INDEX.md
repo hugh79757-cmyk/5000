@@ -1,5 +1,7 @@
 # Triage Index
 
+- 2026-08-05 | fix | keyword-map-audit-camping-fix | KEYWORD_MAP 전수 감사 — low_relevance 위험 키워드 589→212 (377쌍 토큰 단위 삭제) + camping-hugo 실패 해소. 스캐너/삭제 엔진 신규 도구화
+- 2026-08-05 | fix | fix-stap-finance-hugo-db-diversity-and-publish | STAP finance-hugo DB 기반 상품 다양화(last_used_at) + 프로덕션 실발행 검증 + depth_next 제거 + push
 - 2026-08-04 | config | llm-fallback-chain-setup | 16개 무료 LLM + DeepSeek 유료 폴백 체인 구성 (Google/Groq/Cerebras/NVIDIA/Zhipu/OpenCode Zen)
 - 2026-07-26 | fix | tap-meta-response-block-fix | TAP 블로거 메타 응답("죄송합니다. 이미 작성했습니다") 발행 차단 — 4계층 방어(프롬프트/검증기/AI라이터/파이프라인) 구현
 - 2026-07-22 | fix | adsense-5sites-standardize | 5개 Hugo 블로그 AdSense 설정 지침서 기준 통일 (rotcha/techpawz/kuta/biz/issue)
