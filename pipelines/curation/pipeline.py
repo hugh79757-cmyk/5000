@@ -856,6 +856,25 @@ def run(cfg):
             if reason not in ("quota_met", "already_running", "similar_title"):
                 _tg_error(blog_id, reason, f"[curation] 발행 실패: {reason}")
 
+            # ── Phase 58 모니터 통합 (additive — reason → spec.hook 매핑, 기존 알림과 병렬) ──
+            # phase는 lookup_reason()로 매핑된 spec.hook 그대로 사용 (deploy_error → post_deploy).
+            # 하드코딩 금지 — monitor가 hook 불일치를 차단함.
+            try:
+                from shared.problem_registry import lookup_reason
+                from shared.problem_monitor import get_monitor
+                _spec = lookup_reason(reason)
+                if _spec is not None:
+                    get_monitor().report(
+                        blog_id,
+                        {"reason": reason},
+                        phase=_spec.hook,
+                        extra={"consecutive_failures": _consecutive_failures.get(blog_id, 0) + 1},
+                    )
+                else:
+                    logger.warning(f"[problem_monitor] 미등록 reason (curation run): {reason}")
+            except Exception as _me:
+                logger.error(f"[problem_monitor] curation run() 보고 실패: {_me}")
+
             # 임계값 기반 추가 알림 (쿨다운, dry_run 지원)
             if reason not in ("quota_met", "already_running"):
                 _consecutive_failures[blog_id] = _consecutive_failures.get(blog_id, 0) + 1

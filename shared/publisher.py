@@ -843,7 +843,29 @@ def _run_validation(site_path, slug, blog_id, title, result):
         return
     with open(html_path, encoding="utf-8") as _f:
         html = _f.read()
-    v = _validate_post_html(html, blog_id)
+
+    # ── Phase 58 post-validate 훅 (P15/P19/P24 — 발행 흐름 차단 금지, 조용한 실패 금지) ──
+    # _validate_post_html 예외 → P24(검증 함수 자체 결함), 정상 issues dict → P15/P19.
+    try:
+        v = _validate_post_html(html, blog_id)
+        try:
+            from shared.problem_detectors import detect_validation_issue
+            from shared.problem_monitor import get_monitor
+            _det = detect_validation_issue(v, blog_id)
+            if _det is not None and _det.problem_id in ("P15", "P19"):
+                get_monitor().report(blog_id, {"detection": _det}, phase="post_validate", extra={})
+        except Exception as _me:
+            logger.error(f"[problem_monitor] post_validate 보고 실패: {_me}")
+    except Exception as _ve:
+        # P24 — 검증 함수 자체 결함 (MINOR quiet: monitor가 로그만 기록)
+        logger.warning(f"[VALIDATE] 검증 함수 예외 (P24): {_ve}")
+        try:
+            from shared.problem_monitor import get_monitor
+            get_monitor().report(blog_id, {"reason": "validation_defect"}, phase="post_validate", extra={})
+        except Exception as _me:
+            logger.error(f"[problem_monitor] P24 보고 실패: {_me}")
+        return
+
     if v["issues"]:
         from shared.telegram_notifier import send_error as _tg_err
         emoji = "🔴" if not v["passed"] else "🟡"
@@ -853,6 +875,55 @@ def _run_validation(site_path, slug, blog_id, title, result):
             msg += f"{sev} {i['check']}: {i['msg']}\n"
         _tg_err(blog_id, "validation", msg)
     logger.info(f"[VALIDATE] {blog_id} {'✅' if v['passed'] else '⚠️'} ({len(v['issues'])} issues)")
+
+    # ── Phase 58 P06 썸네일 404 확인 (post_publish — 발행 직후 1회만, 배치 스캔 금지) ──
+    _check_published_featureimage(site_path, slug, blog_id)
+
+
+def _check_published_featureimage(site_path, slug, blog_id):
+    """P06 — 발행 직후 featureimage가 설정된 경우 1회만 HTTP 확인.
+
+    frontmatter의 featureimage/cover.image/image URL을 읽어 HEAD(5s, 실패 시 GET)로
+    상태 확인. 404/500이면 monitor.report(broken_featureimage, phase="post_publish").
+    네트워크 오류/예외는 문제로 판정하지 않음. 훅 실패는 로그만 (발행 흐름 차단 없음).
+    """
+    import os
+    try:
+        md_path = os.path.join(site_path, "content", "posts", slug, "index.md")
+        if not os.path.isfile(md_path):
+            return
+        with open(md_path, encoding="utf-8") as _f:
+            md = _f.read()
+        img_url = ""
+        for pat in [r'featureimage:\s+"(.+)"', r'cover:\s*\n\s+image:\s+"(.+)"', r'cover:\s*\n\s+image:\s+(.+)', r'image:\s+"(.+)"', r'image:\s+(.+)']:
+            m = re.search(pat, md)
+            if m:
+                img_url = m.group(1).strip().strip('"')
+                if img_url:
+                    break
+        if not img_url:
+            return
+        import requests as _http
+        try:
+            resp = _http.head(img_url, timeout=5, allow_redirects=True)
+            if resp.status_code in (405, 501):
+                resp = _http.get(img_url, timeout=5)
+            status = resp.status_code
+        except Exception as _ne:
+            # 네트워크 오류 — 문제로 판정하지 않음 (1회 확인 실패는 None 처리)
+            logger.info(f"[P06] 썸네일 확인 불가 (네트워크): {img_url[:80]} — {_ne}")
+            return
+        if status in (404, 500):
+            logger.warning(f"[P06] 썸네일 404/500 감지: {blog_id} {img_url[:120]} (HTTP {status})")
+            try:
+                from shared.problem_monitor import get_monitor
+                get_monitor().report(blog_id, {"reason": "broken_featureimage"}, phase="post_publish", extra={})
+            except Exception as _me:
+                logger.error(f"[problem_monitor] P06 보고 실패: {_me}")
+        else:
+            logger.info(f"[P06] 썸네일 확인 OK: {blog_id} (HTTP {status})")
+    except Exception as _e:
+        logger.warning(f"[P06] 썸네일 확인 예외 (무시): {_e}")
 
 
 @log_stage("publish_post")

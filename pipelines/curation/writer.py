@@ -742,7 +742,17 @@ def generate_curation_article(keyword, products, blog_id=None):
     _temps = [0.85, 0.95, 0.75]  # 시도별 다양화
     for attempt in range(3):
         _temp = _temps[attempt] if attempt < len(_temps) else 0.85
-        result = ai_generate(system_prompt, user_prompt, temperature=_temp)
+        try:
+            result = ai_generate(system_prompt, user_prompt, temperature=_temp)
+        except RuntimeError as _re:
+            # ── Phase 58 P22 — LLM 폴백 체인 전체 실패 (ai_writer 전 tier 소진) ──
+            # 기존 전파/흡수 흐름 불변 (re-raise), P22 정확 원인 알림만 추가.
+            try:
+                from shared.problem_monitor import get_monitor
+                get_monitor().report(blog_id, {"reason": "llm_fallback_exhausted"}, phase="result_parse", extra={})
+            except Exception as _me:
+                logger.error(f"[problem_monitor] P22 보고 실패: {_me}")
+            raise
         if not result:
             logger.error(f"AI 생성 실패 (시도 {attempt+1}/3): {keyword}")
             continue
@@ -750,6 +760,15 @@ def generate_curation_article(keyword, products, blog_id=None):
         body = result if isinstance(result, str) else result.get("content", "")
         if not body:
             continue
+
+        # ── Phase 58 post-generate raw 훅 (sanitize 이전 raw 감지 — BUG-54-001 교훈) ──
+        # 감지만 수행. 기존 _sanitize_body/_is_cot_body 흐름은 수정하지 않음.
+        try:
+            from shared.problem_monitor import get_monitor
+            for det in get_monitor().detect("post_generate", body, blog_id):
+                get_monitor().report(blog_id, {"detection": det}, phase="post_generate", extra={})
+        except Exception as _me:
+            logger.error(f"[problem_monitor] post_generate 보고 실패: {_me}")
 
         # CoT/프롬프트 지시문 본문 감지 — 즉시 재시도 (sanitization 전에 검사)
         if _is_cot_body(body):
