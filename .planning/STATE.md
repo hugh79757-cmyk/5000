@@ -67,6 +67,8 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-05 | 전 블로그 KEYWORD_MAP 전수 감사 — low_relevance 위험 키워드 589 고유쌍 → 212 (제거 377쌍: 외국어혼합 256 + 오프토픽 82 + B1검토 39, 유지 KEEP_B1 84 + KEEP_C 126, SKIP_ARTIFACT 2) | `a8ed1ec30`, `bd98db2ef` |
+| 2026-08-05 | camping-hugo 일반명 키워드(조명/난로/선풍기) 제거 + 스케줄러 재시작(PID 12380→31420, camping 발행 성공) | `ca9f9e7ad` |
 | 2026-08-05 | golf-hugo/bike-hugo no_keyword 발행 실패 해소 — golf/bike 키워드 24개 수동 수집(products ≥3건) + 스케줄러 재시작(PID 54024→12380, auto_collector 2985개 로드) + scheduler.py catchup/register 시각 파싱 방어 가드 (tap-blogger YAML sexagesimal 600/840 크래시 차단) | `2871c889c`, `64a9874a9` |
 | 2026-08-05 | cuap 15개 블로그중 오늘 만든 5개 블로그가 클라우드 플레어 설정이 완료가 안됐다. 배포까지 완료해줘. (massage/car/homeappliance/golf/bike-hugo custom domain 바인딩 + 배포, WORKERS_BLOGS 추가) | `633678a40` + CUAP `9712f78`, `59f3647` |
 | 2026-07-26 | Fix _validate_frontmatter split("---") regression — description 내 markdown table separator(---)로 YAML 파싱 실패 → regex 기반 분리로 수정 (rap3/4/5 발행 실패 5건 원인 해결) | `4bda255f6` |
