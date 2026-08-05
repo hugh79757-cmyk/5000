@@ -17,7 +17,7 @@ blogs:
     - '16:16'
     - '20:16'
   site_path: /Users/twinssn/Projects/cap/compare-hugo
-  status: active
+  status: paused
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: bridge
@@ -46,7 +46,7 @@ blogs:
     - '16:14'
     - '20:14'
   site_path: /Users/twinssn/Projects/cap/deal-hugo
-  status: inactive
+  status: paused
   theme: Blowfish
   managed_by: pipeline
 - cf_project: ev-hugo
@@ -67,7 +67,7 @@ blogs:
     - '16:20'
     - '20:20'
   site_path: /Users/twinssn/Projects/cap/ev-hugo
-  status: inactive
+  status: paused
   theme: Blowfish
   managed_by: pipeline
 - cf_project: guide-hugo
@@ -88,7 +88,7 @@ blogs:
     - '16:18'
     - '20:18'
   site_path: /Users/twinssn/Projects/cap/guide-hugo
-  status: inactive
+  status: paused
   theme: Blowfish
   managed_by: pipeline
 - cf_project: hotissue-hugo
@@ -150,7 +150,7 @@ blogs:
     - '16:12'
     - '20:12'
   site_path: /Users/twinssn/Projects/cap/tco-hugo
-  status: inactive
+  status: paused
   theme: Blowfish
   managed_by: pipeline
 - cf_project: rank-hugo
@@ -167,7 +167,7 @@ blogs:
     times:
     - '07:22'
   site_path: /Users/twinssn/Projects/cap/rank-hugo
-  status: active
+  status: paused
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -185,7 +185,7 @@ blogs:
     times:
     - '07:24'
   site_path: /Users/twinssn/Projects/cap/pick-hugo
-  status: active
+  status: paused
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: monetize
