@@ -29,6 +29,8 @@ load_dotenv(os.path.join(FIVEK_ROOT, ".env"))
 import contextlib
 
 from shared.telegram_notifier import send_error as _tg_error
+from shared.problem_registry import lookup_reason
+from shared.problem_monitor import get_monitor
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -147,13 +149,33 @@ def _get_failure_counts() -> dict:
         return {}
 
 
-def _increment_failure_count(blog_id: str) -> int:
+def _increment_failure_count(blog_id: str, problem_id: str | None = None) -> int:
+    """연속 실패 카운터 증분. problem_id가 주어지면 {blog_id}와
+    {blog_id}:{problem_id} 확장 키 둘 다 1씩 증분 (Phase 58, W-1 카운터 공용화)."""
     counts = _get_failure_counts()
     counts[blog_id] = counts.get(blog_id, 0) + 1
+    if problem_id:
+        _ext_key = f"{blog_id}:{problem_id}"
+        counts[_ext_key] = counts.get(_ext_key, 0) + 1
     os.makedirs(os.path.dirname(_FAILURE_COUNT_FILE), exist_ok=True)
     with open(_FAILURE_COUNT_FILE, "w") as f:
         json.dump(counts, f)
     return counts[blog_id]
+
+
+def _increment_extended_failure_count(blog_id: str, problem_id: str) -> int:
+    """{blog_id}:{problem_id} 확장 키만 증분 — 기존 {blog_id}는 증분하지 않음.
+
+    no_result 계열은 기존 실패 분기가 _increment_failure_count(blog_id)로
+    {blog_id}를 이미 증분하므로, 이중 증분을 피하면서 문제별 연속 카운터를
+    함께 유지하기 위한 전용 경로 (Phase 58, W-1)."""
+    counts = _get_failure_counts()
+    _ext_key = f"{blog_id}:{problem_id}"
+    counts[_ext_key] = counts.get(_ext_key, 0) + 1
+    os.makedirs(os.path.dirname(_FAILURE_COUNT_FILE), exist_ok=True)
+    with open(_FAILURE_COUNT_FILE, "w") as f:
+        json.dump(counts, f)
+    return counts[_ext_key]
 
 
 def _reset_failure_count(blog_id: str) -> None:
@@ -162,6 +184,20 @@ def _reset_failure_count(blog_id: str) -> None:
         del counts[blog_id]
     with open(_FAILURE_COUNT_FILE, "w") as f:
         json.dump(counts, f)
+
+
+def _reset_extended_failure_keys(blog_id: str) -> None:
+    """발행 성공 시 {blog_id}:{problem_id} 확장 키 일괄 삭제 (연속 카운터 누적 방지).
+
+    기존 _reset_failure_count(blog_id)가 다루는 {blog_id} 키는 건드리지 않는다."""
+    counts = _get_failure_counts()
+    _prefix = f"{blog_id}:"
+    _ext_keys = [k for k in counts if k.startswith(_prefix)]
+    if _ext_keys:
+        for _k in _ext_keys:
+            del counts[_k]
+        with open(_FAILURE_COUNT_FILE, "w") as f:
+            json.dump(counts, f)
 
 
 def load_blogs():
@@ -688,8 +724,19 @@ def dispatch(blog_id):
     if result.get("success"):
         _record_ledger(blog_id)
         _reset_failure_count(blog_id)
+        _reset_extended_failure_keys(blog_id)
         if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS:
-            _build_and_deploy_central(blog_id)
+            deploy_ok = _build_and_deploy_central(blog_id)
+            if not deploy_ok:
+                # Phase 58 Task 5: ETAP/Workers 배포 실패 캡처 — P04 (hook=post_deploy).
+                # _build_and_deploy_central은 bool만 반환하므로 Hugo/P05 vs Wrangler/P04
+                # 구분 정보는 없어 기본 P04 deploy_error로 보고 (구분 배선은 후속 작업).
+                logger.warning(
+                    "[problem_monitor] 배포 실패 캡처: blog=%s reason=deploy_error "
+                    "problem_id=P04 phase=post_deploy",
+                    blog_id)
+                get_monitor().report(
+                    blog_id, {"reason": "deploy_error"}, phase="post_deploy", extra={})
         # STAP/Hugo 배포 실패 — success=True지만 배포는 실패한 경우
         deploy_err = result.get("deploy_error")
         if deploy_err:
@@ -738,6 +785,30 @@ def dispatch(blog_id):
                         logger.info(f"[{blog_id}] STAP collect_all() 백그라운드 실행 시작")
                 except Exception as _e:
                     logger.warning(f"[{blog_id}] STAP collect_all 실행 실패: {_e}")
+            # ── Phase 58 Task 5 (additive): reason → 문제 매핑 + 모니터 훅 ──
+            # 기존 _tg_error 발송은 유지, monitor.report는 병렬 (쿨다운이 중복 흡수).
+            _spec = lookup_reason(reason)
+            if _spec is None:
+                logger.warning(
+                    "unknown failure reason: %s (blog=%s) — monitor 발송 생략",
+                    reason, blog_id)
+            else:
+                if reason in ("no_result", "no_data", "fetch_error", "no_content"):
+                    # 기존 no_result 분기가 _increment_failure_count(blog_id)로
+                    # {blog_id}를 이미 증분 — 이중 증분을 피하고 확장 키만 동기화 (W-1).
+                    _increment_extended_failure_count(blog_id, _spec.problem_id)
+                    _consec = _get_failure_counts().get(blog_id, 0)
+                else:
+                    _consec = _increment_failure_count(blog_id, _spec.problem_id)
+                logger.warning(
+                    "[problem_monitor] result_parse 매핑: blog=%s reason=%s "
+                    "problem_id=%s consecutive=%s",
+                    blog_id, reason, _spec.problem_id, _consec)
+                get_monitor().report(
+                    blog_id,
+                    {"reason": reason},
+                    phase=_spec.hook,
+                    extra={"consecutive_failures": _consec})
     return result
 
 
