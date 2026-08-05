@@ -173,19 +173,13 @@ def generate(
                 content = message.content
                 finish_reason = getattr(choice, "finish_reason", None)
                 
-                # (B) reasoning 모델 대응: content가 비어있으면 reasoning_content에서 추출
+                # (B) reasoning 모델 대응: content가 비어있으면 skip → 다음 tier
                 if not content:
                     reasoning = getattr(message, 'reasoning_content', None)
                     if reasoning:
-                        content = reasoning
-                        logger.info(f"[ai_writer] reasoning_content에서 추출: {attempt_tier}")
-                
-                # 성공 → circuit breaker 리셋
-                _circuit_state["failures"] = 0
-                _circuit_state["open_until"] = 0.0
-
-                if not content:
-                    last_error = f"{attempt_tier}: 빈 응답 (reasoning_content도 없음)"
+                        # reasoning_content를 사용하지 않음 — 누수 위험
+                        logger.warning(f"[ai_writer] reasoning_content 감지됨 (미사용): {attempt_tier}")
+                    last_error = f"{attempt_tier}: 빈 응답"
                     logger.warning(f"[ai_writer] {last_error}")
                     continue
 
@@ -219,11 +213,27 @@ def generate(
 
                 content = _clean_ai_output(content)
 
+                # thinking/reasoning 태그 스트립
+                from shared.ai_response_parser import _strip_thinking_tags
+                content = _strip_thinking_tags(content)
+
                 # 중국어 검증
                 if _is_chinese_content(content):
                     last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
                     logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
                     continue
+
+                # 다국어 누수 검증 (generate() 수준 — 모든 호출자 공통)
+                from shared.ai_response_parser import _check_multilingual_leak
+                has_leak, leak_name, leak_text = _check_multilingual_leak(content)
+                if has_leak:
+                    last_error = f"{attempt_tier}: 누수 감지 ({leak_name}: {leak_text})"
+                    logger.warning(f"[ai_writer] {last_error} — 재생성")
+                    continue
+
+                # 성공 → circuit breaker 리셋
+                _circuit_state["failures"] = 0
+                _circuit_state["open_until"] = 0.0
 
                 logger.info(
                     f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"

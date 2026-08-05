@@ -10,8 +10,9 @@ from typing import Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
-# LLM 사고과정 누수 시그니처
+# LLM 사고과정 누수 시그니처 (다국어 확장)
 THINKING_PATTERNS = [
+    # 한국어 사고과정
     r'사용자가 제공한 데이터',
     r'절대 .* 말라고 했습니다',
     r'초안:',
@@ -25,7 +26,58 @@ THINKING_PATTERNS = [
     r'추론:',
     r'계획:',
     r'다음 단계:',
+    # 영어 사고과정 누수
+    r'(?:^|\n)\s*(?:The user has provided|Let me re-?[Rr]ead|Wait,|we need to|Let me\b|I should\b|Actually,|First,)',
+    # 프롬프트 지시문 노출
+    r'bold-list로 정리|테이블 금지|1~2문장으로 소개|H2 없이|최소 \d+문장|~를 명시해야|금지 표현|체크포인트|구조:|도입부 \(',
+    # thinking/reasoning 태그 잔재
+    r'<think(?:ing)?>|</think(?:ing)?>|<reasoning>|</reasoning>',
 ]
+
+# CJK 누수 — 한국어 블로그에서 중국어 간체 키워드 등장 (instruction leak)
+CJK_INSTRUCTION_LEAK = [
+    r'我们根据|需要遵守|禁止词汇|注意所有|根据要求',
+    r'应当|必须遵守|不得|禁止|规则如下',
+]
+
+# 금지어 역노출 — 프롬프트가 금지한 표현이 본문에 등장
+FORBIDDEN_WORD_REVERSE = [
+    r'바랍니다', r'되시길', r'있으시', r'마무리하며', r'마치며',
+    r'정리하며', r'알아보겠습니다', r'과연', r'놀랍게도', r'충격적으로',
+]
+
+
+def _strip_thinking_tags(content: str) -> str:
+    """LLM 응답에서 thinking/reasoning 태그를 구조적으로 제거"""
+    if not content:
+        return content
+    # <thinking>...</thinking> 제거
+    content = re.sub(r'<think(?:ing)?>.*?</think(?:ing)?>', '', content, flags=re.DOTALL)
+    # <reasoning>...</reasoning> 제거
+    content = re.sub(r'<reasoning>.*?</reasoning>', '', content, flags=re.DOTALL)
+    # <chain-of-thought>...</chain-of-thought> 제거
+    content = re.sub(r'<chain[- ]of[- ]thought>.*?</chain[- ]of[- ]thought>', '', content, flags=re.DOTALL)
+    return content.strip()
+
+
+def _check_multilingual_leak(content: str) -> Tuple[bool, Optional[str], Optional[str]]:
+    """
+    다국어 누수 검사 (언어 불문)
+    Returns: (has_leak, pattern_name, matched_text)
+    """
+    # 한국어 + 영어 사고과정 + 프롬프트 지시문
+    for pattern in THINKING_PATTERNS:
+        m = re.search(pattern, content)
+        if m:
+            return True, "thinking_leak", m.group()[:80]
+    
+    # CJK instruction leak (중국어 지시문 누수)
+    for pattern in CJK_INSTRUCTION_LEAK:
+        m = re.search(pattern, content)
+        if m:
+            return True, "cjk_instruction_leak", m.group()[:80]
+    
+    return False, None, None
 
 def _parse_structured_response(content: str) -> Tuple[Optional[str], Optional[str], bool]:
     """
@@ -143,31 +195,15 @@ def _parse_structured_response(content: str) -> Tuple[Optional[str], Optional[st
 
 def _check_thinking_leak(content: str) -> Tuple[bool, Optional[str]]:
     """
-    LLM 사고과정 누수 검사
+    LLM 사고과정 누수 검사 (다국어 확장)
     
     Returns:
         Tuple[has_leak, leak_pattern]: 누수 여부와 패턴
     """
-    for pattern in THINKING_PATTERNS:
-        if re.search(pattern, content):
-            logger.warning(f"[ai_writer] 사고과정 누수 감지: {pattern}")
-            return True, pattern
-    
-    # 추가 검사: 패턴이 정확히 일치하지 않는 경우도 확인
-    # "이제 작성" 패턴이 문장 중간에 있을 수 있음
-    if "이제 작성" in content or "이제 시작" in content:
-        logger.warning(f"[ai_writer] 사고과정 누수 감지: 이제 작성/시작 패턴")
-        return True, "이제 작성/시작"
-    
-    # "~해야 합니다" 패턴 (마침표가 없는 경우도 포함)
-    if "~해야 합니다" in content:
-        logger.warning(f"[ai_writer] 사고과정 누수 감지: ~해야 합니다 패턴")
-        return True, "~해야 합니다"
-    
-    # "규칙" 패턴이 콜론 없이 문장 중간에 있을 수 있음
-    if "규칙" in content and len(content.split("규칙")) > 1:
-        logger.warning(f"[ai_writer] 사고과정 누수 감지: 규칙 패턴")
-        return True, "규칙"
+    has_leak, pattern_name, matched = _check_multilingual_leak(content)
+    if has_leak:
+        logger.warning(f"[ai_writer] 사고과정 누수 감지 ({pattern_name}): {matched}")
+        return True, f"{pattern_name}:{matched}"
     
     return False, None
 
