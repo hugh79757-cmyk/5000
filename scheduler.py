@@ -417,7 +417,15 @@ def _catchup_missed_inner() -> None:
         times = blog.get("schedule", {}).get("times", [])
         expected = 0
         for t in times:
-            h, m = map(int, str(t).split(":"))
+            parts = str(t).split(":")
+            if len(parts) != 2:
+                logger.warning(f"CATCHUP: 잘못된 스케줄 시각 무시 — {blog_id} time={t!r}")
+                continue
+            try:
+                h, m = map(int, parts)
+            except ValueError:
+                logger.warning(f"CATCHUP: 잘못된 스케줄 시각 무시 — {blog_id} time={t!r}")
+                continue
             if h < now.hour or (h == now.hour and m <= now.minute):
                 expected += 1
 
