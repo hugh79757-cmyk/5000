@@ -1,4 +1,4 @@
-# Phase D 최종 판정표 (v4 — 전체본문 기준 확정본)
+# Phase D 최종 판정표 (v5 — 전체본문 측정본)
 
 > **이 문서의 숫자는 변경 금지.** `.continue-here.md`의 "확정치(변경금지)" 블록과 동기화.
 
@@ -7,13 +7,14 @@
 | 항목 | 값 | 출처 |
 |------|-----|------|
 | 검증 대상 | CAP 8 + TAP 5 = 13 블로그 | — |
-| Phase A (dry-run) | 26/26 PASS | `data/phase5_verify_result.json` (500자 제한 → 전체본문 보강 완료) |
+| Phase A (dry-run) | **26/26 PASS** | `data/phase5_dryrun/result.json` (전체본문 스캔, 저장본문 재판정) |
 | 탐지 포스트 (dedup) | **178건** | 스캐너 전체 본문 스캔 |
 | strong 오염 | **13건** | 스캐너 (전체 본문, ko_thinking/test_dummy) |
 | CJK 오탐 | **112건** | 스캐너 (cjk_line_leak) |
 | 스타일 이슈 | **54건** | 스캐너 (forbidden_word_reverse) |
 | 복합 탐지 (strong+style) | **1건** | — |
 | drafted 포스트 (.md) | **26건** | 파일 실측 (`grep -rl 'draft: true'`) |
+| strong undrafted | **0건** | strong 13건 전부 drafted |
 
 ## 감사 산식 (단일 등식 — 변경 금지)
 
@@ -28,6 +29,27 @@
 | style | 54 | 53 style-only + 1 strong+style |
 | overlap | 1 | strong+style 복합 1건 |
 | **합산** | **178** | 13 + 112 + 54 - 1 = 178 ✓ |
+
+## Phase A dry-run 측정 결과 (전체본문 스캔)
+
+| Blog | Post 1 | Post 2 | 블로그 전체 |
+|------|:---:|:---:|:---:|
+| compare-hugo | PASS | PASS | PASS |
+| deal-hugo | PASS | PASS | PASS |
+| ev-hugo | PASS | PASS | PASS |
+| guide-hugo | PASS | PASS | PASS |
+| hotissue-hugo | PASS | PASS | PASS |
+| pick-hugo | PASS | PASS | PASS |
+| rank-hugo | PASS | PASS | PASS |
+| tco-hugo | PASS | PASS | PASS |
+| travel-hugo | PASS | PASS | PASS |
+| travel1-hugo | PASS | PASS | PASS |
+| travel2-hugo | PASS | PASS | PASS |
+| travel3-hugo | PASS | PASS | PASS |
+| travel4-hugo | PASS | PASS | PASS |
+| **합계** | | | **26/26 PASS** |
+
+> 측정 방법: `phase5_dryrun_fullbody.py`로 13블로그 × 2건 = 26건 dry-run → `data/phase5_dryrun/{blog}/{n}.md`에 저장 → `scan_multilingual_leak.py` 패턴으로 전체본문 스캔 → strong 패턴(ko_thinking/prompt_instruction_leak/test_dummy/thinking_tag_remain/forbidden_grammar_break) 0건이면 PASS.
 
 ## drafted 실측 (파일 기준)
 
@@ -101,15 +123,16 @@
 
 | 항목 | 이전 | 현재 |
 |------|------|------|
-| `phase5_verify.py` scan_content() |500자 제한 | 전체 본문 스캔 (ko_thinking) |
-| `scan_multilingual_leak.py` scan_file() |500자 제한 | 전체 본문 스캔 (ko_thinking) |
-| Phase A 26/26PASS | 500자 기준 | 전체본문 기준 재확인 (변경 없음) |
+| `phase5_verify.py` scan_content() | 500자 제한 | 전체 본문 스캔 (ko_thinking) |
+| `scan_multilingual_leak.py` scan_file() | 500자 제한 | 전체 본문 스캔 (ko_thinking) |
+| `phase5_dryrun_fullbody.py` SCAN_PATTERNS | 스캐너 패턴과 불일치 | 스캐너 패턴과 일치하도록 수정 |
+| Phase A dry-run | 본문 미저장, 재판정 불가 | `data/phase5_dryrun/{blog}/{n}.md`에 저장, 재판정 가능 |
 
 ## 잔존 위험
 
-1. **스타일 이슈 54건**: forbidden_word_reverse — 오염 아님, 콘텐츠 스타일 문제
+1. **스타일 이슈 54건**: forbidden_word_reverse — 오염 아님, 콘텐츠 스타일 문제. 통과 조건에 영향 없음
 2. **CJK 오탐 112건**: heritage 한자 병기 — 정상 콘텐츠, 수정 불필요
-3. **Phase A 500자 맹점**: 기존 dry-run 본문 미저장으로 재판정 불가. 패치된 writer가 생성한 콘텐츠이므로 실제 영향 미미하나, 향후 검증 시 전체본문 스캔 사용 필요
+3. **Phase A 500자 맹점**: 해소됨. dry-run 본문을 파일에 저장하고 전체본문 스캔으로 재판정 완료
 
 ## unpause 커맨드 (실행 금지)
 

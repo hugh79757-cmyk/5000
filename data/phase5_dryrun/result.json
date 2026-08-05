@@ -1,0 +1,218 @@
+{
+  "posts": [
+    {
+      "blog": "compare-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "compare-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "deal-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "deal-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "ev-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "ev-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "guide-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "guide-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "hotissue-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "hotissue-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "pick-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "pick-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "rank-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "rank-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "tco-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "tco-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel1-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel1-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel2-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel2-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel3-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel3-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel4-hugo",
+      "file": "1.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    },
+    {
+      "blog": "travel4-hugo",
+      "file": "2.md",
+      "scan": {
+        "pass": true,
+        "findings": []
+      }
+    }
+  ],
+  "summary": {
+    "total": 26,
+    "passed": 26,
+    "failed": 0,
+    "all_pass": true
+  }
+}
