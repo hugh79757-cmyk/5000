@@ -13,7 +13,7 @@ import subprocess
 import json
 
 # draft 전환 대상 패턴 (강한 오염 시그니처)
-DRAFT_PATTERNS = {"ko_thinking", "test_dummy", "prompt_instruction_leak", "cjk_line_leak", "thinking_tag_remain"}
+DRAFT_PATTERNS = {"ko_thinking", "test_dummy", "prompt_instruction_leak", "cjk_line_leak", "thinking_tag_remain", "forbidden_grammar_break"}
 
 def add_draft_true(filepath):
     """파일 프론트매터에 draft: true 추가 (라인 편집)"""
