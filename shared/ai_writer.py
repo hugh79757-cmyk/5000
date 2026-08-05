@@ -22,6 +22,23 @@ CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
 CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
 
+def _trace_llm(record: dict):
+    """LLM 생성 추적 로그 — data/llm_trace/YYYY-MM-DD.jsonl 에 한 줄 append.
+    어떤 모델이 채택됐고, 어떤 tier들이 왜 폴백됐는지 사후 추적용(원본 불변)."""
+    try:
+        import json as _json
+        from datetime import datetime as _dt
+        d = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "llm_trace")
+        os.makedirs(d, exist_ok=True)
+        record["ts"] = _dt.now().isoformat(timespec="seconds")
+        fp = os.path.join(d, _dt.now().strftime("%Y-%m-%d") + ".jsonl")
+        with open(fp, "a", encoding="utf-8") as f:
+            f.write(_json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception as _e:
+        logger.warning(f"[ai_writer] trace 기록 실패(무시): {_e}")
+
+
+
 def load_models_config():
     with open(os.path.join(CONFIG_DIR, "models.yaml"), encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -127,6 +144,7 @@ def generate(
 
     last_error = None
     any_truncation_failed = False  # 전 tier 걸친 트렁케이션 실패 추적
+    _trace_attempts = []  # (tier, model, provider, 폴백사유) 누적 — 추적 로그용
     for attempt_tier in attempted_tiers:
         # Circuit breaker check
         if _circuit_state["open_until"] > time.time():
@@ -221,6 +239,7 @@ def generate(
                 if _is_chinese_content(content):
                     last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
                     logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
+                    _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "chinese_content"})
                     continue
 
                 # 다국어 누수 검증 (generate() 수준 — 모든 호출자 공통)
@@ -229,6 +248,7 @@ def generate(
                 if has_leak:
                     last_error = f"{attempt_tier}: 누수 감지 ({leak_name}: {leak_text})"
                     logger.warning(f"[ai_writer] {last_error} — 재생성")
+                    _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": f"leak:{leak_name}"})
                     continue
 
                 # 성공 → circuit breaker 리셋
@@ -238,6 +258,16 @@ def generate(
                 logger.info(
                     f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
                 )
+                _trace_llm({
+                    "event": "success",
+                    "final_tier": attempt_tier,
+                    "final_model": tier_config["model"],
+                    "final_provider": tier_config["provider"],
+                    "fallback_count": len(_trace_attempts),
+                    "fallbacks": _trace_attempts,
+                    "chars": len(content),
+                    "tokens": response.usage.total_tokens if response.usage else 0,
+                })
                 return {
                     "content": content,
                     "model": tier_config["model"],
@@ -260,10 +290,12 @@ def generate(
         if tier_truncation_failed:
             # 절단으로 인한 재시도 소진 → 다음 tier로 폴백
             logger.warning(f"[ai_writer] {attempt_tier}: 트렁케이션 재시도 소진 ({MAX_RETRIES}회) — 다음 tier 폴백")
+            _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "truncation_exhausted"})
             continue
         else:
             # 절단 아닌 다른 사유로 재시도 소진 → 다음 tier 폴백
             logger.warning(f"[ai_writer] {attempt_tier}: 재시도 {MAX_RETRIES}회 소진 — 다음 tier 폴백")
+            _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "retries_exhausted"})
             continue
 
     # 모든 tier 실패
