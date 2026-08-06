@@ -60,6 +60,7 @@ progress:
 | 49 | CUAP Cross-link Bugfix — 크로스링크 slug 불일치 근본 수정 + 전수 배치 수정 | ✅ | `4b33b43fd` + `1b249d615` (2026-07-26) |
 | 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
 | 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
+| 58 | 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템 (PublishMonitor) | ✅ | 8 커밋 (`0e17f9acc`~`3e5aa1cd5`, 2026-08-06) |
 
 ---
 
@@ -201,4 +202,41 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-05 - Completed quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*
+## Phase 58: 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템 (2026-08-06)
+
+**목표:** 24개 발행 문제를 `PROBLEM_REGISTRY`에 전부 등록하고, 발행 시 문제 발생 시 문제별
+한국어 Telegram 알림(problem_id, 문제명, 감지 단계, 패턴, 연속 횟수, 조치)을 신규
+`PublishMonitor` 단일 진입점으로 보내는 시스템 구축 (additive, non-destructive)
+
+**구현 내용 (8 커밋, 5 wave):**
+- `shared/problem_registry.py` — ProblemSpec + Detection + PROBLEM_REGISTRY 24건 + unknown_failure,
+  lookup_reason/lookup_problem. reason 인벤토리 34건 전수 매핑 (CRITICAL 6 / MAJOR 12 / MINOR 6)
+- `shared/problem_detectors.py` — 순수 탐지 5함수 (P07 CJK / P08 CoT / P09 URL 반복 / P23 길이 / P15·P19 검증)
+  + post_generate 디스패처. 기존 validators/ai_response_parser 시그니처 재사용, 신규 regex 없음
+- `shared/problem_monitor.py` — PublishMonitor + get_monitor 싱글턴. 실 ThresholdChecker API 사용
+  (쿨다운 `_in_cooldown`/`_mark_alerted`, MAJOR `check_consecutive_failures`), `PROBLEM_ALERT_DRY_RUN` env,
+  phase=spec.hook 강제, 신규 cooldown 코드 0건
+- `dispatcher.py` — 실패 분기 reason→problem 매핑, `_build_and_deploy_central` 반환 캡처(False→P04 post_deploy),
+  `failure_count.json` `{blog_id}:{problem_id}` 확장 키 + 성공 시 확장 키 삭제. 기존 `_tg_error` 호출 수 불변
+- `pipelines/curation/*` + `shared/publisher.py` — run() 실패 블록 monitor 병렬 호출(phase=spec.hook),
+  post-generate raw 훅(sanitize 이전), P22 `ai_generate` RuntimeError 캐치(re-raise 유지), P15/P24 분기,
+  P06 featureimage 1회 HTTP 확인(post_publish)
+- 테스트 4파일 (registry 13 / detectors 36 / monitor 10 / integration 8 = 67 신규)
+
+**검증:**
+- baseline 228/22/1 → 최종 295/22/1 (295 = 228 기존 + 67 신규), **신규 실패 0건** (실패 22건은 사전 존재,
+  baseline과 byte-identical)
+- dry-run 실발송 0건 (T7 patch assert 1차 근거 + dry-run/normal 결과 동일)
+- additivity 게이트: `_tg_error(deploy)`=1, `_tg_error(quota)`=0, curation `_tg_error`=4, publisher `_tg_err(validation)`=1
+  — 전부 수정 전과 동일. 신규 cooldown 코드 0건
+- 커밋 8건 태스크 단위 원자적 분리 (커밋 계획과 정확히 일치)
+
+**잔존 위험 (Phase 59+ 이연):**
+- P05(Hugo build) vs P04(wrangler) 구분 미배선 — `_build_and_deploy_central` bool 반환 계약 변경 필요
+- `detect_post_generate`가 본문 전체를 P23 검사에 전달 → 500자 초과 본문마다 P23(quiet, 발송 없음) 보고 잡음
+- dry-run(24h) 실운영 관찰 후 실발송 전환 검토 (launchd `PROBLEM_ALERT_DRY_RUN=1`)
+- `validators.py:744-758` `body_md` NameError — 스코프 밖, 별도 phase
+
+---
+
+*Last updated: 2026-08-06 - Phase 58 완료 (PublishMonitor 알림 시스템, 8 커밋) + quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*
