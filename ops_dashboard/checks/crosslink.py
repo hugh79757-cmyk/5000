@@ -1,12 +1,12 @@
 """ops_dashboard.checks.crosslink — 크로스링크 주제 일관성 자동검사 (M03 / audit Q5)
 
 블로그 포스트 내 삽입된 내부 크로스링크를 파싱해,
-링크 대상 글의 카테고리/계열이 원글과 같거나 인접한지 판정한다.
+링크 대상이 cuap_entity_linker.py의 CROSS_GRAPH에 정의된 의도적 연결인지 판정한다.
+CROSS_GRAPH에 없으면 무관 링크로 간주해 fail.
 """
 from __future__ import annotations
 
 import logging
-import os
 import re
 from pathlib import Path
 from urllib.parse import urlparse
@@ -15,34 +15,26 @@ from ops_dashboard.checks import register_check
 
 logger = logging.getLogger(__name__)
 
-# CUAP 블로그 도메인 → 카테고리 매핑
-CUAP_BLOG_CATEGORIES = {
-    "appliance.informationhot.kr": "가전",
-    "baby.informationhot.kr": "유아/출산",
-    "beauty.informationhot.kr": "뷰티",
-    "camping.informationhot.kr": "캠핑",
-    "fitness.informationhot.kr": "피트니스",
-    "health.informationhot.kr": "건강",
-    "interior.informationhot.kr": "인테리어",
-    "kitchen.informationhot.kr": "주방",
-    "laptop.informationhot.kr": "노트북",
-    "pet.informationhot.kr": "펫",
-    "senior.informationhot.kr": "건강",  # SEAP 시니어/복지
+# CUAP 블로그 도메인 → 블로그 ID 매핑 (CROSS_GRAPH 키와 일치)
+CUAP_DOMAIN_TO_BLOG_ID = {
+    "appliance.informationhot.kr": "appliance-hugo",
+    "baby.informationhot.kr": "baby-hugo",
+    "beauty.informationhot.kr": "beauty-hugo",
+    "camping.informationhot.kr": "camping-hugo",
+    "fitness.informationhot.kr": "fitness-hugo",
+    "health.informationhot.kr": "health-hugo",
+    "interior.informationhot.kr": "interior-hugo",
+    "kitchen.informationhot.kr": "kitchen-hugo",
+    "laptop.informationhot.kr": "laptop-hugo",
+    "pet.informationhot.kr": "pet-hugo",
+    "senior.informationhot.kr": "senior-hugo",
 }
 
-# 인접 카테고리 정의 (같거나 인접하면 pass)
-ADJACENT_CATEGORIES = {
-    "가전": {"가전", "주방", "노트북"},
-    "주방": {"주방", "가전", "인테리어"},
-    "노트북": {"노트북", "가전"},
-    "뷰티": {"뷰티", "건강", "유아/출산"},
-    "건강": {"건강", "뷰티", "유아/출산", "피트니스"},
-    "유아/출산": {"유아/출산", "뷰티", "건강"},
-    "캠핑": {"캠핑", "피트니스", "인테리어"},
-    "피트니스": {"피트니스", "건강", "캠핑"},
-    "인테리어": {"인테리어", "주방", "캠핑"},
-    "펫": {"펫"},
-}
+# CROSS_GRAPH 직접 임포트 (shared 모듈에서)
+try:
+    from shared.cuap_entity_linker import CROSS_GRAPH
+except ImportError:
+    CROSS_GRAPH = {}
 
 
 def _find_hugo_root(blog_row: dict) -> Path | None:
@@ -64,53 +56,42 @@ def _read_file_safe(path: Path) -> str:
         return ""
 
 
-def _extract_frontmatter_category(content: str) -> str | None:
-    """Extract category from frontmatter."""
-    # categories: ['추천'] or categories: ["추천"] or categories: [추천]
-    m = re.search(r"categories\s*:\s*\[([^\]]+)\]", content)
-    if m:
-        cats = m.group(1)
-        # 첫 번째 카테고리만 사용
-        first = re.search(r'["\']?([^"\',]+)["\']?', cats)
-        if first:
-            return first.group(1).strip()
-    return None
-
-
 def _extract_crosslink_urls(content: str) -> list[str]:
     """Extract internal CUAP cross-link URLs from post content."""
     urls = []
-    # 패턴: <a href="https://blog.informationhot.kr/posts/...">
     for m in re.finditer(r'<a\s+href="(https://[^"]+\.informationhot\.kr/posts/[^"]+)"', content):
         urls.append(m.group(1))
     return urls
 
 
-def _resolve_post_category_from_url(url: str) -> str | None:
-    """Resolve blog domain from URL and map to category."""
+def _resolve_blog_id_from_url(url: str) -> str | None:
+    """Resolve blog_id from URL using domain mapping."""
     try:
         parsed = urlparse(url)
         domain = parsed.netloc
-        return CUAP_BLOG_CATEGORIES.get(domain)
+        return CUAP_DOMAIN_TO_BLOG_ID.get(domain)
     except Exception:
         return None
 
 
-def _is_category_consistent(source_category: str, target_category: str) -> bool:
-    """Check if target category is same or adjacent to source."""
-    if source_category == target_category:
-        return True
-    adjacent = ADJACENT_CATEGORIES.get(source_category, set())
-    return target_category in adjacent
+def _is_crosslink_allowed(source_blog_id: str, target_blog_id: str) -> bool:
+    """Check if cross-link from source to target is defined in CROSS_GRAPH."""
+    if source_blog_id not in CROSS_GRAPH:
+        return False
+    graph = CROSS_GRAPH[source_blog_id]
+    allowed = set()
+    for category in ("primary", "secondary", "use_cases"):
+        allowed.update(graph.get(category, []))
+    return target_blog_id in allowed
 
 
 @register_check("crosslink_consistency")
 def check_crosslink_consistency(conn, blog_id: str) -> dict:
     """크로스링크 주제 일관성 검사 (M03 / audit Q5).
 
-    각 포스트의 크로스링크가 같은/인접 계열을 가리키는지 검사.
-    무관 카테고리 링크가 있으면 fail.
-    카테고리 메타데이터가 없으면 UNKNOWN(needs_manual).
+    각 포스트의 크로스링크가 CROSS_GRAPH에 정의된 의도적 연결인지 검사.
+    CROSS_GRAPH에 없는 링크가 있으면 fail.
+    CUAP 블로그가 아니면 UNKNOWN(needs_manual).
     """
     blog = conn.execute(
         "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
@@ -122,18 +103,20 @@ def check_crosslink_consistency(conn, blog_id: str) -> dict:
     if not site:
         return {"status": "unknown", "detail": f"Site path not found for {blog_id}"}
 
-    # 블로그 자체의 카테고리 결정 (도메인/브랜드 기반)
-    source_category = _resolve_blog_category(blog)
-    if not source_category:
-        return {"status": "unknown", "detail": f"Cannot determine category for blog {blog_id}"}
+    # Only apply to CUAP blogs (have CROSS_GRAPH entry)
+    if blog_id not in CROSS_GRAPH:
+        return {
+            "status": "unknown",
+            "detail": f"Blog {blog_id} not in CROSS_GRAPH — not a CUAP blog",
+        }
 
-    # 포스트 디렉토리 탐색
     posts_dir = site / "content" / "posts"
     if not posts_dir.is_dir():
         return {"status": "pass", "detail": "No content/posts directory"}
 
     violations = []
     checked_posts = 0
+    total_links = 0
 
     for post_dir in posts_dir.iterdir():
         if not post_dir.is_dir():
@@ -147,7 +130,6 @@ def check_crosslink_consistency(conn, blog_id: str) -> dict:
         if not content.strip():
             continue
 
-        # 크로스링크 URL 추출
         crosslink_urls = _extract_crosslink_urls(content)
         if not crosslink_urls:
             continue
@@ -155,23 +137,24 @@ def check_crosslink_consistency(conn, blog_id: str) -> dict:
         checked_posts += 1
 
         for url in crosslink_urls:
-            target_category = _resolve_post_category_from_url(url)
-            if not target_category:
-                # CUAP 외부 링크거나 알 수 없는 도메인
+            total_links += 1
+            target_blog_id = _resolve_blog_id_from_url(url)
+            if not target_blog_id:
+                # CUAP 외부 링크
                 continue
 
-            if not _is_category_consistent(source_category, target_category):
+            if not _is_crosslink_allowed(blog_id, target_blog_id):
                 violations.append({
                     "post": post_dir.name,
-                    "source_category": source_category,
-                    "target_category": target_category,
+                    "source_blog": blog_id,
+                    "target_blog": target_blog_id,
                     "url": url,
                 })
 
     if violations:
-        detail = f"{len(violations)} cross-links to unrelated categories found in {checked_posts} posts"
+        detail = f"{len(violations)}/{total_links} cross-links NOT in CROSS_GRAPH found in {checked_posts} posts"
         evidence_lines = [
-            f"Post: {v['post']}, Source: {v['source_category']}, Target: {v['target_category']}, URL: {v['url']}"
+            f"Post: {v['post']}, Source: {v['source_blog']}, Target: {v['target_blog']}, URL: {v['url']}"
             for v in violations[:3]
         ]
         evidence = "\n".join(evidence_lines)
@@ -182,20 +165,6 @@ def check_crosslink_consistency(conn, blog_id: str) -> dict:
 
     return {
         "status": "pass",
-        "detail": f"All {checked_posts} posts with cross-links have consistent categories",
+        "detail": f"All {total_links} cross-links in {checked_posts} posts match CROSS_GRAPH",
         "evidence_url": "",
     }
-
-
-def _resolve_blog_category(blog: sqlite3.Row) -> str | None:
-    """Resolve blog's category from its domain or brand."""
-    domain = blog["domain"] if blog["domain"] else ""
-    if domain in CUAP_BLOG_CATEGORIES:
-        return CUAP_BLOG_CATEGORIES[domain]
-
-    # Fallback: try to infer from brand
-    brand = blog["brand"] if blog["brand"] else ""
-    if brand == "cuap":
-        # Could map from blog_id if domain not in CUAP_BLOG_CATEGORIES
-        pass
-    return None
