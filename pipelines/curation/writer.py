@@ -292,6 +292,16 @@ def _sanitize_body(body):
     return body.strip()
 
 
+def _count_h2(body):
+    """본문의 H2 (## ) 헤딩 개수 — Q6 H2>=1 가드용.
+
+    `### `(H3) 이상은 매치하지 않음 (`^##\\s`는 `##` 바로 뒤에 공백/탭만 허용).
+    """
+    if not body:
+        return 0
+    return len(re.findall(r"^##\s", body, flags=re.MULTILINE))
+
+
 
 def _build_product_block(products):
     """상품 데이터를 프롬프트용 텍스트로 변환 (enriched 데이터 포함)"""
@@ -823,12 +833,23 @@ def generate_curation_article(keyword, products, blog_id=None):
         # 금지어 치환 + 메타문구 제거
         body = _sanitize_body(body)
 
+        # H2 가드 (Q6): H2가 0이면 재생성 유도 — 옛 TOP5 포맷(H3-only) 방지
+        if _count_h2(body) == 0:
+            logger.warning(f"H2 없음 (시도 {attempt+1}/3): {keyword} — 재시도")
+            body = ""
+            continue
+
         if len(body) >= 1800:
             break
         logger.warning(f"글자수 미달 (시도 {attempt+1}/3): {keyword} ({len(body)}자)")
 
     if not body or len(body) < 800:
         logger.error(f"최종 생성 결과 부족: {keyword} ({len(body)}자)")
+        return None
+
+    # H2 가드 최종 확인 (Q6): 재시도 3회 후에도 H2=0이면 명시적 fail (침묵 통과 방지)
+    if _count_h2(body) == 0:
+        logger.error(f"H2 없는 최종 본문 차단 (재시도 3회 소진): {keyword}")
         return None
 
     # CoT 본문 재생성 실패 검사 — 2회 시도 후에도 CoT 본문이면 차단
