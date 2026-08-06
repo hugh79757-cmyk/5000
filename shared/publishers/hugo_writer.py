@@ -905,7 +905,31 @@ def _build_funnel_cards_md(blog_cfg, body_md):
     return body_md, counts
 
 
-def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False):
+def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_url, is_draft=False,
+                     inject_internal_links=False, adsense_config=None, cross_sell_config=None,
+                     body_images=None):
+    """Write a Hugo post with optional ETAP post-processing hooks.
+
+    Args:
+        blog_cfg: Blog configuration dict (theme, site_path, id, domain, etc.)
+        title: Post title
+        body_md: Markdown body content
+        slug: URL slug
+        category: Post category
+        tags: Comma-separated tags string or list
+        thumbnail_url: Featured image URL
+        is_draft: Whether post is a draft
+        inject_internal_links: If True, inject cross-blog internal links via entity_linker
+        adsense_config: If provided, insert AdSense blocks. Dict with keys:
+            None = use default ETAP AdSense block
+            {"html": "..."} = use custom AdSense HTML
+        cross_sell_config: If provided, insert cross-sell block. Dict with keys:
+            country, city, exclude_blog, max_items, position ("top"|"bottom")
+        body_images: List of body image dicts (url, credit) to insert after H2 headings
+
+    Returns:
+        dict with success, file, url keys on success; or success=False with error
+    """
     if not slug or not str(slug).strip():
         logger.error(f"[PUBLISH] slug가 비어있어 발행 중단: title={title}")
         return {"success": False, "error": "empty slug"}
@@ -974,6 +998,59 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # never see raw ** or ~~ in the rendered page.
     body_md = _convert_inline_md_to_html(body_md)
     body_md, _funnel_counts = _build_funnel_cards_md(blog_cfg, body_md)
+
+    # ── ETAP post-processing hooks (additive, opt-in) ──
+    blog_id = blog_cfg.get("id", "")
+
+    # 1. Internal links injection
+    if inject_internal_links:
+        try:
+            from shared.entity_linker import inject_internal_links as _inject_links
+            body_md = _inject_links(body_md, current_blog=blog_id, max_links=5)
+        except ImportError:
+            logger.warning("[PUBLISH] shared.entity_linker not available — skipping internal links")
+
+    # 2. Body images insertion (after H2 headings)
+    if body_images:
+        h2_positions = [m.start() for m in re.finditer(r"^## ", body_md, re.MULTILINE)]
+        for idx in range(min(len(body_images), len(h2_positions))):
+            img = body_images[idx]
+            img_url = img.get("url", "")
+            img_credit = img.get("credit", "")
+            img_block = f"\n\n![Photo]({img_url})\n*{img_credit}*\n"
+            h2_line_end = body_md.index("\n", h2_positions[idx]) + 1
+            next_pp = body_md.find("\n\n", h2_line_end)
+            if next_pp == -1:
+                next_pp = len(body_md)
+            body_md = body_md[:next_pp] + img_block + body_md[next_pp:]
+            # Recalculate H2 positions after insertion
+            h2_positions = [m.start() for m in re.finditer(r"^## ", body_md, re.MULTILINE)]
+
+    # 3. AdSense block insertion
+    if adsense_config is not None:
+        try:
+            from pipelines.etap.post_processor import insert_adsense as _insert_ads
+            body_md = _insert_ads(body_md)
+        except ImportError:
+            logger.warning("[PUBLISH] pipelines.etap.post_processor not available — skipping AdSense")
+
+    # 4. Cross-sell block insertion
+    if cross_sell_config is not None:
+        try:
+            from shared.entity_linker import build_cross_sell_html as _build_cross
+            from pipelines.etap.post_processor import insert_cross_sell_block as _insert_cross
+            _cs_country = cross_sell_config.get("country", "")
+            _cs_city = cross_sell_config.get("city", "")
+            _cs_exclude = cross_sell_config.get("exclude_blog", blog_id)
+            _cs_max = cross_sell_config.get("max_items", 3)
+            _cs_position = cross_sell_config.get("position", "bottom")
+            _cross_html = _build_cross(country=_cs_country, city=_cs_city,
+                                       exclude_blog=_cs_exclude, max_items=_cs_max)
+            if _cross_html:
+                body_md = _insert_cross(_cross_html, _cross_html, position=_cs_position)
+        except ImportError:
+            logger.warning("[PUBLISH] cross-sell modules not available — skipping cross-sell")
+
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags, description=description)
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
@@ -991,3 +1068,75 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     domain = blog_cfg.get("domain", "")
     expected_url = f"https://{domain}/posts/{slug}/"
     return {"success": True, "file": file_path, "url": expected_url}
+
+
+def _write_hugo_post_etap(article, cover_image=None, body_images=None, blog_id=None,
+                          site_path=None, category=None, is_draft=False):
+    """ETAP convenience wrapper — maps ETAP article format to shared _write_hugo_post().
+
+    This function translates the ETAP article dict convention into the shared
+    _write_hugo_post() call, enabling all ETAP-specific post-processing hooks
+    (internal links, AdSense, body images, cross-sell).
+
+    Args:
+        article: ETAP article dict with keys: slug, title, content, tags, description,
+                 _draft, country, city, image_url, image_credit
+        cover_image: Cover image dict with 'url' and optional 'credit' keys
+        body_images: List of body image dicts with 'url' and 'credit' keys
+        blog_id: Blog identifier string
+        site_path: Hugo site filesystem path
+        category: Post category string
+        is_draft: Whether post is a draft
+
+    Returns:
+        Post directory path on success, None on failure
+    """
+    slug = article["slug"]
+    title = article["title"]
+    content = article["content"]
+    tags = article.get("tags", [])
+    description = article.get("description", "")
+    is_draft = is_draft or article.get("_draft", False)
+
+    # Resolve thumbnail: prefer cover_image arg → article.image_url → None
+    thumbnail_url = None
+    if cover_image and cover_image.get("url"):
+        thumbnail_url = cover_image["url"]
+    elif article.get("image_url"):
+        thumbnail_url = article["image_url"]
+
+    # Build blog_cfg for the shared function
+    blog_cfg = {
+        "id": blog_id or "",
+        "site_path": site_path or "",
+        "theme": "Blowfish",
+        "domain": "",
+        "shortcodes_enabled": True,
+    }
+
+    result = _write_hugo_post(
+        blog_cfg=blog_cfg,
+        title=title,
+        body_md=content,
+        slug=slug,
+        category=category or "",
+        tags=tags,
+        thumbnail_url=thumbnail_url,
+        is_draft=is_draft,
+        inject_internal_links=True,
+        adsense_config={},
+        cross_sell_config={
+            "country": article.get("country", ""),
+            "city": article.get("city", ""),
+            "exclude_blog": blog_id or "",
+            "max_items": 3,
+            "position": "bottom",
+        },
+        body_images=body_images,
+    )
+
+    if result.get("success"):
+        return os.path.join(site_path, "content", "posts", slug)
+    else:
+        logger.error(f"[ETAP] _write_hugo_post_etap failed: {result.get('error')}")
+        return None
