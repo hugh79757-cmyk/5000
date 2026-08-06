@@ -3,11 +3,11 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-05T00:40:00Z"
+last_updated: "2026-08-06T12:00:00Z"
 progress:
-  total_phases: 30
+  total_phases: 31
   completed_phases: 29
-  percent: 97
+  percent: 94
 ---
 
 # Project State: 5000
@@ -61,6 +61,7 @@ progress:
 | 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
 | 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
 | 58 | 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템 (PublishMonitor) | ✅ | 8 커밋 (`0e17f9acc`~`3e5aa1cd5`, 2026-08-06) |
+| 59 | Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합 | 📋 | Planned (2026-08-06) |
 
 ---
 
@@ -68,6 +69,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-06 | Phase 59 Planning — Ops Dashboard + Blowfish 단일화 + 파이프라인 통합 CONTEXT/RESEARCH/PLAN 작성 | `planned` |
 | 2026-08-05 | 전 블로그 KEYWORD_MAP 전수 감사 — low_relevance 위험 키워드 589 고유쌍 → 212 (제거 377쌍: 외국어혼합 256 + 오프토픽 82 + B1검토 39, 유지 KEEP_B1 84 + KEEP_C 126, SKIP_ARTIFACT 2) | `a8ed1ec30`, `bd98db2ef` |
 | 2026-08-05 | camping-hugo 일반명 키워드(조명/난로/선풍기) 제거 + 스케줄러 재시작(PID 12380→31420, camping 발행 성공) | `ca9f9e7ad` |
 | 2026-08-05 | golf-hugo/bike-hugo no_keyword 발행 실패 해소 — golf/bike 키워드 24개 수동 수집(products ≥3건) + 스케줄러 재시작(PID 54024→12380, auto_collector 2985개 로드) + scheduler.py catchup/register 시각 파싱 방어 가드 (tap-blogger YAML sexagesimal 600/840 크래시 차단) | `2871c889c`, `64a9874a9` |
@@ -239,4 +241,4 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-06 - Phase 58 완료 (PublishMonitor 알림 시스템, 8 커밋) + quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*
+*Last updated: 2026-08-06 - Phase 59 Planning 완료 (Ops Dashboard + Blowfish 단일화 + 파이프라인 통합) + quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*

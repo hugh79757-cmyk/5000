@@ -1,8 +1,8 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-07-28
+**Last updated:** 2026-08-06
 
-**Actual phases completed:** 32 phases 완료 (Phase 52 Wave 1 진행 중)
+**Actual phases completed:** 32 phases 완료 (Phase 59 Planned)
 **현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
 
 ---
@@ -562,6 +562,23 @@ Total in 898 ms +
 
 ---
 
+## Phase 58: 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템
+**Priority:** 🔴 HIGH
+**Cycle:** 조사 → 구현(additive) → 검증(dry-run)
+**Status:** 📋 Planned (2026-08-06)
+**Plan:** `.planning/phase-58-publish-problem-telegram-alerting/PLAN.md` (v2, PLAN-CHECK PASS)
+**Context:** 발행 오류 알림이 `send_error` 단일 템플릿(raw reason)이라 문제 원인 식별 불가. similar_title·CJK/CoT 누수·배포 실패(ETAP/Workers)·이미지 URL 반복 등 8건이 침묵 상태.
+**Goal:** 24개 발행 문제(P01~P24)를 PROBLEM_REGISTRY에 등록하고, 발행 시 문제 발생 시 **어떤 문제인지 정확한 문제별 한국어 Telegram 알림**을 신규 PublishMonitor 단일 진입점으로 전송 (additive, 기존 `_tg_error` 경로 보존).
+**Key Tasks:**
+- 신규 모듈 3종: `shared/problem_registry.py`(ProblemSpec+PROBLEM_REGISTRY 24건), `shared/problem_detectors.py`(순수 탐지), `shared/problem_monitor.py`(PublishMonitor+dry-run)
+- 통합 지점 6곳: dispatcher 결과 파싱/배포 반환 캡처, curation run(), post-generate raw 훅(sanitize 이전), post-publish 검증, P22 ai_generate RuntimeError 캐치
+- 심각도 정책: CRITICAL=always+60분 쿨다운 / MAJOR=consecutive:3 / MINOR=quiet. `PROBLEM_ALERT_DRY_RUN=1` 롤아웃
+- CJK 오탐 방지: 한글 비율 0.5 기반 (travel2 heritage 한자 병기 86건 오탐 실측 반영)
+- 검증: 신규 테스트 4파일 + 기존 스위트 회귀 0건 게이트
+**이연(Phase 59):** `notify.py` 교체, 죽은 코드(`send_validation`/`send_no_result_alert`) 삭제, 기존 `_tg_error` 경로 단일화, `_has_repeated_pattern` 3중 복제 통폐합
+
+---
+
 ## Phase 56: CUAP 키워드 정리 + 임계값 완충 → kitchen/beauty 재활성화
 **Status:** ✅ Complete (2026-08-03)
 **Plan:** `.planning/phase-56-cuap-keyword-threshold/PLAN.md`
@@ -573,3 +590,32 @@ Total in 898 ms +
 - alert_thresholds.py: maybe_alert()에 연속 횟수 확인 추가
 - pipeline.py: consecutive_failures를 maybe_alert()에 전달
 - cuap.yaml: kitchen-hugo, beauty-hugo → active + force_draft:true
+
+---
+
+## Phase 59: Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합
+**Priority:** 🔴 HIGH
+**Cycle:** 조사 → 구현(staged rollout) → 검증
+**Status:** 📋 Planned (2026-08-06)
+**Plan:** `.planning/phase-59-ops-dashboard-and-unification/PLAN.md`
+**Context:** 85개 블로그의 운영 상태를 모바일/웹에서 실시간 파악하는 대시보드 구축 + Blowfish 테마 단일 소스 고정 + 7갈래 파이프라인 분기 단일화
+**Goal:**
+1. Ops Dashboard: "무엇이 왜 고장났고, 언제 멈췄고, 표준에서 얼마나 벗어났는지" 실시간 파악
+2. Blowfish: 테마 오버라이드를 단일 소스로 고정, PaperMod/Congo → Blowfish 통일
+3. 파이프라인: ETAP `_write_hugo_post()` 35중복 제거, publisher.py 토큰 불일치 해소
+**Key Tasks:**
+- Wave 1: ops_dashboard Flask UI + 헬스체크 엔진 + JSON API (포트 5060)
+- Wave 2: Cloudflare Tunnel 원격 접근 + 텔레그램 알림 통합
+- Wave 3: Blowfish 테마 단일화 (hotissue PaperMod→Blowfish, stock Congo→Blowfish)
+- Wave 4: ETAP `_write_hugo_post()` 35중복 → shared/hugo_writer.py 수렴 (staged rollout)
+- Wave 5: dispatcher flights-hugo 이름 정렬 + publisher.py 토큰 죽은 코드 제거
+- Wave 6: 전체 검증 + GSD 문서 업데이트
+**Acceptance:**
+- ops dashboard에서 CUAP stale + senior 썸네일 + CJK 릭 + 표준 위반 노출
+- ETAP `_write_hugo_post()` 중복 0건
+- 테마 3종 → Blowfish 1종
+**Dependencies:** `ADSENSE-GUIDE.md`, `Blowfish-Hugo-테마-업그레이드-표준-지침서.md v1.2`, `audit_5000.md`
+**Documents:**
+- `.planning/phase-59-ops-dashboard-and-unification/CONTEXT.md` — 요구사항
+- `.planning/phase-59-ops-dashboard-and-unification/RESEARCH.md` — 코드베이스 분석
+- `.planning/phase-59-ops-dashboard-and-unification/PLAN.md` — 6-wave 실행 계획
