@@ -16,6 +16,21 @@ from pathlib import Path
 STALE_THRESHOLD_DAYS = 3  # 발행 정지 기준 (마지막 발행 이후 경과일)
 
 
+def _get_normalization_target_ids(conn: sqlite3.Connection) -> set[str]:
+    """정상화 대상 블로그 ID — active + 재개 예정(maintenance 대상).
+
+    2026-08-06 (커밋 C 3단계): 준비도 지표 산정 대상을 active + 재개 예정
+    블로그로 한정. 비활성(inactive/disabled)·발행기록 없는 블로그는 분모에서
+    제외된다(ETAP 35개 등 AdSense 미사용/미발행 사이트가 준비도를 막지 않음).
+    """
+    rows = conn.execute("""
+        SELECT blog_id FROM blog_lifecycle
+        WHERE config_status = 'active'
+           OR maintenance_status IN ('awaiting', 'in_progress')
+    """).fetchall()
+    return {r["blog_id"] for r in rows}
+
+
 def _get_publish_log_conn() -> sqlite3.Connection:
     """publish_ledger DB 연결 (content.db)."""
     from ops_dashboard.db import get_publish_log_conn
@@ -23,7 +38,12 @@ def _get_publish_log_conn() -> sqlite3.Connection:
 
 
 def compute_standard_compliance(conn: sqlite3.Connection) -> dict:
-    """표준 준수율: standard_compliance 최신 결과 pass 비율."""
+    """표준 준수율: standard_compliance 최신 결과 pass 비율 (정상화 대상 한정)."""
+    target_ids = _get_normalization_target_ids(conn)
+    if not target_ids:
+        return {"pass_count": 0, "fail_count": 0, "unknown_count": 0,
+                "total": 0, "ratio": 0.0, "green": False}
+
     rows = conn.execute("""
         SELECT cr.blog_id, cr.status
         FROM check_results cr
@@ -36,11 +56,22 @@ def compute_standard_compliance(conn: sqlite3.Connection) -> dict:
             AND cr.checked_at = latest.latest
     """).fetchall()
 
-    total = len(rows)
-    pass_count = sum(1 for r in rows if r["status"] == "pass")
-    fail_count = sum(1 for r in rows if r["status"] == "fail")
-    unknown_count = total - pass_count - fail_count
+    # 정상화 대상 블로그별 최신 결과 매핑
+    latest_by_blog = {r["blog_id"]: r["status"] for r in rows}
+    pass_count = 0
+    fail_count = 0
+    unknown_count = 0
+    for bid in sorted(target_ids):
+        status = latest_by_blog.get(bid)
+        if status == "pass":
+            pass_count += 1
+        elif status == "fail":
+            fail_count += 1
+        else:
+            # 검사 결과 없음(미실행) 또는 unknown → unknown으로 집계
+            unknown_count += 1
 
+    total = len(target_ids)
     ratio = (pass_count / total * 100.0) if total > 0 else 0.0
     return {
         "pass_count": pass_count,
@@ -48,31 +79,31 @@ def compute_standard_compliance(conn: sqlite3.Connection) -> dict:
         "unknown_count": unknown_count,
         "total": total,
         "ratio": round(ratio, 1),
-        "green": total > 0 and ratio == 100.0 and fail_count == 0,
+        "green": total > 0 and ratio == 100.0 and fail_count == 0 and unknown_count == 0,
     }
 
 
 def compute_stale_active_blogs(conn: sqlite3.Connection) -> dict:
-    """stale active 블로그 수.
+    """stale(발행 정지) 블로그 수 — 정상화 대상(active + 재개 예정) 한정.
 
     blog_lifecycle.days_since_last_publish가 NULL(미집계)이므로,
     실제 데이터 소스인 publish_ledger(content.db)에서 마지막 성공 발행을 조회한다.
+    발행 기록 자체가 없는 블로그는 stale로 치지 않고 별도 "관리 제외" 버킷으로 분리
+    (2026-08-06, 커밋 C 3단계: techpawz/rotcha 계열 발행기록 없음 블로그가
+    준비도를 막지 않도록).
     """
-    # active 블로그 목록 (ops.db)
-    active_blogs = conn.execute(
-        "SELECT blog_id FROM blog_lifecycle WHERE config_status = 'active'"
-    ).fetchall()
-    active_ids = {r["blog_id"] for r in active_blogs}
-
-    if not active_ids:
-        return {"count": 0, "green": True, "stale_blogs": []}
+    # 정상화 대상 블로그 (active + 재개 예정)
+    target_ids = _get_normalization_target_ids(conn)
+    if not target_ids:
+        return {"count": 0, "green": True, "stale_blogs": [], "excluded_no_history": []}
 
     # publish_ledger에서 블로그별 마지막 성공 발행 시각
     ledger = _get_publish_log_conn()
     now = datetime.now()
     stale_blogs = []
+    no_history = []
 
-    for bid in active_ids:
+    for bid in sorted(target_ids):
         row = ledger.execute(
             "SELECT MAX(created_at) AS last FROM publish_ledger"
             " WHERE blog_id = ? AND status = 'published'",
@@ -80,17 +111,17 @@ def compute_stale_active_blogs(conn: sqlite3.Connection) -> dict:
         ).fetchone()
         last = row["last"] if row else None
         if last is None:
-            # 발행 기록 자체 없음 → 발행 정지로 간주
+            # 발행 기록 없음 → stale로 치지 않고 별도 버킷
+            no_history.append({"blog_id": bid, "days": None})
+            continue
+        try:
+            last_dt = datetime.fromisoformat(last)
+        except (ValueError, TypeError):
             stale_blogs.append({"blog_id": bid, "days": None})
-        else:
-            try:
-                last_dt = datetime.fromisoformat(last)
-            except (ValueError, TypeError):
-                stale_blogs.append({"blog_id": bid, "days": None})
-                continue
-            days = (now - last_dt).days
-            if days > STALE_THRESHOLD_DAYS:
-                stale_blogs.append({"blog_id": bid, "days": days})
+            continue
+        days = (now - last_dt).days
+        if days > STALE_THRESHOLD_DAYS:
+            stale_blogs.append({"blog_id": bid, "days": days})
 
     ledger.close()
 
@@ -98,15 +129,29 @@ def compute_stale_active_blogs(conn: sqlite3.Connection) -> dict:
         "count": len(stale_blogs),
         "green": len(stale_blogs) == 0,
         "stale_blogs": stale_blogs,
+        "excluded_no_history": no_history,
     }
 
 
 def compute_open_known_issues(conn: sqlite3.Connection) -> dict:
-    """미해결 known_issue 수."""
-    row = conn.execute(
-        "SELECT COUNT(*) AS cnt FROM known_issues WHERE gsd_status = 'open'"
-    ).fetchone()
-    count = row["cnt"]
+    """미해결 known_issue 수 — 정상화 대상 블로그 관련 이슈 한정.
+
+    이슈의 blog_ids가 비어 있으면(구조 이슈 STRUCT 등) 전역 이슈로 간주해 항상
+    집계하고, blog_ids가 있으면 정상화 대상 블로그와 교집합이 있는 경우에만
+    집계한다 (비활성 블로그 전용 이슈는 준비도를 막지 않음).
+    """
+    target_ids = _get_normalization_target_ids(conn)
+    rows = conn.execute(
+        "SELECT issue_id, blog_ids FROM known_issues WHERE gsd_status = 'open'"
+    ).fetchall()
+    count = 0
+    for r in rows:
+        blog_ids = (r["blog_ids"] or "").strip()
+        if not blog_ids:
+            # 전역 구조 이슈 — 항상 집계
+            count += 1
+        elif any(bid in target_ids for bid in (b.strip() for b in blog_ids.split(",")) if bid):
+            count += 1
     return {"count": count, "green": count == 0}
 
 

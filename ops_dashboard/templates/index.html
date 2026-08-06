@@ -5,7 +5,7 @@
 {% if readiness %}
 <div class="alert {% if readiness.ready %}alert-ok{% else %}alert-warn{% endif %}" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem">
   <strong>확장 준비도: {% if readiness.ready %}<span style="color:#28a745">&#128994; 준비완료</span>{% else %}<span style="color:#dc3545">&#128308; 확장 금지</span>{% endif %}</strong>
-  <span style="color:#6c757d">표준 {{ readiness.metrics.standard_compliance.ratio }}%</span>
+  <span style="color:#6c757d">정상화 대상 {{ readiness.metrics.standard_compliance.total }}개 · 표준 {{ readiness.metrics.standard_compliance.ratio }}% (pass {{ readiness.metrics.standard_compliance.pass_count }})</span>
   <span style="color:#6c757d">|</span>
   <span style="color:#6c757d">stale {{ readiness.metrics.stale_active_blogs.count }}</span>
   <span style="color:#6c757d">|</span>
