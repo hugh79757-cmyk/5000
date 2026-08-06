@@ -616,6 +616,69 @@ Subagent에 위임하기 전 스스로 판단:
 
 <!-- GSD:subagent-stuck-detection-end -->
 
+<!-- GSD:destructive-ops-start -->
+
+## 파괴적 작업 수행 규칙 (2026-08-06)
+
+> 사고 배경: run_sync()이 non-unique 인덱스 위에서 중복 15,514행을 재삽입하고,
+> backfill이 1,412곳의 제목을 오염시킴(STRUCT-11). 되돌리기 어려운 작업은
+> 항상 사전 계획 + 로그 + worklog를 남긴다. 위반은 조용한 실패로 취급하지 않는다.
+
+### 1. 파괴적 작업 정의 (보수적 기본값)
+
+아래에 해당하면 **파괴적 작업**이다. 경계가 애매하면 파괴적으로 간주한다.
+
+- DB: DELETE / UPDATE / DROP / 테이블·인덱스 재생성 / 스키마 마이그레이션
+- 프로덕션 DB(content.db 등)에 대한 **대량 INSERT** (run_sync류, 소스 전체 재삽입)
+- wrangler 배포·재배포 (Pages/Workers)
+- git push / tag 이동 / force push / history rewrite
+- 파일·디렉터리 대량 삭제 (rm -rf, 반복 삭제 루프)
+- 스케줄러·데몬 정지·기동 (launchd, scheduler.py 등)
+- 콘텐츠 재생성으로 라이브 글을 덮어쓰는 작업
+- 기존 기능의 삭제·교체를 수반하는 코드 변경 (추가만이 아닌 경우)
+
+**비파괴(로그 불필요):** 읽기 전용 조회(grep, SELECT, curl -I), 대시보드 로드,
+테스트 실행, 문서 작성. 단, SELECT라도 실행 후 데이터가 변하면 파괴적이다.
+
+**영구 보존 대상 (삭제 금지):** content.db의 `source=''` 실발행 행.
+실발행 기록 유실 0을 보장해야 한다.
+
+### 2. 파괴적 작업 4단계 프로토콜 (강제)
+
+1. **사전 카운트/영향 범위 출력** — 삭제·변경 예정 건수, 대상 범위를 먼저 출력.
+2. **되돌림 수단 확보** — 백업 경로(예: `data/content.db.bak_<ts>`) 또는
+   롤백 태그/커밋을 명시하고 확인.
+3. **실행** — 사전 확인 후에만.
+4. **사후 대조** — before/after 수치를 비교해 출력. 실발행 행수(예: source='' 36행)
+   보존 여부를 반드시 재확인.
+
+**필수 사용자 확인:** 대량 삭제·프로덕션 DB 변경은 "삭제 예정 건수"를 먼저
+보고하고 사용자 확인을 받은 뒤에만 실행한다. 스스로 판단해 넘어가지 않는다.
+
+**라이브 스케줄러 선행 정지:** 프로덕션 DB에 쓰는 작업(INSERT/UPDATE/DELETE/
+마이그레이션)은 라이브 스케줄러·데몬 정지 확인을 선행 조건으로 한다.
+정지 확인 전에는 실행 금지.
+
+### 3. 로그·worklog 연동 (필수)
+
+- 파괴적 작업 1건마다 `logs/destructive_YYYY-MM-DD.log`에 한 줄 append:
+  `[시각] 명령 | 사전카운트= | 백업= | 사후= | 보존확인=`. 민감정보(토큰/비밀번호)는 마스킹.
+- 파괴적 작업이 하나라도 포함된 작업 단위는 종료 시
+  `.planning/worklog/WL-<날짜>-<주제>.md`를 남긴다.
+  **"커밋 또는 파괴적 작업 → worklog 필수"**. 비파괴 작업만 있으면 worklog 선택.
+- worklog 양식/예시: `.planning/worklog/README.md` 참조. 상세 분해 절차는
+  `.planning/skills/fleet-ops-audit-playbook.md` 참조(중복 서술 금지).
+
+### 4. 즉시 적용 — 진행 중 사고 대상
+
+content.db 복구 작업이 이 규칙의 첫 적용 대상이다:
+- 복구는 4단계 프로토콜(사전 카운트 → 백업 → 실행 → 사후 대조)을 따른다.
+- `logs/destructive_2026-08-06.log`와
+  `.planning/worklog/WL-20260806-content-db-recovery.md`를 생성한다.
+- 복구 절차 상세: `.planning/phase-60-publish-investigation-and-hardening/RECOVERY-content-db-20260806.md`
+
+<!-- GSD:destructive-ops-end -->
+
 <!-- GSD:workflow-start source:GSD defaults -->
 
 ## GSD Workflow Enforcement
