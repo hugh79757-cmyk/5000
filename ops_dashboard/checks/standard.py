@@ -190,7 +190,28 @@ def _check_r02(site: Path) -> tuple[bool, str]:
 
     Inline in hugo.toml as [params.advertisement], or in config/_default/
     params.toml as [advertisement] (Hugo auto-maps params.toml to site.Params).
+
+    N/A: if the site does not load adsbygoogle.js in extend-head/extend_head
+    (AdSense not used), the rule does not apply — pass (R03/R05/R06 pattern).
     """
+    # AdSense 미사용 판별: extend-head/extend_head에 adsbygoogle 로더 없으면 N/A
+    loader_files = (
+        site / "layouts/partials/extend-head.html",
+        site / "layouts/partials/extend_head.html",
+        site / "layouts/partials/extend-head.html",
+    )
+    seen = set()
+    adsense_loader = False
+    for f in loader_files:
+        if f in seen:
+            continue
+        seen.add(f)
+        if f.exists() and "adsbygoogle" in _read_file_safe(f):
+            adsense_loader = True
+            break
+    if not adsense_loader:
+        return True, "AdSense 미사용 (extend-head에 adsbygoogle 로더 없음) — N/A"
+
     configs = _find_all_config_files(site)
     if not configs:
         return False, "No hugo.toml/config/params found at root or config/_default/"
