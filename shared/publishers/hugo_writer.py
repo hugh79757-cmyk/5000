@@ -1012,6 +1012,53 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             # Recalculate H2 positions after insertion
             h2_positions = [m.start() for m in re.finditer(r"^## ", body_md, re.MULTILINE)]
 
+    # 2.5. Disclaimer insertion before first affiliate link (Rule B)
+    #    Insert "이 포스팅은 쿠팡 파트너스 활동의 일환으로..." right before
+    #    the first affiliate link (<a href="...link.coupang.com...">).
+    #    Skip if no affiliate link found (do NOT insert at top as fallback —
+    #    misplaced disclosure must be avoided).
+    #    Skip if disclaimer already exists near top (top 20% of body).
+    _DISCLAIMER_TEXT = (
+        "이 포스팅은 쿠팡 파트너스 활동의 일환으로, "
+        "이에 따른 일정액의 수수료를 제공받습니다.\n\n"
+    )
+    _affiliate_link_re = re.compile(r'<a\s[^>]*href=["\'][^"\']*link\.coupang\.com[^"\']*["\'][^>]*>', re.IGNORECASE)
+    _top_disclaimer_re = re.compile(
+        r'이 포스팅은 쿠팡 파트너스 활동의 일환으로.*수수료를 제공받습니다\.?',
+        re.DOTALL,
+    )
+
+    def _needs_disclaimer(body: str) -> bool:
+        """상단 30% 내에 면책이 이미 있으면 False.
+        면책 시작 문구('이 포스팅은 쿠팡 파트너스')만 감지해도 충분."""
+        if not body:
+            return False
+        # 상단 30% + 최소 200자로 체크 (짧은 글도 커버)
+        check_len = max(200, len(body) // 3)
+        first_chunk = body[:check_len]
+        # 면책 시작 문구 감지 (전체 문장 completes 아니어도 됨)
+        return not re.search(r'이 포스팅은 쿠팡 파트너스 활동의 일환으로', first_chunk)
+
+    def _insert_disclaimer_before_first_affiliate(body: str) -> tuple[str, bool, str]:
+        """첫 제휴 링크 앞에 면책 삽입. 성공 시 (body, True, ''), 실패 시 (body, False, 사유)."""
+        if not _needs_disclaimer(body):
+            return body, False, "상단 면책 이미 존재 — 스킵"
+        m = _affiliate_link_re.search(body)
+        if not m:
+            return body, False, "제휴 링크 특정 불가 — 스킵 (폴백 삽입 금지)"
+        insert_pos = m.start()
+        # 앞 라인 끝을 정리 (빈 줄 하나 추가)
+        prefix = body[:insert_pos].rstrip()
+        if prefix and not prefix.endswith("\n"):
+            prefix += "\n\n"
+        return prefix + _DISCLAIMER_TEXT + body[insert_pos:], True, ""
+
+    body_md, disc_inserted, disc_reason = _insert_disclaimer_before_first_affiliate(body_md)
+    if disc_inserted:
+        logger.info(f"[PUBLISH] 면책 문구 첫 제휴 링크 직전 삽입 완료: {blog_id}/{slug}")
+    elif disc_reason != "상단 면책 이미 존재 — 스킵":
+        logger.warning(f"[PUBLISH] 면책 문구 삽입 스킵: {blog_id}/{slug} — {disc_reason}")
+
     # 3. AdSense block insertion
     if adsense_config is not None:
         try:
