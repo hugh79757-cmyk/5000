@@ -1,0 +1,436 @@
+"""ops_dashboard.checks.standard — 표준 준수 검사 (R01-R12)
+
+Blowfish/AdSense 표준 규칙을 blog별로 검사하고,
+CRITICAL 위반 발견 시 텔레그램 알림을 보낸다.
+"""
+from __future__ import annotations
+
+import logging
+import os
+import re
+from pathlib import Path
+
+from ops_dashboard.checks import register_check
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Rule definitions: R01-R12
+# ---------------------------------------------------------------------------
+
+STANDARD_RULES: list[dict] = [
+    {
+        "rule_id": "R01",
+        "target": "hugo.toml",
+        "severity": "CRITICAL",
+        "description": "showTableOfContents must be false",
+        "check": "_check_r01",
+    },
+    {
+        "rule_id": "R02",
+        "target": "hugo.toml",
+        "severity": "CRITICAL",
+        "description": "Advertisement section with adsense slots required",
+        "check": "_check_r02",
+    },
+    {
+        "rule_id": "R03",
+        "target": "extend-head.html",
+        "severity": "CRITICAL",
+        "description": "adsbygoogle.js must use site.Params (no hardcoding)",
+        "check": "_check_r03",
+    },
+    {
+        "rule_id": "R04",
+        "target": "extend_head.html",
+        "severity": "MAJOR",
+        "description": "GA4 + mobile correction CSS required",
+        "check": "_check_r04",
+    },
+    {
+        "rule_id": "R05",
+        "target": "adsense/top.html",
+        "severity": "MAJOR",
+        "description": "overflow:hidden;min-height:100px wrapper + outside push div",
+        "check": "_check_r05",
+    },
+    {
+        "rule_id": "R06",
+        "target": "adsense/in-article.html",
+        "severity": "CRITICAL",
+        "description": "fluid+in-article format (no auto) + outside push div",
+        "check": "_check_r06",
+    },
+    {
+        "rule_id": "R07",
+        "target": "single.html",
+        "severity": "MAJOR",
+        "description": "H2 split injection + prose wrapper",
+        "check": "_check_r07",
+    },
+    {
+        "rule_id": "R08",
+        "target": "single.html",
+        "severity": "MAJOR",
+        "description": "Description (lead) must be removed",
+        "check": "_check_r08",
+    },
+    {
+        "rule_id": "R09",
+        "target": "baseof.html",
+        "severity": "MAJOR",
+        "description": "No custom override — use theme default",
+        "check": "_check_r09",
+    },
+    {
+        "rule_id": "R10",
+        "target": "custom.css",
+        "severity": "MAJOR",
+        "description": "Unfilled space removal + dark mode + min-height rules",
+        "check": "_check_r10",
+    },
+    {
+        "rule_id": "R11",
+        "target": "layouts/",
+        "severity": "MAJOR",
+        "description": "mobile-sticky.html must not be used",
+        "check": "_check_r11",
+    },
+    {
+        "rule_id": "R12",
+        "target": "layouts/",
+        "severity": "MAJOR",
+        "description": "No override files beyond the allowed set",
+        "check": "_check_r12",
+    },
+]
+
+# Allowed override files (CONTEXT.md §4-3)
+ALLOWED_OVERRIDES = {
+    "layouts/_default/single.html",
+    "layouts/partials/extend-head.html",
+    "layouts/partials/extend_head.html",
+    "layouts/partials/adsense",
+}
+
+
+def _find_hugo_root(blog_row: dict) -> Path | None:
+    """Resolve the Hugo site root from blog_lifecycle row."""
+    site_path = blog_row.get("site_path", "")
+    if not site_path:
+        return None
+    p = Path(site_path)
+    if not p.is_dir():
+        return None
+    return p
+
+
+def _read_file_safe(path: Path) -> str:
+    """Read file contents, return empty string on error."""
+    try:
+        return path.read_text(encoding="utf-8", errors="replace")
+    except (OSError, PermissionError):
+        return ""
+
+
+# ---------------------------------------------------------------------------
+# Individual rule checks — each returns (pass/fail, detail)
+# ---------------------------------------------------------------------------
+
+def _check_r01(site: Path) -> tuple[bool, str]:
+    """R01: showTableOfContents must be false in hugo.toml."""
+    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml"):
+        cfg = site / name
+        if cfg.exists():
+            content = _read_file_safe(cfg)
+            # Look for showTableOfContents = false
+            if re.search(r"showTableOfContents\s*=\s*false", content, re.IGNORECASE):
+                return True, f"{name}: showTableOfContents=false confirmed"
+            if re.search(r"showTableOfContents\s*=\s*true", content, re.IGNORECASE):
+                return False, f"{name}: showTableOfContents=true (must be false)"
+            return True, f"{name}: showTableOfContents not set (assumed false)"
+    return False, "No hugo.toml/config found"
+
+
+def _check_r02(site: Path) -> tuple[bool, str]:
+    """R02: [params.advertisement] with adsense slots required."""
+    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml"):
+        cfg = site / name
+        if cfg.exists():
+            content = _read_file_safe(cfg)
+            if "[params.advertisement]" in content or "advertisement:" in content:
+                has_adsense = "adsense" in content.lower()
+                has_slots = "topSlot" in content or "inArticleSlot" in content
+                if has_adsense and has_slots:
+                    return True, f"{name}: advertisement section with slots found"
+                return False, f"{name}: advertisement section present but missing adsense/slots"
+            return False, f"{name}: no [params.advertisement] section"
+    return False, "No hugo.toml/config found"
+
+
+def _check_r03(site: Path) -> tuple[bool, str]:
+    """R03: adsbygoogle.js must use site.Params, not hardcoded publisher ID."""
+    for partial_dir in ("layouts/partials",):
+        extend_head = site / partial_dir / "extend-head.html"
+        if not extend_head.exists():
+            extend_head = site / partial_dir / "extend_head.html"
+        if extend_head.exists():
+            content = _read_file_safe(extend_head)
+            if "adsbygoogle" not in content:
+                return True, "No adsbygoogle reference (not applicable)"
+            # Good: uses site.Params
+            if "site.Params" in content or ".Site.Params" in content:
+                return True, "extend-head: uses site.Params for adsbygoogle"
+            # Bad: hardcoded publisher ID
+            if "ca-pub-" in content:
+                return False, "extend-head: hardcoded ca-pub- (must use site.Params)"
+            return True, "extend-head: adsbygoogle present, no hardcoded ID detected"
+    return True, "No extend-head.html found (not applicable)"
+
+
+def _check_r04(site: Path) -> tuple[bool, str]:
+    """R04: GA4 + mobile correction CSS in extend_head.html."""
+    for partial_dir in ("layouts/partials",):
+        for name in ("extend_head.html", "extend-head.html"):
+            p = site / partial_dir / name
+            if p.exists():
+                content = _read_file_safe(p)
+                has_ga = "gtag" in content or "GA4" in content or "google-analytics" in content
+                has_mobile = "max-width" in content or "font-size" in content or "mobile" in content.lower()
+                if has_ga and has_mobile:
+                    return True, "extend_head: GA4 + mobile CSS found"
+                missing = []
+                if not has_ga:
+                    missing.append("GA4")
+                if not has_mobile:
+                    missing.append("mobile CSS")
+                return False, f"extend_head: missing {', '.join(missing)}"
+    return False, "No extend_head.html found"
+
+
+def _check_r05(site: Path) -> tuple[bool, str]:
+    """R05: adsense/top.html — overflow:hidden;min-height:100px wrapper."""
+    top_file = site / "layouts/partials/adsense/top.html"
+    if not top_file.exists():
+        return True, "No adsense/top.html (not applicable)"
+    content = _read_file_safe(top_file)
+    has_overflow = "overflow" in content and "hidden" in content
+    has_minheight = "min-height" in content
+    if has_overflow and has_minheight:
+        return True, "top.html: overflow:hidden + min-height present"
+    missing = []
+    if not has_overflow:
+        missing.append("overflow:hidden")
+    if not has_minheight:
+        missing.append("min-height")
+    return False, f"top.html: missing {', '.join(missing)}"
+
+
+def _check_r06(site: Path) -> tuple[bool, str]:
+    """R06: adsense/in-article.html — fluid+in-article format (no auto)."""
+    in_article = site / "layouts/partials/adsense/in-article.html"
+    if not in_article.exists():
+        return True, "No adsense/in-article.html (not applicable)"
+    content = _read_file_safe(in_article)
+    has_fluid = "fluid" in content
+    has_in_article = "in-article" in content
+    has_auto = re.search(r'data-ad-format\s*=\s*"auto"', content)
+    if has_fluid and has_in_article and not has_auto:
+        return True, "in-article.html: fluid+in-article format, no auto"
+    issues = []
+    if not has_fluid:
+        issues.append("missing fluid format")
+    if not has_in_article:
+        issues.append("missing in-article format")
+    if has_auto:
+        issues.append("data-ad-format=auto (prohibited)")
+    return False, f"in-article.html: {', '.join(issues)}"
+
+
+def _check_r07(site: Path) -> tuple[bool, str]:
+    """R07: single.html — H2 split injection + prose wrapper."""
+    single = site / "layouts/_default/single.html"
+    if not single.exists():
+        return True, "No single.html override (theme default used)"
+    content = _read_file_safe(single)
+    has_h2_split = "h2" in content.lower() and ("split" in content.lower() or "inject" in content.lower() or "adsense" in content.lower())
+    has_prose = "prose" in content
+    if has_h2_split and has_prose:
+        return True, "single.html: H2 injection + prose wrapper found"
+    missing = []
+    if not has_h2_split:
+        missing.append("H2 split injection")
+    if not has_prose:
+        missing.append("prose wrapper")
+    return False, f"single.html: missing {', '.join(missing)}"
+
+
+def _check_r08(site: Path) -> tuple[bool, str]:
+    """R08: single.html — Description (lead) must be removed."""
+    single = site / "layouts/_default/single.html"
+    if not single.exists():
+        return True, "No single.html override (theme default used)"
+    content = _read_file_safe(single)
+    # Check for .Lead or .Description usage that should be removed
+    if ".Lead" in content or ".Description" in content:
+        # Check if it's commented out (good)
+        lines = content.split("\n")
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("<!--"):
+                continue
+            if (".Lead" in stripped or ".Description" in stripped) and not stripped.startswith("//"):
+                return False, "single.html: .Lead/.Description still present (not removed)"
+    return True, "single.html: .Lead/.Description removed or commented out"
+
+
+def _check_r09(site: Path) -> tuple[bool, str]:
+    """R09: baseof.html — no custom override."""
+    baseof = site / "layouts/_default/baseof.html"
+    if not baseof.exists():
+        return True, "No baseof.html override (theme default used)"
+    content = _read_file_safe(baseof)
+    # If baseof.html exists, it should be minimal or identical to theme
+    # Flag if it has significant custom content
+    if len(content.strip().split("\n")) > 5:
+        return False, "baseof.html: custom override detected (should use theme default)"
+    return True, "baseof.html: minimal override"
+
+
+def _check_r10(site: Path) -> tuple[bool, str]:
+    """R10: custom.css — unfilled space + dark mode + min-height rules."""
+    custom_css = site / "assets/css/custom.css"
+    if not custom_css.exists():
+        return False, "No custom.css found"
+    content = _read_file_safe(custom_css)
+    has_unfilled = "unfilled" in content.lower() or "min-height" in content
+    has_dark = "dark" in content.lower() or "@media (prefers-color-scheme" in content
+    if has_unfilled and has_dark:
+        return True, "custom.css: unfilled + dark mode rules found"
+    missing = []
+    if not has_unfilled:
+        missing.append("unfilled/min-height rules")
+    if not has_dark:
+        missing.append("dark mode rules")
+    return False, f"custom.css: missing {', '.join(missing)}"
+
+
+def _check_r11(site: Path) -> tuple[bool, str]:
+    """R11: mobile-sticky.html must not be used."""
+    mobile_sticky = site / "layouts/partials/adsense/mobile-sticky.html"
+    if mobile_sticky.exists():
+        return False, "mobile-sticky.html found (prohibited per ADSENSE §8)"
+    return True, "No mobile-sticky.html (correct)"
+
+
+def _check_r12(site: Path) -> tuple[bool, str]:
+    """R12: No override files beyond the allowed set."""
+    layouts_dir = site / "layouts"
+    if not layouts_dir.is_dir():
+        return True, "No layouts/ directory (no overrides)"
+    allowed_files = set()
+    for prefix in ALLOWED_OVERRIDES:
+        allowed_files.add(prefix)
+        # Also allow the file itself
+        allowed_files.add(prefix + ".html")
+
+    violations = []
+    for f in layouts_dir.rglob("*"):
+        if not f.is_file():
+            continue
+        rel = str(f.relative_to(site))
+        # Check if this file is in allowed set
+        is_allowed = False
+        for allowed in ALLOWED_OVERRIDES:
+            if rel.startswith(allowed) or rel == allowed + ".html":
+                is_allowed = True
+                break
+        if not is_allowed:
+            violations.append(rel)
+
+    if violations:
+        return False, f"Unauthorized overrides: {', '.join(violations[:5])}"
+    return True, "All override files are in the allowed set"
+
+
+# ---------------------------------------------------------------------------
+# Check dispatch
+# ---------------------------------------------------------------------------
+
+_CHECK_FUNCTIONS = {
+    "R01": _check_r01,
+    "R02": _check_r02,
+    "R03": _check_r03,
+    "R04": _check_r04,
+    "R05": _check_r05,
+    "R06": _check_r06,
+    "R07": _check_r07,
+    "R08": _check_r08,
+    "R09": _check_r09,
+    "R10": _check_r10,
+    "R11": _check_r11,
+    "R12": _check_r12,
+}
+
+
+@register_check("standard_compliance")
+def check_standard_compliance(conn, blog_id: str) -> dict:
+    """Run R01-R12 standard checks for a blog. Returns status dict."""
+    from ops_dashboard.db import get_blog_detail
+
+    blog_info = get_blog_detail(conn, blog_id)
+    if not blog_info:
+        return {"status": "unknown", "detail": f"Blog {blog_id} not found in lifecycle"}
+
+    blog_row = blog_info.get("blog", {})
+    site = _find_hugo_root(blog_row)
+    if not site:
+        return {"status": "unknown", "detail": f"Site path not found for {blog_id}"}
+
+    failures = []
+    passes = []
+
+    for rule_def in STANDARD_RULES:
+        rule_id = rule_def["rule_id"]
+        check_fn = _CHECK_FUNCTIONS.get(rule_id)
+        if not check_fn:
+            continue
+
+        try:
+            passed, detail = check_fn(site)
+        except Exception as e:
+            logger.error("Rule %s check failed for %s: %s", rule_id, blog_id, e)
+            failures.append({"rule_id": rule_id, "severity": rule_def["severity"],
+                             "detail": f"Check error: {e}"})
+            continue
+
+        if passed:
+            passes.append(rule_id)
+        else:
+            failures.append({"rule_id": rule_id, "severity": rule_def["severity"],
+                             "detail": detail})
+
+    # Determine overall status
+    if not failures:
+        return {"status": "pass", "detail": f"All {len(passes)} rules passed"}
+
+    # Check for CRITICAL failures → send Telegram alert
+    critical_failures = [f for f in failures if f["severity"] == "CRITICAL"]
+    if critical_failures:
+        try:
+            from shared.telegram_notifier import send_standard_violation
+            for cf in critical_failures:
+                send_standard_violation(
+                    blog_id,
+                    cf["rule_id"],
+                    cf["severity"],
+                    cf["detail"],
+                )
+        except Exception as e:
+            logger.error("Failed to send Telegram violation alert for %s: %s", blog_id, e)
+
+    detail_parts = [f"{f['rule_id']}({f['severity']}): {f['detail']}" for f in failures]
+    return {
+        "status": "fail",
+        "detail": f"{len(failures)}/{len(passes) + len(failures)} rules failed: " + "; ".join(detail_parts[:5]),
+    }

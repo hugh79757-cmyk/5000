@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 API_URL = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage"
+DASHBOARD_URL = os.environ.get("OPS_DASHBOARD_URL", "http://localhost:5060")
 
 
 def send(message, parse_mode="HTML") -> bool | None:
@@ -111,3 +112,32 @@ def send_no_result_alert(blog_id: str, failure_count: int):
     text += f"<b>연속 실패:</b> {failure_count}회\n"
     text += "<b>조치:</b> 데이터 수집 파이프라인 점검 필요"
     return send(text)
+
+
+def send_dashboard_alert(blog_id: str, check_name: str, status: str, detail: str) -> bool | None:
+    """Send alert with link to blog detail page on dashboard."""
+    url = f"{DASHBOARD_URL}/blog/{blog_id}"
+    msg = (
+        f"🔴 <b>Ops Alert</b>\n"
+        f"Blog: <code>{blog_id}</code>\n"
+        f"Check: {check_name}\n"
+        f"Status: {status}\n"
+        f"Detail: {detail}\n"
+        f"🔗 <a href=\"{url}\">Dashboard</a>"
+    )
+    return send(msg)
+
+
+def send_standard_violation(blog_id: str, rule_id: str, severity: str, detail: str) -> bool | None:
+    """Send alert for standard compliance violation (CRITICAL only)."""
+    if severity != "CRITICAL":
+        return None
+    url = f"{DASHBOARD_URL}/blog/{blog_id}"
+    msg = (
+        f"⚠️ <b>Standard Violation</b>\n"
+        f"Blog: <code>{blog_id}</code>\n"
+        f"Rule: {rule_id} ({severity})\n"
+        f"Detail: {detail}\n"
+        f"🔗 <a href=\"{url}\">Dashboard</a>"
+    )
+    return send(msg)
