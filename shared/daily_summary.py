@@ -44,6 +44,7 @@ def record_event(
 
 
 def generate_summary(conn: sqlite3.Connection, summary_date: str | None = None) -> dict:
+    """일일 요약 생성. 디바운스 적용 후 실제 푸시 건수를 계산합니다."""
     if summary_date is None:
         summary_date = datetime.now().strftime("%Y-%m-%d")
 
@@ -63,22 +64,36 @@ def generate_summary(conn: sqlite3.Connection, summary_date: str | None = None) 
         blog_by_problem.setdefault(problem_id, []).append(blog_id)
         total_events += cnt
 
-    realtime_count = 0
+    # 디바운스 적용: 동일 (blog_id, problem_id) → 1회만 실시간 푸시
+    debounce_rows = conn.execute(
+        "SELECT blog_id, problem_id FROM notification_debounce WHERE push_date = ?",
+        (summary_date,),
+    ).fetchall()
+    debounced_keys = {(r[0], r[1]) for r in debounce_rows}
+
+    realtime_raw = 0
+    realtime_pushed = 0  # 디바운스 적용 후 실제 푸시
     summary_count = 0
     for problem_id, cnt in breakdown.items():
         if is_realtime(problem_id):
-            realtime_count += cnt
+            realtime_raw += cnt
+            # 이 problem_id에 대해 디바운스된 블로그 수 = 실제 푸시 건수
+            unique_blogs = set(blog_by_problem.get(problem_id, []))
+            pushed = sum(1 for b in unique_blogs if (b, problem_id) in debounced_keys)
+            realtime_pushed += pushed
         else:
             summary_count += cnt
 
     message_text = _format_message(summary_date, breakdown, blog_by_problem,
-                                   total_events, realtime_count, summary_count)
+                                   total_events, realtime_raw, realtime_pushed,
+                                   summary_count)
 
     return {
         "date": summary_date,
         "total_events": total_events,
-        "realtime_count": realtime_count,
-        "summary_count": summary_count,
+        "realtime_raw": realtime_raw,          # 디바운스 전 원건수
+        "realtime_pushed": realtime_pushed,     # 디바운스 후 실제 푸시
+        "summary_count": summary_count,         # 요약 집계 원건수
         "breakdown": breakdown,
         "blog_by_problem": blog_by_problem,
         "message_text": message_text,
@@ -97,7 +112,8 @@ def _format_message(
     breakdown: dict[str, int],
     blog_by_problem: dict[str, list[str]],
     total: int,
-    realtime: int,
+    realtime_raw: int,
+    realtime_pushed: int,
     summary: int,
 ) -> str:
     if not breakdown:
@@ -139,7 +155,7 @@ def _format_message(
                 lines.append(f"  {problem_id} {name} ×{cnt}")
         lines.append("")
 
-    lines.append(f"📊 총 {total}건 (실시간 {realtime} + 요약 {summary})")
+    lines.append(f"📊 총 {total}건 (실시간 푸시 {realtime_pushed}건 / 원 {realtime_raw}건 + 요약 {summary}건)")
     lines.append("🔗 상세: http://localhost:5060/api/attention")
 
     return "\n".join(lines)
