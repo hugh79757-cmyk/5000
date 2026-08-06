@@ -548,7 +548,7 @@ ETAP_PIPELINE_BLOGS = {
     "adventure-hugo", "airlines-hugo", "airports-hugo", "bus-hugo",
     "citytours-hugo", "cruise-hugo", "culture-hugo", "daytrips-hugo",
     "deals-hugo", "dining-hugo", "escape-hugo", "esim-hugo",
-    "eurail-hugo", "extreme-hugo", "ferry-hugo", "flight-hugo",
+    "eurail-hugo", "extreme-hugo", "ferry-hugo", "flights-hugo",
     "foodtour-hugo", "ghost-hugo", "hiking-hugo", "layover-hugo",
     "luxury-hugo", "michelin-hugo", "multiday-hugo", "nature-hugo",
     "nightlife-hugo", "nomad-hugo", "phototour-hugo", "tours-hugo",
