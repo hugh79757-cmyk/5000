@@ -113,18 +113,89 @@ def _sync_source(ledger_conn, src):
         if not title or not blog_id:
             continue
         try:
+            # 주의: idx_ledger_dedup이 실제 DB에서 UNIQUE가 아닐 수 있음(선존 버그).
+            # INSERT OR IGNORE는 non-unique 인덱스에서 무력하므로, 존재 확인 후 INSERT.
+            # (기존 중복 데이터는 건드리지 않음 — 비파괴 가드)
+            dup = ledger_conn.execute(
+                "SELECT 1 FROM publish_ledger"
+                " WHERE blog_id=? AND slug=? AND DATE(created_at)=DATE(?) LIMIT 1",
+                (blog_id, slug or "", created_at)
+            ).fetchone()
+            if dup:
+                continue
             ledger_conn.execute(
-                """INSERT OR IGNORE INTO publish_ledger
+                """INSERT INTO publish_ledger
                    (blog_id, title, slug, published_url, status, source, created_at)
                    VALUES (?,?,?,?,?,?,?)""",
                 (blog_id, title, slug or "", url or "", "published", src["name"], created_at)
             )
-            if ledger_conn.execute("SELECT changes()").fetchone()[0] > 0:
-                inserted += 1
+            inserted += 1
         except Exception as e:
             logger.debug(f"[ledger_sync] insert skip ({blog_id}): {e}")
     ledger_conn.commit()
     return inserted
+
+def backfill_blank_titles(ledger_conn=None) -> int:
+    """publish_ledger에서 title이 빈 published 행을 소스 DB의 제목으로 복구.
+
+    ⚠️ 비활성화 가드 (2026-08-06): 이 함수는 run_sync()에서 호출되지 않는다.
+    2026-08-06 오염 사고로 다제목 일자에 잘못된 제목이 채워질 위험이 확인됨.
+    스케줄러 정지 + UNIQUE 인덱스 마이그레이션 이후, 복구 절차서에 따라
+    안전하게 실행할 것 (data 복구 계획: .planning/phase-60-*/RECOVERY-*.md).
+
+    STRUCT-07: dispatcher._record_ledger가 CUAP 블로그 title을 항상 빈 값으로
+    기록해 왔음 (content.db articles에 CUAP 레코드 없음). 소스별 publish_log의
+    같은 날짜 발행 제목으로 기존 빈 행을 채운다.
+
+    반환: 갱신된 행 수.
+    """
+    closed = ledger_conn is None
+    if ledger_conn is None:
+        try:
+            ledger_conn = sqlite3.connect(str(LEDGER_DB))
+            _ensure_schema(ledger_conn)
+        except Exception as e:
+            logger.exception(f"[ledger_sync] backfill 연결 실패: {e}")
+            return 0
+
+    updated = 0
+    for src in SOURCES:
+        db_path = src["db"]
+        if not db_path.exists():
+            continue
+        try:
+            src_conn = sqlite3.connect(db_path)
+            rows = src_conn.execute(src["sql"]).fetchall()
+            src_conn.close()
+        except Exception as e:
+            logger.debug(f"[ledger_sync] backfill {src['name']} 조회 실패: {e}")
+            continue
+
+        mapping = src["mapping"]
+        for row in rows:
+            blog_id = row[mapping.index("blog_id")]
+            title = (row[mapping.index("title")] or "").strip()
+            if not title or not blog_id:
+                continue
+            created_at = row[mapping.index("published_at")] if "published_at" in mapping else None
+            if not created_at:
+                continue
+            try:
+                cur = ledger_conn.execute(
+                    """UPDATE publish_ledger SET title = ?
+                       WHERE blog_id = ? AND title = '' AND status = 'published'
+                         AND DATE(created_at) = DATE(?)""",
+                    (title, blog_id, created_at),
+                )
+                updated += cur.rowcount
+            except Exception as e:
+                logger.debug(f"[ledger_sync] backfill update skip ({blog_id}): {e}")
+
+    if closed:
+        ledger_conn.commit()
+        ledger_conn.close()
+    return updated
+
 
 def run_sync():
     try:
@@ -141,6 +212,7 @@ def run_sync():
         total += n
         if n > 0:
             logger.info(f"[ledger_sync] {src['name']}: {n}건 신규 등록")
+    conn.commit()
     conn.close()
     logger.info(f"[ledger_sync] 완료 — 총 {total}건 신규: {results}")
     return {"success": True, "total": total, "detail": results}

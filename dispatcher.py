@@ -347,6 +347,23 @@ def _record_ledger(blog_id) -> None:
                     title, url, source_id = row[0], row[1], row[2] or ""
                 conn_src.close()
 
+        if not title and not url:
+            # CUAP 블로그는 curation.db publish_log에 기록됨 (STRUCT-07:
+            # content.db articles에는 CUAP 레코드가 없어 title이 항상 빈 값이었음)
+            try:
+                conn_cu = sqlite3.connect(os.path.join(FIVEK_ROOT, "data", "curation.db"))
+                row_cu = conn_cu.execute(
+                    "SELECT title, slug FROM publish_log WHERE blog_id=? ORDER BY id DESC LIMIT 1",
+                    (blog_id,)
+                ).fetchone()
+                if row_cu:
+                    title = row_cu[0] or ""
+                    url = row_cu[1] or ""
+                    source_id = blog_id
+                conn_cu.close()
+            except Exception:
+                pass
+
         conn = sqlite3.connect(str(LEDGER_DB))
         conn.execute(
             "INSERT INTO publish_ledger (blog_id, title, published_url, status, created_at, source_id) VALUES (?,?,?,?,?,?)",

@@ -8,6 +8,7 @@ Phase 60 Part 2: 블로그 정비·재개 프레임워크
 from __future__ import annotations
 
 import logging
+import os
 import re
 import sqlite3
 from pathlib import Path
@@ -27,35 +28,45 @@ logger = logging.getLogger(__name__)
 
 
 def _check_cjk_in_title(conn: sqlite3.Connection, blog_id: str) -> dict:
-    """M01: 제목 CJK 없음 — 최근 발행 제목에 한자/일본어/중국어 누수 없음"""
-    cjk_pattern = re.compile(r'[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]')
+    """M01: 제목 CJK 없음 — 최근 발행 제목에 한자/일본어/중국어 누수 없음
 
-    # 발행 로그에서 최근 제목 조회
-    tables_and_cols = [
-        ("publish_log", "title", "published_at"),
-        ("publish_ledger", "title", "created_at"),
+    주의 (Part 6 확정): publish_ledger는 content.db, publish_log는 curation.db에 있음.
+    ops.db(conn)에는 없어서 이전에는 항상 graceful pass(무력)였음.
+    """
+    cjk_pattern = re.compile(r'[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]')
+    project_root = Path(__file__).parent.parent.parent
+
+    # 발행 로그에서 최근 제목 조회 — 실제 소유 DB 직접 연결
+    # (publish_log: curation.db / publish_ledger: content.db)
+    sources = [
+        ("content.db", "publish_ledger", "title", "created_at"),
+        ("curation.db", "publish_log", "title", "published_at"),
     ]
 
-    for table, col, date_col in tables_and_cols:
+    contaminated = []
+    for db_name, table, col, date_col in sources:
+        db_path = project_root / "data" / db_name
         try:
-            rows = conn.execute(f"""
+            db_conn = sqlite3.connect(str(db_path))
+            db_conn.row_factory = sqlite3.Row
+            rows = db_conn.execute(f"""
                 SELECT {col} FROM {table}
                 WHERE blog_id = ? AND {col} IS NOT NULL AND {col} != ''
                 ORDER BY {date_col} DESC LIMIT 20
             """, (blog_id,)).fetchall()
+            db_conn.close()
         except sqlite3.OperationalError:
             continue
 
-        contaminated = []
         for (title,) in rows:
             if title and cjk_pattern.search(title):
                 contaminated.append(title[:50])
 
-        if contaminated:
-            return {
-                "status": "fail",
-                "detail": f"M01: CJK 포함 제목 {len(contaminated)}건 — " + "; ".join(contaminated[:3]),
-            }
+    if contaminated:
+        return {
+            "status": "fail",
+            "detail": f"M01: CJK 포함 제목 {len(contaminated)}건 — " + "; ".join(contaminated[:3]),
+        }
 
     return {"status": "pass", "detail": "M01: 최근 제목 20건 중 CJK 포함 없음"}
 
@@ -317,14 +328,23 @@ def _check_keyword_availability(conn: sqlite3.Connection, blog_id: str) -> dict:
 
 
 def _check_similar_title_safety(conn: sqlite3.Connection, blog_id: str) -> dict:
-    """M07: P03 유사제목 안전 — 최근 유사 제목 차단 이력 없음"""
-    # publish_ledger에서 failed + similar_title 확인
+    """M07: P03 유사제목 안전 — 최근 유사 제목 차단 이력 없음
+
+    주의 (Part 6 확정): publish_ledger는 content.db에 있음.
+    ops.db(conn)에는 없어서 이전에는 항상 graceful pass(무력)였음.
+    """
+    project_root = Path(__file__).parent.parent.parent
+    # publish_ledger에서 failed + similar_title 확인 (content.db 직접 연결)
     try:
-        recent_fails = conn.execute("""
+        content_db = project_root / "data" / "content.db"
+        db_conn = sqlite3.connect(str(content_db))
+        db_conn.row_factory = sqlite3.Row
+        recent_fails = db_conn.execute("""
             SELECT COUNT(*) FROM publish_ledger
             WHERE blog_id = ? AND status = 'failed' AND stage = 'similar_title'
               AND created_at > datetime('now', '-7 days')
         """, (blog_id,)).fetchone()[0]
+        db_conn.close()
 
         if recent_fails > 0:
             return {
@@ -353,12 +373,17 @@ def _check_cot_leak(conn: sqlite3.Connection, blog_id: str) -> dict:
 
 
 def _check_publish_log_integrity(conn: sqlite3.Connection, blog_id: str) -> dict:
-    """M09: publish_log 기록 정상 — 발행 성공 시 기록 남음"""
+    """M09: publish_log 기록 정상 — 발행 성공 시 기록 남음
+
+    publish_ledger는 content.db에 있고, 각 파이프라인의 실제 발행 로그는
+    소스별 DB에 있다 (curation.db publish_log, stap_content.db articles,
+    car.db publish_log 등). STAP 계열(finance-hugo 등)은 curation.db에
+    기록이 없으므로 소스 DB를 함께 확인한다 (STRUCT-10 오판 수정).
+    """
     project_root = Path(__file__).parent.parent.parent
 
     # publish_ledger는 content.db에 있음
     content_db = project_root / "data" / "content.db"
-    curation_db = project_root / "data" / "curation.db"
 
     try:
         # content.db에서 publish_ledger 발행 건수 확인
@@ -371,24 +396,62 @@ def _check_publish_log_integrity(conn: sqlite3.Connection, blog_id: str) -> dict
         """, (blog_id,)).fetchone()[0]
         c_conn.close()
 
-        # curation.db에서 publish_log 발행 건수 확인
-        cu_conn = sqlite3.connect(str(curation_db))
-        cu_conn.row_factory = sqlite3.Row
-        log_count = cu_conn.execute("""
-            SELECT COUNT(*) FROM publish_log
-            WHERE blog_id = ? AND published_at > datetime('now', '-7 days')
-        """, (blog_id,)).fetchone()[0]
-        cu_conn.close()
-
-        if successes > 0 and log_count == 0:
+        if successes == 0:
             return {
-                "status": "fail",
-                "detail": f"M09: ledger에 발행 {successes}건이나 publish_log 0건 — 기록 누락",
+                "status": "pass",
+                "detail": "M09: 최근 7일 내 발행 없음 (확인 생략)",
+            }
+
+        # 소스별 publish_log 확인 (파이프라인별 DB, 어느 하나라도 기록 있으면 정상)
+        candidates = [
+            # (DB 경로, 테이블, blog_id 컬럼, 날짜 컬럼)
+            (project_root / "data" / "curation.db", "publish_log", "blog_id", "published_at"),
+            (project_root / "data" / "stap_content.db", "articles", "blog_id", "created_at"),
+            (project_root / "data" / "car.db", "publish_log", "site", "published_at"),
+            (project_root / "data" / "stock.db", "publish_log", "blog_id", "published_at"),
+            (project_root / "data" / "rap.db", "publish_log", "blog_id", "published_at"),
+        ]
+        # 외부 STAP 프로젝트 DB (STRUCT-10: finance-hugo 등 STAP 계열)
+        stap_root = Path(os.environ.get(
+            "STAP_ROOT", str(project_root.parent / "STAP")
+        ))
+        stap_db = stap_root / "data" / "stap_content.db"
+        if stap_db.exists():
+            candidates.append((stap_db, "articles", "blog_id", "created_at"))
+
+        total_log = 0
+        detail_parts = []
+        for db_path, table, id_col, date_col in candidates:
+            if not db_path.exists():
+                continue
+            try:
+                s_conn = sqlite3.connect(str(db_path))
+                s_conn.row_factory = sqlite3.Row
+                if id_col == "site":
+                    # car.db publish_log은 site 컬럼에 blog_id(-hugo 제거) 사용
+                    key = blog_id.replace("-hugo", "")
+                else:
+                    key = blog_id
+                n = s_conn.execute(f"""
+                    SELECT COUNT(*) FROM {table}
+                    WHERE {id_col} = ? AND {date_col} > datetime('now', '-7 days')
+                """, (key,)).fetchone()[0]
+                s_conn.close()
+                if n > 0:
+                    detail_parts.append(f"{db_path.name}:{n}")
+                    total_log += n
+            except (sqlite3.OperationalError, OSError):
+                continue
+
+        if total_log > 0:
+            return {
+                "status": "pass",
+                "detail": f"M09: ledger 발행 {successes}건, 소스 로그 {total_log}건 ({', '.join(detail_parts)})",
             }
 
         return {
-            "status": "pass",
-            "detail": f"M09: ledger 발행 {successes}건, publish_log {log_count}건",
+            "status": "fail",
+            "detail": f"M09: ledger에 발행 {successes}건이나 모든 소스 DB 기록 0건 — 기록 누락",
         }
     except (sqlite3.OperationalError, OSError) as e:
         return {"status": "unknown", "detail": f"M09: DB 접근 불가 — {e}"}

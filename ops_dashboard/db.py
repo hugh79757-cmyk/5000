@@ -6,6 +6,7 @@
   - check_results: 헬스체크 실행 이력
 """
 import json
+import logging
 import os
 import re
 import sqlite3
@@ -347,8 +348,45 @@ def sync_blog_lifecycle(conn: sqlite3.Connection) -> int:
                 ))
             count += 1
 
+    # days_since_last_publish 집계 — publish_ledger(content.db)에서 마지막 성공 발행 기준
+    _sync_days_since_last_publish(conn)
+
     conn.commit()
     return count
+
+
+def _sync_days_since_last_publish(conn: sqlite3.Connection) -> None:
+    """blog_lifecycle.days_since_last_publish를 publish_ledger 실데이터로 갱신.
+
+    이전에는 이 컬럼이 항상 NULL(미집계)이라 freshness/stale 지표가 실값을
+    반영하지 못했다. 마지막 status='published' 발행일 기준 경과 일수를 기록한다.
+    """
+    try:
+        ledger = get_publish_log_conn()
+        rows = ledger.execute("""
+            SELECT blog_id, MAX(created_at) AS last
+            FROM publish_ledger
+            WHERE status = 'published'
+            GROUP BY blog_id
+        """).fetchall()
+        ledger.close()
+
+        now = datetime.now()
+        for row in rows:
+            try:
+                last_dt = datetime.fromisoformat(row["last"])
+            except (ValueError, TypeError):
+                continue
+            days = (now - last_dt).days
+            conn.execute(
+                "UPDATE blog_lifecycle SET days_since_last_publish = ? WHERE blog_id = ?",
+                (days, row["blog_id"]),
+            )
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.exception(f"[sync] days_since_last_publish 집계 실패: {e}")
+
+    conn.commit()
 
 
 # ---------------------------------------------------------------------------
@@ -403,6 +441,7 @@ SEED_ISSUES: list[dict] = [
     {"issue_id": "STRUCT-08", "blog_ids": "", "category": "structural", "symptom": "M01 무력 — _check_cjk_in_title()가 ops.db에서 publish_log/publish_ledger 조회. 두 테이블은 curation.db/content.db에만 존재 → 매회 OperationalError → 항상 pass (23/23). 실질 검사 불가", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "run M01 on 23 active blogs → 전부 pass + ops.db에 테이블 부재 확인", "notes": "수정 후보: (1) M01을 content.db(publish_ledger)/curation.db(publish_log) 연결로 전환, (2) ops.db에 publish_ledger 스키마 미러링 + ledger_sync로 채움. 실수정은 Part 6 이후 별도 묶음으로 보류"},
     {"issue_id": "STRUCT-09", "blog_ids": "", "category": "structural", "symptom": "M07 무력 — _check_similar_title_safety()가 ops.db에서 publish_ledger 조회 (테이블은 content.db 소유) → 매회 OperationalError → 항상 pass (23/23). similar_title 차단 감지 불가", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "run M07 on 23 active blogs → 전부 pass + ops.db에 publish_ledger 부재 확인", "notes": "수정 후보: content.db(publish_ledger) 직접 연결로 전환. M01과 동일 경로로 일괄 처리 권장. 실수정은 Part 6 이후 별도 묶음으로 보류"},
     {"issue_id": "STRUCT-10", "blog_ids": "finance-hugo", "category": "structural", "symptom": "M09 실패 — finance-hugo 최근 7일 ledger 발행 35건이지만 curation.db publish_log 0건. 기록 누락 의심", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "M09 실행 결과 ledger 발행 35건 vs publish_log 0건", "notes": "M09는 content.db/curation.db 직접 연결로 정상 작동 중. finance-hugo는 publish_log 기록 자체가 없음 — 발행 경로가 curation 파이프라인을 거치지 않거나 기록 로직 누락. 수정 후보: finance-hugo 발행 경로에서 curation publish_log 기록 확인. 실수정은 Part 6 이후 별도 묶음으로 보류"},
+    {"issue_id": "STRUCT-11", "blog_ids": "", "category": "structural", "symptom": "idx_ledger_dedup이 non-unique — ledger_sync._ensure_schema는 UNIQUE 기대하나 실제 DB는 CREATE INDEX(비유니크)라 INSERT OR IGNORE가 중복을 못 막음 → run_sync() 호출마다 소스 전체 행 재삽입", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "PRAGMA index_list(publish_ledger) 확인 — idx_ledger_dedup sql에 UNIQUE 없음. 중복 (blog_id,slug,DATE) 그룹 8,414개(선존) + run_sync 재실행 시 재삽입", "notes": "evidence: 실제 인덱스 정의 'CREATE INDEX idx_ledger_dedup ON publish_ledger(blog_id, slug, DATE(created_at))' (UNIQUE 키워드 없음). 중복 추정: 선존 28,936행 + 2026-08-06 run_sync 실행분 15,514행 = 현재 총 초과행 39,734. 마이그레이션(DROP + CREATE UNIQUE)은 스케줄러 정지 후 별도 계획으로 보류. run_sync는 SELECT-존재확인 후 INSERT로 비파괴 가드 적용됨(2026-08-06)"},
 
     # Triage 해결 이슈 (대표적 10건)
     {"issue_id": "T-04", "blog_ids": "tap-blogger", "category": "tap", "symptom": "tap_meta_response — 메타 응답 발행 (해결됨)", "recorded_date": "2026-07-26", "gsd_status": "resolved", "auto_detectable": "yes", "detection_method": "validators.py 메타 패턴 매칭"},
@@ -669,13 +708,15 @@ def get_attention_items(conn: sqlite3.Connection) -> list[dict]:
         ORDER BY category, issue_id
     """).fetchall()
 
-    # 3) stale 블로그 (active인데 오래된 발행)
+    # 3) stale 블로그 (active인데 오래된 발행 또는 발행 기록 없음)
     stale = conn.execute("""
         SELECT blog_id, days_since_last_publish, lifecycle_status
         FROM blog_lifecycle
         WHERE config_status = 'active'
-          AND days_since_last_publish IS NOT NULL
-          AND days_since_last_publish > 3
+          AND (
+              days_since_last_publish IS NULL
+              OR days_since_last_publish > 3
+          )
         ORDER BY days_since_last_publish DESC
     """).fetchall()
 
@@ -1105,13 +1146,15 @@ def get_open_known_issues(conn: sqlite3.Connection) -> list[dict]:
 
 
 def get_stale_blogs(conn: sqlite3.Connection, threshold_days: int = 3) -> list[dict]:
-    """stale 블로그 조회 (active인데 오래된 발행)."""
+    """stale 블로그 조회 (active인데 오래된 발행 또는 발행 기록 없음)."""
     rows = conn.execute("""
         SELECT blog_id, days_since_last_publish, lifecycle_status
         FROM blog_lifecycle
         WHERE config_status = 'active'
-          AND days_since_last_publish IS NOT NULL
-          AND days_since_last_publish > ?
+          AND (
+              days_since_last_publish IS NULL
+              OR days_since_last_publish > ?
+          )
         ORDER BY days_since_last_publish DESC
     """, (threshold_days,)).fetchall()
     return [dict(r) for r in rows]
