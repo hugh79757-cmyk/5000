@@ -54,6 +54,87 @@ def _check_cjk_in_title(conn: sqlite3.Connection, blog_id: str) -> dict:
     return {"status": "pass", "detail": "M01: 최근 제목 20건 중 CJK 포함 없음"}
 
 
+def _check_cjk_in_body_and_slug(conn: sqlite3.Connection, blog_id: str) -> dict:
+    """M11: 본문·슬러그 CJK 없음 — 포스트 본문과 URL 슬러그에 CJK 누수 없음 (확장)"""
+    # CJK 문자 패턴 (한자, 히라가나, 가타카나)
+    cjk_pattern = re.compile(r'[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]')
+    # 퍼센트 인코딩된 CJK 패턴 (%E4%B8%AD%... 등 - 3바이트 UTF-8 시퀀스)
+    percent_cjk_pattern = re.compile(r'(?:%[Ee][0-9a-fA-F]{2}){3,}')
+
+    blog_row = conn.execute(
+        "SELECT site_path FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+
+    if not blog_row or not blog_row["site_path"]:
+        return {"status": "unknown", "detail": "M11: site_path 없음 — 수동 확인 필요"}
+
+    site_path = Path(blog_row["site_path"])
+    posts_dir = site_path / "content" / "posts"
+    if not posts_dir.is_dir():
+        return {"status": "unknown", "detail": f"M11: {posts_dir} 디렉토리 없음"}
+
+    # 최근 20개 포스트의 본문과 슬러그 검사
+    body_contaminated = []
+    slug_contaminated = []
+    checked = 0
+
+    for post_dir in sorted(posts_dir.iterdir(), reverse=True)[:20]:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+
+        try:
+            content = idx.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+
+        checked += 1
+
+        # 1. 슬러그(디렉토리명) CJK 검사 - 원문 + 퍼센트인코딩 모두
+        slug = post_dir.name
+        if cjk_pattern.search(slug) or percent_cjk_pattern.search(slug):
+            slug_contaminated.append(slug[:60])
+
+        # 2. 본문 CJK 검사 (frontmatter 이후 내용)
+        # frontmatter 끝(--- 또는 +++) 이후부터 본문 시작
+        # 패턴: ---\n...\n--- 또는 +++\n...\n+++
+        parts = re.split(r'^\s*(?:---|\+\+\+)\s*$', content, maxsplit=2, flags=re.MULTILINE)
+        if len(parts) >= 3:
+            body_text = parts[2]  # 두 번째 구분자 이후
+        elif len(parts) == 2:
+            body_text = parts[1]  # 하나의 구분자만 있는 경우
+        else:
+            body_text = content  # frontmatter 없으면 전체를 본문으로 간주
+
+        # 코드 블록, HTML 태그 제거 후 검사
+        cleaned_body = re.sub(r'```.*?```', '', body_text, flags=re.DOTALL)
+        cleaned_body = re.sub(r'<[^>]+>', '', cleaned_body)
+
+        if cjk_pattern.search(cleaned_body):
+            # 컨텍스트 포함해서 저장
+            # CJK 문자 주변 50자 추출
+            for m in cjk_pattern.finditer(cleaned_body):
+                start = max(0, m.start() - 30)
+                end = min(len(cleaned_body), m.end() + 30)
+                context = cleaned_body[start:end].replace('\n', ' ')
+                body_contaminated.append(f"{post_dir.name}: ...{context}...")
+                break  # 포스트당 1건만 기록
+
+    if slug_contaminated:
+        return {
+            "status": "fail",
+            "detail": f"M11: 슬러그 CJK {len(slug_contaminated)}건 — " + "; ".join(slug_contaminated[:3]),
+        }
+
+    if body_contaminated:
+        return {
+            "status": "fail",
+            "detail": f"M11: 본문 CJK {len(body_contaminated)}건 — " + "; ".join(body_contaminated[:3]),
+        }
+
+    return {"status": "pass", "detail": f"M11: 최근 {checked}개 포스트 본문·슬러그 CJK 없음"}
+
+
 def _check_image_repetition(conn: sqlite3.Connection, blog_id: str) -> dict:
     """M02: 이미지 정상 — 동일 이미지 반복 사용 없음"""
     # recent_titles에서 featureimage 수집 (Hugo 사이트)
@@ -104,17 +185,12 @@ def _check_image_repetition(conn: sqlite3.Connection, blog_id: str) -> dict:
     return {"status": "pass", "detail": f"M02: {len(featureimages)}개 포스트 이미지 고유성 양호"}
 
 
-def _check_crosslink_relevance(conn: sqlite3.Connection, blog_id: str) -> dict:
-    """M03: 크로스링크 주제 일관 — 내부 링크가 블로그 주제와 무관하지 않음"""
-    # 기본 검사: blog_id와 무관한 도메인의 링크가 과도한지 확인
-    blog_row = conn.execute(
-        "SELECT site_path, domain FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchall()
-    if not blog_row:
-        return {"status": "unknown", "detail": "M03: 블로그 정보 없음"}
+from ops_dashboard.checks import crosslink as crosslink_check
 
-    # 간이 검사: 현재로서는 pass 처리 (상세 검사는 에이전트가 수행)
-    return {"status": "pass", "detail": "M03: 수동 확인 대상 — 에이전트 점검 필요"}
+
+def _check_crosslink_relevance(conn: sqlite3.Connection, blog_id: str) -> dict:
+    """M03: 크로스링크 주제 일관 — 내부 링크가 블로그 주제와 무관하지 않음 (M03/audit Q5)"""
+    return crosslink_check.check_crosslink_consistency(conn, blog_id)
 
 
 def _check_content_quality(conn: sqlite3.Connection, blog_id: str) -> dict:
@@ -357,6 +433,7 @@ MAINTENANCE_CHECKS = {
     "M08": _check_cot_leak,
     "M09": _check_publish_log_integrity,
     "M10": _check_domain_health,
+    "M11": _check_cjk_in_body_and_slug,
 }
 
 

@@ -99,3 +99,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import crosslink  # noqa: F401
+except ImportError:
+    pass
+
