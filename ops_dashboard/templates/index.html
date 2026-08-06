@@ -29,6 +29,31 @@
 <div class="alert alert-ok"><span>&#10003;</span> No attention items — all clear.</div>
 {% endif %}
 
+<!-- Daily Notification Summary -->
+{% if daily_summary and daily_summary.total_events > 0 %}
+<div class="card-grid" style="margin-top:1rem">
+  <div class="stat-card"><span class="num" style="color:#dc3545">{{ daily_summary.total_events }}</span><span class="label">알림 이벤트</span></div>
+  <div class="stat-card"><span class="num" style="color:#6c757d">{{ daily_summary.total_suppressed }}</span><span class="label">디바운스 억제</span></div>
+</div>
+{% if daily_summary.breakdown %}
+<div style="margin-top:0.5rem;padding:0.75rem;background:var(--card-bg,#fff);border-radius:6px;border:1px solid var(--border,#e0e0e0)">
+  <strong>📋 오늘 알림 요약 ({{ daily_summary.date }})</strong>
+  <ul style="margin:0.5rem 0 0 1.2rem;list-style:none;padding:0">
+    {% for pid, cnt in daily_summary.breakdown.items() %}
+    <li style="margin-bottom:0.25rem">
+      <span class="badge badge-{{ 'fail' if pid.startswith('P0') else 'warn' if pid.startswith('P1') else 'unknown' }}">{{ pid }}</span>
+      ×{{ cnt }}
+      <span style="color:#6c757d">({{ daily_summary.blog_by_problem[pid]|join(', ') }})</span>
+    </li>
+    {% endfor %}
+  </ul>
+  <div style="margin-top:0.5rem;font-size:0.85rem;color:#6c757d">
+    🔗 <a href="/api/daily-summary">API</a> · <a href="/api/attention">상세</a>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+
 <!-- Maintenance Overview -->
 {% if maintenance_summary %}
 <h2>정비 진행 상황</h2>

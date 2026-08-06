@@ -220,6 +220,8 @@ def _register_human_routes(app: Flask) -> None:
         attention = get_attention_items(conn)
         brands = {b["brand"] for b in blogs}
         maintenance_summary = get_maintenance_summary(conn)
+        from ops_dashboard.db import get_daily_summary
+        daily_summary = get_daily_summary(conn)
 
         summary = {
             "total": len(blogs),
@@ -239,6 +241,7 @@ def _register_human_routes(app: Flask) -> None:
             attention=attention,
             summary=summary,
             maintenance_summary=maintenance_summary,
+            daily_summary=daily_summary,
         )
 
     @app.route("/blog/<blog_id>")
@@ -395,6 +398,16 @@ def _register_api_routes(app: Flask) -> None:
         from ops_dashboard.checks.maintenance import check_maintenance_checklist
         result = check_maintenance_checklist(conn, blog_id)
         return jsonify(result)
+
+    @app.route("/api/daily-summary")
+    @require_auth
+    def api_daily_summary():
+        """일일 알림 요약 데이터"""
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import get_daily_summary
+        summary_date = request.args.get("date")
+        return jsonify(get_daily_summary(conn, summary_date))
 
 
 # ---------------------------------------------------------------------------

@@ -127,6 +127,26 @@ CREATE TABLE IF NOT EXISTS standard_rules (
 );
 
 CREATE INDEX IF NOT EXISTS idx_standard_rules_target ON standard_rules(target);
+
+-- Phase 60 Part 3: 알림 재설계 테이블
+CREATE TABLE IF NOT EXISTS daily_summary_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    summary_date TEXT NOT NULL,
+    problem_id TEXT NOT NULL,
+    blog_id TEXT NOT NULL,
+    count INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_dse_date ON daily_summary_events(summary_date);
+
+CREATE TABLE IF NOT EXISTS notification_debounce (
+    blog_id TEXT NOT NULL,
+    problem_id TEXT NOT NULL,
+    push_date TEXT NOT NULL,
+    first_seen_at TEXT NOT NULL,
+    suppressed_count INTEGER DEFAULT 0,
+    PRIMARY KEY (blog_id, problem_id, push_date)
+);
 """)
 
     # Phase 60: 기존 테이블에 새 컬럼 추가 (IF NOT EXISTS는 컬럼 추가 안 됨)
@@ -704,3 +724,46 @@ def record_check(
         VALUES (?, ?, ?, ?, ?)
     """, (blog_id, check_name, status, detail, evidence_url))
     conn.commit()
+
+
+# ---------------------------------------------------------------------------
+# Phase 60 Part 3: Daily summary & debounce
+# ---------------------------------------------------------------------------
+
+def get_daily_summary(conn: sqlite3.Connection, summary_date: str | None = None) -> dict:
+    """일일 알림 요약 데이터 조회 (API + 템플릿용)."""
+    from datetime import datetime as _dt
+    if summary_date is None:
+        summary_date = _dt.now().strftime("%Y-%m-%d")
+
+    rows = conn.execute(
+        "SELECT problem_id, blog_id, SUM(count) as cnt "
+        "FROM daily_summary_events WHERE summary_date = ? "
+        "GROUP BY problem_id, blog_id ORDER BY cnt DESC",
+        (summary_date,),
+    ).fetchall()
+
+    breakdown: dict[str, int] = {}
+    blog_by_problem: dict[str, list[str]] = {}
+    total = 0
+    for problem_id, blog_id, cnt in rows:
+        breakdown[problem_id] = breakdown.get(problem_id, 0) + cnt
+        blog_by_problem.setdefault(problem_id, []).append(blog_id)
+        total += cnt
+
+    debounce_rows = conn.execute(
+        "SELECT blog_id, problem_id, suppressed_count "
+        "FROM notification_debounce WHERE push_date = ? "
+        "ORDER BY suppressed_count DESC",
+        (summary_date,),
+    ).fetchall()
+    suppressed = sum(r["suppressed_count"] for r in debounce_rows)
+
+    return {
+        "date": summary_date,
+        "total_events": total,
+        "total_suppressed": suppressed,
+        "breakdown": breakdown,
+        "blog_by_problem": blog_by_problem,
+        "debounce_events": [dict(r) for r in debounce_rows],
+    }

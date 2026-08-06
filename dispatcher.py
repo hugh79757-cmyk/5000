@@ -31,6 +31,8 @@ import contextlib
 from shared.telegram_notifier import send_error as _tg_error
 from shared.problem_registry import lookup_reason
 from shared.problem_monitor import get_monitor
+from shared.daily_summary import record_event as _record_summary_event, init_daily_summary_tables
+from shared.notification_debounce import should_push as _debounce_push, init_debounce_tables
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -741,36 +743,67 @@ def dispatch(blog_id):
         deploy_err = result.get("deploy_error")
         if deploy_err:
             _record_failure(blog_id, "deploy", deploy_err[:300])
-            _tg_error(blog_id, "deploy",
-                f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
-                f"원인: {deploy_err[:200]}\n"
-                f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
+            # 실시간 푸시: 디바운스 적용 (하루 1회)
+            try:
+                _ops_conn = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
+                init_debounce_tables(_ops_conn)
+                if _debounce_push(_ops_conn, blog_id, "deploy_error"):
+                    _tg_error(blog_id, "deploy",
+                        f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
+                        f"원인: {deploy_err[:200]}\n"
+                        f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
+                _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
+                    "deploy_error", blog_id)
+                _ops_conn.close()
+            except Exception:
+                # 디바운스 실패 시 기존대로 발송
+                _tg_error(blog_id, "deploy",
+                    f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
+                    f"원인: {deploy_err[:200]}\n"
+                    f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
     else:
         reason = result.get("reason", "unknown")
         if reason not in ("quota_met", "already_running", "duplicate_title"):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
-            # no_result/데이터부족 등은 텔레그램 전송 (침묵 방지)
+            # no_result/no_content — 실제 파이프라인 실패 → 실시간 푸시 + 요약 기록
             if reason in ("no_result", "no_data", "fetch_error", "no_content"):
-                # IPO 데이터가 없으면 하루 cooldown + 1회 알림 (재시도 없음)
+                # IPO 데이터가 없으면 하루 cooldown
                 if blog_id == "ipo-hugo" and reason == "no_content":
-                    _tg_error(blog_id, reason,
-                        f"[{blog_id}] IPO/증권신고서 데이터 없음 — 오늘 발행 중단\n"
-                        f"다음 데이터 갱신을 기다립니다 (내일 00:00 재시작)")
                     _set_daily_cooldown(blog_id)
                 else:
                     count = _increment_failure_count(blog_id)
-                    _tg_error(blog_id, reason, f"pipeline {reason}: 발행 가능 데이터 없음 (연속 {count}회)")
                     if count >= _ESCALATION_THRESHOLD:
                         _set_daily_cooldown(blog_id)
-                        _tg_error(blog_id, "escalation",
-                            f"[{blog_id}] {count}회 연속 {reason} — 오늘 발행 중단, 내일 00:00 재시작")
+                # 실시간 푸시: 디바운스 적용 (하루 1회)
+                _problem_id = lookup_reason(reason).problem_id if lookup_reason(reason) else reason
+                try:
+                    _ops_conn = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
+                    init_debounce_tables(_ops_conn)
+                    init_daily_summary_tables(_ops_conn)
+                    if _debounce_push(_ops_conn, blog_id, _problem_id):
+                        _tg_error(blog_id, reason,
+                            f"[{blog_id}] pipeline {reason}: 발행 가능 데이터 없음\n"
+                            f"연속 실패: {_increment_failure_count(blog_id)}회\n"
+                            f"조치: 데이터 수집 소스/API 상태 확인")
+                    _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
+                        _problem_id, blog_id)
+                    _ops_conn.close()
+                except Exception:
+                    # 디바운스 실패 시 기존대로 발송
+                    _tg_error(blog_id, reason,
+                        f"[{blog_id}] pipeline {reason}: 발행 가능 데이터 없음")
             elif reason in ("duplicate_slug", "duplicate_source_id"):
                 existing = result.get("existing_url", "")
                 dup_type = reason.replace("duplicate_", "")
-                _tg_error(blog_id, reason,
-                    f"[{blog_id}] 중복 발행 방지 — {dup_type} 중복\n"
-                    f"기존글: {existing or 'slug 확인 필요'}\n"
-                    f"데이터 갱신을 위해 STAP collect_all() 자동 실행합니다.")
+                # 일일 요약에 기록 (텔레그램 소음 제거)
+                try:
+                    _ops_conn = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
+                    init_daily_summary_tables(_ops_conn)
+                    _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
+                        "P16", blog_id)
+                    _ops_conn.close()
+                except Exception:
+                    pass
                 # STAP collect_all 자동 실행 (데이터 갱신)
                 try:
                     _STAP_DIR = "/Users/twinssn/Projects/STAP"
