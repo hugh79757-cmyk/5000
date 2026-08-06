@@ -196,10 +196,11 @@ def _check_r02(site: Path) -> tuple[bool, str]:
         return False, "No hugo.toml/config/params found at root or config/_default/"
     content = "\n".join(_read_file_safe(c) for c in configs)
     # [params.advertisement] (hugo.toml inline) or [advertisement] (params.toml)
+    # or YAML "advertisement:" (hugo.yaml, indentation allowed)
     has_adv_section = (
         "[params.advertisement]" in content
         or re.search(r"^\[advertisement\]\s*$", content, re.M)
-        or re.search(r"^advertisement:\s*$", content, re.M)
+        or re.search(r"^\s*advertisement:\s*$", content, re.M)
     )
     if not has_adv_section:
         return False, f"no [params.advertisement] section (checked {len(configs)} config files)"
