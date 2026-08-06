@@ -106,12 +106,40 @@ STANDARD_RULES: list[dict] = [
 ]
 
 # Allowed override files (CONTEXT.md §4-3)
+# 2026-08-06 (커밋 C 4단계): 다수 블로그에 동일 해시로 존재하는
+# 의도된 SEO/광고 공통 오버라이드를 인가 목록에 추가.
+#  - related.html: 77개 블로그 (73 동일 해시)
+#  - head/custom.html: 35개 (동일 해시, adsbygoogle 로더)
+#  - cuap-spider-links.html / render-link.html: 각 15개 (동일 해시)
+#  - translations.html: 7개 (언어 스위처 비활성)
+#  - tradingview-widget.html: 6개 (주식 위젯)
+#  - extend-article-link.html: 5개 / shortcodes article,lead: 각 5개
+#  - chain-card / chain-official-card: 각 3개 / extend-head-uncached: 8개
+# 개별 고유 오버라이드(사용 빈도 1)는 여전히 위반으로 보고된다.
 ALLOWED_OVERRIDES = {
     "layouts/_default/single.html",
     "layouts/partials/extend-head.html",
     "layouts/partials/extend_head.html",
     "layouts/partials/adsense",
+    "layouts/partials/related.html",
+    "layouts/partials/head/custom.html",
+    "layouts/partials/cuap-spider-links.html",
+    "layouts/_default/_markup/render-link.html",
+    "layouts/partials/header/components/translations.html",
+    "layouts/partials/tradingview-widget.html",
+    "layouts/partials/extend-article-link.html",
+    "layouts/shortcodes/article.html",
+    "layouts/shortcodes/lead.html",
+    "layouts/shortcodes/chain-card.html",
+    "layouts/shortcodes/chain-official-card.html",
+    "layouts/shortcodes/dual-cta.html",
+    "layouts/partials/extend-head-uncached.html",
+    "layouts/partials/related-posts.html",
 }
+
+# 오버라이드가 아닌 정크 파일: 위반으로 보고하지 않지만 별도로 집계한다.
+# (.DS_Store macOS 메타데이터, .bak 백업 잔재 — 실제 오버라이드가 아님)
+JUNK_OVERRIDE_SUFFIXES = (".DS_Store", ".bak", ".bak2", "~")
 
 
 def _find_hugo_root(blog_row: dict) -> Path | None:
@@ -388,21 +416,26 @@ def _check_r11(site: Path) -> tuple[bool, str]:
 
 
 def _check_r12(site: Path) -> tuple[bool, str]:
-    """R12: No override files beyond the allowed set."""
+    """R12: No override files beyond the allowed set.
+
+    2026-08-06 (커밋 C 4단계): .DS_Store/.bak 등 정크 파일은 오버라이드가
+    아니므로 위반에서 제외하고 detail에 별도로 집계한다. 인가 목록은
+    ALLOWED_OVERRIDES 참조.
+    """
     layouts_dir = site / "layouts"
     if not layouts_dir.is_dir():
         return True, "No layouts/ directory (no overrides)"
-    allowed_files = set()
-    for prefix in ALLOWED_OVERRIDES:
-        allowed_files.add(prefix)
-        # Also allow the file itself
-        allowed_files.add(prefix + ".html")
 
     violations = []
+    junk_files = []
     for f in layouts_dir.rglob("*"):
         if not f.is_file():
             continue
         rel = str(f.relative_to(site))
+        # 정크 파일 (.DS_Store, *.bak 등) — 오버라이드 위반 아님
+        if rel.endswith(JUNK_OVERRIDE_SUFFIXES) or "/.DS_Store" in rel:
+            junk_files.append(rel)
+            continue
         # Check if this file is in allowed set
         is_allowed = False
         for allowed in ALLOWED_OVERRIDES:
@@ -413,7 +446,12 @@ def _check_r12(site: Path) -> tuple[bool, str]:
             violations.append(rel)
 
     if violations:
-        return False, f"Unauthorized overrides: {', '.join(violations[:5])}"
+        detail = f"Unauthorized overrides: {', '.join(violations[:5])}"
+        if junk_files:
+            detail += f" (junk: {', '.join(junk_files[:3])})"
+        return False, detail
+    if junk_files:
+        return True, f"All override files allowed (junk: {', '.join(junk_files[:3])})"
     return True, "All override files are in the allowed set"
 
 

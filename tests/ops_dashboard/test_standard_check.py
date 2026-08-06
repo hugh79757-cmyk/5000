@@ -117,3 +117,62 @@ class TestNonCriticalNoTelegram:
         result = CHECKS["standard_compliance"](conn, "test-hugo")
         # MAJOR violations should NOT trigger Telegram
         mock_send.assert_not_called()
+
+
+class TestR12AllowedOverrides:
+    """R12: layouts/ 오버라이드 인가 목록 검사 (2026-08-06 확장)."""
+
+    def _make_site(self, tmp_path, files):
+        site = tmp_path / "site"
+        for rel in files:
+            p = site / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text("{{ .Title }}", encoding="utf-8")
+        return site
+
+    def test_allowed_overrides_pass(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r12
+        site = self._make_site(tmp_path, [
+            "layouts/_default/single.html",
+            "layouts/partials/related.html",          # 77개 블로그 공통
+            "layouts/partials/head/custom.html",      # 35개 adsbygoogle 로더
+            "layouts/partials/cuap-spider-links.html",# 15개 CUAP 교차링크
+            "layouts/_default/_markup/render-link.html",
+            "layouts/partials/adsense/in-article.html",
+            "layouts/partials/adsense/top.html",
+        ])
+        ok, detail = _check_r12(site)
+        assert ok is True, detail
+        assert "Unauthorized" not in detail
+
+    def test_unknown_override_fails(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r12
+        site = self._make_site(tmp_path, [
+            "layouts/sitemap.xml",   # 사용 빈도 1~2 개별 오버라이드
+        ])
+        ok, detail = _check_r12(site)
+        assert ok is False
+        assert "sitemap.xml" in detail
+
+    def test_junk_files_not_violations(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r12
+        site = self._make_site(tmp_path, [
+            "layouts/partials/related.html",
+            "layouts/.DS_Store",
+            "layouts/_default/single.html.bak",
+            "layouts/partials/extend-head.html.bak",
+        ])
+        ok, detail = _check_r12(site)
+        # 정크만 있으면 pass (위반 아님), detail에 junk 집계
+        assert ok is True, detail
+        assert ".DS_Store" in detail
+
+    def test_allowed_prefix_matches_subdirs(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r12
+        site = self._make_site(tmp_path, [
+            "layouts/partials/adsense/in-article.html",
+            "layouts/partials/adsense/leaderboard.html",
+            "layouts/partials/adsense/adsense-loader.html",
+        ])
+        ok, detail = _check_r12(site)
+        assert ok is True, detail
