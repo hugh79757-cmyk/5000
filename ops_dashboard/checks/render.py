@@ -47,35 +47,82 @@ async def _fetch_get(client: httpx.AsyncClient, url: str) -> tuple[Optional[int]
         return None, None
 
 
-def _check_og_image(html: str, base_url: str) -> tuple[bool, Optional[str]]:
-    """HTML에서 og:image URL 추출하고 접근 가능 여부 확인."""
-    m = re.search(r'property=["\']og:image["\']\s+content=["\']([^"\']+)["\']', html)
-    if not m:
-        m = re.search(r'name=["\']og:image["\']\s+content=["\']([^"\']+)["\']', html)
-    if m:
-        og_url = m.group(1)
-        if og_url.startswith("/"):
-            from urllib.parse import urljoin
-            og_url = urljoin(base_url, og_url)
-        return True, og_url
+def _check_og_image(html: str) -> tuple[bool, Optional[str]]:
+    """HTML에서 og:image URL 추출 (속성 순서 무관).
+
+    - 표준 순서: property="og:image" content="..."
+    - 역순 (Blogger): content='...' property='og:image'
+    """
+    patterns = [
+        # 표준 순서 (property/name 먼저)
+        r'property=["\']og:image["\']\s+content=["\']([^"\']+)["\']',
+        r'name=["\']og:image["\']\s+content=["\']([^"\']+)["\']',
+        # 역순 (Blogger: content 먼저)
+        r'content=["\']([^"\']+)["\']\s+property=["\']og:image["\']',
+        r'content=["\']([^"\']+)["\']\s+name=["\']og:image["\']',
+    ]
+    for pat in patterns:
+        m = re.search(pat, html)
+        if m:
+            return True, m.group(1)
     return False, None
+
+
+def _find_post_url(html: str, base_url: str) -> Optional[str]:
+    """홈페이지 HTML에서 첫 번째 포스트 URL 추출.
+
+    minified(unquoted) href와 Blogger(/YYYY/MM/slug.html) 패턴을 모두 지원한다.
+    순수 목록 페이지(/posts/, /posts)와 정적 에셋은 건너뛴다.
+    """
+    from urllib.parse import urljoin
+
+    # 1) /posts/<slug>/ 패턴 (Hugo 표준) — quoted/unquoted 모두.
+    #    /posts/(목록), /posts(목록), css/js 등 정적 에셋은 제외.
+    for pat in (
+        r'href=["\']([^"\']+/posts/[^"\']+)[\'"]',
+        r'href=([^\s>]+/posts/[^\s>\'"]+)',
+        r'href=(/posts/[^\s>\'"]+)',
+    ):
+        for m in re.finditer(pat, html):
+            url = m.group(1)
+            path = url.split("?", 1)[0].rstrip("/")
+            # Blogger feeds/등 비포스트 경로 제외
+            if "feeds/" in path or "/feeds" in path:
+                continue
+            # 목록/인덱스 페이지 제외
+            if path.endswith("/posts") or path.endswith("/posts/") or path.endswith("/posts/index.html"):
+                continue
+            # 정적 에셋 제외
+            if re.search(r"\.(css|js|png|jpe?g|webp|svg|ico|xml|json|txt)$", path):
+                continue
+            return url if url.startswith("http") else urljoin(base_url, url)
+
+    # 2) Blogger: /YYYY/MM/slug.html (feeds 등 목록/정적 리소스 제외)
+    for m in re.finditer(r'href=["\']([^"\']+/\d{4}/\d{2}/[^"\']+\.html)[\'"]', html):
+        url = m.group(1)
+        if "feeds/" in url or "/feeds" in url:
+            continue
+        return url if url.startswith("http") else urljoin(base_url, url)
+
+    # 3) 루트 수준 포스트 슬러그 (PaperMod 계열: /<slug>-2026<...>/ 또는 /<slug>-20…/)
+    for m in re.finditer(r'href=([^\s>]+)', html):
+        url = m.group(1)
+        if "feeds/" in url or "/feeds" in url:
+            continue
+        path = url.split("?", 1)[0].rstrip("/")
+        if re.search(r"\.(css|js|png|jpe?g|webp|svg|ico|xml|json|txt)$", path):
+            continue
+        # 루트 슬러그 후보: 퍼센트인코딩/한글/영문 슬러그에 날짜 패턴(-2026 등) 포함
+        slug = path.rsplit("/", 1)[-1]
+        if slug and re.search(r"(20\d{2}|-s\d+|\d{6})", slug) and "/" not in path[1:]:
+            return url if url.startswith("http") else urljoin(base_url, url)
+
+    return None
 
 
 def _check_adsbygoogle(html: str) -> bool:
     """HTML에 adsbygoogle.js 로드 코드가 있는지 확인."""
     return "adsbygoogle" in html and ("adsbygoogle.js" in html or "googlesyndication.com" in html)
-
-
-def _check_featureimage(html: str, base_url: str) -> tuple[bool, Optional[str]]:
-    """frontmatter featureimage나 썸네일 이미지 URL 확인."""
-    m = re.search(r'<meta\s+name=["\']featureimage["\']\s+content=["\']([^"\']+)["\']', html)
-    if m:
-        img_url = m.group(1)
-        if img_url.startswith("/"):
-            from urllib.parse import urljoin
-            img_url = urljoin(base_url, img_url)
-        return True, img_url
-    return False, None
 
 
 async def _check_single_blog(client: httpx.AsyncClient, semaphore: asyncio.Semaphore, blog_id: str, domain: str) -> dict:
@@ -95,34 +142,36 @@ async def _check_single_blog(client: httpx.AsyncClient, semaphore: asyncio.Semap
                 "evidence_url": base_url,
             }
 
-        # 2. og:image 확인
-        og_ok, og_url = _check_og_image(html, base_url)
-        if not og_ok:
-            failures.append("og:image missing or inaccessible")
-            if og_url:
-                evidence_urls.append(f"og:image: {og_url}")
-        else:
-            evidence_urls.append(f"og:image: {og_url} (OK)")
-
-        # 3. adsbygoogle.js 로드 확인
+        # 2. adsbygoogle.js 로드 확인
         if not _check_adsbygoogle(html):
             failures.append("adsbygoogle.js not loaded")
         else:
             evidence_urls.append("adsbygoogle.js: loaded")
 
-        # 4. 썸네일/featureimage 확인 (최근 포스트 1개 샘플)
-        post_link_match = re.search(r'href=["\'](https?://[^"\']+/posts/[^"\']+)["\']', html)
-        if post_link_match:
-            post_url = post_link_match.group(1)
+        # 3. og:image 확인 — 테마(Hugo/Blowfish/PaperMod)는 홈페이지가 아닌
+        #    포스트 페이지에서 og:image를 발행하므로, 최근 포스트 1개를 샘플로 검사.
+        #    (Blogger는 content 먼저 역순 속성 발행 — _check_og_image가 처리)
+        post_url = _find_post_url(html, base_url)
+        og_checked_on = "homepage"
+        og_ok = False
+        og_url = None
+        if post_url:
             post_status, post_html = await _fetch_get(client, post_url)
             if post_status and 200 <= post_status < 400:
-                thumb_ok, thumb_url = _check_featureimage(post_html, base_url)
-                if not thumb_ok:
-                    failures.append("featureimage/thumbnail inaccessible")
-                    if thumb_url:
-                        evidence_urls.append(f"featureimage: {thumb_url}")
-                else:
-                    evidence_urls.append(f"featureimage: {thumb_url} (OK)")
+                og_checked_on = "post"
+                og_ok, og_url = _check_og_image(post_html)
+                if not og_ok:
+                    # 포스트에서 못 찾으면 홈페이지에서 fallback 확인
+                    og_ok, og_url = _check_og_image(html)
+                    if og_ok:
+                        og_checked_on = "homepage"
+        else:
+            og_ok, og_url = _check_og_image(html)
+
+        if not og_ok:
+            failures.append("og:image missing or inaccessible")
+        else:
+            evidence_urls.append(f"og:image: {og_url} (OK, from {og_checked_on})")
 
         if failures:
             return {

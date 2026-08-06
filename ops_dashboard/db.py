@@ -399,6 +399,11 @@ SEED_ISSUES: list[dict] = [
     {"issue_id": "STRUCT-06", "blog_ids": "flights-hugo", "category": "etap", "symptom": "flights_flight — flights-hugo(YAML/CF) vs flight-hugo(dispatcher) 불일치", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "grep flight-hugo in dispatcher.py vs YAML"},
     {"issue_id": "STRUCT-07", "blog_ids": "beauty-hugo", "category": "structural", "symptom": "publish_ledger title 공백: 발행 성공(published) 시 title=\"\" 45.9%(187/407). ledger 기록 누락", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "SELECT COUNT(*) WHERE title=\"\" AND status=\"published\" — 187/407건"},
 
+    # Phase 60 Part 6: maintenance 체크 무력화 확정 (2026-08-06)
+    {"issue_id": "STRUCT-08", "blog_ids": "", "category": "structural", "symptom": "M01 무력 — _check_cjk_in_title()가 ops.db에서 publish_log/publish_ledger 조회. 두 테이블은 curation.db/content.db에만 존재 → 매회 OperationalError → 항상 pass (23/23). 실질 검사 불가", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "run M01 on 23 active blogs → 전부 pass + ops.db에 테이블 부재 확인", "notes": "수정 후보: (1) M01을 content.db(publish_ledger)/curation.db(publish_log) 연결로 전환, (2) ops.db에 publish_ledger 스키마 미러링 + ledger_sync로 채움. 실수정은 Part 6 이후 별도 묶음으로 보류"},
+    {"issue_id": "STRUCT-09", "blog_ids": "", "category": "structural", "symptom": "M07 무력 — _check_similar_title_safety()가 ops.db에서 publish_ledger 조회 (테이블은 content.db 소유) → 매회 OperationalError → 항상 pass (23/23). similar_title 차단 감지 불가", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "run M07 on 23 active blogs → 전부 pass + ops.db에 publish_ledger 부재 확인", "notes": "수정 후보: content.db(publish_ledger) 직접 연결로 전환. M01과 동일 경로로 일괄 처리 권장. 실수정은 Part 6 이후 별도 묶음으로 보류"},
+    {"issue_id": "STRUCT-10", "blog_ids": "finance-hugo", "category": "structural", "symptom": "M09 실패 — finance-hugo 최근 7일 ledger 발행 35건이지만 curation.db publish_log 0건. 기록 누락 의심", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "M09 실행 결과 ledger 발행 35건 vs publish_log 0건", "notes": "M09는 content.db/curation.db 직접 연결로 정상 작동 중. finance-hugo는 publish_log 기록 자체가 없음 — 발행 경로가 curation 파이프라인을 거치지 않거나 기록 로직 누락. 수정 후보: finance-hugo 발행 경로에서 curation publish_log 기록 확인. 실수정은 Part 6 이후 별도 묶음으로 보류"},
+
     # Triage 해결 이슈 (대표적 10건)
     {"issue_id": "T-04", "blog_ids": "tap-blogger", "category": "tap", "symptom": "tap_meta_response — 메타 응답 발행 (해결됨)", "recorded_date": "2026-07-26", "gsd_status": "resolved", "auto_detectable": "yes", "detection_method": "validators.py 메타 패턴 매칭"},
     {"issue_id": "T-07", "blog_ids": "kitchen-hugo", "category": "cuap", "symptom": "kitchen_blank_body — 모바일 본문 공백 (해결됨)", "recorded_date": "2026-07-21", "gsd_status": "resolved", "auto_detectable": "yes", "detection_method": "모바일 뷰포트 본문 공백 확인"},
@@ -425,8 +430,8 @@ def seed_known_issues(conn: sqlite3.Connection) -> int:
                 INSERT OR IGNORE INTO known_issues
                 (issue_id, blog_ids, category, symptom, recorded_date,
                  gsd_status, auto_detectable, detection_method,
-                 resolution_status, current_detection, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 resolution_status, current_detection, updated_at, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 issue["issue_id"],
                 issue.get("blog_ids", ""),
@@ -439,6 +444,7 @@ def seed_known_issues(conn: sqlite3.Connection) -> int:
                 issue["gsd_status"],  # resolution_status = gsd_status 초기값
                 "na",
                 now,
+                issue.get("notes", ""),
             ))
             count += 1
         except sqlite3.IntegrityError:

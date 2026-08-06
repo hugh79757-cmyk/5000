@@ -1,6 +1,24 @@
 {% extends "base.html" %}
 {% block content %}
 
+<!-- Part 6: 확장 준비도 게이트 -->
+{% if readiness %}
+<div class="alert {% if readiness.ready %}alert-ok{% else %}alert-warn{% endif %}" style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem">
+  <strong>확장 준비도: {% if readiness.ready %}<span style="color:#28a745">&#128994; 준비완료</span>{% else %}<span style="color:#dc3545">&#128308; 확장 금지</span>{% endif %}</strong>
+  <span style="color:#6c757d">표준 {{ readiness.metrics.standard_compliance.ratio }}%</span>
+  <span style="color:#6c757d">|</span>
+  <span style="color:#6c757d">stale {{ readiness.metrics.stale_active_blogs.count }}</span>
+  <span style="color:#6c757d">|</span>
+  <span style="color:#6c757d">미해결 {{ readiness.metrics.open_known_issues.count }}</span>
+  {% if not readiness.ready %}
+  <span style="font-size:0.85rem;color:#6c757d">
+    (표준 100% &middot; stale 0 &middot; 미해결 0 모두 충족 시 확장 허용)
+  </span>
+  {% endif %}
+  <span style="margin-left:auto;font-size:0.85rem"><a href="/api/readiness">API</a></span>
+</div>
+{% endif %}
+
 <p>{{ blogs|length }} blogs tracked across {{ brands }} brands.</p>
 
 <!-- Summary cards -->

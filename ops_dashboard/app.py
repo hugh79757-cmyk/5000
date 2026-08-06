@@ -264,6 +264,10 @@ def _register_human_routes(app: Flask) -> None:
         attention_agg = get_attention_blogs_aggregate(conn)
         check_severity_map = CHECK_SEVERITY
 
+        # Part 6: 확장 준비도 지표
+        from ops_dashboard.readiness import compute_readiness
+        readiness = compute_readiness(conn)
+
         return render_template(
             "index.html",
             title="Fleet Overview",
@@ -283,6 +287,7 @@ def _register_human_routes(app: Flask) -> None:
             page=page,
             total_pages=total_pages,
             total_items=total_items,
+            readiness=readiness,
         )
 
     @app.route("/blog/<blog_id>")
@@ -448,6 +453,15 @@ def _register_api_routes(app: Flask) -> None:
         from ops_dashboard.db import get_daily_summary
         summary_date = request.args.get("date")
         return jsonify(get_daily_summary(conn, summary_date))
+
+    @app.route("/api/readiness")
+    @require_auth
+    def api_readiness():
+        """확장 준비도 지표 (Part 6)."""
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.readiness import compute_readiness
+        return jsonify(compute_readiness(conn))
 
 
 # ---------------------------------------------------------------------------
