@@ -1,4 +1,5 @@
 tier_order:
+- upstage-pro4
 - gemini-3.1-flash-lite
 - gemini-3.5-flash-lite
 - gemini-2.5-flash
@@ -19,6 +20,10 @@ tier_order:
 default:
   provider: deepseek
   model: deepseek-v4-flash
+  temperature: 0.85
+upstage-pro4:
+  provider: upstage
+  model: solar-pro4
   temperature: 0.85
 groq-llama:
   provider: groq
@@ -95,7 +100,7 @@ providers:
     base_url: https://api.openai.com/v1
   upstage:
     api_key_env: UPSTAGE_API_KEY
-    base_url: https://api.upstage.ai/v1/solar
+    base_url: https://api.upstage.ai/v1
   clova:
     api_key_env: CLOVA_API_KEY
     base_url: https://clovastudio.stream.ntruss.com
