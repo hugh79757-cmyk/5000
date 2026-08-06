@@ -33,6 +33,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
 from pipelines.etap.michelin_writer import generate_michelin_guide
+from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post
 
 BLOG_ID = "michelin-hugo"
 SITE_PATH = "/Users/twinssn/Projects/ETAP/michelin-hugo"
@@ -44,61 +45,6 @@ def _get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-def _write_hugo_post(article, cover_image=None, body_images=None, blog_id=None, site_path=None, category=None):
-    slug = article["slug"]
-    post_dir = os.path.join(site_path, "content", "posts", slug)
-    os.makedirs(post_dir, exist_ok=True)
-    now = datetime.now(KST).strftime("%Y-%m-%dT%H:%M:%S+09:00")
-    tags_str = chr(10).join(f'  - "{t}"' for t in article.get("tags", []) if t)
-    cover_line = ""
-    credit_line = ""
-    if cover_image and cover_image.get("url"):
-        from shared.publisher import sanitize_featureimage_url
-        img_url = sanitize_featureimage_url(cover_image["url"])
-        if img_url:
-            cover_line = 'featureimage: "' + img_url + '"'
-    if cover_image and cover_image.get("credit"):
-        credit_line = 'featureimagecredit: "' + cover_image.get("credit", "") + '"'
-    title_safe = article["title"].replace('"', "'")
-    desc_safe = article.get("description", "").replace('"', "'")
-    fm = "---\n"
-    fm += f'title: "{title_safe}"\n'
-    fm += f"date: {now}\n"
-    fm += f'description: "{desc_safe}"\n'
-    if cover_line:
-        fm += cover_line + "\n"
-    if credit_line:
-        fm += credit_line + "\n"
-    fm += "tags:\n" + tags_str + "\n"
-    fm += f'categories:\n  - "{category}"\n'
-    fm += "showTableOfContents: true\n"
-    fm += "---\n"
-    content = article["content"]
-    content = inject_internal_links(content, current_blog=blog_id, max_links=5)
-
-    content = insert_adsense(content)
-    if body_images:
-        h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-        for idx in range(min(len(body_images), len(h2_positions))):
-            img = body_images[idx]
-            img_block = "\n\n![Photo](" + img["url"] + ")\n*" + img.get("credit", "") + "*\n"
-            h2_line_end = content.index("\n", h2_positions[idx]) + 1
-            next_pp = content.find("\n\n", h2_line_end)
-            if next_pp == -1:
-                next_pp = len(content)
-            content = content[:next_pp] + img_block + content[next_pp:]
-            h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-    country = article.get("country", "")
-    city = article.get("city", "")
-    cross_html = build_cross_sell_html(country=country, city=city, exclude_blog=blog_id, max_items=3)
-    if cross_html:
-        content = insert_cross_sell_block(content, cross_html, position="bottom")
-    if cover_image and cover_image.get("credit"):
-        content = cover_image["credit"] + "\n\n" + content
-    with open(os.path.join(post_dir, "index.md"), "w") as f:
-        f.write(fm + "\n" + content)
-    logger.info(f"Post written: {post_dir}")
-    return post_dir
 
 def _build_and_deploy(site_path, blog_id) -> bool | None:
     hugo = "/opt/homebrew/bin/hugo"
@@ -220,7 +166,5 @@ def run_batch(count=3):
         if run():
             ok += 1
         time.sleep(5)
-    if ok > 0:
-        _build_and_deploy(SITE_PATH, BLOG_ID)
     logger.info(f"[michelin-hugo] Batch {ok}/{count}")
     return ok
