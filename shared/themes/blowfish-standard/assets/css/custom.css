@@ -1,0 +1,29 @@
+/* ── AdSense 슬롯 공통 ── */
+.ad-inarticle,
+.ad-top {
+  display: block;
+  margin: 24px 0;
+  min-height: 250px;
+  text-align: center;
+}
+@media (max-width: 767px) {
+  .ad-inarticle,
+  .ad-top {
+    min-height: 200px;
+  }
+}
+
+/* ── unfilled: 공간 제거 ── */
+ins.adsbygoogle[data-ad-status="unfilled"] {
+  min-height: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: none !important;
+}
+
+/* ── 다크모드 배경 방어 ── */
+.dark ins.adsbygoogle,
+html.dark ins.adsbygoogle {
+  background: #fff !important;
+}

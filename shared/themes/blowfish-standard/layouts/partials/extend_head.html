@@ -1,0 +1,31 @@
+<!-- GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+
+<style>
+/* ── 모바일 UI/UX 보정 ── */
+@media (max-width: 767px) {
+  /* 광고 컨테이너 오버플로 방지 */
+  .ad-inarticle, .ad-leaderboard, .ad-top {
+    overflow: hidden !important;
+    max-width: 100% !important;
+  }
+  .ad-inarticle ins, .ad-leaderboard ins, .ad-top ins {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  /* unfilled 광고 공간 제거 */
+  ins.adsbygoogle[data-ad-status="unfilled"] {
+    min-height: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: none !important;
+  }
+}
+</style>
