@@ -13,6 +13,12 @@ import sqlite3
 from pathlib import Path
 
 from ops_dashboard.checks import register_check
+from ops_dashboard.db import (
+    get_blog_maintenance_status,
+    get_blog_site_path,
+    get_known_issues_for_blog,
+    get_latest_check_result,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,14 +67,12 @@ def _check_cjk_in_body_and_slug(conn: sqlite3.Connection, blog_id: str) -> dict:
     # 퍼센트 인코딩된 CJK 패턴 (%E4%B8%AD%... 등 - 3바이트 UTF-8 시퀀스)
     percent_cjk_pattern = re.compile(r'(?:%[Ee][0-9a-fA-F]{2}){3,}')
 
-    blog_row = conn.execute(
-        "SELECT site_path FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
+    blog_site_path = get_blog_site_path(conn, blog_id)
 
-    if not blog_row or not blog_row["site_path"]:
+    if not blog_site_path:
         return {"status": "unknown", "detail": "M11: site_path 없음 — 수동 확인 필요"}
 
-    site_path = Path(blog_row["site_path"])
+    site_path = Path(blog_site_path)
     posts_dir = site_path / "content" / "posts"
     if not posts_dir.is_dir():
         return {"status": "unknown", "detail": f"M11: {posts_dir} 디렉토리 없음"}
@@ -138,14 +142,12 @@ def _check_cjk_in_body_and_slug(conn: sqlite3.Connection, blog_id: str) -> dict:
 def _check_image_repetition(conn: sqlite3.Connection, blog_id: str) -> dict:
     """M02: 이미지 정상 — 동일 이미지 반복 사용 없음"""
     # recent_titles에서 featureimage 수집 (Hugo 사이트)
-    blog_row = conn.execute(
-        "SELECT site_path FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
+    blog_site_path = get_blog_site_path(conn, blog_id)
 
-    if not blog_row or not blog_row["site_path"]:
+    if not blog_site_path:
         return {"status": "unknown", "detail": "M02: site_path 없음 — 수동 확인 필요"}
 
-    site_path = Path(blog_row["site_path"])
+    site_path = Path(blog_site_path)
     posts_dir = site_path / "content" / "posts"
     if not posts_dir.is_dir():
         return {"status": "unknown", "detail": f"M02: {posts_dir} 디렉토리 없음"}
@@ -196,10 +198,11 @@ def _check_crosslink_relevance(conn: sqlite3.Connection, blog_id: str) -> dict:
 def _check_content_quality(conn: sqlite3.Connection, blog_id: str) -> dict:
     """M04: 본문 품질 게이트 — Q1~Q4 이슈 없음"""
     # known_issues에서 이 블로그 관련 Q 이슈 확인
-    q_issues = conn.execute("""
-        SELECT issue_id, symptom FROM known_issues
-        WHERE blog_ids LIKE ? AND issue_id LIKE 'Q%' AND gsd_status = 'open'
-    """, (f"%{blog_id}%",)).fetchall()
+    all_issues = get_known_issues_for_blog(conn, blog_id)
+    q_issues = [
+        i for i in all_issues
+        if i.get("issue_id", "").startswith("Q") and i.get("gsd_status") == "open"
+    ]
 
     if q_issues:
         items = [f"{r['issue_id']}: {r['symptom'][:40]}" for r in q_issues]
@@ -214,11 +217,7 @@ def _check_content_quality(conn: sqlite3.Connection, blog_id: str) -> dict:
 def _check_standard_compliance(conn: sqlite3.Connection, blog_id: str) -> dict:
     """M05: 표준 (광고/테마) 준수 — R01~R12 모두 통과"""
     # 최근 check_results에서 standard_compliance 결과 확인
-    latest = conn.execute("""
-        SELECT status, detail FROM check_results
-        WHERE blog_id = ? AND check_name = 'standard_compliance'
-        ORDER BY checked_at DESC LIMIT 1
-    """, (blog_id,)).fetchone()
+    latest = get_latest_check_result(conn, blog_id, "standard_compliance")
 
     if not latest:
         return {"status": "unknown", "detail": "M05: standard_compliance 미실행 — 먼저 run-checks 실행 필요"}
@@ -341,10 +340,11 @@ def _check_similar_title_safety(conn: sqlite3.Connection, blog_id: str) -> dict:
 def _check_cot_leak(conn: sqlite3.Connection, blog_id: str) -> dict:
     """M08: CoT/프롬프트 누수 없음"""
     # known_issues에서 cot_leak 관련 확인
-    cot = conn.execute("""
-        SELECT issue_id FROM known_issues
-        WHERE blog_ids LIKE ? AND issue_id IN ('P08', 'P07') AND gsd_status = 'open'
-    """, (f"%{blog_id}%",)).fetchall()
+    all_issues = get_known_issues_for_blog(conn, blog_id)
+    cot = [
+        i for i in all_issues
+        if i.get("issue_id") in ("P08", "P07") and i.get("gsd_status") == "open"
+    ]
 
     if cot:
         return {"status": "fail", "detail": f"M08: CoT/CJK 누수 이슈 미해결"}
@@ -396,19 +396,20 @@ def _check_publish_log_integrity(conn: sqlite3.Connection, blog_id: str) -> dict
 
 def _check_domain_health(conn: sqlite3.Connection, blog_id: str) -> dict:
     """M10: 도메인 가용성 — HTTP HEAD 200"""
-    blog = conn.execute(
-        "SELECT domain, config_status FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
-    if not blog or not blog["domain"]:
+    from ops_dashboard.db import get_blog_config_status, get_blog_domain
+    domain = get_blog_domain(conn, blog_id)
+    config_status = get_blog_config_status(conn, blog_id)
+
+    if not domain:
         return {"status": "unknown", "detail": "M10: 도메인 없음"}
 
-    if blog["config_status"] in ("inactive", "disabled"):
+    if config_status in ("inactive", "disabled"):
         return {"status": "pass", "detail": f"M10: 비활성 블로그 — 스킵"}
 
     import urllib.request
     import urllib.error
     try:
-        req = urllib.request.Request(f"https://{blog['domain']}", method="HEAD")
+        req = urllib.request.Request(f"https://{domain}", method="HEAD")
         req.add_header("User-Agent", "OpsDashboard/1.0")
         with urllib.request.urlopen(req, timeout=10) as resp:
             if 200 <= resp.status < 400:
@@ -443,14 +444,12 @@ def check_maintenance_checklist(conn, blog_id: str) -> dict:
 
     정비 대상 블로그(maintenance_status != 'none')에 대해서만 실행.
     """
-    blog = conn.execute(
-        "SELECT maintenance_status FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
+    maintenance_status = get_blog_maintenance_status(conn, blog_id)
 
-    if not blog:
+    if maintenance_status is None:
         return {"status": "unknown", "detail": f"Blog {blog_id} not found"}
 
-    if blog["maintenance_status"] == "none":
+    if maintenance_status == "none":
         return {
             "status": "pass",
             "detail": "정비 대상 아님 — maintenance_checklist 스킵",

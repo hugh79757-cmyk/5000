@@ -7,6 +7,11 @@ from __future__ import annotations
 import logging
 
 from ops_dashboard.checks import register_check
+from ops_dashboard.db import (
+    get_blog_by_id,
+    get_auto_detectable_issues_for_blog,
+    get_fail_checks_for_blog,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -14,21 +19,12 @@ logger = logging.getLogger(__name__)
 @register_check("gsd_crosscheck")
 def check_crosscheck(conn, blog_id: str) -> dict:
     """auto_detectable 이슈가 check_results에서 감지되는지 검증."""
-    blog = conn.execute(
-        "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
+    blog = get_blog_by_id(conn, blog_id)
     if not blog:
         return {"status": "unknown", "detail": f"Blog {blog_id} not found in lifecycle"}
 
     # 이 블로그에 영향을 미치는 auto_detectable 이슈 조회
-    # blog_ids가 비어있으면 일반 이슈 (모든 블로그에 해당)
-    issues = conn.execute("""
-        SELECT issue_id, symptom, blog_ids
-        FROM known_issues
-        WHERE auto_detectable = 'yes'
-          AND gsd_status = 'open'
-          AND (blog_ids LIKE ? OR blog_ids = '')
-    """, (f"%{blog_id}%",)).fetchall()
+    issues = get_auto_detectable_issues_for_blog(conn, blog_id)
 
     if not issues:
         return {
@@ -40,15 +36,8 @@ def check_crosscheck(conn, blog_id: str) -> dict:
     undetected = []
     for issue in issues:
         issue_id = issue["issue_id"]
-        # 해당 이슈의 detection_method를 check_results에서 fail 건이 있는지 확인
-        # 간단히: check_results에서 이 블로그의 fail 항목이 있는지 확인
-        fails = conn.execute("""
-            SELECT check_name, detail
-            FROM check_results
-            WHERE blog_id = ? AND status = 'fail'
-            ORDER BY checked_at DESC
-            LIMIT 5
-        """, (blog_id,)).fetchall()
+        # 해당 블로그의 최근 fail check가 있는지 확인
+        fails = get_fail_checks_for_blog(conn, blog_id)
 
         # auto-detectable 이슈가 있지만 fail check가 없으면 미감지
         if not fails:

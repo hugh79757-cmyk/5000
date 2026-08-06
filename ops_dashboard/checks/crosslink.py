@@ -12,6 +12,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from ops_dashboard.checks import register_check
+from ops_dashboard.db import get_blog_by_id
 
 logger = logging.getLogger(__name__)
 
@@ -93,9 +94,7 @@ def check_crosslink_consistency(conn, blog_id: str) -> dict:
     CROSS_GRAPH에 없는 링크가 있으면 fail.
     CUAP 블로그가 아니면 UNKNOWN(needs_manual).
     """
-    blog = conn.execute(
-        "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
+    blog = get_blog_by_id(conn, blog_id)
     if not blog:
         return {"status": "unknown", "detail": f"Blog {blog_id} not found in lifecycle"}
 

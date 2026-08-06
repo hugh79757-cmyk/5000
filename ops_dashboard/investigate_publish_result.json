@@ -1,0 +1,1446 @@
+[
+  {
+    "blog_id": "--blog",
+    "total_records": 3,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "--help",
+    "total_records": 1,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "adventure-hugo",
+    "total_records": 420,
+    "last_publish": "2026-05-06T08:36:51.203571",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "airlines-hugo",
+    "total_records": 726,
+    "last_publish": "2026-05-06T07:37:34.815877",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "airports-hugo",
+    "total_records": 632,
+    "last_publish": "2026-05-05T10:33:38.035396",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-05, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "appliance-hugo",
+    "total_records": 793,
+    "last_publish": "2026-08-06T10:51:44.022188",
+    "pub_after_8_1": 19,
+    "fail_after_8_1": 9,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 9,
+    "cause": "ok",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 0건 (정상)",
+    "top_fail_reasons": [
+      [
+        "similar_title",
+        7
+      ],
+      [
+        "title_regenerate_failed",
+        1
+      ],
+      [
+        "title_blocked",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "baby-hugo",
+    "total_records": 833,
+    "last_publish": "2026-08-06T11:11:31.948664",
+    "pub_after_8_1": 17,
+    "fail_after_8_1": 21,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 21,
+    "cause": "ok",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 0건 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_keyword",
+        8
+      ],
+      [
+        "write_error",
+        4
+      ],
+      [
+        "low_relevance",
+        4
+      ]
+    ]
+  },
+  {
+    "blog_id": "beauty-hugo",
+    "total_records": 407,
+    "last_publish": "2026-08-06T11:42:13.660575",
+    "pub_after_8_1": 19,
+    "fail_after_8_1": 15,
+    "fail_after_refactor": 1,
+    "fail_before_refactor": 14,
+    "cause": "a",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 1건 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "publish_error",
+        6
+      ],
+      [
+        "write_error",
+        4
+      ],
+      [
+        "similar_title",
+        3
+      ]
+    ]
+  },
+  {
+    "blog_id": "bike-hugo",
+    "total_records": 8,
+    "last_publish": "2026-08-06T09:20:46.685170",
+    "pub_after_8_1": 2,
+    "fail_after_8_1": 6,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 6,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 2건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_keyword",
+        6
+      ]
+    ]
+  },
+  {
+    "blog_id": "biz-techpawz-hugo",
+    "total_records": 0,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "bus-hugo",
+    "total_records": 417,
+    "last_publish": "2026-05-06T08:45:53.106703",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "camping-hugo",
+    "total_records": 498,
+    "last_publish": "2026-08-06T07:14:42.190978",
+    "pub_after_8_1": 20,
+    "fail_after_8_1": 20,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 20,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 20건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "low_relevance",
+        14
+      ],
+      [
+        "write_error",
+        6
+      ]
+    ]
+  },
+  {
+    "blog_id": "car-hugo",
+    "total_records": 3,
+    "last_publish": "2026-08-06T07:31:57.920490",
+    "pub_after_8_1": 2,
+    "fail_after_8_1": 1,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 1,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 2건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_keyword",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "citytours-hugo",
+    "total_records": 240,
+    "last_publish": "2026-05-06T07:06:19.895790",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "compare-hugo",
+    "total_records": 996,
+    "last_publish": "2026-08-04T07:39:54.848332",
+    "pub_after_8_1": 12,
+    "fail_after_8_1": 27,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 27,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 12건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "duplicate_source_id",
+        19
+      ],
+      [
+        "no_topics",
+        7
+      ],
+      [
+        "deploy",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "cruise-hugo",
+    "total_records": 493,
+    "last_publish": "2026-05-05T22:35:46.192119",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-05, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "culture-hugo",
+    "total_records": 423,
+    "last_publish": "2026-05-06T09:00:57.155408",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "daytrips-hugo",
+    "total_records": 434,
+    "last_publish": "2026-05-06T08:20:56.061056",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "deal-hugo",
+    "total_records": 583,
+    "last_publish": "2026-06-05T07:21:01.069164",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-06-05, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "deals-hugo",
+    "total_records": 404,
+    "last_publish": "2026-05-06T09:26:14.399134",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "dining-hugo",
+    "total_records": 399,
+    "last_publish": "2026-05-06T09:05:39.190368",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "dividend-hugo",
+    "total_records": 971,
+    "last_publish": "2026-08-04T20:10:30.494652",
+    "pub_after_8_1": 17,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 17건 발행 중 (정상)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "escape-hugo",
+    "total_records": 228,
+    "last_publish": "2026-05-06T07:20:37.573601",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "esim-hugo",
+    "total_records": 697,
+    "last_publish": "2026-05-06T07:35:38.519389",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "etf-hugo",
+    "total_records": 814,
+    "last_publish": "2026-08-04T08:12:23.133755",
+    "pub_after_8_1": 11,
+    "fail_after_8_1": 11,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 11,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 11건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        10
+      ],
+      [
+        "stap_subprocess_error",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "eurail-hugo",
+    "total_records": 399,
+    "last_publish": "2026-05-06T09:30:40.956123",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "ev-hugo",
+    "total_records": 502,
+    "last_publish": "2026-06-04T10:21:27.572367",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-06-04, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "extreme-hugo",
+    "total_records": 238,
+    "last_publish": "2026-05-06T07:25:37.843209",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "ferry-hugo",
+    "total_records": 418,
+    "last_publish": "2026-05-06T08:50:52.191091",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "finance-hugo",
+    "total_records": 867,
+    "last_publish": "2026-08-06T10:33:03.795572",
+    "pub_after_8_1": 23,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 23건 발행 중 (정상)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "fitness-hugo",
+    "total_records": 810,
+    "last_publish": "2026-08-06T11:21:36.697688",
+    "pub_after_8_1": 20,
+    "fail_after_8_1": 8,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 8,
+    "cause": "ok",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 0건 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_error",
+        4
+      ],
+      [
+        "similar_title",
+        4
+      ]
+    ]
+  },
+  {
+    "blog_id": "flights-hugo",
+    "total_records": 663,
+    "last_publish": "2026-04-23 23:22:23",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-04-23, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "foodtour-hugo",
+    "total_records": 400,
+    "last_publish": "2026-05-06T08:32:39.292274",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "ghost-hugo",
+    "total_records": 231,
+    "last_publish": "2026-05-06T07:35:29.440477",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "golf-hugo",
+    "total_records": 8,
+    "last_publish": "2026-08-06T08:31:00.494542",
+    "pub_after_8_1": 2,
+    "fail_after_8_1": 6,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 6,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 2건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_keyword",
+        6
+      ]
+    ]
+  },
+  {
+    "blog_id": "guide-hugo",
+    "total_records": 519,
+    "last_publish": "2026-06-09T14:56:09.252799",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-06-09, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "health-hugo",
+    "total_records": 470,
+    "last_publish": "2026-08-06T01:57:49.608689",
+    "pub_after_8_1": 18,
+    "fail_after_8_1": 20,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 20,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 18건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_error",
+        9
+      ],
+      [
+        "low_relevance",
+        4
+      ],
+      [
+        "irrelevant_products",
+        4
+      ]
+    ]
+  },
+  {
+    "blog_id": "heritage-hugo",
+    "total_records": 2,
+    "last_publish": "2026-04-15T18:25:40.395732",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-04-15, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "hiking-hugo",
+    "total_records": 225,
+    "last_publish": "2026-05-06T07:15:51.804629",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "homeappliance-hugo",
+    "total_records": 2,
+    "last_publish": "2026-08-06T08:20:52.594274",
+    "pub_after_8_1": 2,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 2건 발행 중 (정상)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "hotissue-hugo",
+    "total_records": 988,
+    "last_publish": "2026-08-05T16:10:57.247388",
+    "pub_after_8_1": 15,
+    "fail_after_8_1": 16,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 16,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 15건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "duplicate_source_id",
+        15
+      ],
+      [
+        "deploy",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "informationhot-hugo",
+    "total_records": 0,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "interior-hugo",
+    "total_records": 769,
+    "last_publish": "2026-08-06T11:02:05.500962",
+    "pub_after_8_1": 20,
+    "fail_after_8_1": 10,
+    "fail_after_refactor": 1,
+    "fail_before_refactor": 9,
+    "cause": "a",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 1건 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "similar_title",
+        6
+      ],
+      [
+        "write_error",
+        2
+      ],
+      [
+        "irrelevant_products",
+        2
+      ]
+    ]
+  },
+  {
+    "blog_id": "ipo-hugo",
+    "total_records": 711,
+    "last_publish": "2026-08-02T14:24:22.621247",
+    "pub_after_8_1": 4,
+    "fail_after_8_1": 21,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 21,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 4건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        17
+      ],
+      [
+        "no_content",
+        3
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "issue-techpawz-hugo",
+    "total_records": 0,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "kitchen-hugo",
+    "total_records": 449,
+    "last_publish": "2026-08-06T11:35:13.985374",
+    "pub_after_8_1": 19,
+    "fail_after_8_1": 20,
+    "fail_after_refactor": 2,
+    "fail_before_refactor": 18,
+    "cause": "a",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 2건 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "write_error",
+        14
+      ],
+      [
+        "publish_error",
+        4
+      ],
+      [
+        "irrelevant_products",
+        2
+      ]
+    ]
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "total_records": 692,
+    "last_publish": "2026-08-06T10:41:23.019039",
+    "pub_after_8_1": 20,
+    "fail_after_8_1": 13,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 13,
+    "cause": "ok",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 0건 (정상)",
+    "top_fail_reasons": [
+      [
+        "low_relevance",
+        6
+      ],
+      [
+        "write_error",
+        4
+      ],
+      [
+        "title_regenerate_failed",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "layover-hugo",
+    "total_records": 231,
+    "last_publish": "2026-05-06T07:40:33.547328",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "luxury-hugo",
+    "total_records": 242,
+    "last_publish": "2026-05-06T07:01:01.028663",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "massage-hugo",
+    "total_records": 3,
+    "last_publish": "2026-08-06T07:20:57.901595",
+    "pub_after_8_1": 2,
+    "fail_after_8_1": 1,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 1,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 2건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_keyword",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "michelin-hugo",
+    "total_records": 705,
+    "last_publish": "2026-05-06T07:39:43.928269",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "multiday-hugo",
+    "total_records": 413,
+    "last_publish": "2026-05-06T09:11:08.824458",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "nature-hugo",
+    "total_records": 372,
+    "last_publish": "2026-05-06T09:15:42.147525",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "nightlife-hugo",
+    "total_records": 235,
+    "last_publish": "2026-05-06T07:30:44.884221",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "nomad-hugo",
+    "total_records": 205,
+    "last_publish": "2026-05-02T09:17:21.947934",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-02, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "pet-hugo",
+    "total_records": 488,
+    "last_publish": "2026-08-06T13:00:48.407897",
+    "pub_after_8_1": 21,
+    "fail_after_8_1": 11,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 11,
+    "cause": "ok",
+    "reason": "리팩토링 후 마지막 성공 2026-08-06, 실패 0건 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_error",
+        4
+      ],
+      [
+        "low_relevance",
+        2
+      ],
+      [
+        "irrelevant_products",
+        2
+      ]
+    ]
+  },
+  {
+    "blog_id": "phototour-hugo",
+    "total_records": 377,
+    "last_publish": "2026-05-05T22:40:45.515846",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-05, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "pick-hugo",
+    "total_records": 466,
+    "last_publish": "2026-07-13T07:27:27.167692",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 37,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 37,
+    "cause": "a",
+    "reason": "마지막 성공 2026-07-13, 이후 시도 37건 실패 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "no_topics",
+        23
+      ],
+      [
+        "no_result",
+        9
+      ],
+      [
+        "no_data",
+        4
+      ]
+    ]
+  },
+  {
+    "blog_id": "rank-hugo",
+    "total_records": 343,
+    "last_publish": "2026-08-05T09:42:14.986896",
+    "pub_after_8_1": 5,
+    "fail_after_8_1": 7,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 7,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 5건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "duplicate_source_id",
+        4
+      ],
+      [
+        "duplicate_slug",
+        2
+      ],
+      [
+        "daily_quota_exceeded",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "rap-hugo",
+    "total_records": 818,
+    "last_publish": "2026-08-04T08:35:41.965369",
+    "pub_after_8_1": 14,
+    "fail_after_8_1": 4,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 4,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 14건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_failed",
+        3
+      ],
+      [
+        "daily_quota_exceeded",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "rap2-hugo",
+    "total_records": 796,
+    "last_publish": "2026-08-04T08:32:55.682326",
+    "pub_after_8_1": 15,
+    "fail_after_8_1": 3,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 3,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 15건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_failed",
+        2
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "rap3-hugo",
+    "total_records": 798,
+    "last_publish": "2026-08-03T18:17:21.926593",
+    "pub_after_8_1": 11,
+    "fail_after_8_1": 8,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 8,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 11건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_failed",
+        5
+      ],
+      [
+        "duplicate_source_id",
+        2
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "rap4-hugo",
+    "total_records": 755,
+    "last_publish": "2026-08-03T18:49:00.434127",
+    "pub_after_8_1": 12,
+    "fail_after_8_1": 5,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 5,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 12건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_failed",
+        4
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "rap5-hugo",
+    "total_records": 788,
+    "last_publish": "2026-08-03T18:52:39.807187",
+    "pub_after_8_1": 11,
+    "fail_after_8_1": 6,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 6,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 11건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "write_failed",
+        4
+      ],
+      [
+        "unknown",
+        1
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "rotcha-blog",
+    "total_records": 2,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "sector-hugo",
+    "total_records": 840,
+    "last_publish": "2026-08-01T10:31:22.339913",
+    "pub_after_8_1": 2,
+    "fail_after_8_1": 2,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 2,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 2건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_content",
+        1
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "senior-blogger",
+    "total_records": 669,
+    "last_publish": "2026-07-28T17:12:12.350115",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 50,
+    "fail_after_refactor": 1,
+    "fail_before_refactor": 49,
+    "cause": "a",
+    "reason": "마지막 성공 2026-07-28, 이후 시도 50건 실패 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "publish_error",
+        48
+      ],
+      [
+        "no_content",
+        1
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "senior-hugo",
+    "total_records": 666,
+    "last_publish": "2026-07-29T07:38:42.961985",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 49,
+    "fail_after_refactor": 1,
+    "fail_before_refactor": 48,
+    "cause": "a",
+    "reason": "마지막 성공 2026-07-29, 이후 시도 49건 실패 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "publish_error",
+        47
+      ],
+      [
+        "no_content",
+        1
+      ],
+      [
+        "inactive",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "stock-hugo",
+    "total_records": 2394,
+    "last_publish": "2026-08-04T20:06:11.427163",
+    "pub_after_8_1": 16,
+    "fail_after_8_1": 3,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 3,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 16건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "duplicate_source_id",
+        2
+      ],
+      [
+        "duplicate_slug",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "tap-blogger",
+    "total_records": 734,
+    "last_publish": "2026-08-05T09:45:22.894606",
+    "pub_after_8_1": 10,
+    "fail_after_8_1": 1,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 1,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 10건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "tap-hugo",
+    "total_records": 793,
+    "last_publish": "2026-05-14 01:03:04.532042",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-14, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "tco-hugo",
+    "total_records": 562,
+    "last_publish": "2026-06-04T16:13:41.900023",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-06-04, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "techpawz-hugo",
+    "total_records": 1,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "tour-hugo",
+    "total_records": 646,
+    "last_publish": "2026-05-06T07:31:20.726999",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "tours-hugo",
+    "total_records": 504,
+    "last_publish": "2026-05-06T07:41:52.119431",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "trains-hugo",
+    "total_records": 493,
+    "last_publish": "2026-05-06T07:44:02.961128",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "transfers-hugo",
+    "total_records": 415,
+    "last_publish": "2026-05-06T09:05:40.421174",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "travel-hugo",
+    "total_records": 568,
+    "last_publish": "2026-08-05T10:01:51.328657",
+    "pub_after_8_1": 9,
+    "fail_after_8_1": 5,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 5,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 9건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        4
+      ],
+      [
+        "deploy",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "travel1-hugo",
+    "total_records": 444,
+    "last_publish": "2026-08-05T10:02:53.562939",
+    "pub_after_8_1": 8,
+    "fail_after_8_1": 5,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 5,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 8건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        4
+      ],
+      [
+        "daily_quota_exceeded",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "travel2-hugo",
+    "total_records": 547,
+    "last_publish": "2026-08-05T10:05:35.685724",
+    "pub_after_8_1": 6,
+    "fail_after_8_1": 7,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 7,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 6건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        6
+      ],
+      [
+        "duplicate_source_id",
+        1
+      ]
+    ]
+  },
+  {
+    "blog_id": "travel3-hugo",
+    "total_records": 446,
+    "last_publish": "2026-08-05T10:07:09.821719",
+    "pub_after_8_1": 8,
+    "fail_after_8_1": 8,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 8,
+    "cause": "ok",
+    "reason": "리팩토링 후 성공 8건 발행 중 (정상)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        8
+      ]
+    ]
+  },
+  {
+    "blog_id": "travel4-hugo",
+    "total_records": 544,
+    "last_publish": "2026-07-28T13:15:53.209557",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 29,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 29,
+    "cause": "a",
+    "reason": "마지막 성공 2026-07-28, 이후 시도 29건 실패 (차단 반복)",
+    "top_fail_reasons": [
+      [
+        "no_result",
+        29
+      ]
+    ]
+  },
+  {
+    "blog_id": "tvshow-blogger",
+    "total_records": 0,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "ud-blogger",
+    "total_records": 0,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "publish_ledger 데이터 없음 (파이프라인 미연동)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "visa-hugo",
+    "total_records": 630,
+    "last_publish": "2026-05-06T07:45:47.354434",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "visafree-hugo",
+    "total_records": 397,
+    "last_publish": "2026-05-06T09:20:52.703799",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "walking-hugo",
+    "total_records": 427,
+    "last_publish": "2026-05-06T08:31:01.473528",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "watersports-hugo",
+    "total_records": 429,
+    "last_publish": "2026-05-06T08:40:50.239571",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "watertours-hugo",
+    "total_records": 234,
+    "last_publish": "2026-05-06T07:10:36.611781",
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 0,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 0,
+    "cause": "b",
+    "reason": "마지막 성공 2026-05-06, 8/1 이후 시도 0건 (발행 시도 중단)",
+    "top_fail_reasons": []
+  },
+  {
+    "blog_id": "x-hugo",
+    "total_records": 3,
+    "last_publish": null,
+    "pub_after_8_1": 0,
+    "fail_after_8_1": 3,
+    "fail_after_refactor": 0,
+    "fail_before_refactor": 3,
+    "cause": "b",
+    "reason": "성공 발행 0건, 실패만 존재 (파이프라인 자체 미가동 또는 첫 시도부터 실패)",
+    "top_fail_reasons": [
+      [
+        "zzz_unknown",
+        1
+      ],
+      [
+        "similar_title",
+        1
+      ],
+      [
+        "no_result",
+        1
+      ]
+    ]
+  }
+]

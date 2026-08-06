@@ -12,12 +12,22 @@ from flask import Flask, Response, g, jsonify, render_template, request
 
 from ops_dashboard.checks import run_all_checks
 from ops_dashboard.db import (
+    CHECK_SEVERITY,
     get_all_blogs,
+    get_attention_blogs,
+    get_attention_blogs_aggregate,
     get_attention_items,
+    get_blog_count,
     get_blog_detail,
+    get_blog_site_path,
+    get_blog_domain,
+    get_blog_pipeline_path,
     get_conn,
+    get_daily_summary,
     get_maintenance_checklist,
     get_maintenance_summary,
+    get_blog_brand,
+    get_blog_config_status,
     init_db,
     seed_known_issues,
     seed_maintenance_status,
@@ -80,8 +90,7 @@ def _get_db() -> sqlite3.Connection:
 def _ensure_db(conn: sqlite3.Connection) -> None:
     """Initialize DB schema and seed data if tables are empty."""
     init_db(conn)
-    row = conn.execute("SELECT COUNT(*) FROM blog_lifecycle").fetchone()
-    if row[0] == 0:
+    if get_blog_count(conn) == 0:
         sync_blog_lifecycle(conn)
         seed_known_issues(conn)
     # Phase 60: 정비 대상 블로그 시드 (기존 데이터에 maintenance_status 없으면 추가)
@@ -106,6 +115,8 @@ def _build_unpause_checklist(
     This is the human verification layer on top of M01~M10 auto-checks.
     Each item has: id, title, note, auto_status, evidence.
     """
+    from ops_dashboard.db import get_blog_site_path, get_blog_domain, get_blog_pipeline_path
+    
     # Index maintenance results by check_id
     m_map = {item["check_id"]: item for item in (maintenance_checklist or [])}
 
@@ -122,12 +133,9 @@ def _build_unpause_checklist(
         return ""
 
     # Blog-specific queries
-    blog = conn.execute(
-        "SELECT site_path, domain, pipeline_path FROM blog_lifecycle WHERE blog_id = ?",
-        (blog_id,),
-    ).fetchone()
-    site_path = blog["site_path"] if blog else ""
-    domain = blog["domain"] if blog else ""
+    site_path = get_blog_site_path(conn, blog_id)
+    domain = get_blog_domain(conn, blog_id)
+    pipeline_path = get_blog_pipeline_path(conn, blog_id)
 
     checklist = [
         {
@@ -232,6 +240,30 @@ def _register_human_routes(app: Flask) -> None:
             "ready_to_resume": sum(1 for b in blogs if b.get("maintenance_status") == "ready"),
         }
 
+        # 5-4: "주의 필요" 뷰 — 필터 파라미터 (기본: 전체)
+        filter_brand = request.args.get("brand", "")
+        filter_check = request.args.get("check", "")
+        filter_severity = request.args.get("severity", "")
+        # 서버사이드 페이지네이션
+        try:
+            page = max(1, int(request.args.get("page", "1")))
+        except ValueError:
+            page = 1
+        page_size = 50
+        attention_blogs_all = get_attention_blogs(
+            conn,
+            brand=filter_brand or None,
+            check_name=filter_check or None,
+            severity=filter_severity or None,
+        )
+        total_items = len(attention_blogs_all)
+        total_pages = max(1, -(-total_items // page_size))  # ceil
+        page = min(page, total_pages)
+        start_idx = (page - 1) * page_size
+        attention_blogs = attention_blogs_all[start_idx : start_idx + page_size]
+        attention_agg = get_attention_blogs_aggregate(conn)
+        check_severity_map = CHECK_SEVERITY
+
         return render_template(
             "index.html",
             title="Fleet Overview",
@@ -242,6 +274,15 @@ def _register_human_routes(app: Flask) -> None:
             summary=summary,
             maintenance_summary=maintenance_summary,
             daily_summary=daily_summary,
+            attention_blogs=attention_blogs,
+            attention_agg=attention_agg,
+            filter_brand=filter_brand,
+            filter_check=filter_check,
+            filter_severity=filter_severity,
+            check_severity_map=check_severity_map,
+            page=page,
+            total_pages=total_pages,
+            total_items=total_items,
         )
 
     @app.route("/blog/<blog_id>")
@@ -272,15 +313,14 @@ def _register_human_routes(app: Flask) -> None:
     def issues():
         conn = _get_db()
         _ensure_db(conn)
-        rows = conn.execute(
-            "SELECT * FROM known_issues ORDER BY category, issue_id"
-        ).fetchall()
+        from ops_dashboard.db import get_open_known_issues
+        issues = get_open_known_issues(conn)
 
         return render_template(
             "issues.html",
             title="Issues",
             active="issues",
-            issues=[dict(r) for r in rows],
+            issues=issues,
         )
 
     @app.route("/standards")
@@ -288,6 +328,7 @@ def _register_human_routes(app: Flask) -> None:
     def standards():
         conn = _get_db()
         _ensure_db(conn)
+        from ops_dashboard.db import get_all_blogs
         blogs = get_all_blogs(conn)
         brands = {}
         for b in blogs:
@@ -334,16 +375,15 @@ def _register_api_routes(app: Flask) -> None:
     def api_issues():
         conn = _get_db()
         _ensure_db(conn)
-        rows = conn.execute(
-            "SELECT * FROM known_issues ORDER BY category, issue_id"
-        ).fetchall()
-        return jsonify([dict(r) for r in rows])
+        from ops_dashboard.db import get_open_known_issues
+        return jsonify(get_open_known_issues(conn))
 
     @app.route("/api/standards")
     @require_auth
     def api_standards():
         conn = _get_db()
         _ensure_db(conn)
+        from ops_dashboard.db import get_all_blogs
         blogs = get_all_blogs(conn)
         brands = {}
         for b in blogs:

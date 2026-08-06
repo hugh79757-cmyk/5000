@@ -7,6 +7,7 @@
 """
 import json
 import os
+import re
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
@@ -270,18 +271,15 @@ def _assign_id_from_key(blog: dict, key: str, val: str) -> None:
 
 
 def _detect_brand(filename: str) -> str:
-    """YAML 파일명에서 계열 감지."""
-    mapping = {
-        "cap.yaml": "cap",
-        "cuap.yaml": "cuap",
-        "etap.yaml": "etap",
-        "rap.yaml": "rap",
-        "seap.yaml": "seap",
-        "stap.yaml": "stap",
-        "tap.yaml": "tap",
-        "manual_blog_for_backup.yaml": "manual",
-    }
-    return mapping.get(filename, "unknown")
+    """YAML 파일명에서 계열(brand) 자동 감지 (하드코딩 없음).
+
+    규칙: 파일명 stem의 첫 번째 세그먼트를 brand로 사용.
+    예: cap.yaml → cap, cuap.yaml → cuap, manual_blog_for_backup.yaml → manual
+    새 YAML 파일(ex: newbrand.yaml) 추가만으로 새 계열이 자동 등록된다.
+    """
+    stem = filename[:-5] if filename.endswith(".yaml") else filename
+    m = re.match(r"^([a-z0-9]+)", stem)
+    return m.group(1) if m else stem
 
 
 def sync_blog_lifecycle(conn: sqlite3.Connection) -> int:
@@ -766,4 +764,676 @@ def get_daily_summary(conn: sqlite3.Connection, summary_date: str | None = None)
         "breakdown": breakdown,
         "blog_by_problem": blog_by_problem,
         "debounce_events": [dict(r) for r in debounce_rows],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Part 5: DB 접근 함수 통일 (인라인 SQL 제거)
+# ---------------------------------------------------------------------------
+
+def get_blog_count(conn: sqlite3.Connection) -> int:
+    """전체 블로그 수 조회."""
+    row = conn.execute("SELECT COUNT(*) FROM blog_lifecycle").fetchone()
+    return row[0] if row else 0
+
+
+def get_blog_by_id(conn: sqlite3.Connection, blog_id: str) -> dict | None:
+    """blog_id로 블로그 상세 조회."""
+    row = conn.execute(
+        "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return dict(row) if row else None
+
+
+def get_blogs_by_brand(conn: sqlite3.Connection, brand: str) -> list[dict]:
+    """계열(brand)별 블로그 조회."""
+    rows = conn.execute(
+        "SELECT * FROM blog_lifecycle WHERE brand = ? ORDER BY blog_id", (brand,)
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_active_blogs(conn: sqlite3.Connection) -> list[dict]:
+    """active 상태 블로그만 조회."""
+    rows = conn.execute(
+        "SELECT * FROM blog_lifecycle WHERE config_status = 'active' ORDER BY brand, blog_id"
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_blogs_with_site_path(conn: sqlite3.Connection) -> list[dict]:
+    """site_path가 있는 블로그 조회 (체크용)."""
+    rows = conn.execute(
+        "SELECT * FROM blog_lifecycle WHERE site_path != '' AND site_path IS NOT NULL ORDER BY brand, blog_id"
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_maintenance_blogs(conn: sqlite3.Connection) -> list[dict]:
+    """정비 대상 블로그 조회."""
+    rows = conn.execute(
+        "SELECT * FROM blog_lifecycle WHERE maintenance_status != 'none' ORDER BY brand, blog_id"
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_blog_site_path(conn: sqlite3.Connection, blog_id: str) -> str | None:
+    """블로그의 site_path 조회."""
+    row = conn.execute(
+        "SELECT site_path FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["site_path"] if row else None
+
+
+def get_blog_domain(conn: sqlite3.Connection, blog_id: str) -> str | None:
+    """블로그의 도메인 조회."""
+    row = conn.execute(
+        "SELECT domain FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["domain"] if row else None
+
+
+def get_blog_pipeline_path(conn: sqlite3.Connection, blog_id: str) -> str | None:
+    """블로그의 pipeline_path 조회."""
+    row = conn.execute(
+        "SELECT pipeline_path FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["pipeline_path"] if row else None
+
+
+def get_blog_brand(conn: sqlite3.Connection, blog_id: str) -> str | None:
+    """블로그의 계열(brand) 조회."""
+    row = conn.execute(
+        "SELECT brand FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["brand"] if row else None
+
+
+def get_blog_config_status(conn: sqlite3.Connection, blog_id: str) -> str | None:
+    """블로그의 config_status 조회."""
+    row = conn.execute(
+        "SELECT config_status FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["config_status"] if row else None
+
+
+def get_blog_days_since_last_publish(conn: sqlite3.Connection, blog_id: str) -> int | None:
+    """블로그의 마지막 발행 후 경과일 조회."""
+    row = conn.execute(
+        "SELECT days_since_last_publish FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["days_since_last_publish"] if row else None
+
+
+def get_blog_maintenance_status(conn: sqlite3.Connection, blog_id: str) -> str | None:
+    """블로그의 정비 상태(maintenance_status) 조회."""
+    row = conn.execute(
+        "SELECT maintenance_status FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["maintenance_status"] if row else None
+
+
+def get_check_results_for_blog(conn: sqlite3.Connection, blog_id: str, limit: int = 50) -> list[dict]:
+    """블로그별 헬스체크 결과 조회 (최신순)."""
+    rows = conn.execute("""
+        SELECT * FROM check_results
+        WHERE blog_id = ?
+        ORDER BY checked_at DESC
+        LIMIT ?
+    """, (blog_id, limit)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_latest_check_result(conn: sqlite3.Connection, blog_id: str, check_name: str) -> dict | None:
+    """블로그의 특정 체크 최신 결과 조회."""
+    row = conn.execute("""
+        SELECT * FROM check_results
+        WHERE blog_id = ? AND check_name = ?
+        ORDER BY checked_at DESC
+        LIMIT 1
+    """, (blog_id, check_name)).fetchone()
+    return dict(row) if row else None
+
+
+def get_fail_checks_for_blog(conn: sqlite3.Connection, blog_id: str) -> list[dict]:
+    """블로그의 실패한 체크 조회."""
+    rows = conn.execute("""
+        SELECT cr.* FROM check_results cr
+        INNER JOIN (
+            SELECT blog_id, check_name, MAX(checked_at) as latest
+            FROM check_results WHERE blog_id = ? GROUP BY blog_id, check_name
+        ) latest ON cr.blog_id = latest.blog_id
+            AND cr.check_name = latest.check_name
+            AND cr.checked_at = latest.latest
+        WHERE cr.status = 'fail'
+        ORDER BY cr.checked_at DESC
+    """, (blog_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_check_results_summary(conn: sqlite3.Connection) -> dict:
+    """전체 체크 결과 요약."""
+    rows = conn.execute("""
+        SELECT status, COUNT(*) as cnt
+        FROM check_results
+        GROUP BY status
+    """).fetchall()
+    return {row["status"]: row["cnt"] for row in rows}
+
+
+# 체크 유형별 심각도 (5-4 필터용)
+CHECK_SEVERITY: dict[str, str] = {
+    "standard_compliance": "CRITICAL",
+    "crosslink_consistency": "CRITICAL",
+    "cjk_leak": "CRITICAL",
+    "gsd_crosscheck": "MAJOR",
+    "freshness": "MAJOR",
+    "render_health": "MAJOR",
+    "maintenance_checklist": "MINOR",
+}
+
+# 심각도 우선순위 (내림차순)
+_SEVERITY_ORDER = {"CRITICAL": 3, "MAJOR": 2, "MINOR": 1}
+
+
+def get_attention_blogs(
+    conn: sqlite3.Connection,
+    brand: str | None = None,
+    check_name: str | None = None,
+    severity: str | None = None,
+) -> list[dict]:
+    """주의 필요 블로그 목록: 최신 check_results에서 fail인 블로그.
+
+    필터:
+      - brand: 계열 (cap/cuap/etap 등)
+      - check_name: 체크 유형 (standard_compliance 등)
+      - severity: 심각도 (CRITICAL/MAJOR/MINOR)
+    반환: 각 블로그당 최신 fail 체크 목록 (블로그 중복 가능, 정렬은 심각도 우선)
+    """
+    sql = """
+        SELECT cr.blog_id, cr.check_name, cr.status, cr.detail,
+               cr.evidence_url, cr.checked_at,
+               bl.brand, bl.config_status, bl.maintenance_status
+        FROM check_results cr
+        INNER JOIN (
+            SELECT blog_id, check_name, MAX(checked_at) as latest
+            FROM check_results GROUP BY blog_id, check_name
+        ) latest ON cr.blog_id = latest.blog_id
+            AND cr.check_name = latest.check_name
+            AND cr.checked_at = latest.latest
+        LEFT JOIN blog_lifecycle bl ON bl.blog_id = cr.blog_id
+        WHERE cr.status = 'fail'
+    """
+    params: list = []
+    if brand:
+        sql += " AND bl.brand = ?"
+        params.append(brand)
+    if check_name:
+        sql += " AND cr.check_name = ?"
+        params.append(check_name)
+    if severity:
+        # severity로 지정된 check_name들만
+        names = [k for k, v in CHECK_SEVERITY.items() if v == severity]
+        if names:
+            placeholders = ",".join("?" * len(names))
+            sql += f" AND cr.check_name IN ({placeholders})"
+            params.extend(names)
+        else:
+            return []
+    sql += " ORDER BY cr.checked_at DESC"
+
+    rows = conn.execute(sql, params).fetchall()
+    items = []
+    for r in rows:
+        d = dict(r)
+        d["severity"] = CHECK_SEVERITY.get(d["check_name"], "MAJOR")
+        items.append(d)
+    # 심각도 우선 정렬
+    items.sort(key=lambda x: _SEVERITY_ORDER.get(x["severity"], 0), reverse=True)
+    return items
+
+
+def get_attention_blogs_aggregate(
+    conn: sqlite3.Connection,
+) -> dict:
+    """주의 필요 블로그 집계: 전체 대비 주의 블로그 수, 필터 옵션 목록."""
+    items = get_attention_blogs(conn)
+    blog_ids = {i["blog_id"] for i in items}
+
+    # 브랜드 분포
+    brands: dict[str, int] = {}
+    for i in items:
+        brand = i.get("brand") or "unknown"
+        brands[brand] = brands.get(brand, 0) + 1
+
+    # 체크 유형 분포
+    check_names: dict[str, int] = {}
+    for i in items:
+        cn = i["check_name"]
+        check_names[cn] = check_names.get(cn, 0) + 1
+
+    # 심각도 분포
+    severities: dict[str, int] = {}
+    for i in items:
+        sev = i["severity"]
+        severities[sev] = severities.get(sev, 0) + 1
+
+    return {
+        "total_blogs": len(blog_ids),
+        "total_items": len(items),
+        "blog_ids": sorted(blog_ids),
+        "brands": brands,
+        "check_names": check_names,
+        "severities": severities,
+    }
+
+
+def get_known_issues_for_blog(conn: sqlite3.Connection, blog_id: str) -> list[dict]:
+    """블로그 관련 known_issues 조회."""
+    rows = conn.execute("""
+        SELECT * FROM known_issues
+        WHERE blog_ids LIKE ? OR blog_ids = ''
+        ORDER BY category, issue_id
+    """, (f"%{blog_id}%",)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_auto_detectable_issues_for_blog(conn: sqlite3.Connection, blog_id: str) -> list[dict]:
+    """블로그 관련 auto_detectable known_issues 조회."""
+    rows = conn.execute("""
+        SELECT issue_id, symptom, blog_ids
+        FROM known_issues
+        WHERE auto_detectable = 'yes'
+          AND gsd_status = 'open'
+          AND (blog_ids LIKE ? OR blog_ids = '')
+        ORDER BY category, issue_id
+    """, (f"%{blog_id}%",)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_recent_fail_check_results(conn: sqlite3.Connection, blog_id: str, check_name: str, since_days: int = 7) -> list[dict]:
+    """최근 N일간 특정 체크의 fail 결과 조회."""
+    from datetime import datetime, timedelta
+    since = (datetime.now() - timedelta(days=since_days)).isoformat()
+    rows = conn.execute("""
+        SELECT * FROM check_results
+        WHERE blog_id = ? AND check_name = ? AND status = 'fail'
+          AND checked_at >= ?
+        ORDER BY checked_at DESC
+    """, (blog_id, check_name, since)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_recent_publish_logs(conn: sqlite3.Connection, blog_id: str, limit: int = 20, table: str = "publish_log") -> list[dict]:
+    """최근 발행 로그 조회 (publish_log 또는 publish_ledger)."""
+    try:
+        rows = conn.execute(f"""
+            SELECT * FROM {table}
+            WHERE blog_id = ? AND title IS NOT NULL AND title != ''
+            ORDER BY published_at DESC
+            LIMIT ?
+        """, (blog_id, limit)).fetchall()
+        return [dict(r) for r in rows]
+    except sqlite3.OperationalError:
+        return []
+
+
+def get_known_issues_by_category(conn: sqlite3.Connection, category: str) -> list[dict]:
+    """카테고리별 known_issues 조회."""
+    rows = conn.execute("""
+        SELECT * FROM known_issues
+        WHERE category = ?
+        ORDER BY issue_id
+    """, (category,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_open_known_issues(conn: sqlite3.Connection) -> list[dict]:
+    """미해결 known_issues 조회."""
+    rows = conn.execute("""
+        SELECT * FROM known_issues
+        WHERE gsd_status = 'open'
+        ORDER BY category, issue_id
+    """).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_stale_blogs(conn: sqlite3.Connection, threshold_days: int = 3) -> list[dict]:
+    """stale 블로그 조회 (active인데 오래된 발행)."""
+    rows = conn.execute("""
+        SELECT blog_id, days_since_last_publish, lifecycle_status
+        FROM blog_lifecycle
+        WHERE config_status = 'active'
+          AND days_since_last_publish IS NOT NULL
+          AND days_since_last_publish > ?
+        ORDER BY days_since_last_publish DESC
+    """, (threshold_days,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_maintenance_checklist_items() -> list[dict]:
+    """정비 체크리스트 항목 반환 (static)."""
+    return MAINTENANCE_CHECKLIST_ITEMS
+
+
+def record_check_item_status(
+    conn: sqlite3.Connection,
+    blog_id: str,
+    check_id: str,
+    status: str,
+    detail: str = "",
+) -> None:
+    """정비 체크리스트 항목 상태 업데이트 (기존 set_check_item_status 래퍼)."""
+    set_check_item_status(conn, blog_id, check_id, status, detail)
+
+
+def init_check_rollups_table(conn: sqlite3.Connection) -> None:
+    """check_rollups 테이블 생성 (Part 5: 롤업 정책)."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS check_rollups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rollup_date TEXT NOT NULL,
+            blog_id TEXT NOT NULL,
+            check_name TEXT NOT NULL,
+            pass_count INTEGER NOT NULL DEFAULT 0,
+            fail_count INTEGER NOT NULL DEFAULT 0,
+            unknown_count INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(rollup_date, blog_id, check_name)
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rollup_date ON check_rollups(rollup_date)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rollup_blog ON check_rollups(blog_id)")
+    conn.commit()
+
+
+def rollup_check_results(conn: sqlite3.Connection, rollup_date: str | None = None) -> int:
+    """일별 check_results를 check_rollups로 집계.
+    
+    반환: 생성/업데이트된 롤업 행 수.
+    """
+    from datetime import datetime as _dt
+    if rollup_date is None:
+        rollup_date = _dt.now().strftime("%Y-%m-%d")
+
+    init_check_rollups_table(conn)
+
+    rows = conn.execute("""
+        SELECT blog_id, check_name,
+               SUM(CASE WHEN status = 'pass' THEN 1 ELSE 0 END) as pass_count,
+               SUM(CASE WHEN status = 'fail' THEN 1 ELSE 0 END) as fail_count,
+               SUM(CASE WHEN status = 'unknown' THEN 1 ELSE 0 END) as unknown_count
+        FROM check_results
+        WHERE date(checked_at) = ?
+        GROUP BY blog_id, check_name
+    """, (rollup_date,)).fetchall()
+
+    count = 0
+    for r in rows:
+        conn.execute("""
+            INSERT OR REPLACE INTO check_rollups
+            (rollup_date, blog_id, check_name, pass_count, fail_count, unknown_count)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (rollup_date, r["blog_id"], r["check_name"],
+              r["pass_count"], r["fail_count"], r["unknown_count"]))
+        count += 1
+
+    conn.commit()
+    return count
+
+
+def cleanup_old_check_results(conn: sqlite3.Connection, keep_days: int = 30) -> int:
+    """N일 이전 check_results 원시 데이터 삭제 (롤업 완료 후).
+    
+    반환: 삭제된 행 수.
+    """
+    from datetime import datetime, timedelta
+    cutoff = (datetime.now() - timedelta(days=keep_days)).strftime("%Y-%m-%d")
+    
+    # 롤업이 존재하는 날짜만 삭제 (롤업 후 안전 삭제)
+    cursor = conn.execute("""
+        DELETE FROM check_results
+        WHERE date(checked_at) < ?
+          AND date(checked_at) IN (
+              SELECT rollup_date FROM check_rollups
+          )
+    """, (cutoff,))
+    deleted = cursor.rowcount
+    conn.commit()
+    return deleted
+
+
+def get_check_rollups(conn: sqlite3.Connection, blog_id: str | None = None, days: int = 30) -> list[dict]:
+    """롤업 데이터 조회."""
+    from datetime import datetime, timedelta
+    since = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    
+    if blog_id:
+        rows = conn.execute("""
+            SELECT * FROM check_rollups
+            WHERE blog_id = ? AND rollup_date >= ?
+            ORDER BY rollup_date DESC, check_name
+        """, (blog_id, since)).fetchall()
+    else:
+        rows = conn.execute("""
+            SELECT * FROM check_rollups
+            WHERE rollup_date >= ?
+            ORDER BY rollup_date DESC, blog_id, check_name
+        """, (since,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_brands(conn: sqlite3.Connection) -> list[str]:
+    """등록된 모든 계열(brand) 조회."""
+    rows = conn.execute("""
+        SELECT DISTINCT brand FROM blog_lifecycle
+        ORDER BY brand
+    """).fetchall()
+    return [r["brand"] for r in rows]
+
+
+def get_blog_ids_by_brand(conn: sqlite3.Connection, brand: str) -> list[str]:
+    """계열별 blog_id 리스트 조회."""
+    rows = conn.execute("""
+        SELECT blog_id FROM blog_lifecycle
+        WHERE brand = ? ORDER BY blog_id
+    """, (brand,)).fetchall()
+    return [r["blog_id"] for r in rows]
+
+
+def discover_yaml_files() -> list[Path]:
+    """config/blogs.d/*.yaml 파일 자동 발견."""
+    return sorted(BLOGS_D.glob("*.yaml"))
+
+
+def get_brand_from_yaml_filename(filename: str) -> str:
+    """YAML 파일명에서 계열(brand) 자동 감지 (하드코딩 없음).
+
+    규칙: 파일명 stem의 첫 번째 세그먼트를 brand로 사용.
+    예: cap.yaml → cap, manual_blog_for_backup.yaml → manual
+    새 YAML 파일 추가만으로 새 계열이 자동 등록된다.
+    """
+    return _detect_brand(filename)
+
+
+def get_all_yaml_blog_ids(conn: sqlite3.Connection) -> list[str]:
+    """YAML 파일에서 파싱된 모든 blog_id 조회."""
+    blog_ids = []
+    for yaml_file in discover_yaml_files():
+        if yaml_file.name.endswith(".bak") or yaml_file.name.startswith("."):
+            continue
+        blogs = _parse_yaml_file(yaml_file)
+        for b in blogs:
+            blog_id = b.get("blog_id", "")
+            if blog_id:
+                blog_ids.append(blog_id)
+    return blog_ids
+
+
+# ---------------------------------------------------------------------------
+# External DB access (content.db, stap_content.db, etc.)
+# ---------------------------------------------------------------------------
+
+def get_publish_log_conn():
+    """publish_log DB 연결 (content.db)."""
+    from shared.paths import FIVEK_ROOT
+    import sqlite3
+    path = str(Path(FIVEK_ROOT) / "data" / "content.db")
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def get_stap_content_conn():
+    """stap_content DB 연결 (stap_content.db)."""
+    from shared.paths import FIVEK_ROOT
+    import sqlite3
+    path = str(Path(FIVEK_ROOT) / "data" / "stap_content.db")
+    conn = sqlite3.connect(path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def get_publish_ledger_blog_ids(conn) -> list[str]:
+    """publish_ledger에 존재하는 모든 blog_id 조회."""
+    rows = conn.execute(
+        "SELECT DISTINCT blog_id FROM publish_ledger ORDER BY blog_id"
+    ).fetchall()
+    return [r["blog_id"] for r in rows]
+
+
+def get_publish_ledger_total(conn, blog_id: str) -> int:
+    """블로그의 전체 발행 기록 수."""
+    row = conn.execute(
+        "SELECT COUNT(*) AS cnt FROM publish_ledger WHERE blog_id = ?", (blog_id,)
+    ).fetchone()
+    return row["cnt"]
+
+
+def get_publish_ledger_last_success(conn, blog_id: str) -> str | None:
+    """블로그의 마지막 성공 발행 시각."""
+    row = conn.execute(
+        "SELECT MAX(created_at) AS last FROM publish_ledger"
+        " WHERE blog_id = ? AND status = 'published'",
+        (blog_id,),
+    ).fetchone()
+    return row["last"]
+
+
+def get_publish_ledger_counts_since(conn, blog_id: str, since: str) -> dict:
+    """특정 시각 이후 published/failed 건수."""
+    row = conn.execute(
+        """SELECT
+            SUM(CASE WHEN status='published' THEN 1 ELSE 0 END) as pub,
+            SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) as fail
+        FROM publish_ledger WHERE blog_id = ? AND created_at >= ?""",
+        (blog_id, since),
+    ).fetchone()
+    return {"pub": row["pub"] or 0, "fail": row["fail"] or 0}
+
+
+def get_publish_ledger_fail_count(
+    conn, blog_id: str, since: str, before: str | None = None
+) -> int:
+    """특정 기간 실패 건수."""
+    if before is None:
+        row = conn.execute(
+            "SELECT COUNT(*) AS cnt FROM publish_ledger"
+            " WHERE blog_id = ? AND status = 'failed' AND created_at >= ?",
+            (blog_id, since),
+        ).fetchone()
+    else:
+        row = conn.execute(
+            "SELECT COUNT(*) AS cnt FROM publish_ledger"
+            " WHERE blog_id = ? AND status = 'failed'"
+            " AND created_at >= ? AND created_at < ?",
+            (blog_id, since, before),
+        ).fetchone()
+    return row["cnt"]
+
+
+def get_publish_ledger_fail_reasons(conn, blog_id: str, since: str, limit: int = 3) -> list[tuple]:
+    """특정 시각 이후 실패 사유 분포 (stage 기준 상위 N개)."""
+    rows = conn.execute(
+        """SELECT stage, COUNT(*) as cnt
+        FROM publish_ledger
+        WHERE blog_id = ? AND status = 'failed' AND created_at >= ?
+        GROUP BY stage ORDER BY cnt DESC LIMIT ?""",
+        (blog_id, since, limit),
+    ).fetchall()
+    return [(r["stage"], r["cnt"]) for r in rows]
+
+
+def get_recent_titles_from_publish_log(conn, blog_id: str, limit: int = 20, table: str = "publish_log") -> list[str]:
+    """발행 로그에서 최근 제목 조회 (content.db 또는 stap_content.db)."""
+    try:
+        rows = conn.execute(f"""
+            SELECT title FROM {table}
+            WHERE blog_id = ? AND title IS NOT NULL AND title != ''
+            ORDER BY published_at DESC LIMIT ?
+        """, (blog_id, limit)).fetchall()
+        return [row["title"] for row in rows]
+    except Exception:
+        return []
+
+
+def get_recent_featureimages(conn, blog_id: str, limit: int = 20) -> list[str]:
+    """최근 포스트의 featureimage 수집 (Hugo 사이트용)."""
+    from ops_dashboard.db import get_blog_site_path
+    from pathlib import Path
+    
+    site_path = get_blog_site_path(get_conn(), blog_id)
+    if not site_path:
+        return []
+    
+    posts_dir = Path(site_path) / "content" / "posts"
+    if not posts_dir.is_dir():
+        return []
+
+    featureimages = []
+    for post_dir in sorted(posts_dir.iterdir(), reverse=True)[:limit]:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        try:
+            content = idx.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        
+        # featureimage 추출 (frontmatter)
+        import re
+        m = re.search(r'featureimage:\s*"([^"]+)"', content)
+        if m:
+            featureimages.append(m.group(1))
+    
+    return featureimages
+
+
+def sync_yaml_to_lifecycle(conn: sqlite3.Connection) -> dict:
+    """YAML 파일 자동 발견 후 blog_lifecycle 동기화.
+
+    - 추가: YAML에 있지만 DB에 없는 블로그 등록
+    - 갱신: YAML에 있는 블로그 필드 갱신
+    - 제거: DB에 있지만 YAML에서 삭제된 블로그 삭제 (YAML이 단일 소스)
+
+    반환: {"added": int, "updated": int, "removed": int}
+    """
+    yaml_blog_ids = set(get_all_yaml_blog_ids(conn))
+    db_blog_ids = set(r["blog_id"] for r in conn.execute("SELECT blog_id FROM blog_lifecycle").fetchall())
+
+    added = yaml_blog_ids - db_blog_ids
+    removed = db_blog_ids - yaml_blog_ids
+
+    # 등록/갱신
+    sync_blog_lifecycle(conn)
+
+    # 제거: YAML에 없는 블로그만 삭제 (체크 결과/이슈는 별도 보존)
+    for blog_id in removed:
+        conn.execute("DELETE FROM blog_lifecycle WHERE blog_id = ?", (blog_id,))
+    conn.commit()
+
+    return {
+        "added": len(added),
+        "updated": len(yaml_blog_ids & db_blog_ids),
+        "removed": len(removed),
     }

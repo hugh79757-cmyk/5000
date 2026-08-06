@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 
 from ops_dashboard.checks import register_check
+from ops_dashboard.db import get_blog_config_status, get_blog_brand, get_blog_domain, get_blog_days_since_last_publish
 
 logger = logging.getLogger(__name__)
 
@@ -26,15 +27,15 @@ BRAND_THRESHOLDS: dict[str, int] = {
 @register_check("freshness")
 def check_freshness(conn, blog_id: str) -> dict:
     """마지막 성공 발행 후 경과일 vs 계열 기준 검사."""
-    blog = conn.execute(
-        "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
-    if not blog:
+    config_status = get_blog_config_status(conn, blog_id)
+    if not config_status:
         return {"status": "unknown", "detail": f"Blog {blog_id} not found in lifecycle"}
 
-    config_status = blog["config_status"]
-    brand = blog["brand"]
-    days = blog["days_since_last_publish"]
+    brand = get_blog_brand(conn, blog_id)
+    if not brand:
+        return {"status": "unknown", "detail": f"Blog {blog_id} brand not found"}
+
+    days = get_blog_days_since_last_publish(conn, blog_id)
 
     # 비활성/비활성화 블로그는 스킵
     if config_status in ("inactive", "disabled"):
