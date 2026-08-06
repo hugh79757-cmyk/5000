@@ -61,7 +61,7 @@ progress:
 | 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
 | 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
 | 58 | 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템 (PublishMonitor) | ✅ | 8 커밋 (`0e17f9acc`~`3e5aa1cd5`, 2026-08-06) |
-| 59 | Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합 | 📋 | Planned (2026-08-06) |
+| 59 | Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합 | 🔄 | 59-07 완료 (2026-08-06) |
 
 ---
 
@@ -69,6 +69,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-06 | Phase 59-07 — hotissue-hugo PaperMod to Blowfish migration (theme field, layouts, hugo.toml, SingleAuthor fix) | `d6ce85165`, `f8c186ed6`, `b3fcdb1`, `e55626b` |
 | 2026-08-06 | Phase 59 Planning — Ops Dashboard + Blowfish 단일화 + 파이프라인 통합 CONTEXT/RESEARCH/PLAN 작성 | `planned` |
 | 2026-08-05 | 전 블로그 KEYWORD_MAP 전수 감사 — low_relevance 위험 키워드 589 고유쌍 → 212 (제거 377쌍: 외국어혼합 256 + 오프토픽 82 + B1검토 39, 유지 KEEP_B1 84 + KEEP_C 126, SKIP_ARTIFACT 2) | `a8ed1ec30`, `bd98db2ef` |
 | 2026-08-05 | camping-hugo 일반명 키워드(조명/난로/선풍기) 제거 + 스케줄러 재시작(PID 12380→31420, camping 발행 성공) | `ca9f9e7ad` |

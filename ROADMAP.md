@@ -163,8 +163,25 @@
 ---
 
 **Roadmap Owner**: 5000 Central Control Pipeline  
-**Last Updated**: 2026-07-26  
-**Next Review**: Phase 45 API Cost Optimization  
+**Last Updated**: 2026-08-06  
+**Next Review**: Phase 59 completion  
+
+---
+
+## Phase 59 — Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합 🔄 **IN PROGRESS**
+
+**Duration**: 2026-08-06  
+**Goal**: Ops Dashboard 구축 + Blowfish 블로그 표준화 + 파이프라인 통합
+
+### Plan 59-07: hotissue-hugo PaperMod to Blowfish Migration ✅ **COMPLETED**
+- **Commit**: `d6ce85165`, `f8c186ed6`, `b3fcdb1`, `e55626b`
+- **Summary**: hotissue-hugo를 PaperMod에서 Blowfish로 마이그레이션
+- **Key Changes**:
+  - cap.yaml theme field: PaperMod → Blowfish
+  - hugo.toml: Blowfish configuration 추가
+  - layouts: 표준 Blowfish 오버라이드 적용
+  - SingleAuthor 템플릿 정의 추가 (빌드 에러 수정)
+- **Verification**: Hugo 빌드 성공 (2125 pages, 0 errors)
 
 ---
 ## Session Completion Note
