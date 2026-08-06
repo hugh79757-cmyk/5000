@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>{{ blogs|length }} blogs tracked across {{ brands }} brands.</p>
+
+<!-- Summary cards -->
+<div class="card-grid">
+  <div class="stat-card"><span class="num">{{ summary.total }}</span><span class="label">Total</span></div>
+  <div class="stat-card"><span class="num" style="color:var(--pass)">{{ summary.active }}</span><span class="label">Active</span></div>
+  <div class="stat-card"><span class="num" style="color:#ffc107">{{ summary.stale }}</span><span class="label">Stale</span></div>
+  <div class="stat-card"><span class="num" style="color:var(--highlight)">{{ summary.issues }}</span><span class="label">Issues</span></div>
+</div>
+
+<!-- Attention items -->
+{% if attention.fail_checks or attention.open_issues or attention.stale_blogs %}
+<div class="alert alert-warn">
+  <span>&#9888;</span>
+  {% if attention.fail_checks %}{{ attention.fail_checks|length }} failed checks{% endif %}
+  {% if attention.open_issues %}{% if attention.fail_checks %} &middot; {% endif %}{{ attention.open_issues|length }} open issues{% endif %}
+  {% if attention.stale_blogs %}{% if attention.fail_checks or attention.open_issues %} &middot; {% endif %}{{ attention.stale_blogs|length }} stale blogs{% endif %}
+</div>
+{% else %}
+<div class="alert alert-ok"><span>&#10003;</span> No attention items — all clear.</div>
+{% endif %}
+
+<!-- Fleet table -->
+<h2>Fleet Status</h2>
+<div class="view-section">
+  <button class="view-toggle">Cards</button>
+  <div class="table-view">
+    <div class="table-wrap">
+      <table>
+        <tr><th data-sort="asc">Blog ID</th><th data-sort>Brand</th><th data-sort>Config</th><th data-sort>Quality</th></tr>
+        {% for b in blogs %}
+        <tr>
+          <td><a href="/blog/{{ b.blog_id }}">{{ b.blog_id }}</a></td>
+          <td><span class="dot dot-{{ b.config_status }}"></span>{{ b.brand }}</td>
+          <td><span class="badge badge-{{ 'pass' if b.config_status == 'active' else 'fail' if b.config_status == 'inactive' else 'unknown' }}">{{ b.config_status }}</span></td>
+          <td>{{ b.quality_grade or '—' }}</td>
+        </tr>
+        {% endfor %}
+        {% if not blogs %}
+        <tr><td colspan="4" class="empty">No blogs synced</td></tr>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+  <div class="card-view">
+    {% for b in blogs %}
+    <div class="mobile-card">
+      <div class="mc-title"><a href="/blog/{{ b.blog_id }}">{{ b.blog_id }}</a></div>
+      <div class="mc-row"><span class="mc-label">Brand</span><span>{{ b.brand }}</span></div>
+      <div class="mc-row"><span class="mc-label">Config</span><span class="badge badge-{{ 'pass' if b.config_status == 'active' else 'fail' if b.config_status == 'inactive' else 'unknown' }}">{{ b.config_status }}</span></div>
+      <div class="mc-row"><span class="mc-label">Quality</span><span>{{ b.quality_grade or '—' }}</span></div>
+    </div>
+    {% endfor %}
+    {% if not blogs %}
+    <p class="empty">No blogs synced</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>Standard compliance overview by brand.</p>
+
+<h2>Brand Compliance</h2>
+{% for brand, data in compliance.items() %}
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <strong style="font-size:1rem">{{ brand }}</strong>
+    <span class="badge badge-{{ 'pass' if data.with_theme == data.total else 'unknown' }}">{{ data.with_theme }}/{{ data.total }} themed</span>
+  </div>
+  <div class="card-grid" style="margin-bottom:0">
+    <div class="stat-card" style="padding:10px">
+      <span class="num" style="font-size:1.3rem">{{ data.total }}</span>
+      <span class="label">Blogs</span>
+    </div>
+    <div class="stat-card" style="padding:10px">
+      <span class="num" style="font-size:1.3rem;color:var(--pass)">{{ data.with_theme }}</span>
+      <span class="label">Themed</span>
+    </div>
+    <div class="stat-card" style="padding:10px">
+      <span class="num" style="font-size:1.3rem;color:var(--pass)">{{ data.with_domain }}</span>
+      <span class="label">Domain Set</span>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% if not compliance %}
+<p class="empty">No data</p>
+{% endif %}
+
+{% endblock %}

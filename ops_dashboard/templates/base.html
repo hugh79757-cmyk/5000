@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ops Dashboard — {{ title }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">Ops Dashboard</span>
+  <nav>
+    <a href="/" {% if active == 'fleet' %}class="active"{% endif %}>Fleet</a>
+    <a href="/issues" {% if active == 'issues' %}class="active"{% endif %}>Issues</a>
+    <a href="/standards" {% if active == 'standards' %}class="active"{% endif %}>Standards</a>
+  </nav>
+</div>
+
+<div class="container">
+  <h1>{{ title }}</h1>
+  {% block content %}{% endblock %}
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

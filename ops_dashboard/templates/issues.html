@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% set open_issues = issues | selectattr("gsd_status", "equalto", "open") | list %}
+{% set resolved_issues = issues | rejectattr("gsd_status", "equalto", "open") | list %}
+
+<p>{{ open_issues|length }} open issues, {{ resolved_issues|length }} resolved.</p>
+
+<h2>Open Issues</h2>
+<div class="view-section">
+  <button class="view-toggle">Cards</button>
+  <div class="table-view">
+    <div class="table-wrap">
+      <table>
+        <tr><th data-sort="asc">ID</th><th data-sort>Category</th><th data-sort>Symptom</th><th data-sort>Auto-detect</th></tr>
+        {% for iss in open_issues %}
+        <tr>
+          <td><strong>{{ iss.issue_id }}</strong></td>
+          <td><span class="badge badge-open">{{ iss.category }}</span></td>
+          <td>{{ iss.symptom[:100] }}</td>
+          <td>{{ iss.auto_detectable }}</td>
+        </tr>
+        {% endfor %}
+        {% if not open_issues %}
+        <tr><td colspan="4" class="empty">No open issues</td></tr>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+  <div class="card-view">
+    {% for iss in open_issues %}
+    <div class="mobile-card">
+      <div class="mc-title">{{ iss.issue_id }} <span class="badge badge-open">{{ iss.category }}</span></div>
+      <div class="mc-row"><span class="mc-label">Symptom</span><span>{{ iss.symptom[:80] }}</span></div>
+      <div class="mc-row"><span class="mc-label">Auto-detect</span><span>{{ iss.auto_detectable }}</span></div>
+    </div>
+    {% endfor %}
+    {% if not open_issues %}
+    <p class="empty">No open issues</p>
+    {% endif %}
+  </div>
+</div>
+
+<h2>Resolved Issues</h2>
+<div class="view-section">
+  <button class="view-toggle">Cards</button>
+  <div class="table-view">
+    <div class="table-wrap">
+      <table>
+        <tr><th data-sort="asc">ID</th><th data-sort>Category</th><th data-sort>Symptom</th></tr>
+        {% for iss in resolved_issues %}
+        <tr>
+          <td><strong>{{ iss.issue_id }}</strong></td>
+          <td><span class="badge badge-resolved">{{ iss.category }}</span></td>
+          <td>{{ iss.symptom[:100] }}</td>
+        </tr>
+        {% endfor %}
+        {% if not resolved_issues %}
+        <tr><td colspan="3" class="empty">No resolved issues</td></tr>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+  <div class="card-view">
+    {% for iss in resolved_issues %}
+    <div class="mobile-card">
+      <div class="mc-title">{{ iss.issue_id }} <span class="badge badge-resolved">{{ iss.category }}</span></div>
+      <div class="mc-row"><span class="mc-label">Symptom</span><span>{{ iss.symptom[:80] }}</span></div>
+    </div>
+    {% endfor %}
+    {% if not resolved_issues %}
+    <p class="empty">No resolved issues</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

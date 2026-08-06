@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Blog info card -->
+<div class="card">
+  <table>
+    <tr><th>Blog ID</th><td>{{ blog.blog_id }}</td></tr>
+    <tr><th>Brand</th><td>{{ blog.brand }}</td></tr>
+    <tr><th>Config Status</th><td><span class="badge badge-{{ 'pass' if blog.config_status == 'active' else 'fail' }}">{{ blog.config_status }}</span></td></tr>
+    <tr><th>Theme</th><td>{{ blog.theme or '—' }}</td></tr>
+    <tr><th>Domain</th><td>{{ blog.domain or '—' }}</td></tr>
+    <tr><th>Pipeline</th><td>{{ blog.pipeline_path or '—' }}</td></tr>
+    <tr><th>Consecutive Failures</th><td style="color:{{ 'var(--fail)' if blog.consecutive_failures else 'var(--text)' }}">{{ blog.consecutive_failures }}</td></tr>
+    <tr><th>Days Since Publish</th><td>{{ blog.days_since_last_publish or '—' }}</td></tr>
+    <tr><th>Quality Grade</th><td>{{ blog.quality_grade or '—' }}</td></tr>
+  </table>
+</div>
+
+<!-- Health checks -->
+<h2>Recent Checks ({{ checks|length }})</h2>
+<div class="table-wrap">
+  <table>
+    <tr><th>Check</th><th>Status</th><th>Detail</th><th>At</th></tr>
+    {% for c in checks %}
+    <tr>
+      <td>{{ c.check_name }}</td>
+      <td><span class="badge badge-{{ c.status }}">{{ c.status }}</span></td>
+      <td>{{ c.detail[:120] if c.detail else '' }}</td>
+      <td>{{ c.checked_at }}</td>
+    </tr>
+    {% endfor %}
+    {% if not checks %}
+    <tr><td colspan="4" class="empty">No checks run</td></tr>
+    {% endif %}
+  </table>
+</div>
+
+<!-- Related issues -->
+<h2>Related Issues ({{ issues|length }})</h2>
+{% for iss in issues %}
+<div class="card">
+  <strong>{{ iss.issue_id }}</strong>
+  <span class="badge badge-{{ iss.gsd_status }}">{{ iss.gsd_status }}</span>
+  <span style="color:var(--text-muted);margin-left:6px">[{{ iss.category }}]</span>
+  <p style="margin-top:6px;font-size:0.85rem">{{ iss.symptom[:120] }}</p>
+</div>
+{% endfor %}
+{% if not issues %}
+<p class="empty">No related issues</p>
+{% endif %}
+
+{% endblock %}

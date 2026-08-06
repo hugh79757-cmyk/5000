@@ -8,7 +8,7 @@ import os
 import sqlite3
 from functools import wraps
 
-from flask import Flask, Response, g, jsonify, render_template_string, request
+from flask import Flask, Response, g, jsonify, render_template, request
 
 from ops_dashboard.checks import run_all_checks
 from ops_dashboard.db import (
@@ -83,62 +83,7 @@ def _ensure_db(conn: sqlite3.Connection) -> None:
         seed_known_issues(conn)
 
 
-# ---------------------------------------------------------------------------
-# Inline HTML templates (Jinja2)
-# ---------------------------------------------------------------------------
 
-_BASE = """<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ops Dashboard — {{ title }}</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#f8f9fa;color:#212529;line-height:1.5}
-.container{max-width:1100px;margin:0 auto;padding:16px}
-h1{font-size:1.4rem;margin-bottom:12px}
-h2{font-size:1.15rem;margin:16px 0 8px}
-a{color:#0d6efd;text-decoration:none}
-a:hover{text-decoration:underline}
-.card{background:#fff;border:1px solid #dee2e6;border-radius:8px;padding:12px;margin-bottom:10px}
-.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.8rem;font-weight:600}
-.badge-pass{background:#d1e7dd;color:#0f5132}
-.badge-fail{background:#f8d7da;color:#842029}
-.badge-unknown{background:#cff4fc;color:#055160}
-.badge-open{background:#f8d7da;color:#842029}
-.badge-resolved{background:#d1e7dd;color:#0f5132}
-table{width:100%;border-collapse:collapse;font-size:.9rem}
-th,td{padding:6px 8px;border:1px solid #dee2e6;text-align:left}
-th{background:#e9ecef;font-weight:600}
-.empty{color:#6c757d;font-style:italic}
-nav{margin-bottom:16px;padding:8px 0;border-bottom:1px solid #dee2e6}
-nav a{margin-right:12px;font-weight:500}
-.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
-.dot-active{background:#198754}.dot-inactive{background:#6c757d}.dot-stale{background:#ffc107}
-@media(max-width:600px){.container{padding:8px}table{font-size:.8rem}th,td{padding:4px}}
-</style>
-</head>
-<body>
-<div class="container">
-<nav><a href="/">Fleet</a> <a href="/issues">Issues</a> <a href="/standards">Standards</a></nav>
-<h1>{{ title }}</h1>
-{{ content|safe }}
-</div>
-</body>
-</html>"""
-
-
-def _render(title: str, content: str) -> str:
-    """Render a page with base layout."""
-    return render_template_string(
-        _BASE, title=title, content=content
-    )
-
-
-def _dot(status: str) -> str:
-    cls = {"active": "dot-active", "inactive": "dot-inactive"}.get(status, "dot-stale")
-    return f'<span class="status-dot {cls}"></span>'
 
 
 # ---------------------------------------------------------------------------
@@ -156,46 +101,22 @@ def _register_human_routes(app: Flask) -> None:
         attention = get_attention_items(conn)
         brands = {b["brand"] for b in blogs}
 
-        rows = []
-        for b in blogs:
-            rows.append(
-                f"<tr><td><a href='/blog/{b['blog_id']}'>{b['blog_id']}</a></td>"
-                f"<td>{_dot(b['config_status'])}{b['brand']}</td>"
-                f"<td>{b['config_status']}</td>"
-                f"<td>{b.get('quality_grade','') or '-'}</td></tr>"
-            )
+        summary = {
+            "total": len(blogs),
+            "active": sum(1 for b in blogs if b["config_status"] == "active"),
+            "stale": len(attention.get("stale_blogs", [])),
+            "issues": len(attention.get("open_issues", [])),
+        }
 
-        fail_count = len(attention.get("fail_checks", []))
-        issue_count = len(attention.get("open_issues", []))
-        stale_count = len(attention.get("stale_blogs", []))
-        attention_html = ""
-        if fail_count or issue_count or stale_count:
-            parts = []
-            if fail_count:
-                parts.append(f"{fail_count} failed checks")
-            if issue_count:
-                parts.append(f"{issue_count} open issues")
-            if stale_count:
-                parts.append(f"{stale_count} stale blogs")
-            attention_html = f'<div class="card badge badge-fail">⚠ {" · ".join(parts)}</div>'
-        else:
-            attention_html = '<p class="empty">No attention items — all clear.</p>'
-
-        content = render_template_string(
-            """<p>{{ total }} blogs tracked across {{ brands }} brands.</p>
-<h2>Fleet Status</h2>
-<table>
-<tr><th>Blog ID</th><th>Brand</th><th>Config</th><th>Quality</th></tr>
-{{ rows|safe }}
-</table>
-<h2>Attention Needed</h2>
-{{ attention|safe }}""",
-            total=len(brands),
+        return render_template(
+            "index.html",
+            title="Fleet Overview",
+            active="fleet",
+            blogs=blogs,
             brands=len(brands),
-            rows="\n".join(rows) or '<tr><td colspan="4" class="empty">No blogs synced</td></tr>',
-            attention=attention_html,
+            attention=attention,
+            summary=summary,
         )
-        return _render("Fleet Overview", content)
 
     @app.route("/blog/<blog_id>")
     @require_auth
@@ -204,60 +125,16 @@ def _register_human_routes(app: Flask) -> None:
         _ensure_db(conn)
         detail = get_blog_detail(conn, blog_id)
         if detail is None:
-            return _render("Not Found", '<p class="empty">Blog not found.</p>'), 404
+            return render_template("404.html", title="Not Found", active=""), 404
 
-        b = detail["blog"]
-        checks = detail["checks"]
-        issues = detail["issues"]
-
-        check_rows = []
-        for c in checks:
-            badge = f"badge-{c['status']}"
-            check_rows.append(
-                f"<tr><td>{c['check_name']}</td>"
-                f"<td><span class='badge {badge}'>{c['status']}</span></td>"
-                f"<td>{c.get('detail','')[:120]}</td>"
-                f"<td>{c.get('checked_at','')}</td></tr>"
-            )
-
-        issue_rows = []
-        for iss in issues:
-            issue_rows.append(
-                f'<div class="card"><strong>{iss["issue_id"]}</strong>: '
-                f'{iss["symptom"][:100]} '
-                f'<span class="badge badge-{iss["gsd_status"]}">{iss["gsd_status"]}</span></div>'
-            )
-
-        content = render_template_string(
-            """<div class="card">
-<h2>{{ blog_id }}</h2>
-<table>
-<tr><th>Brand</th><td>{{ brand }}</td></tr>
-<tr><th>Config Status</th><td>{{ config_status }}</td></tr>
-<tr><th>Theme</th><td>{{ theme }}</td></tr>
-<tr><th>Domain</th><td>{{ domain }}</td></tr>
-<tr><th>Consecutive Failures</th><td>{{ failures }}</td></tr>
-</table>
-</div>
-<h2>Recent Checks ({{ check_count }})</h2>
-<table>
-<tr><th>Check</th><th>Status</th><th>Detail</th><th>At</th></tr>
-{{ check_rows|safe }}
-</table>
-<h2>Related Issues ({{ issue_count }})</h2>
-{{ issue_rows|safe }}""",
-            blog_id=b["blog_id"],
-            brand=b["brand"],
-            config_status=b["config_status"],
-            theme=b.get("theme", ""),
-            domain=b.get("domain", ""),
-            failures=b.get("consecutive_failures", 0),
-            check_count=len(checks),
-            check_rows="\n".join(check_rows) or '<tr><td colspan="4" class="empty">No checks run</td></tr>',
-            issue_count=len(issues),
-            issue_rows="\n".join(issue_rows) or '<p class="empty">No related issues</p>',
+        return render_template(
+            "blog.html",
+            title=f"Blog: {blog_id}",
+            active="fleet",
+            blog=detail["blog"],
+            checks=detail["checks"],
+            issues=detail["issues"],
         )
-        return _render(f"Blog: {blog_id}", content)
 
     @app.route("/issues")
     @require_auth
@@ -267,33 +144,13 @@ def _register_human_routes(app: Flask) -> None:
         rows = conn.execute(
             "SELECT * FROM known_issues ORDER BY category, issue_id"
         ).fetchall()
-        open_issues = [r for r in rows if r["gsd_status"] == "open"]
-        resolved_issues = [r for r in rows if r["gsd_status"] != "open"]
 
-        def _issue_list(items):
-            if not items:
-                return '<p class="empty">None</p>'
-            parts = []
-            for iss in items:
-                parts.append(
-                    f'<div class="card"><strong>{iss["issue_id"]}</strong> '
-                    f'<span class="badge badge-{iss["gsd_status"]}">{iss["gsd_status"]}</span> '
-                    f'[{iss["category"]}] {iss["symptom"][:120]}</div>'
-                )
-            return "\n".join(parts)
-
-        content = render_template_string(
-            """<p>{{ open_count }} open issues, {{ resolved_count }} resolved.</p>
-<h2>Open Issues</h2>
-{{ open_rows|safe }}
-<h2>Resolved Issues</h2>
-{{ resolved_rows|safe }}""",
-            open_count=len(open_issues),
-            resolved_count=len(resolved_issues),
-            open_rows=_issue_list(open_issues),
-            resolved_rows=_issue_list(resolved_issues),
+        return render_template(
+            "issues.html",
+            title="Issues",
+            active="issues",
+            issues=[dict(r) for r in rows],
         )
-        return _render("Issues", content)
 
     @app.route("/standards")
     @require_auth
@@ -303,25 +160,22 @@ def _register_human_routes(app: Flask) -> None:
         blogs = get_all_blogs(conn)
         brands = {}
         for b in blogs:
-            brands.setdefault(b["brand"], []).append(b)
+            brand = b["brand"]
+            if brand not in brands:
+                brands[brand] = {"total": 0, "with_theme": 0, "with_domain": 0}
+            brands[brand]["total"] += 1
+            if b.get("theme"):
+                brands[brand]["with_theme"] += 1
+            if b.get("domain"):
+                brands[brand]["with_domain"] += 1
 
-        sections = []
-        for brand, brand_blogs in sorted(brands.items()):
-            total = len(brand_blogs)
-            with_theme = sum(1 for b in brand_blogs if b.get("theme"))
-            with_domain = sum(1 for b in brand_blogs if b.get("domain"))
-            sections.append(
-                f'<div class="card"><strong>{brand}</strong> — {total} blogs<br>'
-                f"Theme set: {with_theme}/{total} · "
-                f"Domain set: {with_domain}/{total}</div>"
-            )
-
-        content = render_template_string(
-            """<p>Standard compliance overview by brand.</p>
-{{ brand_sections|safe }}""",
-            brand_sections="\n".join(sections) or '<p class="empty">No data</p>',
+        return render_template(
+            "standards.html",
+            title="Standards",
+            active="standards",
+            rules=[],
+            compliance=brands,
         )
-        return _render("Standards", content)
 
 
 # ---------------------------------------------------------------------------
@@ -400,6 +254,10 @@ def create_app() -> Flask:
 
     _register_human_routes(app)
     _register_api_routes(app)
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("404.html", title="Not Found", active=""), 404
 
     @app.teardown_appcontext
     def _close_db(exc):
