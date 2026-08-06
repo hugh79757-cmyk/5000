@@ -47,7 +47,7 @@ blogs:
     - '20:22'
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
   status: paused
-  theme: congo
+  theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
   depth_next:
