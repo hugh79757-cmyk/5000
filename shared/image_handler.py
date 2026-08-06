@@ -45,7 +45,9 @@ def process_and_upload(image_data, bucket=None, key_prefix="car-images") -> str:
 
     now = datetime.now()
     file_hash = hashlib.md5(output.getvalue()).hexdigest()[:8]
-    key = f"{key_prefix}/{now.strftime('%Y/%m/%d')}/{file_hash}.webp"
+    # key_prefix 끝의 /와 다음 / 사이의 이중 슬래시 방지
+    clean_prefix = key_prefix.rstrip("/")
+    key = f"{clean_prefix}/{now.strftime('%Y/%m/%d')}/{file_hash}.webp"
 
     client = get_r2_client()
     client.put_object(
@@ -55,4 +57,5 @@ def process_and_upload(image_data, bucket=None, key_prefix="car-images") -> str:
         ContentType="image/webp",
     )
 
-    return f"{os.getenv('R2_PUBLIC_URL')}/{key}"
+    base_url = os.getenv("R2_PUBLIC_URL", "").rstrip("/")
+    return f"{base_url}/{key}"
