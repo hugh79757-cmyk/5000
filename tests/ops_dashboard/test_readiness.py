@@ -94,7 +94,74 @@ def test_standard_compliance_limited_to_targets():
     assert result["fail_count"] == 0
     assert result["unknown_count"] == 1
     # delta(비활성) fail이 분모에 포함되지 않았음을 확인
-    assert result["ratio"] == round(2 / 3 * 100, 1)
+    # 준수율 = pass / (pass + actionable fail) = 2/2 = 100%
+    assert result["ratio"] == 100.0
+    assert result["deferred_count"] == 0
+    assert result["out_of_scope_count"] == 0
+    conn.close()
+
+
+def test_bucket_split_actionable_deferred_outofscope():
+    """fail 규칙 버킷 분류: actionable은 준수율에, deferred/out_of_scope는 제외."""
+    conn = _make_conn()
+    _seed_lifecycle(conn)
+    # alpha: pass / beta: R12(actionable) / gamma: R06(deferred)
+    # delta(비활성): R04(out_of_scope) — 대상 아님
+    cases = [
+        ("alpha-hugo", "pass", ""),
+        ("beta-hugo", "fail", "2/12 rules failed: R12(MAJOR): Unauthorized overrides: layouts/x.html"),
+        ("gamma-hugo", "fail", "1/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format"),
+        ("delta-hugo", "fail", "1/12 rules failed: R04(MAJOR): extend_head: missing GA4"),
+    ]
+    for bid, status, detail in cases:
+        conn.execute(
+            "INSERT INTO check_results (blog_id, check_name, status, detail, checked_at)"
+            " VALUES (?, 'standard_compliance', ?, ?, datetime('now'))",
+            (bid, status, detail),
+        )
+    conn.commit()
+
+    from ops_dashboard.readiness import compute_standard_compliance
+    result = compute_standard_compliance(conn)
+
+    assert result["total"] == 3
+    assert result["pass_count"] == 1          # alpha
+    assert result["fail_count"] == 1          # beta (actionable R12)
+    assert result["deferred_blocks"] == 1     # gamma
+    assert result["out_of_scope_blocks"] == 0 # delta는 비활성이라 대상 아님
+    assert result["deferred_count"] == 1      # R06 규칙 1건
+    assert result["out_of_scope_count"] == 0  # delta 제외 → R04 0건
+    # 준수율 = pass/(pass+actionable fail) = 1/2 = 50%
+    assert result["ratio"] == 50.0
+    conn.close()
+
+
+def test_bucket_rules_count_aggregates():
+    """deferred/out_of_scope 규칙 건수는 블록과 무관하게 합산 (중복 미계상)."""
+    conn = _make_conn()
+    _seed_lifecycle(conn)
+    # gamma: R06+R04 → deferred 블록 1, 규칙 건수는 R06 1 + R04 1
+    conn.execute(
+        "INSERT INTO check_results (blog_id, check_name, status, detail, checked_at)"
+        " VALUES ('gamma-hugo', 'standard_compliance', 'fail',"
+        " '2/12 rules failed: R06(CRITICAL): x; R04(MAJOR): y', datetime('now'))",
+    )
+    conn.execute(
+        "INSERT INTO check_results (blog_id, check_name, status, detail, checked_at)"
+        " VALUES ('alpha-hugo', 'standard_compliance', 'fail',"
+        " '1/12 rules failed: R06(CRITICAL): z', datetime('now'))",
+    )
+    conn.commit()
+
+    from ops_dashboard.readiness import compute_standard_compliance
+    result = compute_standard_compliance(conn)
+
+    # deferred 블록: gamma(1) + alpha(1) = 2 (beta는 결과 없음 → unknown)
+    assert result["deferred_blocks"] == 2
+    # 규칙 건수: gamma R06(1) + alpha R06(1) = 2
+    assert result["deferred_count"] == 2
+    # out_of_scope 규칙: gamma R04(1)
+    assert result["out_of_scope_count"] == 1
     conn.close()
 
 

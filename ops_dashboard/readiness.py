@@ -37,15 +37,54 @@ def _get_publish_log_conn() -> sqlite3.Connection:
     return get_publish_log_conn()
 
 
+def _parse_failed_rules(detail: str) -> set[str]:
+    """detail 문자열에서 fail 규칙 ID 집합을 추출.
+
+    detail 형식: "3/12 rules failed: R04(MAJOR): ...; R06(CRITICAL): ..."
+    """
+    import re
+    return set(re.findall(r"\bR\d{2}\b", detail or ""))
+
+
+def _bucket_for_rules(rule_bucket: dict[str, str], failed: set[str]) -> str:
+    """fail 규칙 집합의 버킷을 결정.
+
+    - fail 규칙이 없으면 "pass"
+    - actionable 규칙이 하나라도 있으면 "actionable"
+    - 나머지는 deferred/out_of_scope 중 규칙 버킷 우선순위
+    """
+    if not failed:
+        return "pass"
+    if any(rule_bucket.get(r) == "actionable" for r in failed):
+        return "actionable"
+    buckets = {rule_bucket.get(r, "actionable") for r in failed}
+    if "deferred" in buckets:
+        return "deferred"
+    return "out_of_scope"
+
+
 def compute_standard_compliance(conn: sqlite3.Connection) -> dict:
-    """표준 준수율: standard_compliance 최신 결과 pass 비율 (정상화 대상 한정)."""
+    """표준 준수율: 정상화 대상 블록 중 actionable pass 비율.
+
+    2026-08-06 (커밋 C 마감): fail 규칙을 세 버킷으로 재분류한다.
+      - actionable   (가): R01/R02/R05/R07~R12 — 준수율 분모/분자에 반영
+      - deferred     (나): R06 (STRUCT-16, 수익 리스크 보류)
+      - out_of_scope (다): R03/R04 (STRUCT-15/17, 범위 밖)
+    준수율 = pass / (pass + actionable 블록 수). deferred/out_of_scope는
+    규칙 건수로 별도 집계되어 준수율을 끌어내리지 않는다.
+    """
+    # 규칙 버킷 매핑 (STANDARD_RULES에서)
+    from ops_dashboard.checks.standard import STANDARD_RULES
+    rule_bucket = {r["rule_id"]: r.get("bucket", "actionable") for r in STANDARD_RULES}
+
     target_ids = _get_normalization_target_ids(conn)
     if not target_ids:
         return {"pass_count": 0, "fail_count": 0, "unknown_count": 0,
+                "deferred_count": 0, "out_of_scope_count": 0,
                 "total": 0, "ratio": 0.0, "green": False}
 
     rows = conn.execute("""
-        SELECT cr.blog_id, cr.status
+        SELECT cr.blog_id, cr.status, cr.detail
         FROM check_results cr
         INNER JOIN (
             SELECT blog_id, check_name, MAX(checked_at) as latest
@@ -56,30 +95,58 @@ def compute_standard_compliance(conn: sqlite3.Connection) -> dict:
             AND cr.checked_at = latest.latest
     """).fetchall()
 
-    # 정상화 대상 블로그별 최신 결과 매핑
-    latest_by_blog = {r["blog_id"]: r["status"] for r in rows}
+    latest_by_blog = {r["blog_id"]: r for r in rows}
     pass_count = 0
-    fail_count = 0
+    fail_count = 0            # (가) actionable fail 블록 수
+    deferred_blocks = 0       # (나) deferred 버킷 블록 수
+    out_of_scope_blocks = 0   # (다) out_of_scope 버킷 블록 수
+    deferred_count = 0        # (나) deferred 규칙 fail 건수 (R06)
+    out_of_scope_count = 0    # (다) out_of_scope 규칙 fail 건수 (R03/R04)
     unknown_count = 0
+
     for bid in sorted(target_ids):
-        status = latest_by_blog.get(bid)
+        row = latest_by_blog.get(bid)
+        if row is None:
+            unknown_count += 1
+            continue
+        status = row["status"]
         if status == "pass":
             pass_count += 1
-        elif status == "fail":
-            fail_count += 1
-        else:
-            # 검사 결과 없음(미실행) 또는 unknown → unknown으로 집계
+            continue
+        if status == "unknown":
             unknown_count += 1
+            continue
+        # fail → fail 규칙 버킷 분류
+        failed = _parse_failed_rules(row["detail"] or "")
+        bucket = _bucket_for_rules(rule_bucket, failed)
+        if bucket == "actionable":
+            fail_count += 1
+        elif bucket == "deferred":
+            deferred_blocks += 1
+        elif bucket == "out_of_scope":
+            out_of_scope_blocks += 1
+        else:
+            unknown_count += 1
+        # 규칙 건수 단위 집계 (모든 fail 블록에서, 블록 분류와 독립)
+        deferred_count += sum(
+            1 for r in failed if rule_bucket.get(r) == "deferred")
+        out_of_scope_count += sum(
+            1 for r in failed if rule_bucket.get(r) == "out_of_scope")
 
-    total = len(target_ids)
-    ratio = (pass_count / total * 100.0) if total > 0 else 0.0
+    # 준수율 = pass / (pass + actionable fail 블록)
+    denominator = pass_count + fail_count
+    ratio = (pass_count / denominator * 100.0) if denominator > 0 else 0.0
     return {
         "pass_count": pass_count,
         "fail_count": fail_count,
         "unknown_count": unknown_count,
-        "total": total,
+        "deferred_blocks": deferred_blocks,
+        "out_of_scope_blocks": out_of_scope_blocks,
+        "deferred_count": deferred_count,
+        "out_of_scope_count": out_of_scope_count,
+        "total": len(target_ids),
         "ratio": round(ratio, 1),
-        "green": total > 0 and ratio == 100.0 and fail_count == 0 and unknown_count == 0,
+        "green": denominator > 0 and ratio == 100.0 and unknown_count == 0,
     }
 
 
@@ -182,10 +249,13 @@ if __name__ == "__main__":
     init_db(conn)
     result = compute_readiness(conn)
     m = result["metrics"]
+    c = m["standard_compliance"]
     print("확장 준비도:", "🟢 확장 허용" if result["ready"] else "🔴 확장 금지")
-    print(f"  표준 준수율: {m['standard_compliance']['ratio']}% "
-          f"(pass {m['standard_compliance']['pass_count']}/{m['standard_compliance']['total']}, "
-          f"fail {m['standard_compliance']['fail_count']})")
+    print(f"  표준 준수율: {c['ratio']}% "
+          f"(pass {c['pass_count']}/{c['total']}, "
+          f"고칠 대상 fail {c['fail_count']}, "
+          f"보류 {c['deferred_count']}, 범위밖 {c['out_of_scope_count']}, "
+          f"unknown {c['unknown_count']})")
     print(f"  stale active: {m['stale_active_blogs']['count']}개 "
           f"({', '.join(s['blog_id'] for s in m['stale_active_blogs']['stale_blogs'][:3])}...)" if
           m['stale_active_blogs']['count'] else "  stale active: 0개")

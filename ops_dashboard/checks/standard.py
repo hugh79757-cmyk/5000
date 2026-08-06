@@ -17,6 +17,12 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Rule definitions: R01-R12
 # ---------------------------------------------------------------------------
+# bucket(2026-08-06, 커밋 C 마감): 준수율 산정 버킷 분류
+#   - actionable   : 지금 고칠 대상 — 준수율 분모/분자에 반영
+#   - deferred     : 의도적 보류(수익 리스크) — 준수율에서 제외, 별도 표기
+#   - out_of_scope : 정상화 범위 밖 — 준수율에서 제외, 별도 표기
+# R06은 콘솔 슬롯 형식 미확인(STRUCT-16), R03은 이중 관리(STRUCT-15),
+# R04는 GA4 Analytics 사안(STRUCT-17)으로 제외.
 
 STANDARD_RULES: list[dict] = [
     {
@@ -24,6 +30,7 @@ STANDARD_RULES: list[dict] = [
         "target": "hugo.toml",
         "severity": "CRITICAL",
         "description": "showTableOfContents must be false",
+        "bucket": "actionable",
         "check": "_check_r01",
     },
     {
@@ -31,6 +38,7 @@ STANDARD_RULES: list[dict] = [
         "target": "hugo.toml",
         "severity": "CRITICAL",
         "description": "Advertisement section with adsense slots required",
+        "bucket": "actionable",
         "check": "_check_r02",
     },
     {
@@ -38,6 +46,7 @@ STANDARD_RULES: list[dict] = [
         "target": "extend-head.html",
         "severity": "CRITICAL",
         "description": "adsbygoogle.js must use site.Params (no hardcoding)",
+        "bucket": "out_of_scope",
         "check": "_check_r03",
     },
     {
@@ -45,6 +54,7 @@ STANDARD_RULES: list[dict] = [
         "target": "extend_head.html",
         "severity": "MAJOR",
         "description": "GA4 + mobile correction CSS required",
+        "bucket": "out_of_scope",
         "check": "_check_r04",
     },
     {
@@ -52,6 +62,7 @@ STANDARD_RULES: list[dict] = [
         "target": "adsense/top.html",
         "severity": "MAJOR",
         "description": "overflow:hidden;min-height:100px wrapper + outside push div",
+        "bucket": "actionable",
         "check": "_check_r05",
     },
     {
@@ -59,6 +70,7 @@ STANDARD_RULES: list[dict] = [
         "target": "adsense/in-article.html",
         "severity": "CRITICAL",
         "description": "fluid+in-article format (no auto) + outside push div",
+        "bucket": "deferred",
         "check": "_check_r06",
     },
     {
@@ -66,6 +78,7 @@ STANDARD_RULES: list[dict] = [
         "target": "single.html",
         "severity": "MAJOR",
         "description": "H2 split injection + prose wrapper",
+        "bucket": "actionable",
         "check": "_check_r07",
     },
     {
@@ -73,6 +86,7 @@ STANDARD_RULES: list[dict] = [
         "target": "single.html",
         "severity": "MAJOR",
         "description": "Description (lead) must be removed",
+        "bucket": "actionable",
         "check": "_check_r08",
     },
     {
@@ -80,6 +94,7 @@ STANDARD_RULES: list[dict] = [
         "target": "baseof.html",
         "severity": "MAJOR",
         "description": "No custom override — use theme default",
+        "bucket": "actionable",
         "check": "_check_r09",
     },
     {
@@ -87,6 +102,7 @@ STANDARD_RULES: list[dict] = [
         "target": "custom.css",
         "severity": "MAJOR",
         "description": "Unfilled space removal + dark mode + min-height rules",
+        "bucket": "actionable",
         "check": "_check_r10",
     },
     {
@@ -94,6 +110,7 @@ STANDARD_RULES: list[dict] = [
         "target": "layouts/",
         "severity": "MAJOR",
         "description": "mobile-sticky.html must not be used",
+        "bucket": "actionable",
         "check": "_check_r11",
     },
     {
@@ -101,6 +118,7 @@ STANDARD_RULES: list[dict] = [
         "target": "layouts/",
         "severity": "MAJOR",
         "description": "No override files beyond the allowed set",
+        "bucket": "actionable",
         "check": "_check_r12",
     },
 ]
