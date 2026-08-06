@@ -1,7 +1,31 @@
 # WL-20260806-content-db-recovery
 
 > 날짜: 2026-08-06 / 연관: 커밋 219816b57(가드), d0da88bf2(규칙), 최종 마감 커밋
-> 상태: **완료 (백필 원복만 보류)**
+> 상태: **완료 (백필 원복만 보류)** — 커밋 C(표준위반) 마감 2026-08-06
+
+## 세션 스냅샷 (2026-08-06, 커밋 C 마감)
+
+진행: 대시보드 완성 → content.db 복구 완료 → 커밋 B(무력체크/ledger) 완료 →
+커밋 C(표준위반) 완료.
+
+커밋 C 마감 내역 (de386628c):
+- 준수율 산정 버킷 분리: actionable(R01/R02/R05/R07~R12, 준수율 반영) /
+  deferred(R06, STRUCT-16) / out_of_scope(R03 STRUCT-15, R04 STRUCT-17).
+  준수율 = pass/(pass+actionable fail 블록), deferred·out_of_scope는 규칙
+  건수로 별도 표기. RULES에 `bucket` 키 추가.
+- 재정의 신규 준수율: **12.5%** (pass 1/25, actionable fail 7블록,
+  deferred R06 19규칙/16블록, out_of_scope 11규칙/0블록, unknown 1).
+  stale 3, 미해결 19 → 전체 🔴 확장 금지.
+- R01: finance-hugo TOC 비활성 수정 (STAP/finance-hugo, 커밋 f4fe73d).
+- R12: 허용 오버라이드 4→18 확장 (cde31b7bc) — travel4-hugo pass 진입.
+- R02: 81→0 (N/A 판정 개선, 0c9657d14). R06: 조사만(보류, STRUCT-16).
+- STRUCT-14(SEAP/ETAP git 미관리): **중복 아님 확인** — 파일·HEAD·DB 모두
+  1건. 이전 read의 2건 표기는 출력 artifact. 시드 정리 불필요.
+- 회귀: tests/ops_dashboard 14 passed.
+
+다음 세션 진입점: entity_linker INC-CL-01~04 → 금지어 Q5 → H2 Q6 →
+그 후 finance 외 재개 → 리팩토링.
+**스케줄러 정지 상태 유지** (재기동은 별도 승인 필요).
 
 ## 배경
 
