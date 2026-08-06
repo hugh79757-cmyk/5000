@@ -27,6 +27,47 @@
 그 후 finance 외 재개 → 리팩토링.
 **스케줄러 정지 상태 유지** (재기동은 별도 승인 필요).
 
+## 세션 스냅샷 2 (2026-08-06 야간 — INC-CL-01~04 + Q5 금지어)
+
+진행: entity_linker 무관 크로스링크 필터 → INC-CL 이슈 등록/U11 체크리스트 → Q5 금지어 필터 실작동.
+
+### 커밋 3건 (모두 본 세션)
+
+| 커밋 | 내용 |
+|------|------|
+| `7e2bd2312` fix(linker): INC-CL-01~04 무관 크로스링크 필터 | `shared/cuap_entity_linker.py::_fallback_blog()`를 CROSS_GRAPH[blog_id]의 primary/secondary/use_cases 합집합으로 제한(+15/−2). `build_funnel_header`/`build_cross_sell_card` 공유 지점 수정. 재렌더 시뮬레이션 10개 블로그 ALL_10_OK |
+| `501fde0d2` fix(ops): INC-CL-01~04 등록 + U11 | known_issues 4건 open 등록(ops.db INSERT + `ops_dashboard/db.py` SEED_ISSUES durable). `app.py::_build_unpause_checklist()`에 U11 '베이크된 무관 크로스링크 재렌더 정리'(open INC-CL 있는 블로그만, `LIKE 'INC-CL%'`) — camping/pet 11항목, beauty 10항목 |
+| `23edc896a` fix(writer): 금지어 필터 실작동 (Q5) | `pipelines/curation/writer.py`에 `_load_global_forbidden_words()`(quality_checklist.yaml global_forbidden_words 6개 로딩, fail-open), `GLOBAL_FORBIDDEN_WORDS`, `_FORBIDDEN_WORD_REPLACEMENTS`, `_sanitize_body()` 반영(+43) |
+
+### INC-CL 실측 분류 (베이크드 74건/59포스트 — 코드 수정은 신규 생성만 차단)
+
+- camping→baby 15(funnel) / health→camping 12(cross-sell) / laptop→kitchen 32(30 funnel+2 cross-sell) / pet→beauty 15(funnel). inline 기여 0.
+- 사용자 결정(옵션 2): 베이크드 정리 보류 — 해당 블로그 발행 정지 중, 재개 시 재렌더로 자연 정리. INC-CL-01~04 open 유지.
+- INC-CL 블로그 4곳 gsd_crosscheck = pass (M03 fail이 detection 프록시 충족). 준수율 12.5% 불변.
+
+### Q5 검증 — finance 시범 불가 (실측)
+
+- finance-hugo는 **STAP 소속** (dispatcher.py STAP_PIPELINE_MAP `"finance-hugo": "finance"`, 실제 `/Users/twinssn/Projects/STAP/pipelines/finance` + STAP 자체 shared/ai_writer.py) → curation/writer.py 미경유 → finance 시범 생성으로 Q5 검증 불가.
+- 대체 검증: (1) 유닛 — `_sanitize_body()`에 금지어 6개 주입 → 전부 치환/제거 ALL_PASS; (2) 엔드투엔드 dry-run — `generate_curation_article('스킨케어 토너', …, blog_id='beauty-hugo')` 실 LLM 생성(body 3,597자) → 금지어 0건, 발행/배포 없음; (3) 회귀 — tests/ops_dashboard+curation: old writer.py(501fde0d2) vs new(23edc896a) 동일 18 failed/144 passed.
+
+### 발견 — gsd_crosscheck 감지 프록시 취약 (기존, 미수정)
+
+- `crosscheck.py`의 "detected" 판정 = "블로그에 현재 fail 체크가 하나라도 존재" (`get_fail_checks_for_blog` 최신 결과). 전역 이슈(blog_ids='': STRUCT-01/02/08/09/11~13)가 모든 블로그에 적용되어, 일시 fail이 사라지면 crosscheck가 fail로 플립.
+- 실측: travel1-hugo crosscheck 06:03 pass → 13:19 pass → 15:11 fail → 15:12 pass → 15:23 fail (본 세션 이전부터 플래핑). tap/travel1~3/tvshow/ud 6곳 추가 fail은 본 커밋과 무관.
+- 수정하지 않음 (현 세션 범위 외). readiness fail_total 왜곡 가능 — 별도 판단 필요.
+
+### [위반 감지] stale stash pop 사고 (본 세션, 복구 완료)
+
+- pytest 회귀 기준선 비교 중 클린 트리에 `git stash`(no-op) 후 `git stash pop`이 **이전 세션의 stale stash@{0}**을 적용 → UU/DU 충돌 상태로 작업 트리 오염.
+- 복구: 충돌 경로 HEAD 복원 + `git rm -f` DU 런타임 파일(data/cooldown.json, failure_count.json) + writer.py HEAD 확인. 최종 `git status --porcelain` tracked 변경 0건.
+- stale stash@{0~3}는 보존 (이전 세션 미커밋 작업 포함). 잔존: 4개 stash 엔트리 — 사용자 판단 필요.
+
+### 다음 진입점
+
+- H2 Q6 (writer.py H2>=1 가드, 옵 TOP5 포맷 H2=0 포스트 실측) → 그 후 finance 외 재개.
+- gsd_crosscheck 감지 프록시 개선 여부 사용자 결정 대기.
+- **스케줄러 정지 상태 유지.**
+
 ## 배경
 
 `shared/ledger_sync.py` `run_sync()`을 라이브 상태에서 수동 실행. 실제 DB의
