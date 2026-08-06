@@ -16,8 +16,11 @@ from ops_dashboard.db import (
     get_attention_items,
     get_blog_detail,
     get_conn,
+    get_maintenance_checklist,
+    get_maintenance_summary,
     init_db,
     seed_known_issues,
+    seed_maintenance_status,
     sync_blog_lifecycle,
 )
 
@@ -81,9 +84,125 @@ def _ensure_db(conn: sqlite3.Connection) -> None:
     if row[0] == 0:
         sync_blog_lifecycle(conn)
         seed_known_issues(conn)
+    # Phase 60: 정비 대상 블로그 시드 (기존 데이터에 maintenance_status 없으면 추가)
+    seed_maintenance_status(conn)
 
 
 
+
+
+# ---------------------------------------------------------------------------
+# Unpause checklist builder
+# ---------------------------------------------------------------------------
+
+
+def _build_unpause_checklist(
+    conn: sqlite3.Connection,
+    blog_id: str,
+    maintenance_checklist: list[dict],
+) -> list[dict]:
+    """Build the unpause checklist from maintenance results + blog-specific evidence.
+
+    This is the human verification layer on top of M01~M10 auto-checks.
+    Each item has: id, title, note, auto_status, evidence.
+    """
+    # Index maintenance results by check_id
+    m_map = {item["check_id"]: item for item in (maintenance_checklist or [])}
+
+    def _m_status(check_id: str) -> str:
+        item = m_map.get(check_id)
+        if item:
+            return item.get("status", "unknown")
+        return "unknown"
+
+    def _m_detail(check_id: str) -> str:
+        item = m_map.get(check_id)
+        if item:
+            return item.get("detail", "")
+        return ""
+
+    # Blog-specific queries
+    blog = conn.execute(
+        "SELECT site_path, domain, pipeline_path FROM blog_lifecycle WHERE blog_id = ?",
+        (blog_id,),
+    ).fetchone()
+    site_path = blog["site_path"] if blog else ""
+    domain = blog["domain"] if blog else ""
+
+    checklist = [
+        {
+            "id": "U01",
+            "title": "제목 CJK 누수 없음",
+            "note": "한자/일본어/중국어가 제목에 섞여 있으면 검색 엔진 노출 불리",
+            "auto_status": _m_status("M01"),
+            "evidence": _m_detail("M01"),
+        },
+        {
+            "id": "U02",
+            "title": "이미지 정상 (URL 고유)",
+            "note": "동일 featureimage 반복 사용 없음, R2 업로드 정상",
+            "auto_status": _m_status("M02"),
+            "evidence": _m_detail("M02"),
+        },
+        {
+            "id": "U03",
+            "title": "크로스링크 주제 일관",
+            "note": "같은/인접 카테고리 링크만, 무관 카테고리 링크 없음",
+            "auto_status": "needs_manual",
+            "evidence": "M03 자동검사 미구현 — 에이전트가 content/posts/ 내부 링크 도메인 분석 필요",
+        },
+        {
+            "id": "U04",
+            "title": "본문 품질 게이트 통과",
+            "note": "Q1(경험 허위), Q2(소스불명 수치), Q3(건강 효능 단정), Q4(제목-본문 불일치) 이슈 없음",
+            "auto_status": _m_status("M04"),
+            "evidence": _m_detail("M04"),
+        },
+        {
+            "id": "U05",
+            "title": "표준 (광고/테마) 준수",
+            "note": "ADSENSE-GUIDE.md R01~R12 모두 통과, Blowfish 테마 표준",
+            "auto_status": _m_status("M05"),
+            "evidence": _m_detail("M05"),
+        },
+        {
+            "id": "U06",
+            "title": "금지어 미사용",
+            "note": "좋은/최고의/강추/완전 좋 등 주관적 표현 없음",
+            "auto_status": "needs_manual",
+            "evidence": "M01~M10에 없음 — quality_checklist.yaml 정의 존재하나 curation 파이프라인 미적용",
+        },
+        {
+            "id": "U07",
+            "title": "H2/H3 구조 정상",
+            "note": "최소 H2 3개 이상, H3 적절 배치, 단락 200자 초과",
+            "auto_status": "needs_manual",
+            "evidence": "M01~M10에 없음 — 프롬프트는 H2 구조 지시하나 미적용 글 존재 (writer.py:496 미검증)",
+        },
+        {
+            "id": "U08",
+            "title": "메타 (og:image, canonical, description)",
+            "note": "og:image 200 OK, canonical 정상, description 존재",
+            "auto_status": _m_status("M10"),
+            "evidence": _m_detail("M10") + " (도메인 상태)",
+        },
+        {
+            "id": "U09",
+            "title": "URL 슬러그 정상",
+            "note": "CJK/퍼센트인코딩 오염 없음, 적정 길이",
+            "auto_status": _m_status("M01"),
+            "evidence": _m_detail("M01") + " (슬러그는 제목에서 유도)",
+        },
+        {
+            "id": "U10",
+            "title": "토픽/키워드 잔량",
+            "note": "active 키워드 충분, 유사 제목 재차단 없음",
+            "auto_status": _m_status("M06"),
+            "evidence": _m_detail("M06"),
+        },
+    ]
+
+    return checklist
 
 
 # ---------------------------------------------------------------------------
@@ -100,12 +219,15 @@ def _register_human_routes(app: Flask) -> None:
         blogs = get_all_blogs(conn)
         attention = get_attention_items(conn)
         brands = {b["brand"] for b in blogs}
+        maintenance_summary = get_maintenance_summary(conn)
 
         summary = {
             "total": len(blogs),
             "active": sum(1 for b in blogs if b["config_status"] == "active"),
             "stale": len(attention.get("stale_blogs", [])),
             "issues": len(attention.get("open_issues", [])),
+            "maintenance": sum(1 for b in blogs if b.get("maintenance_status") in ("awaiting", "in_progress")),
+            "ready_to_resume": sum(1 for b in blogs if b.get("maintenance_status") == "ready"),
         }
 
         return render_template(
@@ -116,6 +238,7 @@ def _register_human_routes(app: Flask) -> None:
             brands=len(brands),
             attention=attention,
             summary=summary,
+            maintenance_summary=maintenance_summary,
         )
 
     @app.route("/blog/<blog_id>")
@@ -127,6 +250,9 @@ def _register_human_routes(app: Flask) -> None:
         if detail is None:
             return render_template("404.html", title="Not Found", active=""), 404
 
+        maintenance_checklist = get_maintenance_checklist(conn, blog_id)
+        unpause_checklist = _build_unpause_checklist(conn, blog_id, maintenance_checklist)
+
         return render_template(
             "blog.html",
             title=f"Blog: {blog_id}",
@@ -134,6 +260,8 @@ def _register_human_routes(app: Flask) -> None:
             blog=detail["blog"],
             checks=detail["checks"],
             issues=detail["issues"],
+            maintenance_checklist=maintenance_checklist,
+            unpause_checklist=unpause_checklist,
         )
 
     @app.route("/issues")
@@ -235,6 +363,38 @@ def _register_api_routes(app: Flask) -> None:
         blog_ids = [blog_id] if blog_id else None
         summary = run_all_checks(conn, blog_ids=blog_ids)
         return jsonify(summary)
+
+    @app.route("/api/maintenance/status", methods=["POST"])
+    @require_auth
+    def api_maintenance_status():
+        """정비 상태 변경: blog_id + maintenance_status"""
+        from ops_dashboard.db import update_maintenance_status
+        conn = _get_db()
+        _ensure_db(conn)
+        data = request.get_json(force=True)
+        blog_id = data.get("blog_id")
+        status = data.get("maintenance_status")
+        if not blog_id or not status:
+            return jsonify({"error": "blog_id and maintenance_status required"}), 400
+        valid = ("none", "awaiting", "in_progress", "ready")
+        if status not in valid:
+            return jsonify({"error": f"Invalid status. Must be one of: {valid}"}), 400
+        update_maintenance_status(conn, blog_id, status)
+        return jsonify({"ok": True, "blog_id": blog_id, "maintenance_status": status})
+
+    @app.route("/api/maintenance/checklist", methods=["POST"])
+    @require_auth
+    def api_maintenance_checklist_run():
+        """특정 블로그의 정비 체크리스트 실행"""
+        conn = _get_db()
+        _ensure_db(conn)
+        data = request.get_json(force=True)
+        blog_id = data.get("blog_id")
+        if not blog_id:
+            return jsonify({"error": "blog_id required"}), 400
+        from ops_dashboard.checks.maintenance import check_maintenance_checklist
+        result = check_maintenance_checklist(conn, blog_id)
+        return jsonify(result)
 
 
 # ---------------------------------------------------------------------------

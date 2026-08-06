@@ -137,40 +137,52 @@ def _read_file_safe(path: Path) -> str:
 # Individual rule checks — each returns (pass/fail, detail)
 # ---------------------------------------------------------------------------
 
+def _find_config_file(site: Path) -> Path | None:
+    """Find hugo.toml / config.toml at root or config/_default/ (Hugo config dir)."""
+    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml"):
+        # Check root first
+        root_cfg = site / name
+        if root_cfg.exists():
+            return root_cfg
+        # Then config/_default/ (Hugo config directory pattern)
+        dir_cfg = site / "config" / "_default" / name
+        if dir_cfg.exists():
+            return dir_cfg
+    return None
+
+
 def _check_r01(site: Path) -> tuple[bool, str]:
     """R01: showTableOfContents must be false in hugo.toml."""
-    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml"):
-        cfg = site / name
-        if cfg.exists():
-            content = _read_file_safe(cfg)
-            # Look for showTableOfContents = false
-            if re.search(r"showTableOfContents\s*=\s*false", content, re.IGNORECASE):
-                return True, f"{name}: showTableOfContents=false confirmed"
-            if re.search(r"showTableOfContents\s*=\s*true", content, re.IGNORECASE):
-                return False, f"{name}: showTableOfContents=true (must be false)"
-            return True, f"{name}: showTableOfContents not set (assumed false)"
-    return False, "No hugo.toml/config found"
+    cfg = _find_config_file(site)
+    if cfg is None:
+        return False, "No hugo.toml/config found at root or config/_default/"
+    content = _read_file_safe(cfg)
+    # Look for showTableOfContents = false
+    if re.search(r"showTableOfContents\s*=\s*false", content, re.IGNORECASE):
+        return True, f"{cfg.name}: showTableOfContents=false confirmed"
+    if re.search(r"showTableOfContents\s*=\s*true", content, re.IGNORECASE):
+        return False, f"{cfg.name}: showTableOfContents=true (must be false)"
+    return True, f"{cfg.name}: showTableOfContents not set (assumed false)"
 
 
 def _check_r02(site: Path) -> tuple[bool, str]:
     """R02: [params.advertisement] with adsense slots required."""
-    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml"):
-        cfg = site / name
-        if cfg.exists():
-            content = _read_file_safe(cfg)
-            if "[params.advertisement]" in content or "advertisement:" in content:
-                has_adsense = "adsense" in content.lower()
-                has_slots = "topSlot" in content or "inArticleSlot" in content
-                if has_adsense and has_slots:
-                    return True, f"{name}: advertisement section with slots found"
-                return False, f"{name}: advertisement section present but missing adsense/slots"
-            return False, f"{name}: no [params.advertisement] section"
-    return False, "No hugo.toml/config found"
+    cfg = _find_config_file(site)
+    if cfg is None:
+        return False, "No hugo.toml/config found at root or config/_default/"
+    content = _read_file_safe(cfg)
+    if "[params.advertisement]" in content or "advertisement:" in content:
+        has_adsense = "adsense" in content.lower()
+        has_slots = "topSlot" in content or "inArticleSlot" in content
+        if has_adsense and has_slots:
+            return True, f"{cfg.name}: advertisement section with slots found"
+        return False, f"{cfg.name}: advertisement section present but missing adsense/slots"
+    return False, f"{cfg.name}: no [params.advertisement] section"
 
 
 def _check_r03(site: Path) -> tuple[bool, str]:
     """R03: adsbygoogle.js must use site.Params, not hardcoded publisher ID."""
-    for partial_dir in ("layouts/partials",):
+    for partial_dir in ("layouts/partials", "config/_default/layouts/partials"):
         extend_head = site / partial_dir / "extend-head.html"
         if not extend_head.exists():
             extend_head = site / partial_dir / "extend_head.html"
@@ -414,20 +426,16 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
     if not failures:
         return {"status": "pass", "detail": f"All {len(passes)} rules passed"}
 
-    # Check for CRITICAL failures → send Telegram alert
+    # Check for CRITICAL failures → 기록만, 실시간 푸시는 Part 3에서 전환
+    # (2026-08-06 Part 1: 표준 위반 실시간 푸시 비활성화 — ops.db 기록 유지)
     critical_failures = [f for f in failures if f["severity"] == "CRITICAL"]
     if critical_failures:
-        try:
-            from shared.telegram_notifier import send_standard_violation
-            for cf in critical_failures:
-                send_standard_violation(
-                    blog_id,
-                    cf["rule_id"],
-                    cf["severity"],
-                    cf["detail"],
-                )
-        except Exception as e:
-            logger.error("Failed to send Telegram violation alert for %s: %s", blog_id, e)
+        logger.warning(
+            "CRITICAL standard violations for %s: %s",
+            blog_id,
+            [f["rule_id"] for f in critical_failures],
+        )
+        # Telegram push disabled — will be re-enabled as daily summary in Part 3
 
     detail_parts = [f"{f['rule_id']}({f['severity']}): {f['detail']}" for f in failures]
     return {

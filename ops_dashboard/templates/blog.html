@@ -7,6 +7,12 @@
     <tr><th>Blog ID</th><td>{{ blog.blog_id }}</td></tr>
     <tr><th>Brand</th><td>{{ blog.brand }}</td></tr>
     <tr><th>Config Status</th><td><span class="badge badge-{{ 'pass' if blog.config_status == 'active' else 'fail' }}">{{ blog.config_status }}</span></td></tr>
+    <tr><th>정비 상태</th><td>
+      {% if blog.maintenance_status == 'ready' %}<span class="badge badge-pass">재개준비</span>
+      {% elif blog.maintenance_status == 'in_progress' %}<span class="badge badge-warn">정비중</span>
+      {% elif blog.maintenance_status == 'awaiting' %}<span class="badge badge-unknown">정비대기</span>
+      {% else %}<span>—</span>{% endif %}
+    </td></tr>
     <tr><th>Theme</th><td>{{ blog.theme or '—' }}</td></tr>
     <tr><th>Domain</th><td>{{ blog.domain or '—' }}</td></tr>
     <tr><th>Pipeline</th><td>{{ blog.pipeline_path or '—' }}</td></tr>
@@ -15,6 +21,46 @@
     <tr><th>Quality Grade</th><td>{{ blog.quality_grade or '—' }}</td></tr>
   </table>
 </div>
+
+<!-- Maintenance Checklist -->
+{% if maintenance_checklist %}
+<h2>정비 체크리스트 ({{ maintenance_checklist|selectattr('status', 'equalto', 'pass')|list|length }}/{{ maintenance_checklist|length }} 통과)</h2>
+
+<!-- Progress bar -->
+{% set pass_count = maintenance_checklist|selectattr('status', 'equalto', 'pass')|list|length %}
+{% set total = maintenance_checklist|length %}
+{% set pct = ((pass_count / total * 100)|round|int) if total > 0 else 0 %}
+<div style="background:#eee;border-radius:8px;height:24px;margin-bottom:16px">
+  <div style="background:{% if pct == 100 %}#28a745{% elif pct >= 50 %}#ffc107{% else %}#dc3545{% endif %};border-radius:8px;height:24px;width:{{ pct }}%;text-align:center;color:white;font-size:13px;line-height:24px">
+    {{ pct }}%
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <tr><th>항목</th><th>상태</th><th>상세</th><th>확인 시각</th></tr>
+    {% for item in maintenance_checklist %}
+    <tr>
+      <td><strong>{{ item.check_id }}</strong> {{ item.check_name }}</td>
+      <td>
+        {% if item.status == 'pass' %}<span style="color:#28a745">✓ 통과</span>
+        {% elif item.status == 'fail' %}<span style="color:#dc3545">✗ 실패</span>
+        {% elif item.status == 'unknown' %}<span style="color:#6c757d">? 미확인</span>
+        {% else %}<span style="color:#6c757d">○ 대기</span>{% endif %}
+      </td>
+      <td style="font-size:0.85rem">{{ item.detail[:100] if item.detail else '—' }}</td>
+      <td style="font-size:0.8rem;color:var(--text-muted)">{{ item.checked_at[:16] if item.checked_at else '—' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+{% if blog.maintenance_status == 'ready' %}
+<div class="alert alert-ok" style="margin-top:12px">
+  <span>&#10003;</span> <strong>재개 준비 완료</strong> — 모든 정비 항목 통과. dispatcher 재개 가능.
+</div>
+{% endif %}
+{% endif %}
 
 <!-- Health checks -->
 <h2>Recent Checks ({{ checks|length }})</h2>
@@ -34,6 +80,92 @@
     {% endif %}
   </table>
 </div>
+
+<!-- Unpause Checklist (정비 완료 후 재개 전 수동 확인) -->
+{% if unpause_checklist %}
+<h2>재개 전 확인사항 (Unpause Checklist)</h2>
+<p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:12px">
+  자동 검사(M01~M10) 통과 후에도 아래 항목을 <strong>반드시 확인</strong> 후 dispatcher 재개.
+</p>
+
+{% set unpause_pass = unpause_checklist|selectattr('auto_status', 'equalto', 'pass')|list|length %}
+{% set unpause_manual = unpause_checklist|selectattr('auto_status', 'equalto', 'needs_manual')|list|length %}
+{% set unpause_fail = unpause_checklist|selectattr('auto_status', 'equalto', 'fail')|list|length %}
+{% set unpause_total = unpause_checklist|length %}
+{% set unpause_pct = ((unpause_pass / unpause_total * 100)|round|int) if unpause_total > 0 else 0 %}
+<div style="background:#eee;border-radius:8px;height:20px;margin-bottom:12px">
+  <div style="background:{% if unpause_fail > 0 %}#dc3545{% elif unpause_manual > 0 %}#ffc107{% else %}#28a745{% endif %};border-radius:8px;height:20px;width:{{ unpause_pct }}%;text-align:center;color:white;font-size:12px;line-height:20px">
+    {{ unpause_pass }}/{{ unpause_total }} 자동통과
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>확인 항목</th><th>자동 검사</th><th>검증 근거</th><th>확인</th></tr>
+    {% for item in unpause_checklist %}
+    <tr>
+      <td>{{ item.id }}</td>
+      <td>
+        <strong>{{ item.title }}</strong>
+        {% if item.note %}<br><span style="font-size:0.8rem;color:var(--text-muted)">{{ item.note }}</span>{% endif %}
+      </td>
+      <td>
+        {% if item.auto_status == 'pass' %}<span style="color:#28a745">✓ 자동통과</span>
+        {% elif item.auto_status == 'fail' %}<span style="color:#dc3545">✗ 자동실패</span>
+        {% elif item.auto_status == 'needs_manual' %}<span style="color:#e67e22">⚠ 수동확인필요</span>
+        {% else %}<span style="color:#6c757d">— 미확인</span>{% endif %}
+      </td>
+      <td style="font-size:0.8rem;max-width:300px">{{ item.evidence }}</td>
+      <td>
+        <input type="checkbox" class="unpause-check" data-id="{{ item.id }}" 
+               {% if item.auto_status == 'pass' %}disabled checked title="자동 통과 — 확인 불필요"{% endif %}
+               {% if item.auto_status == 'fail' %}disabled title="자동 실패 — 먼저 해소 필요"{% endif %}>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+<div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+  <button id="btn-unpause-confirm" disabled
+          style="padding:8px 16px;border-radius:6px;border:none;background:#28a745;color:white;cursor:not-allowed;font-size:0.9rem"
+          title="모든 항목 확인 후 활성화">
+    재개 확정
+  </button>
+  <span id="unpause-status" style="font-size:0.85rem;color:var(--text-muted)">
+    {{ unpause_pass }}/{{ unpause_total }} 자동통과
+  </span>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const checks = document.querySelectorAll('.unpause-check');
+  const btn = document.getElementById('btn-unpause-confirm');
+  const status = document.getElementById('unpause-status');
+  
+  function updateState() {
+    const total = checks.length;
+    const checked = document.querySelectorAll('.unpause-check:checked').length;
+    const allDone = checked >= total;
+    btn.disabled = !allDone;
+    btn.style.cursor = allDone ? 'pointer' : 'not-allowed';
+    btn.style.background = allDone ? '#28a745' : '#6c757d';
+    status.textContent = checked + '/' + total + ' 확인완료';
+    if (allDone) {
+      status.textContent += ' — 재개 가능';
+      status.style.color = '#28a745';
+    } else {
+      status.style.color = 'var(--text-muted)';
+    }
+  }
+  
+  checks.forEach(function(cb) {
+    if (!cb.disabled) cb.addEventListener('change', updateState);
+  });
+  updateState();
+});
+</script>
+{% endif %}
 
 <!-- Related issues -->
 <h2>Related Issues ({{ issues|length }})</h2>

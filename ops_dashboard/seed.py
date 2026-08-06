@@ -14,7 +14,7 @@ _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-from ops_dashboard.db import get_conn, init_db, seed_known_issues, sync_blog_lifecycle
+from ops_dashboard.db import get_conn, init_db, seed_known_issues, seed_maintenance_status, sync_blog_lifecycle
 
 
 def main() -> None:
@@ -37,6 +37,9 @@ def main() -> None:
 
     issue_count = seed_known_issues(conn)
     print(f"Seeded {issue_count} known issues")
+
+    maint_count = seed_maintenance_status(conn)
+    print(f"Seeded {maint_count} maintenance status entries")
 
     if args.run_checks:
         from ops_dashboard.checks import run_all_checks

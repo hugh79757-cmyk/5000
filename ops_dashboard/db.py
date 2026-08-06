@@ -19,6 +19,23 @@ BLOGS_D = PROJECT_ROOT / "config" / "blogs.d"
 # Connection helpers
 # ---------------------------------------------------------------------------
 
+def _alter_columns(conn: sqlite3.Connection) -> None:
+    """기존 테이블에 새 컬럼 추가 (이미 존재하면 무시)."""
+    alters = [
+        # blog_lifecycle 정비 컬럼
+        "ALTER TABLE blog_lifecycle ADD COLUMN maintenance_status TEXT NOT NULL DEFAULT 'none'",
+        "ALTER TABLE blog_lifecycle ADD COLUMN maintenance_started_at TEXT",
+        "ALTER TABLE blog_lifecycle ADD COLUMN maintenance_completed_at TEXT",
+        "ALTER TABLE blog_lifecycle ADD COLUMN resume_ready INTEGER NOT NULL DEFAULT 0",
+    ]
+    for sql in alters:
+        try:
+            conn.execute(sql)
+        except sqlite3.OperationalError:
+            pass  # 이미 컬럼이 있으면 무시
+    conn.commit()
+
+
 def get_conn(db_path: str | Path | None = None) -> sqlite3.Connection:
     p = str(db_path or DB_PATH)
     conn = sqlite3.connect(p)
@@ -49,8 +66,27 @@ def init_db(conn: sqlite3.Connection) -> None:
         domain_health TEXT DEFAULT '',
         standard_compliance TEXT DEFAULT '',
         notes TEXT DEFAULT '',
+        -- 정비·재개 프레임워크 필드 (Phase 60 Part 2)
+        maintenance_status TEXT NOT NULL DEFAULT 'none',
+        maintenance_started_at TEXT,
+        maintenance_completed_at TEXT,
+        resume_ready INTEGER NOT NULL DEFAULT 0,
         updated_at TEXT DEFAULT (datetime('now'))
     );
+
+    -- 정비 체크리스트 항목 추적
+    CREATE TABLE IF NOT EXISTS maintenance_checklist (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        blog_id TEXT NOT NULL,
+        check_id TEXT NOT NULL,
+        check_name TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        detail TEXT DEFAULT '',
+        checked_at TEXT,
+        UNIQUE(blog_id, check_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_maint_blog ON maintenance_checklist(blog_id);
 
     CREATE TABLE IF NOT EXISTS known_issues (
         issue_id TEXT PRIMARY KEY,
@@ -92,6 +128,9 @@ CREATE TABLE IF NOT EXISTS standard_rules (
 
 CREATE INDEX IF NOT EXISTS idx_standard_rules_target ON standard_rules(target);
 """)
+
+    # Phase 60: 기존 테이블에 새 컬럼 추가 (IF NOT EXISTS는 컬럼 추가 안 됨)
+    _alter_columns(conn)
 
 
 # ---------------------------------------------------------------------------
@@ -428,8 +467,149 @@ def seed_standard_rules(conn: sqlite3.Connection) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Maintenance status seed — Phase 60 Part 2
+# ---------------------------------------------------------------------------
+
+MAINTENANCE_SEED_BLOGS: list[dict] = [
+    # P03으로 차단된 7개 블로그 + RAP 정비 대상
+    {"blog_id": "beauty-hugo", "maintenance_status": "awaiting"},
+    {"blog_id": "interior-hugo", "maintenance_status": "awaiting"},
+    {"blog_id": "kitchen-hugo", "maintenance_status": "awaiting"},
+    {"blog_id": "pick-hugo", "maintenance_status": "awaiting"},
+    {"blog_id": "senior-hugo", "maintenance_status": "awaiting"},
+    {"blog_id": "senior-blogger", "maintenance_status": "awaiting"},
+    {"blog_id": "travel4-hugo", "maintenance_status": "awaiting"},
+]
+
+
+def seed_maintenance_status(conn: sqlite3.Connection) -> int:
+    """정비 대상 블로그에 maintenance_status를 시드.
+
+    반환: 업데이트된 행 수.
+    """
+    count = 0
+    for item in MAINTENANCE_SEED_BLOGS:
+        try:
+            conn.execute("""
+                UPDATE blog_lifecycle
+                SET maintenance_status = ?
+                WHERE blog_id = ? AND maintenance_status = 'none'
+            """, (item["maintenance_status"], item["blog_id"]))
+            count += conn.total_changes
+        except sqlite3.OperationalError:
+            pass
+    conn.commit()
+    return count
+
+
+# ---------------------------------------------------------------------------
 # Public helpers
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# 정비 체크리스트 — Phase 60 Part 2 표준
+# ---------------------------------------------------------------------------
+
+MAINTENANCE_CHECKLIST_ITEMS: list[dict] = [
+    #CUAP/RAP 정비 경험에서 추출한 표준 항목
+    {"check_id": "M01", "name": "제목 CJK 없음", "description": "제목에 한자/일본어/중국어 누수 없음"},
+    {"check_id": "M02", "name": "이미지 정상 (동일 반복 없음)", "description": "썸네일/본문 이미지가 동일 이미지를 반복 사용하지 않음"},
+    {"check_id": "M03", "name": "크로스링크 주제 일관", "description": "내부 링크가 블로그 주제와 무관하지 않음"},
+    {"check_id": "M04", "name": "본문 품질 게이트 통과", "description": "Q1~Q4 품질 이슈 없음 (허위 경험, 소스불명 수치, 건강효능 단정, 템플릿 반복)"},
+    {"check_id": "M05", "name": "표준 (광고/테마) 준수", "description": "R01~R12 표준 규칙 모두 통과"},
+    {"check_id": "M06", "name": "토픽/키워드 잔량 충분", "description": "active 키워드 100개 이상, 7일 내 사용 키워드 30% 미만"},
+    {"check_id": "M07", "name": "P03 유사제목 안전", "description": "최근 3일 내 발행 제목과 유사한 제목이 파이프라인에서 생성되지 않음"},
+    {"check_id": "M08", "name": "CoT/프롬프트 누수 없음", "description": "본문에 사고 과정(CoT)이나 프롬프트 문구 누수 없음"},
+    {"check_id": "M09", "name": "publish_log 기록 정상", "description": "발행 성공 시 publish_log에 기록이 정상적으로 남음"},
+    {"check_id": "M10", "name": "도메인 가용성", "description": "HTTP HEAD 200 정상 응답"},
+]
+
+
+def init_maintenance_checklist(conn: sqlite3.Connection, blog_id: str) -> None:
+    """특정 블로그의 정비 체크리스트 항목을 초기화."""
+    for item in MAINTENANCE_CHECKLIST_ITEMS:
+        try:
+            conn.execute("""
+                INSERT OR IGNORE INTO maintenance_checklist
+                (blog_id, check_id, check_name, status)
+                VALUES (?, ?, ?, 'pending')
+            """, (blog_id, item["check_id"], item["name"]))
+        except sqlite3.IntegrityError:
+            pass
+    conn.commit()
+
+
+def get_maintenance_checklist(conn: sqlite3.Connection, blog_id: str) -> list[dict]:
+    """특정 블로그의 정비 체크리스트 조회."""
+    rows = conn.execute("""
+        SELECT * FROM maintenance_checklist
+        WHERE blog_id = ? ORDER BY check_id
+    """, (blog_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_maintenance_summary(conn: sqlite3.Connection) -> dict:
+    """전체 블로그별 정비 진행 상황 요약."""
+    rows = conn.execute("""
+        SELECT
+            bl.blog_id,
+            bl.brand,
+            bl.maintenance_status,
+            bl.resume_ready,
+            bl.config_status,
+            COUNT(CASE WHEN mc.status = 'pass' THEN 1 END) as pass_count,
+            COUNT(CASE WHEN mc.status = 'fail' THEN 1 END) as fail_count,
+            COUNT(CASE WHEN mc.status = 'pending' THEN 1 END) as pending_count,
+            COUNT(*) as total_checks
+        FROM blog_lifecycle bl
+        LEFT JOIN maintenance_checklist mc ON bl.blog_id = mc.blog_id
+        WHERE bl.maintenance_status != 'none'
+        GROUP BY bl.blog_id
+        ORDER BY bl.brand, bl.blog_id
+    """).fetchall()
+    return [dict(r) for r in rows]
+
+
+def set_check_item_status(
+    conn: sqlite3.Connection,
+    blog_id: str,
+    check_id: str,
+    status: str,
+    detail: str = "",
+) -> None:
+    """정비 체크리스트 항목 상태 업데이트."""
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).isoformat()
+    conn.execute("""
+        UPDATE maintenance_checklist
+        SET status = ?, detail = ?, checked_at = ?
+        WHERE blog_id = ? AND check_id = ?
+    """, (status, detail, now, blog_id, check_id))
+    conn.commit()
+
+
+def update_maintenance_status(
+    conn: sqlite3.Connection,
+    blog_id: str,
+    maintenance_status: str,
+) -> None:
+    """블로그의 정비 상태 업데이트."""
+    from datetime import datetime, timezone
+    now = datetime.now(timezone.utc).isoformat()
+    fields = {"maintenance_status": maintenance_status}
+    if maintenance_status == "in_progress":
+        fields["maintenance_started_at"] = now
+    elif maintenance_status == "ready":
+        fields["maintenance_completed_at"] = now
+        fields["resume_ready"] = 1
+    elif maintenance_status == "none":
+        fields["resume_ready"] = 0
+
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
+    values = list(fields.values()) + [blog_id]
+    conn.execute(f"UPDATE blog_lifecycle SET {set_clause} WHERE blog_id = ?", values)
+    conn.commit()
+
 
 def get_all_blogs(conn: sqlite3.Connection) -> list[dict]:
     """blog_lifecycle 전체 조회."""

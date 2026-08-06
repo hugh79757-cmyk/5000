@@ -94,3 +94,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import maintenance  # noqa: F401
+except ImportError:
+    pass
+
