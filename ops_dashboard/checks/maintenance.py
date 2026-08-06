@@ -154,11 +154,12 @@ def _check_standard_compliance(conn: sqlite3.Connection, blog_id: str) -> dict:
 
 
 def _check_keyword_availability(conn: sqlite3.Connection, blog_id: str) -> dict:
-    """M06: 토픽/키워드 잔량 충분 — active 키워드 100개 이상"""
-    # 1차: pipeline DB의 keywords 테이블 확인
+    """M06: 키워드 잔량 충분 — KEYWORD_MAP 정의 − published_products 사용 = 미발행 잔량"""
     project_root = Path(__file__).parent.parent.parent
+    MIN_REMAINING = 24  # 잔량 기준
 
-    for db_name in ["curation.db", "rap.db", "content.db", "senior.db"]:
+    # 1차: keywords 테이블이 있는 pipeline DB (rap, senior 등)
+    for db_name in ["rap.db", "content.db", "senior.db"]:
         db_path = project_root / "data" / db_name
         if not db_path.exists():
             continue
@@ -167,39 +168,22 @@ def _check_keyword_availability(conn: sqlite3.Connection, blog_id: str) -> dict:
             tables = [r[0] for r in c.execute(
                 "SELECT name FROM sqlite_master WHERE type='table'"
             ).fetchall()]
-
             if "keywords" in tables:
                 count = c.execute("""
                     SELECT COUNT(*) FROM keywords
                     WHERE blog_id = ? AND active = 1
                 """, (blog_id,)).fetchone()[0]
                 c.close()
-                if count < 100:
+                if count < MIN_REMAINING:
                     return {
                         "status": "fail",
-                        "detail": f"M06: active 키워드 {count}개 (기준 100개 미달)",
+                        "detail": f"M06: active 키워드 {count}개 (기준 {MIN_REMAINING}개 미달)",
                     }
                 return {
                     "status": "pass",
                     "detail": f"M06: active 키워드 {count}개",
                 }
-
-            # 2차: published_products에서 사용 가능한 키워드 수 추정
-            if "published_products" in tables:
-                total = c.execute("""
-                    SELECT COUNT(DISTINCT keyword) FROM published_products
-                    WHERE blog_id = ?
-                """, (blog_id,)).fetchone()[0]
-                c.close()
-                if total > 0:
-                    # published_products는 "사용한" 키워드만 기록 — KEYWORD_MAP 전체는 아님
-                    return {
-                        "status": "pass",
-                        "detail": f"M06: published_products에서 {total}개 키워드 사용 이력 (KEYWORD_MAP 전체는 코드 참조)",
-                    }
-                c.close()
-            else:
-                c.close()
+            c.close()
         except (sqlite3.OperationalError, Exception):
             try:
                 c.close()
@@ -207,25 +191,54 @@ def _check_keyword_availability(conn: sqlite3.Connection, blog_id: str) -> dict:
                 pass
             continue
 
-    # 3차: Python 파일에서 KEYWORD_MAP 직접 확인
+    # 2차: KEYWORD_MAP(Python) − published_products(DB) = 미발행 잔량
+    # curation 블로그의 표준 계산 경로
     try:
         import importlib.util
         kw_path = project_root / "pipelines" / "curation" / "keywords.py"
-        if kw_path.exists():
-            spec = importlib.util.spec_from_file_location("keywords", str(kw_path))
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            kw_map = getattr(mod, "KEYWORD_MAP", {})
-            count = len(kw_map.get(blog_id, []))
-            if count > 0:
-                return {
-                    "status": "pass",
-                    "detail": f"M06: KEYWORD_MAP에서 {count}개 키워드 정의 (Python 파일 참조)",
-                }
-    except Exception:
-        pass
+        if not kw_path.exists():
+            return {"status": "unknown", "detail": "M06: keywords.py 파일 없음"}
 
-    return {"status": "unknown", "detail": "M06: 키워드 소스 미확인 — 수동 확인 필요"}
+        spec = importlib.util.spec_from_file_location("keywords", str(kw_path))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        kw_map = getattr(mod, "KEYWORD_MAP", {})
+
+        defined = set(kw_map.get(blog_id, []))
+        if not defined:
+            return {
+                "status": "unknown",
+                "detail": f"M06: KEYWORD_MAP에 {blog_id} 키워드 없음",
+            }
+
+        # published_products에서 이미 사용한 키워드
+        used = set()
+        curation_db = project_root / "data" / "curation.db"
+        if curation_db.exists():
+            c = sqlite3.connect(str(curation_db))
+            rows = c.execute("""
+                SELECT DISTINCT keyword FROM published_products
+                WHERE blog_id = ?
+            """, (blog_id,)).fetchall()
+            used = {r[0] for r in rows}
+            c.close()
+
+        remaining = defined - used
+        remaining_count = len(remaining)
+
+        if remaining_count < MIN_REMAINING:
+            return {
+                "status": "fail",
+                "detail": f"M06: 잔량 {remaining_count}개 < 기준 {MIN_REMAINING}개 "
+                          f"(정의 {len(defined)}개 − 사용 {len(used)}개)",
+            }
+
+        return {
+            "status": "pass",
+            "detail": f"M06: 잔량 {remaining_count}개 (정의 {len(defined)}개 − 사용 {len(used)}개)",
+        }
+    except Exception as e:
+        return {"status": "unknown", "detail": f"M06: 계산 오류 — {e}"}
 
 
 def _check_similar_title_safety(conn: sqlite3.Connection, blog_id: str) -> dict:
