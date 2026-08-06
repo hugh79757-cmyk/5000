@@ -135,6 +135,18 @@
 - 이동 전/후: `e0fea5821…` → `f4f23865c8…` (f13045f31은 f4f23865c의 9커밋 앞 조상 — 안전 이동). HEAD describe: post-dashboard-baseline-6-g3cbee787e.
 - 문서 표기 통일: playbook(fleet-ops-audit-playbook.md:133)은 태그 이름 참조뿐(해시 하드코딩 없음) → 정정 불필요. worklog 내 표기는 위 표로 통일.
 
+### 작업 2 — stash 정리 (완료: drop 2건, 보류 2건)
+
+| stash | base | 파일·변경 | 성격 | 처리 |
+|-------|------|-----------|------|------|
+| @{1} | 8/3 | cuap.yaml 9곳 active→inactive + curation/pipeline 40줄 + writer.py + title_templates + defense_layers 테스트 + tap.yaml + ROADMAP/INDEX + .DS_Store | CUAP 중지를 config로 처리하는 방향 — **재개 전략("스케줄러 정지 유지 + config active 그대로")과 상충** | **drop** (아카이브 stash1-2026-08-03.diff, 17,653B) |
+| @{0} | 8/3 | rap.yaml force_draft 5곳 + car/rap pipeline + **test_alert_thresholds 완화(18-fail 2건 fix 시도)** + ROADMAP/CONCERNS/INDEX | force_draft는 이미 커밋됨(중복), rap 상태(active/quota5)는 HEAD(paused/quota10)와 상이 — 통째 살리면 config 오염 위험 | **drop** (아카이브 stash0-2026-08-03.diff, 27,096B). 18-fail 2건(test_alert_thresholds)은 stash 병합 없이 다음 작업에서 별도 재작성 — **메모만, 이번엔 미처리** |
+| @{2} | 7/30 | keywords.py 브랜드 리네이밍("그램"→"LG 그램" 등) + travel fetcher 계절 필터→경고만 로그(데이터 소진 방지) + senior/stock/rap fetcher·pipeline + STATE.md + triage | 파이프라인 실질 개선(특히 travel 계절 필터 완화) — 유효 작업 | **보류** (사용자 확인 대기, 아카이브 stash2-2026-07-30.diff) |
+| @{3} | 7/26 | phase-8 flagged 정리(delete_flagged_posts 신규, flagged_posts.yaml 3,286줄, verify_cleanup 116줄) + telegram_notifier 전면 개편 + validators.py 214줄 + hugo_writer/dispatcher + AGENTS.md | phase-8 작업의 미커밋 잔여 — validators/notifier 변경이 이후 커밋에 반영됐는지 불확실(회수 가치 있음) | **보류** (사용자 확인 대기, 아카이브 stash3-2026-07-26.diff) |
+
+- drop 대상 diff 전문: `.planning/worklog/archives/stash{0,1}-2026-08-03.diff` (파괴적 로그 + 본 문서 기록).
+- 남은 stash: @{0}=7/30(파이프라인), @{1}=7/26(phase-8) — 모두 보류, 사용자 결정 대기.
+
 ## 4단계 프로토콜 이행
 
 1. **사전 카운트**: 초기 57,771행 / source!='' 중복 24,061행 / source='' 18,301행(전량 보존 불변식).
