@@ -165,6 +165,44 @@ BANNED_REPLACEMENTS = {
     "추천해 드리겠습니다": "추천합니다",
 }
 
+# ── Q5: global_forbidden_words (config/quality_checklist.yaml) ──
+# 주관적·광고성 표현 중립어 치환 맵. YAML 단어 → 대체 표현 (치환 없으면 삭제).
+# YAML에 단어가 추가/삭제되면 GLOBAL_FORBIDDEN_WORDS가 따라가므로 dead config 해소.
+_FORBIDDEN_WORD_REPLACEMENTS = {
+    "추천드립니다": "추천합니다",
+    "인기가 많습니다": "널리 이용되고 있습니다",
+    "맛있는": "",
+    "좋은": "적합한",
+    "훌륭한": "뛰어난",
+    "최고의": "가장 적합한",
+}
+
+
+def _load_global_forbidden_words():
+    """config/quality_checklist.yaml의 global_forbidden_words 로딩 (Q5).
+
+    fail-open: 파일 없음/파싱 오류 시 빈 목록 + 경고 로그. 금지어 필터만
+    미동작하며 발행 자체는 차단하지 않음 (기존 BANNED_REPLACEMENTS 동작 불변).
+    """
+    import yaml
+    cfg_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+        "config", "quality_checklist.yaml",
+    )
+    try:
+        with open(cfg_path, encoding="utf-8") as _f:
+            cfg = yaml.safe_load(_f) or {}
+        words = ((cfg.get("global_criteria") or {}).get("global_forbidden_words")) or []
+        words = [w for w in words if isinstance(w, str) and w.strip()]
+        logger.info("[Q5] global_forbidden_words 로딩: %d개 %s", len(words), words)
+        return words
+    except Exception as _e:
+        logger.warning("[Q5] quality_checklist.yaml 로딩 실패 — 금지어 필터 미적용: %s", _e)
+        return []
+
+
+GLOBAL_FORBIDDEN_WORDS = _load_global_forbidden_words()
+
 
 def _fix_repeated_image_urls(body_md):
     """Detect and fix image URLs with token repetition patterns (LLM stutter).
@@ -217,6 +255,11 @@ def _sanitize_body(body):
     for phrase, replacement in BANNED_REPLACEMENTS.items():
         if phrase in body:
             body = body.replace(phrase, replacement)
+    # ── Q5: global_forbidden_words 필터 (quality_checklist.yaml 로딩, 중립어 치환) ──
+    for _word in GLOBAL_FORBIDDEN_WORDS:
+        _replacement = _FORBIDDEN_WORD_REPLACEMENTS.get(_word, "")
+        body = body.replace(_word, _replacement)
+    body = re.sub(r" {2,}", " ", body)  # 삭제 치환("" ) 잔여 공백 정리
     # 스펙 부족 메타문구 제거
     body = re.sub(r"[^\.]*스펙\s*정보가?\s*(?:부족|없|미상)[^\.]*\.?\s*", "", body)
     body = re.sub(r"[^\.]*무게\s*범위가?\s*불확실[^\.]*\.?\s*", "", body)
