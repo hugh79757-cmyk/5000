@@ -1,6 +1,7 @@
 from pipelines.etap.post_processor import insert_adsense
 from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, mark_entity_published, register_entity
+from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post_shared
 
 """
 항공권 딜 글 발행 파이프라인
@@ -86,47 +87,33 @@ def _insert_body_images(content, images):
     return "\n".join(lines)
 
 def _write_hugo_post(cfg, article):
-    slug = article["slug"]
-    post_dir = os.path.join(cfg["site_path"], "content", "posts", slug)
-    os.makedirs(post_dir, exist_ok=True)
-    now = datetime.now(KST).isoformat(timespec="seconds")
-    tags_yaml = "\n".join([f'  - "{t}"' for t in article.get("tags", [])])
-    img_block = f'featureimage: "{article.get("image_url", "")}"'
-    fm = f"""---
-title: "{article['title']}"
-date: {now}
-description: "{article['description']}"
-{img_block}
-tags:
-{tags_yaml}
-categories:
-  - "Flight Deals"
-params:
-  priceUpdateTime: "{datetime.now(KST).strftime('%B %d, %Y %H:%M KST')}"
-showTableOfContents: true
----
+    """Flight pipeline adapter — wraps shared _write_hugo_post_etap with flight-specific features.
 
-{_insert_body_images(article['content'], article.get('body_images', []))}
-"""
-    filepath = os.path.join(post_dir, "index.md")
-    with open(filepath, "w") as f:
-        f.write(fm)
-    logger.info(f"[ETAP-Flight] 파일 생성: {filepath}")
-    return filepath
+    Flight deals have unique frontmatter fields (priceUpdateTime) and use _insert_body_images
+    for body image placement.
+    """
+    # Prepare article for shared function
+    blog_id = cfg.get("id", "flights-hugo")
+    site_path = cfg.get("site_path", "")
+    category = "Flight Deals"
 
+    # Add flight-specific metadata to article for the shared function
+    article_with_meta = article.copy()
+    article_with_meta["_flight_price_update_time"] = datetime.now(KST).strftime('%B %d, %Y %H:%M KST')
 
-def _build_and_deploy(cfg) -> None:
-    site = cfg["site_path"]
-    # leaf bundle 방지: content/posts/index.md 존재 시 삭제
-    from pathlib import Path as _Path
-    rogue = _Path(site) / "content" / "posts" / "index.md"
-    if rogue.exists():
-        rogue.unlink()
-        logger.info(f"[guard] Removed rogue index.md from {site}")
-    subprocess.run(["/opt/homebrew/bin/hugo", "--gc", "--minify"], cwd=site, capture_output=True)
-    subprocess.run(["/opt/homebrew/bin/wrangler", "pages", "deploy", "public",
-                    "--project-name", cfg["cf_project"]], cwd=site, capture_output=True)
-    logger.info(f"[ETAP-Flight] Deployed to {cfg['domain']}")
+    # Use shared function (handles inject_internal_links, adsense, cross-sell, body images)
+    result = _write_hugo_post_shared(
+        article=article_with_meta,
+        cover_image={"url": article.get("image_url", ""), "credit": article.get("image_credit", "")},
+        body_images=article.get("body_images", []),
+        blog_id=blog_id,
+        site_path=site_path,
+        category=category,
+    )
+
+    if result:
+        logger.info(f"[ETAP-Flight] 파일 생성: {result}")
+    return result
 
 
 def mark_published(topic_id, blog_id, title, slug) -> None:
@@ -198,8 +185,6 @@ def run_batch(cfg, count=2):
             break
         if i < count - 1:
             time.sleep(5)
-    if any(r["status"] == "ok" for r in results):
-        _build_and_deploy(cfg)
     ok = sum(1 for r in results if r["status"] == "ok")
     logger.info(f"[ETAP-Flight] 배치 완료: {ok}/{count}건")
     return results
