@@ -138,8 +138,13 @@ def _read_file_safe(path: Path) -> str:
 # ---------------------------------------------------------------------------
 
 def _find_config_file(site: Path) -> Path | None:
-    """Find hugo.toml / config.toml at root or config/_default/ (Hugo config dir)."""
-    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml"):
+    """Find hugo.toml / config.toml at root or config/_default/ (Hugo config dir).
+
+    params.toml included (2026-08-06, fix): CUAP/ETAP store params in
+    config/_default/params.toml, which Hugo auto-maps to site.Params.
+    """
+    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml",
+                 "params.toml", "params.yaml"):
         # Check root first
         root_cfg = site / name
         if root_cfg.exists():
@@ -149,6 +154,21 @@ def _find_config_file(site: Path) -> Path | None:
         if dir_cfg.exists():
             return dir_cfg
     return None
+
+
+def _find_all_config_files(site: Path) -> list[Path]:
+    """Find ALL config files (hugo.toml + params.toml) for R02 aggregation.
+
+    R02 must inspect both hugo.toml and params.toml: [params.advertisement]
+    may live in either (hugo.toml inline or params.toml auto-Params mapping).
+    """
+    found: list[Path] = []
+    for name in ("hugo.toml", "hugo.yaml", "config.toml", "config.yaml",
+                 "params.toml", "params.yaml"):
+        for p in (site / name, site / "config" / "_default" / name):
+            if p.exists() and p not in found:
+                found.append(p)
+    return found
 
 
 def _check_r01(site: Path) -> tuple[bool, str]:
@@ -166,18 +186,28 @@ def _check_r01(site: Path) -> tuple[bool, str]:
 
 
 def _check_r02(site: Path) -> tuple[bool, str]:
-    """R02: [params.advertisement] with adsense slots required."""
-    cfg = _find_config_file(site)
-    if cfg is None:
-        return False, "No hugo.toml/config found at root or config/_default/"
-    content = _read_file_safe(cfg)
-    if "[params.advertisement]" in content or "advertisement:" in content:
-        has_adsense = "adsense" in content.lower()
-        has_slots = "topSlot" in content or "inArticleSlot" in content
-        if has_adsense and has_slots:
-            return True, f"{cfg.name}: advertisement section with slots found"
-        return False, f"{cfg.name}: advertisement section present but missing adsense/slots"
-    return False, f"{cfg.name}: no [params.advertisement] section"
+    """R02: [params.advertisement] with adsense slots required.
+
+    Inline in hugo.toml as [params.advertisement], or in config/_default/
+    params.toml as [advertisement] (Hugo auto-maps params.toml to site.Params).
+    """
+    configs = _find_all_config_files(site)
+    if not configs:
+        return False, "No hugo.toml/config/params found at root or config/_default/"
+    content = "\n".join(_read_file_safe(c) for c in configs)
+    # [params.advertisement] (hugo.toml inline) or [advertisement] (params.toml)
+    has_adv_section = (
+        "[params.advertisement]" in content
+        or re.search(r"^\[advertisement\]\s*$", content, re.M)
+        or re.search(r"^advertisement:\s*$", content, re.M)
+    )
+    if not has_adv_section:
+        return False, f"no [params.advertisement] section (checked {len(configs)} config files)"
+    has_adsense = "adsense" in content.lower()
+    has_slots = "topSlot" in content or "inArticleSlot" in content
+    if has_adsense and has_slots:
+        return True, f"advertisement section with slots found ({len(configs)} config files)"
+    return False, f"advertisement section present but missing adsense/slots: adsense={has_adsense} slots={has_slots}"
 
 
 def _check_r03(site: Path) -> tuple[bool, str]:
