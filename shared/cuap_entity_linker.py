@@ -350,9 +350,22 @@ def _pick_safe_entity(conn, blog_id, max_candidates=5):
 
 
 def _fallback_blog(blog_id, used_blogs, max_candidates=5):
-    """blocked/필터된 블로그 대체: 안전 블로그에서 첫 번째 엔티티 반환."""
+    """blocked/필터된 블로그 대체: 안전 블로그에서 첫 번째 엔티티 반환.
+
+    audit Q5 준수: CROSS_GRAPH[blog_id]에 정의된 블로그(primary/secondary/
+    use_cases 합집합)만 fallback 대상으로 제한. 그래프 밖 무관 크로스링크
+    (INC-CL-01~04: camping→baby, health→camping, laptop→kitchen,
+    pet→beauty)를 차단한다. 판정 기준은 crosslink.py _is_crosslink_allowed와
+    동일 — CROSS_GRAPH가 카테고리 인접성 메타데이터.
+    """
+    graph = CROSS_GRAPH.get(blog_id, {})
+    allowed = set()
+    for category in ("primary", "secondary", "use_cases"):
+        allowed.update(graph.get(category, []))
+    if not allowed:
+        return None, None
     for fb in _SAFE_FALLBACK_BLOGS:
-        if fb == blog_id or fb in used_blogs:
+        if fb == blog_id or fb in used_blogs or fb not in allowed:
             continue
         conn = _get_db()
         try:
