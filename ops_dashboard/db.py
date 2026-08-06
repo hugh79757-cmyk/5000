@@ -77,10 +77,21 @@ def init_db(conn: sqlite3.Connection) -> None:
         checked_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
-    CREATE INDEX IF NOT EXISTS idx_check_blog ON check_results(blog_id);
-    CREATE INDEX IF NOT EXISTS idx_check_name ON check_results(check_name);
-    CREATE INDEX IF NOT EXISTS idx_check_time ON check_results(checked_at);
-    """)
+CREATE INDEX IF NOT EXISTS idx_check_blog ON check_results(blog_id);
+CREATE INDEX IF NOT EXISTS idx_check_name ON check_results(check_name);
+CREATE INDEX IF NOT EXISTS idx_check_time ON check_results(checked_at);
+
+CREATE TABLE IF NOT EXISTS standard_rules (
+    rule_id TEXT PRIMARY KEY,
+    target TEXT NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'MAJOR',
+    description TEXT NOT NULL DEFAULT '',
+    enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_standard_rules_target ON standard_rules(target);
+""")
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +101,16 @@ def init_db(conn: sqlite3.Connection) -> None:
 def _parse_yaml_file(path: Path) -> list[dict]:
     """간단한 YAML 파서 (pyyaml 없이, blogs.d 형식 전용).
 
-    블로그 항목은 '- id:'로 시작하는 항목을 찾아서 파싱한다.
+    블로그 항목은 '- key:' 패턴으로 시작하는 항목을 찾아서 파싱한다.
+    blog_id는 다음 키에서 추출 (우선순위): id, cf_project, blogger_blog_id,
+    blog_id_env(환경변수 이름 → 값은 런타임에 확인 불가하므로 이름 기록).
+
+    지원하는 시작 키:
+      - id: compare-hugo          (cap, cuap, etap, rap, tap)
+      - cf_project: compare-hugo  (cap, stap)
+      - blogger_blog_id: ...      (seap)
+      - domain: ...               (manual)
+      - blog_id_env: ...          (tap - tvshow-blogger, ud-blogger)
     """
     blogs = []
     current = None
@@ -100,13 +120,21 @@ def _parse_yaml_file(path: Path) -> list[dict]:
         for line in f:
             stripped = line.rstrip()
 
-            # 새 블로그 항목 시작
-            if stripped.startswith("- id:"):
+            # 새 블로그 항목 시작: 들여쓰기 없는 '- ' 접두사
+            if stripped.startswith("- ") and not stripped.startswith("  "):
+                # 새 항목 시작
                 if current:
                     blogs.append(current)
-                blog_id = stripped.split(":", 1)[1].strip()
-                current = {"blog_id": blog_id, "source_file": path.name}
+                current = {"blog_id": "", "source_file": path.name}
                 in_schedule = False
+
+                # 첫 키에서 ID 추출 시도
+                after_dash = stripped[2:].strip()  # "- " 제거
+                if ":" in after_dash:
+                    key, _, val = after_dash.partition(":")
+                    key = key.strip()
+                    val = val.strip()
+                    _assign_id_from_key(current, key, val)
                 continue
 
             if current is None:
@@ -125,25 +153,61 @@ def _parse_yaml_file(path: Path) -> list[dict]:
                 in_schedule = False
 
             # 일반 키: 값 파싱
-            if stripped.startswith("status:"):
-                current["config_status"] = stripped.split(":", 1)[1].strip()
-            elif stripped.startswith("domain:"):
-                current["domain"] = stripped.split(":", 1)[1].strip()
-            elif stripped.startswith("cf_project:"):
-                current["cf_project"] = stripped.split(":", 1)[1].strip()
-            elif stripped.startswith("site_path:"):
-                current["site_path"] = stripped.split(":", 1)[1].strip()
-            elif stripped.startswith("theme:"):
-                current["theme"] = stripped.split(":", 1)[1].strip()
-            elif stripped.startswith("pipeline:"):
-                current["pipeline"] = stripped.split(":", 1)[1].strip()
-            elif stripped.startswith("daily_quota:"):
-                current["daily_quota"] = stripped.split(":", 1)[1].strip()
+            if ":" not in stripped:
+                continue
+            key, _, val = stripped.partition(":")
+            key = key.strip()
+            val = val.strip()
+
+            if key == "id":
+                current["blog_id"] = val
+            elif key == "cf_project":
+                current["cf_project"] = val
+                if not current.get("blog_id"):
+                    current["blog_id"] = val
+            elif key == "blogger_blog_id":
+                current["blog_id"] = current.get("blog_id") or val
+            elif key == "blog_id_env":
+                current["blog_id_env"] = val
+                if not current.get("blog_id"):
+                    current["blog_id"] = f"env:{val}"
+            elif key == "status":
+                current["config_status"] = val
+            elif key == "domain":
+                current["domain"] = val
+            elif key == "site_path":
+                current["site_path"] = val
+            elif key == "theme":
+                current["theme"] = val
+            elif key == "pipeline":
+                current["pipeline"] = val
+            elif key == "daily_quota":
+                current["daily_quota"] = val
 
     if current:
         blogs.append(current)
 
     return blogs
+
+
+def _assign_id_from_key(blog: dict, key: str, val: str) -> None:
+    """첫 '- key: val' 라인에서 blog_id를 할당."""
+    if key == "id":
+        blog["blog_id"] = val
+    elif key == "cf_project":
+        blog["cf_project"] = val
+        blog["blog_id"] = val
+    elif key == "blogger_blog_id":
+        blog["blog_id"] = val
+    elif key == "domain":
+        blog["domain"] = val
+        # domain에서 blog_id 유추 불가 — 나중에 보완
+    elif key == "blog_id_env":
+        blog["blog_id_env"] = val
+        blog["blog_id"] = f"env:{val}"
+    else:
+        # 알 수 없는 시작 키 — 일단 빈 ID
+        pass
 
 
 def _detect_brand(filename: str) -> str:
@@ -316,6 +380,46 @@ def seed_known_issues(conn: sqlite3.Connection) -> int:
                 "na",
                 now,
             ))
+            count += 1
+        except sqlite3.IntegrityError:
+            pass
+    conn.commit()
+    return count
+
+
+# ---------------------------------------------------------------------------
+# Standard rules seed
+# ---------------------------------------------------------------------------
+
+SEED_STANDARD_RULES: list[dict] = [
+    {"rule_id": "R01", "target": "hugo.toml", "severity": "CRITICAL", "description": "showTableOfContents must be false"},
+    {"rule_id": "R02", "target": "hugo.toml", "severity": "CRITICAL", "description": "Advertisement section with adsense slots required"},
+    {"rule_id": "R03", "target": "extend-head.html", "severity": "CRITICAL", "description": "adsbygoogle.js must use site.Params (no hardcoding)"},
+    {"rule_id": "R04", "target": "extend_head.html", "severity": "MAJOR", "description": "GA4 + mobile correction CSS required"},
+    {"rule_id": "R05", "target": "adsense/top.html", "severity": "MAJOR", "description": "overflow:hidden;min-height:100px wrapper + outside push div"},
+    {"rule_id": "R06", "target": "adsense/in-article.html", "severity": "CRITICAL", "description": "fluid+in-article format (no auto) + outside push div"},
+    {"rule_id": "R07", "target": "single.html", "severity": "MAJOR", "description": "H2 split injection + prose wrapper"},
+    {"rule_id": "R08", "target": "single.html", "severity": "MAJOR", "description": "Description (lead) must be removed"},
+    {"rule_id": "R09", "target": "baseof.html", "severity": "MAJOR", "description": "No custom override — use theme default"},
+    {"rule_id": "R10", "target": "custom.css", "severity": "MAJOR", "description": "Unfilled space removal + dark mode + min-height rules"},
+    {"rule_id": "R11", "target": "layouts/", "severity": "MAJOR", "description": "mobile-sticky.html must not be used"},
+    {"rule_id": "R12", "target": "layouts/", "severity": "MAJOR", "description": "No override files beyond the allowed set"},
+]
+
+
+def seed_standard_rules(conn: sqlite3.Connection) -> int:
+    """standard_rules 테이블에 R01~R12 규칙을 시드.
+
+    반환: 삽입된 행 수 (기존과 중복된 것은 무시).
+    """
+    count = 0
+    for rule in SEED_STANDARD_RULES:
+        try:
+            conn.execute("""
+                INSERT OR IGNORE INTO standard_rules
+                (rule_id, target, severity, description)
+                VALUES (?, ?, ?, ?)
+            """, (rule["rule_id"], rule["target"], rule["severity"], rule["description"]))
             count += 1
         except sqlite3.IntegrityError:
             pass

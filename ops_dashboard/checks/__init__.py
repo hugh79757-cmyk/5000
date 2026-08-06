@@ -72,3 +72,25 @@ def run_all_checks(
                 summary["unknown"] += 1
 
     return summary
+
+
+try:
+    from ops_dashboard.checks import standard  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from ops_dashboard.checks import freshness  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from ops_dashboard.checks import render  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from ops_dashboard.checks import crosscheck  # noqa: F401
+except ImportError:
+    pass
+

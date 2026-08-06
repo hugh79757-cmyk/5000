@@ -1,0 +1,2102 @@
+{
+  "created_at": "2026-08-06T13:03:49.835566",
+  "total_blogs": 85,
+  "total_checks": 340,
+  "pass": 205,
+  "fail": 85,
+  "unknown": 50,
+  "attention_items": [
+    {
+      "blog_id": "compare-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "deal-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "ev-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "guide-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "hotissue-hugo",
+      "check": "standard_compliance",
+      "detail": "2/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/robots.txt",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "pick-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4, mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rank-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4, mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "tco-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/partials/related.html, layouts/partials/header/components/translations.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "appliance-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "baby-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "beauty-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "bike-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "camping-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "car-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "fitness-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "golf-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "health-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "homeappliance-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "interior-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "kitchen-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/index.html, layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/partials/extend-footer.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "laptop-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "massage-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "pet-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "adventure-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "airlines-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "airports-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "bus-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "citytours-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "cruise-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "culture-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "daytrips-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "deals-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "dining-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "escape-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "esim-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "eurail-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "extreme-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "ferry-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "flights-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "foodtour-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "ghost-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "hiking-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "layover-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "luxury-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "michelin-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "multiday-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "nature-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "nightlife-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "nomad-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "phototour-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "tour-hugo",
+      "check": "standard_compliance",
+      "detail": "6/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R03(CRITICAL): extend-head: hardcoded ca-pub- (must use site.Params); R04(MAJOR): extend_head: missing mobile CSS; R10(MAJOR): No custom.css found",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "tours-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "trains-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "transfers-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "visa-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "visafree-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "walking-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "watersports-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "watertours-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "biz-techpawz-hugo",
+      "check": "standard_compliance",
+      "detail": "2/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/sitemap.xml, layouts/partials/author.html, layouts/partials/related-single-bottom.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "informationhot-hugo",
+      "check": "standard_compliance",
+      "detail": "8/12 rules failed: R02(CRITICAL): hugo.toml: advertisement section present but missing adsense/slots; R03(CRITICAL): extend-head: hardcoded ca-pub- (must use site.Params); R04(MAJOR): extend_head: missing mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R07(MAJOR): single.html: missing H2 split injection, prose wrapper",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "issue-techpawz-hugo",
+      "check": "standard_compliance",
+      "detail": "1/12 rules failed: R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/shortcodes/chain-card.html, layouts/shortcodes/chain-official-card.html, layouts/shortcodes/dday.html, layouts/shortcodes/inchcm.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rotcha-blog",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/404.html, layouts/archives/single.html, layouts/shortcodes/chain-card.html, layouts/shortcodes/chain-official-card.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "techpawz-hugo",
+      "check": "standard_compliance",
+      "detail": "1/12 rules failed: R12(MAJOR): Unauthorized overrides: layouts/index.html, layouts/.DS_Store, layouts/sitemap.xml, layouts/shortcodes/chain-card.html, layouts/shortcodes/chain-official-card.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rap-hugo",
+      "check": "standard_compliance",
+      "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rap2-hugo",
+      "check": "standard_compliance",
+      "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rap3-hugo",
+      "check": "standard_compliance",
+      "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rap4-hugo",
+      "check": "standard_compliance",
+      "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "rap5-hugo",
+      "check": "standard_compliance",
+      "detail": "6/12 rules failed: R03(CRITICAL): extend-head: hardcoded ca-pub- (must use site.Params); R04(MAJOR): extend_head: missing mobile CSS; R05(MAJOR): top.html: missing overflow:hidden, min-height; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R09(MAJOR): baseof.html: custom override detected (should use theme default)",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "senior-blogger",
+      "check": "gsd_crosscheck",
+      "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "senior-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R02(CRITICAL): hugo.yaml: advertisement section present but missing adsense/slots; R04(MAJOR): extend_head: missing GA4, mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R08(MAJOR): single.html: .Lead/.Description still present (not removed); R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/shortcodes/btn.html, layouts/shortcodes/coupang.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "dividend-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "etf-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "finance-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "ipo-hugo",
+      "check": "standard_compliance",
+      "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/extend-article-footer.html, layouts/partials/related.html, layouts/partials/extend-article-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "sector-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "stock-hugo",
+      "check": "standard_compliance",
+      "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/partials/tradingview-widget.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "tap-blogger",
+      "check": "gsd_crosscheck",
+      "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "travel-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/language-redirect.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "travel1-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "travel2-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "travel3-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "travel4-hugo",
+      "check": "standard_compliance",
+      "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/extend-head-uncached.html, layouts/partials/related.html",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "tvshow-blogger",
+      "check": "gsd_crosscheck",
+      "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)",
+      "evidence_url": ""
+    },
+    {
+      "blog_id": "ud-blogger",
+      "check": "gsd_crosscheck",
+      "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)",
+      "evidence_url": ""
+    }
+  ],
+  "brands": {
+    "cap": {
+      "total": 8,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "cuap": {
+      "total": 15,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "etap": {
+      "total": 36,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "manual": {
+      "total": 5,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "rap": {
+      "total": 5,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "seap": {
+      "total": 2,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "stap": {
+      "total": 6,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    },
+    "tap": {
+      "total": 8,
+      "pass": 0,
+      "fail": 0,
+      "unknown": 0
+    }
+  },
+  "blog_results": {
+    "compare-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "deal-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "ev-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "guide-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "hotissue-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "2/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/robots.txt"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 4 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "pick-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4, mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "rank-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4, mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "tco-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/partials/related.html, layouts/partials/header/components/translations.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "appliance-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "baby-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "beauty-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "bike-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "camping-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "car-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "fitness-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "golf-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "health-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "homeappliance-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "interior-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "kitchen-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/index.html, layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/partials/extend-footer.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "laptop-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "massage-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "pet-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/cuap-spider-links.html, layouts/partials/related.html, layouts/_default/_markup/render-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "adventure-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "airlines-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "airports-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "bus-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "citytours-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "cruise-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "culture-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "daytrips-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "deals-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "dining-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "escape-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "esim-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "eurail-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "extreme-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "ferry-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "flights-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 3 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "foodtour-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "ghost-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "hiking-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "layover-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "luxury-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "michelin-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "multiday-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "nature-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "nightlife-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "nomad-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is disabled — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is disabled — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "phototour-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "tour-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "6/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R03(CRITICAL): extend-head: hardcoded ca-pub- (must use site.Params); R04(MAJOR): extend_head: missing mobile CSS; R10(MAJOR): No custom.css found"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "tours-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "trains-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "transfers-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "visa-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "visafree-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "walking-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "watersports-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "watertours-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing GA4, mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/partials/related.html, layouts/partials/head/custom.html"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "biz-techpawz-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "2/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/sitemap.xml, layouts/partials/author.html, layouts/partials/related-single-bottom.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "informationhot-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "8/12 rules failed: R02(CRITICAL): hugo.toml: advertisement section present but missing adsense/slots; R03(CRITICAL): extend-head: hardcoded ca-pub- (must use site.Params); R04(MAJOR): extend_head: missing mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R07(MAJOR): single.html: missing H2 split injection, prose wrapper"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "issue-techpawz-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "1/12 rules failed: R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/shortcodes/chain-card.html, layouts/shortcodes/chain-official-card.html, layouts/shortcodes/dday.html, layouts/shortcodes/inchcm.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "rotcha-blog": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.toml: no [params.advertisement] section; R04(MAJOR): extend_head: missing GA4; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/404.html, layouts/archives/single.html, layouts/shortcodes/chain-card.html, layouts/shortcodes/chain-official-card.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "techpawz-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "1/12 rules failed: R12(MAJOR): Unauthorized overrides: layouts/index.html, layouts/.DS_Store, layouts/sitemap.xml, layouts/shortcodes/chain-card.html, layouts/shortcodes/chain-official-card.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "rap-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "rap2-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "rap3-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "rap4-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "2/12 rules failed: R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/extend-head-uncached.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "rap5-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "6/12 rules failed: R03(CRITICAL): extend-head: hardcoded ca-pub- (must use site.Params); R04(MAJOR): extend_head: missing mobile CSS; R05(MAJOR): top.html: missing overflow:hidden, min-height; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R09(MAJOR): baseof.html: custom override detected (should use theme default)"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "senior-blogger": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "fail",
+        "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)"
+      },
+      "standard_compliance": {
+        "status": "unknown",
+        "detail": "Site path not found for senior-blogger"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "senior-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R02(CRITICAL): hugo.yaml: advertisement section present but missing adsense/slots; R04(MAJOR): extend_head: missing GA4, mobile CSS; R06(CRITICAL): in-article.html: missing fluid format, missing in-article format, data-ad-format=auto (prohibited); R08(MAJOR): single.html: .Lead/.Description still present (not removed); R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/shortcodes/btn.html, layouts/shortcodes/coupang.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "dividend-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "etf-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "finance-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "ipo-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "4/12 rules failed: R01(CRITICAL): hugo.toml: showTableOfContents=true (must be false); R02(CRITICAL): hugo.toml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/extend-article-footer.html, layouts/partials/related.html, layouts/partials/extend-article-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "sector-hugo": {
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      },
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R02(CRITICAL): hugo.yaml: no [params.advertisement] section; R06(CRITICAL): in-article.html: missing fluid format, data-ad-format=auto (prohibited); R12(MAJOR): Unauthorized overrides: layouts/partials/tradingview-widget.html, layouts/partials/related.html, layouts/partials/extend-article-link.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      }
+    },
+    "stock-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "5/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R04(MAJOR): extend_head: missing mobile CSS; R10(MAJOR): No custom.css found; R12(MAJOR): Unauthorized overrides: layouts/.DS_Store, layouts/partials/tradingview-widget.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 3 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "tap-blogger": {
+      "standard_compliance": {
+        "status": "unknown",
+        "detail": "Site path not found for tap-blogger"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "fail",
+        "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)"
+      }
+    },
+    "travel-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/language-redirect.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "travel1-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "travel2-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "travel3-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "travel4-hugo": {
+      "standard_compliance": {
+        "status": "fail",
+        "detail": "3/12 rules failed: R01(CRITICAL): No hugo.toml/config found; R02(CRITICAL): No hugo.toml/config found; R12(MAJOR): Unauthorized overrides: layouts/shortcodes/article.html, layouts/shortcodes/lead.html, layouts/partials/extend-head-uncached.html, layouts/partials/related.html"
+      },
+      "freshness": {
+        "status": "unknown",
+        "detail": "No publish data available (days_since_last_publish is NULL)"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "HTTP 200 — site reachable"
+      },
+      "gsd_crosscheck": {
+        "status": "pass",
+        "detail": "All 2 auto-detectable issues have corresponding check failures"
+      }
+    },
+    "tvshow-blogger": {
+      "standard_compliance": {
+        "status": "unknown",
+        "detail": "Site path not found for tvshow-blogger"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "fail",
+        "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)"
+      }
+    },
+    "ud-blogger": {
+      "standard_compliance": {
+        "status": "unknown",
+        "detail": "Site path not found for ud-blogger"
+      },
+      "freshness": {
+        "status": "pass",
+        "detail": "Blog is inactive — freshness check not applicable"
+      },
+      "render_health": {
+        "status": "pass",
+        "detail": "Blog is inactive — render check not applicable"
+      },
+      "gsd_crosscheck": {
+        "status": "fail",
+        "detail": "2/2 auto-detectable issues not detected by checks: STRUCT-01: etap_write_hugo — _write_hugo_post() 30+ 파일 중복; STRUCT-02: publisher_token — publisher.py CLOUDFLARE_API_TOKEN 유지 (불일치)"
+      }
+    }
+  }
+}
