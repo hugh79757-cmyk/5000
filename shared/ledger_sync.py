@@ -81,8 +81,13 @@ def _ensure_schema(conn) -> None:
         )
     """)
     conn.execute("""
+        -- partial UNIQUE (source != '' 조건부, 2026-08-06 STRUCT-11 해결):
+        -- source='' 은 레거시 실발행(dispatcher._record_ledger) 기록으로
+        -- 전량 보존 대상 — 인덱스에서 제외해 UNIQUE 충돌을 막는다.
+        -- source!='' (run_sync 소스 재삽입 경로)만 4중 키로 dedup한다.
         CREATE UNIQUE INDEX IF NOT EXISTS idx_ledger_dedup
-        ON publish_ledger(blog_id, slug, DATE(created_at))
+        ON publish_ledger(blog_id, slug, DATE(created_at), source)
+        WHERE source != ''
     """)
     conn.execute("""
         CREATE INDEX IF NOT EXISTS idx_ledger_blog_date
@@ -113,9 +118,9 @@ def _sync_source(ledger_conn, src):
         if not title or not blog_id:
             continue
         try:
-            # 주의: idx_ledger_dedup이 실제 DB에서 UNIQUE가 아닐 수 있음(선존 버그).
-            # INSERT OR IGNORE는 non-unique 인덱스에서 무력하므로, 존재 확인 후 INSERT.
-            # (기존 중복 데이터는 건드리지 않음 — 비파괴 가드)
+            # idx_ledger_dedup은 partial UNIQUE(source != '')로 2026-08-06에 재생성됨(STRUCT-11 해결).
+            # SELECT-존재확인 후 INSERT로 이중 안전장치 유지 (3중 키 기준은 partial UNIQUE의
+            # 4중 키보다 넓어, 같은 날짜·slug의 다른 source 삽입도 미리 차단).
             dup = ledger_conn.execute(
                 "SELECT 1 FROM publish_ledger"
                 " WHERE blog_id=? AND slug=? AND DATE(created_at)=DATE(?) LIMIT 1",
