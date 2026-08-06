@@ -163,11 +163,6 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     if category:
         fm += "categories: ['" + category + "']\n"
     if thumbnail_url:
-        fm += "cover:\n"
-        fm += '  image: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
-        fm += '  relative: true\n'
-        fm += '  alt: ' + _sanitize_yaml_value(title) + '\n'
-        fm += "  hidden: false\n"
         fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     fm += "---\n\n"
     return fm, date_str
@@ -201,21 +196,12 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     if tag_list:
         fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
     if thumbnail_url:
-        fm += "cover:\n"
-        fm += '  image: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
-        fm += '  relative: true\n'
         fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     elif "stock" in blog_id:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/stock-default-thumbnail.webp"
-        fm += "cover:\n"
-        fm += '  image: ' + _sanitize_yaml_value(_url) + '\n'
-        fm += '  relative: true\n'
         fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
     else:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
-        fm += "cover:\n"
-        fm += '  image: ' + _sanitize_yaml_value(_url) + '\n'
-        fm += '  relative: true\n'
         fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
     fm += "---\n"
     return fm, date_str
