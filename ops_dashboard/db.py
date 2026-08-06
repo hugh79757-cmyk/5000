@@ -362,6 +362,8 @@ SEED_ISSUES: list[dict] = [
     {"issue_id": "Q2", "blog_ids": "beauty-hugo,fitness-hugo,health-hugo", "category": "cuap", "symptom": "unsource_number — 소스 불명 수치 (30%)", "recorded_date": "2026-08-05", "gsd_status": "open", "auto_detectable": "no", "detection_method": "프롬프트 퍼지 표현 필터 미적용"},
     {"issue_id": "Q3", "blog_ids": "beauty-hugo,health-hugo", "category": "cuap", "symptom": "health_efficacy — 건강 효능 단정 (20%, 법적 리스크)", "recorded_date": "2026-08-05", "gsd_status": "open", "auto_detectable": "no", "detection_method": "프롬프트 건강 효능 금지 지시 없음"},
     {"issue_id": "Q4", "blog_ids": "baby-hugo,camping-hugo,pet-hugo", "category": "cuap", "symptom": "template_h2 — 반복 H2 템플릿 구조 (30%)", "recorded_date": "2026-08-05", "gsd_status": "open", "auto_detectable": "no", "detection_method": "프롬프트가 ## N위: 제품명 고정 강제"},
+    {"issue_id": "Q5", "blog_ids": "beauty-hugo", "category": "quality", "symptom": "금지어 dead config: quality_checklist.yaml global_forbidden_words 6개 정의되나 writer.py 런타임 미적용", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "re.findall(pattern, content) — 좋은(12건), 최고의(4건) 실측"},
+    {"issue_id": "Q6", "blog_ids": "beauty-hugo", "category": "quality", "symptom": "H2 검증 허점: writer.py:496이 H2 카운트만 하고 H2>=1 미검증. 옛 TOP5 포맷 잔존글에서 H2=0 발생", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "re.findall(r'^## ', content) — H2=0 포스트 1건 실측"},
 
     # 품질 감사 (미해결)
     {"issue_id": "QA-01", "blog_ids": "travel3-hugo", "category": "tap", "symptom": "title_body_region — 제목 '계룡시' vs 본문 '서산시' 지역 불일치", "recorded_date": "2026-08-05", "gsd_status": "open", "auto_detectable": "no", "detection_method": "제목-본문 지역 검증 게이트 미구현"},
@@ -377,6 +379,7 @@ SEED_ISSUES: list[dict] = [
     {"issue_id": "STRUCT-03", "blog_ids": "hotissue-hugo", "category": "cap", "symptom": "theme_mismatch — PaperMod 테마 (Blowfish 통일 기준 위반)", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "YAML theme 필드 != blowfish"},
     {"issue_id": "STRUCT-04", "blog_ids": "stock-hugo", "category": "stap", "symptom": "theme_mismatch — Congo 테마 (Blowfish 통일 기준 위반)", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "YAML theme 필드 != blowfish"},
     {"issue_id": "STRUCT-06", "blog_ids": "flights-hugo", "category": "etap", "symptom": "flights_flight — flights-hugo(YAML/CF) vs flight-hugo(dispatcher) 불일치", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "grep flight-hugo in dispatcher.py vs YAML"},
+    {"issue_id": "STRUCT-07", "blog_ids": "beauty-hugo", "category": "structural", "symptom": "publish_ledger title 공백: 발행 성공(published) 시 title=\"\" 45.9%(187/407). ledger 기록 누락", "recorded_date": "2026-08-06", "gsd_status": "open", "auto_detectable": "yes", "detection_method": "SELECT COUNT(*) WHERE title=\"\" AND status=\"published\" — 187/407건"},
 
     # Triage 해결 이슈 (대표적 10건)
     {"issue_id": "T-04", "blog_ids": "tap-blogger", "category": "tap", "symptom": "tap_meta_response — 메타 응답 발행 (해결됨)", "recorded_date": "2026-07-26", "gsd_status": "resolved", "auto_detectable": "yes", "detection_method": "validators.py 메타 패턴 매칭"},
