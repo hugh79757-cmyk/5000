@@ -68,6 +68,44 @@
 - gsd_crosscheck 감지 프록시 개선 여부 사용자 결정 대기.
 - **스케줄러 정지 상태 유지.**
 
+## 세션 스냅샷 3 (2026-08-06 심야 — Q5 종료 + Q6 H2 가드 + STRUCT-18 + stash 확인)
+
+### Q6 — fix(writer): H2>=1 가드 (커밋 ed36af514)
+
+- 수정 방식: **재생성 유도 + 최종 명시적 fail 이중 구조**. `_count_h2()` 추가(`^##\s`, H3 제외, 탭 허용). 시도 루프 내 `_sanitize_body()` 직후 H2=0 → warning + body="" + continue(재시도). 루프 종료 후 H2=0 잔존 → `logger.error` + `return None`(침묵 통과 방지).
+- 실측: `화장수-추천-top5-2026년`(CUAP beauty-hugo) **H1=0/H2=0** — 옛 TOP5 포맷은 H3(###)만 사용. `유모차-추천-인기-순위-top5`는 H2=1.
+- dry-run: 실 LLM `generate_curation_article('화장수 토너', …, beauty-hugo)` → **H2=9, len=4297** — 신규 생성 H2>=1 보장 확인 (발행/배포 없음).
+- 유닛: H3-only 3회 → None(fail) / 1차 H2=0→재시도→2차 H2>0 성공(retry) / H2 카운트 정확성.
+- 회귀: **18 failed / 144 passed — baseline과 동일 이름·동일 건수** (diff 확인).
+
+### Q5 종료 (커밋 23edc896a, known_issue resolved)
+
+- finance=STAP 파이프라인(별도 shared/ai_writer.py, dispatcher STAP_PIPELINE_MAP) → CUAP writer.py의 Q5 검증 대상 아님 **확정 기록**.
+- 검증 완료: beauty-hugo dry-run(3,597자, 금지어 0) + 유닛(주입 6건 전부 치환/제거).
+- 공백 노트: **"실발행 검증은 CUAP 재개 후"** — known_issue Q5 notes + db.py SEED에 기록.
+
+### STRUCT-18 등록 (gsd_crosscheck 플래핑 — 코드 미수정, 메모)
+
+- crosscheck detected 프록시 = "블로그에 fail 체크 1개라도 존재" + 전역 이슈(blog_ids='') 전파 → 일시 fail 소멸 시 pass↔fail 플래핑. travel1-hugo 06:03 pass→13:19 pass→15:11 fail→15:12 pass→15:23 fail 실측. tap/travel1~3/tvshow/ud 6곳 일시 +fail(본 세션 커밋과 무관).
+- `auto_detectable='no'`로 등록 — auto=yes 시 모든 블로그 crosscheck가 추가 fail되는 것을 방지(메모 성격). 개선 방향(다음 작업 후보): 감지 프록시를 **체크명별 매핑**(auto-detectable 이슈 ↔ 담당 체크명)으로 전환.
+
+### stash 4건 — 읽기 전용 확인 (pop/drop/apply 안 함)
+
+| stash | base | 내용 | HEAD 중복 판정 |
+|-------|------|------|----------------|
+| @{0} | 8/3 c9800eb61 | rap.yaml force_draft(5곳) + car/rap pipeline + test_alert_thresholds 완화(18-fail 중 2건 fix 시도) + 계획 문서 | rap force_draft만 **중복(커밋됨)**. rap 상태 active/quota5는 HEAD(paused/quota10)와 상이 — 스테일. 테스트 수정은 미커밋 |
+| @{1} | 8/3 1cb5a0f4b | cuap.yaml 10곳 active→inactive + curation/pipeline.py 40줄 + writer.py + title_templates + defense_layers 테스트 | 전부 미커밋. 현재 cuap.yaml은 전부 active — CUAP 중지는 config가 아닌 스케줄러 정지로 처리 중 |
+| @{2} | 7/30 fd016b3a3 | keywords.py 브랜드 리네이밍("그램"→"LG 그램") + travel 계절 필터→경고만 로그(데이터 소진 방지) + senior/stock/rap fetcher·pipeline + STATE.md | 전부 미커밋 |
+| @{3} | 7/26 c0df11b38 | phase-8 flagged 정리(delete_flagged_posts 신규, flagged_posts.yaml 3,286줄, verify_cleanup) + telegram_notifier 전면 개편 + validators.py 214줄 + hugo_writer/dispatcher + AGENTS.md | 전부 미커밋. 일부는 이후 커밋에서 다른 형태로 반영됐을 가능성(reverse-apply 0건이라 정확 역본 아님) |
+
+정리(pop/drop/apply)는 사용자 판단으로 보류.
+
+### 정상화 잔여 재집계 (Q5/Q6 종료 후)
+
+- 준수율 **12.5% 불변** (pass 1/25, actionable fail 7, deferred 19, out_of_scope 11, unknown 1). stale **3**. known_issue **22개 open**(23 − Q5 − Q6 + STRUCT-18, 정상화 대상 교집합 기준). → 확장 BLOCKED 유지.
+- 잔여: R01(TOC 비활성 8곳), R03(로더 Publisher ID 3곳), R06/STRUCT-16(광고 형식, 콘솔 확인 대기), STRUCT-12/13(content.db), STRUCT-14(git 미관리), STRUCT-15(이중 관리), STRUCT-18(crosscheck), INC-CL-01~04(베이크드 재렌더), Q1~Q4/QA-01~06(비대상/미해결).
+- **스케줄러 정지 상태 유지. finance 외 발행 재개 금지.**
+
 ## 배경
 
 `shared/ledger_sync.py` `run_sync()`을 라이브 상태에서 수동 실행. 실제 DB의
