@@ -137,6 +137,16 @@ def _build_unpause_checklist(
     domain = get_blog_domain(conn, blog_id)
     pipeline_path = get_blog_pipeline_path(conn, blog_id)
 
+    # 베이크된 무관 크로스링크 이슈 (INC-CL): 코드 필터는 7e2bd2312로
+    # 신규 생성을 차단했지만 기존 발행 포스트의 무관 링크는 재개 시
+    # 재렌더로 정리해야 한다. open INC-CL 이슈가 있으면 재개 조건에 추가.
+    baked_inc_cl_rows = conn.execute("""
+        SELECT issue_id, symptom FROM known_issues
+        WHERE gsd_status = 'open'
+          AND issue_id LIKE 'INC-CL%'
+          AND (',' || blog_ids || ',') LIKE ?
+    """, (f"%,{blog_id},",)).fetchall()
+
     checklist = [
         {
             "id": "U01",
@@ -209,6 +219,16 @@ def _build_unpause_checklist(
             "evidence": _m_detail("M06"),
         },
     ]
+
+    # 베이크드 크로스링크 재렌더 정리 (INC-CL open 이슈가 있는 블로그만)
+    for idx, inc in enumerate(baked_inc_cl_rows, start=1):
+        checklist.append({
+            "id": f"U1{0 + idx}",
+            "title": "베이크된 무관 크로스링크 재렌더 정리",
+            "note": "코드 필터(7e2bd2312)로 신규 생성은 차단됨. 기존 발행 포스트의 CROSS_GRAPH 밖 링크는 재개 시 새 로직으로 재렌더해 정리",
+            "auto_status": "needs_manual",
+            "evidence": f"{inc['issue_id']}: {inc['symptom'][:120]}",
+        })
 
     return checklist
 
