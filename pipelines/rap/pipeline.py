@@ -6,6 +6,7 @@ import random
 import sqlite3
 from datetime import datetime
 
+from shared.db import get_db_path
 from shared.validators import assert_korean_or_reject, sanitize_title
 
 logger = logging.getLogger(__name__)
@@ -16,7 +17,10 @@ except ImportError:
     def tg_error(*a, **k) -> None:
         return None
 
-RAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "rap.db")
+# RAP 전용 DB path는 shared/db.py 중앙 해석으로 배선 (Phase 61, D-06).
+# get_db_path("rap") 은 기존 data/rap.db 와 동일 경로를 반환하므로 동작 불변.
+RAP_DB_PATH = get_db_path("rap")
+# GAP_DB_PATH 는 gap.db 폴백으로 인라인 유지 (Review: gap.db 는 shared/db.py 로 배선하지 않음).
 GAP_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "gap.db")
 
 # 부동산 무관 키워드 제외 패턴

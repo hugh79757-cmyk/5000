@@ -136,7 +136,11 @@ def fetch_senior_jobs():
 
 import sqlite3
 
-SENIOR_DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "senior.db")
+# 시니어(SEAP) 전용 DB path는 shared/db.py 중앙 해석으로 배선 (Phase 61, D-06).
+# get_db_path("senior") 은 기존 data/senior.db 와 동일 경로를 반환하므로 동작 불변.
+from shared.db import get_db_path
+
+SENIOR_DB_PATH = get_db_path("senior")
 
 
 def init_senior_db() -> None:
