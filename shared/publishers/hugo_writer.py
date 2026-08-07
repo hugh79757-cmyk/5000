@@ -117,9 +117,9 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
         fm += 'description: ' + _sanitize_yaml_value(description, max_len=200) + '\n'
     fm += 'slug: ' + _sanitize_yaml_value(slug) + '\n'
     if category:
-        fm += 'categories: [' + _sanitize_yaml_value(category) + ']\n'
+        fm += 'categories:\n  - ' + category + '\n'
     if tag_list:
-        fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
+        fm += "tags: [" + ", ".join(t.strip("'\"") for t in (_sanitize_yaml_value(t) for t in tag_list)) + "]\n"
     if thumbnail_url:
         fm += 'image: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
         fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
@@ -159,9 +159,9 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
     if description:
         fm += 'description: ' + _sanitize_yaml_value(description, max_len=200) + '\n'
     if tag_list:
-        fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
+        fm += "tags: [" + ", ".join(t.strip("'\"") for t in (_sanitize_yaml_value(t) for t in tag_list)) + "]\n"
     if category:
-        fm += "categories: ['" + category + "']\n"
+        fm += "categories:\n  - " + category + "\n"
     if thumbnail_url:
         fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     fm += "---\n\n"
@@ -192,9 +192,9 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
         fm += 'description: ' + _sanitize_yaml_value(description, max_len=200) + '\n'
     fm += 'slug: ' + _sanitize_yaml_value(slug) + '\n'
     if category:
-        fm += 'categories: [' + _sanitize_yaml_value(category) + ']\n'
+        fm += 'categories:\n  - ' + category + '\n'
     if tag_list:
-        fm += "tags: [" + ", ".join(_sanitize_yaml_value(t) for t in tag_list) + "]\n"
+        fm += "tags: [" + ", ".join(t.strip("'\"") for t in (_sanitize_yaml_value(t) for t in tag_list)) + "]\n"
     if thumbnail_url:
         fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
     elif "stock" in blog_id:
@@ -924,7 +924,26 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
         site_path = os.path.join(os.path.dirname(FIVEK_ROOT), blog_cfg.get("repo", ""))
+    # ── C01/C04 원인추적 훅 (a) 생성 직후 ──
+    try:
+        from shared.leak_tracker import check_c01_c04
+        _leak_result = check_c01_c04(body_md, "after_generation", slug, locale="ko")
+        if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
+            logger.info(f"[LEAK-TRACKER] (a)생성직후 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} {slug}")
+    except ImportError:
+        pass
+
     body_md = _clean_body(body_md, site_path=site_path)
+
+    # ── C01/C04 원인추적 훅 (b) humanizer 통과 직후 ──
+    try:
+        from shared.leak_tracker import check_c01_c04
+        _leak_result = check_c01_c04(body_md, "after_humanizer", slug, locale="ko")
+        if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
+            logger.info(f"[LEAK-TRACKER] (b)humanizer후 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} {slug}")
+    except ImportError:
+        pass
+
     description = _extract_description(body_md)
 
     if not thumbnail_url:
@@ -1088,6 +1107,16 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     body_md = body_md + "\n\n" + schema_json
     content = fm + body_md
 
+    # ── C01/C04 원인추적 훅 (c) 저장 직전 ──
+    try:
+        from shared.leak_tracker import check_c01_c04
+        _leak_result = check_c01_c04(content, "before_write", slug, locale="ko")
+        if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
+            logger.warning(f"[LEAK-TRACKER] (c)저장직전 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} — 배포중단 대상 {slug}")
+            return {"success": False, "error": f"leak_detected: C01={_leak_result['c01_detected']}, C04={_leak_result['c04_detected']}"}
+    except ImportError:
+        pass
+
     _ok, _err = _validate_frontmatter(fm)
     if not _ok:
         logger.error(f"[PUBLISH] Invalid front matter — write blocked: {_err}")
@@ -1127,6 +1156,16 @@ def _write_hugo_post_etap(article, cover_image=None, body_images=None, blog_id=N
     slug = article["slug"]
     title = article["title"]
     content = article["content"]
+
+    # ── C01/C04 원인추적 훅 (a) ETAP 생성 직후 ──
+    try:
+        from shared.leak_tracker import check_c01_c04
+        _leak_result = check_c01_c04(content, "after_generation_etap", slug, locale="en")
+        if _leak_result["c04_detected"]:
+            logger.info(f"[LEAK-TRACKER] (a)ETAP생성직후 C04:{_leak_result['c04_detected']} {slug}")
+    except ImportError:
+        pass
+
     tags = article.get("tags", [])
     description = article.get("description", "")
     is_draft = is_draft or article.get("_draft", False)
