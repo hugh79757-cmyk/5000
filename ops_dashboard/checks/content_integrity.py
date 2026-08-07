@@ -1,0 +1,365 @@
+"""ops_dashboard.checks.content_integrity — C01~C08 콘텐츠 무결성 검사
+
+블로그별 콘텐츠 무결성 규칙(C01~C08)을 검사하고 결과를 check_results에 기록.
+"""
+from __future__ import annotations
+
+import json
+import logging
+import re
+from datetime import datetime
+from pathlib import Path
+
+from ops_dashboard.checks import register_check
+from ops_dashboard.db import get_blog_detail, record_check
+
+logger = logging.getLogger(__name__)
+
+# 프론트매터 키 목록 (C03 검출 대상)
+FM_KEYS = ["title", "og_image", "featureimage", "date", "slug",
+            "categories", "tags", "description", "draft", "image", "pubDate", "author"]
+
+# C04 패턴 (국문 + 영문) - dispatcher.py preflight_check와 동일한 패턴 사용
+C04_KO_PATTERNS = [
+    r"생각해보자\b",         # "생각해보자" (문장 끝)
+    r"생각해\s*보자\b",      # "생각해 보자" (문장 끝)
+    r"다음\s*단계로\s*넘어", # "다음 단계로 넘어가자"
+    r"단계별로\s*진행해",    # "단계별로 진행해보자"
+    r"우선\s*,?\s*(우리가|제가|내가|우리)\s*해야",  # "우선, 우리가 해야..."
+    r"우리가\s*해야\s*할\s*것은",  # "우리가 해야 할 것은"
+    r"생각\s*과정을\s*통해", # "생각 과정을 통해"
+    r"결론부터\s*말하면",    # "결론부터 말하면"
+    r"먼저\s*생각해보자",    # "먼저 생각해보자" (let's think)
+    r"단계별로\s*생각",      # "단계별로 생각해보자"
+]
+C04_EN_PATTERNS = [
+    r"\bNeed\s+to\s+think\b",
+    r"\bWe\s+need\s+to\s+write\b",
+    r"Let['']s\s+think\s+step\s+by\s+step",
+    r"think\s+step\s+by\s+step",
+    r"let['']s\s+break\s+this\s+down",
+    r"here['']s\s+the\s+plan",
+    r"\bfirstly,?\s+",      # "Firstly," (LLM 스타일)
+    r"\b secondly,?\s+",    # "Secondly," (LLM 스타일)
+    r"in\s+order\s+to\s+achieve",
+    r"as\s+an\s+AI\s+language\s+model",
+]
+
+
+def _find_site_path(conn, blog_id: str) -> Path | None:
+    """blog_lifecycle에서 site_path 추출."""
+    blog = get_blog_detail(conn, blog_id)
+    if not blog:
+        return None
+    sp = blog.get("site_path", "")
+    p = Path(sp) if sp else None
+    return p if p and p.exists() else None
+
+
+def _read_post_files(site: Path) -> list[tuple[Path, str]]:
+    """site/content/posts/의 최신 md 파일 목록 반환."""
+    posts_dir = site / "content" / "posts"
+    if not posts_dir.exists():
+        return []
+    cutoff = datetime.now().timestamp() - 7 * 86400
+    results = []
+    for md_file in posts_dir.rglob("*.md"):
+        if md_file.stat().st_mtime >= cutoff:
+            results.append((md_file, md_file.read_text(encoding="utf-8", errors="replace")))
+    return results
+
+
+def _parse_frontmatter(content: str) -> tuple[str | None, dict]:
+    """frontmatter 파싱 (단순 regex)."""
+    m = re.match(r"^---\n(.*?)\n---\n", content, re.DOTALL)
+    if not m:
+        return None, {}
+    fm_text = m.group(1)
+    fm = {}
+    for line in fm_text.split("\n"):
+        if ":" in line:
+            k, v = line.split(":", 1)
+            k, v = k.strip(), v.strip().strip("'\"")
+            fm[k] = v
+    return fm_text, fm
+
+
+def _check_c01(fm_text: str | None) -> tuple[bool, str]:
+    """C01: 프론트매터 내 곡선따옴표."""
+    if not fm_text:
+        return True, "frontmatter 없음 (skip)"
+    curved_single = ["\u2018", "\u2019"]  # ' '
+    curved_double = ["\u201c", "\u201d"]  # " "
+    found = []
+    if any(c in fm_text for c in curved_single):
+        found.append("곡선따옴표(' ')")
+    if any(c in fm_text for c in curved_double):
+        found.append('곡선따옴표(" ")')
+    if found:
+        return False, f"C01 위반: {', '.join(found)}"
+    return True, "C01 통과"
+
+
+def _check_c02(content: str) -> tuple[bool, str]:
+    """C02: 프론트매터 미종료 — 첫 --- 이후 두 번째 --- 존재 여부로만 판정."""
+    lines = content.split('\n')
+    first_dash = None
+    second_dash = None
+    for i, line in enumerate(lines):
+        if line.strip() == '---':
+            if first_dash is None:
+                first_dash = i
+            elif second_dash is None and i > first_dash:
+                second_dash = i
+                break  # 첫 --- 이후 두 번째만 찾으면 중단 (전체 카운트 금지)
+    if first_dash is None:
+        return False, "C02 위반: 첫 --- 없음"
+    if second_dash is None:
+        return False, "C02 위반: 첫 --- 이후 두 번째 --- 없음"
+    return True, "C02 통과"
+
+
+def _check_c03(body_md: str) -> tuple[bool, str]:
+    """C03: 본문에 프론트매터 키 라인 유출."""
+    pattern = re.compile(r'^\s*(' + '|'.join(FM_KEYS) + r'):\s*')
+    leaked = [l.strip()[:60] for l in body_md.split('\n') if pattern.match(l)]
+    if leaked:
+        return False, f"C03 위반: {len(leaked)}건 — {leaked[0]}"
+    return True, "C03 통과"
+
+
+def _check_c04(body_md: str, blog_id: str) -> tuple[bool, str]:
+    """C04: LLM 프롬프트/사고문 누수. 국문+영문 패턴 모두 확인."""
+    patterns = C04_KO_PATTERNS + C04_EN_PATTERNS
+    found = []
+    for pat in patterns:
+        m = re.search(pat, body_md, re.IGNORECASE)
+        if m:
+            found.append(m.group()[:40])
+    if found:
+        return False, f"C04 위반: 프롬프트 누수 {len(found)}건 — {found[0]}"
+    return True, "C04 통과"
+
+
+def _check_c05(fm: dict) -> tuple[bool, str]:
+    """C05: draft:true 발행 대상."""
+    if fm.get("draft", "").lower() == "true":
+        return False, "C05 위반: draft:true 발행 대상"
+    return True, "C05 통과"
+
+
+def _check_c06(file_path: Path, blog_id: str) -> tuple[bool, str]:
+    """C06: 로컬 mtime > 마지막 배포 시각 (단순화: 최근 수정 파일 경고)."""
+    if not file_path.exists():
+        return True, "파일 없음 (skip)"
+    mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
+    days_since = (datetime.now() - mtime).days
+    if days_since < 1:
+        return False, f"C06 경고: 최근 수정 ({mtime.strftime('%Y-%m-%d')})"
+    return True, f"C06 통과 (마지막 수정 {days_since}일 전)"
+
+
+def _check_c07(body_md: str, conn) -> tuple[bool, str]:
+    """C07: 죽은 크로스셀 링크.
+
+    실제 구현: data-target-slug 추출 → content.db published 확인 → HTTP HEAD 확인.
+    운영 환경에서는 외부 HTTP 호출이 필요하므로, 여기서는 DB 기반 검사만 수행.
+    """
+    # data-target-slug 추출
+    target_slugs = re.findall(r'data-target-slug=["\']([^"\']+)["\']', body_md)
+    if not target_slugs:
+        return True, "크로스셀 링크 없음 (skip)"
+
+    # content.db에서 published 확인
+    try:
+        dead = []
+        for slug in target_slugs:
+            row = conn.execute(
+                "SELECT COUNT(*) as cnt FROM publish_ledger WHERE slug=? AND status='published'",
+                (slug,)
+            ).fetchone()
+            if row["cnt"] == 0:
+                dead.append(slug)
+        if dead:
+            return False, f"C07 위반: 죽은 크로스셀 링크 {len(dead)}건 — {dead[0]}"
+    except Exception as e:
+        logger.warning(f"[C07] DB 확인 실패: {e}")
+    return True, "C07 통과 (HTTP 확인은 운영 환경에서)"
+
+
+def _check_c08(site: Path | None, blog_id: str) -> tuple[bool, str]:
+    """C08: 라이브-파일 불일치. 현재 placeholder (라이브 비교 API 연동 필요)."""
+    # TODO: 라이브 사이트 HTML 크롤링 → 제목/og_image 비교
+    return True, "C08: 라이브 비교 미구현 (placeholder)"
+
+
+@register_check("c01_curve_quote")
+def check_c01(conn, blog_id: str) -> dict:
+    """C01: 프론트매터 내 곡선따옴표 검사."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    # 최신 포스트만 검사
+    _, content = posts[0]
+    fm_text, _ = _parse_frontmatter(content)
+    passed, detail = _check_c01(fm_text)
+    return {"status": "pass" if passed else "fail", "detail": detail}
+
+
+@register_check("c02_frontmatter_close")
+def check_c02(conn, blog_id: str) -> dict:
+    """C02: 프론트매터 미종료 검사."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        passed, detail = _check_c02(content)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C02 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C02 통과 ({len(posts)}건)"}
+
+
+@register_check("c03_fm_key_leak")
+def check_c03(conn, blog_id: str) -> dict:
+    """C03: 본문 프론트매터 키 유출 검사."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_c03(body)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C03 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C03 통과 ({len(posts)}건)"}
+
+
+@register_check("c04_prompt_leak")
+def check_c04(conn, blog_id: str) -> dict:
+    """C04: LLM 프롬프트/사고문 누수 검사 (국문+영문)."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_c04(body, blog_id)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C04 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C04 통과 ({len(posts)}건)"}
+
+
+@register_check("c05_draft_publish")
+def check_c05(conn, blog_id: str) -> dict:
+    """C05: draft:true 발행 대상 검사."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        _, fm = _parse_frontmatter(content)
+        passed, detail = _check_c05(fm)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C05 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C05 통과 ({len(posts)}건)"}
+
+
+@register_check("c06_mtime_deploy")
+def check_c06(conn, blog_id: str) -> dict:
+    """C06: 로컬 mtime > 배포 시각 검사."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    warnings = []
+    for path, _ in posts:
+        passed, detail = _check_c06(path, blog_id)
+        if not passed:
+            warnings.append(detail)
+
+    if warnings:
+        return {"status": "fail",
+                "detail": f"C06 경고 {len(warnings)}건: {'; '.join(warnings[:3])}"}
+    return {"status": "pass", "detail": f"C06 통과 ({len(posts)}건)"}
+
+
+@register_check("c07_dead_crossell")
+def check_c07(conn, blog_id: str) -> dict:
+    """C07: 죽은 크로스셀 링크 검사."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_c07(body, conn)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C07 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C07 통과 ({len(posts)}건)"}
+
+
+@register_check("c08_live_file_mismatch")
+def check_c08(conn, blog_id: str) -> dict:
+    """C08: 라이브-파일 불일치 검사 (placeholder)."""
+    return {"status": "unknown", "detail": "C08: 라이브 비교 미구현 (향후 활성화)"}

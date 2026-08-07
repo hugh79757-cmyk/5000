@@ -104,3 +104,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import content_integrity  # noqa: F401
+except ImportError:
+    pass
+
