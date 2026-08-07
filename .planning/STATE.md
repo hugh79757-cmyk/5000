@@ -3,16 +3,16 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-07T18:56:00Z"
+last_updated: "2026-08-07T20:00:00Z"
 progress:
-  total_phases: 32
-  completed_phases: 32
+  total_phases: 33
+  completed_phases: 33
   percent: 100
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 62 실행 완료 (Content Leak Prevention C01~C08)**
+**Status:** v1.1 — **Phase 66 완료 (P09 시나리오 A/B 판별 — 조사·판정·제안). Phase 52 Wave 5 진행 중.**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -59,11 +59,14 @@ progress:
 | 28 | CUAP Worker 404→500 Fix — 6개 Worker 블로그 missing-asset 500 → 404 | ✅ | 완료 (2026-07-21) |
 | 49 | CUAP Cross-link Bugfix — 크로스링크 slug 불일치 근본 수정 + 전수 배치 수정 | ✅ | `4b33b43fd` + `1b249d615` (2026-07-26) |
 | 50 | CTA Button Center — CSS 클래스 표준화 + 인라인 스타일 마이그레이션 | ✅ | 완료 (2026-07-26) |
-| 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
+| 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 5 진행 중 (Wave 1~4 완료, 2026-07-28) |
 | 58 | 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템 (PublishMonitor) | ✅ | 8 커밋 (`0e17f9acc`~`3e5aa1cd5`, 2026-08-06) |
 | 59 | Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합 | ✅ | 10 커밋 (59-02~59-11, 2026-08-06) |
 | 61 | Pipeline Standardization & Branch Renewal | ✅ | 9 plans/6 waves 실행 (2026-08-07) |
 | 62 | Content Leak Prevention — C01~C08 Rule System | ✅ | 5 plans/5 waves 실행 완료 (2026-08-07): standard_rules INSERT, leak_tracker 훅, preflight 게이트, 대시보드 체크 |
+| 63 | Content Integrity Refinement — C07/C09 검증 + 저혈압 글 판정 | ✅ | 1 plan/1 wave 실행 완료 (2026-08-07): C09 check_c09_frontmatter() 추가, 62-01 재검증 (C04 16/16, C07 95/95, C09 27/27, 오탐 0), health 저혈압 글 배포누락 판정 |
+| 64 | 규칙 체계 자기진화 + 운영헌장 | ✅ | 설계·문서 완료 (2026-08-07): C05→P 이동, 네임스페이스 분리(RULE-/ISSUE-), S01/S04 severity 확정, 관찰기간 7일+긴급예외, 오탐미탐 자동기록/승격 사람승인, Task 6 프리플라이트 체크리스트 5종 설계, OPERATIONS-CHARTER 갱신 |
+| 66 | P09 시나리오 A/B 판별 (조사 전용) | ✅ | 연구·판정 완료 (2026-08-07): P09 알림 로그 0건 + 라이브 URL 전수 Clean → 시나리오 B 성립. 감지O·수정X 패턴 실존 확인, 현재 라이브에 없음. 감지-수정 이원화 확인, 재발 대비 방향성 2가지 제안. 코드 수정·INSERT·배포 일체 없음. |
 
 ---
 
@@ -246,7 +249,7 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-07 - Phase 61 Execution 완료 (9 plans / 6 waves) — Pipeline Standardization & Branch Renewal*
+*Last updated: 2026-08-07 - Phase 64 완료 (규칙 체계 자기진화 + 운영헌장 설계·문서 + health-hugo C09/C04 실전 수습). Phase 52 Wave 5 진행 중.*
 
 ---
 
