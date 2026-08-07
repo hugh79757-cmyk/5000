@@ -4,8 +4,8 @@ date: "2026-08-06T16:31:25+09:00"
 draft: false
 description: 매일 들고 다니는 가방은 스타일과 실용성을 동시에 만족시켜야 합니다. 2026년 8월 기준, 부담 없는 가격대로 일상에서 편하게 사용할 수 있는 가방 수요가 높습니다. 특히 학생부터 직장인까지 누구나 데일리로 활용하기 좋은 제품들을 중심으로 정리했습니다. 본인의 라이프
 slug: 가방-추천-12만원대-합격점-아이템-5종
-categories: "['추천']"
-tags: "['가방']"
+categories: ["추천"]
+tags: ["가방"]
 cover: 
 featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/curation-images/hash/23f7763b//2026/08/06/a1ef07ae.webp"
 ---

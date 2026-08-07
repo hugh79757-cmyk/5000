@@ -4,8 +4,8 @@ date: "2026-08-05T10:30:35+09:00"
 draft: false
 description: 2026년 8월, 무더운 날씨와 반복되는 일상으로 지친 몸을 챙기기 위해 많은 이들이 간 건강에 관심을 기울이고 있습니다. 특히 업무 과부하와 불규칙한 생활 패턴이 지속되는 환경에서는 건강한 일상을 유지하기 위한 적절한 관리가 필수적입니다. 시중에 다양한 성분과 형태의
 slug: 간-건강-지키는-밀크씨슬-영양제-성분-비교-분석
-categories: "['추천']"
-tags: "['간건강']"
+categories: ["추천"]
+tags: ["간건강"]
 cover: 
 featureimage: "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/curation-images/hash/c41dfe32//2026/08/05/d2529ba7.webp"
 ---
