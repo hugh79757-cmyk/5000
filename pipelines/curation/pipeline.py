@@ -1269,33 +1269,38 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     # CUAP 엔티티 등록 (fail-open) — 다음 발행분부터 크로스 링크 대상
     try:
-        # 2026-07-26: result["url"] (hugo_writer._write_hugo_post) > result["file"] (on-disk path) > _make_slug(keyword)
-        if result.get("url"):
-            _actual_slug = result["url"].rstrip("/").split("/")[-1]
-        elif result.get("file"):
-            # result["file"] = "/path/to/content/posts/{slug}/index.md" or "/path/to/content/posts/{date}-{slug}.md"
-            _file_slug = Path(result["file"]).parent.name
-            # PaperMod format: file_path = posts/{date}-{slug}.md → extract from filename
-            if not _file_slug or _file_slug == "posts":
-                _file_slug = Path(result["file"]).stem
-                if "-" in _file_slug:
-                    _file_slug = _file_slug.split("-", 1)[1] if _file_slug.split("-", 1)[0].isdigit() else _file_slug
-            _actual_slug = _file_slug
+        # 2026-08-07: draft 글은 링커 Entities에서 제외 (404 방지)
+        # draft:true 글은 Hugo 빌드에서 제외되어 public/에 없음 → 링커가 참조하면 404
+        if is_draft:
+            logger.info(f"[{blog_id}] draft 글이라 CUAP 엔티티 등록 스킵: {keyword}")
         else:
-            _actual_slug = slug
-        # 추천추천 중복 방지: keyword가 이미 "추천"으로 끝나면 한 번만
-        _link_label = keyword.strip() if keyword.strip().endswith("추천") else f"{keyword.strip()} 추천"
-        _link_label = _link_label.strip() or "추천"
-        register_cuap_entity(
-            entity_type="category",
-            entity_name=keyword,
-            blog_id=blog_id,
-            post_slug=_actual_slug,
-            link_label=_link_label,
-            priority=50,
-            published=1,
-        )
-        logger.info(f"[{blog_id}] CUAP 엔티티 등록: {keyword}")
+            # 2026-07-26: result["url"] (hugo_writer._write_hugo_post) > result["file"] (on-disk path) > _make_slug(keyword)
+            if result.get("url"):
+                _actual_slug = result["url"].rstrip("/").split("/")[-1]
+            elif result.get("file"):
+                # result["file"] = "/path/to/content/posts/{slug}/index.md" or "/path/to/content/posts/{date}-{slug}.md"
+                _file_slug = Path(result["file"]).parent.name
+                # PaperMod format: file_path = posts/{date}-{slug}.md → extract from filename
+                if not _file_slug or _file_slug == "posts":
+                    _file_slug = Path(result["file"]).stem
+                    if "-" in _file_slug:
+                        _file_slug = _file_slug.split("-", 1)[1] if _file_slug.split("-", 1)[0].isdigit() else _file_slug
+                _actual_slug = _file_slug
+            else:
+                _actual_slug = slug
+            # 추천추천 중복 방지: keyword가 이미 "추천"으로 끝나면 한 번만
+            _link_label = keyword.strip() if keyword.strip().endswith("추천") else f"{keyword.strip()} 추천"
+            _link_label = _link_label.strip() or "추천"
+            register_cuap_entity(
+                entity_type="category",
+                entity_name=keyword,
+                blog_id=blog_id,
+                post_slug=_actual_slug,
+                link_label=_link_label,
+                priority=50,
+                published=1,
+            )
+            logger.info(f"[{blog_id}] CUAP 엔티티 등록: {keyword}")
     except Exception as _e:
         logger.warning(f"[{blog_id}] CUAP 엔티티 등록 실패 (fail-open): {_e}")
 
