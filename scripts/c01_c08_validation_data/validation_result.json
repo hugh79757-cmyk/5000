@@ -1,0 +1,1061 @@
+{
+  "summary": {
+    "dead_links_detection_rate": "53/53",
+    "dongnam_detection_rate": "42/42",
+    "contamination_detection_rate": "16/16",
+    "etap_false_positive_rate": "0/5",
+    "normal_false_positive_rate": "0/20"
+  },
+  "details": {
+    "c07_dead_links": [
+      {
+        "post_slug": "homli-acha-iseun-cordless-vacuum-recommend-20man-wondae-practical-seontaeg-4jong-2026-july-gijun",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "humidifier-recommend-pullaseuse-inig-practicalhyeongbuteo-daecapacitykkaji-5jong",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "latesthyeong-cha-iseun-ai-vs-e-eoleu-cordless-vacuum-recommend-4jong-practical-compare-2026-july",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "lojitegg-vs-seuka-i-woseu-ge-iming-ibmun-2man-wondae-mousewa-180hz-monitor-recommend",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "samsung-beulluseuka-i-3100peulle-omaegseu-recommend-10pyeong-air-purifier-passing-grade-seontaeg-ga-ideu",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "wini-ama-idi-eo-fridge-2026-july-compare-recommend-25man140man-won-practical-seontaeg",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "샤오미-로봇청소기-5고러그-침대-집먼지-추천-실속-top-5",
+        "target": "침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대"
+      },
+      {
+        "post_slug": "홈리아비브르-무선청소기-추천-예산별-최적의-선택",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "배냇밀맘스쿠킹-이유식-추천-17390원부터-실속-선택",
+        "target": "고양이털뭉치-관리-사료-5종-실속-추천-힐스세라피드프레스티지-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 고양이털뭉치-관리-사료-5종-실속-추천-힐스세라피드프레스티지-비교"
+      },
+      {
+        "post_slug": "아기-발육-차트-추천-top5-2026년",
+        "target": "강아지스마트 장난감-추천-top5-2026년",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 강아지스마트 장난감-추천-top5-2026년"
+      },
+      {
+        "post_slug": "아기-선크림-추천-오가베베노엘로힐스-피부에-순한-실속-top-4",
+        "target": "강아지-필수템-best-5-2026년-7월-플로우데이굿츄프스-추천",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 강아지-필수템-best-5-2026년-7월-플로우데이굿츄프스-추천"
+      },
+      {
+        "post_slug": "아기침대-추천-top5-2026년",
+        "target": "반려동물안전-추천-top5-2026년",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 6건 — 텀블러-추천-top5-2026년"
+      },
+      {
+        "post_slug": "흘러내리지-않는-아기양말-고르는-팁과-사이즈-선택법",
+        "target": "강아지스마트 장난감-2026년-8월-기준-실속-있는-선택-리스트",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 강아지스마트 장난감-2026년-8월-기준-실속-있는-선택-리스트"
+      },
+      {
+        "post_slug": "baeli-eogeullo-ulabyu-el-hyaluronic-acid-ampoule-recommend-pibu-ta-ibbyeol-practical-5seon",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "jinjeong-cream-recommend-pyeongang-yulmilkinbontonig-pibu-ta-ibbyeol-seontaeg-ga-ideu",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "letinol-serum-recommend-peulaengkeullikoseunolloji-2026-seontaeg-gijun-chongjeongli",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "melabeul-adamgongbang-juleum-gaeseon-cream-recommend-1man-wondae-habgyeog-top-5",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "pantenol-cream-recommend-la-undeulaebdeomapaegtoli-mingamseong-pibuleul-wihan-5jong-compare",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "seunail-cream-compare-wine-iji-ellensilla-opigen-capacitypriceseongbun",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "toso-ungtujib-poham-mogongsuchugcream-5jong-compare-2026-july-practical-seontaeg",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "넛세린토코보-자외선-차단-스틱-추천-2026년-7월-합격점-5종",
+        "target": "침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — 침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대"
+      },
+      {
+        "post_slug": "한스킨더후-비비크림-추천-2026년-7월-피부-타입별-5종-비교",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "난로-추천-top5-2026년",
+        "target": "반려동물안전-추천-top5-2026년",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 3건 — 라텍스-밴드-세트-추천-top5-2026년"
+      },
+      {
+        "post_slug": "랜턴-추천-top5-2026년",
+        "target": "강아지스마트 장난감-추천-top5-2026년",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 강아지스마트 장난감-추천-top5-2026년"
+      },
+      {
+        "post_slug": "버팔로아이두젠-침낭-세트-추천-2만원대-실속-경량-선택",
+        "target": "고양이털뭉치-관리-사료-5종-실속-추천-힐스세라피드프레스티지-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 고양이털뭉치-관리-사료-5종-실속-추천-힐스세라피드프레스티지-비교"
+      },
+      {
+        "post_slug": "helseubelteu-recommend-habinjyeojelotuhi-eolo-2man-wondaebuteo-7man-wondae-passing-grade-5seon",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "helseujanggab-recommend-he-illololangseu-compare-1man-wondae-practical-gud-eunsal-bangji",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "homteule-ining-yongpum-recommend-hadilo-eo-ja-iloboljelobadi-ampeolseu-poham-1man-wondaebuteo-10man-won-miman-practical-5seon",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "hyeogseonsaengse-ipeubon-muleup-bohodae-recommend-silje-sseobon-salam-i-goleun-top5",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "jeob-isig-leoningmeosin-compare-duseulun-vs-seutebpeul-price-daebi-passing-grade",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "nyu-yog-we-initeulolaeb-en-eseu-protein-bochungje-compare-price-daebi-5jong-recommend",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "seopoteu-on-anapa-poham-sonmogbohodae-top5-recommend-undong-yug-a-ilsang-practical-seontaeg",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "레깅스-추천-장사부아르메데스-운동별-실속-선택",
+        "target": "침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대"
+      },
+      {
+        "post_slug": "천연고무-요가매트-추천-뮤트호미내스트-실속-선택-top5",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "여드름-피부-영양제-추천-top5-2026년",
+        "target": "기초 스킨케어 추천-추천-top5-2026년",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 기초 스킨케어 추천-추천-top5-2026년"
+      },
+      {
+        "post_slug": "피부-영양제-추천-총정리-2026년-7월-이너비-아쿠아리치글루타치온-5종",
+        "target": "기초 스킨케어 추천-추천-top5-2026년",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 기초 스킨케어 추천-추천-top5-2026년"
+      },
+      {
+        "post_slug": "10man-wondae-mattress-recommend-homjeulibingnaenggamtopeo-practical-seontaeg-4jong-compare",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "emmakurua-memory-foam-mattress-recommend-3man120man-wondae-practical-compare",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "fahomissunihome-미니-책상-추천-가격-대비-합격점-top-5",
+        "target": "침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — 침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대"
+      },
+      {
+        "post_slug": "fahomissunihome-미니-책상-추천-가격-대비-합격점-top-5",
+        "target": "바운서-추천-트리미고베이비 hexatrigesimal-신생아-육아-필수템",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — 침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대"
+      },
+      {
+        "post_slug": "gagu-yanolja-dongseogagu-ijeu-ka-i-1dan-3seolab-sunabbed-silsa-yong-hugi",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "gagugolae-recommend-top5-2026",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "jinuseubedeuli-um-mattress-recommend-7man-wondae-practical-5seon",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "me-ikingmk300jinuseu-2026-july-ha-ibeulideu-mattress-5jong-chongjeongli",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "momeonseuteubolune-o-olseun-jungsim-syupeosinggeul-mattress-5jong-1182man-won-passing-grade-jeongli",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "다니카-vs-호미내스트-메쉬-의자-추천-어떤-게-실속일까",
+        "target": "바운서-추천-트리미고베이비かもし-신생아-육아-필수템",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 바운서-추천-트리미고베이비かもし-신생아-육아-필수템"
+      },
+      {
+        "post_slug": "신성나라나눔조명-가로등-추천-220만원대-실속-top-5",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "aenikeulli-eojoseb-2026-july-laptop-geochidae-top5-practical-compare",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "daehagsaeng-laptop-recommend-samsunge-isuseu-practical-compare-50man-wondae190man-wondae",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "gaelleogsibug6-14inchi-recommend-lental-gomin-kkeutnaen-practical-laptop",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "geulaepig-dija-in-laptop-recommend-top5-2026",
+        "target": "tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — tent방수 스프레이 추천-comet-vs-blackdog-vs-unknown-onetouch-waterproofshade-compare"
+      },
+      {
+        "post_slug": "gigaseuton-memolikadeu-recommend-seu-wichi2kamela-yong-practical-seontaeg",
+        "target": "hagye-camping-추천-recommend-top5-2026",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — hagye-camping-추천-recommend-top5-2026"
+      },
+      {
+        "post_slug": "삼성-nt901x3hnt370b5l-노트북-추천-30만원대-실속-선택",
+        "target": "침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 침낭-내의-추천-추천-몽크로스usb발열침낭-실속-top5-25만원대"
+      }
+    ],
+    "c07_dongnam": [
+      {
+        "post_slug": "관절-보호를-위한-슬개골-탈구-예방-강아지계단-고르는-팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "강아지밥그릇-추천-펫코본페리페페-높이조절로-달라지는-식사-자세",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "top-5-강아지옷-선택한-이유와-특징",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "고양이-공-장난감-종류별-특징과-놀이-효과-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "흡수-빠른-단백질-보충제-가수분해-유청-단백질-비교-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "눈물사료-어떤-걸-골라야-할까-상황별-추천",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "에윤-펫하우스에르블랑-고양이-밥그릇-추천-반려묘-식사-환경-개선-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "관절-고르는-법-2026년-최신-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "고운-질감의-가는입자-커피-원두-분쇄도-조절-팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "관절-보호를-위한-강아지-미끄럼-방지-매트-비교-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "강아지슬링백-고르는-법-2026년-최신-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "반려묘-건강을-위한-뉴트리플랜-습식사료-급여-후기",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "더캣츠-고민된다면-검색니즈별-실속-선정-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "그리니즈-대안-덴탈껌-추천---상황별-실속-선택",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "bunio몽뜨리-강아지-계단-추천-슬개골-건강-지키는-실속-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "캠핑용-가스통-안전한-선택과-관리-핵심-수칙",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "발-편한-등산화-고르는-핵심-기준과-브랜드별-비교",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "top-5-폴대-선택한-이유와-특징",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "멀티툴-고르는-법-2026년-최신-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "캠핑용-다용도-네트-활용법-수납-정리-꿀팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "여름철-필수템---침대형-모기장-설치-및-구매-팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "스마트베리대우어플라이언스-그릴-추천-주방부터-캠핑까지-실속-비교",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "초보자를-위한-백패킹-텐트-및-배낭-장비-구성-팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 2건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "방수포-추천-50만원-이하-합격점-top-5",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "얼굴형-보완하는-데일리-모자-스타일링-팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "아이스박스-추천-activa아일라잇코멧-14490원부터-실속-3종",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "캠핑용-침낭-보온성과-무게별-비교-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "캠핑용-led-랜턴-밝기별-비교-및-구매-팁",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "우비-추천-레인벙커마이제이컴퍼니-장마철-대비-실속-있는-선택",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "야간-등산용-고성능-헤드랜턴-밝기별-비교-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "지속력-좋은-파운데이션-피부-타입별-비교-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "면역력-높이는-영양제-성분별-핵심-비교-및-효과-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "네덜란드-산양유-단백질-및-치즈칼슘-고르는-법-2026년-최신-가이드",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "스트레스-완화-영양제-테아닌-성분-효과와-제품-비교",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "매일-챙기는-건강하게-식단-관리하는-법",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "다이어트-단백질-쉐이크-추천---뉴욕웨이-라이트와-플라이밀-비교",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "혈당-관리-돕는-당뇨-건강식품-성분별-핵심-비교",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "가방-추천-12만원대-합격점-아이템-5종",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "여드름-피부-영양제-추천-고민된다면-지금-사야-하는-이유",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "어린이-유산균-추천-06만원-이하-합격점-top-4",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "포인드-비건-손톱영양제-포함-2026년-8월-추천-2만원대-합격점-top-5",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      },
+      {
+        "post_slug": "간-건강-지키는-밀크씨슬-영양제-성분-비교-분석",
+        "target": "동남냄비받침-2026년-8월-최신-스펙과-가격-비교",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C07 위반: 죽은 크로스셀 링크 1건 — 동남냄비받침-2026년-8월-최신-스펙과-가격-비교"
+      }
+    ],
+    "c04_contamination": [
+      {
+        "post_slug": "아기침대-추천-top5-2026년",
+        "blog_id": "baby-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "난로-추천-top5-2026년",
+        "blog_id": "camping-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): fail"
+      },
+      {
+        "post_slug": "잘만-cpu쿨러쿨링팬-총정리-8천원7만원대-top-5-선택-가이드",
+        "blog_id": "camping-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): fail"
+      },
+      {
+        "post_slug": "선풍기-추천-top5-2026년",
+        "blog_id": "camping-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "케틀벨-하나로-전신을-태우는-20분-홈트-루틴",
+        "blog_id": "fitness-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): fail"
+      },
+      {
+        "post_slug": "라텍스-밴드-세트-추천-top5-2026년",
+        "blog_id": "fitness-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "트레드밀-추천-top5-2026년",
+        "blog_id": "fitness-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "네덜란드-추천-top5-2026년",
+        "blog_id": "health-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "고려은단-추천-top5-2026년",
+        "blog_id": "health-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): fail"
+      },
+      {
+        "post_slug": "가구밸리-추천-top5-2026년",
+        "blog_id": "interior-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "밀폐-추천-top5-2026년",
+        "blog_id": "kitchen-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "주방이-즐거워지는-감성-살림법-오늘부터-시작하는-공간-변화",
+        "blog_id": "kitchen-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): pass"
+      },
+      {
+        "post_slug": "텀블러-추천-top5-2026년",
+        "blog_id": "kitchen-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): fail"
+      },
+      {
+        "post_slug": "울트라북-추천-top5-2026년",
+        "blog_id": "laptop-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "크롬북-추천-top5-2026년",
+        "blog_id": "laptop-hugo",
+        "signature": "ko_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): pass / C04(ko): fail"
+      },
+      {
+        "post_slug": "맥북-에어-m5auusda-156인치-비교-2026년-8월-실속-선택은",
+        "blog_id": "laptop-hugo",
+        "signature": "en_thinking",
+        "expected": "fail",
+        "actual": "fail",
+        "check": "C04(en): fail / C04(ko): pass"
+      }
+    ],
+    "c04_etap": [
+      {
+        "post_slug": "ba-adventure",
+        "blog_id": "adventure-hugo",
+        "expected": "pass",
+        "actual": "pass",
+        "check": "C04 통과(en)"
+      },
+      {
+        "post_slug": "iberia-airline-review",
+        "blog_id": "airlines-hugo",
+        "expected": "pass",
+        "actual": "pass",
+        "check": "C04 통과(en)"
+      },
+      {
+        "post_slug": "abruzzo-airport-psr-guide",
+        "blog_id": "airports-hugo",
+        "expected": "pass",
+        "actual": "pass",
+        "check": "C04 통과(en)"
+      },
+      {
+        "post_slug": "le-havre-to-paris-bus",
+        "blog_id": "bus-hugo",
+        "expected": "pass",
+        "actual": "pass",
+        "check": "C04 통과(en)"
+      },
+      {
+        "post_slug": "pima-county-city-tours",
+        "blog_id": "citytours-hugo",
+        "expected": "pass",
+        "actual": "pass",
+        "check": "C04 통과(en)"
+      }
+    ],
+    "c01_c02_c03_c05_normal": [
+      {
+        "post_slug": "직수형-정수기-렌탈-전-꼭-확인해야-할-필터-성능-비교",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "흡입력-강한-청소기-추천-2026년-7월-비브르-v25000-vs-필모어-초강력-실사용-비교와-선택-기준",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "프리옴munjjing-에어프라이어-추천-상황별로-골라보는-실속-가이드",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "wini-ama-idi-eo-fridge-2026-july-compare-recommend-25man140man-won-practical-seontaeg",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "양문형-냉장고-추천-현대큐밍쿠잉-용량과-가격의-합격점",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "고온세척물걸-추천-richmagicvoltmate고압-스팀청소기-실속-top5",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "se-iniglichimaejig-cho-eumpa-humidifier-recommend-2man-wondae-practical-top-4",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "latesthyeong-cha-iseun-ai-vs-e-eoleu-cordless-vacuum-recommend-4jong-practical-compare-2026-july",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "heub-iblyeog-ganghan-vacuum-recommend-2026-july-bibeuleu-v25000-vs-pilmo-eo-choganglyeog-silsa-yong-comparewa-seontaeg-gijun",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "humidifier-recommend-pullaseuse-inig-practicalhyeongbuteo-daecapacitykkaji-5jong",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "goseongneung-gajeon-4jong-recommend-virluxpukak-practical-seontaeg",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "homli-acha-iseun-cordless-vacuum-recommend-20man-wondae-practical-seontaeg-4jong-2026-july-gijun",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "1ingagu-e-eopeula-i-eo-recommend-oyeahliteulli-2l-geullaseu-47man-won-practical-top-5",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "2026년-7월-가정용-홈캠-추천-타포amsky씨앤케어-4종-합격점-비교",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "위닉스-공기청정기-추천-필터부터-본체까지-합격점",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "lojitegg-vs-seuka-i-woseu-ge-iming-ibmun-2man-wondae-mousewa-180hz-monitor-recommend",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "비브르차이슨-무선청소기-실속-추천-2026년-7월-가격-대비-top-5",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "샤오미-로봇청소기-5고러그-침대-집먼지-추천-실속-top-5",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "gajeong-yong-homkaem-recommend-tapoamskyssi-aenke-eo-4jong-passing-grade-compare",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      },
+      {
+        "post_slug": "라라홈-리얼브러쉬-등-반려동물-털-청소기-추천-총정리-5만원대-실속형부터",
+        "blog_id": "appliance-hugo",
+        "expected": "all pass",
+        "actual": "all pass",
+        "c01": "C01 통과",
+        "c02": "C02 통과",
+        "c03": "C03 통과",
+        "c05": "C05 통과"
+      }
+    ]
+  },
+  "counts": {
+    "dead_links_total": 53,
+    "dead_links_detected": 53,
+    "contamination_total": 16,
+    "contamination_detected": 16,
+    "dongnam_total": 42,
+    "dongnam_detected": 42,
+    "etap_total": 5,
+    "etap_false_positives": 0,
+    "normal_total": 20,
+    "normal_false_positives": 0
+  }
+}

@@ -1,0 +1,130 @@
+[
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "스펙-비교-레노버-아이디어패드-2026-vs-2025-vs-2024-실속-선택은",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/스펙-비교-레노버-아이디어패드-2026-vs-2025-vs-2024-실속-선택은/index.md",
+    "categories": "['추천']",
+    "tags": "['레노버', '아이디어패드']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "울트라북-고르는-법-2026년-최신-가이드",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/울트라북-고르는-법-2026년-최신-가이드/index.md",
+    "categories": "['추천']",
+    "tags": "['울트라북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "스펙-비교-vs",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/스펙-비교-vs/index.md",
+    "categories": "['추천']",
+    "tags": "['맥북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "휴대성-뛰어난-고성능-노트북-에이수스-젠북-실사용-후기",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/휴대성-뛰어난-고성능-노트북-에이수스-젠북-실사용-후기/index.md",
+    "categories": "['추천']",
+    "tags": "['에이수스', '젠북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "14인치노트북-고민된다면-검색니즈별-실속-선정",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/14인치노트북-고민된다면-검색니즈별-실속-선정/index.md",
+    "categories": "['추천']",
+    "tags": "['14인치노트북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "고성능-게이밍-노트북-오멘-비교-및-사양-분석",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/고성능-게이밍-노트북-오멘-비교-및-사양-분석/index.md",
+    "categories": "['추천']",
+    "tags": "['오멘']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "대학생-직장인-휴대용-초경량-노트북-비교-분석",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/대학생-직장인-휴대용-초경량-노트북-비교-분석/index.md",
+    "categories": "['추천']",
+    "tags": "['초경량노트북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "브이로그-촬영용-고음질-무선-마이크-성능-비교-분석",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/브이로그-촬영용-고음질-무선-마이크-성능-비교-분석/index.md",
+    "categories": "['추천']",
+    "tags": "['마이크']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "재택근무용-사무용-노트북-성능별-핵심-비교-분석",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/재택근무용-사무용-노트북-성능별-핵심-비교-분석/index.md",
+    "categories": "['추천']",
+    "tags": "['사무용노트북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "가성비-대학생-노트북-선택-기준과-인기-모델-비교",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/가성비-대학생-노트북-선택-기준과-인기-모델-비교/index.md",
+    "categories": "['추천']",
+    "tags": "['대학생노트북', '델']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "갤럭시-고민된다면-지금-사야-하는-이유",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/갤럭시-고민된다면-지금-사야-하는-이유/index.md",
+    "categories": "['추천']",
+    "tags": "['갤럭시']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "가성비-노트북-비보북-모델별-상세-비교-및-구매-팁",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/가성비-노트북-비보북-모델별-상세-비교-및-구매-팁/index.md",
+    "categories": "['추천']",
+    "tags": "['델', '비보북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "씽크패드-t540px230-비교-35만원대-실속-선택",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/씽크패드-t540px230-비교-35만원대-실속-선택/index.md",
+    "categories": "['추천']",
+    "tags": "['씽크패드']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "15인치노트북-추천-lg-그램-시리즈와-함께하는-최적의-선택",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/15인치노트북-추천-lg-그램-시리즈와-함께하는-최적의-선택/index.md",
+    "categories": "['추천']",
+    "tags": "['LG', '그램', '15인치노트북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "영상-편집과-코딩을-위한-고성능-작업용-노트북-비교",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/영상-편집과-코딩을-위한-고성능-작업용-노트북-비교/index.md",
+    "categories": "['추천']",
+    "tags": "['작업용노트북']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "laptop-hugo",
+    "post_slug": "13인치노트북-흔한-오해-3가지-2026년-기준-바로잡기",
+    "source_file": "/Users/twinssn/Projects/CUAP/laptop-hugo/content/posts/13인치노트북-흔한-오해-3가지-2026년-기준-바로잡기/index.md",
+    "categories": "['추천']",
+    "tags": "['13인치노트북']",
+    "expected": "fail"
+  }
+]

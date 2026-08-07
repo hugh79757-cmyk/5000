@@ -1,0 +1,90 @@
+[
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "면역력-높이는-영양제-성분별-핵심-비교-및-효과-분석",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/면역력-높이는-영양제-성분별-핵심-비교-및-효과-분석/index.md",
+    "categories": "['추천']",
+    "tags": "['면역력', '면역력 높이는 영양제 추천', '영양제', '높이는', '추천']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "네덜란드-산양유-단백질-및-치즈칼슘-고르는-법-2026년-최신-가이드",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/네덜란드-산양유-단백질-및-치즈칼슘-고르는-법-2026년-최신-가이드/index.md",
+    "categories": "['추천']",
+    "tags": "['네덜란드']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "스트레스-완화-영양제-테아닌-성분-효과와-제품-비교",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/스트레스-완화-영양제-테아닌-성분-효과와-제품-비교/index.md",
+    "categories": "['추천']",
+    "tags": "['스트레스', '완화', '스트레스 완화 영양제 추천', '영양제', '추천']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "매일-챙기는-건강하게-식단-관리하는-법",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/매일-챙기는-건강하게-식단-관리하는-법/index.md",
+    "categories": "['추천']",
+    "tags": "['건강하게']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "다이어트-단백질-쉐이크-추천---뉴욕웨이-라이트와-플라이밀-비교",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/다이어트-단백질-쉐이크-추천---뉴욕웨이-라이트와-플라이밀-비교/index.md",
+    "categories": "['추천']",
+    "tags": "['쉐이크', '다이어트', '추천', '단백질', '다이어트 단백질 쉐이크 추천']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "혈당-관리-돕는-당뇨-건강식품-성분별-핵심-비교",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/혈당-관리-돕는-당뇨-건강식품-성분별-핵심-비교/index.md",
+    "categories": "['추천']",
+    "tags": "['추천', '당뇨 건강식품 추천', '당뇨', '건강식품']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "가방-추천-12만원대-합격점-아이템-5종",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/가방-추천-12만원대-합격점-아이템-5종/index.md",
+    "categories": "['추천']",
+    "tags": "['가방']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "여드름-피부-영양제-추천-고민된다면-지금-사야-하는-이유",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/여드름-피부-영양제-추천-고민된다면-지금-사야-하는-이유/index.md",
+    "categories": "['추천']",
+    "tags": "['피부', '추천', '여드름 피부 영양제 추천', '여드름', '영양제']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "어린이-유산균-추천-06만원-이하-합격점-top-4",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/어린이-유산균-추천-06만원-이하-합격점-top-4/index.md",
+    "categories": "['추천']",
+    "tags": "['어린이 유산균 추천', '추천', '유산균', '어린이']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "포인드-비건-손톱영양제-포함-2026년-8월-추천-2만원대-합격점-top-5",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/포인드-비건-손톱영양제-포함-2026년-8월-추천-2만원대-합격점-top-5/index.md",
+    "categories": "['추천']",
+    "tags": "['추천', '손톱', '영양제', '손톱 영양제 추천']",
+    "expected": "fail"
+  },
+  {
+    "blog_id": "health-hugo",
+    "post_slug": "간-건강-지키는-밀크씨슬-영양제-성분-비교-분석",
+    "source_file": "/Users/twinssn/Projects/CUAP/health-hugo/content/posts/간-건강-지키는-밀크씨슬-영양제-성분-비교-분석/index.md",
+    "categories": "['추천']",
+    "tags": "['간건강']",
+    "expected": "fail"
+  }
+]
