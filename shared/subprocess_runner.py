@@ -1,0 +1,139 @@
+"""shared/subprocess_runner.py — STAP/TAP 외부 프로젝트 subprocess 격리 실행기 (Phase 61, D-03).
+
+dispatcher.py의 `_run_stap`(~61줄)과 `_run_tap_subprocess`(~63줄)이 중복하던
+tempfile-runner + venv python + JSON 파싱 패턴(~124줄 중복)을 하나의 모듈로 중앙화한다.
+이후 Plan 61-08(외부 STAP/TAP 정합)이 이 모듈을 라우팅한다.
+
+CLOUDFLARE_API_TOKEN 안전성:
+  wrangler 4.x는 `CLOUDFLARE_API_TOKEN` env var가 OAuth auth profile보다 우선 적용되어
+  잘못된 계정으로 배포하거나 `Authentication error code: 10000`을 유발한다.
+  따라서 runner 서브프로세스 내부에서 wrangler 호출 전에 반드시 `CLOUDFLARE_API_TOKEN`을
+  env에서 pop한다 (dispatcher._build_and_deploy_central / deploy.py:_deploy_site_inner 와 동일 규칙).
+  본 모듈은 runner에서 pop만 수행하며, wrangler 호출 자체는 수행하지 않는다.
+
+Signature 브리지: 대상 callable의 시그니처에 인자가 있으면 `fn(cfg)`, 없으면 `fn()`을
+호출한다 (dispatcher.py:463-465의 inspect 브리지와 동일). run()/run(cfg)/run_publish()
+모두 지원한다.
+
+사용:
+    from shared.subprocess_runner import run_subprocess
+    result = run_subprocess(
+        project_root=stap_root,
+        venv_python=os.path.join(stap_root, ".venv", "bin", "python3"),
+        module_spec="pipelines.stock.pipeline",
+        run_callable="run",
+        cfg=cfg,
+        prefix="stap",
+    )
+"""
+
+import inspect
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+
+# T-61-02-01: module_spec은 내부 dotted 경로(dispatcher의 제어 레지스트리)지만 방어적으로 검증.
+_MODULE_SPEC_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$")
+
+
+def run_subprocess(
+    project_root: str,
+    venv_python: str,
+    module_spec: str,
+    run_callable: str = "run",
+    cfg: dict | None = None,
+    timeout: int = 600,
+    prefix: str = "subproc",
+) -> dict:
+    """외부 프로젝트 모듈을 격리 subprocess에서 실행하고 dict 결과를 반환한다.
+
+    Args:
+        project_root: 외부 프로젝트 루트 (sys.path + cwd).
+        venv_python: venv python 경로. 존재하지 않으면 sys.executable 폴백.
+        module_spec: dotted import 경로 (예: pipelines.stock.pipeline, app).
+        run_callable: 모듈 내 호출할 callable 이름 (run / run_publish).
+        cfg: callable에 전달할 설정 dict.
+        timeout: subprocess 타임아웃(초). 초과 시 {"success": False, "reason": f"{prefix}_timeout"}.
+        prefix: 실패 reason 접두사 (예: stap/tap).
+
+    Returns:
+        dict: 성공 시 대상 모듈이 출력한 dict. 실패 시 아래 reason 중 하나:
+            f"{prefix}_not_found"      — project_root가 없음
+            f"{prefix}_subprocess_error" — returncode != 0
+            f"{prefix}_no_output"       — stdout에 JSON dict가 없음
+            f"{prefix}_timeout"         — TimeoutExpired
+            f"{prefix}_error"           — 기타 예외
+    """
+    if not module_spec or not _MODULE_SPEC_RE.match(module_spec):
+        raise ValueError(f"invalid module_spec: {module_spec!r}")
+
+    if not os.path.isdir(project_root):
+        return {"success": False, "reason": f"{prefix}_not_found"}
+
+    python = venv_python if (venv_python and os.path.exists(venv_python)) else sys.executable
+    cfg_json = json.dumps(cfg if cfg is not None else {}, ensure_ascii=False)
+
+    runner = "\n".join([
+        "import sys, json, os",
+        f"sys.path.insert(0, {project_root!r})",
+        f"os.chdir({project_root!r})",
+        # CLOUDFLARE_API_TOKEN 제거 — wrangler OAuth profile 우선 적용을 위해 (deploy.py 동일 규칙)
+        "os.environ.pop('CLOUDFLARE_API_TOKEN', None)",
+        "try:",
+        "    from dotenv import load_dotenv",
+        f"    _env = {os.path.join(project_root, '.env')!r}",
+        "    if os.path.exists(_env):",
+        "        load_dotenv(_env, override=True)",
+        "except Exception:",
+        "    pass",
+        "import inspect",
+        f"cfg = json.loads({cfg_json!r})",
+        f"import {module_spec}",
+        f"mod = sys.modules[{module_spec!r}]",
+        f"fn = getattr(mod, {run_callable!r})",
+        "if len(inspect.signature(fn).parameters) > 0:",
+        "    result = fn(cfg)",
+        "else:",
+        "    result = fn()",
+        "if not isinstance(result, dict):",
+        "    result = {'success': bool(result)}",
+        'print(json.dumps(result or {"success": False, "reason": "no_result"}, ensure_ascii=False))',
+    ])
+
+    runner_path = ""
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
+            f.write(runner)
+            runner_path = f.name
+        try:
+            proc = subprocess.run(
+                [python, runner_path],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                cwd=project_root,
+            )
+        except subprocess.TimeoutExpired:
+            return {"success": False, "reason": f"{prefix}_timeout"}
+    except Exception:
+        return {"success": False, "reason": f"{prefix}_error"}
+    finally:
+        if runner_path:
+            try:
+                os.unlink(runner_path)
+            except OSError:
+                pass
+
+    if proc.returncode != 0:
+        return {"success": False, "reason": f"{prefix}_subprocess_error"}
+
+    for line in reversed(proc.stdout.strip().split("\n")):
+        if line.strip().startswith("{"):
+            try:
+                return json.loads(line.strip())
+            except Exception:
+                continue
+    return {"success": False, "reason": f"{prefix}_no_output"}
