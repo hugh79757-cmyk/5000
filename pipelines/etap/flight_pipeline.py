@@ -2,6 +2,7 @@ from pipelines.etap.post_processor import insert_adsense
 from pipelines.etap.quality_guard import postprocess_content, send_alert
 from shared.entity_linker import inject_internal_links, mark_entity_published, register_entity
 from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post_shared
+from pipelines.etap._contract import _normalize_result
 
 """
 항공권 딜 글 발행 파이프라인
@@ -127,7 +128,7 @@ def mark_published(topic_id, blog_id, title, slug) -> None:
     db.close()
 
 
-def run(cfg):
+def _run_impl(cfg):
     topic = pick_flight_topic(blog_id=cfg.get("id", "flights-hugo"))
     if topic:
         post_dir = os.path.join(cfg["site_path"], "content", "posts", topic["slug"])
@@ -168,6 +169,13 @@ def run(cfg):
     return {"status": "ok", "title": article["title"], "slug": article["slug"]}
 
 
+def run(cfg):
+    """표준 계약 정규화 adapter (flight, PIPELINE-STANDARD §3.5). status-dict → success/reason."""
+    return _normalize_result(_run_impl(cfg))
+
+
+
+
 def run_batch(cfg, count=2):
     from pipelines.etap.topic_manager import check_daily_quota
     blog_id = cfg.get("id", "flights-hugo")
@@ -179,7 +187,7 @@ def run_batch(cfg, count=2):
     count = min(count, 5 - today_count)
     results = []
     for i in range(count):
-        result = run(cfg)
+        result = _run_impl(cfg)
         results.append(result)
         if result["status"] == "skip":
             break

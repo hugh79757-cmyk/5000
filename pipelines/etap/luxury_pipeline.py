@@ -29,6 +29,7 @@ from shared.entity_linker import (
     register_entity,
 )
 from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post
+from pipelines.etap._contract import _normalize_result
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -103,7 +104,7 @@ def _add_product_cards(article):
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
-def run(cfg=None) -> bool:
+def _run_impl(cfg=None) -> bool:
     topic = pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
     if not topic:
         logger.info(f"[{BLOG_ID}] No topics")
@@ -136,6 +137,13 @@ def run(cfg=None) -> bool:
         register_entity("country", country, BLOG_ID, article["slug"], "luxury and private tours in " + country, 35, 1)
     return True
 
+
+def run(cfg=None):
+    """표준 계약 정규화 adapter (Phase 61, D-08). 기존 _run_impl 로직 위임. 반환만 표준 dict로."""
+    return _normalize_result(_run_impl(cfg))
+
+
+
 def run_batch(cfg=None, count=3):
     from pipelines.etap.topic_manager import check_daily_quota
     can_pub, today_count = check_daily_quota(BLOG_ID, max_per_day=5)
@@ -145,7 +153,7 @@ def run_batch(cfg=None, count=3):
     count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
-        if run():
+        if _run_impl():
             ok += 1
         time.sleep(5)
     logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")

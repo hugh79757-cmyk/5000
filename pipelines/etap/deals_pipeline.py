@@ -34,6 +34,7 @@ DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
 from pipelines.etap.deals_writer import generate_deals_guide
 from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post
+from pipelines.etap._contract import _normalize_result
 
 BLOG_ID = "deals-hugo"
 SITE_PATH = "/Users/twinssn/Projects/ETAP/deals-hugo"
@@ -82,7 +83,7 @@ def _mark_published(article, blog_id, topic_table, topic_id) -> None:
 def pick_topic():
     return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
 
-def run() -> bool:
+def _run_impl() -> bool:
     topic = pick_topic()
     if not topic:
         logger.info(f"[{BLOG_ID}] No topics")
@@ -110,6 +111,13 @@ def run() -> bool:
         register_entity("city", origin, BLOG_ID, article["slug"], "flight deals from " + origin, 50, 1)
     return True
 
+
+def run():
+    """표준 계약 정규화 adapter (Phase 61, D-08). 기존 _run_impl 로직 위임. 반환만 표준 dict로."""
+    return _normalize_result(_run_impl())
+
+
+
 def run_batch(count=1):
     from pipelines.etap.topic_manager import check_daily_quota
     can_pub, today_count = check_daily_quota("deals-hugo", max_per_day=5)
@@ -120,7 +128,7 @@ def run_batch(count=1):
     count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
-        if run():
+        if _run_impl():
             ok += 1
         time.sleep(5)
     logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")

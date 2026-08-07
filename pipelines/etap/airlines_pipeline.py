@@ -27,6 +27,7 @@ from shared.entity_linker import (
     register_entity,
 )
 from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post
+from pipelines.etap._contract import _normalize_result
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
@@ -98,7 +99,7 @@ def _add_product_cards(article):
         article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
     return article
 
-def run() -> bool:
+def _run_impl() -> bool:
     topic = pick_topic()
     if not topic:
         logger.info("[airlines-hugo] No topics")
@@ -134,6 +135,13 @@ def run() -> bool:
                         airline_name + " airline review", 50, 1)
     return True
 
+
+def run():
+    """표준 계약 정규화 adapter (Phase 61, D-08). 기존 _run_impl 로직 위임. 반환만 표준 dict로."""
+    return _normalize_result(_run_impl())
+
+
+
 def run_batch(count=3):
     from pipelines.etap.topic_manager import check_daily_quota
     can_pub, today_count = check_daily_quota("airlines-hugo", max_per_day=5)
@@ -144,7 +152,7 @@ def run_batch(count=3):
     count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
-        if run():
+        if _run_impl():
             ok += 1
         time.sleep(5)
     logger.info(f"[airlines-hugo] Batch {ok}/{count}")
