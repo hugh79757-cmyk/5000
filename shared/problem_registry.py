@@ -170,6 +170,11 @@ _register(ProblemSpec(
         "fetch_error",
         # DEPLOY-PATHS.md C-6: dispatcher.py:718 escalation stage — 연속 실패 에스컬레이션
         "escalation",
+        # Phase 61 (Plan 61-02): 분기 실측 미등록 reason → P01 (데이터 부족)
+        "no_topic",
+        "no_topics",
+        "no_trade_data",
+        "no_subscription_data",
     ),
     hook="result_parse",
     threshold="consecutive:3",
@@ -194,6 +199,11 @@ _register(ProblemSpec(
         "publish_error",
         # DEPLOY-PATHS.md C-6: rap:1240 publish stage — 발행 실패 알림 stage
         "publish",
+        # Phase 61 (Plan 61-02): 분기 실측 미등록 reason → P02 (생성/발행/프롬프트 실패)
+        "generation_failed",
+        "prompt_not_found",
+        "publish_failed",
+        "write_failed",
     ),
     hook="result_parse",
     threshold="consecutive:3",
@@ -449,6 +459,8 @@ _register(ProblemSpec(
         "daily_quota_exceeded",
         "daily_quota",
         "duplicate_title",
+        # Phase 61 (Plan 61-02): 분기 실측 미등록 reason → P17 (일일 할당량)
+        "daily_quota_reached",
     ),
     hook="result_parse",
     threshold="quiet",
@@ -481,7 +493,7 @@ _register(ProblemSpec(
     problem_id="P19",
     name_ko="오래된/만료 데이터",
     severity="MINOR",
-    reason_keys=("stale", "stale_data", "event_expired"),
+    reason_keys=("stale", "stale_data", "event_expired", "expired_service"),
     hook="post_validate",
     threshold="quiet",
     alert_template=(

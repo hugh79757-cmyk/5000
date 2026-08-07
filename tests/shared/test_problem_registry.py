@@ -136,3 +136,48 @@ class TestUnknownFailureSpec:
         assert spec.threshold == "quiet"
         assert spec.severity == "MINOR"
         assert spec.reason_keys == ()
+
+
+# Phase 61 (Plan 61-02): previously unregistered reason keys must map to concrete P-codes.
+# Corrected per PIPELINE-STANDARD §5.2 + Review #5: `language_error` is ALREADY registered
+# as P12 — it is NOT in this set. The 10 genuinely-unregistered reasons are:
+_UNREGISTERED_REASONS = [
+    "daily_quota_reached",
+    "expired_service",
+    "generation_failed",
+    "no_subscription_data",
+    "no_topic",
+    "no_topics",
+    "no_trade_data",
+    "prompt_not_found",
+    "publish_failed",
+    "write_failed",
+]
+
+
+class TestPhase61UnregisteredReasons:
+    def test_language_error_already_registered(self):
+        """Review #5: language_error is already P12 — must NOT be added again."""
+        spec = lookup_reason("language_error")
+        assert spec is not None
+        assert spec.problem_id == "P12"
+
+    def test_ten_unregistered_reasons_now_recognized(self):
+        for reason in _UNREGISTERED_REASONS:
+            spec = lookup_reason(reason)
+            assert spec is not None, f"{reason} still unmapped"
+            assert spec.problem_id != "unknown_failure", f"{reason} falls to unknown_failure"
+
+    def test_each_new_reason_maps_to_exactly_one_spec(self):
+        for reason in _UNREGISTERED_REASONS:
+            owners = [s for s in PROBLEM_REGISTRY.values() if reason in s.reason_keys]
+            assert len(owners) == 1, f"{reason} mapped to {len(owners)} specs"
+
+    def test_existing_24_reason_mappings_unchanged(self):
+        """No regression in the existing P01..P24 reason mappings."""
+        assert lookup_reason("no_result").problem_id == "P01"
+        assert lookup_reason("deploy_error").problem_id == "P04"
+        assert lookup_reason("content_quality_gate").problem_id == "P12"
+        assert lookup_reason("stap_timeout").problem_id == "P20"
+        assert lookup_reason("quota_met").problem_id == "P17"
+        assert lookup_reason("event_expired").problem_id == "P19"
