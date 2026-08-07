@@ -415,6 +415,12 @@ def run(cfg):
     blog_id = cfg["id"]
     result = _run_single(blog_id, blog_cfg=cfg)
 
+    # 표준 계약 정규화 (PIPELINE-STANDARD §3.3): dict만 반환 — None → no_result.
+    # _run_single은 할당량/데이터 부족/중복 가드 시 None을 반환할 수 있음.
+    # dispatcher는 이미 None을 {"success": False, "reason": "no_result"}로 폴백하므로
+    # (dispatcher.py:732) 이 정규화는 모듈 계약을 dict-only로 통일할 뿐 동작은 동일.
+    result = result if isinstance(result, dict) else {"success": False, "reason": "no_result"}
+
     # 발행 성공 시 품질 메트릭 기록 (Phase 16)
     if result and result.get("success"):
         try:
