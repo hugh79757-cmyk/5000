@@ -245,3 +245,22 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 ---
 
 *Last updated: 2026-08-06 - Phase 59 Planning 완료 (Ops Dashboard + Blowfish 단일화 + 파이프라인 통합) + quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*
+
+---
+
+## Phase 61: Pipeline Standardization & Branch Renewal (2026-08-07)
+
+**Status:** 📋 Planned (context gathered)
+**Context:** `.planning/phases/61-pipeline-standardization-branch-renewal/61-CONTEXT.md`
+**목표:** 85개 블로그 7개 파이프라인 분기(car/curation/etap/rap/senior/travel/stock)를 동일 표준 골격으로 재편하는 리뉴얼
+
+**확정 범위 (사용자 5개 목표 전부 선택):**
+1. 파이프라인 코드 구조 통일 (pipeline/fetcher/topic_manager/writer/enrich/validator 골격)
+2. config 스키마 통일 (blogs.d/*.yaml 표준 스키마 + config_validator 검증)
+3. 실행 방식 통일 (STAP/TAP subprocess 러너 → shared/subprocess_runner.py)
+4. 외부 프로젝트(TAP/STAP) 표준 계약 정합 (물리적 병합 아님)
+5. 새 분기 생성 도구 (scripts/scaffold_branch.py)
+
+**번호 재지정:** phase.add가 Phase 60을 부여했으나 기존 비공식 `phase-60-publish-investigation-and-hardening`과 충돌 → Phase 61로 재지정 (디렉터리 mv + ROADMAP 수정)
+
+**다음 단계:** `/gsd-plan-phase 61`
