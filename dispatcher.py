@@ -336,18 +336,31 @@ def _record_ledger(blog_id) -> None:
                     source_id = slug
             else:
                 # 5000 content.db에서 조회 (non-ETAP)
-                conn_src = sqlite3.connect(str(LEDGER_DB))
-                row = conn_src.execute(
-                    "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
-                    (blog_id,)
-                ).fetchone()
-                if row:
-                    title, url, source_id = row[0], row[1], row[2] or ""
-                conn_src.close()
+                # CUAP(curation pipeline) 블로그는 content.db articles에 과거 레코드가
+                # 남아 있어 잘못된 title이 조회될 수 있음 (2026-08-07 사고:
+                # publish_ledger 57823/57824/57826/57827/57828이 3~4월 옛 articles title로
+                # 기록됨) — curation 블로그는 아래 CUAP 분기에서 curation.db publish_log
+                # 최신 건을 직접 조회하도록 건너뜀.
+                blog_cfg = next(
+                    (b for b in _load_all_blogs().get("blogs", [])
+                     if b.get("id") == blog_id),
+                    None
+                )
+                if not (blog_cfg and blog_cfg.get("pipeline") == "curation"):
+                    conn_src = sqlite3.connect(str(LEDGER_DB))
+                    row = conn_src.execute(
+                        "SELECT title, published_url, source_id FROM articles WHERE blog_id=? AND status='published' ORDER BY rowid DESC LIMIT 1",
+                        (blog_id,)
+                    ).fetchone()
+                    if row:
+                        title, url, source_id = row[0], row[1], row[2] or ""
+                    conn_src.close()
 
         if not title and not url:
             # CUAP 블로그는 curation.db publish_log에 기록됨 (STRUCT-07:
-            # content.db articles에는 CUAP 레코드가 없어 title이 항상 빈 값이었음)
+            # content.db articles에는 CUAP 레코드가 없어 title이 항상 빈 값이었음.
+            # 단, 과거 레코드가 남아있는 curation 블로그는 위 분기에서 articles
+            # 조회를 건너뛰므로 여기까지 도달함)
             try:
                 conn_cu = sqlite3.connect(os.path.join(FIVEK_ROOT, "data", "curation.db"))
                 row_cu = conn_cu.execute(
