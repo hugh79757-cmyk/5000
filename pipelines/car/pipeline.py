@@ -15,6 +15,7 @@ load_dotenv("/Users/twinssn/Projects/5000/.env")
 from pipelines.car.data_builder import build_input
 from pipelines.car.topic_manager import generate_title, make_slug, select_topic, validate_body
 from shared.ai_writer import generate_car
+from shared.db import get_db_path as _get_db_path
 from shared.content_store import get_today_count, init_db, title_similar_exists
 from shared.publisher import publish
 from shared.telegram_notifier import send_error as _tg_error
@@ -23,7 +24,7 @@ from shared.validators import sanitize_title
 logger = logging.getLogger(__name__)
 
 PROJECT_DIR = Path(__file__).parent.parent.parent
-CAR_DB_PATH = PROJECT_DIR / "data" / "car.db"
+CAR_DB_PATH = Path(_get_db_path("car"))
 PROMPTS_DIR = PROJECT_DIR / "prompts"
 
 
