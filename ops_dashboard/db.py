@@ -523,6 +523,24 @@ SEED_STANDARD_RULES: list[dict] = [
     {"rule_id": "R10", "target": "custom.css", "severity": "MAJOR", "description": "Unfilled space removal + dark mode + min-height rules"},
     {"rule_id": "R11", "target": "layouts/", "severity": "MAJOR", "description": "mobile-sticky.html must not be used"},
     {"rule_id": "R12", "target": "layouts/", "severity": "MAJOR", "description": "No override files beyond the allowed set"},
+
+    # C01~C08: 콘텐츠 무결성·누수 규칙 (Phase 62)
+    {"rule_id": "C01", "target": "frontmatter", "severity": "MAJOR",
+     "description": "프론트매터 내 곡선따옴표(\u2018 \u2019 \u201c \u201d) 사용 금지 — YAML 값(타이틀·description·카테고리·태그 등)에 직선따옴표(' \"') 아닌 곡선따옴표 포함 시 위반"},
+    {"rule_id": "C02", "target": "frontmatter", "severity": "CRITICAL",
+     "description": "프론트매터 미종료 — 첫 --- 이후 두 번째 --- 존재하지 않음 (전체 --- 홀수 카운트 판정 금지, 첫--- 이후 두 번째--- 존재 여부로만 판정)"},
+    {"rule_id": "C03", "target": "body", "severity": "MAJOR",
+     "description": "본문에 프론트매터 키 라인 유출 — title:, og_image:, featureimage:, date:, slug: 등 프론트매터 키 라인과 유사한 라인이 본문에 존재"},
+    {"rule_id": "C04", "target": "body", "severity": "CRITICAL",
+     "description": "본문에 LLM 프롬프트/사고문 누수 — 'Need think', 'We need to write', 'Let's think step by step', '먼저', '생각해보자' 등 LLM 지시 복술 흔적"},
+    {"rule_id": "C05", "target": "frontmatter+publish", "severity": "CRITICAL",
+     "description": "draft:true 발행 대상 — frontmatter에 draft: true가 설정되어 있는데 발행 파이프라인이 이를 발행 대상으로 처리"},
+    {"rule_id": "C06", "target": "file+deploy", "severity": "MAJOR",
+     "description": "로컬 mtime > 배포 시각 — 로컬 파일의 mtime이 마지막 배포 시각보다 최신 (배포 후 로컬에서 파일 수정된 상태)"},
+    {"rule_id": "C07", "target": "body+cross-sell", "severity": "MAJOR",
+     "description": "죽은 크로스셀 링크 — 크로스셀 카드가 가리키는 대상 slug가 DB에 published=0이거나 라이브에서 HTTP 404"},
+    {"rule_id": "C08", "target": "live+file", "severity": "CRITICAL",
+     "description": "라이브-파일 불일치 — 라이브 프런트와 로컬 파일 간 불일치 (제목 빔, og_image 유출 등)"},
 ]
 
 
