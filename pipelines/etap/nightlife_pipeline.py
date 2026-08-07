@@ -23,12 +23,12 @@ from pipelines.etap.post_processor import (
 from pipelines.etap.quality_guard import postprocess_content, send_alert
 from pipelines.etap.topic_manager import mark_published_by_id, pick_topic_by_id
 from shared.entity_linker import (
-from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post
     build_cross_sell_html,
     inject_internal_links,
     mark_entity_published,
     register_entity,
 )
+from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post
 
 logger = logging.getLogger(__name__)
 KST = timezone(timedelta(hours=9))
