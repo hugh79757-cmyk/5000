@@ -3,11 +3,11 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-06T12:00:00Z"
+last_updated: "2026-08-07T17:00:00Z"
 progress:
   total_phases: 31
-  completed_phases: 30
-  percent: 97
+  completed_phases: 31
+  percent: 100
 ---
 
 # Project State: 5000
@@ -62,6 +62,7 @@ progress:
 | 52 | Blowfish 블로그 표준화 + 테마 업그레이드 대응 | 🔄 | Wave 1 진행 중 (2026-07-28) |
 | 58 | 발행 문제 인벤토리 + 정밀 Telegram 알림 시스템 (PublishMonitor) | ✅ | 8 커밋 (`0e17f9acc`~`3e5aa1cd5`, 2026-08-06) |
 | 59 | Ops Dashboard + Blowfish 표준 단일화 + 파이프라인 통합 | ✅ | 10 커밋 (59-02~59-11, 2026-08-06) |
+| 61 | Pipeline Standardization & Branch Renewal | ✅ | 9 plans/6 waves 실행 (2026-08-07) |
 
 ---
 
@@ -244,13 +245,13 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-06 - Phase 59 Planning 완료 (Ops Dashboard + Blowfish 단일화 + 파이프라인 통합) + quick task 260805-d7c: golf/bike no_keyword 해소 (커밋 2871c889c, 64a9874a9)*
+*Last updated: 2026-08-07 - Phase 61 Execution 완료 (9 plans / 6 waves) — Pipeline Standardization & Branch Renewal*
 
 ---
 
 ## Phase 61: Pipeline Standardization & Branch Renewal (2026-08-07)
 
-**Status:** 📋 Planned (context gathered)
+**Status:** ✅ Executed (9 plans / 6 waves 완료)
 **Context:** `.planning/phases/61-pipeline-standardization-branch-renewal/61-CONTEXT.md`
 **목표:** 85개 블로그 7개 파이프라인 분기(car/curation/etap/rap/senior/travel/stock)를 동일 표준 골격으로 재편하는 리뉴얼
 
@@ -263,4 +264,30 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 **번호 재지정:** phase.add가 Phase 60을 부여했으나 기존 비공식 `phase-60-publish-investigation-and-hardening`과 충돌 → Phase 61로 재지정 (디렉터리 mv + ROADMAP 수정)
 
-**다음 단계:** `/gsd-plan-phase 61`
+**선행 정리 (사용자 승인, 파괴적 작업):**
+- `5000/CUAP/health-hugo` 죽은 복사본 제거 (274 files, grep 0건, inode 분리 확인) — 커밋 `55ea89f06`, 백업 `/Users/twinssn/Projects/_5000_backups/CUAP-health-hugo_20260807-162010.tar.gz`, worklog `WL-20260807-health-hugo-dead-copy-removal.md`
+- 커밋 전 작업트리 보존: curation pipeline.py draft-skip fix (404 예방) `39f005084`
+- 교차검토 `61-REVIEWS.md` (opencode subagent; claude CLI OAuth 만료로 대체) — 전체 파일 대상 경로 진본 확인, ETAP 35쌍 진본 inode 확인
+
+**Wave 실행 결과 (전 Wave 성공):**
+| Wave | Plan | 내용 |
+|------|------|------|
+| 1 | 61-01 | `docs/PIPELINE-STANDARD.md` — 표준 7-section (run(cfg) 계약, 6-모듈 골격, config 스키마, reason 어휘, DB 규칙) |
+| 2 | 61-02 | `shared/db.py`, `shared/subprocess_runner.py`, config_validator 확장, problem_registry reason-key 10개 추가 (language_error=P12 기등록 제외, travel DB 미배선) |
+| 3 | 61-03 | senior/rap 표준 골격 (pass-through wrapper 6개) + DB 중앙화 |
+| 4 | 61-04/05/06 | car/travel/curation 표준 골격 + DB 중앙화 + travel run() None→no_result 정규화 |
+| 5 | 61-07 | ETAP 35쌍 run(cfg)→dict 어댑터 (24×run()/10×run(cfg=None)/1×run(cfg)=flight 정규화), dispatcher 브리지 보존, 10개 pipeline 사전 SyntaxError 수정 |
+| 6 | 61-08/09 | dispatcher STAP/TAP→run_subprocess 위임(~124줄 중복 제거), `scaffold_branch.py` + .bak/dead-code 보고(삭제 지연) |
+
+**테스트:** 21 failed / 392 passed / 1 skipped (317→392, +75 신규 테스트). 실패 21건은 **사전 baseline** (relevance_scorer/ai_writer/post_validator/curation 키워드·title_hardening·cot·alert·filters) — Phase 61 도입 실패 0건.
+
+**검증:** 9개 SUMMARY (61-01~61-09) 작성. dispatcher 브리지 `git diff` 공백, ETAP 35개 import/AST OK, `data/*.db` tracked 무변경, AdSense ID 불변, 신규 패키지 0.
+
+**잔존 위험 / 후속 작업:**
+- **사전 존재 21건 테스트 실패** — Phase 61과 무관. 별도 정리 필요 (relevance_scorer 기대값 불일치 등).
+- 61-08: `run_subprocess`가 `project_root/.env`만 로드 (기존 STAP은 STAP_ROOT/.env + PROJECT_DIR/.env 둘 다 로드) — STAP 발행이 5000 env 값 의존 시 차이 가능. 라이브 STAP/TAP 발행은 mock 검증만 (운영 스케줄러 관찰 필요).
+- `.bak` 59건 실제 삭제는 별도 승인 후 (파괴적 작업 규칙).
+- `get_db_path`가 etap 미커버 (전용 DB 단일 확인 불가) — 61-07에서 이연.
+- 신규 scaffold 분기는 import-verifiable, end-to-end 발행은 미검증 (placeholder).
+
+**다음 단계:** 21건 사전 실패 정리 (선택), 운영 스케줄러로 61-08 STAP/TAP 라이브 발행 관찰
