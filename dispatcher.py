@@ -639,6 +639,29 @@ def preflight_check(blog_id: str) -> dict:
         # 현재 구현에서는 제목/og_image 비교 로직 생략 (별도 구현 필요)
         # placeholder: 향후 라이브 비교 API 연동 시 활성화
 
+        # --- C09: categories/tags 문자열화 (CRITICAL) ---
+        # YAML 배열이 "['추천']" 같은 문자열 리터럴로 저장되면 Hugo range 실패
+        # severity=CRITICAL → 1건이라도 있으면 배포 차단
+        try:
+            import yaml as _yaml9
+            _fm_body = '\n'.join(lines[1:second_dash]) if second_dash else ''
+            _fm_dict = _yaml9.safe_load(_fm_body) or {}
+            if isinstance(_fm_dict, dict):
+                for _c09_field in ('categories', 'tags'):
+                    _c09_val = _fm_dict.get(_c09_field)
+                    if _c09_val is not None and isinstance(_c09_val, str):
+                        # "['...']" 또는 '["..."]' 패턴이면 문자열화
+                        _c09_match = re.match(r'^\[\s*[\'"].*[\'"]\s*\]$', _c09_val.strip())
+                        if _c09_match:
+                            violations.append({
+                                "rule_id": "C09", "slug": slug, "severity": "CRITICAL",
+                                "detail": f"categories/tags 문자열화: {_c09_field}='{_c09_val}'",
+                                "file": str(md_file)})
+                            blocked = True
+                            break  # 한 포스트당 1건만 기록
+        except Exception:
+            pass  # YAML 파싱 실패 시 C09 검사는 skip (C02에서 이미 걸렸을 가능성)
+
     # 결과 기록 (logs/c01_c04_preflight.json)
     logs_dir = Path(__file__).parent / "logs"
     logs_dir.mkdir(parents=True, exist_ok=True)

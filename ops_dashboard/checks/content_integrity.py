@@ -193,6 +193,34 @@ def _check_c08(site: Path | None, blog_id: str) -> tuple[bool, str]:
     return True, "C08: 라이브 비교 미구현 (placeholder)"
 
 
+def _check_c09(content: str) -> tuple[bool, str]:
+    """C09: categories/tags 문자열화 탐지.
+
+    YAML 파싱 결과 type이 str이고 값이 "['...']" 또는 '["..."]' 패턴이면 fail.
+    type이 list이면 정상 통과.
+    """
+    import yaml as _yaml9
+    import re as _re9
+    try:
+        m = re.match(r"^---\n(.*?)\n---\n", content, re.DOTALL)
+        if not m:
+            return True, "C09 skip (frontmatter 없음)"
+        fm = _yaml9.safe_load(m.group(1)) or {}
+        if not isinstance(fm, dict):
+            return True, "C09 skip (파싱 실패)"
+        issues = []
+        for field in ('categories', 'tags'):
+            val = fm.get(field)
+            if val is not None and isinstance(val, str):
+                if _re9.match(r'^\[\s*[\'"].*[\'"]\s*\]$', val.strip()):
+                    issues.append(f"{field}='{val}' (문자열화된 리스트)")
+        if issues:
+            return False, f"C09 위반: {', '.join(issues)}"
+        return True, "C09 통과"
+    except Exception as e:
+        return True, f"C09 skip (파싱 예외: {e})"
+
+
 @register_check("c01_curve_quote")
 def check_c01(conn, blog_id: str) -> dict:
     """C01: 프론트매터 내 곡선따옴표 검사."""
@@ -363,3 +391,30 @@ def check_c07(conn, blog_id: str) -> dict:
 def check_c08(conn, blog_id: str) -> dict:
     """C08: 라이브-파일 불일치 검사 (placeholder)."""
     return {"status": "unknown", "detail": "C08: 라이브 비교 미구현 (향후 활성화)"}
+
+
+@register_check("c09_str_list_categories")
+def check_c09(conn, blog_id: str) -> dict:
+    """C09: categories/tags 문자열화 탐지.
+
+    YAML 값이 ["추천"] (list)가 아닌 "['추천']" (str)로 저장된 경우 탐지.
+    severity=CRITICAL → 대시보드에서 fail 상태로 표시.
+    """
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        passed, detail = _check_c09(content)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C09 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C09 통과 ({len(posts)}건)"}

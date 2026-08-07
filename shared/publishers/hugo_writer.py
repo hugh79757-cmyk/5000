@@ -1117,6 +1117,24 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     except ImportError:
         pass
 
+    # ── C09: categories/tags 문자열화 저장 직전 차단 (CRITICAL) ──
+    try:
+        import yaml as _yaml9
+        _c09_fm = _yaml9.safe_load(fm) or {}
+        if isinstance(_c09_fm, dict):
+            _c09_issues = []
+            for _c09_field in ('categories', 'tags'):
+                _c09_val = _c09_fm.get(_c09_field)
+                if _c09_val is not None and isinstance(_c09_val, str):
+                    import re as _re9
+                    if _re9.match(r'^\[\s*[\'"].*[\'"]\s*\]$', _c09_val.strip()):
+                        _c09_issues.append(f"{_c09_field}='{_c09_val}'")
+            if _c09_issues:
+                logger.warning(f"[C09] 저장직전 categories/tags 문자열화 탐지 — 배포차단 {slug}: {_c09_issues}")
+                return {"success": False, "error": f"C09_violation: {_c09_issues}"}
+    except Exception:
+        pass  # YAML 파싱 실패 시 C09 검사는 skip
+
     _ok, _err = _validate_frontmatter(fm)
     if not _ok:
         logger.error(f"[PUBLISH] Invalid front matter — write blocked: {_err}")

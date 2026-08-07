@@ -541,6 +541,8 @@ SEED_STANDARD_RULES: list[dict] = [
      "description": "죽은 크로스셀 링크 — 크로스셀 카드가 가리키는 대상 slug가 DB에 published=0이거나 라이브에서 HTTP 404"},
     {"rule_id": "C08", "target": "live+file", "severity": "CRITICAL",
      "description": "라이브-파일 불일치 — 라이브 프런트와 로컬 파일 간 불일치 (제목 빔, og_image 유출 등)"},
+    {"rule_id": "C09", "target": "frontmatter", "severity": "CRITICAL",
+     "description": "categories/tags 문자열화 — YAML 배열이 아닌 문자열 리터럴 \"['추천']\" 형태로 저장되어 Hugo range .Params.categories/tags 실패 (type=list 정상, type=str + [...] 패턴 위반)"},
 ]
 
 
