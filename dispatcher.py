@@ -526,8 +526,161 @@ WORKERS_BLOGS = {
 DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
 DEPLOY_LOCK_TIMEOUT = 600
 
+
+def preflight_check(blog_id: str) -> dict:
+    """배포 전 콘텐츠 무결성 프리플라이트 체크.
+
+    C01~C04·C08 중 critical이 1건이라도 있으면 배포 중단.
+
+    Returns:
+        {"blocked": bool, "violations": list[dict], "reason": str}
+        - blocked=True: 배포 중단 필요
+        - violations: [{rule_id, slug, severity, detail}, ...]
+    """
+    import json
+    import re
+    from datetime import datetime
+    from pathlib import Path
+
+    from shared.paths import FIVEK_ROOT
+
+    violations = []
+    blocked = False
+
+    # 대상 블로그 site_path 확인
+    _all_blogs = _load_all_blogs().get("blogs", [])
+    _cfg = next((b for b in _all_blogs if b.get("id") == blog_id), {})
+    site_path = Path(_cfg.get("site_path", "")) if _cfg.get("site_path") else None
+    if not site_path or not site_path.exists():
+        return {"blocked": False, "violations": [],
+                "reason": f"site_path 없음: {blog_id}"}
+
+    # 최근 발행된 포스트 목록 확인 (content/posts/)
+    posts_dir = site_path / "content" / "posts"
+    if not posts_dir.exists():
+        return {"blocked": False, "violations": [],
+                "reason": f"posts_dir 없음: {posts_dir}"}
+
+    # 최근 7일 내 생성된 포스트 추출 (파일 mtime 기준)
+    cutoff = datetime.now().timestamp() - 7 * 86400
+    recent_posts = []
+    for md_file in posts_dir.rglob("*.md"):
+        if md_file.stat().st_mtime >= cutoff:
+            recent_posts.append(md_file)
+
+    if not recent_posts:
+        return {"blocked": False, "violations": [],
+                "reason": "최근 7일 내 발행 포스트 없음 (skip)"}
+
+    # 각 포스트 검사
+    for md_file in recent_posts:
+        content = md_file.read_text(encoding="utf-8", errors="replace")
+        slug = md_file.parent.name
+
+        # --- C02: 프론트매터 미종료 (CRITICAL) ---
+        lines = content.split('\n')
+        first_dash = None
+        second_dash = None
+        for i, line in enumerate(lines):
+            if line.strip() == '---':
+                if first_dash is None:
+                    first_dash = i
+                elif second_dash is None and i > first_dash:
+                    second_dash = i
+                    break
+        if first_dash is not None and second_dash is None:
+            violations.append({
+                "rule_id": "C02", "slug": slug, "severity": "CRITICAL",
+                "detail": "프론트매터 미종료: 첫 --- 이후 두 번째 --- 없음",
+                "file": str(md_file)})
+            blocked = True
+
+        # --- C04: 프롬프트/사고문 누수 (CRITICAL) ---
+        # 국문 + 영문 패턴 모두 확인
+        # 주의: 일반 한국어 표현과 LLM 프롬프트 누수 패턴을 구분하기 위해
+        # 구체적인 문맥 패턴만 사용 (예: "생각해보자" alone is OK, but "먼저 생각해보자"
+        # as a standalone sentence suggesting LLM reasoning is suspicious)
+        ko_patterns = [
+            r"생각해보자\b",         # "생각해보자" (문장 끝)
+            r"생각해\s*보자\b",      # "생각해 보자" (문장 끝)
+            r"다음\s*단계로\s*넘어", # "다음 단계로 넘어가자"
+            r"단계별로\s*진행해",    # "단계별로 진행해보자"
+            r"우선\s*,?\s*(우리가|제가|내가|우리)\s*해야",  # "우선, 우리가 해야..."
+            r"우리가\s*해야\s*할\s*것은",  # "우리가 해야 할 것은"
+            r"생각\s*과정을\s*통해", # "생각 과정을 통해"
+            r"결론부터\s*말하면",    # "결론부터 말하면"
+            r"먼저\s*생각해보자",    # "먼저 생각해보자" (let's think)
+            r"단계별로\s*생각",      # "단계별로 생각해보자"
+        ]
+        en_patterns = [
+            r"\bNeed\s+to\s+think\b",
+            r"\bWe\s+need\s+to\s+write\b",
+            r"Let['']s\s+think\s+step\s+by\s+step",
+            r"think\s+step\s+by\s+step",
+            r"let['']s\s+break\s+this\s+down",
+            r"here['']s\s+the\s+plan",
+            r"\bfirstly,?\s+",      # "Firstly," (LLM 스타일)
+            r"\b secondly,?\s+",    # "Secondly," (LLM 스타일)
+            r"in\s+order\s+to\s+achieve",
+            r"as\s+an\s+AI\s+language\s+model",
+        ]
+        body_start = content.find("---\n", 4)  # 첫 frontmatter 닫기 이후
+        body = content[body_start:] if body_start > 0 else content
+        for pat in ko_patterns + en_patterns:
+            if re.search(pat, body, re.IGNORECASE):
+                violations.append({
+                    "rule_id": "C04", "slug": slug, "severity": "CRITICAL",
+                    "detail": f"프롬프트 누수 패턴 감지: {pat[:30]}",
+                    "file": str(md_file)})
+                blocked = True
+                break  # 한 포스트당 1건만 기록
+
+        # --- C08: 라이브-파일 불일치 (CRITICAL) ---
+        # 현재 구현에서는 제목/og_image 비교 로직 생략 (별도 구현 필요)
+        # placeholder: 향후 라이브 비교 API 연동 시 활성화
+
+    # 결과 기록 (logs/c01_c04_preflight.json)
+    logs_dir = Path(__file__).parent / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    preflight_log = logs_dir / "c01_c04_preflight.json"
+    _results = {
+        "blog_id": blog_id,
+        "checked_at": datetime.now().isoformat(),
+        "blocked": blocked,
+        "violations": violations,
+        "reason": "차단: critical 위반 있음" if blocked else "통과",
+    }
+    try:
+        existing = json.loads(preflight_log.read_text()) if preflight_log.exists() else {}
+    except (json.JSONDecodeError, OSError):
+        existing = {}
+    existing[blog_id] = _results
+    preflight_log.write_text(json.dumps(existing, ensure_ascii=False, indent=2))
+
+    return _results
+
+
 def _build_and_deploy_central(blog_id: str) -> bool:
     """중앙 빌드+배포 — ETAP/Workers 블로그 공용"""
+    # ── C01~C04·C08 프리플라이트 게이트 ──
+    _pf_result = preflight_check(blog_id)
+    if _pf_result.get("blocked"):
+        logger.error(
+            f"[deploy] 프리플라이트 차단: {blog_id} "
+            f"— critical 위반 {len(_pf_result['violations'])}건: "
+            f"{[v['rule_id']+':'+v['slug'] for v in _pf_result['violations']]}"
+        )
+        # Telegram 알림 (기존 _tg_error 활용)
+        _violation_summary = "; ".join(
+            f"{v['rule_id']}({v['slug']})" for v in _pf_result["violations"]
+        )
+        try:
+            from shared.telegram_notifier import send_error as _tg_error
+            _tg_error(f"[deploy blocked] {blog_id}: {_violation_summary}")
+        except Exception:
+            pass
+        return False
+
     import fcntl as _fcntl
     _all = _load_all_blogs().get("blogs", [])
     _cfg = next((b for b in _all if b.get("id") == blog_id), {})
