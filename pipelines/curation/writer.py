@@ -655,6 +655,44 @@ _COT_ENGLISH_RATIO_THRESHOLD = 0.30
 _COT_WRITING_INSTRUCTION_MIN_MATCHES = 3
 _COT_MARKER_MIN_MATCHES = 1
 
+# C04 패턴 단일 소스 통합: leak_tracker의 패턴 중 writer.py post-generate
+# 단계에서 재사용할 패턴을 명확한 패턴(재시도 대상)과 모호한 패턴(WARNING 관찰)
+# 으로 분리 정의. leak_tracker와 동일 소스에서 파생했으나 writer 용도에 맞게
+# ambiguous 분류 추가.
+#
+# 명확한 패턴: CoT/프롬프트 지시문 성격이 강해 재시도 대상
+_C04_CLEAR_PATTERNS_KO = [
+    r"먼저\s*생각", r"생각해보자", r"생각해\s*보자",
+    r"다음\s*단계", r"단계별로",
+    r"우리가\s*해야\s*할", r"생각\s*과정", r"결론부터\s*말하면",
+]
+_C04_CLEAR_PATTERNS_EN = [
+    r"\bNeed\s+think\b", r"\bWe\s+need\s+to\s+write\b",
+    r"Let.s\s+think\s+step\s+by\s+step", r"think\s+step\s+by\s+step",
+    r"let.s\s+break\s+this\s+down", r"here.?s\s+the\s+plan",
+    r"firstly,?\s", r"secondly,?\s",
+    r"in\s+order\s+to\s+achieve", r"as\s+an\s+AI\s+language\s+model",
+]
+# 모호한 패턴: 자연어에도 등장 가능 → WARNING 관찰만, 재시도 대상 아님
+_C04_AMBIGUOUS_PATTERNS = [
+    (r"우선", "본문 첫머리 + 명령형 어미 + 지시문 구조 동시 충족 시 관찰"),
+    (r"필요한\s*것", "자연어에도 빈출 — 문맥 확인 필요"),
+]
+
+# RULE-C04-S01: 단일 마커("우선") 문맥 관찰 규칙
+# 본문 첫 3줄 이내 + 명령형 어미 + 지시문 구조 동시 충족 시 WARNING 관찰 대상
+_C04_SINGLE_MARKER_CONTEXT = {
+    "position_markers": ["우선"],
+    "imperative_endings": [
+        "해야 한다", "해야 합니다", "해야 할", "해야", "필수다",
+        "필요하다", "중요하다", "반드시", "꼭",
+    ],
+    "instruction_structure": [
+        "첫째", "둘째", "셋째", "다음", "제품명", "선택 기준",
+        "비교", "비교표", "FAQ", "자주 묻는 질문",
+    ],
+}
+
 
 def _is_cot_body(body):
     """본문이 CoT/프롬프트 지시문인지 판정.
@@ -829,6 +867,39 @@ def generate_curation_article(keyword, products, blog_id=None):
             logger.warning(f"[cot_body] CoT 본문 감지 (시도 {attempt+1}): {keyword} — 재시도")
             body = ""
             continue
+
+        # ── C04 패턴 단일 소스 통합 (writer.py 내 패턴으로 post-generate 검사) ──
+        # _is_cot_body가 놓친 C04 패턴을 writer.py 내 명확한/모호한 패턴으로
+        # 구분하여 검사. 명확한 패턴은 재시도, 모호한 패턴은 WARNING 관찰.
+        _c04_detected_clear = False
+        _c04_detected_ambiguous = []
+        _c04_patterns_source = _C04_CLEAR_PATTERNS_KO  # writer.py는 한국어 파이프라인 전용
+        for _pat in _c04_patterns_source:
+            if re.search(_pat, body, re.IGNORECASE):
+                _c04_detected_clear = True
+                break
+        # 모호한 패턴 별도 검사
+        for _amb_pat, _amb_desc in _C04_AMBIGUOUS_PATTERNS:
+            if re.search(_amb_pat, body, re.IGNORECASE):
+                _c04_detected_ambiguous.append(_amb_pat)
+        if _c04_detected_clear:
+            # 명확한 C04 패턴 → 재시도
+            cot_body_detected = True
+            logger.warning(f"[cot_body] C04 누수 감지 (시도 {attempt+1}): {keyword} — 명확한 프롬프트 누수 — 재시도")
+            body = ""
+            continue
+        if _c04_detected_ambiguous:
+            # 모호한 패턴만 탐지 → 문맥 조건 검사 후 WARNING 관찰 여부 결정
+            _body_lines = body.strip().split("\n")
+            _first_lines = "\n".join(_body_lines[:3])
+            _position_hit = any(m in _first_lines for m in _C04_SINGLE_MARKER_CONTEXT["position_markers"])
+            _imperative_hits = sum(1 for e in _C04_SINGLE_MARKER_CONTEXT["imperative_endings"] if e in body)
+            _structure_hits = sum(1 for s in _C04_SINGLE_MARKER_CONTEXT["instruction_structure"] if s in body)
+            _context_score = sum([_position_hit, _imperative_hits >= 1, _structure_hits >= 2])
+            if _context_score >= 2:
+                logger.warning(f"[C04-WARNING] RULE-C04-S01 단일 마커 문맥 의심 (시도 {attempt+1}): {keyword} — {_c04_detected_ambiguous} — 관찰 대상 (7일)")
+            else:
+                logger.info(f"[c04_ambiguous] C04 모호 패턴만 탐지 (시도 {attempt+1}): {keyword} — {_c04_detected_ambiguous} — 문맥 불일치, 자연어로 간주")
 
         # 금지어 치환 + 메타문구 제거
         body = _sanitize_body(body)
