@@ -9,7 +9,6 @@ import os
 import sqlite3
 import subprocess
 import sys
-import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -26,7 +25,6 @@ load_dotenv(os.path.expanduser("~/.env.common"))
 load_dotenv(os.path.join(TAP_ROOT, ".env"))
 load_dotenv(os.path.join(FIVEK_ROOT, ".env"))
 
-import contextlib
 
 from shared.telegram_notifier import send_error as _tg_error
 from shared.problem_registry import lookup_reason
@@ -378,65 +376,23 @@ def _record_ledger(blog_id) -> None:
 # ─── STAP 모듈 격리 ───
 
 def _run_stap(stap_name, cfg):
-    """STAP 파이프라인을 subprocess로 완전 격리 실행"""
+    """STAP 파이프라인을 subprocess로 완전 격리 실행 (shared runner 위임)"""
     from shared.paths import STAP_ROOT as _STAP_ROOT
+    from shared.subprocess_runner import run_subprocess
     stap_root = _STAP_ROOT
     if not os.path.isdir(stap_root):
         logger.error(f"[STAP] STAP 프로젝트를 찾을 수 없음: {stap_root}. STAP_ROOT 환경변수를 확인하세요.")
         return {"success": False, "reason": "stap_not_found"}
-    import json as _json
-    import subprocess as _sp
-    import tempfile as _tmp
     stap_python = os.path.join(stap_root, ".venv", "bin", "python3")
-    if not os.path.exists(stap_python):
-        stap_python = sys.executable
-
-    cfg_json = _json.dumps(cfg, ensure_ascii=False)
-    project_env = str(PROJECT_DIR / ".env")
-
-    runner = "\n".join([
-        "import sys, json, os",
-        "sys.path.insert(0, " + repr(stap_root) + ")",
-        "os.chdir(" + repr(stap_root) + ")",
-        "from dotenv import load_dotenv",
-        "load_dotenv(os.path.join(" + repr(stap_root) + ', ".env"), override=True)',
-        "load_dotenv(" + repr(project_env) + ", override=True)",
-        "cfg = json.loads(" + repr(cfg_json) + ")",
-        "from pipelines." + stap_name + ".pipeline import run",
-        "result = run(cfg)",
-        'print(json.dumps(result or {"success": False, "reason": "no_result"}, ensure_ascii=False))',
-    ])
-
-    try:
-        with _tmp.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
-            f.write(runner)
-            runner_path = f.name
-
-        proc = _sp.run(
-            [stap_python, runner_path],
-            capture_output=True, text=True, timeout=600, cwd=stap_root
-        )
-        os.unlink(runner_path)
-
-        if proc.returncode != 0:
-            logger.error(f"STAP subprocess failed: {proc.stderr[-300:]}")
-            return {"success": False, "reason": "stap_subprocess_error"}
-
-        for line in reversed(proc.stdout.strip().split("\n")):
-            if line.strip().startswith("{"):
-                return _json.loads(line.strip())
-
-        logger.warning(f"STAP no JSON output: {proc.stdout[-200:]}")
-        return {"success": False, "reason": "stap_no_output"}
-
-    except _sp.TimeoutExpired:
-        logger.exception(f"STAP {stap_name} timeout (600s)")
-        with contextlib.suppress(Exception):
-            os.unlink(runner_path)
-        return {"success": False, "reason": "stap_timeout"}
-    except Exception as e:
-        logger.exception(f"STAP {stap_name} error: {e}")
-        return {"success": False, "reason": "stap_error"}
+    return run_subprocess(
+        project_root=stap_root,
+        venv_python=stap_python,
+        module_spec=f"pipelines.{stap_name}.pipeline",
+        run_callable="run",
+        cfg=cfg,
+        timeout=600,
+        prefix="stap",
+    )
 
 
 # ─── 파이프라인 레지스트리 ───
@@ -502,49 +458,26 @@ def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):
 
 
 def _run_tap_subprocess(cfg):
-    """TAP 파이프라인을 subprocess로 완전 격리 실행"""
+    """TAP 파이프라인을 subprocess로 완전 격리 실행 (shared runner 위임)"""
+    from shared.subprocess_runner import run_subprocess
     if not os.path.isdir(TAP_ROOT):
         logger.error(f"[TAP] TAP 프로젝트를 찾을 수 없음: {TAP_ROOT}. TAP_ROOT 환경변수를 확인하세요.")
         return {"success": False, "reason": "tap_not_found"}
-    import json
-    import tempfile
-    tap_root = TAP_ROOT
-    tap_python = os.path.join(tap_root, "venv", "bin", "python3")
-    if not os.path.exists(tap_python):
-        tap_python = sys.executable
-    runner_code = (
-        "import sys, os; sys.path.insert(0, " + repr(tap_root) + "); "
-        "os.chdir(" + repr(tap_root) + "); "
-        "from dotenv import load_dotenv; "
-        "load_dotenv(os.path.join(" + repr(tap_root) + ", '.env'), override=True); "
-        "from app import run_publish; "
-        "result = run_publish(); "
-        "import json; print(json.dumps(result if isinstance(result, dict) else {'success': bool(result)}))"
+    tap_python = os.path.join(TAP_ROOT, "venv", "bin", "python3")
+    result = run_subprocess(
+        project_root=TAP_ROOT,
+        venv_python=tap_python,
+        module_spec="app",
+        run_callable="run_publish",
+        cfg=None,
+        timeout=600,
+        prefix="tap",
     )
-    runner_path = os.path.join(tempfile.gettempdir(), f"tap_runner_{uuid.uuid4().hex}.py")
-    with open(runner_path, "w") as _f:
-        _f.write(runner_code)
-    try:
-        proc = subprocess.run(
-            [tap_python, runner_path],
-            capture_output=True, text=True, timeout=600, cwd=tap_root
-        )
-        if proc.returncode != 0:
-            logger.error(f"TAP subprocess failed: {proc.stderr[-300:]}")
-            return {"success": False, "reason": "tap_subprocess_error"}
-        out = proc.stdout.strip().split("\n")[-1]
-        if out:
-            try:
-                return json.loads(out)
-            except Exception:
-                pass
-        return {"success": True}
-    except subprocess.TimeoutExpired:
-        logger.exception("TAP timeout (600s)")
-        return {"success": False, "reason": "tap_timeout"}
-    except Exception as e:
-        logger.exception(f"TAP error: {e}")
-        return {"success": False, "reason": "tap_error"}
+    # TAP run_publish()는 (bool, result, error) 튜플을 반환할 수 있음 — dict 정규화.
+    # 원래 subprocess runner가 했던 것과 동일하게 비-dict는 {'success': bool(...)}로 변환.
+    if not isinstance(result, dict):
+        return {"success": bool(result)}
+    return result
 
 
 # ─── 파이프라인 실행 ───
