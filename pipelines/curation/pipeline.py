@@ -50,6 +50,7 @@ from shared.telegram_notifier import send_error as _tg_error
 from shared.validators import assert_korean_or_reject, sanitize_title
 from shared.relevance_scorer import migrate_publish_log, score_products, passes_gate
 from shared.alert_thresholds import ThresholdChecker
+from shared.db import get_db_path
 from shared.cuap_entity_linker import (
     inject_cross_blog_links,
     build_cross_sell_card,
@@ -92,7 +93,7 @@ def _release_lock(lock_file) -> None:
             pass
 
 PROJECT_DIR = Path(__file__).parent.parent.parent
-DB_PATH = PROJECT_DIR / "data" / "curation.db"
+DB_PATH = Path(get_db_path("curation"))
 
 def _init_db() -> None:
     """DB 테이블이 없으면 자동 생성 (DB 초기화 복구용)"""
