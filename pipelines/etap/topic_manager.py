@@ -320,3 +320,38 @@ def check_daily_quota(blog_id, max_per_day=5):
         logger.info(f"[{blog_id}] Daily quota reached: {today_count}/{max_per_day}")
         return False, today_count
     return True, today_count
+
+
+# === Phase 61 config-driven 토픽 수렴 기반 (D-08, 추가) ===
+_ETAP_DEFAULT_PIPELINE = "pipelines.etap.pipeline"
+# dispatcher._ETAP_BLOG_EXCEPTIONS와 동일 규칙 (topic_manager는 dispatcher를 import하지 않음)
+_ETAP_TOPIC_EXCEPTIONS = {"flights-hugo": "pipelines.etap.flight_pipeline"}
+
+
+def _module_exists(module_path: str) -> bool:
+    """주어진 모듈 경로가 실제 존재하는지 확인 (import 실행 없이)."""
+    import importlib.util
+    try:
+        return importlib.util.find_spec(module_path) is not None
+    except (ImportError, AttributeError, ValueError):
+        return False
+
+
+def resolve_topic_pipeline(blog_id: str) -> str:
+    """config-driven: ETAP blog_id → 토픽 pipeline 모듈 경로 반환.
+
+    dispatcher._resolve_pipeline의 _ETAP_BLOG_EXCEPTIONS + stem 규칙
+    (blog_id에서 '-hugo'를 제거한 뒤 '<stem>_pipeline')과 동일한 규칙을
+    데이터 주도로 재현한다. blog_id는 ^[a-z0-9-]+$로 검증 후에만 사용해
+    모듈 경로 주입을 방지한다 (Threat T-61-07-03).
+    """
+    import re as _re
+    if not isinstance(blog_id, str) or not _re.fullmatch(r"[a-z0-9-]+", blog_id):
+        raise ValueError(f"resolve_topic_pipeline: invalid blog_id {blog_id!r}")
+    if blog_id in _ETAP_TOPIC_EXCEPTIONS:
+        return _ETAP_TOPIC_EXCEPTIONS[blog_id]
+    stem = blog_id.replace("-hugo", "")
+    if stem == blog_id:
+        return _ETAP_DEFAULT_PIPELINE  # '-hugo' 접미사가 없는 경우
+    path = f"pipelines.etap.{stem}_pipeline"
+    return path if _module_exists(path) else _ETAP_DEFAULT_PIPELINE
