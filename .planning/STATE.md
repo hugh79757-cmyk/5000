@@ -249,7 +249,41 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-07 - Phase 64 완료 (규칙 체계 자기진화 + 운영헌장 설계·문서 + health-hugo C09/C04 실전 수습). Phase 52 Wave 5 진행 중.*
+## Phase 67: fix-g3-first — 오토트리아지 무인화 + 라이브 청소 (2026-08-08)
+
+**Status:** ✅ Executed (G3 완전 통과 + Wave 1·2 완료)
+**백업 태그:** `pre-g3-fix-2026-08-08` @ `e2137bb60233` (push 금지)
+**커밋:** `4d78d3f3f` feat(auto_triage): fail-loud 서버장애 사람호출 + commercial 키워드 우선 + watchdog 3자감시
+
+**실행 내용:**
+- E4-a: `com.5000.ops-dashboard.plist` launchd 등록 (KeepAlive=true, 포트 5060, `python -m ops_dashboard.app`), kill→자동재기동 테스트 통과
+- E4-b: auto_triage fail-loud 전환 — 서버 장애 시 `data_fetch_failure` 사람 호출 (silent_skip 방지)
+- E4-c: 겸용 키워드 commercial 우선 — YAML 순서 + 코드 순서 모두 commercial 먼저, 12/12 테스트 통과, 오삼킴 0건
+- E4-d: analytics_watchdog.sh 3자 감시 확장 — 스케줄러 + ops_dashboard + auto_triage
+- E4-e: `com.5000.auto-triage.plist` launchd 등록 (매일 03:00, DRY_RUN=0, PYTHONPATH), 실모드 1회 실행 통과
+- Wave 1: dead_links.json 53건 HTTP 체크 → 404 9건 식별, 소스 파일 34개 dead 링크 43건 제거, 잔존 0건
+- Wave 2: 8개 블로그(appliance/baby/beauty/camping/fitness/health/interior/laptop-hugo) Hugo 빌드 0 errors + wrangler deploy 8/8 True
+
+**launchd 등록 (repo 밖, git 대상 아님):**
+- `~/Library/LaunchAgents/com.5000.ops-dashboard.plist` — 포트 5060, KeepAlive, 현재 PID 13818
+- `~/Library/LaunchAgents/com.5000.auto-triage.plist` — 매일 03:00, PROBLEM_ALERT_DRY_RUN=0
+
+**라이브 청소 참고 (git 대상 아님):**
+- CUAP 콘텐츠 파일 34개 수정됨 (`/Users/twinssn/Projects/cuap/*-hugo/content/posts/.../index.md`)
+- 백업: `/tmp/cuap_dead_link_fix_backups/` (45개 파일 백업)
+- draft: true 6개 포스트는 라이브 미노출 → 배포 대상에서 제외 (랜턴/발육차트 등)
+- published 47개 포스트 중 5개 표본 라이브 dead 링크 제거 확인
+
+**검증:**
+- E4-a~e 전부 통과
+- Wave 1 dead 링크 잔존 0건
+- Wave 2 published 포스트 표본 5개 dead 링크 없음 확인
+
+**한 줄 결론:** "G3 해소 — 대시보드 자동재기동 [O], 트리아지 fail-loud [O], 겸용키워드 오삼킴 [0], watchdog 3자감시 [O], 오토트리아지 실모드 [등록]. Wave 1·2 라이브 청소 완료."
+
+---
+
+*Last updated: 2026-08-08 - Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). 백업 태그 pre-g3-fix-2026-08-08. push 금지.*
 
 ---
 
