@@ -865,18 +865,159 @@ def record_check(
     status: str,
     detail: str = "",
     evidence_url: str = "",
+    rule_id: str | None = None,
+    problem_id: str | None = None,
+    severity: str | None = None,
+    action: str | None = None,
 ) -> None:
-    """헬스체크 결과를 기록."""
+    """헬스체크 결과를 기록.
+
+    Phase 69 W2: rule_id/problem_id/severity/action 선택 파라미터는 기본값 None —
+    기존 호출(새 인자 없이)은 그대로 동작하고, 새 파라미터가 주어지면 해당 컬럼에 기록한다.
+    """
     conn.execute("""
-        INSERT INTO check_results (blog_id, check_name, status, detail, evidence_url)
-        VALUES (?, ?, ?, ?, ?)
-    """, (blog_id, check_name, status, detail, evidence_url))
+        INSERT INTO check_results
+            (blog_id, check_name, status, detail, evidence_url,
+             rule_id, problem_id, severity, action)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (blog_id, check_name, status, detail, evidence_url,
+          rule_id, problem_id, severity, action))
     conn.commit()
 
 
-# ---------------------------------------------------------------------------
-# Phase 60 Part 3: Daily summary & debounce
-# ---------------------------------------------------------------------------
+def record_check_rule(
+    conn: sqlite3.Connection,
+    blog_id: str,
+    rule_id: str,
+    status: str,
+    severity: str,
+    action: str,
+    detail: str = "",
+    evidence_url: str = "",
+) -> None:
+    """개별 규칙 실패 1건을 개별 행으로 기록 (Phase 69 W3 — dual-write).
+
+    aggregate 행(standard_compliance, rule_id NULL)과 구분되도록 check_name을 rule_id 값으로
+    기록하고, rule_id/severity/action 컬럼을 채운다. 기존 aggregate·detail 자유텍스트는
+    그대로 유지된다 (개별행은 추가만).
+    """
+    record_check(
+        conn,
+        blog_id,
+        check_name=rule_id,      # 개별행 check_name = rule_id (aggregate와 구분)
+        status=status,
+        detail=detail,
+        evidence_url=evidence_url,
+        rule_id=rule_id,
+        problem_id=None,
+        severity=severity,
+        action=action,
+    )
+
+
+def replace_triage_classifications(
+    conn: sqlite3.Connection,
+    run_id: str,
+    rows: list[dict],
+) -> None:
+    """auto-triage 분류 결과를 run_id로 묶어 '최신 1회분만' 유지 (Phase 69 W4.5).
+
+    dry-run 여부와 무관하게 DB 기록 동작은 확인 가능해야 한다는 사용자 요구를
+    유지하면서, 반복 실행 시 누적되는 것을 차단한다. 기존 기록(이전 run 포함,
+    run_id 미기재 레거시 행 포함)을 먼저 전부 삭제한 뒤 현재 run 행만 삽입하므로
+    프로덕션 triage_classifications에는 항상 '최신 run의 1회분'만 존재한다.
+
+    rows: [{problem_id, severity, target, action, source, detail, classification}, ...]
+    실패 시 예외를 던져 조용한 실패를 방지한다 (호출부에서 텔레그램/JSON 경로와 격리).
+    """
+    conn.execute("DELETE FROM triage_classifications")
+    for row in rows:
+        conn.execute("""
+            INSERT INTO triage_classifications
+                (run_id, problem_id, severity, target, action, source, detail, classification)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            run_id,
+            row.get("problem_id", ""),
+            row.get("severity", ""),
+            row.get("target", ""),
+            row.get("action", ""),
+            row.get("source", ""),
+            row.get("detail", ""),
+            row.get("classification", ""),
+        ))
+    conn.commit()
+
+
+def get_registry_view(conn: sqlite3.Connection) -> dict:
+    """단일 엔드포인트 /api/registry용 통합 뷰 (Phase 69 W5-3).
+
+    규칙(개별 R 행 + registry 선언)과 오류분류(triage_classifications 최신 +
+    registry error 선언)를 **동일 스키마**로 노출한다. B7의 6필드(id/kind/target/
+    status/severity/action/evidence) 한계를 넘어 rule_id/problem_id 구조 필드까지
+    포함한다.
+
+    반환:
+        {"rules": [entry...], "errors": [entry...]}
+    각 entry 스키마:
+        id, kind, target, status, severity, action, evidence,
+        rule_id, problem_id, bucket, threshold
+    """
+    from ops_dashboard.registry import by_kind
+
+    def _rule_entry(e, row):
+        return {
+            "id": e.id,
+            "kind": "rule",
+            "target": e.target,
+            "status": row["status"] if row else "unknown",
+            "severity": e.severity,
+            "action": e.action,
+            "evidence": (row["evidence_url"] or row["detail"] or "") if row else "",
+            "rule_id": e.id,
+            "problem_id": "",
+            "bucket": e.bucket,
+            "threshold": e.threshold,
+        }
+
+    def _error_entry(e, row):
+        return {
+            "id": e.id,
+            "kind": "error",
+            "target": e.target or (row["target"] if row else ""),
+            "status": row["classification"] if row else "unknown",
+            "severity": row["severity"] if row and row["severity"] else e.severity,
+            "action": row["action"] if row and row["action"] else e.action,
+            "evidence": (row["detail"] or row["source"] or "") if row else "",
+            "rule_id": "",
+            "problem_id": e.id,
+            "bucket": "",
+            "threshold": e.threshold,
+        }
+
+    rules = []
+    for e in by_kind("rule"):
+        row = conn.execute(
+            "SELECT status, detail, evidence_url FROM check_results "
+            "WHERE check_name = ? ORDER BY checked_at DESC LIMIT 1",
+            (e.id,),
+        ).fetchone()
+        rules.append(_rule_entry(e, row))
+
+    errors = []
+    for e in by_kind("error"):
+        row = conn.execute(
+            "SELECT classification, severity, action, target, source, detail "
+            "FROM triage_classifications WHERE problem_id = ? "
+            "ORDER BY classified_at DESC LIMIT 1",
+            (e.id,),
+        ).fetchone()
+        errors.append(_error_entry(e, row))
+
+    return {"rules": rules, "errors": errors}
+
+
+
 
 def get_daily_summary(conn: sqlite3.Connection, summary_date: str | None = None) -> dict:
     """일일 알림 요약 데이터 조회 (API + 템플릿용)."""
