@@ -719,12 +719,19 @@ def get_all_blogs(conn: sqlite3.Connection) -> list[dict]:
     return [dict(r) for r in rows]
 
 
-def get_attention_items(conn: sqlite3.Connection) -> list[dict]:
-    """주의 필요 항목: fail/stale check_results + open known_issues."""
-    # 1) 최근 실패한 헬스체크가 있는 블로그
-    fail_checks = conn.execute("""
-        SELECT cr.blog_id, cr.check_name, cr.status, cr.detail, cr.evidence_url, cr.checked_at
+def get_attention_items(conn: sqlite3.Connection) -> dict:
+    """주의 필요 항목: fail/stale check_results + open known_issues.
+
+    fail_checks: 운영 블로그(config_status='active', maintenance_status!='paused')의
+    최신 fail 체크만 포함.
+    excluded_fail_checks: 비운영/제외 대상 블로그의 fail 체크 (별도 집계).
+    """
+    # 1) 최근 실패한 헬스체크 (블로그 라이프사이클 정보 포함)
+    rows = conn.execute("""
+        SELECT cr.blog_id, cr.check_name, cr.status, cr.detail, cr.evidence_url, cr.checked_at,
+               bl.config_status, bl.maintenance_status
         FROM check_results cr
+        LEFT JOIN blog_lifecycle bl ON cr.blog_id = bl.blog_id
         INNER JOIN (
             SELECT blog_id, check_name, MAX(checked_at) as latest
             FROM check_results GROUP BY blog_id, check_name
@@ -735,14 +742,35 @@ def get_attention_items(conn: sqlite3.Connection) -> list[dict]:
         ORDER BY cr.checked_at DESC
     """).fetchall()
 
-    # 2) 미해결 known_issues
+    fail_checks = []
+    excluded_fail_checks = []
+    for r in rows:
+        d = {
+            "blog_id": r["blog_id"],
+            "check_name": r["check_name"],
+            "status": r["status"],
+            "detail": r["detail"],
+            "evidence_url": r["evidence_url"],
+            "checked_at": r["checked_at"],
+        }
+        config_status = r["config_status"]
+        maintenance_status = r["maintenance_status"]
+        # 운영 중이고 paused가 아니면 fail_checks에 포함
+        if config_status == "active" and maintenance_status != "paused":
+            fail_checks.append(d)
+        else:
+            d["config_status"] = config_status
+            d["maintenance_status"] = maintenance_status
+            excluded_fail_checks.append(d)
+
+    # 2) 미해결 known_issues (변경 없음)
     open_issues = conn.execute("""
         SELECT * FROM known_issues
         WHERE gsd_status = 'open'
         ORDER BY category, issue_id
     """).fetchall()
 
-    # 3) stale 블로그 (active인데 오래된 발행 또는 발행 기록 없음)
+    # 3) stale 블로그 (active 한정, 변경 없음)
     stale = conn.execute("""
         SELECT blog_id, days_since_last_publish, lifecycle_status
         FROM blog_lifecycle
@@ -755,7 +783,8 @@ def get_attention_items(conn: sqlite3.Connection) -> list[dict]:
     """).fetchall()
 
     return {
-        "fail_checks": [dict(r) for r in fail_checks],
+        "fail_checks": fail_checks,
+        "excluded_fail_checks": excluded_fail_checks,
         "open_issues": [dict(r) for r in open_issues],
         "stale_blogs": [dict(r) for r in stale],
     }
@@ -1044,6 +1073,8 @@ def get_attention_blogs(
             AND cr.checked_at = latest.latest
         LEFT JOIN blog_lifecycle bl ON bl.blog_id = cr.blog_id
         WHERE cr.status = 'fail'
+        AND bl.config_status = 'active'
+        AND (bl.maintenance_status IS NULL OR bl.maintenance_status != 'paused')
     """
     params: list = []
     if brand:

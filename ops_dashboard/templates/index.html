@@ -47,6 +47,7 @@
   {% if attention.fail_checks %}{{ attention.fail_checks|length }} failed checks{% endif %}
   {% if attention.open_issues %}{% if attention.fail_checks %} &middot; {% endif %}{{ attention.open_issues|length }} open issues{% endif %}
   {% if attention.stale_blogs %}{% if attention.fail_checks or attention.open_issues %} &middot; {% endif %}{{ attention.stale_blogs|length }} stale blogs{% endif %}
+  {% if attention.excluded_fail_checks %} <span style="font-size:0.85rem;color:#6c757d;margin-left:0.5rem">(제외: {{ attention.excluded_fail_checks|length }}건 — 비운영 블로그)</span>{% endif %}
 </div>
 {% else %}
 <div class="alert alert-ok"><span>&#10003;</span> No attention items — all clear.</div>
