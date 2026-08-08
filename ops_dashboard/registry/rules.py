@@ -157,6 +157,21 @@ RULES: list[UnifiedEntry] = [
         action="featureimage를 R2(pub-<hash>.r2.dev) 호스팅 webp로 설정",
         bucket="actionable",
     ),
+    # W7 확대: R2-01 — 이미지 URL R2 버킷/키 패턴 정합성 검사.
+    # THUMBNAIL-01(존재+R2+webp)과 역할 분리: R2-01은 featureimage + 본문 이미지
+    # 전체를 대상으로 R2 도메인(pub-<hash>.r2.dev) 호스팅 여부만 검사(webp 무관).
+    # 표준.py의 _CHECK_FUNCTIONS 및 STANDARD_RULES에는 추가하지 않음 —
+    # registry 선언 + _check_r2_01 함수만으로 자동편입.
+    UnifiedEntry(
+        id="R2-01",
+        kind="rule",
+        target="content/posts/*/index.md (featureimage + 본문 이미지 URL)",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r2_01",
+        action="모든 이미지 URL을 승인된 R2 버킷(pub-<hash>.r2.dev)으로 설정",
+        bucket="actionable",
+    ),
 ]
 
 # W6-a: rule↔문제분류(problem_id) 대응 선언.

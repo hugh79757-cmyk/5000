@@ -572,6 +572,107 @@ def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# R2-01: 이미지 URL R2 버킷/키 패턴 정합성 검사 (W7 확대)
+# ---------------------------------------------------------------------------
+# 역할: THUMBNAIL-01(featureimage 존재+R2+webp)과 분리.
+# R2-01은 featureimage + 본문 내 모든 이미지 URL을 대상으로
+# 승인된 R2 도메인(pub-<hash>.r2.dev) 호스팅 여부만 검사(webp 무관).
+# 표준.py의 _CHECK_FUNCTIONS 및 STANDARD_RULES에는 추가하지 않음 —
+# registry 선언 + _check_r2_01 함수만으로 자동편입.
+# ---------------------------------------------------------------------------
+
+_R2_DOMAIN_PATTERN = re.compile(r"https?://pub-[0-9a-f]+\.r2\.dev")
+
+
+def _extract_image_urls(content: str) -> list[str]:
+    """포스트 본문(content.md)에서 이미지 URL 추출.
+
+    마크다운 이미지 문법 ![alt](url)과 HTML <img src="url"> 양쪽 지원.
+    특징: URL만 반환, 중복 제거 없음(호출부에서 처리).
+    """
+    urls: list[str] = []
+    # 마크다운: ![...](url)  또는  ![alt](url "title")
+    for m in re.finditer(r"""!\[[^\]]*\]\(\s*(https?://[^\)"'\s]+)""", content):
+        urls.append(m.group(1).strip())
+    # HTML: <img ... src="url"> 또는 <img ... src='url'>
+    for m in re.finditer(r"""<img\s[^>]*src\s*=\s*["']?(https?://[^"'>\s]+)["']?""", content, re.IGNORECASE):
+        urls.append(m.group(1).strip())
+    return urls
+
+
+def _check_r2_01(site: Path) -> tuple[bool, str]:
+    """R2-01: featureimage + 본문 이미지 URL이 승인된 R2 도메인 호스팅인지 검사.
+
+    최근 10개 포스트(_recent_posts)의 index.md에서:
+      - frontmatter featureimage
+      - 본문 내 모든 이미지 URL (마크다운 ![](url) + HTML <img src=url>)
+    를 추출해 pub-<hash>.r2.dev 도메인 호스팅 여부를 확인.
+
+    R2 도메인(href pub-<hash>.r2.dev) 호스팅이 아닌 URL이 1건이라도 있으면 fail.
+    이미지 URL이 전혀 없는 포스트만 있으면 pass.
+    featureimage 없음 + 본문 이미지 없음은 위반 아님(pass).
+
+    THUMBNAIL-01과의 차이:
+      - THUMBNAIL-01: featureimage만 대상, R2 + webp 모두 요구
+      - R2-01: featureimage + 본문 이미지 전체 대상, R2 도메인만 요구(webp 무관)
+    """
+    posts = _recent_posts(site, 10)
+    if not posts:
+        posts_dir = site / "content" / "posts"
+        if not posts_dir.is_dir():
+            return False, "content/posts/ 디렉토리 없음 — 이미지 검사 대상 아님"
+        return True, "포스트 없음 — 검사 대상 없음 (pass)"
+
+    invalid_entries: list[str] = []
+    checked_count = 0
+
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        if not content.strip():
+            continue
+
+        # 1) frontmatter featureimage
+        fm_match = re.search(r"featureimage:\s*[\"']?([^\"'\n]+)[\"']?", content)
+        if fm_match and fm_match.group(1).strip():
+            url = fm_match.group(1).strip()
+            checked_count += 1
+            if not _R2_DOMAIN_PATTERN.search(url):
+                invalid_entries.append(f"{post_dir.name}/featureimage: {url}")
+
+        # 2) 본문 이미지 URL (featureimage와 중복 가능 — 중복은 허용)
+        body_start = content.find("---", 3)  # 두 번째 --- 이후가 본문
+        if body_start >= 0:
+            body = content[body_start + 3:]
+        else:
+            body = content
+        for url in _extract_image_urls(body):
+            if not url:
+                continue
+            # featureimage와 중복 제거
+            if fm_match and url == fm_match.group(1).strip():
+                continue
+            checked_count += 1
+            if not _R2_DOMAIN_PATTERN.search(url):
+                invalid_entries.append(f"{post_dir.name}/body: {url}")
+
+    if checked_count == 0:
+        return True, f"최근 {len(posts)}개 포스트 전부 이미지 URL 없음 (pass)"
+
+    if invalid_entries:
+        detail = (
+            f"R2 패턴 위반 {len(invalid_entries)}건 / 검사 {checked_count}건: "
+            + "; ".join(invalid_entries[:3])
+        )
+        if len(invalid_entries) > 3:
+            detail += f" 외 {len(invalid_entries) - 3}건"
+        return False, detail
+    return True, f"최근 {checked_count}건 전부 R2 도메인 호스팅 (정상)"
+
+
+# ---------------------------------------------------------------------------
 # Check dispatch
 # ---------------------------------------------------------------------------
 
