@@ -28,6 +28,33 @@ import sqlite3
 
 logger = logging.getLogger(__name__)
 
+# ── URL health check cache (process-lifetime, no TTL needed for scheduler) ──
+# key: post_url, value: True(alive) / False(dead/errored)
+# 프로세스 재시작 시 캐시 초기화 → 매 실행마다 fresh 체크.
+_URL_HEALTH_CACHE: dict = {}
+
+
+def _url_is_alive(url: str, timeout: float = 2.5) -> bool:
+    """HEAD 요청으로 URL이 200인지 확인. 실패·타임아웃 시 False 반환(안전 스킵).
+
+    캐시 히트 시 요청 생략. 네트워크 없는 환경에서도 발행 차단 없이 스킵만 한다.
+    """
+    if not url:
+        return False
+    if url in _URL_HEALTH_CACHE:
+        return _URL_HEALTH_CACHE[url]
+
+    try:
+        import requests as _requests
+        resp = _requests.head(url, timeout=timeout, allow_redirects=True)
+        alive = resp.status_code == 200
+    except Exception:
+        # 네트워크 오류, DNS 실패, requests 미설치 등 → 안전하게 False
+        alive = False
+
+    _URL_HEALTH_CACHE[url] = alive
+    return alive
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
@@ -183,17 +210,23 @@ def init_cuap_tables():
 
 
 def register_cuap_entity(entity_type, entity_name, blog_id, post_slug,
-                         link_label, priority=50, published=0) -> None:
+                         link_label, priority=50, published=0,
+                         is_draft=False) -> bool:
     """글 발행 시 엔티티 등록. 이미 있으면 무시 (INSERT OR IGNORE).
 
     보안: entity_name len > 2, blog_id in BLOG_DOMAINS 검증.
+    is_draft=True이면 등록을 스킵한다 (draft 포스트는 실제 배포되지 않으므로).
     """
     if not entity_name or len(entity_name) <= 2:
-        return
+        return False
+    # draft 포스트는 실제 Hugo 빌드에 포함되지 않으므로 엔티티 등록 스킵
+    if is_draft:
+        logger.info(f"skip cuap entity register (draft): {blog_id}/{post_slug}")
+        return False
     domain = BLOG_DOMAINS.get(blog_id, "")
     if not domain:
         logger.warning(f"Unknown blog_id: {blog_id}")
-        return
+        return False
     # CUAP 블로그 permalink은 /posts/<slug>/ 형식 (Blowfish 테마 기본)
     post_url = f"{domain}/posts/{post_slug}/"
     conn = _get_db()
@@ -206,8 +239,11 @@ def register_cuap_entity(entity_type, entity_name, blog_id, post_slug,
         """, (entity_type, entity_name, blog_id, post_slug,
               post_url, link_label, priority, published))
         conn.commit()
+        logger.info(f"CUAP 엔티티 등록: {entity_name} ({blog_id}/{post_slug})")
+        return True
     except Exception as e:
         logger.exception(f"register_cuap_entity failed: {e}")
+        return False
     finally:
         conn.close()
 
@@ -335,7 +371,11 @@ def _target_blogs(blog_id, max_targets=4):
 
 
 def _pick_safe_entity(conn, blog_id, max_candidates=5):
-    """안전한 엔티티(후기 프레임 미포함)를 선택. 없으면 None 반환."""
+    """안전한 엔티티(후기 프레임 미포함 + URL alive)를 선택. 없으면 None 반환.
+
+    URL이 200이 아니면(dead) 스킵하고 다음 후보로 넘어간다.
+    후보 전부가 dead거나 리뷰프레임이면 None 반환 → 카드 생략.
+    """
     rows = conn.execute("""
         SELECT entity_name, post_url, link_label, post_slug
         FROM cuap_entities
@@ -344,8 +384,12 @@ def _pick_safe_entity(conn, blog_id, max_candidates=5):
         LIMIT ?
     """, (blog_id, max_candidates)).fetchall()
     for r in rows:
-        if not _is_review_frame_slug(r["post_slug"] or ""):
-            return r
+        if _is_review_frame_slug(r["post_slug"] or ""):
+            continue
+        if not _url_is_alive(r["post_url"]):
+            logger.info(f"[entity] skip dead URL: {r['post_url']} (entity={r['entity_name']})")
+            continue
+        return r
     return None
 
 
