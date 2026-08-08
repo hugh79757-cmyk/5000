@@ -483,6 +483,15 @@ def _register_api_routes(app: Flask) -> None:
         from ops_dashboard.readiness import compute_readiness
         return jsonify(compute_readiness(conn))
 
+    @app.route("/api/registry")
+    @require_auth
+    def api_registry():
+        """통합 레지스트리 뷰 (Phase 69 W5-3): 규칙 + 오류선언 + 실데이터를 단일 스키마로 노출."""
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import get_registry_view
+        return jsonify(get_registry_view(conn))
+
 
 # ---------------------------------------------------------------------------
 # App factory
