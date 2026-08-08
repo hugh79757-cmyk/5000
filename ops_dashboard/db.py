@@ -729,6 +729,7 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
     # 1) 최근 실패한 헬스체크 (블로그 라이프사이클 정보 포함)
     rows = conn.execute("""
         SELECT cr.blog_id, cr.check_name, cr.status, cr.detail, cr.evidence_url, cr.checked_at,
+               cr.rule_id, cr.problem_id, cr.severity, cr.action,
                bl.config_status, bl.maintenance_status
         FROM check_results cr
         LEFT JOIN blog_lifecycle bl ON cr.blog_id = bl.blog_id
@@ -742,26 +743,65 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
         ORDER BY cr.checked_at DESC
     """).fetchall()
 
+    # W6a.1 (Phase 69): aggregate+individual dual-write 중복 병합.
+    # W3가 개별 규칙행(check_name=rule_id, 예: 'R06')과 aggregate 행
+    # (check_name='standard_compliance')을 함께 기록하므로, 동일 블로그의
+    # standard_compliance 계열이 auto_triage에서 이중 집계된다. 여기서
+    # (blog, check_name) 단위로 aggregate+individual을 하나의 fail_check로
+    # 병합한다 — 개별 행이 있으면 그 rule_id를 구조 필드로 채택(구조 분류),
+    # 없으면 기존대로 빈 값(자유텍스트 폴백)으로 유지.
     fail_checks = []
     excluded_fail_checks = []
+
+    def _is_std_family(r):
+        # standard_compliance 계열: aggregate(check_name='standard_compliance')
+        # 또는 개별 규칙 행(check_name == rule_id, 예: 'R06').
+        return r["check_name"] == "standard_compliance" or (
+            bool(r["rule_id"]) and r["check_name"] == r["rule_id"]
+        )
+
+    # (blog_id → 최신 실패 행) 그룹핑 후 standard_compliance 계열 병합.
+    _by_blog: dict[str, list] = {}
     for r in rows:
-        d = {
-            "blog_id": r["blog_id"],
-            "check_name": r["check_name"],
-            "status": r["status"],
-            "detail": r["detail"],
-            "evidence_url": r["evidence_url"],
-            "checked_at": r["checked_at"],
-        }
-        config_status = r["config_status"]
-        maintenance_status = r["maintenance_status"]
-        # 운영 중이고 paused가 아니면 fail_checks에 포함
-        if config_status == "active" and maintenance_status != "paused":
-            fail_checks.append(d)
-        else:
-            d["config_status"] = config_status
-            d["maintenance_status"] = maintenance_status
-            excluded_fail_checks.append(d)
+        _by_blog.setdefault(r["blog_id"], []).append(r)
+
+    for blog_id, brs in _by_blog.items():
+        cfg = brs[0]["config_status"]
+        maint = brs[0]["maintenance_status"]
+        family = [r for r in brs if _is_std_family(r)]
+        others = [dict(r) for r in brs if not _is_std_family(r)]
+
+        entries = others
+        if family:
+            agg = next((r for r in family if r["check_name"] == "standard_compliance"), None)
+            ind = [r for r in family if r["check_name"] != "standard_compliance"]
+            base = agg if agg is not None else ind[0]
+            rid = ind[0]["rule_id"] if ind else None  # 개별 행이 있으면 rule_id 채택
+            sev = ind[0]["severity"] if ind else base["severity"]
+            act = ind[0]["action"] if ind else base["action"]
+            detail = (agg["detail"] if agg is not None
+                      else "; ".join(f"{i['rule_id']}: {i['detail']}" for i in ind))
+            entries.append({
+                "blog_id": blog_id,
+                "check_name": "standard_compliance",
+                "status": "fail",
+                "detail": detail,
+                "evidence_url": (agg or ind[0])["evidence_url"],
+                "checked_at": max(r["checked_at"] for r in family),
+                "rule_id": rid,
+                "problem_id": (agg or ind[0])["problem_id"],
+                "severity": sev,
+                "action": act,
+            })
+
+        for d in entries:
+            # 운영 중이고 paused가 아니면 fail_checks에 포함
+            if cfg == "active" and maint != "paused":
+                fail_checks.append(d)
+            else:
+                d["config_status"] = cfg
+                d["maintenance_status"] = maint
+                excluded_fail_checks.append(d)
 
     # 2) 미해결 known_issues (변경 없음)
     open_issues = conn.execute("""
