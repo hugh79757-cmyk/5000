@@ -1247,9 +1247,17 @@ def _run_inner(cfg, blog_id, daily_quota):
     is_draft = cfg.get("force_draft", False) or article.get("is_draft", False)
     result = publish(blog_id, title, body_md, category="추천", tags=tags_str, thumbnail_url=thumbnail_url, is_draft=is_draft)
     if not result or not result.get("success"):
-        logger.error(f"[{blog_id}] 발행 실패: {title}")
-        _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
-        return {"success": False, "reason": "publish_error"}
+        error = result.get("error", "") if result else ""
+        if "leak_detected" in error:
+            _record_failure(blog_id, "leak_detected", error[:200], keyword)
+            return {"success": False, "reason": "leak_detected"}
+        elif "C09" in error:
+            _record_failure(blog_id, "c09_violation", error[:200], keyword)
+            return {"success": False, "reason": "c09_violation"}
+        else:
+            logger.error(f"[{blog_id}] 발행 실패: {title}")
+            _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
+            return {"success": False, "reason": "publish_error"}
 
     # 발행 기록 (관련성 점수 포함)
     from shared.relevance_scorer import log_publish_audit

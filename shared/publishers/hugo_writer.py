@@ -11,6 +11,26 @@ from shared.paths import FIVEK_ROOT, HUGO_PATH
 logger = logging.getLogger(__name__)
 
 
+def _detect_locale(text):
+    """콘텐츠에 한글(CJK)이 포함됐는지 감지해 locale 결정.
+
+    한글 음절·가나·한자 등 CJK 문자가 1개라도 있으면 'ko', 없으면 'en'.
+    _write_hugo_post의 3개 C04 훅에서 locale 자동 결정에 사용.
+    (기존 locale="ko" 고정 → 영문 C04 패턴 미차단 문제 해소)
+    """
+    if not text:
+        return "en"
+    for c in text:
+        o = ord(c)
+        if 0xAC00 <= o <= 0xD7AF:  # 한글 음절
+            return "ko"
+        if 0x4E00 <= o <= 0x9FFF:  # 한자/중국어
+            return "ko"
+        if 0x3040 <= o <= 0x30FF:  # 일본어 가나
+            return "ko"
+    return "en"
+
+
 def _fix_repeated_image_urls(body_md):
     """Detect and fix image URLs with token repetition patterns (LLM stutter).
 
@@ -920,6 +940,9 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         logger.error(f"[PUBLISH] slug가 비어있어 발행 중단: title={title}")
         return {"success": False, "error": "empty slug"}
 
+    # locale 감지 (schema_json 오염 전 — 본문 기준으로만 결정)
+    _locale = _detect_locale(body_md)
+
     theme = blog_cfg.get("theme", "PaperMod")
     site_path = blog_cfg.get("site_path", "")
     if not site_path:
@@ -927,7 +950,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ── C01/C04 원인추적 훅 (a) 생성 직후 ──
     try:
         from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(body_md, "after_generation", slug, locale="ko")
+        _leak_result = check_c01_c04(body_md, "after_generation", slug, locale=_locale)
         if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
             logger.info(f"[LEAK-TRACKER] (a)생성직후 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} {slug}")
     except ImportError:
@@ -938,7 +961,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ── C01/C04 원인추적 훅 (b) humanizer 통과 직후 ──
     try:
         from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(body_md, "after_humanizer", slug, locale="ko")
+        _leak_result = check_c01_c04(body_md, "after_humanizer", slug, locale=_locale)
         if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
             logger.info(f"[LEAK-TRACKER] (b)humanizer후 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} {slug}")
     except ImportError:
@@ -1110,7 +1133,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ── C01/C04 원인추적 훅 (c) 저장 직전 ──
     try:
         from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(content, "before_write", slug, locale="ko")
+        _leak_result = check_c01_c04(content, "before_write", slug, locale=_locale)
         if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
             logger.warning(f"[LEAK-TRACKER] (c)저장직전 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} — 배포중단 대상 {slug}")
             return {"success": False, "error": f"leak_detected: C01={_leak_result['c01_detected']}, C04={_leak_result['c04_detected']}"}
