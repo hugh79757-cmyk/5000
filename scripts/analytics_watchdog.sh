@@ -70,6 +70,38 @@ else
     fi
 fi
 
+# ── 1.5. Ops Dashboard 서버 생존 확인 (보조 감시 — E4-d) ──
+# launchd KeepAlive로 자동 복구되므로 death 알림은 저우선순위.
+# 단, 2회 연속 PID 없음이면 launchd 자체 문제일 수 있어 알림.
+OPS_PID=$(pgrep -f "ops_dashboard/app.py" 2>/dev/null | head -1)
+if [ -n "$OPS_PID" ]; then
+    echo "[$TS] ✅ ops_dashboard 정상 (PID $OPS_PID, 포트 5060)" >> "$LOG_FILE"
+else
+    # lsof로도 확인 (PID 없어졌을 때 포트 닫혔는지)
+    if lsof -i :5060 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        echo "[$TS] ⚠️ ops_dashboard PID 없으나 포트 5060 청취 중 — 재시작 중 추정 (알림 생략)" >> "$LOG_FILE"
+    else
+        echo "[$TS] ⚠️ ops_dashboard 사망 감지 (PID 없음, 포트 5060 미청취) — launchd 자동 복구 대기" >> "$LOG_FILE"
+    fi
+fi
+
+# ── 1.6. Auto-triage 마지막 실행 시각 확인 (E4-d) ──
+# 매일 1회 실행 가정, 36시간 넘으면 미실행 경고.
+TRIAGE_LOG="/Users/twinssn/Projects/5000/logs/auto_triage_summary.log"
+TRIAGE_MAX_HOURS=36
+if [ -f "$TRIAGE_LOG" ]; then
+    TRIAGE_MTIME=$(stat -f %m "$TRIAGE_LOG" 2>/dev/null || echo 0)
+    NOW_EPOCH=$(date +%s)
+    TRIAGE_AGE_HOURS=$(( (NOW_EPOCH - TRIAGE_MTIME) / 3600 ))
+    if [ "$TRIAGE_AGE_HOURS" -gt "$TRIAGE_MAX_HOURS" ]; then
+        echo "[$TS] ⚠️ auto_triage 미실행 감지 (마지막 실행 ${TRIAGE_AGE_HOURS}시간 전, 임계 ${TRIAGE_MAX_HOURS}시간) — launchd 스케줄 확인 필요" >> "$LOG_FILE"
+    else
+        echo "[$TS] ✅ auto_triage 최근 실행 확인 (${TRIAGE_AGE_HOURS}시간 전)" >> "$LOG_FILE"
+    fi
+else
+    echo "[$TS] ⚠️ auto_triage 로그 파일 없음 ($TRIAGE_LOG) — 실행 이력 없음" >> "$LOG_FILE"
+fi
+
 # ── 2. Analytics 수집 미실행 감지 (기존 로직) ──
 LAST_LOG=$(tail -50 /Users/twinssn/Projects/5000/logs/analytics_collect.log 2>/dev/null | grep "완료" | tail -1)
 if echo "$LAST_LOG" | grep -q "완료"; then

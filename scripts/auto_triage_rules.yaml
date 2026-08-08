@@ -107,9 +107,21 @@ triage_rules:
       type: contextual
       근거: "no_keyword는 키워드 성격에 따라 처리 구분"
     subtypes:
+      - subtype: commercial_keyword_fail
+        판정기준:
+          - "키워드가 상품명·제품 카테고리('안마의자 추천', '공기청정기')"
+          - "키워드에 '추천/비교/리뷰/가격/구매/할인/베스트/TOP/순위/제품/모델/사양' 포함"
+          - "동일한 commercial 키워드 연속 3회 이상 no_keyword"
+        자동조치:
+          - type: summary_append
+            내용: "commercial-fail: {blog_id} 키워드 '{keyword}' — 상품 있으나 매칭 실패"
+        사람호출:
+          조건: "상품 키워드 연속 실패 시만 (자동 스킵 불가)"
+
       - subtype: informational_keyword
         판정기준:
-          - "키워드가 장소·행사·개념 등 정보성('서울 근교 반려견 운동장', '분당 카페 추천')"
+          - "키워드가 장소·행사·개념 등 정보성 (예: '서울 근교 반려견 운동장')"
+          - "commercial_keyword_fail 서브타입에 미매칭 (상품 키워드 우선 적용 후 남은 것만 여기 해당)"
           - "Coupang 검색 결과가 0건 또는 insufficient_products"
           - "irrelevant_products / low_relevance"
         자동조치:
@@ -119,17 +131,6 @@ triage_rules:
             내용: "info-skip: {blog_id} 키워드 '{keyword}' — 정보성, 상품 없음 (정상)"
         사람호출:
           조건: "불필요 (정보성 키워드는 상품 매칭 불가가 정상)"
-
-      - subtype: commercial_keyword_fail
-        판정기준:
-          - "키워드가 상품명·제품 카테고리('안마의자 추천', '공기청정기')"
-          - "Coupang 검색 결과가 있음에도 insufficient_products/low_relevance"
-          - "동일한 commercial 키워드 연속 3회 이상 no_keyword"
-        자동조치:
-          - type: summary_append
-            내용: "commercial-fail: {blog_id} 키워드 '{keyword}' — 상품 있으나 매칭 실패"
-        사람호출:
-          조건: "상품 키워드 연속 실패 시만 (자동 스킵 불가)"
 
       - subtype: collect_error
         판정기준:
@@ -393,6 +394,18 @@ triage_rules:
         내용: "{blog_id}: leak_detected C01={c01}, C04={c04} — 실제 콘텐츠 오염"
     사람호출:
       조건: "항상 (콘텐츠 오염은 자동 처리 불가)"
+
+  - problem_id: data_fetch_failure
+    name_ko: "대시보드 데이터 취득 실패 (서버 장애)"
+    판정:
+      type: actual_defect
+      근거: "fetch_dashboard_data()가 모든 엔드포인트에서 오류 반환 → 대시보드 서버 접근 불가"
+      오탐여부: false
+    자동조치:
+      - type: escalate
+        내용: "system: 데이터 취득 실패 — 대시보드 서버({DASHBOARD_URL}) 접근 불가. 모든 엔드포인트 오류."
+    사람호출:
+      조건: "항상 (무인 시스템이 데이터 소스를 못 읽으면 눈먼 상태 → 즉시 사람 호출)"
 
   - problem_id: watchdog_death
     name_ko: "워치독 스케줄러 death 알림"

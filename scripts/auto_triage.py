@@ -281,21 +281,26 @@ class TriageEngine:
         c01 = context.get("c01", False)
         c04 = context.get("c04", False)
 
-        if subtype == "informational_keyword":
-            # 정보성 키워드 판단 (간단한 휴리스틱)
-            info_keywords = ["근교", "추천", "가이드", "비교", "고르는", "후기", "리스트업",
-                             "방법", "조건", "신청", "지원", "혜택", "정리", "순위", "TOP",
-                             "사용법", "후기", "리뷰", "분석", "체크리스트"]
-            return any(kw in keyword for kw in info_keywords) or \
-                   "no_keyword" in reason or \
-                   context.get("insufficient_products", False) or \
-                   context.get("irrelevant_products", False)
-
         if subtype == "commercial_keyword_fail":
+            # ⚠ G3-fix: commercial을 먼저 검사 — "추천/비교/리뷰" 등 겸용 키워드가
+            # informational로 먼저 매칭되어 silent_skip 되는 오삼킴 방지.
+            # 상품 키워드는 정보성보다 상업성 우선.
             commercial_keywords = ["추천", "비교", "리뷰", "가격", "구매", "할인",
                                    "베스트", "TOP", "순위", "제품", "모델", "사양"]
             return any(kw in keyword for kw in commercial_keywords) or \
                    context.get("insufficient_products", False)
+
+        if subtype == "informational_keyword":
+            # 정보성 키워드 판단 (간단한 휴리스틱)
+            # commercial_keyword_fail에서 이미 "추천/비교/리뷰"를 처리했으므로
+            # 여기서는 순수 정보성 키워드만 남음.
+            info_keywords = ["근교", "가이드", "고르는", "후기", "리스트업",
+                             "방법", "조건", "신청", "지원", "혜택", "정리", "순위", "TOP",
+                             "사용법", "분석", "체크리스트"]
+            return any(kw in keyword for kw in info_keywords) or \
+                   "no_keyword" in reason or \
+                   context.get("insufficient_products", False) or \
+                   context.get("irrelevant_products", False)
 
         if subtype == "collect_error":
             return "collect_error" in reason
@@ -704,8 +709,35 @@ def run_triage(dry_run: bool = True) -> str:
     # 1. 대시보드 data에서 attention/fail_checks 수집
     dashboard = fetch_dashboard_data()
     attention = dashboard.get("attention", {})
+
+    # ⚠ G3-fix: 서버 장애 감지 — 데이터 취득 실패는 silent_skip이 아니라 사람 호출
+    # fetch_dashboard_data()가 {"error": ...}를 반환한 엔드포인트가 전부이면
+    # 데이터 소스 자체를 못 읽은 것이므로 "데이터 취득 실패"로 보고해야 함.
+    # 정상적으로 데이터를 받았는데 fail_checks=[]인 경우(이슈 0)와 반드시 구분.
+    endpoint_errors = {name: data for name, data in dashboard.items()
+                       if isinstance(data, dict) and data.get("error")}
+    총엔드포인트 = len({"attention", "issues", "fleet", "readiness"} & set(dashboard.keys()))
+    오류엔드포인트 = len(endpoint_errors)
+    서버장애 = (총엔드포인트 > 0 and 오류엔드포인트 == 총엔드포인트)
+
+    if 서버장애:
+        _server_failure_record = {
+            "problem_id": "data_fetch_failure",
+            "blog_id": "system",
+            "classification": "escalated",
+            "action": "사람 호출: 대시보드 데이터 취득 실패 — 서버 장애 가능성 (전원 엔드포인트 오류)",
+            "detail": f"엔드포인트 {오류엔드포인트}/{총엔드포인트} 오류: " +
+                      ", ".join(f"{n}={d.get('error','?')[:80]}" for n, d in endpoint_errors.items()),
+        }
+    else:
+        _server_failure_record = None
+
     fail_checks = attention.get("fail_checks", [])
     open_issues = attention.get("open_issues", [])
+
+    # ⚠ G3-fix: 서버 장애 기록이 있으면 최우선 people-call로 주입
+    if _server_failure_record:
+        engine._accumulate(_server_failure_record, escalated=True)
 
     # fail_checks 트리아지
     for item in fail_checks:

@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 _DEFAULT_USER = "ops"
-_DEFAULT_PASSWORD = "changeme"
+_DEFAULT_PASSWORD = "112233"
 
 
 def _get_auth_credentials() -> tuple[str, str]:
