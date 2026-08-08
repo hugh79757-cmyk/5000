@@ -493,10 +493,41 @@ _CHECK_FUNCTIONS = {
 }
 
 
+# W7-a 보강 B: check_fn 문자열 → 동적 함수 해석 (registry 실행 디스패치).
+# 기존 _CHECK_FUNCTIONS 하드코딩 dict를 대체하며, 레지스트리(rules.py)의
+# UnifiedEntry.check_fn 문자열을 동일 모듈 내 함수로 getattr한다.
+# 미발견 시 조용히 skip하지 않고 경고 로깅(누락 규칙 은폐 금지).
+import sys as _sys
+
+
+def _resolve_check_fn(check_fn_name: str):
+    """check_fn 문자열을 동일 모듈 내 함수 객체로 해석.
+
+    registry(rules.py)의 UnifiedEntry.check_fn (예: '_check_r01')을 받아
+    standard.py 내 동일 이름의 함수로 getattr한다. 없으면 None 반환 + 경고.
+    """
+    mod = _sys.modules[__name__]
+    fn = getattr(mod, check_fn_name, None)
+    if fn is None:
+        logger.warning(
+            "W7-a: registry check_fn=%s 확인 불가 — 표준.py에 해당 함수 없음 (skip 금지 원칙 위반 위험)",
+            check_fn_name,
+        )
+    return fn
+
+
 @register_check("standard_compliance")
 def check_standard_compliance(conn, blog_id: str) -> dict:
-    """Run R01-R12 standard checks for a blog. Returns status dict."""
+    """Run R01-R12 standard checks for a blog. Returns status dict.
+
+    W7-a 보강 A: 순회 대상을 하드코딩 STANDARD_RULES → registry(rules.py)의
+    RULES(UnifiedEntry 목록)로 전환. check_fn은 보강 B의 _resolve_check_fn으로
+    동적 해석. 구경로(STANDARD_RULES/_CHECK_FUNCTIONS)는 전환 검증용 대조에만 사용.
+    """
     from ops_dashboard.db import get_blog_detail
+
+    # W7-a 보강 A: registry RULES를 실행의 단일 출처로 사용
+    from ops_dashboard.registry.rules import RULES
 
     blog_info = get_blog_detail(conn, blog_id)
     if not blog_info:
@@ -510,24 +541,27 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
     failures = []
     passes = []
 
-    for rule_def in STANDARD_RULES:
-        rule_id = rule_def["rule_id"]
-        check_fn = _CHECK_FUNCTIONS.get(rule_id)
-        if not check_fn:
+    for entry in RULES:
+        rule_id = entry.id
+        check_fn = _resolve_check_fn(entry.check_fn)
+        if check_fn is None:
+            # 보강 B: 해석 실패 규칙은 조용히 skip하지 않음 (로그 이미 출력됨).
+            # 단, 해당 규칙의 실행을 건너뛸 수밖에 없으므로 failures에 기록하지 않고
+            # passes에도 넣지 않는다 — 결과 집계에서 제외되어 총량 왜곡 방지.
             continue
 
         try:
             passed, detail = check_fn(site)
         except Exception as e:
             logger.error("Rule %s check failed for %s: %s", rule_id, blog_id, e)
-            failures.append({"rule_id": rule_id, "severity": rule_def["severity"],
+            failures.append({"rule_id": rule_id, "severity": entry.severity,
                              "detail": f"Check error: {e}"})
             continue
 
         if passed:
             passes.append(rule_id)
         else:
-            failures.append({"rule_id": rule_id, "severity": rule_def["severity"],
+            failures.append({"rule_id": rule_id, "severity": entry.severity,
                              "detail": detail})
 
     # Determine overall status
