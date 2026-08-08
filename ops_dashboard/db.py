@@ -1311,19 +1311,31 @@ def get_attention_blogs_aggregate(
         sev = i["severity"]
         severities[sev] = severities.get(sev, 0) + 1
 
-    # 전체 옵션 목록 (필터링용 드롭다운이 fail 있는 항목만 보여주는 문제 해소)
+    # 전체 옵션 목록 (필터링용 드롭다운 — 전체 데이터 기준으로 표시)
+    # all_brands: blog_lifecycle 기준 전체 블로그 수 per brand
     all_brands: dict[str, int] = {}
-    for row in conn.execute("SELECT DISTINCT brand FROM blog_lifecycle ORDER BY brand").fetchall():
-        brand = row["brand"]
-        all_brands[brand] = brands.get(brand, 0)
+    for row in conn.execute(
+        "SELECT brand, COUNT(*) as cnt FROM blog_lifecycle GROUP BY brand ORDER BY cnt DESC"
+    ).fetchall():
+        all_brands[row["brand"]] = row["cnt"]
 
+    # all_check_names: check_results 전체 기준 체크 유형별 total 건수
     all_check_names: dict[str, int] = {}
-    for cn in sorted(check_names.keys()):
-        all_check_names[cn] = check_names.get(cn, 0)
+    for row in conn.execute(
+        "SELECT check_name, COUNT(*) as cnt FROM check_results GROUP BY check_name ORDER BY cnt DESC"
+    ).fetchall():
+        all_check_names[row["check_name"]] = row["cnt"]
 
+    # all_severities: check_results 전체 fail 기준 심각도별 총 건수
+    #   CHECK_SEVERITY는 check_name→severity 매핑이므로,
+    #   실제 fail 결과의 severity 분포를 직접 집계한다.
     all_severities: dict[str, int] = {}
-    for sev in CHECK_SEVERITY.keys():
-        all_severities[sev] = severities.get(sev, 0)
+    for row in conn.execute(
+        "SELECT severity, COUNT(*) as cnt FROM check_results "
+        "WHERE status='fail' AND severity IS NOT NULL AND severity != '' "
+        "GROUP BY severity ORDER BY cnt DESC"
+    ).fetchall():
+        all_severities[row["severity"]] = row["cnt"]
 
     return {
         "total_blogs": len(blog_ids),
