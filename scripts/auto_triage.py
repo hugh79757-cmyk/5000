@@ -802,6 +802,9 @@ def run_triage(dry_run: bool = True) -> str:
     else:
         _server_failure_record = None
 
+    # W6-b: 이번 run 동안 standard 폴백 추적 초기화 (검증 관문용).
+    _FALLBACK_TRACE_STD.clear()
+
     fail_checks = attention.get("fail_checks", [])
     open_issues = attention.get("open_issues", [])
 
@@ -974,16 +977,26 @@ def _build_registry_map(registry_data: dict | None) -> dict:
     return mapping
 
 
+# W6-b: standard_compliance(R01-R12) 계열이 폴백 경로를 타는지 추적.
+# 구조필드로 해석된 standard 항목은 이 집합에 들어가지 않아야 하고,
+# 들어가면 W6-b 검증 관문(폴백 0)이 실패한다. (check_name, blog_id) 기록.
+_FALLBACK_TRACE_STD: list[tuple[str, str]] = []
+
+
 def _resolve_problem_id(item: dict, registry_map: dict) -> str:
     """fail_check item → problem_id (구조 필드 우선 + 자유텍스트 폴백, Phase 69 W5-2).
 
     우선순위:
       1. `item.problem_id` 가 있으면 그대로 사용.
       2. `item.rule_id` 가 있고 registry_map에 대응 problem_id가 있으면 사용.
-      3. 둘 다 없으면 기존 자유텍스트 폴백: _pattern_to_problem_id →
-         _check_name_to_problem_id → unknown_failure.
+      3. W6-b: `standard_compliance` 계열은 여기서 **구조필드 단일 경로**로 종료한다.
+         구조필드로 해석되지 못하면 unknown_failure로 노출(조용한 오분류 금지)하고
+         _pattern/_check_name 자유텍스트 폴백을 호출하지 않는다. 폴백 추적에 기록.
+      4. R01-R12 밖 체크 타입(maintenance_checklist/freshness/render_health/
+         crosslink_consistency 등)은 기존 자유텍스트 폴백 유지:
+         _pattern_to_problem_id → _check_name_to_problem_id → unknown_failure.
 
-    폴백 체인은 W6까지 제거하지 않는다 (레거시 응답 하위호환).
+    폴백 파서 자체는 W6-b 이후에도 R01-R12 밖 타입용으로 남긴다 (전면 삭제 금지).
     """
     pid = (item.get("problem_id") or "").strip()
     if pid:
@@ -991,6 +1004,10 @@ def _resolve_problem_id(item: dict, registry_map: dict) -> str:
     rid = (item.get("rule_id") or "").strip()
     if rid and registry_map.get(rid):
         return registry_map[rid]
+    # W6-b: standard_compliance 계열은 구조필드 단일 경로 — 자유텍스트 폴백 금지.
+    if (item.get("check_name") or "").strip() == "standard_compliance":
+        _FALLBACK_TRACE_STD.append((item.get("check_name", ""), item.get("blog_id", "")))
+        return "unknown_failure"
     pid = _pattern_to_problem_id(item.get("pattern", ""))
     if pid:
         return pid
