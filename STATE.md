@@ -72,7 +72,87 @@
 
 ---
 
-### CUAP 복원·발행재개·INC-CL (Phase 49 이후 별도 실측 구간)
+### 운영 안정화 3건 (2026-08-08, 커밋 3b21c49f)
+
+스케줄러 운영 안정화 — 감시·방어·가시성 3개 갭 해소. 사전 태그 `pre-stabilize-3fix-2026-08-08`.
+
+- **(a) watchdog 허위 death 알림 해소** (`scripts/analytics_watchdog.sh`)
+  - 원인: scheduler.log mtime이 Bluefin/Pika에서 갱신 안 됨 → 3154분 경과로 오판 → 11:31 허위 death 알림 발송 예정
+  - 해결: pgrep으로 scheduler.py PID 생존 확인 우선, 차선으로 error.log mtime 확인
+  - 검증: PID 60331 생존 → "정상" 판정, 허위 알림 미발송
+
+- **(b) 영문 C04 방어선 복원** (`shared/publishers/hugo_writer.py`)
+  - 원인: _write_hugo_post의 3개 C04 훅이 locale="ko" 고정 → 영문 C04 패턴("We need to write" 등) 미차단
+  - 해결: `_detect_locale(body_md)` 헬퍼 추가 (CJK 감지로 ko/en 자동 결정), 함수 초반에 locale 사전 감지 후 3개 훅에서 공유. before_write 훅은 content가 아닌 body_md 기준으로 locale 결정 (frontmatter 한국어 메타데이터 오염 방지)
+  - 검증: 영문 C04 차단 ✅, 한글 C04 회귀 없음 ✅, 정상 영문 오탐 없음 ✅, 정상 한글 통과 ✅
+
+- **(c) 게이트 visibility: leak_detected/C09_violation 구분 기록** (`pipelines/curation/pipeline.py`)
+  - 원인: publish() 실패 시 error 필드를 잃고 reason="publish_error"로만 기록 → C04 차단인지 다른 실패인지 구분 불가
+  - 해결: result["error"] 확인 → leak_detected/C09_violation/publish_error 구분 후 각각 _record_failure
+  - 검증: scheduler.error.log에 stage=leak_detected 기록 확인
+
+- **관찰 기간 진입**: 아래 지표로 안정화 유지 여부 모니터링. 이상 없으면 정식 완료 처리.
+
+#### 관찰 지표 (관찰 기간 중 확인 기준)
+
+| 지표 | 확인 위치 | 정상 기준 | 갱신 주기 |
+|------|-----------|----------|-----------|
+| 스케줄러 heartbeat/PID 생존 | `ps -p 60331` 또는 `pgrep -f scheduler.py` | PID 존재 + S 상태 | 수시 |
+| scheduler.error.log 활성 | `tail -1 /tmp/5000-scheduler.error.log` | 오늘 날짜 라인 존재 | 수시 |
+| watchdog 오탐 없음 | `tail -5 /Users/twinssn/Projects/5000/logs/analytics_watchdog.log` | "death 알림 발송" 엔트리 없음 | 30분 (watchdog 실행 시) |
+| 게이트 차단 건수·이유 | `grep "leak_detected\|c09_violation" /tmp/5000-scheduler.error.log` | 건수 집계 가능, 이유 명확 | 수시 |
+| 발행 성공/실패 추이 | `grep "\[OUT\]" /Users/twinssn/Projects/5000/logs/scheduler.log` | success:true/false 비율 추적 | 수시 |
+
+**관찰 기간:** 2026-08-08 ~ (다음 이상 발생 시 또는 1주일 후 검토). 이상 발생 시 이 STATE 항목에 기록 후 조치.
+
+---
+
+## 오늘 안정화 작업 — 관찰기 지표 (2026-08-08)
+
+2026-08-08 안정화 3건 + senior 발행재개 + C04 오탐 제거 + watchdog 복구. 아래 지표로 안정화 유지 여부 모니터링. 이상 발생 시 이 섹션에 기록 후 조치.
+
+### 관찰 지표
+
+| 지표 | 확인 명령 / 소스 | 정상 기준 | 갱신 주기 |
+|------|------------------|----------|-----------|
+| **스케줄러 PID 생존** | `ps -p 78295 -o pid,state,etime` 또는 `pgrep -f scheduler.py` | PID 존재 + S 상태, 기동 후 12h 이상 생존 | 수시 |
+| **스케줄러 error.log 활성** | `tail -1 /tmp/5000-scheduler.error.log` | 오늘 날짜(2026-08-08) 라인 존재 | 수시 |
+| **watchdog 스케줄러 인식** | `tail -3 /Users/twinssn/Projects/5000/logs/analytics_watchdog.log` | "✅ 스케줄러 정상 (PID 78295 생존)" 기록, "death 알림" 없음 | 30분 (watchdog 주기) |
+| **watchdog PID 생존** | `ps -p 34819 -o pid,state,etime` | PID 34819 존재 + S 상태 | 수시 |
+| **leak-origin.log "우선" 신규탐지 0** | `awk -F'[][]' '$2 >= "2026-08-08 13:25:34"' /Users/twinssn/Projects/5000/logs/leak-origin.log \| grep -c 우선` | 0건 | 수시 (발행 사이클마다) |
+| **senior-hugo freshness 해소** | `sqlite3 data/content.db "SELECT blog_id, days_since_last_publish FROM blog_lifecycle WHERE blog_id='senior-hugo'"` (또는 ops_dashboard.db blog_lifecycle) | days_since_last_publish ≤ 3 | sync 주기 |
+| **senior-blogger freshness 해소** | 동일 쿼리 `blog_id='senior-blogger'` | days_since_last_publish ≤ 3 | sync 주기 |
+| **senior-hugo maintenance 해소** | `sqlite3 data/content.db "SELECT blog_id, maintenance_status FROM blog_lifecycle WHERE blog_id='senior-hugo'"` | maintenance_status = 'ready' | sync 주기 |
+| **senior-blogger maintenance 해소** | 동일 쿼리 `blog_id='senior-blogger'` | maintenance_status = 'ready' | sync 주기 |
+| **CUAP 자연 사이클 발행 성공률** | `grep "published" /tmp/5000-scheduler.error.log \| grep -c "발행 성공"` (또는 scheduler.log [OUT] 성공/실패) | success 건수 > 0, leak_detected 건수 감소 | 수시 |
+| **senior-hugo 발행 성공** | `sqlite3 data/content.db "SELECT blog_id, status, title, created_at FROM publish_ledger WHERE blog_id='senior-hugo' ORDER BY id DESC LIMIT 3"` | 최근 1건 이상 status='published' | 발행 시 |
+
+### 미결 항목 (백로그, 이번 미수정)
+
+- **bike-hugo no_keyword**: 키워드 수집 단계 문제 (C04 무관). 큐에 키워드 없음으로 발행 시도 실패. collect 단계 확인 필요.
+- **senior-blogger C04 부재**: `shared/publishers/blogger_publisher.py`에 `check_c01_c04()` 호출 없음. Hugo 경로만 C04 게이트 적용됨. 장기 백로그.
+- **34건 표준미준수**: R02/R06/R12 등 규칙 위반. 관찰 후 파일럿 접근 예정 (시니어 안정화 확인 후).
+- **P09 이미지URL 오탐**: 재확인 필요. scanner 오탐 여부 조사 후 처리.
+
+### 커밋 격리 결과
+
+| 커밋 | 파일 | 내용 |
+|------|------|------|
+| (A) `fix(leak_tracker): remove false-positive C04 pattern "우선"` | `shared/leak_tracker.py` | `_C04_KO_PATTERNS`에서 `r"우선\s*"` 1줄 제거. 63건(86.3%) 오탐 해소, 진짜 누수("We need to write" 등) 차단 유지 |
+| (B) `fix(senior): pending 중복필터 + duplicate_source_id 재시도 루프` | `pipelines/senior/fetcher.py`, `pipelines/senior/pipeline.py` | fetcher: get_pending_service에 content.db 발행 source_id 제외(NOT IN) 필터. pipeline: run()에 duplicate_source_id 발생 시 mark_published 후 최대 2회 재시도 루프 추가. 두 블로그 동시발행 설계(가중치 82.9% 중복) 확정 |
+| (C) `docs(STATE): add observation indicators for 2026-08-08 stabilization` | `STATE.md` | C04 오탐 제거 + senior 발행재개 + watchdog 복구 관찰기 지표 11종 + 미결 백로그 4건 기록 |
+
+### 제외 파일 (이번 커밋 대상 아님, unstaged 유지)
+
+| 파일 | 사유 |
+|------|------|
+| `pipelines/curation/pipeline.py` | force_draft/is_draft 관련 변경 — 별도 커밋 후보 |
+| `shared/cuap_entity_linker.py` | is_draft 파라미터 추가 — 별도 커밋 후보 |
+| `shared/publishers/deploy.py` | force_draft --buildDrafts — 별도 커밋 후보 |
+| `scripts/backfill_cuap_entities.py` | is_draft 백필 — 별도 커밋 후보 |
+| `.DS_Store`, `.continue-here.md` | 잡파일·작업파일, 커밋 대상 아님 |
+| `dispatcher.py` | 오늘 안정화 작업과 직접 연관 없음 |
+| watchdog 복구 (`launchctl kickstart`) | 코드 변경 없는 운영 조치 → STATE.md에 기록만 함 |
 - CUAP 후보 10+ 블로그: 2026-08-01 이후 전부 발행 시도 중 + 성공도 발생. 중단이 아니라 **실패 동반 정상 가동**. (Part 1 조사 결론과 일치)
 - senior 계열 / travel4-hugo: 2026-08-01 이후 success 0. 원인 axis는 서로 다름(senior 계열: publish_error 위주 / travel4-hugo: no_result 위주).
 - "INC-CL 74건 재렌더" 표현: 스크립트 `scripts/render_inc_cl_fix.py` 존재하나, content.db 유사제목 stage 총합은 CUAP 후보 기준 30건. 74는 다른 집계·로그 카운터일 가능성 높음(문서 통일 필요).
