@@ -799,6 +799,11 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
     )
     if _is_active:
         _record_failed_rules(conn, blog_id, failures)
+    # fail→pass 전환 시 개별 fail 행 자동 scrub (웨이브3)
+    # passes 목록에 든 rule_id의 기존 fail 행이 남아있으면(stale) 삭제.
+    # 실제 fail 행(aggregate fail 목록의 rule)은 삭제하지 않음.
+    if passes:
+        _scrub_passed_rules(conn, blog_id, passes)
     return {
         "status": "fail",
         "detail": f"{len(failures)}/{len(passes) + len(failures)} rules failed: " + "; ".join(detail_parts[:5]),
@@ -836,4 +841,25 @@ def _record_failed_rules(conn, blog_id: str, failures: list) -> None:
             severity=severity,
             action=action,
             detail=f.get("detail", ""),
+        )
+
+
+def _scrub_passed_rules(conn, blog_id: str, passes: list[str]) -> None:
+    """fail→pass 전환된 규칙의 기존 개별 fail 행을 삭제 (전환형 stale 청소).
+
+    check_standard_compliance가 pass로 판정한 rule_id들에 대해,
+    check_results에 남아 있는 status='fail' 개별 행을 삭제한다.
+
+    안전 원칙:
+      - passes 목록의 rule_id만 대상으로 함 (확실히 pass인 규칙만)
+      - status='fail'인 행만 삭제 (pass/unknown 행은 보존)
+      - passes가 비어있으면 아무것도 하지 않음
+      - 실제 fail 행(aggregate fail 목록의 rule)은 passes에 없으므로 삭제되지 않음
+    """
+    if not passes:
+        return
+    for rule_id in passes:
+        conn.execute(
+            "DELETE FROM check_results WHERE blog_id = ? AND check_name = ? AND status = 'fail'",
+            (blog_id, rule_id),
         )
