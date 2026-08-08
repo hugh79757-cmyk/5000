@@ -1,0 +1,429 @@
+# Auto-Triage Rules — 알림 자동 분류·처리 규칙
+# 형식: 각 알림 유형별로 (a) 판정, (b) 자동 조치, (c) 사람 호출 조건
+
+triage_rules:
+
+  # ── CRITICAL (always threshold) — 실제와 오탐 구분 필요 ──
+
+  - problem_id: standard_compliance
+    name_ko: "표준준수 실패 (R01~R12 규칙 위반)"
+    판정:
+      type: actual_defect
+      근거: "블로그가 R01~R12 표준 규칙 중 하나 이상 위반 — 실제 결함"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+        내용: "표준준수 실패: R01~R12 중 위반 규칙 있음. 요약에 기록, 알림 유지."
+      - type: summary_append
+        내용: "{blog_id}: 표준준수 실패 — R01~R12 규칙 위반 (상세: {pattern})"
+    사람호출:
+      조건: "요약 확인하여 특정 규칙 위반 집중 대응 필요 시"
+
+  - problem_id: P09
+    name_ko: "이미지 URL 토큰 반복"
+    판정:
+      type: actual_defect  # 실제 LLM stutter 패턴. 오탐 아님
+      근거: "detect_repeated_image_url: unique_segments < total_segments/2 → 실제 URL 세그먼트 중복"
+      오탐여부: false
+    자동조치:
+      - type: log_only  # 알림은 그대로, 하지만 처리 결과 요약에 포함
+        내용: "P09 감지됨 — URL 세그먼트 중복. 실제 결함이므로 알림 유지, 요약에 기록"
+      - type: summary_append
+        내용: "{blog_id}: P09 {pattern} — 실제 결함 (알림 유지)"
+    사람호출:
+      조건: "항상 (실제 결함이므로 자동 처리 불가)"
+      note: "P09는 LLM URL stutter 실제 탐지 → 이미지 URL 재생성 필요"
+
+  - problem_id: P07
+    name_ko: "CJK 누수"
+    판정:
+      type: actual_defect
+      근거: "detect_cjk_leak: CJK 문자 탐지 → 콘텐츠 오염 실제 신호"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+      - type: summary_append
+        내용: "{blog_id}: P07 CJK 누수 — 실제 결함"
+    사람호출:
+      조건: "항상 (실제 콘텐츠 오염)"
+
+  - problem_id: P08
+    name_ko: "LLM/CoT 누수"
+    판정:
+      type: actual_defect
+      근거: "detect_cot_leak: CoT 패턴 탐지 → 실제 프롬프트 누수"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+      - type: summary_append
+        내용: "{blog_id}: P08 CoT 누수 — 실제 결함"
+    사람호출:
+      조건: "항상 (실제 프롬프트 누수)"
+
+  - problem_id: P04
+    name_ko: "배포 실패 (deploy_error)"
+    판정:
+      type: actual_defect
+      근거: "wrangler/pages 배포 실패 → 인프라 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+      - type: summary_append
+        내용: "{blog_id}: P04 배포 실패 — 사람 확인 필요"
+    사람호출:
+      조건: "항상 (CRITICAL, 인프라 문제)"
+
+  - problem_id: P05
+    name_ko: "Hugo 빌드 실패"
+    판정:
+      type: actual_defect
+      근거: "Hugo 빌드 실패 → 테마/콘텐츠 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+      - type: summary_append
+        내용: "{blog_id}: P05 Hugo 빌드 실패"
+    사람호출:
+      조건: "항상 (CRITICAL)"
+
+  - problem_id: P06
+    name_ko: "썸네일 404"
+    판정:
+      type: actual_defect
+      근거: "featureimage URL 404 → 썸네일 누락"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+      - type: summary_append
+        내용: "{blog_id}: P06 썸네일 404"
+    사람호출:
+      조건: "항상 (CRITICAL)"
+
+  # ── MAJOR (consecutive:3 threshold) — 문맥별 분류 ──
+
+  - problem_id: P14
+    name_ko: "수집/품질 게이트 실패 (no_keyword 등)"
+    판정:
+      type: contextual
+      근거: "no_keyword는 키워드 성격에 따라 처리 구분"
+    subtypes:
+      - subtype: informational_keyword
+        판정기준:
+          - "키워드가 장소·행사·개념 등 정보성('서울 근교 반려견 운동장', '분당 카페 추천')"
+          - "Coupang 검색 결과가 0건 또는 insufficient_products"
+          - "irrelevant_products / low_relevance"
+        자동조치:
+          - type: silent_skip  # 알림 없이 로그만
+            내용: "정보성 키워드 '{keyword}' → 상품 매칭 불가 (정상). 알림 제외, 로그만."
+          - type: summary_append
+            내용: "info-skip: {blog_id} 키워드 '{keyword}' — 정보성, 상품 없음 (정상)"
+        사람호출:
+          조건: "불필요 (정보성 키워드는 상품 매칭 불가가 정상)"
+
+      - subtype: commercial_keyword_fail
+        판정기준:
+          - "키워드가 상품명·제품 카테고리('안마의자 추천', '공기청정기')"
+          - "Coupang 검색 결과가 있음에도 insufficient_products/low_relevance"
+          - "동일한 commercial 키워드 연속 3회 이상 no_keyword"
+        자동조치:
+          - type: summary_append
+            내용: "commercial-fail: {blog_id} 키워드 '{keyword}' — 상품 있으나 매칭 실패"
+        사람호출:
+          조건: "상품 키워드 연속 실패 시만 (자동 스킵 불가)"
+
+      - subtype: collect_error
+        판정기준:
+          - "collect_error (수집 자체 실패)"
+        자동조치:
+          - type: log_only
+        사람호출:
+          조건: "연속 2회 이상 collect_error → API/크롤러 문제 가능성"
+
+  - problem_id: P01
+    name_ko: "발행 데이터 없음 (no_result)"
+    판정:
+      type: contextual
+    subtypes:
+      - subtype: no_data genuine
+        판정기준:
+          - "데이터 소스 조회 결과가 0건 (정당한 데이터 부재)"
+        자동조치:
+          - type: silent_skip
+            내용: "데이터 소스 비어있음 — 오늘 발행 대상 없음 (정상)"
+        사람호출:
+          조건: "데이터 소스 자체가 텅 빈 경우만 (파이프라인 데이터 수집 문제)"
+
+      - subtype: pipeline_error
+        판정기준:
+          - "fetch_error / no_topic 등 수집 파이프라인 오류"
+        자동조치:
+          - type: summary_append
+            내용: "{blog_id}: P01 파이프라인 오류 ({reason})"
+        사람호출:
+          조건: "연속 3회 이상 fetch_error → 데이터 수집 파이프라인 문제"
+
+  - problem_id: P02
+    name_ko: "콘텐츠 생성 실패 (no_content / publish_error)"
+    판정:
+      type: contextual
+    subtypes:
+      - subtype: leak_detected_embedded
+        판정기준:
+          - "error_msg에 leak_detected 포함"
+          - "C01=True 또는 C04=True"
+        자동조치:
+          - type: escalate  # 사람 호출 (실제 콘텐츠 오염)
+            내용: "{blog_id}: P02 — leak_detected 내포 (C01={c01}, C04={c04})"
+        사람호출:
+          조건: "항상 (콘텐츠 오염은 자동 처리 불가)"
+
+      - subtype: transient_error
+        판정기준:
+          - "publish_error + error_msg에 timeout/network 관련 단어"
+          - "transient 오류 패턴"
+        자동조치:
+          - type: retry_silent
+            내용: "일시적 오류 ({reason}) — 자동 재시도 대기"
+        사람호출:
+          조건: "연속 3회 이상 transient 오류 → 인프라 문제"
+
+      - subtype: genuine_failure
+        판정기준:
+          - "위 둘에 해당하지 않는 no_content/publish_error"
+        자동조치:
+          - type: summary_append
+            내용: "{blog_id}: P02 콘텐츠 생성 실패 ({reason})"
+        사람호출:
+          조건: "연속 3회 이상 → 프롬프트/모델 문제"
+
+  - problem_id: P03
+    name_ko: "유사 제목 중복 (similar_title)"
+    판정:
+      type: auto_skip_possible
+      근거: "제목 유사도 80% 초과 → 자동 스킵 가능 (중복 방지 기능 정상 작동)"
+    자동조치:
+      - type: silent_skip
+        내용: "similar_title 감지 → 제목 중복 방지 정상 작동, 알림 제외"
+    사람호출:
+      조건: "특정 키워드가 지속적으로 similar_title 걸리는 경우 (키워드 변형 필요)"
+
+  - problem_id: P10
+    name_ko: "제목 템플릿 패턴 (title_blocked)"
+    판정:
+      type: auto_skip_possible
+      근거: "블랙키워드/템플릿 패턴 차단 → 품질 게이트 정상 작동"
+    자동조치:
+      - type: silent_skip
+        내용: "title_blocked → 블랙키워드 차단 정상, 알림 제외"
+    사람호출:
+      조건: "정상 키워드가 title_blocked 되면 블랙키워드 목록 확인 필요"
+
+  - problem_id: P11
+    name_ko: "제목 재생성 실패"
+    판정:
+      type: contextual
+    subtypes:
+      - subtype: keyword_issue
+        판정기준:
+          - "제목 재생성 실패가 특정 키워드에서 반복"
+        자동조치:
+          - type: summary_append
+            내용: "{blog_id}: P11 제목 재생성 실패 ({keyword})"
+        사람호출:
+          조건: "연속 2회 이상 → 제목 생성 프롬프트/모델 문제"
+
+  - problem_id: P12
+    name_ko: "콘텐츠 품질 게이트 차단"
+    판정:
+      type: actual_defect
+      근거: "콘텐츠 품질 게이트(중국어 생성 차단 등) → 실제 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (실제 품질 문제)"
+
+  - problem_id: P13
+    name_ko: "API 차단 (rate_limited)"
+    판정:
+      type: auto_handle
+      근거: "rate limit은 재시도/할당량 초기화 후 자동 복구 가능"
+    자동조치:
+      - type: retry_schedule
+        내용: "rate_limited → 다음 사이클로 자동 재시도 (대기)"
+    사람호출:
+      조건: "연속 3회 이상 rate_limited → API 키/할당량 문제"
+
+  - problem_id: P15
+    name_ko: "발행 후 검증 실패"
+    판정:
+      type: actual_defect
+      근거: "발행 후 검증 실패 → 콘텐츠 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (발행 후 검증 실패는 실제 문제)"
+
+  - problem_id: P20
+    name_ko: "subprocess 에러 (STAP/TAP)"
+    판정:
+      type: contextual
+    subtypes:
+      - subtype: timeout
+        판정기준:
+          - "stap_timeout / tap_timeout"
+        자동조치:
+          - type: retry_schedule
+            내용: "subprocess timeout → 다음 사이클 재시도"
+        사람호출:
+          조건: "연속 3회 이상 timeout → subprocess 문제"
+
+  - problem_id: P21
+    name_ko: "설정 오류 (config_error)"
+    판정:
+      type: actual_defect
+      근거: "블로그 설정 오류 → 설정 수정 필요"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (설정 오류는 사람이 수정)"
+
+  - problem_id: P22
+    name_ko: "LLM 폴백 체인 전체 실패"
+    판정:
+      type: actual_defect
+      근거: "16개 무료 모델 전부 실패 + 유료 DeepSeek도 실패 → LLM 인프라 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (LLM 인프라 문제)"
+
+  # ── MINOR (quiet threshold) — 로그만 ──
+
+  - problem_id: P16
+    name_ko: "중복 slug/source_id"
+    판정:
+      type: auto_handle
+      근거: "중복은 자동 처리 가능 (중복 제거 후 재발행)"
+    자동조치:
+      - type: silent_skip
+        내용: "P16 중복 → 중복 제거 후 재발행 대기"
+    사람호출:
+      조건: "불필요 (자동 처리 가능)"
+
+  - problem_id: P17
+    name_ko: "일일 할당량 도달"
+    판정:
+      type: auto_handle
+      근거: "할당량 도달은 정상 (내일 다시 시도)"
+    자동조치:
+      - type: silent_skip
+        내용: "P17 할당량 도달 → 내일 재시도"
+    사람호출:
+      조건: "불필요 (정상)"
+
+  - problem_id: P18
+    name_ko: "동시 실행 방지"
+    판정:
+      type: auto_handle
+      근거: "동시 실행 방지는 정상 동작"
+    자동조치:
+      - type: silent_skip
+        내용: "P18 동시 실행 방지 → 이전 실행 종료 대기"
+    사람호출:
+      조건: "불필요 (정상)"
+
+  - problem_id: P19
+    name_ko: "오래된/만료 데이터"
+    판정:
+      type: auto_handle
+      근거: "만료 데이터는 자동 건너뛰기 정상"
+    자동조치:
+      - type: silent_skip
+        내용: "P19 만료 데이터 → 자동 스킵"
+    사람호출:
+      조건: "불필요 (정상)"
+
+  - problem_id: P23
+    name_ko: "이미지 URL 길이 초과"
+    판정:
+      type: auto_handle
+      근거: "URL 길이 초과는 sanitize로 자동 처리 가능"
+    자동조치:
+      - type: silent_skip
+        내용: "P23 URL 길이 초과 → sanitize 처리"
+    사람호출:
+      조건: "불필요 (자동 처리)"
+
+  - problem_id: P24
+    name_ko: "검증 함수 자체 결함"
+    판정:
+      type: actual_defect
+      근거: "검증 함수 결함은 실제 코드 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (코드 결함)"
+
+  - problem_id: unknown_failure
+    name_ko: "미등록 실패 사유"
+    판정:
+      type: actual_defect
+      근거: "미등록 reason → 신규 문제 가능성"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (미등록 reason은 신규 문제 가능성)"
+
+# ── Dashboard 추가 알림 유형 (problem_registry 외) ──
+
+  - problem_id: leak_detected
+    name_ko: "콘텐츠 누수 (C01/C04)"
+    판정:
+      type: actual_defect
+      근거: "hugo_writer.py C01/C04 검사 → 실제 프롬프트/사고 누수"
+      오탐여부: false  # C04 '우선' 패턴 제거로 오탐 해소됨
+    자동조치:
+      - type: escalate
+        내용: "{blog_id}: leak_detected C01={c01}, C04={c04} — 실제 콘텐츠 오염"
+    사람호출:
+      조건: "항상 (콘텐츠 오염은 자동 처리 불가)"
+
+  - problem_id: watchdog_death
+    name_ko: "워치독 스케줄러 death 알림"
+    판정:
+      type: auto_handle
+      근거: "워치독이 자체적으로 death 감지 후 알림. 자동 복구 가능."
+    자동조치:
+      - type: auto_recovery
+        내용: "워치독 death → launchd 자동 재시작 확인, 미재시작 시 수동 재시작 권고"
+    사람호출:
+      조건: "launchd 재시작이 안 될 때만 (KeepAlive 실패)"
+
+  - problem_id: dead_entity_link
+    name_ko: "크로스 링크 소멸 (404 엔티티)"
+    판정:
+      type: actual_defect
+      근거: "cuap_entities에 등록된 URL이 404 → 링크 깨짐"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+        내용: "dead entity link: {entity} → {url} 404"
+    사람호출:
+      조건: "항상 (엔티티 링크 복구는 수동)"
+
+  - problem_id: build_failed_hugo
+    name_ko: "Hugo 빌드 실패 (상세)"
+    판정:
+      type: actual_defect
+      근거: "Hugo 빌드 에러 로그 → 콘텐츠/테마 문제"
+      오탐여부: false
+    자동조치:
+      - type: log_only
+    사람호출:
+      조건: "항상 (Hugo 빌드 실패는 수동 확인 필요)"
