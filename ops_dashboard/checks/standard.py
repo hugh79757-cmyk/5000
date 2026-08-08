@@ -488,6 +488,24 @@ def _check_r12(site: Path) -> tuple[bool, str]:
 _R2_PATTERN = re.compile(r"pub-[0-9a-f]+\.r2\.dev")
 
 
+def _recent_posts(site: Path, n: int = 10) -> list[Path]:
+    """content/posts/에서 mtime 기준 최신 n개 포스트 디렉토리를 반환 (W7-b sortfix).
+
+    포스트는 하위 디렉토리 단위로 저장되므로, 각 디렉토리의 mtime을 기준으로
+    최신순으로 정렬한다. 포스트 수가 n 미만이면 전체 반환.
+    포스트가 없거나 content/posts/가 없으면 빈 리스트 반환.
+
+    slug 언어에 관계없이 실제 최근 포스트가 뽑히도록 sorted() 알파벳순 대신
+    mtime 기준 정렬을 사용한다 (THUMBNAIL-01 정렬 결함 수정, W7-b sortfix).
+    """
+    posts_dir = site / "content" / "posts"
+    if not posts_dir.is_dir():
+        return []
+    posts = [d for d in posts_dir.iterdir() if d.is_dir()]
+    posts.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+    return posts[:n]
+
+
 def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
     """THUMBNAIL-01: 최근 포스트의 featureimage가 R2 업로드 + webp인지 검사.
 
@@ -497,13 +515,16 @@ def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
       - URL이 .webp로 끝남
     조건 미충족 URL이 1건이라도 있으면 fail, 전부 충족 또는 featureimage 없는
     포스트만 있으면 pass. featureimage가 아예 없는 포스트 수는 detail에 집계한다.
-    """
-    posts_dir = site / "content" / "posts"
-    if not posts_dir.is_dir():
-        return False, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님"
 
-    posts = sorted(posts_dir.iterdir())[-10:]  # 최근 10개 (디렉토리명 역순 아님 — 알파벳순 최근)
+    검사 대상 포스트는 _recent_posts(site, 10)로 mtime 기준 최신 10개를 사용한다
+    (sorted() 알파벳순 대신 mtime 기준 — W7-b sortfix).
+    """
+    posts = _recent_posts(site, 10)
     if not posts:
+        # content/posts/ 없음 또는 포스트 없음
+        posts_dir = site / "content" / "posts"
+        if not posts_dir.is_dir():
+            return False, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님"
         return True, "포스트 없음 — 검사 대상 없음 (pass)"
 
     valid_count = 0
