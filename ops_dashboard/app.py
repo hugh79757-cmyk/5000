@@ -308,6 +308,9 @@ def _register_human_routes(app: Flask) -> None:
             total_pages=total_pages,
             total_items=total_items,
             readiness=readiness,
+            all_brands=attention_agg.get("all_brands", {}),
+            all_check_names=attention_agg.get("all_check_names", {}),
+            all_severities=attention_agg.get("all_severities", {}),
         )
 
     @app.route("/blog/<blog_id>")

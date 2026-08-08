@@ -1311,6 +1311,20 @@ def get_attention_blogs_aggregate(
         sev = i["severity"]
         severities[sev] = severities.get(sev, 0) + 1
 
+    # 전체 옵션 목록 (필터링용 드롭다운이 fail 있는 항목만 보여주는 문제 해소)
+    all_brands: dict[str, int] = {}
+    for row in conn.execute("SELECT DISTINCT brand FROM blog_lifecycle ORDER BY brand").fetchall():
+        brand = row["brand"]
+        all_brands[brand] = brands.get(brand, 0)
+
+    all_check_names: dict[str, int] = {}
+    for cn in sorted(check_names.keys()):
+        all_check_names[cn] = check_names.get(cn, 0)
+
+    all_severities: dict[str, int] = {}
+    for sev in CHECK_SEVERITY.keys():
+        all_severities[sev] = severities.get(sev, 0)
+
     return {
         "total_blogs": len(blog_ids),
         "total_items": len(items),
@@ -1318,6 +1332,9 @@ def get_attention_blogs_aggregate(
         "brands": brands,
         "check_names": check_names,
         "severities": severities,
+        "all_brands": all_brands,
+        "all_check_names": all_check_names,
+        "all_severities": all_severities,
     }
 
 
