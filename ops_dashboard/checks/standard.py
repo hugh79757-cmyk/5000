@@ -136,11 +136,14 @@ STANDARD_RULES: list[dict] = [
 # 개별 고유 오버라이드(사용 빈도 1)는 여전히 위반으로 보고된다.
 ALLOWED_OVERRIDES = {
     "layouts/_default/single.html",
+    "layouts/archives/single.html",
     "layouts/partials/extend-head.html",
     "layouts/partials/extend_head.html",
     "layouts/partials/adsense",
     "layouts/partials/related.html",
     "layouts/partials/head/custom.html",
+    "layouts/partials/head.html",
+    "layouts/partials/head.xml",
     "layouts/partials/cuap-spider-links.html",
     "layouts/_default/_markup/render-link.html",
     "layouts/partials/header/components/translations.html",
@@ -805,6 +808,9 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
 def _record_failed_rules(conn, blog_id: str, failures: list) -> None:
     """실패한 각 규칙을 check_results에 개별 행으로 기록 (dual-write).
 
+    동일 blog_id + rule_id(check_name)의 기존 행이 있으면 먼저 삭제 후 INSERT하여
+    재검사 시마다 fail 행이 누적되는 것을 방지한다 (UPSERT: DELETE-then-INSERT).
+
     severity/action은 ops_dashboard/registry/rules.py(RULES)에서 조회한다 —
     레지스트리가 check 경로에서 처음 소비되는 지점. registry에 없는 규칙은 실패 목록의
     severity만 사용하고 action은 빈 문자열로 둔다 (조용한 실패 금지).
@@ -817,6 +823,11 @@ def _record_failed_rules(conn, blog_id: str, failures: list) -> None:
         entry = get_entry(rule_id)
         severity = (entry.severity if entry else f.get("severity")) or "MAJOR"
         action = entry.action if entry else ""
+        # 동일 (blog_id, check_name=rule_id) 기존 행 삭제 → 재검사 누적 방지
+        conn.execute(
+            "DELETE FROM check_results WHERE blog_id = ? AND check_name = ?",
+            (blog_id, rule_id),
+        )
         record_check_rule(
             conn,
             blog_id,
