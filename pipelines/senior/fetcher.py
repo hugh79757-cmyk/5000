@@ -241,20 +241,53 @@ def sync_services():
     return inserted
 
 
-def get_pending_service(category=None):
-    """senior.db에서 pending 서비스 1건 반환 (category 우선, 없으면 전체)"""
+def get_pending_service(category=None, blog_id=None):
+    """senior.db에서 pending 서비스 1건 반환 (category 우선, 없음면 전체).
+    blog_id가 주어지면 content.db articles에 이미 발행된 source_id를 제외한다."""
     init_senior_db()
     conn = sqlite3.connect(SENIOR_DB_PATH)
     try:
+        # content.db에서 이미 발행된 source_id 목록 조회 (중복 방지)
+        published_source_ids = set()
+        if blog_id:
+            try:
+                from shared.content_store import get_conn as _get_content_conn
+                cconn = _get_content_conn()
+                pub_rows = cconn.execute(
+                    "SELECT DISTINCT source_id FROM articles "
+                    "WHERE blog_id=? AND status='published' AND data_source='gov24_api'",
+                    (blog_id,)
+                ).fetchall()
+                published_source_ids = {r[0] for r in pub_rows if r[0]}
+                cconn.close()
+            except Exception as _e:
+                logger.warning(f"발행 source_id 조회 실패 (무시): {_e}")
+
         if category:
-            row = conn.execute(
-                "SELECT * FROM services WHERE status='pending' AND category=? ORDER BY id ASC LIMIT 1",
-                (category,)
-            ).fetchone()
+            if published_source_ids:
+                placeholders = ','.join(['?' for _ in published_source_ids])
+                row = conn.execute(
+                    f"SELECT * FROM services WHERE status='pending' AND category=? "
+                    f"AND service_id NOT IN ({placeholders}) ORDER BY id ASC LIMIT 1",
+                    [category] + list(published_source_ids)
+                ).fetchone()
+            else:
+                row = conn.execute(
+                    "SELECT * FROM services WHERE status='pending' AND category=? ORDER BY id ASC LIMIT 1",
+                    (category,)
+                ).fetchone()
         else:
-            row = conn.execute(
-                "SELECT * FROM services WHERE status='pending' ORDER BY id ASC LIMIT 1"
-            ).fetchone()
+            if published_source_ids:
+                placeholders = ','.join(['?' for _ in published_source_ids])
+                row = conn.execute(
+                    f"SELECT * FROM services WHERE status='pending' "
+                    f"AND service_id NOT IN ({placeholders}) ORDER BY id ASC LIMIT 1",
+                    list(published_source_ids)
+                ).fetchone()
+            else:
+                row = conn.execute(
+                    "SELECT * FROM services WHERE status='pending' ORDER BY id ASC LIMIT 1"
+                ).fetchone()
         if not row:
             return None
         cols = [d[0] for d in conn.execute("SELECT * FROM services LIMIT 0").description]

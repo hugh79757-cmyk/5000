@@ -126,6 +126,7 @@ def run(cfg):
         enrich_service_detail,
         get_pending_count,
         get_pending_service,
+        mark_published as _mark_published_svc,
         sync_services,
     )
     from pipelines.senior.writer import generate_senior_article as generate_article
@@ -156,10 +157,10 @@ def run(cfg):
     topic_type = _pick_topic(blog_id, [])
     logger.info(f"Topic selected: {topic_type}")
 
-    # 4. DB에서 pending 서비스 선택
-    candidate = get_pending_service(category=topic_type)
+    # 4. DB에서 pending 서비스 선택 (content.db 발행 이력으로 중복 필터)
+    candidate = get_pending_service(category=topic_type, blog_id=blog_id)
     if not candidate:
-        candidate = get_pending_service(category=None)
+        candidate = get_pending_service(category=None, blog_id=blog_id)
     if not candidate:
         logger.error(f"{blog_id}: pending 서비스 없음")
         return {"success": False, "reason": "no_data"}
@@ -241,10 +242,88 @@ def run(cfg):
         logger.exception(f"{blog_id}: 글 생성 예외: {e}")
         return {"success": False, "reason": "no_content"}
 
-    # 8. 발행
-    if platform == "hugo":
-        return _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate)
-    return _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate)
+    # 8. 발행 (duplicate_source_id 재시도 포함 — 시니어 두 채널이 동일 서비스를
+    #    각각 발행하는 구조이므로, duplicate 발생 시 mark_published 후 다음 서비스로 재시도)
+    publish_ok = False
+    for attempt in range(3):
+        if platform == "hugo":
+            result = _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate)
+        else:
+            result = _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate)
+
+        if result.get("success"):
+            return result
+
+        _reason = result.get("reason")
+        if _reason == "duplicate_source_id" and attempt < 2:
+            # 이미 발행된 서비스 정리 후 다음 가용 서비스로 재시도
+            if candidate and candidate.get("service_id"):
+                try:
+                    from pipelines.senior.fetcher import mark_published as _mp
+                    _mp(candidate["service_id"])
+                    logger.info(f"duplicate_source_id 정리 (재시도 {attempt+1}/2): {candidate['service_id']}")
+                except Exception as _e:
+                    logger.warning(f"mark_published 실패: {_e}")
+            # 다음 candidate 선택
+            candidate = get_pending_service(category=topic_type, blog_id=blog_id) or \
+                         get_pending_service(category=None, blog_id=blog_id)
+            if not candidate:
+                logger.error(f"{blog_id}: 재시도 후 pending 서비스 고갈")
+                return {"success": False, "reason": "no_data"}
+            if not candidate.get("support_content"):
+                candidate = enrich_service_detail(candidate)
+            # 새 candidate로 article 재생성
+            tags = _prepare_tags(candidate, topic_type)
+            try:
+                related_services = []
+                try:
+                    import sqlite3 as _sq3
+                    _rc = _sq3.connect(SENIOR_DB_PATH)
+                    _rc.row_factory = _sq3.Row
+                    _rows = _rc.execute(
+                        """SELECT * FROM services
+                           WHERE status='pending'
+                           AND category=?
+                           AND service_id != ?
+                           ORDER BY id ASC LIMIT 3""",
+                        (candidate.get("category", "생활지원"), candidate.get("service_id", ""))
+                    ).fetchall()
+                    cols = ["id","service_id","service_name","description","target","category",
+                            "apply_method","apply_url","department","support_content","purpose",
+                            "selection_criteria","documents","contact","law_basis","deadline",
+                            "status","collected_at","published_at"]
+                    for row in _rows:
+                        related_services.append(dict(zip(cols, row, strict=False)))
+                    _rc.close()
+                except Exception as _re:
+                    logger.warning(f"related 조회 실패 (재시도): {_re}")
+                data = {
+                    "services": [candidate, *related_services],
+                    "jobs": [],
+                    "today": _dt2.now().strftime("%Y년 %m월 %d일"),
+                    "total_services": 1 + len(related_services),
+                    "total_jobs": 0,
+                    "categories": [candidate.get("category", "생활지원")],
+                }
+                article = generate_article(data, topic_type=topic_type, enriched_service=candidate)
+                if not article:
+                    return {"success": False, "reason": "no_content"}
+                _lang_err = assert_korean_or_reject(article.get("title", ""), article.get("body_md", ""), blog_id)
+                if _lang_err:
+                    return {"success": False, "reason": "language_error"}
+                thumb_url = _make_thumbnail(cfg, article, topic_type, platform)
+            except Exception as _e:
+                logger.exception(f"{blog_id}: 재시도 글 생성 실패: {_e}")
+                return {"success": False, "reason": "no_content"}
+            continue
+
+        # duplicate_source_id 외 실패면 즉시 반환
+        if _reason == "duplicate_source_id":
+            logger.error(f"{blog_id}: duplicate_source_id 재시도 회수 소진")
+        logger.error(f"{blog_id}: 발행 실패 — reason={_reason}")
+        return {"success": False, "reason": _reason}
+
+    return {"success": False, "reason": "publish_error"}
 
 
 def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
@@ -283,14 +362,33 @@ def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
             logger.info(f"Hugo published: {article['title']} -> {result.get('url')}")
             if candidate and candidate.get("service_id"):
                 try:
-                    from pipelines.senior.fetcher import mark_published
-                    mark_published(candidate["service_id"])
+                    from pipelines.senior.fetcher import mark_published as _mp
+                    _mp(candidate["service_id"])
                     logger.info(f"mark_published: {candidate['service_id']}")
                 except Exception as _me:
                     logger.warning(f"mark_published 실패: {_me}")
             return result
+        _reason = result.get("reason") if result else None
+        if not _reason:
+            _err = result.get("error", "") if result else ""
+            if _err.startswith("leak_detected"):
+                _reason = "leak_detected"
+            elif _err.startswith("C09_violation"):
+                _reason = "c09_violation"
+            elif _err.startswith("invalid_frontmatter"):
+                _reason = "invalid_frontmatter"
+            else:
+                _reason = "publish_error"
         logger.error(f"Hugo publish failed: {result}")
-        return {"success": False, "reason": "publish_error"}
+        # duplicate_source_id: 이미 발행된 서비스 — services 상태도 published로 정리해 재선택 방지
+        if _reason == "duplicate_source_id" and candidate and candidate.get("service_id"):
+            try:
+                from pipelines.senior.fetcher import mark_published as _mp2
+                _mp2(candidate["service_id"])
+                logger.info(f"duplicate_source_id 정리: mark_published({candidate['service_id']})")
+            except Exception as _dm:
+                logger.warning(f"duplicate_source_id mark_published 실패: {_dm}")
+        return {"success": False, "reason": _reason}
     except Exception as e:
         logger.exception(f"Hugo publish error: {e}")
         return {"success": False, "reason": "publish_error"}
@@ -342,14 +440,33 @@ def _do_publish_blogger(cfg, blog_id, article, tags, thumb_url, candidate=None):
             logger.info(f"Blogger published: {article['title']} -> {result.get('url')}")
             if candidate and candidate.get("service_id"):
                 try:
-                    from pipelines.senior.fetcher import mark_published
-                    mark_published(candidate["service_id"])
+                    from pipelines.senior.fetcher import mark_published as _mp3
+                    _mp3(candidate["service_id"])
                     logger.info(f"mark_published: {candidate['service_id']}")
                 except Exception as _me:
                     logger.warning(f"mark_published 실패: {_me}")
             return result
+        _reason = result.get("reason") if result else None
+        if not _reason:
+            _err = result.get("error", "") if result else ""
+            if _err.startswith("leak_detected"):
+                _reason = "leak_detected"
+            elif _err.startswith("C09_violation"):
+                _reason = "c09_violation"
+            elif _err.startswith("invalid_frontmatter"):
+                _reason = "invalid_frontmatter"
+            else:
+                _reason = "publish_error"
         logger.error(f"Blogger publish failed: {result}")
-        return {"success": False, "reason": "publish_error"}
+        # duplicate_source_id: 이미 발행된 서비스 — services 상태도 published로 정리해 재선택 방지
+        if _reason == "duplicate_source_id" and candidate and candidate.get("service_id"):
+            try:
+                from pipelines.senior.fetcher import mark_published as _mp4
+                _mp4(candidate["service_id"])
+                logger.info(f"duplicate_source_id 정리: mark_published({candidate['service_id']})")
+            except Exception as _dm:
+                logger.warning(f"duplicate_source_id mark_published 실패: {_dm}")
+        return {"success": False, "reason": _reason}
     except Exception as e:
         logger.exception(f"Blogger publish error: {e}")
         return {"success": False, "reason": "publish_error"}
