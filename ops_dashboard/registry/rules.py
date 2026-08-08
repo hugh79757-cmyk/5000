@@ -1,0 +1,157 @@
+"""ops_dashboard.registry.rules — 표준 준수 규칙 R01~R12 선언 (Phase 69, W1).
+
+`ops_dashboard/checks/standard.py`의 `STANDARD_RULES`(L27~L124)를 **동일한 중립
+스키마(UnifiedEntry)** 로 미러링한 순수 선언이다. 기존 STANDARD_RULES는 이 웨이브에서
+수정하지 않는다 — 소비 전환은 후속 웨이브(W6)에서 이룬다.
+
+매핑 규칙:
+    rule_id   -> id
+    target    -> target (그대로)
+    severity  -> severity (그대로)
+    description -> action (조치 문구로 변환)
+    bucket    -> bucket (그대로)
+    check     -> check_fn (함수명 문자열)
+    threshold -> rule은 항상 검사하므로 "always"
+
+R06 참고 (deprecate-then-split 전방 참조, W1/W3/W7 정합):
+    R06은 이 웨이브에서는 그대로 `R06`으로 선언·기록하되, W7에서 R06A/R06B로 분화된다.
+    이 시점에 R06A/R06B를 미리 만들지 않는다.
+"""
+from __future__ import annotations
+
+from ops_dashboard.registry.schema import UnifiedEntry, validate_entry
+
+RULES: list[UnifiedEntry] = [
+    UnifiedEntry(
+        id="R01",
+        kind="rule",
+        target="hugo.toml",
+        severity="CRITICAL",
+        threshold="always",
+        check_fn="_check_r01",
+        action="showTableOfContents를 false로 설정",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R02",
+        kind="rule",
+        target="hugo.toml",
+        severity="CRITICAL",
+        threshold="always",
+        check_fn="_check_r02",
+        action="Advertisement 섹션에 adsense 슬롯이 필요함",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R03",
+        kind="rule",
+        target="extend-head.html",
+        severity="CRITICAL",
+        threshold="always",
+        check_fn="_check_r03",
+        action="adsbygoogle.js는 site.Params 사용 (하드코딩 금지)",
+        bucket="out_of_scope",
+    ),
+    UnifiedEntry(
+        id="R04",
+        kind="rule",
+        target="extend_head.html",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r04",
+        action="GA4 + 모바일 보정 CSS 필요",
+        bucket="out_of_scope",
+    ),
+    UnifiedEntry(
+        id="R05",
+        kind="rule",
+        target="adsense/top.html",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r05",
+        action="overflow:hidden;min-height:100px 래퍼 + outside push div 필요",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R06",
+        kind="rule",
+        target="adsense/in-article.html",
+        severity="CRITICAL",
+        threshold="always",
+        check_fn="_check_r06",
+        action="fluid+in-article format (no auto) + outside push div 필요",
+        bucket="deferred",
+    ),
+    UnifiedEntry(
+        id="R07",
+        kind="rule",
+        target="single.html",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r07",
+        action="H2 split injection + prose wrapper 필요",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R08",
+        kind="rule",
+        target="single.html",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r08",
+        action="Description (lead) 제거 필요",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R09",
+        kind="rule",
+        target="baseof.html",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r09",
+        action="커스텀 오버라이드 없음 — 테마 기본값 사용",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R10",
+        kind="rule",
+        target="custom.css",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r10",
+        action="미채움 공간 제거 + 다크모드 + min-height 규칙 필요",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R11",
+        kind="rule",
+        target="layouts/",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r11",
+        action="mobile-sticky.html 사용 금지",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="R12",
+        kind="rule",
+        target="layouts/",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_r12",
+        action="허용 집합을 벗어난 오버라이드 파일 없음",
+        bucket="actionable",
+    ),
+]
+
+# W6-a: rule↔문제분류(problem_id) 대응 선언.
+# R01~R12는 전부 표준준수(adSense/SEO/템플릿) 규칙이므로, 어느 규칙이 위반되든 문제분류
+# `standard_compliance`(표준준수 실패)로 대응된다. P-family 발행오류(P01~P24)가 아님 —
+# `_check_name_to_problem_id`의 `standard_compliance → standard_compliance` 매핑과 정합.
+# auto_triage._build_registry_map이 이 맵을 단일 출처로 사용해 구조 필드 우선 경로를
+# 발화시킨다. 폴백 파서는 W6-b 제거 전까지 그대로 유지한다.
+RULE_TO_PROBLEM: dict[str, str] = {entry.id: "standard_compliance" for entry in RULES}
+
+# W1 게이트: 모든 선언이 스키마 허용 값을 지키는지 즉시 검증.
+for _entry in RULES:
+    validate_entry(_entry)

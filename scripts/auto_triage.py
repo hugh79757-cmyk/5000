@@ -25,6 +25,10 @@ from typing import Any
 # 경로
 # ---------------------------------------------------------------------------
 FIVEK_ROOT = Path(__file__).resolve().parents[1]
+# 직접 실행 시 프로젝트 루트를 sys.path에 추가 (shared/ops_dashboard import 보장).
+# launchd는 PYTHONPATH로 이미 주입되며, 여기서는 중복 삽입을 방지한다.
+if str(FIVEK_ROOT) not in sys.path:
+    sys.path.insert(0, str(FIVEK_ROOT))
 DASHBOARD_URL = "http://localhost:5060"
 TRIAGE_RULES_PATH = FIVEK_ROOT / "scripts" / "auto_triage_rules.yaml"
 SUMMARY_LOG = FIVEK_ROOT / "logs" / "auto_triage_summary.log"
@@ -594,6 +598,7 @@ def fetch_dashboard_data() -> dict[str, Any]:
         ("issues", "/api/issues"),
         ("fleet", "/api/fleet"),
         ("readiness", "/api/readiness"),
+        ("registry", "/api/registry"),
     ]
     for name, path in endpoints:
         url = f"{DASHBOARD_URL}{path}"
@@ -702,6 +707,66 @@ def parse_scheduler_notifications(log_lines: list[str]) -> list[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 # 트리아지 실행
 # ---------------------------------------------------------------------------
+def _classification_rows(engine: TriageEngine) -> list[dict]:
+    """TriageEngine 누적 결과에서 DB/JSON 기록용 분류 행 추출 (Phase 69 W4).
+
+    engine.results의 각 항목에 severity/action을 PROBLEM_REGISTRY에서 보강한다.
+    기존 분류 로직·요약 생성은 건드리지 않는다 — 이 함수는 출력 경로 추가만 담당.
+    """
+    rows = []
+    from shared.problem_registry import lookup_problem
+
+    for r in engine.results:
+        pid = r.get("problem_id", "unknown_failure")
+        spec = lookup_problem(pid)
+        severity = (spec.severity if spec else "") or r.get("severity", "")
+        action = (r.get("action") or (spec.action if spec else "")) or ""
+        rows.append({
+            "problem_id": pid,
+            "severity": severity,
+            "target": r.get("blog_id", ""),
+            "action": action,
+            "source": r.get("pattern", "") or r.get("reason", "") or r.get("check_name", ""),
+            "detail": r.get("detail", ""),
+            "classification": r.get("classification", ""),
+        })
+    return rows
+
+
+def _write_classifications_json(rows: list[dict]) -> str:
+    """분류 결과를 JSON 파일로 덤프 (DB 접근 실패 시에도 데이터 보존 — 조용한 실패 금지).
+
+    반환: 작성된 JSON 파일 경로.
+    """
+    dump_dir = SUMMARY_LOG.parent  # logs/
+    dump_dir.mkdir(parents=True, exist_ok=True)
+    path = dump_dir / f"triage_classifications_{datetime.now().strftime('%Y%m%d')}.json"
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps({"written_at": datetime.now().isoformat(timespec="seconds"),
+                            "rows": rows}, ensure_ascii=False) + "\n")
+    return str(path)
+
+
+def _record_classifications_db(rows: list[dict]) -> None:
+    """분류 결과를 ops.db triage_classifications 테이블에 기록 (Phase 69 W4).
+
+    dry-run 여부와 무관하게 DB 실재화는 수행한다 (텔레그램 발송만 dry_run으로 억제).
+    실패 시 예외를 던져 조용한 실패를 방지한다 — 호출부에서 텔레그램/JSON 경로와 격리.
+    """
+    from ops_dashboard import db as ops_db
+
+    # Phase 69 W4.5: run_id로 묶어 '최신 1회분만' 유지 — 반복 실행 누적 차단.
+    # 기존 기록을 삭제하고 현재 run 행만 삽입하므로 건수는 실행 간 누적되지 않는다.
+    run_id = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    conn = ops_db.get_conn()
+    ops_db.init_db(conn)
+    try:
+        ops_db.replace_triage_classifications(conn, run_id=run_id, rows=rows)
+    finally:
+        conn.close()
+
+
 def run_triage(dry_run: bool = True) -> str:
     """트리아지 실행 → 요약 보고서 반환."""
     engine = TriageEngine(load_triage_rules(TRIAGE_RULES_PATH))
@@ -709,6 +774,11 @@ def run_triage(dry_run: bool = True) -> str:
     # 1. 대시보드 data에서 attention/fail_checks 수집
     dashboard = fetch_dashboard_data()
     attention = dashboard.get("attention", {})
+
+    # W5-2: /api/registry의 rules/errors로 rule_id→problem_id 역방향 매핑 구성.
+    # 구조 필드가 있는 개별행(rule_id 채워짐)을 구조적으로 분류하기 위한 조인 안전망.
+    # registry를 못 받거나 비면 {} — 폴백으로 안전 동작.
+    registry_map = _build_registry_map(dashboard.get("registry"))
 
     # ⚠ G3-fix: 서버 장애 감지 — 데이터 취득 실패는 silent_skip이 아니라 사람 호출
     # fetch_dashboard_data()가 {"error": ...}를 반환한 엔드포인트가 전부이면
@@ -745,15 +815,10 @@ def run_triage(dry_run: bool = True) -> str:
         check_name = item.get("check_name", "")
         pattern = item.get("pattern", "")
 
-        # 1. 패턴 기반으로 problem_id 판별
-        problem_id = _pattern_to_problem_id(pattern)
-        if not problem_id:
-            # 패턴으로 판별 안 되면 check_name 기반으로
-            problem_id = _check_name_to_problem_id(check_name)
-
-        if not problem_id:
-            # 둘 다 안 되면 unknown_failure
-            problem_id = "unknown_failure"
+        # W5-2: 구조 필드(problem_id/rule_id) 우선 + 자유텍스트 폴백.
+        # 구조 필드가 없으면 기존 _pattern_to_problem_id/_check_name_to_problem_id로
+        # 폴백하므로 분류 결과는 W5 전 baseline과 동일하게 유지된다.
+        problem_id = _resolve_problem_id(item, registry_map)
 
         ctx = {
             "keyword": item.get("keyword", ""),
@@ -765,6 +830,11 @@ def run_triage(dry_run: bool = True) -> str:
             "insufficient_products": item.get("insufficient_products", False),
             "irrelevant_products": item.get("irrelevant_products", False),
             "check_name": check_name,
+            # W5-2: 구조 필드를 engine 분류에도 실어 전달 (향후 W6에서 사용).
+            "rule_id": item.get("rule_id", ""),
+            "problem_id": item.get("problem_id", ""),
+            "severity": item.get("severity", ""),
+            "action": item.get("action", ""),
         }
         engine.triage_notification(problem_id, blog_id, ctx)
 
@@ -829,6 +899,15 @@ def run_triage(dry_run: bool = True) -> str:
     engine_summary = engine.summary  # dict
     summary_text = engine.generate_summary()  # string
 
+    # Phase 69 W4: 분류 결과 DB/JSON 실재화 (기존 출력은 그대로 유지, 추가만)
+    try:
+        cls_rows = _classification_rows(engine)
+        _record_classifications_db(cls_rows)
+        json_path = _write_classifications_json(cls_rows)
+        print(f"[W4] triage classifications recorded: {len(cls_rows)} rows (json={json_path})")
+    except Exception as e:  # noqa: BLE001 — 실패해도 기존 알림 경로는 중단하지 않는다
+        print(f"[W4] classification persist failed: {e}")
+
     # 로깅
     log_line = f"[{datetime.now().isoformat(timespec='seconds')}] 트라이아지 완료: 총{engine_summary['total_alerts']}건, 자동처리{engine_summary['auto_handled']}건, 사람호출{engine_summary['escalated']}건\n"
     log_line += summary_text
@@ -861,6 +940,64 @@ def _check_name_to_problem_id(check_name: str) -> str | None:
         "gsd_crosscheck": "unknown_failure",
     }
     return mapping.get(check_name)
+
+
+def _build_registry_map(registry_data: dict | None) -> dict:
+    """/api/registry 응답 → rule_id→problem_id 매핑 구성 (Phase 69 W5-2).
+
+    fail_check item의 `rule_id`를 구조적으로 problem_id로 대응시키기 위한 역방향
+    매핑. 단일 출처는 `ops_dashboard/registry/rules.py`의 **선언적 `RULE_TO_PROBLEM`**
+    (W6-a) — R01~R12 규칙이 위반되면 `standard_compliance` 문제분류로 대응된다.
+    이를 1차로 채우고, registry 응답의 rule/error id 동일성 매칭으로 추가 대응을
+    병합한다 (안전망).
+
+    registry 모듈을 못 읽으면 기존 id 동일성 매칭만 사용하고, 그마저 없으면 `{}`
+    반환 — 폴백으로 안전 동작. 폴백 파서(_pattern_to_problem_id 등)는 W6-b 제거 전까지
+    유지한다.
+    """
+    mapping: dict[str, str] = {}
+    # W6-a: 선언적 rule↔problem 대응을 단일 출처로 사용.
+    try:
+        from ops_dashboard.registry.rules import RULE_TO_PROBLEM
+
+        mapping.update(RULE_TO_PROBLEM)
+    except Exception:  # noqa: BLE001 — registry 미가용 시 id 동일성 매칭으로 안전 폴백.
+        pass
+    # 안전망: registry 응답의 rule id가 error id와 동일하면 그대로 대응.
+    if registry_data:
+        rules = registry_data.get("rules") or []
+        error_ids = {e.get("id") for e in (registry_data.get("errors") or [])}
+        for r in rules:
+            rid = r.get("id")
+            if rid and rid in error_ids:
+                mapping[rid] = rid
+    return mapping
+
+
+def _resolve_problem_id(item: dict, registry_map: dict) -> str:
+    """fail_check item → problem_id (구조 필드 우선 + 자유텍스트 폴백, Phase 69 W5-2).
+
+    우선순위:
+      1. `item.problem_id` 가 있으면 그대로 사용.
+      2. `item.rule_id` 가 있고 registry_map에 대응 problem_id가 있으면 사용.
+      3. 둘 다 없으면 기존 자유텍스트 폴백: _pattern_to_problem_id →
+         _check_name_to_problem_id → unknown_failure.
+
+    폴백 체인은 W6까지 제거하지 않는다 (레거시 응답 하위호환).
+    """
+    pid = (item.get("problem_id") or "").strip()
+    if pid:
+        return pid
+    rid = (item.get("rule_id") or "").strip()
+    if rid and registry_map.get(rid):
+        return registry_map[rid]
+    pid = _pattern_to_problem_id(item.get("pattern", ""))
+    if pid:
+        return pid
+    pid = _check_name_to_problem_id(item.get("check_name", ""))
+    if pid:
+        return pid
+    return "unknown_failure"
 
 
 def _pattern_to_problem_id(pattern: str) -> str | None:
