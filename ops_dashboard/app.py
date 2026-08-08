@@ -494,11 +494,18 @@ def _register_api_routes(app: Flask) -> None:
     @app.route("/api/registry")
     @require_auth
     def api_registry():
-        """통합 레지스트리 뷰 (Phase 69 W5-3): 규칙 + 오류선언 + 실데이터를 단일 스키마로 노출."""
+        """통합 레지스트리 뷰 (Phase 69 W5-3): 규칙 + 오류선언 + 실데이터를 단일 스키마로 노출.
+
+        쿼리 파라미터:
+            blog_id — 지정 시 해당 블로그의 check_results만 대상으로 필터링.
+                      미지정 시 모든 블로그 대상 (기존 동작).
+        """
+        from flask import request as _request
+        blog_id = _request.args.get("blog_id") or None
         conn = _get_db()
         _ensure_db(conn)
         from ops_dashboard.db import get_registry_view
-        return jsonify(get_registry_view(conn))
+        return jsonify(get_registry_view(conn, blog_id=blog_id))
 
 
 # ---------------------------------------------------------------------------

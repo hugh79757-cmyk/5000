@@ -949,7 +949,7 @@ def replace_triage_classifications(
     conn.commit()
 
 
-def get_registry_view(conn: sqlite3.Connection) -> dict:
+def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> dict:
     """단일 엔드포인트 /api/registry용 통합 뷰 (Phase 69 W5-3).
 
     규칙(개별 R 행 + registry 선언)과 오류분류(triage_classifications 최신 +
@@ -957,15 +957,112 @@ def get_registry_view(conn: sqlite3.Connection) -> dict:
     status/severity/action/evidence) 한계를 넘어 rule_id/problem_id 구조 필드까지
     포함한다.
 
+    **경로 Y (자연어 detail 문자열만 존재)**: check_standard_compliance는 통과한
+    규칙의 개별 행을 생성하지 않으므로, R01~R11 등 통과 규칙이 UI상 unknown으로
+    보이는 문제가 있었다. 또한 stale fail 행이 남아있으면 실제 현재는 pass인데도
+    fail로 표시된다.
+
+    이 수정:
+      1. blog_id 파라미터 지원 — 해당 블로그의 check_results만 대상으로 함.
+         api_registry가 ?blog_id=xxx를 받으면 그 블로그 기준으로 필터링.
+      2. 최신 standard_compliance aggregate 행의 detail을 파싱해, 통과한 규칙은
+         pass로, 실패한 규칙은 fail로 표시한다. 파싱 실패·애매한 경우 현행 폴백
+         (row status 또는 unknown)을 유지해 fail을 pass로 오판하지 않는다.
+      3. check_results 데이터에는 write하지 않는다 (SELECT-only).
+
     반환:
         {"rules": [entry...], "errors": [entry...]}
     각 entry 스키마:
         id, kind, target, status, severity, action, evidence,
         rule_id, problem_id, bucket, threshold
     """
+    import re as _re
     from ops_dashboard.registry import by_kind
 
-    def _rule_entry(e, row):
+    _RULE_ID_RE = _re.compile(r"\bR\d{2}\b(?=\()")       # R04(MAJOR) → R04
+    _ALL_PASS_RE = _re.compile(r"^All\s+\d+\s+rules passed$")  # All 14 rules passed
+    _RULES_FAILED_RE = _re.compile(
+        r"(\d+)/\d+\s+rules failed:\s*(.+)$", _re.DOTALL
+    )  # "2/14 rules failed: R04(...); R12(...)"
+
+    def _parse_failed_rule_ids(detail: str) -> set[str]:
+        """detail 문자열에서 실패한 rule_id 집합 추출.
+
+        형식: 'N/M rules failed: R04(MAJOR): desc; R12(MAJOR): desc'
+        safety: 파싱 실패 시 빈 집합 반환 → 호출 측에서 pass 승격을 하지 않음.
+        """
+        if not detail:
+            return set()
+        try:
+            m = _RULES_FAILED_RE.search(detail)
+            if not m or not m.group(2):
+                return set()
+            return set(_RULE_ID_RE.findall(m.group(2)))
+        except Exception:
+            return set()
+
+    def _determine_rule_status_from_aggregate(rule_id: str, sc_row: dict) -> str | None:
+        """표준준수 aggregate 기준으로 특정 rule_id의 상태 결정.
+
+        반환:
+            "pass"  — aggregate가 pass이고 rule_id가 통과로 판단됨
+            "fail"  — aggregate가 fail이고 rule_id가 실패 목록에 있음
+            None    — 결정 불가 (폴백으로 넘김)
+        """
+        if not sc_row:
+            return None
+        status = sc_row.get("status", "")
+        detail = sc_row.get("detail", "")
+
+        # case 1: 전체 통과
+        if status == "pass" and _ALL_PASS_RE.match(detail):
+            return "pass"
+
+        # case 2: 실패 있음 — rule_id가 실패 목록에 있으면 fail, 없으면 pass
+        if status == "fail":
+            failed_ids = _parse_failed_rule_ids(detail)
+            if failed_ids:
+                if rule_id in failed_ids:
+                    return "fail"
+                # 실패 목록에 없는 rule_id → 통과한 것으로 판단 → pass
+                return "pass"
+            # 파싱 실패 (failed_ids 빈 집합) → 확실하지 않음 → 폴백
+            return None
+
+        # status unknown 등 기타 → 폴백
+        return None
+
+    def _rule_evidence(rule_id: str, row: dict | None, determined: str | None) -> str:
+        """rule별 evidence 문자열.
+
+        aggregate로 상태가 결정됐으면 rule별 행이 없을 수 있으므로,
+        그 경우 aggregate detail을 축약해 사용.
+        """
+        if row:
+            return row.get("evidence_url") or row.get("detail") or ""
+        # 행 없음 + aggregate 판정됨 → aggregate 정보 축약
+        if determined == "pass":
+            return "표준준수 aggregate 통과 (개별 행 없음)"
+        return ""
+
+    def _rule_entry(e, row, sc_row=None):
+        determined = _determine_rule_status_from_aggregate(e.id, sc_row)
+        if determined is not None:
+            # aggregate 기준으로 상태 결정 (경로 Y)
+            return {
+                "id": e.id,
+                "kind": "rule",
+                "target": e.target,
+                "status": determined,
+                "severity": e.severity,
+                "action": e.action,
+                "evidence": _rule_evidence(e.id, row, determined),
+                "rule_id": e.id,
+                "problem_id": "",
+                "bucket": e.bucket,
+                "threshold": e.threshold,
+            }
+        # 폴백: 기존 로직 (확정된 개별 행이 있으면 그 status, 없으면 unknown)
         return {
             "id": e.id,
             "kind": "rule",
@@ -995,17 +1092,35 @@ def get_registry_view(conn: sqlite3.Connection) -> dict:
             "threshold": e.threshold,
         }
 
+    # blog_id 필터용 WHERE 절 접미사
+    blog_filter = ""
+    if blog_id:
+        blog_filter = " AND blog_id = ?"
+        _blog_id_param = (blog_id,)
+    else:
+        _blog_id_param = ()
+
+    def _latest_check(check_name: str) -> dict | None:
+        sql = (
+            f"SELECT status, detail, evidence_url FROM check_results "
+            f"WHERE check_name = ?{blog_filter} "
+            f"ORDER BY checked_at DESC LIMIT 1"
+        )
+        params = (check_name,) + _blog_id_param if blog_filter else (check_name,)
+        row = conn.execute(sql, params).fetchone()
+        return dict(row) if row else None
+
+    # standard_compliance aggregate 최신 1행 미리 조회 (모든 rule에 공통 사용)
+    sc_row = _latest_check("standard_compliance")
+
     rules = []
     for e in by_kind("rule"):
-        row = conn.execute(
-            "SELECT status, detail, evidence_url FROM check_results "
-            "WHERE check_name = ? ORDER BY checked_at DESC LIMIT 1",
-            (e.id,),
-        ).fetchone()
-        rules.append(_rule_entry(e, row))
+        row = _latest_check(e.id)
+        rules.append(_rule_entry(e, row, sc_row))
 
     errors = []
     for e in by_kind("error"):
+        # triage_classifications는 blog_id 필터 대상 아님 (전역 분류 테이블)
         row = conn.execute(
             "SELECT classification, severity, action, target, source, detail "
             "FROM triage_classifications WHERE problem_id = ? "
