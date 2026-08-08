@@ -877,10 +877,19 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 1. **백업**: 코드 수정 전 `git tag pre-<작업명>-<YYYYMMDD>` + DB 관련 시 `cp data/<db>.db data/<db>.db.bak_<YYYYMMDD>`. 백업 없이 수정 금지.
 2. **로컬 Hugo 빌드 0에러**: `HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify --source /경로/블로그`. 에러 있으면 중단·롤백.
 3. **배포**: `dispatcher.py`로 블로그별 1회 배포. 수동 wrangler·`--commit-dirty=true`·git push 금지. Workers 블로그(health/pet/kitchen/beauty/camping/baby)는 `wrangler deploy --config wrangler.toml`, 그 외 Pages는 `wrangler pages deploy` — dispatcher.py가 자동 구분.
-4. **재검증**: `/api/registry`에서 해당 rule_id status가 `"fail"` → `"pass"` 또는 `"unknown"`(체크 미실행) 전환 확인. FAIL→PASS 확인 없이 완료 보고 금지.
-5. **로그**: 파괴적 작업 포함 시 `logs/destructive_YYYY-MM-DD.log`에 한 줄 append. 민감정보 마스킹.
+4. **재검사 트리거 (필수, 누락 금지)**: 코드 수정·배포 후 화면이 갱신되려면 반드시 수동 재검사 호출이 필요하다. 대시보드에는 자동 재검사 스케줄이 없으므로, **POST /api/run-checks?blog_id={blog_id}**(개별 블로그) 또는 **POST /api/run-checks**(전체)를 호출하지 않으면 `/api/registry`·`/api/attention`·블로그 상세 페이지에 수정 결과가 반영되지 않는다.
+   - 개별 블로그 FIX 후: `curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" "http://localhost:5060/api/run-checks?blog_id={blog_id}"` → 반환 직후 check_results 갱신. 그 다음에 `/api/registry` status 확인.
+   - 정비 체크리스트 항목(M01~M10) FIX 후: `curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" -H "Content-Type: application/json" -d "{\"blog_id\":\"{blog_id}\"}" "http://localhost:5060/api/maintenance/checklist"` → 정비 체크리스트 재실행.
+   - **경고**: 이 호출 없이는 FAIL→PASS를 확인할 수 없다. 체크 결과를 "믿고" 완료 보고하는 것은 금지.
+5. **재검증 FAIL→PASS 확인**: 재검사 트리거 호출 후 `/api/registry`에서 해당 rule_id의 status가 `"fail"` → `"pass"` 또는 `"unknown"`(체크 미실행 상태로 전환)으로 바뀌었는지 확인. 예: R04 fix 후 `/api/registry` → R04 status=`"pass"`, evidence에 `"extend_head: GA4 + mobile CSS found"` 등. **FAIL→PASS 확인 없이 완료 보고 금지.**
+6. **로그**: 파괴적 작업 포함 시 `logs/destructive_YYYY-MM-DD.log`에 한 줄 append. 민감정보 마스킹.
 
-게이트 실패 시: 빌드 에러 → 원복구(git checkout 또는 백업 복원) 후 재구성. 배포 실패 → dispatcher 로그 확인, 재시도 금지. 재검증 여전히 FAIL → action 오류 또는 추가 문제 — 사용자 보고 후 진행.
+게이트 실패 시: 빌드 에러 → 원복구(git checkout 또는 백업 복원) 후 재구성. 배포 실패 → dispatcher 로그 확인, 재시도 금지. 재검증 여전히 FAIL → action이 잘못됐거나 추가 문제 — 사용자 보고 후 진행. **재검사 트리거를 호출하지 않은 상태에서 "FAIL→PASS 예상"으로 완료 보고하는 것은 게이트 위반.**
+
+#### C.1.2.1 자동 갱신 대기의 STOP 조건
+
+- 현재 대시보드는 **자동 재검사 스케줄이 없다**. "배포했으니 잠시 후 화면이 갱신되길 기다린다"는 계획은 STOP 조건 (e): 목표 상태가 증거 기반으로 특정되지 않음 + "자동 갱신이 언제 올지 불명"에 해당. 에이전트는 재검사를 명시적으로 직접 호출해야 하고, 호출 전까지 화면 상태를 "확정된 것"으로 취급하지 않는다.
+- 재검사 트리거 후에도 FAIL이 유지되면, 재시도 무한루프는 금지. 원인 귀속 후 진행(코드 수정 재시도 vs action 오류 판단).
 
 #### C.1.3 STOP 조건 (공통, 실행 에이전트 필수 체크)
 
@@ -916,6 +925,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) hugo.toml 외의 파일이 변경됨 → 중단
   - (d) R01 외에 다른 rule_id까지 fail로 변함 → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 대시보드에는 자동 재검사 스케줄 없음 — 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면을 갱신한 뒤 재검증해야 함. 자동 갱신을 기다리는 계획은 STOP.
 - **검증**: `/api/registry` R01 status = `pass` (또는 `unknown`).
 - **비가역 플래그**: 없음.
 
@@ -932,8 +942,9 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - ❌ layouts, 콘텐츠, 다른 설정 파일. 슬롯 ID 자체를 악의적으로 바꾸지 말 것(실제 존재하는 슬롯인지 확인).
 - **사용자 결정지점**: 슬롯 ID가 실제 AdSense 계정에 존재하는지 확인이 필요할 때 1회.
 - **STOP 조건**:
-  - (a) hugo.toml 외 파일 변경 → 중단
-  - (d) R02 수정 후 R03/R06 등 연관 광고 규칙이 예상과 다르게 변함 → 중단·보고
+   - (a) hugo.toml 외 파일 변경 → 중단
+   - (d) R02 수정 후 R03/R06 등 연관 광고 규칙이 예상과 다르게 변함 → 중단·보고
+   - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R02 status = `pass`.
 - **비가역 플래그**: 없음. 단, publisher ID 변경은 수익 영향 → 변경 전 계열 매핑 확인 필수.
 
@@ -952,6 +963,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) extend-head.html 외 파일 변경 → 중단
   - (f) params.toml 광고 설정을 레시피 의도와 다르게 삭제/변경 → 중단 (의도: 하드코딩 제거 + 사이트.Params 참조. 설정값 자체를 없애는 것 아님.)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R03 status = `pass` (또는 체크 방식상 `unknown`로 전환).
 - **비가역 플래그**: 없음. 단, informationhot의 이중 관리 해소는 STRUCT-15 연계 → 변경 전 확인.
 
@@ -972,6 +984,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - (a) extend_head.html 외 파일 변경 → 중단
   - (e) 측정 ID가 제공되지 않았고 에이전트가 임의로 추정 생성하려 함 → 중단·보고 (추정 금지)
   - (d) R04 수정 후 R03/R17(STRUCT-17 연계) 등 상태 이상 변화 → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R04 status = `pass`.
 - **비가역 플래그**: 없음. 단, GA4 측정 ID 변경은 추적 단절 → 기존 ID가 있으면 재사용, 없으면 신규 생성 결정은 사람.
 
@@ -990,6 +1003,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) top.html 외 파일 변경 → 중단
   - (b) 1파일 기대인데 다수 파일 diff → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R05 status = `pass`.
 - **비가역 플래그**: 없음.
 
@@ -1011,6 +1025,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - (b) 1블로그 1파일 기대인데 여러 파일/블로그가 한 번에 변경됨 → 중단·보고 (레시피는 블로그별 1파일. 일괄이 필요하면 별도 승인.)
   - (e) 목표 상태가 evidence로 특정되지 않음 — 예: "fluid가 뭔지 모호" → 중단. 이 레시피에서는 "data-ad-format=fluid + data-ad-layout=in-article + push div 밖"으로 특정됨 → 통과.
   - (d) R06 수정 후 R05/R11/R12 등 인접 규칙 상태 이상 변화 → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R06 status = `pass` + 동일 블로그의 R05·R11·R12 무영향 확인.
 - **비가역 플래그**: 없음(파일 내용 수정). 단, AdSense 슬롯 실제 동작은 외부 의존 → 라이브에서 blank 광고 발생 시 별도 조사.
 
@@ -1029,6 +1044,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) single.html 외 파일 변경 → 중단
   - (b) 예상 1파일 변경인데 다수 템플릿이 영향받음 → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R07 status = `pass`.
 - **비가역 플래그**: 없음.
 
@@ -1047,6 +1063,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) single.html 외 파일 변경 → 중단
   - (e) "lead"가 어떤 요소인지 특정 안 됨 → 중단·보고 (이 레시피는 .Lead/.Description 클래스명으로 특정)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R08 status = `pass`.
 - **비가역 플래그**: 없음.
 
@@ -1065,6 +1082,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) baseof.html 외 파일 변경 → 중단
   - (e) "불필요한 오버라이드" 범위가 애매 → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R09 status = `pass`.
 - **비가역 플래그**: 없음(삭제). 단, 삭제 후 실제 사이트에 필요한 오버라이드였으면 복원 필요 → 삭제 전 diff 기억.
 
@@ -1083,6 +1101,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) custom.css 외 파일 변경 → 중단
   - (b) CSS 생성이 여러 파일로 번짐 → 중단·보고 (1파일 생성 기대)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R10 status = `pass`.
 - **비가역 플래그**: 없음.
 
@@ -1100,6 +1119,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (a) mobile-sticky.html 외 파일 변경 → 중단
   - (f) 삭제 대신 비활성화만 하려는 시도가 범위를 넘는지 확인 (이 레시피는 삭제 지향; 다른 방식의 비활성화는 별도 검토)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R11 status = `pass`.
 - **비가역 플래그**: 없음(삭제). 단, 삭제 후 필요하면 재생성 가능.
 
@@ -1119,6 +1139,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - (a) 허용 집합 내 파일이 diff에 포함됨 → 중단
   - (b) junk 정리가 여러 디렉터리로 번짐 → 중단·보고 (레시피는 layouts/ 내 junk만)
   - (e) "허용 집합" 기준 불명확 → 중단·보고 (이 경우 standard.py의 허용 목록을 먼저 확인)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R12 status = `pass`.
 - **비가역 플래그**: 없음(삭제). 단, 삭제 전 어떤 파일을 지웠는지 기록(복원 가능하게).
 
@@ -1139,6 +1160,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - (a) featureimage 외 필드/파일 변경 → 중단
   - (b) 1포스트 기대인데 여러 포스트가 한 번에 변경됨 → 중단·보고 (레시피는 포스트별 1건. 일괄이 필요하면 별도 승인.)
   - (f) featureimage를 R2 URL로 바꾸면서 원본 이미지를 삭제/덮어쓰는 행위 → 중단 (원본 보존이 전제)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` THUMBNAIL-01 status = `pass` + 해당 포스트 featureimage가 R2 webp URL인지 확인.
 - **비가역 플래그**: 없음(URL 치환). 단, 원본 이미지 소실 시 재업로드가 필요해지면 작업 범위 확대 → 그때 B 유지.
 
@@ -1162,6 +1184,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - (b) 예상 변경 건수(예: 7건)를 초과해 다수 포스트·이미지가 변경됨 → 중단·보고
   - (f) 이미지 원본을 삭제/변환/덮어쓰는 행위 → 중단 (URL 치환만 허용)
   - (e) "본문 이미지" 범위가 불명확(예: 어떤 마크업이 이미지인지 식별 곤란) → 중단·보고 (이 레시피는 `![...](url)`와 HTML `<img src=>`를 이미지로 본다; 그 외 애매하면 정지)
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` R2-01 status = `pass` + 해당 포스트의 featureimage·본문 이미지 URL이 모두 R2 도메인인지 확인.
 - **비가역 플래그**: 없음(URL 치환). 단, 원본 이미지가 실제로 R2에 없으면 재업로드가 수반되고, 그때는 작업 범위가 늘어나므로 B 유지.
 
@@ -1249,6 +1272,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - (a) featureimage 외 변경 → 중단
   - (f) 원본 이미지 삭제/변형 → 중단
   - (e) 썸네일이 왜 깨졌는지(URL 오류·R2 부재·경로 정책) 특정 안 됨 → 중단·보고
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/registry` THUMBNAIL-01·R2-01 관련 상태 + featureimage URL HTTP 200 확인.
 - **비가역 플래그**: 없음(원본 보존 전제).
 
@@ -1292,6 +1316,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (e) "누출"이 어떤 내용인지 특정 안 됨 → 중단·보고
   - (a) 허용 범위(프롬프트·검사)를 벗어나 콘텐츠 본문을 임의 수정 → 중단
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: leak 스캔 통과 + 동일 유형 재발 없음.
 - **비가역 플래그**: 없음. 단, 프롬프트 변경은 글쓰기 품질에 영향 → 변경 전 확인.
 
@@ -1308,6 +1333,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (e) known issue의 목표 상태가 불명확 → 중단·보고
   - (a) 허용 범위를 벗어난 조치 → 중단
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: `/api/attention`·`/api/registry`에서 해당 issue/status 변화 확인.
 - **비가역 플래그**: 이슈별 다름 — STRUCT-11/12/13 등 DB 관련은 C.4로.
 
@@ -1324,6 +1350,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **STOP 조건**:
   - (e) "끊긴 링크" 범위가 특정 안 됨 → 중단·보고
   - (a) 허용 범위(엔티티 링크)를 벗어나 콘텐츠 본문 임의 수정 → 중단
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
 - **검증**: 엔티티 링크 검사 통과 + 404 없음.
 - **비가역 플래그**: 없음(링크 교체/제거). 단, 엔티티 재등록은 콘텐츠·DB 변경 수반 가능 → 그때 별도 검토.
 
@@ -1342,6 +1369,19 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 | **DB 대량 INSERT (run_sync류, 소스 전체 재삽입)** | 이미 발생한 STRUCT-11 류의 재발 가능 | 백업 + 영향 카운트 + 스케줄러 정지 + 사용자 승인 |
 
 > 공통 규칙: 비가역군이 "해체"되려면, 해당 항목을 담당하는 별도 웨이브에서 (1) 사전 카운트/영향 범위 출력, (2) 백업/롤백 수단 확보, (3) 사용자 승인, (4) 사후 대조를 모두 거친 뒤에야 실행 가능하다. 이 레시피북의 그 어떤 A/B 등급 레시피도 위 항목을 우회하지 않는다.
+
+### C.4.1 재검사 트리거 — 수동 갱신 전제 (공통)
+
+> 2026-08-08 추가. 대시보드에 자동 재검사 스케줄이 없어, FIX·배포 후 화면이 갱신되려면 반드시 수동 호출이 필요하다.
+
+- **대시보드 상태**: 현재 Ops 대시보드(`http://localhost:5060`)에는 자동 재검사 스케줄이 없다. 코드 수정·배포 후 `/api/registry`·`/api/attention`·블로그 상세 페이지의 check_results는 **자동으로 갱신되지 않는다.**
+- **필수 수동 호출**:
+  - 개별 블로그 FIX 후: `POST /api/run-checks?blog_id={blog_id}` — curl 또는 HTTP 클라이언트. 반환 직후 check_results 갱신.
+  - 정비 체크리스트(M01~M10) FIX 후: `POST /api/maintenance/checklist` + JSON body `{"blog_id":"{blog_id}"}`.
+  - 전체 재검사: `POST /api/run-checks` (blog_id 없이).
+- **경고**: 이 호출 없이는 FAIL→PASS를 확인할 수 없다. "배포했으니 잠시 후 화면이 갱신되길 기다린다"는 계획은 STOP 조건 (e)에 해당. 에이전트는 재검사를 명시적으로 직접 호출해야 하고, 호출 전까지 화면 상태를 "확정된 것"으로 취급하지 않는다.
+- **UI 부재**: 현재 Ops 대시보드 화면에는 위 세 API를 트리거하는 버튼·폼·JS가 없다. "마스터 갱신 버튼"은 존재하지 않음 — curl로만 호출 가능. UI 버튼 추가는 별도 작업(추가 지점: `ops_dashboard/templates/index.html`에 전체 재검사 폼, `blog.html`에 개별 재검사·정비용 fetch JS 버튼).
+- **재검사 트리거 후 검증**: 호출 직후 `/api/registry`에서 해당 rule_id status가 `"fail"` → `"pass"` 또는 `"unknown"`으로 전환됐는지 확인. FAIL→PASS 확인 없이 완료 보고 금지.
 
 ### C.5 매뉴얼 시뮬레이션 증명 (문서화 목적, 실제 수정 없음)
 
