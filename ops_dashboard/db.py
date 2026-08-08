@@ -874,14 +874,23 @@ def record_check(
 
     Phase 69 W2: rule_id/problem_id/severity/action 선택 파라미터는 기본값 None —
     기존 호출(새 인자 없이)은 그대로 동작하고, 새 파라미터가 주어지면 해당 컬럼에 기록한다.
+
+    UPSERT: 동일 (blog_id, check_name)의 기존 행을 먼저 삭제 후 INSERT하여
+    재검사 시마다 행이 누적되는 것을 방지한다 (웨이브3).
+    checked_at은 Python local time ISO 8601로 기록 (SQLite UTC 아님).
     """
+    from datetime import datetime
+    now_iso = datetime.now().isoformat()
+    conn.execute("""
+        DELETE FROM check_results WHERE blog_id = ? AND check_name = ?
+    """, (blog_id, check_name))
     conn.execute("""
         INSERT INTO check_results
             (blog_id, check_name, status, detail, evidence_url,
-             rule_id, problem_id, severity, action)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             rule_id, problem_id, severity, action, checked_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (blog_id, check_name, status, detail, evidence_url,
-          rule_id, problem_id, severity, action))
+          rule_id, problem_id, severity, action, now_iso))
     conn.commit()
 
 
