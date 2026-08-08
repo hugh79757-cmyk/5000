@@ -474,6 +474,83 @@ def _check_r12(site: Path) -> tuple[bool, str]:
 
 
 # ---------------------------------------------------------------------------
+# THUMBNAIL-01: 썸네일 존재·600×600·webp·R2 업로드 여부 검사 (W7-b 추가)
+# ---------------------------------------------------------------------------
+# W7-b: THUMBNAIL-01은 rules.py RULES에 선언만 추가하고,
+# _CHECK_FUNCTIONS 및 STANDARD_RULES에는 추가하지 않는다 —
+# W7-a 보강 A/B로 registry → 동적 디스패치 경로가 열렸기 때문.
+# 대상: 5000 중앙 파이프라인 발행(구 curation) 블로그의 content/posts/ 내 포스트.
+# 판정: 최근 포스트(최대 10개) 중 featureimage가 있는 포스트 전부 R2 + webp면 pass,
+#       R2가 아닌 URL 또는 webp가 아닌 URL이 1건이라도 있으면 fail.
+#       featureimage가 없는 포스트(누락)는 썸네일 규칙 위반이 아니라 별도 집계만 한다.
+# ---------------------------------------------------------------------------
+
+_R2_PATTERN = re.compile(r"pub-[0-9a-f]+\.r2\.dev")
+
+
+def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
+    """THUMBNAIL-01: 최근 포스트의 featureimage가 R2 업로드 + webp인지 검사.
+
+    Hugo 사이트 content/posts/ 내 최근 10개 포스트의 index.md frontmatter에서
+    featureimage를 추출해 다음 조건을 전부 만족하는지 확인:
+      - URL이 R2 도메인에 호스팅됨 (pub-<hash>.r2.dev 패턴)
+      - URL이 .webp로 끝남
+    조건 미충족 URL이 1건이라도 있으면 fail, 전부 충족 또는 featureimage 없는
+    포스트만 있으면 pass. featureimage가 아예 없는 포스트 수는 detail에 집계한다.
+    """
+    posts_dir = site / "content" / "posts"
+    if not posts_dir.is_dir():
+        return False, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님"
+
+    posts = sorted(posts_dir.iterdir())[-10:]  # 최근 10개 (디렉토리명 역순 아님 — 알파벳순 최근)
+    if not posts:
+        return True, "포스트 없음 — 검사 대상 없음 (pass)"
+
+    valid_count = 0
+    invalid_entries = []
+    missing_count = 0
+
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        m = re.search(r"featureimage:\s*[\"']?([^\"'\n]+)[\"']?", content)
+        if not m or not m.group(1).strip():
+            missing_count += 1
+            continue
+        url = m.group(1).strip()
+        is_r2 = bool(_R2_PATTERN.search(url))
+        is_webp = url.lower().endswith(".webp")
+        if is_r2 and is_webp:
+            valid_count += 1
+        else:
+            reason = []
+            if not is_r2:
+                reason.append("R2 아님")
+            if not is_webp:
+                reason.append("webp 아님")
+            invalid_entries.append(f"{post_dir.name}: {url} ({', '.join(reason)})")
+
+    total_checked = valid_count + len(invalid_entries)
+    if total_checked == 0:
+        return True, f"최근 {len(posts)}개 포스트 전부 featureimage 없음 (pass — 썸네일 위반 아님)"
+
+    if invalid_entries:
+        detail = (
+            f"썸네일 위반 {len(invalid_entries)}건 / 검사 {total_checked}건 "
+            f"(유효 {valid_count}, 누락 {missing_count}): "
+            + "; ".join(invalid_entries[:3])
+        )
+        if len(invalid_entries) > 3:
+            detail += f" 외 {len(invalid_entries) - 3}건"
+        return False, detail
+    return True, (
+        f"최근 {total_checked}건 전부 R2+webp 충족 (누락 {missing_count}건 — featureimage 없음)"
+    )
+
+
+# ---------------------------------------------------------------------------
 # Check dispatch
 # ---------------------------------------------------------------------------
 

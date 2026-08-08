@@ -142,6 +142,21 @@ RULES: list[UnifiedEntry] = [
         action="허용 집합을 벗어난 오버라이드 파일 없음",
         bucket="actionable",
     ),
+    # W7-b: THUMBNAIL-01 — 썸네일 존재·600×600·webp·R2 업로드 여부 검사.
+    # 표준.py의 _CHECK_FUNCTIONS 및 STANDARD_RULES에는 **추가하지 않음**.
+    # W7-a 보강 A/B로 registry RULES → _resolve_check_fn 동적 디스패치 경로가
+    # 열렸으므로, rules.py 선언 + standard.py _check_thumbnail_01 함수만으로
+    # check_standard_compliance() 순회에 자동 편입되는지 검증 대상.
+    UnifiedEntry(
+        id="THUMBNAIL-01",
+        kind="rule",
+        target="content/posts/*/index.md (frontmatter featureimage)",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_thumbnail_01",
+        action="featureimage를 R2(pub-<hash>.r2.dev) 호스팅 webp로 설정",
+        bucket="actionable",
+    ),
 ]
 
 # W6-a: rule↔문제분류(problem_id) 대응 선언.
