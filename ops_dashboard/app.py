@@ -453,11 +453,16 @@ def _register_api_routes(app: Flask) -> None:
     @app.route("/api/maintenance/checklist", methods=["POST"])
     @require_auth
     def api_maintenance_checklist_run():
-        """특정 블로그의 정비 체크리스트 실행"""
+        """특정 블로그의 정비 체크리스트 실행
+
+        JSON body({"blog_id": "..."}) 또는 form data(blog_id=...) 모두 수용.
+        JS fetch 호출(application/json)과 HTML form 제출을 모두 지원.
+        """
         conn = _get_db()
         _ensure_db(conn)
-        data = request.get_json(force=True)
-        blog_id = data.get("blog_id")
+        # JSON 우선, 없으면 form에서 추출 (JS fetch + HTML form 겸용)
+        data = request.get_json(silent=True) or request.form
+        blog_id = (data.get("blog_id") if isinstance(data, dict) else None)
         if not blog_id:
             return jsonify({"error": "blog_id required"}), 400
         from ops_dashboard.checks.maintenance import check_maintenance_checklist

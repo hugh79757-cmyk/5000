@@ -26,6 +26,14 @@
 {% if maintenance_checklist %}
 <h2>정비 체크리스트 ({{ maintenance_checklist|selectattr('status', 'equalto', 'pass')|list|length }}/{{ maintenance_checklist|length }} 통과)</h2>
 
+<!-- Refresh button -->
+<div style="margin-bottom:0.75rem">
+  <button id="btn-refresh-maintenance" data-blog-id="{{ blog.blog_id }}"
+          style="padding:0.4rem 0.9rem;border-radius:3px;border:1px solid var(--border,#ccc);cursor:pointer;background:#6c757d;color:white;font-size:0.9rem">
+    정비 체크리스트 재실행
+  </button>
+</div>
+
 <!-- Progress bar -->
 {% set pass_count = maintenance_checklist|selectattr('status', 'equalto', 'pass')|list|length %}
 {% set total = maintenance_checklist|length %}
