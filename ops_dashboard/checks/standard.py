@@ -546,7 +546,50 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
         # Telegram push disabled — will be re-enabled as daily summary in Part 3
 
     detail_parts = [f"{f['rule_id']}({f['severity']}): {f['detail']}" for f in failures]
+    # Phase 69 W3 — dual-write: 각 실패 규칙을 개별 행으로 추가 기록.
+    # aggregate 행(standard_compliance)은 run_all_checks가 기록하므로 여기서는
+    # 개별행(record_check_rule)만 추가한다. severity/action은 registry(rules.py)에서 조회.
+    #
+    # W6a.2 (Phase 69): 개별 행은 **활성 블로그만** 생성한다. 비활성/일시중지
+    # (dead/paused/excluded) 블로그까지 개별 행을 기록하면 get_attention_items의
+    # excluded_fail_checks가 개별 행만큼 부풀어(+70) excluded 오염이 발생한다.
+    # get_attention_items의 활성 판정(config_status=='active' and
+    # maintenance_status!='paused')과 동일 기준을 사용한다. aggregate 행은
+    # 호출부(run_all_checks)가 비활성 블로그 포함 전부 기록하므로 excluded 판정에
+    # 필요한 자유텍스트는 그대로 유지된다.
+    _is_active = (
+        blog_row.get("config_status") == "active"
+        and blog_row.get("maintenance_status") != "paused"
+    )
+    if _is_active:
+        _record_failed_rules(conn, blog_id, failures)
     return {
         "status": "fail",
         "detail": f"{len(failures)}/{len(passes) + len(failures)} rules failed: " + "; ".join(detail_parts[:5]),
     }
+
+
+def _record_failed_rules(conn, blog_id: str, failures: list) -> None:
+    """실패한 각 규칙을 check_results에 개별 행으로 기록 (dual-write).
+
+    severity/action은 ops_dashboard/registry/rules.py(RULES)에서 조회한다 —
+    레지스트리가 check 경로에서 처음 소비되는 지점. registry에 없는 규칙은 실패 목록의
+    severity만 사용하고 action은 빈 문자열로 둔다 (조용한 실패 금지).
+    """
+    from ops_dashboard.db import record_check_rule
+    from ops_dashboard.registry import get_entry
+
+    for f in failures:
+        rule_id = f["rule_id"]
+        entry = get_entry(rule_id)
+        severity = (entry.severity if entry else f.get("severity")) or "MAJOR"
+        action = entry.action if entry else ""
+        record_check_rule(
+            conn,
+            blog_id,
+            rule_id=rule_id,
+            status="fail",
+            severity=severity,
+            action=action,
+            detail=f.get("detail", ""),
+        )
