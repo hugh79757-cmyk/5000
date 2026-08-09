@@ -653,6 +653,18 @@ def _post_process(content):
         _cut_pos = _h2_positions[4]
         content = content[:_cut_pos].rstrip()
 
+    # ── 쿠팡 여행용품 추천 삽입 (후처리) ──────────────────────────────
+    try:
+        from shared.coupang_travel import CoupangTravel
+        _ct = CoupangTravel()
+        if _ct.is_configured():
+            _blog_id = getattr(_inject_entity_cards, "_current_blog_id", "travel-hugo")
+            _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=3)
+            if _coupang_html:
+                content = content.rstrip() + _coupang_html
+    except Exception as _ce:
+        logger.warning("쿠팡 여행용품 삽입 실패: %s", _ce)
+
     return content
 
 
@@ -664,7 +676,7 @@ def _inject_entity_cards(content):
     - 하단: 마지막 H2 섹션 끝에 1개 (없으면 중단과 통합)
     """
     import re as _re
-    from core.tap_entity_manager import _build_card_html, _fetch_candidates, _pick_two, _find_heading_ends
+    from core.tap_entity_manager import _build_card_html, _fetch_candidates, _pick_two
 
     candidates = _fetch_candidates("tap-blogger", "")
     selected = _pick_two(candidates)
@@ -673,59 +685,23 @@ def _inject_entity_cards(content):
 
     cards = [_build_card_html(s) for s in selected]
 
-    # H2 위치 수집
-    h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTODEINE)]
+    h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
     if not h2_positions:
         return content + "\n" + cards[0]
 
-    # 상단 카드: 첫 H2 앞에 삽입
     content = content[:h2_positions[0]] + cards[0] + "\n" + content[h2_positions[0]:]
 
-    # H2 위치 재계산 (상단 카드 삽입으로 내용 길이 변화)
     h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
 
     if len(selected) < 2 or len(h2_positions) < 3:
-        # 카드 1개만 있거나 H2가 2개 이하면 중간에 1개만 추가
         mid_idx = len(h2_positions) // 2
         content = content[:h2_positions[mid_idx]] + "\n" + cards[-1] + "\n" + content[h2_positions[mid_idx]:]
         return content
 
-    # 중단 카드: 중간 H2 앞에 삽입
     mid_idx = len(h2_positions) // 2
     content = content[:h2_positions[mid_idx]] + "\n" + cards[1] + "\n" + content[h2_positions[mid_idx]:]
 
     return content
-
-    # ── 쿠팡 여행용품 추천 삽입 (신규: get_product_cards → HTML 그리드) ──────────────────
-    try:
-        from shared.coupang_travel import CoupangTravel
-        _ct = CoupangTravel()
-        if _ct.is_configured():
-            _blog_id = getattr(_post_process, "_current_blog_id", "travel-hugo")
-            _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=3)
-            if _coupang_html:
-                content = content.rstrip() + _coupang_html
-    except Exception as _ce:
-        logger.warning("쿠팡 여행용품 삽입 실패: %s", _ce)
-
-    # CTA 제휴 박스 삽입
-    cta_html = """
-<div class="cta-box">
-  <p style="margin:0;font-size:1.1rem;">여행 숙소를 찾고 계신가요?</p>
-  <a href="https://kr.trip.com/?Allianceid=7451816&SID=283255449&trip_sub1=&trip_sub3=D14664967" target="_blank" rel="nofollow">트립닷컴에서 최저가 확인하기</a>
-</div>
-"""
-    content = content.rstrip() + "\n\n" + cta_html
-
-
-
-    # GPT가 생성한 인라인 네이버 지도 링크 제거 (마크다운 + blockquote 모두)
-    content = re.sub(r"\s*\[네이버 지도에서 보기\]\(https://map\.naver\.com[^)]*\)", "", content)
-    content = re.sub(r"^>\s*.*네이버 지도에서 보기.*$", "", content, flags=re.MULTILINE)
-    content = re.sub(r"^>\s*\[.*?\]\(https://map\.naver\.com[^)]*\)\s*", "", content, flags=re.MULTILINE)
-    content = re.sub(r"\s*지도에서\s*보기\s*", "", content)
-    return re.sub(r"\[네이버 지도에서 보기\]\(https://search\.naver\.com[^)]*\)", "", content)
-
 
 
 
@@ -1011,7 +987,7 @@ def generate_content(data, blog_id="travel-hugo"):
         "name": _first_item_name,
     }
 
-    prompt_result = build_prompt(prompt_id, data_block, extra_vars=extra_vars)
+    prompt_result = build_prompt(prompt_id, data_block, extra_vars=extra_vars, inject_samples=True, sample_category=source_type)
     system_prompt = prompt_result["system"]
     user_prompt = prompt_result["user"]
 
@@ -1212,11 +1188,12 @@ def generate_content(data, blog_id="travel-hugo"):
     import random as _rand
     templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES["travel-hugo"])
     # 1곳일 때 "{count}" 포함 템플릿 제외 (제목-본문 불일치 방지)
-    if _body_place_count <= 1:
-        _filtered = [t for t in templates if "{count}" not in t]
+    # _body_place_count 대신 len(items) 사용 — 본문 생성 전 결정 가능한 기준
+    if len(items) <= 1:
+        _filtered = [t for t in templates if "{count}" not in t and "{count}선" not in t]
         if _filtered:
             templates = _filtered
-    template = _rand.choice(templates)
+    template = _rand.choice(templates) if templates else TITLE_TEMPLATES.get(blog_id, [""])[0]
     # region/theme 빈값 보호
     if not display_region or len(display_region) < 2:
         display_region = data.get("display_region", data.get("region", "전국"))
@@ -1347,9 +1324,11 @@ def generate_content(data, blog_id="travel-hugo"):
         generated_title = title_result["content"].strip().strip('"').strip("'").strip()
         generated_title = re.sub(r"^(제목[:\s]*|Title[:\s]*)", "", generated_title).strip()
         
-        # "1곳" 어색한 제목 보정
+        # "1곳" 어색한 제목 보정 (regex 기반, 단독 단어 "1곳"만 제거)
         if "1곳" in generated_title:
-            generated_title = generated_title.replace(" 1곳", "").replace("1곳 ", "")
+            generated_title = _re.sub(r'\b1곳\b', ' ', generated_title).strip()
+            # 연속 공백 정리
+            generated_title = _re.sub(r'\s{2,}', ' ', generated_title)
         
         if len(generated_title) > 5:
             import random as _r
@@ -1391,7 +1370,12 @@ def generate_content(data, blog_id="travel-hugo"):
     # SEO description 생성: 지역 + 테마 + 핵심정보
     _item_names = [it.get("title", it.get("facltNm", ""))[:15] for it in items[:3] if it.get("title") or it.get("facltNm")]
     _names_str = ", ".join(_item_names) if _item_names else theme
-    _seo_desc = f"{display_region} {theme} — {_names_str}. {len(items)}곳 정보와 방문 팁 정리."
+    _item_count = len(items)
+    if _item_count > 1:
+        _place_word = f"{_item_count}곳"
+        _seo_desc = f"{display_region} {theme} — {_names_str}. {_place_word} 정보와 방문 팁 정리."
+    else:
+        _seo_desc = f"{display_region} {theme} — {_names_str}. 방문 팁 정리."
     if len(_seo_desc) > 160:
         _seo_desc = _seo_desc[:157] + "..."
     # [PATCH] DESC 주석 제거됨
