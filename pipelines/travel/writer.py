@@ -1143,6 +1143,34 @@ def generate_content(data, blog_id="travel-hugo"):
         except Exception as e:
             logger.warning(f"[heritage-card] 삽입 실패: {e}")
 
+    # Heritage 글: 본문에 대표 이미지(hero)를 도입부 직후 첫 H2 앞에 삽입
+    # 단, 첫 번째 아이템이 H3와 매칭되면 _inject_images가 처리하므로 hero는 생략
+    if source_type == "heritage" and items:
+        _heritage_img = items[0].get("image", "") or ""
+        if _heritage_img and _heritage_img.startswith("http"):
+            # 첫 아이템이 H3와 매칭될지 사전 확인
+            _first_item_name = items[0].get("title", "").strip()
+            _first_item_key = _first_item_name.replace(" ", "")
+            _matched_by_inject = False
+            for _line in content.split("\n"):
+                if _line.startswith("### ") and _first_item_key and (
+                    _first_item_key in _line.replace(" ", "") or _first_item_name in _line
+                ):
+                    _matched_by_inject = True
+                    break
+            if not _matched_by_inject:
+                _first_h2_idx = content.find("\n## ")
+                if _first_h2_idx > 0:
+                    _hero_alt = _first_item_name[:40] or "대표 이미지"
+                    content = (
+                        content[:_first_h2_idx]
+                        + f'\n\n![{_hero_alt}]({_heritage_img.replace("http://", "https://", 1)})\n'
+                        + content[_first_h2_idx:]
+                    )
+                else:
+                    _hero_alt = _first_item_name[:40] or "대표 이미지"
+                    content = f'\n\n![{_hero_alt}]({_heritage_img.replace("http://", "https://", 1)})\n\n' + content
+
     items = data.get("items", [])
     content = _inject_images(items, content, blog_id=blog_id)
     _is_festival = (source_type == "korservice" and _select_prompt_id(blog_id, source_type) == "travel1_festival")
