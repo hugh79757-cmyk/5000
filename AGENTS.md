@@ -1560,6 +1560,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
   - **M08** (CoT/프롬프트 누수 없음, `_check_cot_leak` L360-372): known_issues에서 P07/P08이 open 상태면 fail. 조치: 누수 이슈 해결 → **leak_detected 레시피(C.3) 참조.**
   - **M09** (publish_log 기록 정상, `_check_publish_log_integrity` L375-457): content.db publish_ledger 발행 건수 > 0이나 모든 소스 DB(curation.db, stap_content.db, car.db, stock.db, rap.db 등) 로그 0건이면 fail. 조치: 소스 DB 로그 기록 누락 원인 조사·수정 → **파이프라인 로그 설정 점검.**
   - **M10** (도메인 가용성, `_check_domain_health` L460-482): 도메인 HTTP HEAD가 200-399 범위 아니면 fail, 연결 실패도 fail. 조치: 도메인 상태·배포 확인 → **인프라 점검.**
+    - M10 도메인 이상 시: 도메인 HEAD 200 확인 실패면 → 배포 상태 확인 (`wrangler pages deployment list {blog_id}`), DNS 설정 확인, 서버/Cloudflare 상태 확인. 코드/콘텐츠 수정 범위 아님.
   - **M11** (본문·슬러그 CJK 없음, `_check_cjk_in_body_and_slug` L74-150): 최근 20개 포스트 본문 또는 슬러그(디렉토리명)에 한자·히라가나·가타카나 포함 시 fail. 조치: 본문/슬러그 재생성(CJK 제거) → **콘텐츠 재생성 수반, 🔴 별도 웨이브 승인 필요.**
 - **등급 결정트리** (전체 maintenance_checklist):
   - 개별 M-항목 fail → 해당 항목 조치로 해결 → `POST /api/maintenance/checklist` (JSON body `{"blog_id": "{blog_id}"}`) 재실행 → 전체 pass 전환 → resume_ready = True.
@@ -1586,6 +1587,13 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 | **freshness** | 1건 | `check_freshness()` (`ops_dashboard/checks/freshness.py:27-69`): 계열별 stale 기준(cuap=1일, etap/tap/stap/cap/rap/seap=7일, manual=30일) 대비 마지막 성공 발행 후 경과일 초과 시 fail. 조치: 해당 블로그 신규 발행 → **파이프라인 정상 발행으로 해소, 별도 FIX 레시피 불필요(설계상 정상).** |
 
 > 참고: freshness는 "조치가 파이프라인 정상 발행"이라는 점에서 FIX 레시피북의 "코드 수정·콘텐츠 수정" 유형과 성격이 다름. freshness fail은 파이프라인을 정상 가동하면 자동 해소되므로 레시피북에 등재하지 않음.
+>
+> **freshness 발생 시 확인할 항목 (체크리스트 — 수정 레시피 아님, 운영 액션):**
+> - 스케줄러 실행 중인가? (`ps aux | grep scheduler.py`)
+> - 해당 블로그 daily_quota 소진됐는가? (`config/blogs.d/*.yaml`)
+> - 데이터 소스 고갈? (festival.db, course.db, tap.db content_pool 잔여량)
+> - blocked 사유? (P01 no_result, P14 keyword 소진, P17 daily 소진 등)
+> - 파이프라인 정상 동작? (`logs/` 최근 오류, dispatcher.log)
 
 ---
 
