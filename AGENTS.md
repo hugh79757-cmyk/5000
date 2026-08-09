@@ -1448,7 +1448,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 
 > 추가일: 2026-08-09 | 상태: 활성 | 출처: `ops_dashboard/checks/content_integrity.py`, `ops_dashboard/checks/maintenance.py` 판정 로직 확인 기반.
 > 적용 우선순위: c06_mtime_deploy(22건) > c05_draft_publish(14건) > maintenance_checklist M01~M11(7건).
-> 나머지 C-계열(gsd_crosscheck, c03_fm_key_leak, c04_prompt_leak, freshness)은 판정 로직 확인·분류만 수록하고 레시피 초안은 선택(🔽 참고).
+> 나머지 C-계열(gsd_crosscheck, freshness)은 판정 로직 확인·분류만 수록하고 레시피 초안은 선택(🔽 참고). c03_fm_key_leak·c04_prompt_leak은 위 C.6에 정식 등재됨.
 
 #### C06 — 로컬 파일 수정 시각 검사 (c06_mtime_deploy) — INFO 등급 (참고용)
 
@@ -1492,6 +1492,56 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **검증 방법**: 조치 후 `POST /api/run-checks?blog_id={blog_id}` → c05_draft_publish status가 pass로 전환 확인.
 - **비가역 플래그**: 없음 (draft 플래그 변경 + 재배포, 본문 보존 전제).
 
+#### C03 — 프론트매터 키 본문 유출 (c03_fm_key_leak)
+
+- **정의**: 포스트 본문(프론트매터 이후)에 프론트매터 키 형식의 라인(title:, og_image:, featureimage:, date:, slug:, categories:, tags:, description:, draft:, image:, pubDate:, author: 등)이 노출되어 있는 상태. 프론트매터 영역이 아닌 본문에 이런 라인이 있으면 파싱 오류나 표시 문제의 원인이 될 수 있음.
+- **fail 판정 근거 (evidence)**:
+  - `_check_c03()` (`ops_dashboard/checks/content_integrity.py:123-129`): 본문에 `^\s*(FM_KEYS):\s*` 정규식이 매치되는 라인이 있으면 fail. FM_KEYS = ["title", "og_image", "featureimage", "date", "slug", "categories", "tags", "description", "draft", "image", "pubDate", "author"].
+  - fail 증거: `"C03 위반: N건 — leaked_line"` (예: `"C03 위반: 2건 — title: 서울 맛집 top5"`).
+  - check_c03 전체 결과: `"C03 위반 {len(violations)}건: {slug}: {detail}; ..."` (`ops_dashboard/checks/content_integrity.py:285-287`).
+- **조치 대상 파일**: 해당 블로그의 `content/posts/<slug>/index.md` (본문 내 앞머터 키 라인 노출이 적발된 포스트)
+- **조치 내용**:
+  - 본문에서 앞머터 키 형식의 라인 제거. 대부분 다음과 같은 원인:
+    - LLM이 본문 첫 부분에 프론트매터 복사본을 실수로 생성
+    - 앞머터에 넣어야 할 필드를 본문에 적어넣음
+    - 이미지 URL이나 제목이 본문 상단에 중복 기재됨
+  - 제거 시 본문 내용(실제 글 텍스트)은 보존하고, 키가 노출된 라인만 삭제.
+  - 제거 후 재배포 필요 (Hugo 빌드 시 frontmatter 이후 본문 출력).
+- **등급**: **B** — 본문에서 노출 라인 제거 + 재배포. 어느 라인이 키 노출인지 개별 확인 1회 필요하나 조치는 명확.
+- **사용자 결정지점**: 없음 (B등급이나 조치는 명확 — 노출 라인 제거 + 재배포). 단, 제거 대상 라인이 본문 내용인지 앞머터 키 유출인지 애매하면 판단 1회.
+- **STOP 조건**:
+  - (a) 조치 범위가 해당 포스트의 본문 내 키 노출 라인 제거로 한정되는지 확인. 다른 포스트·다른 필드까지 번지면 중단.
+  - (f) 조치 과정에서 원본 콘텐츠 본문이 삭제/변형되지 않도록 주의 (키 노출 라인만 제거).
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
+- **검증 방법**: 조치 후 `POST /api/run-checks?blog_id={blog_id}` → c03_fm_key_leak status가 pass로 전환 확인.
+- **비가역 플래그**: 없음 (본문 중 키 노출 라인 제거, 본문 내용 보존 전제). 단, 제거 대상이 실제 본문 내용인데 키 노출로 오판한 경우 복원 필요 → 제거 전 해당 라인 보존(복사) 권고.
+
+#### C04 — LLM 프롬프트/사고문 누수 (c04_prompt_leak)
+
+- **정의**: 포스트 본문에 LLM 프롬프트 지시문·사고Chain-of-Thought 마커·시스템 메시지 등 내부 정보가 국문·영문 패턴으로 포함된 상태. 예: "생각해보자", "다음 단계로 넘어", "We need to write", "Let's think step by step" 등.
+- **fail 판정 근거 (evidence)**:
+  - `_check_c04()` (`ops_dashboard/checks/content_integrity.py:132-142`): C04_KO_PATTERNS + C04_EN_PATTERNS 목록으로 본문 검사. 매치되면 fail.
+  - C04_KO_PATTERNS (10개): `생각해보자`, `생각해 보자`, `다음 단계로 넘어`, `단계별로 진행해`, `우선, 우리가 해야`, `우리가 해야 할 것은`, `생각 과정을 통해`, `결론부터 말하면`, `먼저 생각해보자`, `단계별로 생각`.
+  - C04_EN_PATTERNS (10개): `Need to think`, `We need to write`, `Let's think step by step`, `think step by step`, `let's break this down`, `here's the plan`, ` firstly,`, ` secondly,`, `in order to achieve`, `as an AI language model`.
+  - fail 증거: `"C04 위반: 프롬프트 누수 N건 — matched_text"` (예: `"C04 위반: 프롬프트 누수 1건 — 생각해보자"`).
+  - check_c04 전체 결과: `"C04 위반 {len(violations)}건: {slug}: {detail}; ..."` (`ops_dashboard/checks/content_integrity.py:302-304`).
+  - **leak_detected(C.3)와의 관계**: C04는 "프롬프트/사고문 누수"라는 문제 유형에서 C.3의 leak_detected와 동일 계열. C.3 leak_detected 레시피의 "수정 의도·허용 범위"를 공유한다. C04는 dashboard에서 별도 check_name으로 감지되는 구체적 검사.
+- **조치 대상 파일**: 해당 블로그의 `content/posts/<slug>/index.md` (본문 내 누수 패턴 적발 포스트)
+- **조치 내용**:
+  - 본문에서 누수 패턴 제거 (누수 라인/문장 삭제 또는 자연어로 재작성).
+  - 주의: 누수 제거는 재발 방지 중심. 프롬프트·방지 로직도 함께 점검 필요.
+  - 누수 패턴 제거 후 재배포 필요.
+  - **C.3 leak_detected 레시피 참조**: 허용 범위·비가역 플래그 등 공통 원칙은 C.3 leak_detected 레시피를 따른다. 여기선 check_name별 구체적 판정 로직만 추가 기술.
+- **등급**: **B** — 본문 누수 패턴 제거 + 재배포 + 프롬프트 점검. 어느 패턴이 누수인지 개별 확인 필요하나 조치는 명확.
+- **사용자 결정지점**: 없음 (B등급이나 조치는 명확 — 누수 패턴 제거 + 재배포 + 프롬프트 점검). 단, 누수 패턴이 프롬프트 지시문인지 실제 콘텐츠인지 불명하면 판단 1회.
+- **STOP 조건**:
+  - (a) 조치 범위가 해당 포스트의 본문 내 누수 패턴 제거로 한정되는지 확인. 다른 포스트·다른 영역까지 번지면 중단.
+  - (a) 허용 범위(프롬프트·검사)를 벗어나 콘텐츠 본문을 임의 수정 → 중단. 누수 제거만 허용.
+  - (e) "누출"이 어떤 내용인지 특정 안 됨 → 중단·보고.
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
+- **검증 방법**: 조치 후 `POST /api/run-checks?blog_id={blog_id}` → c04_prompt_leak status가 pass로 전환 확인.
+- **비가역 플래그**: 없음 (본문 중 누수 패턴 제거·재작성, 본문 의도 보존 전제). 단, 프롬프트 변경은 글쓰기 품질에 영향 → 변경 전 확인.
+
 #### maintenance_checklist (M01~M11 정비 체크리스트)
 
 - **정의**: 블로그 정비 대상 블로그(maintenance_status != 'none')에 대해 M01~M11 정비 항목을 일괄 실행하고 전체 통과 여부를 판정. maintenance_checklist 자체가 fail이면 하나 이상의 M-항목이 fail 상태. 현재 7건이 fail (M01~M11 중 하나 이상이 실패한 블로그 7개).
@@ -1531,8 +1581,8 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 | check_name | fail 건수 | 판정 로직 요약 | 분류 |
 |------------|----------|--------------|------|
 | **gsd_crosscheck** | 3건 | `check_crosscheck()` (`ops_dashboard/checks/crosscheck.py:19-58`): auto_detectable 이슈가 있으나 해당 블로그의 fail check_results가 없으면 fail. **메타 검사**(다른 체크가 이슈를 제대로 catch했는지 검증). 조치: 근본은 각 auto_detectable 이슈에 대한 개별 체크가 fail을 내도록 하는 것 — gsd_crosscheck 자체보다 해당 이슈의 담당 체크를 정비. **별도 레시피 불필요(메타 검사).** |
-| **c03_fm_key_leak** | 3건 | `_check_c03()` (`ops_dashboard/checks/content_integrity.py:123-129`): 본문(프론트매터 이후)에 FM_KEYS(title, og_image, featureimage, date, slug 등) 라인이 regex로 검출되면 fail. 증거: `"C03 위반: N건 — leaked_line"`. 조치: 본문에서 frontmatter 키 형식의 라인 제거 → **content 수정(경미).** 레시피 초안은 선택. |
-| **c04_prompt_leak** | 1건 | `_check_c04()` (`ops_dashboard/checks/content_integrity.py:132-142`): C04_KO_PATTERNS + C04_EN_PATTERNS(국문·영문 LLM 프롬프트/사고문 패턴)으로 본문 검사, 검출 시 fail. 증거: `"C04 위반: 프롬프트 누수 N건 — matched_text"`. P08/P07(leak_detected)과 밀접. 조치: 본문에서 누수 패턴 제거 + 프롬프트/방지 로직 점검 → **leak_detected 레시피(C.3) 참조, 본문 수정은 별도.** 레시피 초안은 선택. |
+| **c03_fm_key_leak** | 3건 | `_check_c03()` (`ops_dashboard/checks/content_integrity.py:123-129`): 본문(프론트매터 이후)에 FM_KEYS(title, og_image, featureimage, date, slug 등) 라인이 regex로 검출되면 fail. 증거: `"C03 위반: N건 — leaked_line"`. 조치: 본문에서 frontmatter 키 형식의 라인 제거 → **content 수정(경미).** 레시피: **위 C.6 C03 참조 (정식 등재).** |
+| **c04_prompt_leak** | 1건 | `_check_c04()` (`ops_dashboard/checks/content_integrity.py:132-142`): C04_KO_PATTERNS + C04_EN_PATTERNS(국문·영문 LLM 프롬프트/사고문 패턴)으로 본문 검사, 검출 시 fail. 증거: `"C04 위반: 프롬프트 누수 N건 — matched_text"`. P08/P07(leak_detected)과 밀접. 조치: 본문에서 누수 패턴 제거 + 프롬프트/방지 로직 점검 → **leak_detected 레시피(C.3) 참조, 본문 수정은 별도.** 레시피: **위 C.6 C04 참조 (정식 등재).** |
 | **freshness** | 1건 | `check_freshness()` (`ops_dashboard/checks/freshness.py:27-69`): 계열별 stale 기준(cuap=1일, etap/tap/stap/cap/rap/seap=7일, manual=30일) 대비 마지막 성공 발행 후 경과일 초과 시 fail. 조치: 해당 블로그 신규 발행 → **파이프라인 정상 발행으로 해소, 별도 FIX 레시피 불필요(설계상 정상).** |
 
 > 참고: freshness는 "조치가 파이프라인 정상 발행"이라는 점에서 FIX 레시피북의 "코드 수정·콘텐츠 수정" 유형과 성격이 다름. freshness fail은 파이프라인을 정상 가동하면 자동 해소되므로 레시피북에 등재하지 않음.
