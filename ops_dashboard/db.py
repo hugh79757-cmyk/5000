@@ -719,12 +719,41 @@ def get_all_blogs(conn: sqlite3.Connection) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+_RULE_ID_RE = re.compile(r"\bR\d{2}\b(?=\()")  # R04(MAJOR) → R04
+_RULES_FAILED_RE = re.compile(
+    r"(\d+)/\d+\s+rules failed:\s*(.+)$", re.DOTALL
+)  # "2/14 rules failed: R04(...); R12(...)"
+
+def _parse_failed_rule_ids(detail: str) -> list[str]:
+    """표준준수 aggregate detail 문자열에서 실패한 rule_id 목록을 추출.
+
+    형식 기대값:
+        "N/M rules failed: R04(MAJOR): desc; R08(MAJOR): desc; R12(MAJOR): desc"
+    안전 원칙:
+        - "N/M rules failed:" 패턴이 있을 때만 표준 fail 상세로 간주
+        - 파싱 실패·매칭 없으면 빈 리스트 반환 (배지 없음, 기존 detail 유지)
+        - 패턴에 없으면 rule_id가 존재해도 만들어내지 않음
+    """
+    if not detail:
+        return []
+    try:
+        # 표준 fail 상세는 반드시 "N/M rules failed:" 구문을 포함함
+        if not _RULES_FAILED_RE.search(detail):
+            return []
+        return _RULE_ID_RE.findall(detail)
+    except Exception:
+        return []
+
+
 def get_attention_items(conn: sqlite3.Connection) -> dict:
     """주의 필요 항목: fail/stale check_results + open known_issues.
 
     fail_checks: 운영 블로그(config_status='active', maintenance_status!='paused')의
     최신 fail 체크만 포함.
     excluded_fail_checks: 비운영/제외 대상 블로그의 fail 체크 (별도 집계).
+
+    반환 dict에는 표준준수 fail 행에 한해 failed_rule_ids(list[str])가 포함된다
+    (UI에서 rule_id 배지 펼침을 위해 파싱한 값. 파싱 실패 시 빈 리스트).
     """
     # 1) 최근 실패한 헬스체크 (블로그 라이프사이클 정보 포함)
     rows = conn.execute("""
@@ -792,6 +821,7 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
                 "problem_id": (agg or ind[0])["problem_id"],
                 "severity": sev,
                 "action": act,
+                "failed_rule_ids": _parse_failed_rule_ids(detail),
             })
 
         for d in entries:
@@ -802,6 +832,11 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
                 d["config_status"] = cfg
                 d["maintenance_status"] = maint
                 excluded_fail_checks.append(d)
+
+    # standard_compliance가 아닌 행에는 failed_rule_ids를 붙이지 않음 (기존 표시 유지)
+    for d in fail_checks + excluded_fail_checks:
+        if d.get("check_name") != "standard_compliance":
+            d.pop("failed_rule_ids", None)
 
     # 2) 미해결 known_issues (변경 없음)
     open_issues = conn.execute("""
@@ -1407,6 +1442,13 @@ def get_attention_blogs(
         items.append(d)
     # 심각도 우선 정렬
     items.sort(key=lambda x: _SEVERITY_ORDER.get(x["severity"], 0), reverse=True)
+
+    # UI 배지 펼침을 위해 표준준수 fail 행에만 failed_rule_ids 보충.
+    # (get_attention_items와 동일 파서·재사용, 안전 폴백 포함)
+    for d in items:
+        if d.get("check_name") == "standard_compliance":
+            d["failed_rule_ids"] = _parse_failed_rule_ids(d.get("detail") or "")
+
     return items
 
 

@@ -156,7 +156,16 @@
           <span class="badge badge-{{ 'fail' if a.severity == 'CRITICAL' else 'warn' if a.severity == 'MAJOR' else 'unknown' }}">{{ a.severity }}</span>
         </td>
         <td><span class="badge badge-fail">{{ a.status }}</span></td>
-        <td style="font-size:0.85rem;max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ a.detail }}">{{ a.detail }}</td>
+         <td style="font-size:0.85rem;max-width:380px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ a.detail }}">
+           {{ a.detail }}
+           {% if a.check_name == 'standard_compliance' and a.failed_rule_ids %}
+           <span style="display:inline-block;margin-left:6px;vertical-align:middle">
+             {% for rid in a.failed_rule_ids %}
+             <span class="badge badge-warn" style="margin-left:3px">{{ rid }}</span>
+             {% endfor %}
+           </span>
+           {% endif %}
+         </td>
       </tr>
       {% endfor %}
       {% if not attention_blogs %}
