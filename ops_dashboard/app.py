@@ -6,7 +6,9 @@ All routes are protected by Basic Auth (OPS_USER/OPS_PASSWORD env vars).
 import logging
 import os
 import sqlite3
+import time
 from functools import wraps
+from pathlib import Path
 
 from flask import Flask, Response, g, jsonify, render_template, request
 
@@ -17,17 +19,18 @@ from ops_dashboard.db import (
     get_attention_blogs,
     get_attention_blogs_aggregate,
     get_attention_items,
+    get_blog_brand,
+    get_blog_config_status,
     get_blog_count,
     get_blog_detail,
-    get_blog_site_path,
     get_blog_domain,
     get_blog_pipeline_path,
+    get_blog_site_path,
+    get_blogs_by_brand,
     get_conn,
     get_daily_summary,
     get_maintenance_checklist,
     get_maintenance_summary,
-    get_blog_brand,
-    get_blog_config_status,
     init_db,
     seed_known_issues,
     seed_maintenance_status,
@@ -35,6 +38,38 @@ from ops_dashboard.db import (
 )
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# YAML 자동 싱크 — 파일 mtime 기반 (진실 소스: config/blogs.d/*.yaml)
+# ---------------------------------------------------------------------------
+
+_BLOGS_D_DIR = Path(__file__).resolve().parent.parent / "config" / "blogs.d"
+_YAML_SYNC_MARKER = Path("/tmp/ops_yaml_sync_marker")
+
+def _yaml_dirty() -> bool:
+    """YAML 파일이 마지막 싱크 시점보다 새로 수정됐는지 확인.
+
+    마커 파일이 없으면 최초 싱크로 간주 (True 반환).
+    """
+    try:
+        last_sync = _YAML_SYNC_MARKER.stat().st_mtime
+    except FileNotFoundError:
+        return True  # 마커 없음 → 최초 싱크 필요
+    if not _BLOGS_D_DIR.is_dir():
+        return False
+    for yf in _BLOGS_D_DIR.glob("*.yaml"):
+        if yf.name.endswith(".bak") or yf.name.startswith("."):
+            continue
+        try:
+            if yf.stat().st_mtime > last_sync:
+                return True
+        except OSError:
+            continue
+    return False
+
+def _touch_sync_marker() -> None:
+    """마지막 싱크 시점 마커를 현재 시각으로 갱신."""
+    _YAML_SYNC_MARKER.touch()
 
 # ---------------------------------------------------------------------------
 # Auth helpers
@@ -88,13 +123,29 @@ def _get_db() -> sqlite3.Connection:
 
 
 def _ensure_db(conn: sqlite3.Connection) -> None:
-    """Initialize DB schema and seed data if tables are empty."""
+    """DB 스키마 초기화 + 시드 데이터.
+
+    최초 요청 시 1회 실행. YAML→DB 싱크는 _sync_yaml_if_needed()에서
+    mtime 체크 후 별도 처리하므로 여기선 호출하지 않음.
+    """
     init_db(conn)
     if get_blog_count(conn) == 0:
-        sync_blog_lifecycle(conn)
         seed_known_issues(conn)
-    # Phase 60: 정비 대상 블로그 시드 (기존 데이터에 maintenance_status 없으면 추가)
     seed_maintenance_status(conn)
+
+
+def _sync_yaml_if_needed(conn: sqlite3.Connection) -> bool:
+    """YAML이 새로 수정됐으면 blog_lifecycle 동기화.
+
+    반환: True = 싱크 실행됨, False = 변경 없음.
+    """
+    if not _yaml_dirty():
+        return False
+    count = sync_blog_lifecycle(conn)
+    _touch_sync_marker()
+    if count:
+        logger.info("[yaml-sync] %d개 블로그 갱신 (YAML mtime 변경)", count)
+    return True
 
 
 
@@ -288,14 +339,33 @@ def _register_human_routes(app: Flask) -> None:
         from ops_dashboard.readiness import compute_readiness
         readiness = compute_readiness(conn)
 
+        # Fleet Status 표에도 brand 필터 적용 (주의 필요 테이블과 동일하게)
+        if filter_brand:
+            fleet_blogs = get_blogs_by_brand(conn, filter_brand)
+        else:
+            fleet_blogs = blogs
+
+        # 필터 적용 시 summary 재계산
+        if filter_brand:
+            fleet_summary = {
+                "total": len(fleet_blogs),
+                "active": sum(1 for b in fleet_blogs if b["config_status"] == "active"),
+                "stale": len(attention.get("stale_blogs", [])),
+                "issues": len(attention.get("open_issues", [])),
+                "maintenance": sum(1 for b in fleet_blogs if b.get("maintenance_status") in ("awaiting", "in_progress")),
+                "ready_to_resume": sum(1 for b in fleet_blogs if b.get("maintenance_status") == "ready"),
+            }
+        else:
+            fleet_summary = summary
+
         return render_template(
             "index.html",
             title="Fleet Overview",
             active="fleet",
-            blogs=blogs,
+            blogs=fleet_blogs,
             brands=len(brands),
             attention=attention,
-            summary=summary,
+            summary=fleet_summary,
             maintenance_summary=maintenance_summary,
             daily_summary=daily_summary,
             attention_blogs=attention_blogs,
@@ -507,6 +577,20 @@ def _register_api_routes(app: Flask) -> None:
         from ops_dashboard.db import get_registry_view
         return jsonify(get_registry_view(conn, blog_id=blog_id))
 
+    @app.route("/api/sync-yaml", methods=["POST"])
+    @require_auth
+    def api_sync_yaml():
+        """YAML → blog_lifecycle 강제 동기화 (수동 백업).
+
+        mtime 체크와 무관하게 즉시 sync 실행. YAML 편집 후 대시보드 반영이
+        지연될 때 사용. before_request의 자동 sync와 동일한 함수를 호출.
+        """
+        conn = _get_db()
+        _ensure_db(conn)
+        count = sync_blog_lifecycle(conn)
+        _touch_sync_marker()
+        return jsonify({"synced": count, "status": "ok"})
+
 
 # ---------------------------------------------------------------------------
 # App factory
@@ -525,6 +609,17 @@ def create_app() -> Flask:
 
     _register_human_routes(app)
     _register_api_routes(app)
+
+    @app.before_request
+    def _before_request_yaml_sync():
+        """매 요청 전 YAML mtime 확인 → 변경됐으면 blog_lifecycle 동기화.
+
+        진실 소스(config/blogs.d/*.yaml)와 DB의 config_status 일치를 유지.
+       マー커 파일(/tmp/ops_yaml_sync_marker)로 마지막 sync 시점 추적.
+        """
+        conn = _get_db()
+        _ensure_db(conn)
+        _sync_yaml_if_needed(conn)
 
     @app.errorhandler(404)
     def not_found(e):

@@ -1,0 +1,15 @@
+blogs:
+- id: tvshow-blogger
+  name: tv-show 맛집블로그
+  domain: tv-show.informationhot.kr
+  platform: blogger
+  pipeline: travel
+  managed_by: manual
+  status: active
+- id: ud-blogger
+  name: ud 레시피블로그
+  domain: ud.informationhot.kr
+  platform: blogger
+  pipeline: travel
+  managed_by: manual
+  status: active
