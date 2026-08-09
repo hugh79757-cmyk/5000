@@ -33,6 +33,24 @@ tap-blogger(travel.rotcha.kr, Blogger 플랫폼)는 5000의 `writer.py` 후처�
 
 **단, 리서치 결과 tap-blogger는 5000 writer.py를 거치지 않으므로, 위 항목은 TAP 프로젝트 코드에서 구현되어야 함.** 5000-side 코드 수정은 tap-blogger에 영향 없음.
 
+---
+
+## ★ TAP 아키텍처: Writer 분리 구조 (필독)
+
+TAP 프로젝트는 **플랫폼별로 Writer가 분리**되어 있다. 에이전트는 이 구분을 반드시 숙지할 것.
+
+| 구분 | Hugo Writer (5000) | Blogger Writer (TAP) |
+|------|-------------------|---------------------|
+| **대상** | travel-hugo, travel1~4-hugo | tap-blogger (travel.rotcha.kr) |
+| **코드 위치** | `5000/pipelines/travel/writer.py` | `TAP/core/ai_writer.py` + `TAP/core/content_processor.py` |
+| **본문 생성** | `_post_process()`: H2 제한, 쿠팡 삽입, 엔티티 카드 | `ai_writer.py` 프롬프트 + `content_processor.py` 후처리 |
+| **네이버 지도** | `_inject_naver_map()`: 본문 H3 끝 버튼 | `content_processor.py:insert_images_and_links()`: 본문 + nearby 버튼 |
+| **Nearby** | `_enrich_with_nearby()` / `_enrich_with_nearby_restaurants_only()` | `content_processor.py:add_nearby_section()` |
+| **쿠팡** | `coupang_travel.py:get_product_cards()` | 없음 (Trip.com만 있음, 여행 테마에서는 스킵) |
+| **발행** | Hugo → Cloudflare Pages | Blogger API v3 직접 발행 |
+
+**핵심:** tap-blogger(travel.rotcha.kr) 수정 = **TAP 프로젝트 코드** 수정. travel-hugo 등 수정 = **5000 pipelines/travel/writer.py** 수정. 두 코드는 서로 독립적.
+
 ## Acceptance Criteria
 
 **⚠️ 주의: 아래 기준은 5000-side 코드 수정 기준이며, tap-blogger에는 영향 없음.**
@@ -78,29 +96,55 @@ tap-blogger(travel.rotcha.kr, Blogger 플랫폼)는 5000의 `writer.py` 후처�
 
 ### Task 2: (5000-side) 마무리 H2 추가 — Hugo 블로그 전용
 
-본문 마지막에 "마무리" H2 추가 로직 구현. 위치는 "여행 준비에 도움되는 추천 용품" 섹션 바로 위.
-
-- 기존 본문 끝부분 감지 후 H2 삽입
-- 또는 post-processing 단계에서 마지막 섹션 앞에 H2 추가
-
-**적용 대상:** travel-hugo 등 Hugo 블로그
-**미적용:** tap-blogger
-
-### Task 3: (5000-side) 네이버 지도 버튼 가운데 정렬 + 여백 — Hugo 블로그 전용
-
-`_inject_naver_map()` 함수에서 생성되는 버튼 HTML에 가운데 정렬 및 위아래 여백 스타일 추가:
-
-```html
-<div style="text-align:center; margin-top:24px; margin-bottom:24px;">
-  <a href="..." ...>네이버 지도에서 보기</a>
-</div>
+**★ 삽입 규칙 (명확화):**
+```
+본문 마지막 콘텐츠
+↓ (content.rstrip())
+"\n\n## 마무리\n\n"  ← 신규 삽입
+↓ 
+쿠팡 상품 섹션 HTML  ← 기존 CoupangTravel.get_product_cards() 결과
 ```
 
-- 기존 `margin-top:12px` → `margin-top:24px; margin-bottom:24px`로 변경
-- 버튼 위아래 여백 확보로 가독성 개선 (고씨굴 등 장소명에서 버튼 간격이 좁았던 문제 해결)
+**코드 위치:** `pipelines/travel/writer.py` L714
+```python
+content = content.rstrip() + "\n\n## 마무리\n\n" + _coupang_html
+```
+
+- 본문 끝부분을 `rstrip()`으로 정리
+- `\n\n## 마무리\n\n` 삽입 (H2 소제목)
+- 그 아래 쿠팡 상품 섹션 연결
+- "여행 준비에 도움되는 추천 용품"은 쿠팡 섹션 내 H2로 이미 포함되어 있음 (Task 1에서 `## `로 변경됨)
 
 **적용 대상:** travel-hugo 등 Hugo 블로그
-**미적용:** tap-blogger
+**미적용:** tap-blogger (TAP ai_writer.py 프롬프트에서 H2 구조 결정)
+
+### Task 3: (5000-side) 네이버 지도 버튼 스타일 — Hugo 블로그 전용
+
+**★ 네이버 지도 버튼은 두 곳에 존재하며, 적용 스타일이 다름:**
+
+#### 3-A. 본문 H3 끝 버튼 — 가운데 정렬 (`_inject_naver_map`)
+- **위치:** `pipelines/travel/writer.py` L321-423, `_inject_naver_map()` 함수
+- **대상:** 본문 각 장소(H3) 끝에 삽입되는 네이버 지도 버튼
+- **수정:** 버튼 wrapper div에 `text-align:center` 적용
+```html
+<div style="text-align:center;margin-top:24px;margin-bottom:24px;">
+  <a href="..." ...>{장소명} 네이버 지도에서 보기</a>
+</div>
+```
+- 기존 `margin-top:12px` → `margin-top:24px; margin-bottom:24px`로 변경 (여백 확보)
+
+#### 3-B. Nearby 카드 버튼 — 위아래 여백 (`_enrich_with_nearby` / `_enrich_with_nearby_restaurants_only`)
+- **위치:** `pipelines/travel/writer.py` L525-639
+- **대상:** nearby 맛집/관광지 카드의 네이버 지도 버튼
+- **현재 상태:** 버튼 자체는 inline-block, 카드 body는 `text-align:center` 적용됨 (L553, L606)
+- **수정 필요:** 버튼에 위아래 margin 추가 (현재 margin 없음, padding만 있음)
+```python
+# L557, L610의 버튼 스타일 수정
+style="display:inline-block;padding:8px 20px;margin-top:12px;margin-bottom:12px;..."
+```
+
+**적용 대상:** travel-hugo 등 Hugo 블로그
+**미적용:** tap-blogger (TAP content_processor.py에서 별도 관리)
 
 ---
 
@@ -108,21 +152,34 @@ tap-blogger(travel.rotcha.kr, Blogger 플랫폼)는 5000의 `writer.py` 후처�
 
 **리서치 결과 tap-blogger의 레이아웃은 TAP 프로젝트 코드에서 결정됨.** 5000-side 코드는 tap-blogger에 영향 없음.
 
-4-1. **네이버 지도 버튼 스타일 확인**
-   - 파일: `/Users/twinssn/Projects/TAP/core/content_processor.py`
-   - 함수: `insert_images_and_links()` (L185-259)
-   - 버튼 HTML에 `text-align:center` 및 `margin` 스타일 적용 여부 확인
-   - 미적용도면 수정 필요
+TAP 아키텍처에 따라 **Blogger Writer**(TAP/core/)와 **Hugo Writer**(5000/pipelines/travel/writer.py)는 별도 코드베이스.
 
-4-2. **"마무리" H2 구조 확인**
-   - 파일: `/Users/twinssn/Projects/TAP/core/ai_writer.py`
-   - 캠핑 프롬프트 (L200-233): h2 구조에 "마무리" 포함 여부 확인
-   - user가 요청한 "마무리" H2가 프롬프트에 명시되어 있는지 확인
+#### 4-1. 네이버 지도 버튼 스타일 확인 (본문 + Nearby 구분)
 
-4-3. **쿠팡 상품 섹션 (선택)**
-   - tap-blogger에는 현재 쿠팡 상품 섹션이 없음 (TAP content_processor.py에 쿠팡 관련 코드 없음)
-   - 필요시 TAP content_processor.py에 5000 CoupangTravel 연동 추가 검토
-   - 단, 여행 테마(캠핑, 문화유산, 축제)에서는 Trip.com 제휴 박스도 삽입되지 않음 (AFFILIATE_INAPPROPRIATE_KEYWORDS)
+**★ TAP도 본문 버튼과 Nearby 버튼이 별도로 처리됨:**
+
+- **본문 H3 끝 버튼:** `TAP/core/content_processor.py:insert_images_and_links()` (L185-259)
+  - `###` 마크다운 헤딩 → `<h3>` HTML 변환 시 버튼 삽입
+  - 버튼 HTML에 `text-align:center` 및 margin 스타일 적용 여부 확인
+  
+- **Nearby 버튼:** `TAP/core/content_processor.py:add_nearby_section()` (또는 유사 함수)
+  - nearby 카드 내 네이버 지도 버튼 스타일 확인
+  - 카드 body 정렬 + 버튼 여백 확인
+
+#### 4-2. "마무리" H2 구조 확인
+
+- 파일: `/Users/twinssn/Projects/TAP/core/ai_writer.py`
+- 캠핑 프롬프트 (L200-233): h2 구조에 "마무리" 포함 여부 확인
+  - RESEARCH 결과: 캠핑은 이미 4개 h2 (고르는 기준, 한눈에 비교, 방문 팁, 마무리)
+  - user가 요청한 "마무리" H2가 프롬프트에 명시되어 있는지 확인
+- heritage: 3개 h2 (보는 포인트, 한눈에 비교, 마무리)
+- korservice: 5개 h2 (고르는 기준, 한눈에 비교, 방문 팁, FAQ, 마무리)
+
+#### 4-3. 쿠팡 상품 섹션 (선택)
+
+- tap-blogger에는 현재 쿠팡 상품 섹션이 없음 (TAP content_processor.py에 쿠팡 관련 코드 없음)
+- 필요시 TAP content_processor.py에 5000 CoupangTravel 연동 추가 검토
+- 단, 여행 테마(캠핑, 문화유산, 축제)에서는 Trip.com 제휴 박스도 삽입되지 않음 (AFFILIATE_INAPPROPRIATE_KEYWORDS)
 
 ## 완료 기준
 
@@ -153,6 +210,10 @@ tap-blogger(travel.rotcha.kr, Blogger 플랫폼)는 5000의 `writer.py` 후처�
 ## 참고
 
 - 기존 발행글 (강원도 영월 가족 캠핑장): https://travel.rotcha.kr/2026/08/3_01403288312.html
+- **TAP 아키텍처 문서 (필독):** `.planning/phases/PHASE-68/TAP-WRITER-ARCHITECTURE.md`
+  - Blogger Writer (TAP/core/) vs Hugo Writer (5000/pipelines/travel/) 분리 구조
+  - 네이버 지도 버튼 처리 방식 차이 (본문 vs nearby)
+  - 쿠팡 상품 섹션 존재 여부 차이
 - TAP body layout spec: `.config/opencode/skills/tap-blog-spec/SKILL.md`
 - writer.py H2 개수 제한: 최대 4개 (writer.py L695-698)
 - **RESEARCH 결과:** tap-blogger는 5000 writer.py를 거치지 않음 — TAP 프로젝트 자체 파이프라인 사용
