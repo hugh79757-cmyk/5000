@@ -212,20 +212,20 @@
             {% else %}—{% endif %}
           </td>
             <td style="white-space:nowrap">
-              {% set qg = b.quality_grade|default_if_none('') %}
+              {% set qg = b.quality_grade if b.quality_grade is not none else '' %}
               {% if qg == 'A' %}
                 <span style="color:#9aa0a6">A</span>
-                {% if b.quality_fail_count is defined and b.quality_fail_count == 0 %} <span style="color:#9aa0a6">(0)</span>{% endif %}
+                <span style="color:#9aa0a6"> ({{ b.quality_fail_count|default(0) }})</span>
               {% elif qg == 'B' %}
                 <span class="badge badge-unknown">B</span>
-                {% if b.quality_fail_count is defined %} <span class="badge badge-unknown">({{ b.quality_fail_count }})</span>{% endif %}
+                <span class="badge badge-unknown"> ({{ b.quality_fail_count|default(0) }})</span>
               {% elif qg == 'C' %}
                 <span class="badge badge-warn">C</span>
-                {% if b.quality_fail_count is defined %} <span class="badge badge-warn">({{ b.quality_fail_count }})</span>{% endif %}
+                <span class="badge badge-warn"> ({{ b.quality_fail_count|default(0) }})</span>
               {% else %}
                 —
               {% endif %}
-              {% if b.quality_grade in ('A','B','C') and b.failed_rule_ids %}
+              {% if qg in ('A','B','C') and b.failed_rule_ids %}
                 <span style="margin-left:6px">
                   {% for rid in b.failed_rule_ids %}
                   <span class="badge badge-warn" style="margin-left:3px">{{ rid }}</span>
@@ -254,20 +254,20 @@
         {% else %}—{% endif %}
       </span></div>
       <div class="mc-row"><span class="mc-label">Quality</span><span>
-        {% set qg = b.quality_grade|default_if_none('') %}
+        {% set qg = b.quality_grade if b.quality_grade is not none else '' %}
         {% if qg == 'A' %}
           <span style="color:#9aa0a6">A</span>
-          {% if b.quality_fail_count is defined and b.quality_fail_count == 0 %} <span style="color:#9aa0a6">(0)</span>{% endif %}
+          <span style="color:#9aa0a6"> ({{ b.quality_fail_count|default(0) }})</span>
         {% elif qg == 'B' %}
           <span class="badge badge-unknown">B</span>
-          {% if b.quality_fail_count is defined %} <span class="badge badge-unknown">({{ b.quality_fail_count }})</span>{% endif %}
+          <span class="badge badge-unknown"> ({{ b.quality_fail_count|default(0) }})</span>
         {% elif qg == 'C' %}
           <span class="badge badge-warn">C</span>
-          {% if b.quality_fail_count is defined %} <span class="badge badge-warn">({{ b.quality_fail_count }})</span>{% endif %}
+          <span class="badge badge-warn"> ({{ b.quality_fail_count|default(0) }})</span>
         {% else %}
           —
         {% endif %}
-        {% if b.quality_grade in ('A','B','C') and b.failed_rule_ids %}
+        {% if qg in ('A','B','C') and b.failed_rule_ids %}
           <span style="margin-left:6px">
             {% for rid in b.failed_rule_ids %}
             <span class="badge badge-warn" style="margin-left:3px">{{ rid }}</span>
