@@ -119,19 +119,19 @@
 <h2>주의 필요 <span class="badge badge-warn">{{ attention_agg.total_items }} 건 / {{ attention_agg.total_blogs }} 블로그</span></h2>
 <div class="filter-bar" style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap">
   <form method="get" action="/" style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;width:100%">
-    <select name="brand" style="padding:0.35rem;border-radius:4px;border:1px solid var(--border,#ccc)">
+    <select name="brand" onchange="this.form.submit()" style="padding:0.35rem;border-radius:4px;border:1px solid var(--border,#ccc)">
       <option value="">계열 전체</option>
       {% for b, cnt in all_brands.items() %}
       <option value="{{ b }}" {% if filter_brand == b %}selected{% endif %}>{{ b }} ({{ cnt }})</option>
       {% endfor %}
     </select>
-    <select name="check" style="padding:0.35rem;border-radius:4px;border:1px solid var(--border,#ccc)">
+    <select name="check" onchange="this.form.submit()" style="padding:0.35rem;border-radius:4px;border:1px solid var(--border,#ccc)">
       <option value="">체크 전체</option>
       {% for c, cnt in all_check_names.items() %}
       <option value="{{ c }}" {% if filter_check == c %}selected{% endif %}>{{ c }} ({{ cnt }})</option>
       {% endfor %}
     </select>
-    <select name="severity" style="padding:0.35rem;border-radius:4px;border:1px solid var(--border,#ccc)">
+    <select name="severity" onchange="this.form.submit()" style="padding:0.35rem;border-radius:4px;border:1px solid var(--border,#ccc)">
       <option value="">심각도 전체</option>
       {% for s, cnt in all_severities.items() %}
       <option value="{{ s }}" {% if filter_severity == s %}selected{% endif %}>{{ s }} ({{ cnt }})</option>
