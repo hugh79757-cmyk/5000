@@ -211,7 +211,28 @@
             {% elif b.maintenance_status == 'awaiting' %}<span class="badge badge-unknown">정비대기</span>
             {% else %}—{% endif %}
           </td>
-          <td>{{ b.quality_grade or '—' }}</td>
+            <td style="white-space:nowrap">
+              {% set qg = b.quality_grade|default_if_none('') %}
+              {% if qg == 'A' %}
+                <span style="color:#9aa0a6">A</span>
+                {% if b.quality_fail_count is defined and b.quality_fail_count == 0 %} <span style="color:#9aa0a6">(0)</span>{% endif %}
+              {% elif qg == 'B' %}
+                <span class="badge badge-unknown">B</span>
+                {% if b.quality_fail_count is defined %} <span class="badge badge-unknown">({{ b.quality_fail_count }})</span>{% endif %}
+              {% elif qg == 'C' %}
+                <span class="badge badge-warn">C</span>
+                {% if b.quality_fail_count is defined %} <span class="badge badge-warn">({{ b.quality_fail_count }})</span>{% endif %}
+              {% else %}
+                —
+              {% endif %}
+              {% if b.quality_grade in ('A','B','C') and b.failed_rule_ids %}
+                <span style="margin-left:6px">
+                  {% for rid in b.failed_rule_ids %}
+                  <span class="badge badge-warn" style="margin-left:3px">{{ rid }}</span>
+                  {% endfor %}
+                </span>
+              {% endif %}
+            </td>
         </tr>
         {% endfor %}
         {% if not blogs %}
@@ -232,7 +253,28 @@
         {% elif b.maintenance_status == 'awaiting' %}<span class="badge badge-unknown">정비대기</span>
         {% else %}—{% endif %}
       </span></div>
-      <div class="mc-row"><span class="mc-label">Quality</span><span>{{ b.quality_grade or '—' }}</span></div>
+      <div class="mc-row"><span class="mc-label">Quality</span><span>
+        {% set qg = b.quality_grade|default_if_none('') %}
+        {% if qg == 'A' %}
+          <span style="color:#9aa0a6">A</span>
+          {% if b.quality_fail_count is defined and b.quality_fail_count == 0 %} <span style="color:#9aa0a6">(0)</span>{% endif %}
+        {% elif qg == 'B' %}
+          <span class="badge badge-unknown">B</span>
+          {% if b.quality_fail_count is defined %} <span class="badge badge-unknown">({{ b.quality_fail_count }})</span>{% endif %}
+        {% elif qg == 'C' %}
+          <span class="badge badge-warn">C</span>
+          {% if b.quality_fail_count is defined %} <span class="badge badge-warn">({{ b.quality_fail_count }})</span>{% endif %}
+        {% else %}
+          —
+        {% endif %}
+        {% if b.quality_grade in ('A','B','C') and b.failed_rule_ids %}
+          <span style="margin-left:6px">
+            {% for rid in b.failed_rule_ids %}
+            <span class="badge badge-warn" style="margin-left:3px">{{ rid }}</span>
+            {% endfor %}
+          </span>
+        {% endif %}
+      </span></div>
     </div>
     {% endfor %}
     {% if not blogs %}

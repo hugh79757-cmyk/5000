@@ -712,11 +712,46 @@ def update_maintenance_status(
 
 
 def get_all_blogs(conn: sqlite3.Connection) -> list[dict]:
-    """blog_lifecycle 전체 조회."""
+    """blog_lifecycle 전체 조회.
+
+    Fleet Status 표의 소스. 표준준수 fail 정보를 후처리로 보충해
+    quality_grade / quality_fail_count / failed_rule_ids 를 함께 반환한다
+    (DB write 없음, 조회 단계 계산).
+    """
     rows = conn.execute(
         "SELECT * FROM blog_lifecycle ORDER BY brand, blog_id"
     ).fetchall()
-    return [dict(r) for r in rows]
+    blogs = [dict(r) for r in rows]
+
+    # 최신 standard_compliance fail 행 dict(blog_id -> dict)
+    sc_latest: dict[str, dict] = {}
+    for row in conn.execute("""
+        SELECT cr.blog_id, cr.detail, cr.checked_at
+        FROM check_results cr
+        INNER JOIN (
+            SELECT blog_id, MAX(checked_at) as latest
+            FROM check_results
+            WHERE check_name = 'standard_compliance'
+            GROUP BY blog_id
+        ) latest ON cr.blog_id = latest.blog_id AND cr.checked_at = latest.latest
+        WHERE cr.check_name = 'standard_compliance'
+    """).fetchall():
+        sc_latest[row["blog_id"]] = dict(row)
+
+    for b in blogs:
+        bid = b.get("blog_id")
+        sc = sc_latest.get(bid)
+        if not sc:
+            b["quality_grade"] = ""
+            b["quality_fail_count"] = 0
+            b["failed_rule_ids"] = []
+            continue
+        rule_ids = _parse_failed_rule_ids(sc.get("detail") or "")
+        b["failed_rule_ids"] = rule_ids
+        b["quality_fail_count"] = len(rule_ids)
+        b["quality_grade"] = _quality_grade_from_rule_ids(rule_ids)
+
+    return blogs
 
 
 _RULE_ID_RE = re.compile(r"\bR\d{2}\b(?=\()")  # R04(MAJOR) → R04
@@ -743,6 +778,16 @@ def _parse_failed_rule_ids(detail: str) -> list[str]:
         return _RULE_ID_RE.findall(detail)
     except Exception:
         return []
+
+
+def _quality_grade_from_rule_ids(rule_ids: list[str]) -> str:
+    """표준준수 fail rule_id 개수 기반 품질 등급(A/B/C)."""
+    n = len(rule_ids)
+    if n == 0:
+        return "A"
+    if n <= 2:
+        return "B"
+    return "C"
 
 
 def get_attention_items(conn: sqlite3.Connection) -> dict:
@@ -1449,6 +1494,7 @@ def get_attention_blogs(
         if d.get("check_name") == "standard_compliance":
             d["failed_rule_ids"] = _parse_failed_rule_ids(d.get("detail") or "")
 
+    # Fleet Status Quality 등급용 필드 보충은 별도 함수(get_all_blogs 보강)에서 수행.
     return items
 
 
