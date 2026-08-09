@@ -3,20 +3,20 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-08T23:00:00Z"
+last_updated: "2026-08-09T21:10:00Z"
 progress:
   # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
   # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
   total_phases: 32
-  completed_phases: 27
+  completed_phases: 28
   in_progress_phases: 1
-  planned_phases: 4
-  percent: 84
+  planned_phases: 3
+  percent: 88
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.**
+**Status:** v1.1 — **Phase 68 PPM-5 완료 (images:// URL 정규식 검증 추가). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -72,6 +72,7 @@ progress:
 | 64 | 규칙 체계 자기진화 + 운영헌장 | ✅ | 설계·문서 완료 (2026-08-07): C05→P 이동, 네임스페이스 분리(RULE-/ISSUE-), S01/S04 severity 확정, 관찰기간 7일+긴급예외, 오탐미탐 자동기록/승격 사람승인, Task 6 프리플라이트 체크리스트 5종 설계, OPERATIONS-CHARTER 갱신 |
 | 66 | P09 시나리오 A/B 판별 (조사 전용) | ✅ | 조사 완료 (2026-08-07). A 반증: health-hugo·pet-hugo 이미지 URL 4,776개 전수 스캔 결과 P09 패턴(세그먼트 50% 이상 중복) 0건. B 확정 불가: P09 알림 로그 0건이나, 로그 부재가 "알림 미발생"인지 "로그 유실"인지 구분 불가 → B 성립 여부는 확인 불가. 감지 slug 특정 불가(로그 0건). deploy.log range 오류(178건/70 slug, 전부 pet-hugo tags repr)와 P09는 별개 확정(교차 0건). 66-RESEARCH.md "B 성립" 결론은 지나치게 강함 — A만 반증되고 B는 미확정이 정확. 코드 수정·INSERT·배포 일체 없음. |
 | 67 | fix-g3-first — 오토트리아지 무인화 + 라이브 청소 | ✅ | 실행 완료 (2026-08-08). 커밋 `4d78d3f3f`. launchd 등록 2건(ops-dashboard + auto-triage), auto_triage fail-loud 전환, watchdog 3자 감시, dead_links 43건 제거(Wave 1), 8개 블로그 빌드·배포(Wave 2). STATE.md Phase 67 섹션에 상세. |
+| 68 | PPM-5 images:// URL 정규식 검증 추가 | ✅ | 실행 완료 (2026-08-09). 커밋 `ceb65a170`. shared/app_images/core.py 신규 생성: IMAGES_URL_PATTERN(^images://), _build_images_asset_path() 정규식 검증, _validate_images_url(), normalize_hugo_asset_url(). baby-hugo 등 HUGO_BASEURL 없는 환경에서 images:// 생성 시 FrontMatter 삭제 방지 안전 가드. |
 | 45 | TAP Blog Meta-Response Detection & Prevention | 📋 Planned | 미시작. ROADMAP Phase 45 참조. TAP 블로거 AI 메타 응답 발행 방지. core/validators.py + core/ai_writer.py + app.py. Phase 44 이후 권장. |
 | 53 | Complete Phase 52 Wave 6: Build and Deploy | 📋 Planned | 미시작. Phase 52 Wave 5 완료 후 실행. 36개 블로그 Hugo 빌드 + wrangler 배포 + 라이브 검증. ROADMAP Phase 53 참조. |
 | 54 | Curation Title Generation Hardening (제목 fallback 제거) | 📋 Planned | 미시작. `.planning/phase-54-title-hardening/PLAN.md` 존재. writer.py:538-539 하드코딩 fallback 제거 + H1 형식 강제 + CoT/프롬프트 누출 차단. "추천 TOP5 (연도년)" 패턴 134건 재발 중 — 시급. |
@@ -388,3 +389,35 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 - 대시보드 UI에서 C0 체크 결과를 시각적으로 표시는 별도 작업
 
 **다음 단계:** Phase 52 Blowfish 표준화 Wave 5-6 계속 진행
+
+---
+
+## Phase 68: PPM-5 images:// URL 정규식 검증 추가 (2026-08-09)
+
+**Status:** ✅ Executed (1 plan / 1 wave 완료)
+**커밋:** `ceb65a170` feat(app_images): add images:// URL generation with regex validation (PPM-5)
+
+**실행 내용:**
+- `shared/app_images/core.py` 신규 생성
+  - `IMAGES_URL_PATTERN = re.compile(r"^images://")` 상수 정의
+  - `_validate_images_url(url)` — images:// URL 유효성 검증 함수
+  - `_build_images_asset_path(path, use_images_scheme=True)` — images:// 생성 시 정규식 검증 적용
+  - `normalize_hugo_asset_url(url, base_url)` — images:// → 절대 URL 변환, base_url 없으면 None 반환 (FrontMatter 삭제 방지 가드)
+- baby-hugo 등 HUGO_BASEURL/ASSET_DOMAIN 없는 환경에서 images:// 생성 시 의도 명확화
+- PPM-6(기본 스킴 변경)은 추후 단계로 이월
+
+**검증:**
+- [x] IMAGES_URL_PATTERN 패턴: `^images://`
+- [x] _build_images_asset_path에서 _validate_images_url 호출 확인
+- [x] 무효한 URL(https:// 등) 검증 실패 → False 반환 확인
+- [x] 기존 테스트 393 passed (실패 22건은 사전 baseline, Phase 68과 무관)
+
+**잔존 위험 / 후속 작업:**
+- PPM-6: 기본 스킴을 https://로 변경하는 작업은 별도 phase로 이관
+- 실제 파이프라인에서 _build_images_asset_path 사용 여부는 호출 측에서 결정
+
+**한 줄 결론:** "PPM-5 완료 — images:// URL 생성 시 IMAGES_URL_PATTERN(^images://) 정규식 검증 추가, 무효 URL 생성 거부, base_url 없을 때 None 반환으로 FrontMatter 삭제 방지."
+
+---
+
+*Last updated: 2026-08-09 - Phase 68 PPM-5 완료 (images:// URL 정규식 검증 추가). Phase 67 완료. Phase 52 Wave 5 진행 중.*
