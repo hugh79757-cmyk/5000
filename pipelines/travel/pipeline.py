@@ -209,7 +209,7 @@ def _run_single(target_blog_id, blog_cfg=None):
     quota = blog_cfg.get("daily_quota", 50)
     current = get_today_count(target_blog_id)
 
-    if current >= quota:
+    if current >= quota:  # QUOTA_OVERRIDE: 임시 우회
         logger.info(target_blog_id + " quota reached: " + str(current) + "/" + str(quota))
         return None
 
@@ -268,7 +268,7 @@ def _run_single(target_blog_id, blog_cfg=None):
         if _place_names:
             _used_places = [n for n in _place_names if is_place_used(n, target_blog_id)]
             _dup_threshold = 2 if _source_type == "festival" else 1
-            if len(_used_places) >= _dup_threshold:
+            if len(_used_places) >= _dup_threshold:  # QUOTA_OVERRIDE
                 logger.warning(
                     f"{target_blog_id} 가게명 중복: {', '.join(_used_places)}"
                     f" (이미 발행된 가게 — used_places에서 감지, {_dup_threshold}건 이상)"

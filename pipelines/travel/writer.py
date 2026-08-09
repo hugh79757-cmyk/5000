@@ -696,10 +696,11 @@ def _post_process(content):
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
-    # H2 과다 방지: 4개 초과 시 마지막 H2 섹션 제거
+    # H2 과다 방지: 3개 초과 시 마지막 H2 섹션 제거
+    # (마무리 H2 + 쿠팡 섹션이 후처리에서 추가되므로 여유 확보)
     _h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-    if len(_h2_positions) > 4:
-        _cut_pos = _h2_positions[4]
+    if len(_h2_positions) > 3:
+        _cut_pos = _h2_positions[3]
         content = content[:_cut_pos].rstrip()
 
     # ── 쿠팡 여행용품 추천 삽입 (후처리) ──────────────────────────────

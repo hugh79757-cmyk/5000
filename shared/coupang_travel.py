@@ -304,14 +304,13 @@ class CoupangTravel:
         if not final_products:
             return ""
         
-        # 섹션 제목
+        # 섹션 제목 — TAP 본문 규격 §2.5: <p><strong>...</strong></p> (H2 아님)
         section_title = SECTION_TITLES.get(blog_id, "여행 준비에 도움되는 추천 용품")
         
         # HTML 인라인 스타일 사용 (Blogger markdown parser가 리스트/이미지 크기 제어 못함)
         # 참조: tour3.rotcha.kr (Hugo) - coupang-product-grid / coupang-product-card 클래스 사용
         # Blogger에서는 인라인 스타일로 동일 레이아웃 구현
-        # 섹션 제목은 H2로 출력 (Blogger에서 H2 렌더링)
-        lines = [f'\n\n## {section_title}\n',
+        lines = [f'\n\n<p><strong>{section_title}</strong></p>\n',
                  '<div style="display:flex;flex-wrap:wrap;gap:12px;">']
         
         for p in final_products:

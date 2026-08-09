@@ -937,7 +937,8 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
     blog_cfg = get_blog_config(blog_id)
 
     today_count = get_today_count(blog_id)
-    if today_count >= blog_cfg.get("daily_quota", 50):
+    # QUOTA_OVERRIDE: 임시 우회
+    if today_count >= blog_cfg.get("daily_quota", 50):  # QUOTA_OVERRIDE
         return {"success": False, "reason": "daily_quota_exceeded", "count": today_count}
 
     slug = slugify(title)

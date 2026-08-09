@@ -826,17 +826,21 @@ def _post_process(body_md, blog_id, keyword):
 
     parts = []
 
-    # 3. 쿠팡 파트너스
-    try:
-        from shared.coupang_travel import CoupangTravel
-        ct = CoupangTravel()
-        if ct.is_configured():
-            coupang_md = ct.get_travel_product_links(blog_id=blog_id, count=2)
-            if coupang_md:
-                parts.append(coupang_md)
-                logger.info("쿠팡 링크 삽입 완료")
-    except Exception as e:
-        logger.warning(f"쿠팡 링크 삽입 실패: {e}")
+    # 3. 쿠팡 파트너스 — RAP(부동산) 계열 제외
+    #    RAP 블로그는 거주/입주 정보 중심으로, 쿠팡 여행용품과 무관
+    if not blog_id or blog_id.startswith("rap"):
+        logger.debug(f"쿠팡 파트너스 건너뜀 (RAP 계열): {blog_id}")
+    else:
+        try:
+            from shared.coupang_travel import CoupangTravel
+            ct = CoupangTravel()
+            if ct.is_configured():
+                coupang_md = ct.get_travel_product_links(blog_id=blog_id, count=2)
+                if coupang_md:
+                    parts.append(coupang_md)
+                    logger.info("쿠팡 링크 삽입 완료")
+        except Exception as e:
+            logger.warning(f"쿠팡 링크 삽입 실패: {e}")
 
     # 4. 네이버지도 버튼
     _NO_MAP_KEYWORDS = [

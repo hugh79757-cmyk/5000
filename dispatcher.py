@@ -829,8 +829,8 @@ def dispatch(blog_id):
         logger.info(f"{blog_id} is not active")
         _record_failure(blog_id, "inactive", f"blog status = {cfg.get('status')}")
         return None
-    # 발행 전 중복 체크
-    if _is_duplicate(blog_id):
+    # 발행 전 중복 체크 (QUOTA_OVERRIDE: 임시 우회)
+    if _is_duplicate(blog_id):  # QUOTA_OVERRIDE
         logger.info(f"[DEDUP] {blog_id} 동일 제목 중복 — 발행 건너뜀 (quota 소모 안 함)")
         _record_failure(blog_id, "duplicate_title", "daily_quota 도달")
         return {"success": False, "reason": "duplicate_title"}

@@ -8,15 +8,15 @@ progress:
   # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
   # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
   total_phases: 32
-  completed_phases: 28
-  in_progress_phases: 1
+  completed_phases: 29
+  in_progress_phases: 0
   planned_phases: 3
-  percent: 88
+  percent: 91
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 68 PPM-5 완료 (images:// URL 정규식 검증 추가). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.**
+**Status:** v1.1 — **Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
