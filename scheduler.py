@@ -599,6 +599,39 @@ def _run_course_refresh() -> None:
         logger.exception(f"Course refresh failed: {e}")
 
 
+def _run_tap_fetcher(source: str = "all") -> None:
+    """TAP content_pool 갱신 — core.fetcher를 subprocess로 실행.
+
+    5000 venv python에 sqlalchemy이 필요하며, 없을 경우 실패 로그만 남기고 종료.
+    (refresh_festival.py / refresh_course.py와 별도 스케줄로 운영.)
+    """
+    tap_root = os.getenv("TAP_ROOT", "/Users/twinssn/Projects/TAP")
+    if not os.path.isdir(tap_root):
+        logger.warning(f"[TAP fetcher] TAP_ROOT 없음: {tap_root}")
+        return
+    if not os.path.isdir(os.path.join(tap_root, "core")):
+        logger.warning(f"[TAP fetcher] core/ 디렉토리 없음: {tap_root}/core")
+        return
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-m", "core.fetcher", source],
+            cwd=tap_root,
+            capture_output=True, text=True, timeout=600,
+            env={**os.environ, "TAP_ROOT": tap_root, "BASE_PATH": tap_root},
+        )
+        if proc.stdout:
+            for line in proc.stdout.strip().split("\n")[-5:]:
+                logger.info(f"[TAP fetcher] {line}")
+        if proc.returncode != 0:
+            logger.error(f"[TAP fetcher] 실패 (exit={proc.returncode}): {proc.stderr[-300:]}")
+        else:
+            logger.info(f"[TAP fetcher] {source} 완료")
+    except subprocess.TimeoutExpired:
+        logger.exception(f"[TAP fetcher] {source} 600초 타임아웃")
+    except Exception as e:
+        logger.exception(f"[TAP fetcher] {source} 오류: {e}")
+
+
 def _send_morning_report() -> None:
     subprocess.run([sys.executable, "-m", "shared.daily_report"],
                    cwd=os.path.dirname(os.path.abspath(__file__)))
@@ -653,6 +686,12 @@ def register_schedules():
     logger.info("Course refresh scheduled at 06:05")
     schedule.every().day.at("06:10").do(_run_stap_collector)
     logger.info("STAP data collector scheduled at 06:10")
+
+    # TAP content_pool 갱신 (core.fetcher) — refresh_festival.py / refresh_course.py 직후
+    schedule.every().day.at("06:07").do(_run_tap_fetcher, "festival")
+    logger.info("TAP festival fetcher scheduled at 06:07 (daily)")
+    schedule.every().monday.at("06:15").do(_run_tap_fetcher, "camping")
+    logger.info("TAP camping fetcher scheduled Monday at 06:15")
 
     schedule.every().day.at("06:30").do(_run_car_refresh)
 
