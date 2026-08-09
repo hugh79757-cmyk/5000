@@ -304,11 +304,15 @@ class CoupangTravel:
         if not final_products:
             return ""
         
-        # HTML 그리드 생성
+        # 섹션 제목
         section_title = SECTION_TITLES.get(blog_id, "여행 준비에 도움되는 추천 용품")
         
-        html = ['\n\n<p class="coupang-section-title">' + section_title + '</p>']
-        html.append('<div class="coupang-product-grid">')
+        # HTML 인라인 스타일 사용 (Blogger markdown parser가 리스트/이미지 크기 제어 못함)
+        # 참조: tour3.rotcha.kr (Hugo) - coupang-product-grid / coupang-product-card 클래스 사용
+        # Blogger에서는 인라인 스타일로 동일 레이아웃 구현
+        # 섹션 제목은 H2로 출력 (Blogger에서 H2 렌더링)
+        lines = [f'\n\n## {section_title}\n',
+                 '<div style="display:flex;flex-wrap:wrap;gap:12px;">']
         
         for p in final_products:
             pid = p.get("productId")
@@ -321,44 +325,39 @@ class CoupangTravel:
                 continue
             
             price_str = f'{price:,}원'
-            img_tag = ''
-            if image:
-                img_tag = f'<img src="{image}" alt="{name}" loading="lazy" onerror="this.style.display=\'none\'">'
             
-            html.append(f'''
-  <article class="coupang-product-card">
-    <a href="{link}" target="_blank" rel="nofollow">
-      {img_tag}
-      <span class="coupang-product-name">{name}</span>
-      <span class="coupang-product-price">{price_str}</span>
-    </a>
-  </article>''')
+            # CSS로 이미지 크기 고정 (Blogger에서 size 파라미터 무시함)
+            style = ('style="display:flex;align-items:center;gap:8px;'
+                     'padding:8px;background:#f5f5f5;border-radius:8px;'
+                     'text-decoration:none;color:#333;"')
+            
+            if image:
+                img_style = ('style="width:80px;height:80px;object-fit:cover;'
+                            'border-radius:6px;flex-shrink:0;"')
+                lines.append(f'<a href="{link}" target="_blank" rel="nofollow"{style}>'
+                             f'<img src="{image}" alt="{name}" loading="lazy"{img_style}>'
+                             f'<div style="line-height:1.3;min-width:0;">'
+                             f'<div style="font-size:13px;font-weight:500;word-break:break-all;">{name}</div>'
+                             f'<div style="font-size:12px;color:#666;">{price_str}</div>'
+                             f'</div></a>')
+            else:
+                lines.append(f'<a href="{link}" target="_blank" rel="nofollow"{style}>'
+                             f'<div style="line-height:1.3;">'
+                             f'<div style="font-size:13px;font-weight:500;">{name}</div>'
+                             f'<div style="font-size:12px;color:#666;">{price_str}</div>'
+                             f'</div></a>')
         
-        html.append('</div>')
-        html.append('<p class="coupang-disclaimer">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>')
+        lines.append('</div>')
+        lines.append('<p style="font-size:0.8em;color:#888;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>')
         
-        return "\n".join(html)
+        return "\n".join(lines)
 
     # Legacy method for backward compatibility
     def get_travel_product_links(self, blog_id="travel-hugo", count=2):
         if not self.is_configured():
             return ""
-        # New implementation returns HTML, convert to markdown-like for backward compat
-        html = self.get_product_cards(blog_id, count)
-        if not html:
+        # New implementation returns markdown list
+        text = self.get_product_cards(blog_id, count)
+        if not text:
             return ""
-        # Simple extraction for legacy
-        import re
-        items = re.findall(r'<span class="coupang-product-name">([^<]+)</span>.*?<span class="coupang-product-price">([^<]+)</span>', html)
-        if not items:
-            return ""
-        lines = ["\n\n---\n", f"## {SECTION_TITLES.get(blog_id, '여행 준비에 도움되는 추천 용품')}\n"]
-        for name, price in items:
-            # Find link
-            link_match = re.search(rf'<a href="([^"]+)"[^>]*>.*?{re.escape(name)}', html)
-            link = link_match.group(1) if link_match else "#"
-            lines.append(f'- [{name}]({link}) — {price}')
-        lines.append("")
-        lines.append("> **이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.**")
-        lines.append("")
-        return "\n".join(lines)
+        return text

@@ -319,7 +319,10 @@ def _build_data_block(data):
 
 
 def _inject_naver_map(body_md, items, is_festival=False):
-    """v3.1: 장소당 1회만 삽입, 본문 마지막 H2 뒤에 배치"""
+    """각 H3(장소 소제목) 본문 끝(다음 H2/H3 직전)에 네이버 지도 버튼 삽입.
+    H2에는 버튼 삽입하지 않음.
+    순서: ### 장소명 → ![이미지] → 본문... → [네이버 지도에서 보기] → 다음 ###/##
+    """
     import urllib.parse
     if not items:
         return body_md
@@ -335,58 +338,91 @@ def _inject_naver_map(body_md, items, is_festival=False):
             url = "https://search.naver.com/search.naver?query=" + encoded
         else:
             url = "https://map.naver.com/v5/search/" + encoded
-        _btn_label = " 네이버에서 검색하기" if is_festival else " 지도 열기"
-        _btn_cls = "naver-search-btn" if is_festival else "naver-map-btn"
-        btn_html = '<a class="' + _btn_cls + '" href="' + url + '" target="_blank" rel="nofollow">' + title + _btn_label + "</a>"
+        _btn_label = " 네이버에서 검색하기" if is_festival else " 네이버 지도에서 보기"
+        btn_html = ('<div style="text-align:center;margin-top:24px;margin-bottom:24px;">'
+                    '<a href="' + url + '" target="_blank" rel="nofollow" '
+                    'style="display:inline-block;padding:8px 16px;'
+                    'background:#181616;color:#fff;border-radius:6px;'
+                    'text-decoration:none;font-size:14px;font-weight:500;">'
+                    + title + _btn_label + '</a>'
+                    '</div>')
         map_links.append((title, btn_html))
     if not map_links:
         return body_md
 
-    # H2/H3 위치 수집
     lines = body_md.split("\n")
-    heading_indices = [i for i, ln in enumerate(lines) if re.match(r"^#{2,3}\s+", ln)]
 
-    # 각 장소를 매칭되는 첫 번째 H2/H3 뒤에 1회만 삽입
+    # H3만 수집 (H2 제외)
+    h3_indices = [i for i, ln in enumerate(lines) if re.match(r"^###\s+", ln)]
+    if not h3_indices:
+        return body_md
+
+    # 각 H3에 매칭되는 아이템 버튼 찾기
     used_titles = set()
     insert_map = {}  # {line_index: btn_html}
 
     for ml_title, btn_html in map_links:
         if ml_title in used_titles:
             continue
-        name_core = ml_title.replace(" ", "")
-        for h_idx in heading_indices:
-            h_line = lines[h_idx]
-            # 매칭: 3글자 이상 핵심어가 H2에 포함
-            name_parts = [p for p in ml_title.split() if len(p) >= 2]
-            match_count = sum(1 for part in name_parts if part in h_line)
-            core_match = any(name_core[i:i+3] in h_line.replace(" ", "") for i in range(len(name_core)-2)) if len(name_core) >= 3 else False
-            if match_count >= 2 or (len(name_parts) == 1 and name_parts[0] in h_line) or core_match:
-                if h_idx not in insert_map:
-                    insert_map[h_idx] = btn_html
-                    used_titles.add(ml_title)
+        ml_key = ml_title.replace(" ", "")
+        matched_h3_idx = None
+        for h3_idx in h3_indices:
+            h3_line = lines[h3_idx]
+            h3_text = h3_line.replace("### ", "").strip()
+            h3_key = h3_text.replace(" ", "")
+            # 매칭: H3 텍스트가 아이템명 포함 or 아이템명이 H3 텍스트 포함
+            if ml_key in h3_key or h3_key in ml_key or any(p in h3_text for p in ml_title.split() if len(p) >= 2):
+                matched_h3_idx = h3_idx
+                break
+        if matched_h3_idx is None:
+            continue
+
+        # 해당 H3의 섹션 끝 찾기: 다음 H2 또는 H3 직전 인덱스
+        next_heading_idx = None
+        for nh_idx in range(matched_h3_idx + 1, len(lines)):
+            if re.match(r"^#{2,3}\s+", lines[nh_idx]):
+                next_heading_idx = nh_idx
                 break
 
-    # 매칭 안 된 장소는 본문 끝에 삽입
-    tail_btns = []
-    for ml_title, btn_html in map_links:
-        if ml_title not in used_titles:
-            tail_btns.append(btn_html)
+        # 섹션 끝(다음 헤딩 직전 빈 라인 또는 마지막 비어있지 않은 라인)에 버튼 삽입
+        if next_heading_idx is not None:
+            target_idx = next_heading_idx - 1
+            # 빈 라인 찾기 (뒤에서부터)
+            for ins_idx in range(target_idx, matched_h3_idx, -1):
+                if lines[ins_idx].strip() == "":
+                    insert_map[ins_idx] = btn_html
+                    used_titles.add(ml_title)
+                    break
+            else:
+                # 빈 라인 없으면 마지막 내용 라인 다음에 삽입
+                insert_map[target_idx] = btn_html
+                used_titles.add(ml_title)
+        else:
+            # 마지막 H3: 본문 끝까지
+            for ins_idx in range(len(lines) - 1, matched_h3_idx, -1):
+                if lines[ins_idx].strip() == "":
+                    insert_map[ins_idx] = btn_html
+                    used_titles.add(ml_title)
+                    break
+            else:
+                insert_map[len(lines) - 1] = btn_html
+                used_titles.add(ml_title)
 
-    # 조립
-    result = []
-    for i, line in enumerate(lines):
-        result.append(line)
-        if i in insert_map:
-            result.append("")
-            result.append(insert_map[i])
-            result.append("")
+    # 매칭 안 된 장소는 본문 끝에 삽입
+    tail_btns = [btn for _, btn in map_links if _ not in used_titles]
+
+    # 조립 (뒤에서부터 삽입해서 인덱스 밀려도 안전)
+    for i in sorted(insert_map.keys(), reverse=True):
+        lines.insert(i + 1, "")
+        lines.insert(i + 1, insert_map[i])
+        lines.insert(i + 1, "")
 
     # 매칭 안 된 버튼은 맨 끝에 추가
     for btn in tail_btns:
-        result.append("")
-        result.append(btn)
+        lines.append("")
+        lines.append(btn)
 
-    return "\n".join(result)
+    return "\n".join(lines)
 
 
 def _fallback_image_from_korservice(items, theme):
@@ -432,43 +468,56 @@ def _fallback_image_from_korservice(items, theme):
 
 
 def _inject_images(items, content, blog_id=None):
-    """API image URLs into body after each H2 in order"""
+    """각 H3(장소 소제목)에 해당 아이템 이미지를 매칭하여 H3 직후에 삽입.
+    순서: ### 장소명 → ![장소명](이미지) → 본문
+    H2('한눈에 비교' 등)에는 이미지 삽입하지 않음.
+    """
     existing = len(re.findall(r"!\[", content))
     if existing >= len(items):
         return content
 
     from shared.content_store import is_image_used
-    img_list = []
+    # 아이템별 (이름, 이미지) 목록 — 이미지 있는 것만
+    img_map = {}  # {아이템명 핵심 키워드: img_url}
     for item in items:
-        name = item.get("facltNm", item.get("title", ""))
+        name = item.get("facltNm", item.get("title", "")).strip()
         img = item.get("firstImageUrl") or item.get("firstimage") or item.get("image") or ""
-        if name and img and img.startswith("http"):
-            # http → https 변환 (mixed content 방지)
-            if img.startswith("http://tong.visitkorea.or.kr"):
-                img = img.replace("http://", "https://", 1)
-            if img.startswith("http://www.khs.go.kr"):
-                img = img.replace("http://", "https://", 1)
-            if is_image_used(img, blog_id=blog_id):
-                logger.info("이미지 중복 스킵: %s (%s)", name[:20], img[-30:])
-                continue
-            img_list.append((name, img))
+        if not name or not img or not img.startswith("http"):
+            continue
+        if img.startswith("http://"):
+            img = img.replace("http://", "https://", 1)
+        if is_image_used(img, blog_id=blog_id):
+            logger.info("이미지 중복 스킵: %s (%s)", name[:20], img[-30:])
+            continue
+        # 매칭용 핵심어 추출 (공백 제거 + 2글자 이상 단어)
+        key = name.replace(" ", "")
+        img_map[key] = (name, img)
 
-    if not img_list:
+    if not img_map:
         return content
 
     lines = content.split("\n")
     result = []
-    img_idx = 0
     for line in lines:
         result.append(line)
-        if (line.startswith(("## ", "### "))) and img_idx < len(img_list) and not any(skip in line for skip in ["여행 준비", "함께 읽어보기", "코스 주변 맛집", "반경 10km"]):
-            name, img_url = img_list[img_idx]
-            result.append("")
-            result.append(f"![{name}]({img_url})")
-            result.append("")
-            img_idx += 1
-
-    # 잔여 이미지는 삽입하지 않음 (본문 끝에 이미지가 쌓이는 문제 방지)
+        # H3만 대상 (## 무시)
+        if line.startswith("### ") and not any(skip in line for skip in ["여행 준비", "함께 읽어보기", "코스 주변 맛집", "반경 10km"]):
+            h3_text = line.replace("### ", "").strip()
+            h3_key = h3_text.replace(" ", "")
+            # H3 제목과 아이템 이름 매칭 — 정확히 1개 H3에만 이미지 할당 (중복 방지)
+            matched = None
+            for item_key, (item_name, img_url) in img_map.items():
+                # 아이템명이 H3 제목에 포함되면 매칭 (부분 매칭 우선)
+                if item_key in h3_key or item_name in h3_text:
+                    matched = (item_name, img_url)
+                    break
+            # 매칭된 아이템은 재사용 금지 (이미지가 중복 삽입되지 않도록)
+            if matched:
+                result.append("")
+                result.append(f"![{matched[0]}]({matched[1]})")
+                result.append("")
+                # 해당 아이템 키 제거 (중복 매칭 방지)
+                img_map.pop(next(k for k, v in img_map.items() if v == matched), None)
 
     return "\n".join(result)
 
@@ -501,11 +550,11 @@ def _enrich_with_nearby_restaurants_only(data, html):
         card = '<div class="nearby-card">'
         if img:
             card += '<img class="nearby-card-img" src="' + img + '" alt="' + name + '" loading="lazy">'
-        card += '<div class="nearby-card-body">'
-        card += '<strong class="nearby-card-name">' + name + "</strong>"
+        card += '<div class="nearby-card-body" style="text-align:center;">'
+        card += '<strong class="nearby-card-name" style="display:block;margin-bottom:4px;">' + name + "</strong>"
         if addr:
-            card += '<span class="nearby-card-addr">' + addr + "</span>"
-        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도 열기</a>'
+            card += '<span class="nearby-card-addr" style="display:block;margin-bottom:8px;color:#555;">' + addr + "</span>"
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow" style="display:inline-block;padding:8px 20px;background:#181616;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">네이버 지도에서 보기</a>'
         card += "</div></div>"
         return card
 
@@ -554,11 +603,11 @@ def _enrich_with_nearby(data, html):
         card = '<div class="nearby-card">'
         if img:
             card += '<img class="nearby-card-img" src="' + img + '" alt="' + name + '" loading="lazy">'
-        card += '<div class="nearby-card-body">'
-        card += '<strong class="nearby-card-name">' + name + "</strong>"
+        card += '<div class="nearby-card-body" style="text-align:center;">'
+        card += '<strong class="nearby-card-name" style="display:block;margin-bottom:4px;">' + name + "</strong>"
         if addr:
-            card += '<span class="nearby-card-addr">' + addr + "</span>"
-        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow">지도 열기</a>'
+            card += '<span class="nearby-card-addr" style="display:block;margin-bottom:8px;color:#555;">' + addr + "</span>"
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow" style="display:inline-block;padding:8px 20px;background:#181616;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">네이버 지도에서 보기</a>'
         card += "</div></div>"
         return card
 
@@ -661,7 +710,8 @@ def _post_process(content):
             _blog_id = getattr(_inject_entity_cards, "_current_blog_id", "travel-hugo")
             _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=3)
             if _coupang_html:
-                content = content.rstrip() + _coupang_html
+                # 본문 마지막에 '마무리' H2 추가 후 쿠팡 섹션 연결
+                content = content.rstrip() + "\n\n## 마무리\n\n" + _coupang_html
     except Exception as _ce:
         logger.warning("쿠팡 여행용품 삽입 실패: %s", _ce)
 
@@ -693,7 +743,16 @@ def _inject_entity_cards(content):
 
     h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
 
-    if len(selected) < 2 or len(h2_positions) < 3:
+    if len(selected) < 2:
+        return content
+
+    if len(h2_positions) < 2:
+        # H2가 1개뿐이면 두 번째 카드는 본문 맨 끝에 배치 (상단 회귀 방지)
+        content = content.rstrip() + "\n\n" + cards[1]
+        return content
+
+    if len(h2_positions) < 3:
+        # H2가 2개면 중간 위치(첫 H2와 둘째 H2 사이 또는 둘째 H2 앞)에 배치
         mid_idx = len(h2_positions) // 2
         content = content[:h2_positions[mid_idx]] + "\n" + cards[-1] + "\n" + content[h2_positions[mid_idx]:]
         return content
@@ -1094,12 +1153,8 @@ def generate_content(data, blog_id="travel-hugo"):
     angle = data.get("angle", theme)
     items = data.get("items", [])
 
-    # 실제 본문에서 다룬 장소 수 산출 (H3 또는 H2 내 장소명 매칭)
-    _body_h3 = re.findall(r"^### (.+)", content, re.MULTILINE)
-    _body_place_count = len(_body_h3) if _body_h3 else len(items)
-    # H3가 없으면 items 수 사용, 단 data_block 절단([:3]) 반영
-    if _body_place_count == 0:
-        _body_place_count = min(len(items), 3)
+    # 실제 다룬 장소 수는 items 기준으로만 결정 (H3 수에 영향받지 않음)
+    _body_place_count = len(items) if len(items) > 0 else 1
 
     TITLE_TEMPLATES = {
         "travel-hugo": [
@@ -1186,7 +1241,7 @@ def generate_content(data, blog_id="travel-hugo"):
 
 
     import random as _rand
-    templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES["travel-hugo"])
+    templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES.get("travel2-hugo") if source_type == "heritage" else TITLE_TEMPLATES["travel-hugo"])
     # 1곳일 때 "{count}" 포함 템플릿 제외 (제목-본문 불일치 방지)
     # _body_place_count 대신 len(items) 사용 — 본문 생성 전 결정 가능한 기준
     if len(items) <= 1:
@@ -1221,8 +1276,8 @@ def generate_content(data, blog_id="travel-hugo"):
 
     place_names = ", ".join([i.get("title", i.get("facltNm", ""))[:12] for i in items[:3]])
 
-    # blog_id별 제목 프롬프트 분기
-    if blog_id == "travel2-hugo":
+    # blog_id별 제목 프롬프트 분기 (tap-blogger도 heritage 콘텐츠면 travel2-hugo 프롬프트 사용)
+    if blog_id == "travel2-hugo" or (blog_id == "tap-blogger" and source_type == "heritage"):
         title_prompt = f"""자연스럽고 클릭하고 싶은 한국어 블로그 제목 1개만 출력하세요. 따옴표 없이 제목만.
 
 지역: {display_region}
@@ -1249,7 +1304,7 @@ def generate_content(data, blog_id="travel-hugo"):
 
 지역: {display_region}
 테마: {theme}
-장소수: {_body_place_count}
+
 대표 장소: {place_names}
 
 핵심 원칙: 검색되는 말(지역+주제)을 앞쪽에, 실제 장소 이름을 하나 넣고, 클릭할 이유가 보이게. 군더더기 없이 25~35자.
