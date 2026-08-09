@@ -554,7 +554,7 @@ def _enrich_with_nearby_restaurants_only(data, html):
         card += '<strong class="nearby-card-name" style="display:block;margin-bottom:4px;">' + name + "</strong>"
         if addr:
             card += '<span class="nearby-card-addr" style="display:block;margin-bottom:8px;color:#555;">' + addr + "</span>"
-        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow" style="display:inline-block;padding:8px 20px;background:#181616;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">네이버 지도에서 보기</a>'
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow" style="display:inline-block;padding:8px 20px;margin-top:12px;margin-bottom:12px;background:#181616;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">네이버 지도에서 보기</a>'
         card += "</div></div>"
         return card
 
@@ -607,7 +607,7 @@ def _enrich_with_nearby(data, html):
         card += '<strong class="nearby-card-name" style="display:block;margin-bottom:4px;">' + name + "</strong>"
         if addr:
             card += '<span class="nearby-card-addr" style="display:block;margin-bottom:8px;color:#555;">' + addr + "</span>"
-        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow" style="display:inline-block;padding:8px 20px;background:#181616;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">네이버 지도에서 보기</a>'
+        card += '<a class="nearby-card-btn" href="' + map_url + '" target="_blank" rel="nofollow" style="display:inline-block;padding:8px 20px;margin-top:12px;margin-bottom:12px;background:#181616;color:#fff;border-radius:6px;text-decoration:none;font-size:14px;font-weight:500;">네이버 지도에서 보기</a>'
         card += "</div></div>"
         return card
 
