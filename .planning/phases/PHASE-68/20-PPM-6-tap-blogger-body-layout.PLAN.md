@@ -60,10 +60,10 @@ TAP 프로젝트는 **플랫폼별로 Writer가 분리**되어 있다. 에이전
 - [x] 네이버 지도 버튼 스타일 가운데 정렬 적용 (Hugo 블로그 전용)
 - [x] 기존 테스트 통과 확인
 
-**tap-blogger 실제 적용을 위한 별도 기준 (TAP 프로젝트 코드):**
-- [ ] TAP `ai_writer.py` 프롬프트에서 "마무리" H2 구조 포함 여부 확인
-- [ ] TAP `content_processor.py:insert_images_and_links()`에서 네이버 지도 버튼 스타일 확인 (가운데 정렬, 여백)
-- [ ] TAP 발행글 실제 확인 (travel.rotcha.kr)
+**tap-blogger 실제 적용 기준 (TAP 프로젝트 코드) — 확인 완료:**
+- [x] TAP `ai_writer.py` 프롬프트에서 "마무리" H2 구조 포함 여부 확인 → **이미 포함됨** (캠핑 4개 h2 중 마지막)
+- [x] TAP `content_processor.py:insert_images_and_links()`에서 네이버 지도 버튼 스타일 확인 → **이미 `text-align:center` 적용**, green 버튼 (#03C75A). info-box 구조 내에서 레이아웃 제어됨. 수정 불필요.
+- [x] TAP 발행글 실제 확인 (travel.rotcha.kr) → https://travel.rotcha.kr/2026/08/3_01403288312.html
 
 ## 범위 (Scope)
 
@@ -154,28 +154,32 @@ style="display:inline-block;padding:8px 20px;margin-top:12px;margin-bottom:12px;
 
 TAP 아키텍처에 따라 **Blogger Writer**(TAP/core/)와 **Hugo Writer**(5000/pipelines/travel/writer.py)는 별도 코드베이스.
 
-#### 4-1. 네이버 지도 버튼 스타일 확인 (본문 + Nearby 구분)
+#### 4-1. 네이버 지도 버튼 스타일 확인 (본문 + Nearby 구분) — ✅ 확인 완료
 
 **★ TAP도 본문 버튼과 Nearby 버튼이 별도로 처리됨:**
 
-- **본문 H3 끝 버튼:** `TAP/core/content_processor.py:insert_images_and_links()` (L185-259)
-  - `###` 마크다운 헤딩 → `<h3>` HTML 변환 시 버튼 삽입
-  - 버튼 HTML에 `text-align:center` 및 margin 스타일 적용 여부 확인
-  
-- **Nearby 버튼:** `TAP/core/content_processor.py:add_nearby_section()` (또는 유사 함수)
-  - nearby 카드 내 네이버 지도 버튼 스타일 확인
-  - 카드 body 정렬 + 버튼 여백 확인
+- **본문 info box 버튼:** `TAP/core/content_processor.py:insert_images_and_links()` (L204)
+  - 버튼 HTML: `<p style="text-align:center;"><a href="{map_url}" ... style="display:inline-block; background:#03C75A; ...">네이버 지도에서 보기</a></p>`
+  - **이미 `text-align:center` 적용됨.** green 버튼(#03C75A), rounded(25px), inline-block.
+  - info-box 구조 내에서 레이아웃 제어됨. margin 별도 조절 불필요 (info-box가 div로 감싸져 있음).
+  - **판단: 수정 불필요.**
 
-#### 4-2. "마무리" H2 구조 확인
+- **Nearby 버튼:** `TAP/core/nearby_info.py:render_nearby_html()` (L317-318, L341-342)
+  - 버튼 형태 아님: `<a href="{map_url}" ... style="color:#03C75A; font-size:13px; text-decoration:none;">지도에서 보기</a>`
+  - inline 텍스트 링크 스타일. 5000-side의 nearby 카드 버튼과는 다른 디자인.
+  - **판단: 현재 스타일도 깔끔함. 수정 불필요.**
+
+#### 4-2. "마무리" H2 구조 확인 — ✅ 확인 완료
 
 - 파일: `/Users/twinssn/Projects/TAP/core/ai_writer.py`
-- 캠핑 프롬프트 (L200-233): h2 구조에 "마무리" 포함 여부 확인
-  - RESEARCH 결과: 캠핑은 이미 4개 h2 (고르는 기준, 한눈에 비교, 방문 팁, 마무리)
-  - user가 요청한 "마무리" H2가 프롬프트에 명시되어 있는지 확인
+- 캠핑 프롬프트 (L200-233): h2 구조에 "마무리" 포함 확인
+  - **이미 4개 h2:** 고르는 기준, 한눈에 비교, 방문 팁, **마무리**
+  - user가 요청한 "마무리" H2가 프롬프트에 명시되어 있음
 - heritage: 3개 h2 (보는 포인트, 한눈에 비교, 마무리)
 - korservice: 5개 h2 (고르는 기준, 한눈에 비교, 방문 팁, FAQ, 마무리)
+- **판단: 모든 카테고리에서 "마무리" H2 이미 존재함. 수정 불필요.**
 
-#### 4-3. 쿠팡 상품 섹션 (선택)
+#### 4-3. 쿠팡 상품 섹션 (선택) — ℹ️ 해당 없음
 
 - tap-blogger에는 현재 쿠팡 상품 섹션이 없음 (TAP content_processor.py에 쿠팡 관련 코드 없음)
 - 필요시 TAP content_processor.py에 5000 CoupangTravel 연동 추가 검토
@@ -190,9 +194,9 @@ TAP 아키텍처에 따라 **Blogger Writer**(TAP/core/)와 **Hugo Writer**(5000
 - [x] 기존 기능 회귀 없음 (H2 개수 제한 등 영향 확인)
 
 **TAP 프로젝트 (tap-blogger 실제 적용):**
-- [ ] TAP content_processor.py의 네이버 지도 버튼 스타일 확인 및 필요시 수정
-- [ ] TAP ai_writer.py 프롬프트의 "마무리" H2 구조 확인
-- [ ] tap-blogger 실제 발행글(travel.rotcha.kr)에서 레이아웃 확인
+- [x] TAP content_processor.py의 네이버 지도 버튼 스타일 확인 및 필요시 수정 → **확인 완료, 수정 불필요** (info box 내 button 이미 `text-align:center` 적용)
+- [x] TAP ai_writer.py 프롬프트의 "마무리" H2 구조 확인 → **확인 완료, 이미 포함** (캠핑 4개 h2: 고르는 기준, 한눈에 비교, 방문 팁, 마무리)
+- [x] tap-blogger 실제 발행글(travel.rotcha.kr)에서 레이아웃 확인 → https://travel.rotcha.kr/2026/08/3_01403288312.html
 
 ## 검증 기준
 
@@ -203,9 +207,9 @@ TAP 아키텍처에 따라 **Blogger Writer**(TAP/core/)와 **Hugo Writer**(5000
 - [x] 네이버 지도 버튼 스타일 확인 (test 스크립트로 검증)
 
 **TAP 프로젝트:**
-- [ ] content_processor.py:insert_images_and_links() 네이버 지도 버튼 HTML 확인
-- [ ] ai_writer.py 프롬프트의 마무리 H2 구조 확인
-- [ ] tap-blogger 실제 발행글 확인 (travel.rotcha.kr)
+- [x] content_processor.py:insert_images_and_links() 네이버 지도 버튼 HTML 확인 → info box 내 button, `text-align:center` 적용, green(#03C75A), rounded. 수정 불필요.
+- [x] ai_writer.py 프롬프트의 마무리 H2 구조 확인 → 캠핑 프롬프트에 4개 h2 포함, 마지막이 "마무리"
+- [x] tap-blogger 실제 발행글 확인 (travel.rotcha.kr) → https://travel.rotcha.kr/2026/08/3_01403288312.html
 
 ## 참고
 
