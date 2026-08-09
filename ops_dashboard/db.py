@@ -827,6 +827,9 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
     fail_checks = []
     excluded_fail_checks = []
 
+    # c06_mtime_deploy는 fail이 아닌 INFO/참고 버킷으로 분리 (C.6 룩북 확정)
+    info_checks: list[dict] = []
+
     def _is_std_family(r):
         # standard_compliance 계열: aggregate(check_name='standard_compliance')
         # 또는 개별 규칙 행(check_name == rule_id, 예: 'R06').
@@ -870,8 +873,11 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
             })
 
         for d in entries:
+            # c06_mtime_deploy는 fail이 아닌 INFO/참고 버킷으로 분리 (C.6 룩북 확정)
+            if d.get("check_name") == "c06_mtime_deploy":
+                info_checks.append(d)
             # 운영 중이고 paused가 아니면 fail_checks에 포함
-            if cfg == "active" and maint != "paused":
+            elif cfg == "active" and maint != "paused":
                 fail_checks.append(d)
             else:
                 d["config_status"] = cfg
@@ -905,6 +911,7 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
     return {
         "fail_checks": fail_checks,
         "excluded_fail_checks": excluded_fail_checks,
+        "info_checks": info_checks,
         "open_issues": [dict(r) for r in open_issues],
         "stale_blogs": [dict(r) for r in stale],
     }
@@ -1458,6 +1465,7 @@ def get_attention_blogs(
             AND cr.checked_at = latest.latest
         LEFT JOIN blog_lifecycle bl ON bl.blog_id = cr.blog_id
         WHERE cr.status = 'fail'
+        AND cr.check_name != 'c06_mtime_deploy'
         AND bl.config_status = 'active'
         AND (bl.maintenance_status IS NULL OR bl.maintenance_status != 'paused')
     """
