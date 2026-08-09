@@ -155,6 +155,10 @@ class TestDetectPostGenerateDispatcher:
         assert "P08" in {d.problem_id for d in result}
 
     def test_mixed_content_returns_all_applicable(self):
+        # P07(CJK 누수)만 트리거되고 P09/P23은 이미지 URL이 없어 미발동.
+        # 구 코드는 본문 전체를 detect_repeated_image_url/ detect_image_url_length에
+        # 전달해 오탐(P09/P23)했으나, 수정後は 이미지 markdown/HTML/frontmatter에서만
+        # URL을 추출해 개별 검사하므로 이 텍스트만으로는 P09/P23 미발동 (BUG-P09-001 수정).
         content = (
             "https://img.example.com/a/a/a/a/a/a/a/a/"
             + "b" * 500
@@ -162,4 +166,48 @@ class TestDetectPostGenerateDispatcher:
         )
         result = detect_post_generate(content, "test-hugo")
         assert isinstance(result, list)
-        assert {d.problem_id for d in result} == {"P07", "P09", "P23"}
+        assert {d.problem_id for d in result} == {"P07"}
+
+    def test_p09_p23_fire_only_on_real_image_urls(self):
+        """P09/P23은 실제 이미지 URL 문법(![](url), <img src>)이 있을 때만 발동.
+
+        본문 전체가 아니라 이미지 URL 각각을 개별 검사하므로,
+        URL 자체에 세그먼트 중복/길이 초과가 없으면 오탐하지 않는다.
+        """
+        # 반복 세그먼트가 있는 이미지 URL → P09 발동
+        # total=25, unique=11, unique(11) < total/2(12.5) → P09 트리거
+        content_p09 = (
+            "![alt]("
+            + "https://img.example.com/"
+            + "a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/"  # 16개 'a' 반복
+            + "b/c/d/e/f/g"  # 고유 세그먼트 7개
+            + ")"
+        )
+        result = detect_post_generate(content_p09, "test-hugo")
+        assert {d.problem_id for d in result} == {"P09"}
+
+        # 500자 초과 이미지 URL → P23 발동
+        long_url = "https://img.example.com/" + "x" * 510 + ".jpg"
+        content_p23 = f"![alt]({long_url})"
+        result = detect_post_generate(content_p23, "test-hugo")
+        assert {d.problem_id for d in result} == {"P23"}
+
+        # 정상 이미지 URL(세그먼트 중복 없고 길이 500자 이하) → P09/P23 미발동
+        content_ok = "![alt](https://img.example.com/photos/korea/seoul/2026/08/image.webp)"
+        result = detect_post_generate(content_ok, "test-hugo")
+        assert {d.problem_id for d in result} == set()
+
+    def test_p09_does_not_fire_on_plain_text_url(self):
+        """동일 URL 문자열이라도 이미지 마크업 없이 단순 텍스트면 P09 미발동.
+
+        URL 추출기는 ![](url), <img src=url>, frontmatter featureimage만 인식하므로
+        본문에 그냥 적힌 URL 문자열은 검사 대상에서 제외된다.
+        """
+        plain_url = (
+            "https://img.example.com/"
+            + "a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/"
+            + "b/c/d/e/f/g"
+        )
+        result = detect_post_generate(plain_url, "test-hugo")
+        # CJK 패턴도 없고 이미지 마크업도 없음 → 아무 감지 없음
+        assert {d.problem_id for d in result} == set()
