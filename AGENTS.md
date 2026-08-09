@@ -1444,6 +1444,104 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 
 ---
 
+### C.6 콘텐츠 무결성 검사(C01~C09) 및 정비 체크리스트 레시피
+
+> 추가일: 2026-08-09 | 상태: 활성 | 출처: `ops_dashboard/checks/content_integrity.py`, `ops_dashboard/checks/maintenance.py` 판정 로직 확인 기반.
+> 적용 우선순위: c06_mtime_deploy(22건) > c05_draft_publish(14건) > maintenance_checklist M01~M11(7건).
+> 나머지 C-계열(gsd_crosscheck, c03_fm_key_leak, c04_prompt_leak, freshness)은 판정 로직 확인·분류만 수록하고 레시피 초안은 선택(🔽 참고).
+
+#### C06 — 로컬 파일 수정 시각 검사 (c06_mtime_deploy)
+
+- **정의**: 최근 1일 이내 수정된 포스트 파일이 존재하면 fail. check_name은 "c06_mtime_deploy"이나, 현재 구현(`_check_c06`, `ops_dashboard/checks/content_integrity.py:152-160`)은 배포 시각과의 비교가 아니라 파일 mtime이 1일 이내인지 여부만 판정.
+- **fail 판정 근거 (evidence)**:
+  - `_check_c06()`: 파일 mtime이 1일 이내면 `False, f"C06 경고: 최근 수정 ({mtime.strftime('%Y-%m-%d')})"` 반환.
+  - check_c06 전체 결과: `"C06 경고 N건: C06 경고: 최근 수정 (YYYY-MM-DD); ..."` (`ops_dashboard/checks/content_integrity.py:360-361`).
+  - **"C06 경고" 문자열 사용** — "위반"보다 약한 표현으로, 경고 수준임을 시사.
+- **조치 대상 파일**: 해당 블로그의 `content/posts/<slug>/index.md` (최근 7일 내 포스트 중 mtime 1일 이내인 파일)
+- **조치 내용**:
+  - (a) 탐지된 파일이 의도적으로 수정된 것이 분명하면(예: 이미지 교체, frontmatter 수정, 콘텐츠 보강 등 정상 작업) 이 체크는 **무시** 가능 — mtime은 정상 작업으로도 갱신됨.
+  - (b) 의도하지 않은 수정(실수, 프로세스 오작동 등)이 의심되면 해당 파일의 수정 원인을 조사하고 필요시 원복.
+  - 주의: 현재 구현은 "배포 시각 vs mtime" 비교가 아니라 "1일 이내 수정 여부"만 확인하므로, 정상 작업으로 수정된 파일도 fail이 될 수 있음. 이 체크의 본래 의도(배포 후 파일 변조 감지)라면 배포 시각 기준 비교가 필요하나, 현재 코드에는 배포 시각 정보가 연동돼 있지 않음.
+- **등급 결정트리**:
+  - 최근 수정 파일이 의도적 작업 결과임이 분명 → **A**(무시 + 체크 통과 처리 검토)
+  - 수정 원인 불명 또는 의도치 않은 수정 의심 → **B**(원인 조사 후 판단)
+  - 체크 설계 의도(배포 후 변조 감지 vs 단순 최근 수정 경고)가 불명 → **B**(의도 확인 1회)
+- **사용자 결정지점**: "c06_mtime_deploy의 설계 의도는? 최근 수정 파일을 경고만 하고 넘어갈지, 배포 후 변조 감지로 엄격히 볼지?" — 이 질문 하나로 등급·조치 방향이 결정됨.
+- **STOP 조건**:
+  - (e) 조치 방향이 "재배포"인지 "무시"인지 불명확하면 중단·보고. 현재 코드가 "경고" 표현을 쓰나 fail로 처리하므로 조치 수준 판단이 선행되어야 함.
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 조치 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
+- **검증 방법**: 조치 후 `POST /api/run-checks?blog_id={blog_id}` → check_results에서 c06_mtime_deploy status가 pass로 전환되는지 확인.
+- **비가역 플래그**: 없음 (파일 수정 없이 조사·판단만 하거나, 필요시 파일 원복). 단, (a) 판단 하에 "무시"로 넘어갈 경우 체크 통과 처리 로직(체크 제외 등)은 별도 검토.
+
+#### C05 — draft:true 발행 감지 (c05_draft_publish)
+
+- **정의**: 발행된 포스트의 frontmatter에 `draft: true`(대소문자 무관)가 남아 있는 상태. draft:true 포스트는 발행 대상에서 제외되어야 하나 실제 발행된 경우 감지.
+- **fail 판정 근거 (evidence)**:
+  - `_check_c05()` (`ops_dashboard/checks/content_integrity.py:145-149`): `fm.get("draft", "").lower() == "true"` → `False, "C05 위반: draft:true 발행 대상"`.
+  - check_c05 전체 결과: `"C05 위반 N건: <slug>: C05 위반: draft:true 발행 대상; ..."` (`ops_dashboard/checks/content_integrity.py:337-338`).
+- **조치 대상 파일**: 해당 블로그의 `content/posts/<slug>/index.md` (draft:true가 적발된 포스트 각각의 frontmatter)
+- **조치 내용**:
+  - frontmatter의 `draft: true`를 `draft: false`로 변경(또는 `draft: true` 라인 제거).
+  - 주의: 이미 발행된 포스트의 frontmatter 수정이므로 수정 후 재배포 필요.
+  - draft:true를 그대로 두는 것은 정책 위반 상태이므로 방치 불가.
+  - **P09 false positive 수정(2026-08-09, BUG-P09-001)과의 관계**: 무관. P09 수정은 `detect_post_generate`가 본문 전체가 아닌 개별 이미지 URL만 검사하도록 변경한 것(`shared/problem_detectors.py`); c05는 frontmatter draft 플래그 검사로 서로 독립적.
+- **등급 결정트리**:
+  - draft:true 삭제 + 재배포 → **B**(파일 수정 + 재배포, 판단 1회)
+- **사용자 결정지점**: 없음 (B등급이나 조치는 명확 — draft:true 제거 + 재배포).
+- **STOP 조건**:
+  - (a) 조치 범위가 해당 포스트의 draft 필드 변경으로만 한정되는지 확인. 다른 필드·다른 포스트까지 번지면 중단.
+  - (f) 조치 과정에서 원본 콘텐츠 본문이 삭제/변형되지 않도록 주의 (frontmatter만 수정).
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 수정·배포 후 반드시 `POST /api/run-checks?blog_id={blog_id}` 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
+- **검증 방법**: 조치 후 `POST /api/run-checks?blog_id={blog_id}` → c05_draft_publish status가 pass로 전환 확인.
+- **비가역 플래그**: 없음 (draft 플래그 변경 + 재배포, 본문 보존 전제).
+
+#### maintenance_checklist (M01~M11 정비 체크리스트)
+
+- **정의**: 블로그 정비 대상 블로그(maintenance_status != 'none')에 대해 M01~M11 정비 항목을 일괄 실행하고 전체 통과 여부를 판정. maintenance_checklist 자체가 fail이면 하나 이상의 M-항목이 fail 상태. 현재 7건이 fail (M01~M11 중 하나 이상이 실패한 블로그 7개).
+- **fail 판정 근거 (evidence)**:
+  - `check_maintenance_checklist()` (`ops_dashboard/checks/maintenance.py:504-567`): MAINTENANCE_CHECKS(M01~M11) 순회 실행 → fail 있으면 `"M-체크리스트: N/M 통과, K개 실패"`, 전체 통과면 `"M-체크리스트: 전체 11항목 통과 — 재개 준비 완료"`.
+  - 개별 M-항목 fail은 `set_check_item_status()`로 DB(`maintenance_checklist_items` 테이블)에 기록됨.
+- **조치 대상**: fail된 개별 M-항목 (maintenance_checklist_items 테이블에서 blog_id별 체크 항목별 status 확인 가능).
+- **M01~M11 각 항목 판정 로직·조치 요약** (판정 로직 출처: `ops_dashboard/checks/maintenance.py`):
+  - **M01** (제목 CJK 없음, `_check_cjk_in_title` L30-71): 최근 20개 발행 제목에 한자(\u4e00-\u9fff)·히라가나(\u3040-\u309f)·가타카나(\u30a0-\u30ff) 포함 시 fail. 조치: 제목 재생성(CJK 제거) → **콘텐츠 재생성 수반, 🔴 별도 웨이브 승인 필요.**
+  - **M02** (이미지 정상, `_check_image_repetition` L153-198): 최근 20개 포스트 featureimage 중 동일 URL 3회 이상 반복 시 fail. 조치: 중복 이미지 사용 포스트의 featureimage 변경 → **content 수정.**
+  - **M03** (크로스링크 주제 일관, `_check_crosslink_relevance` L204-206): `check_crosslink_consistency` 실행, fail 시 크로스링크 관련 조치. 조치: 크로스링크 검토·수정이 필요하면 content 수정. [crosslink.py 상세 참조]
+  - **M04** (본문 품질 게이트, `_check_content_quality` L209-225): known_issues에서 issue_id가 Q로 시작하고 open 상태인 이슈 존재 시 fail. 조치: 해당 Q 이슈 해결 → **이슈 종류별 조치 상이.**
+  - **M05** (표준 준수, `_check_standard_compliance` L228-239): 최신 standard_compliance check_results가 fail이면 fail. 조치: R01~R12 각 규칙별 조치 → **Appendix C.2 레시피로 위임 (이미 존재).**
+  - **M06** (키워드 잔량 충분, `_check_keyword_availability` L242-327): defined 키워드 - published_products 사용 < 24개(남은 키워드)면 fail. 조치: keywords.py/KEYWORD_MAP에 키워드 추가 또는 publish_products 정산 → **키워드 관리.**
+  - **M07** (P03 유사제목 안전, `_check_similar_title_safety` L330-357): 최근 7일 내 similar_title 차단 발생(content.db publish_ledger) 시 fail. 조치: 차단 원인 조사·제목 패턴 조정 → **P10(title_blocked) 레시피 참조 가능.**
+  - **M08** (CoT/프롬프트 누수 없음, `_check_cot_leak` L360-372): known_issues에서 P07/P08이 open 상태면 fail. 조치: 누수 이슈 해결 → **leak_detected 레시피(C.3) 참조.**
+  - **M09** (publish_log 기록 정상, `_check_publish_log_integrity` L375-457): content.db publish_ledger 발행 건수 > 0이나 모든 소스 DB(curation.db, stap_content.db, car.db, stock.db, rap.db 등) 로그 0건이면 fail. 조치: 소스 DB 로그 기록 누락 원인 조사·수정 → **파이프라인 로그 설정 점검.**
+  - **M10** (도메인 가용성, `_check_domain_health` L460-482): 도메인 HTTP HEAD가 200-399 범위 아니면 fail, 연결 실패도 fail. 조치: 도메인 상태·배포 확인 → **인프라 점검.**
+  - **M11** (본문·슬러그 CJK 없음, `_check_cjk_in_body_and_slug` L74-150): 최근 20개 포스트 본문 또는 슬러그(디렉토리명)에 한자·히라가나·가타카나 포함 시 fail. 조치: 본문/슬러그 재생성(CJK 제거) → **콘텐츠 재생성 수반, 🔴 별도 웨이브 승인 필요.**
+- **등급 결정트리** (전체 maintenance_checklist):
+  - 개별 M-항목 fail → 해당 항목 조치로 해결 → `POST /api/maintenance/checklist` (JSON body `{"blog_id": "{blog_id}"}`) 재실행 → 전체 pass 전환 → resume_ready = True.
+  - M01/M11(콘텐츠 본문·제목 재생성), M02(콘텐츠 수정) 등 콘텐츠 변경이 필요한 항목은 비가역적 변경 수반 가능 → **🔴 별도 웨이브 승인 필요.**
+- **사용자 결정지점**: M01/M11 등 콘텐츠 본문·제목 재생성이 필요한 항목의 조치 범위와 방식 결정 시.
+- **STOP 조건**:
+  - (f) M01/M11 조치 계획에 콘텐츠 본문·제목 삭제/재생성이 포함 → 재생성 범위·대상 명시한 별도 웨이브 승인 필요. 자동 금지.
+  - (a) maintenance_checklist 외 파일·DB 수정으로 번지면 중단.
+  - **(e) 재검사 트리거 호출 전 "FAIL→PASS 예상"으로 완료 보고** → 중단. 조치 후 반드시 `POST /api/maintenance/checklist` ({blog_id} 대상) 호출로 화면 갱신 후 재검증. 자동 갱신 대기는 STOP.
+- **검증 방법**: 개별 M-항목 조치 후 `POST /api/maintenance/checklist` (JSON body `{"blog_id": "{blog_id}"}`) 재실행 → maintenance_checklist status가 pass로 전환 + resume_ready = True 확인.
+- **비가역 플래그**: M01/M11(콘텐츠 본문·제목 재생성)은 🔴 별도 웨이브·명시 승인 필요. M02~M10은 조치 내용에 따라 다름(대부분 콘텐츠 수정·설정 변경·인프라 점검 수준, 본문 삭제/변형 없는 범위에서 처리 가능).
+
+---
+
+#### C-계열 기타 검사 — 판정 로직 확인·분류만 (레시피 초안 선택)
+
+아래 C-계열 검사들은 현재 fail 발생하고 있으나, 이번 룩북 추가에서는 판정 로직 확인·분류만 수행하고 레시피 초안은 선택(필요 시 별도 세션에서 작성).
+
+| check_name | fail 건수 | 판정 로직 요약 | 분류 |
+|------------|----------|--------------|------|
+| **gsd_crosscheck** | 3건 | `check_crosscheck()` (`ops_dashboard/checks/crosscheck.py:19-58`): auto_detectable 이슈가 있으나 해당 블로그의 fail check_results가 없으면 fail. **메타 검사**(다른 체크가 이슈를 제대로 catch했는지 검증). 조치: 근본은 각 auto_detectable 이슈에 대한 개별 체크가 fail을 내도록 하는 것 — gsd_crosscheck 자체보다 해당 이슈의 담당 체크를 정비. **별도 레시피 불필요(메타 검사).** |
+| **c03_fm_key_leak** | 3건 | `_check_c03()` (`ops_dashboard/checks/content_integrity.py:123-129`): 본문(프론트매터 이후)에 FM_KEYS(title, og_image, featureimage, date, slug 등) 라인이 regex로 검출되면 fail. 증거: `"C03 위반: N건 — leaked_line"`. 조치: 본문에서 frontmatter 키 형식의 라인 제거 → **content 수정(경미).** 레시피 초안은 선택. |
+| **c04_prompt_leak** | 1건 | `_check_c04()` (`ops_dashboard/checks/content_integrity.py:132-142`): C04_KO_PATTERNS + C04_EN_PATTERNS(국문·영문 LLM 프롬프트/사고문 패턴)으로 본문 검사, 검출 시 fail. 증거: `"C04 위반: 프롬프트 누수 N건 — matched_text"`. P08/P07(leak_detected)과 밀접. 조치: 본문에서 누수 패턴 제거 + 프롬프트/방지 로직 점검 → **leak_detected 레시피(C.3) 참조, 본문 수정은 별도.** 레시피 초안은 선택. |
+| **freshness** | 1건 | `check_freshness()` (`ops_dashboard/checks/freshness.py:27-69`): 계열별 stale 기준(cuap=1일, etap/tap/stap/cap/rap/seap=7일, manual=30일) 대비 마지막 성공 발행 후 경과일 초과 시 fail. 조치: 해당 블로그 신규 발행 → **파이프라인 정상 발행으로 해소, 별도 FIX 레시피 불필요(설계상 정상).** |
+
+> 참고: freshness는 "조치가 파이프라인 정상 발행"이라는 점에서 FIX 레시피북의 "코드 수정·콘텐츠 수정" 유형과 성격이 다름. freshness fail은 파이프라인을 정상 가동하면 자동 해소되므로 레시피북에 등재하지 않음.
+
+---
+
 ## Appendix D — Fleet 확장(온보딩) 런북
 
 > 목적: 5000 대시보드에 새 블로그·새 분기를 추가할 때, 코드 구조를 읽지 않고도 안전하게 등록·검증할 수 있는 표준 절차. Appendix C와 동일한 "의도·경계형" 철학 — 정확한 명령은 실행 시점 생성, 목표 상태·허용 범위·STOP 조건만 못 박음.
