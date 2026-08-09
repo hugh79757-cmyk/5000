@@ -1,9 +1,8 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-08-06
-
-**Actual phases completed:** 32 phases 완료 (Phase 59 Planned)
-**현재 대시보드:** http://localhost:5050 (38개 5000 + 7 SAP + 2 aikorea24 = 47개 블로그 통합)
+**Last updated:** 2026-08-08
+**코드 기준 실제 상태:** Phase 1~17, 24, 28, 49, 50, 52(Wave 1~4), 56, 58, 59, 61, 62, 63, 64, 66, 67 실행 완료. Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55. 문서 갱신 필요(Phase 18~21, 44 상태 불명확).
+**현재 대시보드:** http://localhost:5060 (ops_dashboard, Phase 59 산출물)
 
 ---
 
@@ -199,58 +198,44 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 
 ---
 
-## Next (Phase 18+)
+## Next (실제 남은 Phase)
 
-### Phase 18: Content quality 데이터 기반 최적화 (quality.db 활용)
+### Phase 44: 전수조사 및 전체 수정
+- **Priority:** 🟡 MEDIUM
+- **Status:** 🟡 Partly done (44-01~03 완료, 44-04~05 미완료)
+- **남은 작업:** 44-04 미달 항목 최종 수정(프롬프트 보완) + 44-05 마무리 및 커밋. "좋은" 금지어·H2/H3 구조·브랜드 키워드·travel4 코스명 패턴.
 
-**Priority: 🟢 LOW** — 데이터가 누적되어야 의미 있음 (2주 후)
+### Phase 45: TAP Blog Meta-Response Detection & Prevention
+- **Priority:** 🔴 HIGH
+- **Status:** 📋 Planned (미시작)
+- **Plan:** ROADMAP Phase 45 섹션 참조. TAP 블로거 AI 메타 응답 발행 방지. Phase 44 이후 권장.
 
-### Phase 19: AdSense Publisher ID Standardization + Sticky Ad Removal
+### Phase 52: Blowfish 블로그 표준화 + 테마 업그레이드 대응
+- **Priority:** 🔴 HIGH
+- **Status:** 🔄 Wave 5 진행 중 (Wave 1~4 완료)
+- **남은 작업:** Wave 5(disapproving/redundant 오버라이드 정리) → Wave 6(36개 빌드·배포)
 
-**Priority: 🟡 MEDIUM** — 앵커광고 정상화, 도메인별 pub ID 최종 검증, mobile-sticky 제거
+### Phase 53: Complete Phase 52 Wave 6: Build and Deploy
+- **Priority:** 🔴 HIGH
+- **Status:** 📋 Planned (미시작, Phase 52 Wave 5 완료 후)
+- **내용:** 36개 블로그 Hugo 빌드 0 에러 + wrangler deploy + 라이브 200 확인.
 
-### Phase 20: Hugo Build 안정화 (`--minify` 호환성 + badge shortcode)
+### Phase 54: Curation Title Generation Hardening (제목 fallback 제거)
+- **Priority:** 🔴 HIGH
+- **Status:** 📋 Planned (미시작, PLAN.md 존재)
+- **Plan:** `.planning/phase-54-title-hardening/PLAN.md`
+- **시급도:** "추천 TOP5 (연도년)" 템플릿 패턴 134건 누적, 2026-08-01 발행분 5건 연속 재발.
 
-**Priority: 🟡 MEDIUM** — CUAP/TAP baseof.html dead code 제거, badge shortcode 호환성 수정
+### Phase 55: Curation Content Quality Diagnostics
+- **Priority:** 🟡 MEDIUM
+- **Status:** 📋 Planned (미시작, CONTEXT.md 존재)
+- **Plan:** `.planning/phase-55-curation-quality-diagnostics/CONTEXT.md`
+- **내용:** 경험 허위 주장·소 스불명 수치·건강 효능 단정 측정(read-only). Phase 54 이후.
 
-### Phase 21: Funnel Automation — 퍼널 구조 자동화
+### Phase 58~67 이관 완료 (STATE.md 참조)
+- Phase 58·59·61·62·63·64·66·67은 STATE.md "All Phases Status" 표에 상태 등록됨. ROADMAP에는 중복 상세 기술(Phase 58/67 섹션) — 유지하거나 STATE.md로 일원화 검토.
 
-**Priority: 🔴 HIGH** — 블로그 간 퍼널 관계 정의, 퍼널 링크 자동 삽입, STAP entity_linker 버그 수정
-
-### Phase 27: CUAP Cross-Sell Card 404 Fix
-
-**Priority: 🔴 HIGH** — baby 블로그 하단 크로스셀 카드 `-rec` 404 (Phase 25 샘플 데이터 오염)
-**Status:** ✅ Complete (2026-07-21)
-
-- 근본원인: `cuap_entities`(travel-en.db) 29건 전부 Phase 25 테스트 데이터, 실제 발행 slug 0건. `register_cuap_entity()` 미호출.
-- 16개 발행 포스트에 `-rec` 404 URL 베이크됨. 실제 발행 글은 블로그별 68~260개 존재.
-- 수정: DB purge → filesystem 백필 → 16파일 URL 교체 → 재배포 → 라이브 200 검증.
-
----
-
-### Phase 28: CUAP Worker 404→500 Fix
-
-**Priority: 🔴 HIGH** — 6개 Worker 블로그(kitchen 포함)에서 missing-asset 접근 시 HTTP 500 반환 버그
-**Status:** ✅ Complete (2026-07-21)
-
-- 근본원인: `kitchen-hugo/src/index.js`(268-byte)의 `catch`가 missing asset을 무조건 500 "Error"로 변환. 나머지 5개는 142-byte 공유본(try/catch 없음, 정상).
-- 수정: 6개 전체를 canonical worker(`ASSETS.fetch` 직접 반환 + `catch → 404`, never 500)로 통일. md5 `5667ff889e7f951b5c4f98a94293a6b2` 일치.
-- 배포: `deploy_site()`로 6개 Worker 블로그 순차 재배포 (EXIT=0).
-- 검증: 6/6 missing path → 404 (아님 500), 6/6 real post → 200 (regression guard 통과).
-
-### Phase 29: CUAP 콘텐츠 오염 + 퍼널 카드 404 + 광고 공백 수정
-
-**Priority: 🔴 HIGH** — pet-hugo에 뷰티 글 발행, cuap_entities URL 불일치로 크로스셀 404, beauty-hugo 미배포로 광고 공백
-**Status:** ✅ Complete (2026-07-22)
-
-- **29-01:** `keywords.py` pet-hugo 키워드에서 `"관리"` 제거 + 문법 오류 수정 (콤마 누락 8건)
-- **29-02:** `cuap_entities` DB 오염 URL 27건 정리 (4건 삭제 + 23건 slug 업데이트)
-- **29-03:** beauty-hugo 재배포 → 라이브 200 확인
-- **29-04:** 광고 partial 검증 — `ca-pub-6677996696534146` + ad-slot `2195212287` 정상 로드 확인
-
-## Configuration
-
-**현재 Phase 체계:** 37 phases (Phase 32 완료, Phase 40~44 예정)
+**현재 Phase 체계:** Phase 1~17(기반), 24·28·49·50(CUAP/광고), 40~44(콘텐츠 품질), 52·56·58~67(대시보드·규칙·파이프라인 표준화). STATE.md "All Phases Status" 표에 실제 상태 관리.
 
 ## Phase 32: TAP Scheduler Unload (Dual Scheduling Risk Removal)
 
@@ -440,7 +425,7 @@ lead/figure/gallery/accordion/chart shortcode 변환기 hugo_writer.py에 구현
 
 **Priority:** 🔴 HIGH
 **Cycle:** survey → standardize → build → deploy → verify
-**Status:** 🔄 Wave 1 진행 중
+**Status:** 🔄 Wave 5 진행 중 (Wave 1~4 완료, 2026-07-28)
 
 - **Goal:** 36개 Blowfish 블로그를 techpawz-hugo 표준(v1.1)으로 통일, Hugo 테마 업그레이드에 대응 가능한 구조로 전환
 - **Scope:** CUAP 10개 + CAP 7개 + STAP 5개 + TAP 5개 + RAP 4개 + SEAP 1개 + 개별 4개 = 36개 블로그
@@ -625,7 +610,7 @@ Total in 898 ms +
 
 **Priority:** 🔴 HIGH
 **Cycle:** 조사 → 구현(additive) → 검증(dry-run)
-**Status:** 📋 Planned (2026-08-06)
+**Status:** ✅ Complete (2026-08-06, 8 커밋, STATE.md 참조)
 **Plan:** `.planning/phase-58-publish-problem-telegram-alerting/PLAN.md` (v2, PLAN-CHECK PASS)
 **Context:** 발행 오류 알림이 `send_error` 단일 템플릿(raw reason)이라 문제 원인 식별 불가. similar_title·CJK/CoT 누수·배포 실패(ETAP/Workers)·이미지 URL 반복 등 8건이 침묵 상태.
 **Goal:** 24개 발행 문제(P01~P24)를 PROBLEM_REGISTRY에 등록하고, 발행 시 문제 발생 시 **어떤 문제인지 정확한 문제별 한국어 Telegram 알림**을 신규 PublishMonitor 단일 진입점으로 전송 (additive, 기존 `_tg_error` 경로 보존).
@@ -659,7 +644,7 @@ Total in 898 ms +
 
 **Priority:** 🔴 HIGH
 **Cycle:** 조사 → 구현(staged rollout) → 검증
-**Status:** 📋 Planned (2026-08-06)
+**Status:** ✅ Complete (2026-08-06, 10 커밋, STATE.md 참조)
 **Plan:** `.planning/phase-59-ops-dashboard-and-unification/PLAN.md`
 **Context:** 85개 블로그의 운영 상태를 모바일/웹에서 실시간 파악하는 대시보드 구축 + Blowfish 테마 단일 소스 고정 + 7갈래 파이프라인 분기 단일화
 **Goal:**

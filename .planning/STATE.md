@@ -3,16 +3,20 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-07T20:01:00Z"
+last_updated: "2026-08-08T23:00:00Z"
 progress:
-  total_phases: 33
-  completed_phases: 33
-  percent: 100
+  # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
+  # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
+  total_phases: 32
+  completed_phases: 27
+  in_progress_phases: 1
+  planned_phases: 4
+  percent: 84
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 66 완료 (P09 A/B 판별 — A 반증, B 미확정, 감지 slug 특정 불가). Phase 52 Wave 5 진행 중.**
+**Status:** v1.1 — **Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.**
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -67,6 +71,17 @@ progress:
 | 63 | Content Integrity Refinement — C07/C09 검증 + 저혈압 글 판정 | ✅ | 1 plan/1 wave 실행 완료 (2026-08-07): C09 check_c09_frontmatter() 추가, 62-01 재검증 (C04 16/16, C07 95/95, C09 27/27, 오탐 0), health 저혈압 글 배포누락 판정 |
 | 64 | 규칙 체계 자기진화 + 운영헌장 | ✅ | 설계·문서 완료 (2026-08-07): C05→P 이동, 네임스페이스 분리(RULE-/ISSUE-), S01/S04 severity 확정, 관찰기간 7일+긴급예외, 오탐미탐 자동기록/승격 사람승인, Task 6 프리플라이트 체크리스트 5종 설계, OPERATIONS-CHARTER 갱신 |
 | 66 | P09 시나리오 A/B 판별 (조사 전용) | ✅ | 조사 완료 (2026-08-07). A 반증: health-hugo·pet-hugo 이미지 URL 4,776개 전수 스캔 결과 P09 패턴(세그먼트 50% 이상 중복) 0건. B 확정 불가: P09 알림 로그 0건이나, 로그 부재가 "알림 미발생"인지 "로그 유실"인지 구분 불가 → B 성립 여부는 확인 불가. 감지 slug 특정 불가(로그 0건). deploy.log range 오류(178건/70 slug, 전부 pet-hugo tags repr)와 P09는 별개 확정(교차 0건). 66-RESEARCH.md "B 성립" 결론은 지나치게 강함 — A만 반증되고 B는 미확정이 정확. 코드 수정·INSERT·배포 일체 없음. |
+| 67 | fix-g3-first — 오토트리아지 무인화 + 라이브 청소 | ✅ | 실행 완료 (2026-08-08). 커밋 `4d78d3f3f`. launchd 등록 2건(ops-dashboard + auto-triage), auto_triage fail-loud 전환, watchdog 3자 감시, dead_links 43건 제거(Wave 1), 8개 블로그 빌드·배포(Wave 2). STATE.md Phase 67 섹션에 상세. |
+| 45 | TAP Blog Meta-Response Detection & Prevention | 📋 Planned | 미시작. ROADMAP Phase 45 참조. TAP 블로거 AI 메타 응답 발행 방지. core/validators.py + core/ai_writer.py + app.py. Phase 44 이후 권장. |
+| 53 | Complete Phase 52 Wave 6: Build and Deploy | 📋 Planned | 미시작. Phase 52 Wave 5 완료 후 실행. 36개 블로그 Hugo 빌드 + wrangler 배포 + 라이브 검증. ROADMAP Phase 53 참조. |
+| 54 | Curation Title Generation Hardening (제목 fallback 제거) | 📋 Planned | 미시작. `.planning/phase-54-title-hardening/PLAN.md` 존재. writer.py:538-539 하드코딩 fallback 제거 + H1 형식 강제 + CoT/프롬프트 누출 차단. "추천 TOP5 (연도년)" 패턴 134건 재발 중 — 시급. |
+| 55 | Curation Content Quality Diagnostics | 📋 Planned | 미시작. `.planning/phase-55-curation-quality-diagnostics/CONTEXT.md` 존재. 경험 허위 주장·소 스불명 수치·건강 효능 단정 측정(read-only). Phase 54 이후. |
+
+**참고 — 문서상 미정리 잔여:**
+- Phase 44 (전수조사 및 전체 수정): 44-01~03 완료, 44-04~05(프롬프트 보완 + 마무리) 미완료. ROADMAP Phase 44 참조.
+- Old `phase*`(1~17 등) 디렉터리: 완료 판정 파일(PLAN/VERIFICATION/COMPLETION) 없음. 과거 유령 디렉터리로 추정 — 정리 후보.
+- `.planning/phases/61-pipeline-standardization-branch-renewal/`: PLAN.md만 존재(VERIFICATION.md 없음). STATE.md에는 웨이브 요약 포함 실행 기록으로 기술. VERIFICATION 작성 또는 상태 확정 필요.
+- `.planning/phase-54-title-hardening/`, `.planning/phase-55-curation-quality-diagnostics/`: PLAN/CONTEXT만 존재, 실행 아님.
 
 ---
 

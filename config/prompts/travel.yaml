@@ -875,11 +875,7 @@ travel2_heritage_deep:
 
     - H1 사용 금지. H2(##) 4개와 H3(###) 사용
 
-    - 전체 2,500자 이상
-
-    - 제목에 "1곳" 등 숫자를 포함하세요
-
-    - "좋은", "바랍니다" 사용 금지
+    - 제목에 region과 name이 모두 포함되도록 하세요
 
     '
 travel2_heritage_grouped: *id001

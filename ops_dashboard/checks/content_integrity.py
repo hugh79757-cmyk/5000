@@ -48,10 +48,11 @@ C04_EN_PATTERNS = [
 
 def _find_site_path(conn, blog_id: str) -> Path | None:
     """blog_lifecycle에서 site_path 추출."""
-    blog = get_blog_detail(conn, blog_id)
-    if not blog:
+    blog_info = get_blog_detail(conn, blog_id)
+    if not blog_info:
         return None
-    sp = blog.get("site_path", "")
+    blog_row = blog_info.get("blog", {})
+    sp = blog_row.get("site_path", "")
     p = Path(sp) if sp else None
     return p if p and p.exists() else None
 

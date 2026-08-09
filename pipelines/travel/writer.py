@@ -137,7 +137,9 @@ def _build_data_block(data):
         for i, item in enumerate(items, 1):
             lines.append(f"[문화유산 {i}]")
             lines.append(f"이름: {item.get('title', '')}")
-            lines.append(f"주소: {item.get('addr', '')}")
+            addr = item.get('addr', '')
+            if addr:
+                lines.append(f"주소: {addr}")
             if item.get("kdName"):
                 lines.append(f"종목: {item['kdName']}")
             if item.get("era"):
@@ -159,6 +161,15 @@ def _build_data_block(data):
             img = item.get("image") or ""
             if img:
                 lines.append(f"이미지: {img}")
+            # 표 형태 정보 정리
+            lines.append("기본 정보:")
+            lines.append(f"  - 주소: {addr if addr else '정보 없음'}")
+            lines.append(f"  - 종목: {item.get('kdName', '정보 없음')}")
+            lines.append(f"  - 시대: {item.get('era', '정보 없음')}")
+            lines.append(f"  - 지정일: {item.get('designatedDate', '정보 없음')}")
+            lines.append(f"  - 분류: {cats if item.get('category1') else '정보 없음'}")
+            lines.append(f"  - 소유자: {item.get('owner', '정보 없음')}")
+            lines.append(f"  - 규모: {item.get('quantity', '정보 없음')}")
             if item.get("blog_snippets"):
                 lines.append("네이버 블로그 참고정보 (사실 확인 불가, 참고용):")
                 for sn in item["blog_snippets"][:6]:
@@ -582,29 +593,35 @@ def _enrich_with_nearby(data, html):
 
 
 def _post_process(content):
-    # 문장 잘림 수정: 마지막 문자가 마침표/물음표/느낌표가 아니면 제거
+    # 마지막 문장 정리: 온전한 문장으로 끝나도록
     lines = content.rstrip().split("\n")
     while lines and lines[-1].strip() == "":
         lines.pop()
     if lines:
         last = lines[-1].rstrip()
         if last and last[-1] not in ".다!?":
-            # 마지막 온전한 문장까지만 유지
             import re as _re
             match = _re.search(r"(.*[.다!?])", last)
             if match:
                 lines[-1] = match.group(1)
             else:
-                lines.pop()  # 온전한 문장이 없으면 줄 자체 제거
+                lines.pop()
     content = "\n".join(lines)
 
-    """후처리: 미완성 문장, HTML 주석, 과잉 질문 정리"""
     # 노출되면 안 되는 HTML 주석 제거
     content = re.sub(r"<!--\s*(여행용 카메라|편한 워킹화|보조배터리)\s*-->", "", content)
-    # 미완성 문장 수정
+
+    # 미완성 문장 수정 — AI가 "~하시기 ." 형태로 끝낸 경우만 복구
     content = re.sub(r"계획하시기\s*\.", "계획하는 것을 추천한다.", content)
     content = re.sub(r"확인하여\s*\.", "확인하는 것이 좋다.", content)
     content = re.sub(r"확인해 보시기\s*\.", "확인해 보는 것이 좋다.", content)
+    content = re.sub(r"참고하시기\s*\.", "참고하시는 것이 좋습니다.", content)
+    content = re.sub(r"유의하시기\s*\.", "유의하셔야 합니다.", content)
+    content = re.sub(r"방문하시기\s*\.", "방문하시는 것이 좋습니다.", content)
+    content = re.sub(r"이용하시기\s*\.", "이용하시는 것이 좋습니다.", content)
+    content = re.sub(r"확인하시기\s*\.", "확인하시는 것이 좋습니다.", content)
+    content = re.sub(r"준비하시기\s*\.", "준비하시는 것이 좋습니다.", content)
+
     # "궁금하지 않으세요/않으신가요" 2회 초과 시 제거
     q_matches = re.findall(r"[^\n]*궁금하[^\n]*\n?", content)
     if len(q_matches) > 2:
@@ -618,151 +635,66 @@ def _post_process(content):
                     continue
             new_lines.append(line)
         content = "\n".join(new_lines)
+
     # 연속 빈줄 정리
     content = re.sub(r"\n{4,}", "\n\n\n", content)
 
-    # ── 금지 표현 자동 치환 ──────────────────────────────
-    _REPLACE_MAP = [
-        # 문장 잘림 수정 ("참고하시기 ." → 완성 문장)
-        (r"참고하시기\s*\.", "참고하시는 것이 좋습니다."),
-        (r"유의하시기\s*\.", "유의하셔야 합니다."),
-        (r"방문하시기\s*\.", "방문하시는 것이 좋습니다."),
-        (r"이용하시기\s*\.", "이용하시는 것이 좋습니다."),
-        (r"확인하시기\s*\.", "확인하시는 것이 좋습니다."),
-        (r"준비하시기\s*\.", "준비하시는 것이 좋습니다."),
-        # 상투적 블로그 표현 → 정중한 비즈니스 톤
-        (r"추천드립니다", "추천합니다"),
-        (r"참고하시기 바랍니다", "참고하시면 좋겠습니다"),
-        (r"참고하시기를 권장합니다", "참고하시면 좋겠습니다"),
-        (r"많은 이들에게 사랑받고 있습니다", "꾸준히 찾는 분들이 많습니다"),
-        (r"많은 사랑을 받고 있으며", "꾸준히 찾는 분들이 많으며"),
-        (r"많은 사랑을 받고 있습니다", "꾸준히 찾는 분들이 많습니다"),
-        (r"사랑받고 있습니다", "찾는 분들이 많습니다"),
-        (r"많은 고객들에게 사랑받고 있습니다", "단골 손님이 많은 편입니다"),
-        (r"인기를 끌고 있으며", "찾는 손님이 많으며"),
-        (r"인기를 끌고 있습니다", "찾는 손님이 많습니다"),
-        (r"인기가 많습니다", "찾는 분들이 많습니다"),
-        (r"인기가 많은", "자주 찾는"),
-        (r"인기가 높습니다", "찾는 분들이 많습니다"),
-        (r"인기 있는 메뉴들로 인해", "대표 메뉴로 인해"),
-        (r"많은 손님들이 만족할 수 있는", "만족도가 높은"),
-        (r"많은 이들이 찾고 있습니다", "방문객이 꾸준한 편입니다"),
-        (r"느껴보는 것은 좋은 선택이 될 것입니다", "경험해 보시는 것도 좋습니다"),
-        (r"느껴보자", "확인해 보시기 바랍니다"),
-        (r"것을 추천드립니다", "것을 추천합니다"),
-        (r"것을 권장합니다", "것이 좋습니다"),
-        # 금지어 강제 치환
-        (r"바랍니다", "필요합니다"),
-        (r"좋은", "적절한"),
-    ]
-    for _pat, _repl in _REPLACE_MAP:
-        content = re.sub(_pat, _repl, content)
-
-    # ── 문체 통일: ~다/~한다 종결 → ~습니다 체 (포괄 치환) ──
-    _STYLE_RULES = [
-        # 고정 패턴
-        ("잊지 말아야 한다.", "잊지 말아야 합니다."),
-        ("경험해 보길 바란다.", "경험해 보시는 것을 추천합니다."),
-        ("보내기 좋다.", "보내기 좋습니다."),
-    ]
-    for _old, _new in _STYLE_RULES:
-        content = content.replace(_old, _new)
-
-    # 포괄 정규식: "~ㄹ 수 있다." → "~ㄹ 수 있습니다."
-    content = re.sub(r"할 수 있다\.", "할 수 있습니다.", content)
-    content = re.sub(r"될 수 있다\.", "될 수 있습니다.", content)
-    content = re.sub(r"([가-힣])ㄹ 수 있다\.", r"\1ㄹ 수 있습니다.", content)
-
-    # "~하다." → "~합니다." 포괄 치환
-    _DA_PATTERNS = [
-        ("필요하다.", "필요합니다."),
-        ("적합하다.", "적합합니다."),
-        ("가능하다.", "가능합니다."),
-        ("유명하다.", "유명합니다."),
-        ("좋다.", "좋습니다."),
-        ("많다.", "많습니다."),
-        ("크다.", "큽니다."),
-        ("없다.", "없습니다."),
-        ("있다.", "있습니다."),
-        ("된다.", "됩니다."),
-        ("한다.", "합니다."),
-        ("간다.", "갑니다."),
-        ("온다.", "옵니다."),
-        ("본다.", "봅니다."),
-        ("준다.", "줍니다."),
-        ("난다.", "납니다."),
-    ]
-    for _da_old, _da_new in _DA_PATTERNS:
-        content = content.replace(_da_old, _da_new)
-
-    # 추가 금지 표현 변형 제거
-    content = content.replace("만끽하며", "충분히 경험하며")
-    content = content.replace("만끽할", "충분히 즐길")
-
-    # ── 이동시간 정보 제거 (course blog 전용 금지 규칙) ──
-    if getattr(_post_process, "_current_blog_id", "") == "travel4-hugo":
-        logger.info("Applying movement time filtering for course blog...")
-        
-        # 이동시간 관련 표현 제거 (더 포괄적인 패턴)
-        import re as _re
-        
-        movement_patterns = [
-            (r'차로\s*\d+\s*분', ""),    # "차로 30분"
-            (r'도보\s*\d+\s*분', ""),    # "도보 15분"  
-            (r'버스\s*\d+\s*분', ""),    # "버스 25분"
-            (r'지하철\s*\d+\s*분', ""),  # "지하철 20분"
-            (r'차로\s*\d+\s*시간', ""),  # "차로 2시간"
-            (r'도보\s*\d+\s*시간', ""),  # "도보 1시간"
-            (r'\d+\s*분\s*(걸어서|걸리다|소요|걸리며|걸립니다)', ""),  # "30분 걸려서", "소요 30분"
-            (r'\d+\s*시간\s*(걸어서|걸리다|소요|걸리며|걸립니다)', ""),  # "1시간 걸려서"
-            (r'걸어\s*\d+\s*분', ""),    # "걸어 20분"
-            (r'걸어\s*\d+\s*시간', ""),  # "걸어 1시간"
-            (r'(\b\d+\s*분)\b(?!\s*(먹다|기다리다|준비|요리|요리시간|조리|쉬다|휴식|식사|저녁|점심|아침))', ""),  # "30분" (음식/대기/활동 제외)
-            (r'(\b\d+\s*시간)\b(?!\s*(먹다|기다리다|참가|보내다|즐기다|체험|활동|프로그램|이벤트|참석|방문))', ""),   # "2시간" (활동 제외)
-        ]
-        
-        old_content = content
-        for pattern, replacement in movement_patterns:
-            content = _re.sub(pattern, replacement, content)
-        
-        # 최종 정리: 남아있는 숫자+분/시간 조합 제거 (이동시간으로만 해석될 수 있는 경우)
-        content = _re.sub(r'\b\d+\s*분\b', "", content)  # "30분" 등 모든 분 제거
-        content = _re.sub(r'\b\d+\s*시간\b', "", content)  # "2시간" 등 모든 시간 제거
-        
-        removed_count = len(_re.findall(r'\b\d+\s*(분|시간)\b', old_content)) - len(_re.findall(r'\b\d+\s*(분|시간)\b', content))
-        logger.info(f"Movement time filtering completed. Removed {removed_count} time expressions")
-
-    # ── H2 없는 H3 가드: 첫 H3 위에 H2가 없으면 자동 삽입 ─────
-    _lines = content.split("\n")
-    _found_first_h2 = False
-    _insert_idx = None
-    for _i, _line in enumerate(_lines):
-        if _line.startswith("## "):
-            _found_first_h2 = True
-        if _line.startswith("### ") and _found_first_h2 and _insert_idx is None:
-            # 바로 위에 H2가 있는지 확인
-            _prev_non_empty = None
-            for _j in range(_i - 1, -1, -1):
-                if _lines[_j].strip():
-                    _prev_non_empty = _lines[_j]
-                    break
-            if _prev_non_empty and not _prev_non_empty.startswith("## "):
-                _insert_idx = _i
-    if _insert_idx is not None and getattr(_post_process, "_current_blog_id", "") == "travel3-hugo":
-        _lines.insert(_insert_idx, "## 식당별 상세 정보\n")
-        content = "\n".join(_lines)
+    # ── 엔티티 카드 분산 배치 ──────────────────────────────
+    content = _inject_entity_cards(content)
 
     # [PATCH] GPT가 만든 "함께 읽어보기" 섹션 통째로 제거
     _related_idx = content.find("## 함께 읽어보기")
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
-    # H2 과다 방지: GPT가 4개 초과 H2를 생성하면 마지막 H2 섹션들을 제거 (정확히 4개 유지)
+    # H2 과다 방지: 4개 초과 시 마지막 H2 섹션 제거
     _h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
     if len(_h2_positions) > 4:
         _cut_pos = _h2_positions[4]
         content = content[:_cut_pos].rstrip()
-        logger.info("H2 과다 방지: %d개 → 4개로 절단", len(_h2_positions))
+
+    return content
+
+
+def _inject_entity_cards(content):
+    """엔티티 카드를 상/중/하에 분산 배치.
+
+    - 상단: 첫 H2 앞에 1개
+    - 중단: 본문 중간 H2 앞에 1개 (첫 H2와 마지막 H2 사이)
+    - 하단: 마지막 H2 섹션 끝에 1개 (없으면 중단과 통합)
+    """
+    import re as _re
+    from core.tap_entity_manager import _build_card_html, _fetch_candidates, _pick_two, _find_heading_ends
+
+    candidates = _fetch_candidates("tap-blogger", "")
+    selected = _pick_two(candidates)
+    if not selected:
+        return content
+
+    cards = [_build_card_html(s) for s in selected]
+
+    # H2 위치 수집
+    h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTODEINE)]
+    if not h2_positions:
+        return content + "\n" + cards[0]
+
+    # 상단 카드: 첫 H2 앞에 삽입
+    content = content[:h2_positions[0]] + cards[0] + "\n" + content[h2_positions[0]:]
+
+    # H2 위치 재계산 (상단 카드 삽입으로 내용 길이 변화)
+    h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
+
+    if len(selected) < 2 or len(h2_positions) < 3:
+        # 카드 1개만 있거나 H2가 2개 이하면 중간에 1개만 추가
+        mid_idx = len(h2_positions) // 2
+        content = content[:h2_positions[mid_idx]] + "\n" + cards[-1] + "\n" + content[h2_positions[mid_idx]:]
+        return content
+
+    # 중단 카드: 중간 H2 앞에 삽입
+    mid_idx = len(h2_positions) // 2
+    content = content[:h2_positions[mid_idx]] + "\n" + cards[1] + "\n" + content[h2_positions[mid_idx]:]
+
+    return content
 
     # ── 쿠팡 여행용품 추천 삽입 (신규: get_product_cards → HTML 그리드) ──────────────────
     try:
