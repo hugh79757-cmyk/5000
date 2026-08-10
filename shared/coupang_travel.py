@@ -340,14 +340,14 @@ class CoupangTravel:
             if image:
                 img_style = ('style="width:80px;height:80px;object-fit:cover;'
                             'border-radius:6px;flex-shrink:0;"')
-                lines.append(f'<a href="{link}" target="_blank" rel="nofollow"{style}>'
-                             f'<img src="{image}" alt="{name}" loading="lazy"{img_style}>'
+                lines.append(f'<a href="{link}" target="_blank" rel="nofollow" {style}>'
+                             f'<img src="{image}" alt="{name}" loading="lazy" {img_style}>'
                              f'<div style="line-height:1.3;min-width:0;">'
                              f'<div style="font-size:13px;font-weight:500;word-break:break-all;">{name}</div>'
                              f'<div style="font-size:12px;color:#666;">{price_str}</div>'
                              f'</div></a>')
             else:
-                lines.append(f'<a href="{link}" target="_blank" rel="nofollow"{style}>'
+                lines.append(f'<a href="{link}" target="_blank" rel="nofollow" {style}>'
                              f'<div style="line-height:1.3;">'
                              f'<div style="font-size:13px;font-weight:500;">{name}</div>'
                              f'<div style="font-size:12px;color:#666;">{price_str}</div>'
