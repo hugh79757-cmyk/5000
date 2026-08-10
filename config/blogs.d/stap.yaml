@@ -22,7 +22,7 @@ blogs:
     - '13:32'
     - '16:32'
     - '20:32'
-  status: active
+  status: paused
   theme: blowfish
   site_path: /Users/twinssn/Projects/STAP/finance-hugo
   funnel_stage: landing

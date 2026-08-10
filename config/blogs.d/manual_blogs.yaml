@@ -5,11 +5,11 @@ blogs:
   platform: blogger
   pipeline: travel
   managed_by: manual
-  status: active
+  status: paused
 - id: ud-blogger
   name: ud 레시피블로그
   domain: ud.informationhot.kr
   platform: blogger
   pipeline: travel
   managed_by: manual
-  status: active
+  status: paused

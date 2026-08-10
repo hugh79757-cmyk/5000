@@ -5,7 +5,7 @@ blogs:
   name: 로차 블로그
   platform: hugo
   site_path: /Users/twinssn/Projects/rotcha-blog
-  status: active
+  status: paused
   funnel_stage: landing
   managed_by: mde2
 
@@ -15,7 +15,7 @@ blogs:
   name: 인포메이션핫
   platform: hugo
   site_path: /Users/twinssn/Projects/informationhot-hugo
-  status: active
+  status: paused
   funnel_stage: landing
   managed_by: mde2
 
@@ -25,7 +25,7 @@ blogs:
   name: 테크포즈
   platform: hugo
   site_path: /Users/twinssn/Projects/techpawz-hugo
-  status: active
+  status: paused
   funnel_stage: landing
   managed_by: mde2
 
@@ -35,7 +35,7 @@ blogs:
   name: 테크포즈 비즈
   platform: hugo
   site_path: /Users/twinssn/Projects/biz.techpawz-hugo
-  status: active
+  status: paused
   funnel_stage: landing
   managed_by: mde2
 
@@ -45,6 +45,6 @@ blogs:
   name: 테크포즈 이슈
   platform: hugo
   site_path: /Users/twinssn/Projects/issue-techpawz-hugo
-  status: active
+  status: paused
   funnel_stage: landing
   managed_by: mde2
