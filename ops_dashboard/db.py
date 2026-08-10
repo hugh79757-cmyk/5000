@@ -321,7 +321,7 @@ def sync_blog_lifecycle(conn: sqlite3.Connection) -> int:
                     WHERE blog_id = ?
                 """, (
                     brand,
-                    b.get("config_status", "unknown"),
+                    b.get("config_status", b.get("status", "unknown")),
                     b.get("theme", ""),
                     b.get("domain", ""),
                     b.get("cf_project", ""),
@@ -338,7 +338,7 @@ def sync_blog_lifecycle(conn: sqlite3.Connection) -> int:
                 """, (
                     blog_id,
                     brand,
-                    b.get("config_status", "unknown"),
+                    b.get("config_status", b.get("status", "unknown")),
                     "unknown",
                     b.get("theme", ""),
                     b.get("domain", ""),
