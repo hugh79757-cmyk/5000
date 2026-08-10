@@ -1208,6 +1208,10 @@ def _write_hugo_post_etap(article, cover_image=None, body_images=None, blog_id=N
         pass
 
     tags = article.get("tags", [])
+    # ETAP article의 tags는 list — shared _build_frontmatter_*()는 콤마 구분
+    # 문자열을 기대(tags.split(",")). list는 콤마 join으로 정규화 (str이면 그대로).
+    if isinstance(tags, list):
+        tags = ",".join(str(t).strip() for t in tags if str(t).strip())
     description = article.get("description", "")
     is_draft = is_draft or article.get("_draft", False)
 

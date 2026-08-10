@@ -90,6 +90,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-10 | ETAP 발행 회귀 수정 — `_write_hugo_post_etap()`에서 tags list→str 정규화 (AttributeError: 'list' object has no attribute 'split' 해소, luxury/escape/extreme/nightlife/ghost/layover 등 6+블로그) | `본 커밋` |
 | 2026-08-06 | Phase 59-01 — Replace per-pipeline _write_hugo_post() in 34 ETAP pipelines with shared import | `b420e69cc`, `4ff78c0e5`, `d0fd9d2a8`, `a64544294`, `21f445b79` |
 | 2026-08-06 | Phase 59-07 — hotissue-hugo PaperMod to Blowfish migration (theme field, layouts, hugo.toml, SingleAuthor fix) | `d6ce85165`, `f8c186ed6`, `b3fcdb1`, `e55626b` |
 | 2026-08-06 | Phase 59 Execution — Ops Dashboard (Flask UI+JSON API+templates), Blowfish 단일화 (PaperMod/Congo→Blowfish), ETAP _write_hugo_post 35중복 제거, flights-hugo naming fix | 10 커밋 |
