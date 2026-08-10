@@ -564,6 +564,80 @@ def _run_stap_collector() -> None:
 
 
 
+def _run_etap_collectors() -> None:
+    """ETAP 데이터 컬렉터들을 subprocess로 완전 격리 실행 (import shadow 방지)
+
+    수집 대상:
+    - viator.py: Viator deals feed (매일)
+    - aviasales.py: 항공권 가격/캘린더/노선 (매일)
+    - topic_expander.py: 토픽 부족분 자동 보충 (매일)
+    - nomad_data.py: 코워킹/카페/기후 (주 1회)
+    - omio.py: Omio 교통편 CSV (주 1회, CSV 업데이트 의존)
+    - airalo.py: Airalo eSIM XML (주 1회, XML 업데이트 의존)
+    """
+    import subprocess as _sp
+    import tempfile as _tmp
+    etap_root = os.path.join(PROJECT_DIR, "pipelines", "etap")
+    if not os.path.isdir(etap_root):
+        logger.warning("[ETAP collector] etap 디렉토리 없음")
+        return
+
+    # 컬렉터별 실행 스크립트 생성
+    collectors = [
+        ("viator", "from collectors.viator import run_full_collection; print('viator:', run_full_collection())"),
+        ("aviasales", "from collectors.aviasales import run_full_collection; print('aviasales:', run_full_collection())"),
+        ("topic_expander", "from collectors.topic_expander import expand_topics; r = expand_topics(); print('topic_expander:', r['added'])"),
+        ("nomad_data", "from collectors.nomad_data import main; main()"),
+        ("omio", "from collectors.omio import run_full_collection; print('omio:', run_full_collection())"),
+        ("airalo", "from collectors.airalo import run_full_collection; print('airalo:', run_full_collection())"),
+    ]
+
+    ok_count = 0
+    fail_count = 0
+
+    for name, code in collectors:
+        runner = "\n".join([
+            "import sys, os, logging",
+            f"logging.basicConfig(level=logging.INFO, format='%(asctime)s [ETAP-{name}] %(message)s')",
+            "logger = logging.getLogger('etap')",
+            f"sys.path.insert(0, {repr(etap_root)})",
+            f"os.chdir({repr(etap_root)})",
+            "from dotenv import load_dotenv",
+            "load_dotenv(os.path.join(" + repr(etap_root) + ', ".env"), override=True)',
+            code,
+        ])
+
+        try:
+            with _tmp.NamedTemporaryFile(mode="w", suffix=f"_{name}.py", delete=False, encoding="utf-8") as f:
+                f.write(runner)
+                runner_path = f.name
+
+            proc = _sp.run(
+                [sys.executable, runner_path],
+                capture_output=True, text=True, timeout=600,
+                cwd=etap_root,
+            )
+            stdout = (proc.stdout or "").strip()
+            stderr = (proc.stderr or "").strip()
+            if proc.returncode == 0:
+                logger.info(f"[ETAP {name}] 완료: {stdout[-200:]}")
+                ok_count += 1
+            else:
+                logger.error(f"[ETAP {name}] 실패 (exit={proc.returncode}): {stderr[-200:]}")
+                fail_count += 1
+        except _sp.TimeoutExpired:
+            logger.exception(f"[ETAP {name}] 600초 타임아웃")
+            fail_count += 1
+        except Exception as e:
+            logger.exception(f"[ETAP {name}] 오류: {e}")
+            fail_count += 1
+        finally:
+            with contextlib.suppress(Exception):
+                os.unlink(runner_path)
+
+    logger.info(f"[ETAP collector] 완료: {ok_count} 성공, {fail_count} 실패")
+
+
 def _run_senior_sync() -> None:
     """senior.db 서비스 데이터 일일 동기화 (pending 보충)"""
     try:
@@ -684,6 +758,10 @@ def register_schedules():
     logger.info("Festival refresh scheduled at 06:00")
     schedule.every().day.at("06:05").do(_run_course_refresh)
     logger.info("Course refresh scheduled at 06:05")
+    # ETAP 데이터 컬렉터: 매일 05:00 (발행 전 데이터 수집)
+    schedule.every().day.at("05:00").do(_run_etap_collectors)
+    logger.info("ETAP data collectors scheduled at 05:00 (viator + aviasales + topic_expander + nomad + omio + airalo)")
+
     schedule.every().day.at("06:10").do(_run_stap_collector)
     logger.info("STAP data collector scheduled at 06:10")
 

@@ -571,11 +571,11 @@ def seed_standard_rules(conn: sqlite3.Connection) -> int:
 # ---------------------------------------------------------------------------
 
 MAINTENANCE_SEED_BLOGS: list[dict] = [
-    # P03으로 차단된 7개 블로그 + RAP 정비 대상
+    # P03으로 차단된 CUAP 블로그 + SEAP/TAP 정비 대상
+    # CAP 블로그(pick-hugo)는 제외 — M03/M06이 CUAP 전용이라 항상 unknown
     {"blog_id": "beauty-hugo", "maintenance_status": "awaiting"},
     {"blog_id": "interior-hugo", "maintenance_status": "awaiting"},
     {"blog_id": "kitchen-hugo", "maintenance_status": "awaiting"},
-    {"blog_id": "pick-hugo", "maintenance_status": "awaiting"},
     {"blog_id": "senior-hugo", "maintenance_status": "awaiting"},
     {"blog_id": "senior-blogger", "maintenance_status": "awaiting"},
     {"blog_id": "travel4-hugo", "maintenance_status": "awaiting"},
@@ -919,30 +919,39 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
 
 def get_blog_detail(conn: sqlite3.Connection, blog_id: str) -> dict | None:
     """특정 블로그의 전체 정보 + 최근 헬스체크 + 관련 이슈."""
-    blog = conn.execute(
-        "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
-    ).fetchone()
-    if not blog:
-        return None
+    import sqlite3 as _sqlite3
+    old_factory = conn.row_factory
+    conn.row_factory = _sqlite3.Row
+    try:
+        blog = conn.execute(
+            "SELECT * FROM blog_lifecycle WHERE blog_id = ?", (blog_id,)
+        ).fetchone()
+        if not blog:
+            return None
+        blog_dict = dict(blog)
 
-    checks = conn.execute("""
-        SELECT * FROM check_results
-        WHERE blog_id = ?
-        ORDER BY checked_at DESC
-        LIMIT 50
-    """, (blog_id,)).fetchall()
+        checks = conn.execute("""
+            SELECT * FROM check_results
+            WHERE blog_id = ?
+            ORDER BY checked_at DESC
+            LIMIT 50
+        """, (blog_id,)).fetchall()
+        checks_list = [dict(r) for r in checks]
 
-    issues = conn.execute("""
-        SELECT * FROM known_issues
-        WHERE blog_ids LIKE ?
-        ORDER BY issue_id
-    """, (f"%{blog_id}%",)).fetchall()
+        issues = conn.execute("""
+            SELECT * FROM known_issues
+            WHERE blog_ids LIKE ?
+            ORDER BY issue_id
+        """, (f"%{blog_id}%",)).fetchall()
+        issues_list = [dict(r) for r in issues]
 
-    return {
-        "blog": dict(blog),
-        "checks": [dict(r) for r in checks],
-        "issues": [dict(r) for r in issues],
-    }
+        return {
+            "blog": blog_dict,
+            "checks": checks_list,
+            "issues": issues_list,
+        }
+    finally:
+        conn.row_factory = old_factory
 
 
 def record_check(

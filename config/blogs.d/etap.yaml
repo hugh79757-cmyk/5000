@@ -5,7 +5,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: adventure.techpawz.com
   cf_project: adventure-hugo
@@ -25,7 +25,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: airlines.techpawz.com
   cf_project: airlines-hugo
@@ -47,7 +47,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: airports.techpawz.com
   cf_project: airports-hugo
@@ -70,7 +70,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: bus.techpawz.com
   cf_project: bus-hugo
@@ -91,7 +91,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: cruise.techpawz.com
   cf_project: cruise-hugo
@@ -112,7 +112,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: culture.techpawz.com
   cf_project: culture-hugo
@@ -133,7 +133,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: daytrips.techpawz.com
   cf_project: daytrips-hugo
@@ -154,7 +154,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: deals.techpawz.com
   cf_project: deals-hugo
@@ -175,7 +175,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: dining.techpawz.com
   cf_project: dining-hugo
@@ -195,7 +195,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: esim.techpawz.com
   cf_project: esim-hugo
@@ -218,7 +218,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: eurail.techpawz.com
   cf_project: eurail-hugo
@@ -239,7 +239,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: ferry.techpawz.com
   cf_project: ferry-hugo
@@ -259,7 +259,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: flights.techpawz.com
   cf_project: flights-hugo
@@ -282,7 +282,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: foodtour.techpawz.com
   cf_project: foodtour-hugo
@@ -302,7 +302,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: michelin.techpawz.com
   cf_project: michelin-hugo
@@ -325,7 +325,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: multiday.techpawz.com
   cf_project: multiday-hugo
@@ -346,7 +346,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: nature.techpawz.com
   cf_project: nature-hugo
@@ -367,7 +367,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: phototour.techpawz.com
   cf_project: phototour-hugo
@@ -399,7 +399,7 @@ blogs:
     - '20:30'
   site_path: /Users/twinssn/Projects/ETAP/tour-hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   theme: blowfish
   language: en
   blog_type: destination
@@ -410,7 +410,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: tours.techpawz.com
   cf_project: tours-hugo
@@ -432,7 +432,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: trains.techpawz.com
   cf_project: trains-hugo
@@ -455,7 +455,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: transfers.techpawz.com
   cf_project: transfers-hugo
@@ -475,7 +475,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: visa.techpawz.com
   cf_project: visa-hugo
@@ -498,7 +498,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: visafree.techpawz.com
   cf_project: visafree-hugo
@@ -519,7 +519,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: walking.techpawz.com
   cf_project: walking-hugo
@@ -540,7 +540,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: watersports.techpawz.com
   cf_project: watersports-hugo
@@ -562,7 +562,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: luxury.techpawz.com
   cf_project: luxury-hugo
@@ -584,7 +584,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: citytours.techpawz.com
   cf_project: citytours-hugo
@@ -606,7 +606,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: watertours.techpawz.com
   cf_project: watertours-hugo
@@ -628,7 +628,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: hiking.techpawz.com
   cf_project: hiking-hugo
@@ -650,7 +650,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: escape.techpawz.com
   cf_project: escape-hugo
@@ -672,7 +672,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: extreme.techpawz.com
   cf_project: extreme-hugo
@@ -694,7 +694,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: nightlife.techpawz.com
   cf_project: nightlife-hugo
@@ -716,7 +716,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: ghost.techpawz.com
   cf_project: ghost-hugo
@@ -738,7 +738,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: inactive
+  status: active
   daily_quota: 5
   domain: layover.techpawz.com
   cf_project: layover-hugo
@@ -759,7 +759,7 @@ blogs:
   name: Digital Nomad Guide
   pipeline: etap
   platform: hugo
-  status: disabled
+  status: active
   daily_quota: 5
   domain: nomad.techpawz.com
   cf_project: nomad-hugo

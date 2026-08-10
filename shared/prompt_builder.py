@@ -132,7 +132,7 @@ def build(prompt_id, data, extra_vars=None, inject_samples: bool = False, sample
     if inject_samples:
         samples = load_samples(category=sample_category, limit=2)
         if samples:
-            samples_text = "## 참고 글 예시\n\n아래 글은 같은 계열에서 잘 쓴 글의 예시입니다. 톤·문장 구조·정보 전달 방식·표 활용 방식을 참고하되, 그대로 베끼지 마십시오.\n\n"
+            samples_text = "## 참고 글 예시 (글쓰기 기준)\n\n아래 글은 같은 계열에서 잘 쓴 글의 표본 예문입니다. 이 예문을 글쓰기의 기준으로 삼아, 톤(~입니다/~습니다), 문단 구성, 정보 전달 방식, 표와 체크리스트 활용 방식을 그대로 따르십시오. 내용만 새 데이터로 작성하고, 글쓰기 방식은 예문을 따릅니다.\n\n"
             for i, s in enumerate(samples, 1):
                 samples_text += f"### 예시 글 {i}\n\n{s}\n\n"
             user_prompt = user_prompt + "\n\n" + samples_text

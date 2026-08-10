@@ -307,10 +307,17 @@ class CoupangTravel:
         # 섹션 제목 — TAP 본문 규격 §2.5: <p><strong>...</strong></p> (H2 아님)
         section_title = SECTION_TITLES.get(blog_id, "여행 준비에 도움되는 추천 용품")
         
-        # HTML 인라인 스타일 사용 (Blogger markdown parser가 리스트/이미지 크기 제어 못함)
+        # 재발 방지: Goldmark raw HTML 블록 인식 문제 방지 구조
+        # - <div style="..."> 안에 텍스트 + <a> 혼재가 있으면
+        #   Goldmark가 raw HTML 블록으로 인식하지 못해 <a>/<img>가
+        #   &lt;a / &lt;img 로 이스케이프됨 (텍스트 노출).
+        # - 해결: 면책문구를 <div> 밖으로 빼서 별도 <p>로 작성하고,
+        #   <div ...> 안에는 <a> 제품카드만 둔다.
         # 참조: tour3.rotcha.kr (Hugo) - coupang-product-grid / coupang-product-card 클래스 사용
         # Blogger에서는 인라인 스타일로 동일 레이아웃 구현
+        disclaimer = '<p style="font-size:0.8em;color:#888;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>'
         lines = [f'\n\n<p><strong>{section_title}</strong></p>\n',
+                 disclaimer,
                  '<div style="display:flex;flex-wrap:wrap;gap:12px;">']
         
         for p in final_products:
@@ -347,7 +354,6 @@ class CoupangTravel:
                              f'</div></a>')
         
         lines.append('</div>')
-        lines.append('<p style="font-size:0.8em;color:#888;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>')
         
         return "\n".join(lines)
 
