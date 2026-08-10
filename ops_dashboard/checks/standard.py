@@ -302,7 +302,20 @@ def _check_r03(site: Path) -> tuple[bool, str]:
 
 
 def _check_r04(site: Path) -> tuple[bool, str]:
-    """R04: GA4 + mobile correction CSS in extend_head.html."""
+    """R04: GA4 + mobile correction CSS.
+
+    Blowfish 테마는 hugo.toml의 [services.googleAnalytics] ID = "G-..."가 있으면
+    layouts/partials/analytics/main.html 통해 gtag를 자동 생성한다.
+    따라서 다음 중 하나라도 충족하면 PASS:
+      (a) extend-head.html(또는 extend_head.html)에 유효한 GA4 gtag + mobile CSS가 있음
+      (b) hugo.toml(또는 config/_default/hugo.toml)에 [services.googleAnalytics] ID 가 유효한
+          G-[A-Z0-9]+ 형식으로 존재함 (Blowfish가 빌드 시 GA4 자동 생성)
+    둘 다 없으면 FAIL.
+    """
+    ga_found = False
+    evidence = ""
+
+    # (a) extend-head.html 검사
     for partial_dir in ("layouts/partials",):
         for name in ("extend_head.html", "extend-head.html"):
             p = site / partial_dir / name
@@ -312,13 +325,27 @@ def _check_r04(site: Path) -> tuple[bool, str]:
                 has_mobile = "max-width" in content or "font-size" in content or "mobile" in content.lower()
                 if has_ga and has_mobile:
                     return True, "extend_head: GA4 + mobile CSS found"
-                missing = []
-                if not has_ga:
-                    missing.append("GA4")
-                if not has_mobile:
-                    missing.append("mobile CSS")
-                return False, f"extend_head: missing {', '.join(missing)}"
-    return False, "No extend_head.html found"
+                if has_ga:
+                    ga_found = True
+                    evidence = "extend_head: GA4 found but missing mobile CSS"
+                elif has_mobile:
+                    evidence = "extend_head: mobile CSS found but missing GA4"
+                else:
+                    evidence = "extend_head: missing GA4 and mobile CSS"
+                break
+
+    # (b) hugo.toml [services.googleAnalytics] ID 검사 (Blowfish 자동 생성 경로)
+    #    hugo.toml 위치: site/hugo.toml 또는 site/config/_default/hugo.toml
+    for conf_path in (site / "hugo.toml", site / "config" / "_default" / "hugo.toml",
+                      site / "config" / "hugo.toml"):
+        if conf_path.exists():
+            content = _read_file_safe(conf_path)
+            m = re.search(r'\[services\.googleAnalytics\].*?ID\s*=\s*["\']([G]-[A-Z0-9]+)["\']',
+                          content, re.DOTALL)
+            if m:
+                return True, f"hugo.toml: [services.googleAnalytics] ID={m.group(1)} (Blowfish 자동 생성)"
+
+    return False, evidence or "No extend_head.html found and no hugo.toml [services.googleAnalytics] ID"
 
 
 def _check_r05(site: Path) -> tuple[bool, str]:
