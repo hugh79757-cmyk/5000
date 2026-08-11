@@ -71,10 +71,18 @@ def generate_airport_guide(topic):
 DATA (use ONLY this data):
 {summary}
 
+FORMAT (informational style — short paragraphs, tables, clear structure):
+- Opening paragraph: 2-3 sentences stating exactly what this guide covers (airlines, destinations, transport, traveler tips) and who it is for
+- ## Quick Facts: a markdown table of key data — IATA code, location, timezone, airlines operating, direct destination count from the data
+- Use the required H2 sections; use ### for each airline or destination group where useful
+- ## Practical Tips: a short bullet checklist for travelers (arrival time, transport options, what to verify before flying)
+- ## Closing: a clear takeaway plus a note to verify current schedules and services on the airport's official site
+- Keep paragraphs short (2-4 sentences); put structured facts in tables
+
 RULES:
 - Write 800-1,200 words in English
 - Title must include the airport name and IATA code ({iata})
-- Do NOT invent terminal names, lounge names, restaurant names, or services
+- Do NOT invent terminal names, lounge names, restaurant names, services, prices, or schedules
 - ONLY write about what the data confirms
 - If airline/route data is limited, say so honestly
 - If a section has 0 relevant data, OMIT that H2 section entirely. Do NOT write filler content.

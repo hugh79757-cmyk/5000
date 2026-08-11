@@ -408,19 +408,31 @@ def _inject_naver_map(body_md, items, is_festival=False):
                 insert_map[len(lines) - 1] = btn_html
                 used_titles.add(ml_title)
 
-    # 매칭 안 된 장소는 본문 끝에 삽입
+    # 매칭 안 된 장소: 본문 끝(tail) 대신 매칭 실패한 첫 H3 섹션 끝에 삽입.
+    # (테마형 H3 — 축제 프로그램명 등 — 는 장소명과 문자열 매칭이 안 되어
+    #  예전엔 tail_btns로 본문 맨 끝에 몰렸음. 이제 해당 H3 뒤에 배치)
     tail_btns = [btn for _, btn in map_links if _ not in used_titles]
+    if tail_btns and h3_indices:
+        # 매칭 실패한 버튼들은 첫 H3 섹션 끝에 배치 (마지막이 아닌, 첫 번째 H3 뒤)
+        _first_h3 = h3_indices[0]
+        _sec_end = None
+        for _nh in range(_first_h3 + 1, len(lines)):
+            if re.match(r"^#{2,3}\s+", lines[_nh]):
+                _sec_end = _nh
+                break
+        if _sec_end is not None:
+            _ins_pos = _sec_end
+        else:
+            _ins_pos = len(lines)
+        for _btn in tail_btns:
+            lines.insert(_ins_pos, _btn)
+            lines.insert(_ins_pos, "")
 
     # 조립 (뒤에서부터 삽입해서 인덱스 밀려도 안전)
     for i in sorted(insert_map.keys(), reverse=True):
         lines.insert(i + 1, "")
         lines.insert(i + 1, insert_map[i])
         lines.insert(i + 1, "")
-
-    # 매칭 안 된 버튼은 맨 끝에 추가
-    for btn in tail_btns:
-        lines.append("")
-        lines.append(btn)
 
     return "\n".join(lines)
 
@@ -696,11 +708,11 @@ def _post_process(content):
     if _related_idx > 0:
         content = content[:_related_idx].rstrip()
 
-    # H2 과다 방지: 3개 초과 시 마지막 H2 섹션 제거
-    # (마무리 H2 + 쿠팡 섹션이 후처리에서 추가되므로 여유 확보)
+    # H2 과다 방지: 7개 초과 시 마지막 H2 섹션 제거
+    # (정보전달형 구조: 도입부 + H2 5~7개(개요/프로그램/교통/준비/주변/마무리) 허용)
     _h2_positions = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-    if len(_h2_positions) > 3:
-        _cut_pos = _h2_positions[3]
+    if len(_h2_positions) > 7:
+        _cut_pos = _h2_positions[7]
         content = content[:_cut_pos].rstrip()
 
     # ── 쿠팡 여행용품 추천 삽입 (후처리) ──────────────────────────────
@@ -709,10 +721,43 @@ def _post_process(content):
         _ct = CoupangTravel()
         if _ct.is_configured():
             _blog_id = getattr(_inject_entity_cards, "_current_blog_id", "travel-hugo")
+            # GPT가 생성한 plain text disclaimer 제거 (get_product_cards에서 HTML로 추가하므로 중복 방지)
+            _disclaimer_pattern = r'\n*이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다\.\s*'
+            content = re.sub(_disclaimer_pattern, '\n\n', content)
             _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=3)
             if _coupang_html:
-                # 본문 마지막에 '마무리' H2 추가 후 쿠팡 섹션 연결
-                content = content.rstrip() + "\n\n## 마무리\n\n" + _coupang_html
+                # 프롬프트가 이미 마무리/결론 H2를 생성한 경우 중복 삽입 방지
+                _has_closing = bool(re.search(r"^##\s*(마무리|마치며|정리|결론|마지막)", content, re.MULTILINE))
+                # '마무리' H2를 마지막 문단 앞에 삽입 (본문 끝에서 덧붙이면 안 됨)
+                # 마지막 문단(결론부) 찾기: 마지막 비빈줄 문단
+                _lines = content.rstrip().split("\n")
+                # 뒤쪽 빈줄 제거
+                while _lines and _lines[-1].strip() == "":
+                    _lines.pop()
+                if _lines:
+                    # 마지막 문단이 H2/H3면 그 앞에 마무리 삽입
+                    _last = _lines[-1].strip()
+                    if _last.startswith("## ") or _last.startswith("### "):
+                        # 마지막이 헤딩이면 직전 문단들 뒤에 삽입
+                        _insert_pos = len(_lines) - 1
+                        while _insert_pos > 0 and _lines[_insert_pos - 1].strip() == "":
+                            _insert_pos -= 1
+                        if not _has_closing:
+                            _lines.insert(_insert_pos, "")
+                            _lines.insert(_insert_pos, "## 마무리")
+                            _lines.insert(_insert_pos, "")
+                    else:
+                        # 마지막이 일반 문단이면 그 앞에 마무리 삽입
+                        _insert_pos = len(_lines)
+                        while _insert_pos > 0 and _lines[_insert_pos - 1].strip() == "":
+                            _insert_pos -= 1
+                        if not _has_closing:
+                            _lines.insert(_insert_pos, "")
+                            _lines.insert(_insert_pos, "## 마무리")
+                            _lines.insert(_insert_pos, "")
+                    content = "\n".join(_lines) + "\n\n" + _coupang_html
+                else:
+                    content = content.rstrip() + ("\n\n## 마무리\n\n" if not _has_closing else "\n\n") + _coupang_html
     except Exception as _ce:
         logger.warning("쿠팡 여행용품 삽입 실패: %s", _ce)
 
@@ -729,7 +774,10 @@ def _inject_entity_cards(content):
     import re as _re
     from core.tap_entity_manager import _build_card_html, _fetch_candidates, _pick_two
 
-    candidates = _fetch_candidates("tap-blogger", "")
+    # 현재 블로그 기준으로 카드 후보 선정 (기존 "tap-blogger" 하드코딩은
+    # travel1(축제) 글에 맛집/캠핑 카드가 들어가는 주제 이탈 원인)
+    _cur_blog = getattr(_inject_entity_cards, "_current_blog_id", "travel-hugo")
+    candidates = _fetch_candidates(_cur_blog, "")
     selected = _pick_two(candidates)
     if not selected:
         return content
@@ -738,9 +786,11 @@ def _inject_entity_cards(content):
 
     h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
     if not h2_positions:
-        return content + "\n" + cards[0]
+        return content + "\n\n" + cards[0] + "\n\n"
 
-    content = content[:h2_positions[0]] + cards[0] + "\n" + content[h2_positions[0]:]
+    # raw HTML 카드 다음에는 반드시 빈 줄(\n\n) — Hugo가 마크다운 재개 인식.
+    # \n 하나면 </div>\n## 이 HTML 블록으로 취급돼 ## 이 raw 노출됨.
+    content = content[:h2_positions[0]] + cards[0] + "\n\n" + content[h2_positions[0]:]
 
     h2_positions = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
 
@@ -749,17 +799,17 @@ def _inject_entity_cards(content):
 
     if len(h2_positions) < 2:
         # H2가 1개뿐이면 두 번째 카드는 본문 맨 끝에 배치 (상단 회귀 방지)
-        content = content.rstrip() + "\n\n" + cards[1]
+        content = content.rstrip() + "\n\n" + cards[1] + "\n\n"
         return content
 
     if len(h2_positions) < 3:
         # H2가 2개면 중간 위치(첫 H2와 둘째 H2 사이 또는 둘째 H2 앞)에 배치
         mid_idx = len(h2_positions) // 2
-        content = content[:h2_positions[mid_idx]] + "\n" + cards[-1] + "\n" + content[h2_positions[mid_idx]:]
+        content = content[:h2_positions[mid_idx]] + "\n\n" + cards[-1] + "\n\n" + content[h2_positions[mid_idx]:]
         return content
 
     mid_idx = len(h2_positions) // 2
-    content = content[:h2_positions[mid_idx]] + "\n" + cards[1] + "\n" + content[h2_positions[mid_idx]:]
+    content = content[:h2_positions[mid_idx]] + "\n\n" + cards[1] + "\n\n" + content[h2_positions[mid_idx]:]
 
     return content
 
@@ -805,36 +855,57 @@ def _validate_place_names(content: str, real_names: list) -> tuple:
 
     return content, names_ok
 
-def _validate_and_retry(content, system_prompt, user_prompt, max_retries=1):
-    """생성된 콘텐츠의 H3 개수만 검증하고 미달 시 재생성.
-    H2 개수는 post_process가 정리하고, 금지표현도 post_process가 치환하므로 여기서 검증하지 않음."""
+def _validate_and_retry(content, system_prompt, user_prompt, max_retries=3):
+    """생성된 콘텐츠의 H2/H3/글자수를 검증하고 미달 시 재생성.
+    H2 4~5개, H3 2개+, 글자수 2500+ 을 TAP 정보형 구조 기준으로 강제.
+    재시도 시 더 강한 모델 tier로 폴백. 최대 재시도 후에도 미달이면
+    **빈 content 반환 (fail-closed)** — 발행 중단.
+    """
+    # 재시도 tier 후보 — 전체 17개 모델 폴백 체인 중 "시작점" 후보.
+    # ai_writer.generate(tier=X)는 X부터 전체 체인을 순차 시도하므로,
+    # 한 프로바이더(쿼터 소진/타임아웃)가 막혀도 다음 프로바이더로 자동 폴백된다.
+    # zen-deepseek-free는 응답이 느려(타임아웃 빈번) 우선순위에서 제외.
+    _RETRY_TIERS = ["cerebras-gemma", "nvidia-nemotron", "gemini-3.5-flash-lite", "groq-qwen"]
     for attempt in range(max_retries + 1):
         _all_h3_titles = re.findall(r"^### (.+)", content, re.MULTILINE)
         h3_count = len(_all_h3_titles)
+        h2_count = len(re.findall(r"^## ", content, re.MULTILINE))
         char_count = len(content)
 
         issues = []
+        if h2_count < 4:
+            issues.append(f"H2 {h2_count}개→4개 필요 (이상)")
         if h3_count < 2:
             issues.append(f"H3 {h3_count}개→2개 필요 (이상)")
-        if char_count < 2500:
-            issues.append(f"글자수 {char_count}→2500 필요")
+        if char_count < 1500:
+            issues.append(f"글자수 {char_count}→1500 필요")
 
         if not issues:
             if attempt == 0:
-                logger.info("초회 검증 통과 (H3:%d, 글자수:%d)", h3_count, char_count)
+                logger.info("초회 검증 통과 (H2:%d, H3:%d, 글자수:%d)", h2_count, h3_count, char_count)
             else:
-                logger.info("재시도 후 검증 통과 (H3:%d, 글자수:%d)", h3_count, char_count)
-            break
+                logger.info("재시도 후 검증 통과 (H2:%d, H3:%d, 글자수:%d)", h2_count, h3_count, char_count)
+            return content
 
         if attempt < max_retries:
-            logger.warning("검증 실패, 재시도 %d/%d: %s", attempt + 1, max_retries, issues)
-            new_result = ai_generate(system_prompt, user_prompt, tier="default", max_tokens=4800)
+            _retry_tier = _RETRY_TIERS[attempt] if attempt < len(_RETRY_TIERS) else "default"
+            logger.warning("검증 실패, 재시도 %d/%d (%s): %s", attempt + 1, max_retries, _retry_tier, issues)
+            new_result = ai_generate(system_prompt, user_prompt, tier=_retry_tier, max_tokens=4800)
             if new_result and new_result.get("content"):
                 content = new_result["content"]
+                # 재시도 결과도 검증 루프로 다시 감 (H2/H3/글자수)
+                continue
             else:
-                break
+                # 해당 tier가 실패(429 등) — break 대신 다음 tier 후보로 계속 시도
+                logger.warning("재시도 %s 실패(빈 결과) — 다음 모델 후보로 진행", _retry_tier)
+                # attempt를 소모하지 않고 content는 유지한 채 다음 루프로
+                continue
         else:
-            logger.error("최대 재시도 초과, 마지막 결과 사용: %s", issues)
+            logger.error("최대 재시도 초과 — 구조 미달로 발행 중단: %s", issues)
+            return ""
+
+    logger.error("검증 통과 실패 — 발행 중단")
+    return ""
 
     # [과거연도 방어] 제목/본문에서 과거연도 -> 현재연도 변환
     import re as _yre
@@ -1079,18 +1150,21 @@ def generate_content(data, blog_id="travel-hugo"):
     if not names_ok:
         logger.info("장소명 불일치 감지 (재생성 안함)")
 
-    # 검증 및 재시도: H3 개수만 확인 (H2는 post_process가 정리, 금지표현도 post_process가 치환)
-    content = _validate_and_retry(content, system_prompt, user_prompt, max_retries=1)
+    # 검증 및 재시도: H2/H3/글자수 확인 (미달 시 강한 모델 재시도, 최종 미달이면 발행 중단)
+    content = _validate_and_retry(content, system_prompt, user_prompt, max_retries=3)
+    if not content:
+        logger.error("본문 구조 검증 실패 — 발행 중단 (fail-closed)")
+        return None
 
     _post_process._current_blog_id = blog_id
     content = _post_process(content)
 
-    # 다시 한 번 H2 과다 방지 (재시도 결과도 잘라냄)
+    # 다시 한 번 H2 과다 방지 (재시도 결과도 잘라냄) — 정보전달형 구조 허용 (7개)
     _h2_positions_final = [m.start() for m in re.finditer(r"^## ", content, re.MULTILINE)]
-    if len(_h2_positions_final) > 4:
-        _cut_pos_final = _h2_positions_final[4]
+    if len(_h2_positions_final) > 7:
+        _cut_pos_final = _h2_positions_final[7]
         content = content[:_cut_pos_final].rstrip()
-        logger.info("재시도 후 H2 과다 방지: %d개 → 4개로 절단", len(_h2_positions_final))
+        logger.info("재시도 후 H2 과다 방지: %d개 → 7개로 절단", len(_h2_positions_final))
     # travel4-hugo(여행코스)는 맛집 카드만 삽입 (가볼만한곳은 코스 장소와 중복 가능)
     if blog_id == "travel4-hugo":
         content = _enrich_with_nearby_restaurants_only(data, content)
@@ -1174,7 +1248,8 @@ def generate_content(data, blog_id="travel-hugo"):
 
     items = data.get("items", [])
     content = _inject_images(items, content, blog_id=blog_id)
-    _is_festival = (source_type == "korservice" and _select_prompt_id(blog_id, source_type) == "travel1_festival")
+    _is_festival = (source_type in ("festival", "korservice")
+                    and _select_prompt_id(blog_id, source_type) == "travel1_festival")
     content = _inject_naver_map(content, items, is_festival=_is_festival)
 
     display_region = data.get("display_region", "")
@@ -1199,23 +1274,23 @@ def generate_content(data, blog_id="travel-hugo"):
             "{region} {first_camp} 예약 전 알아둘 것과 {count}곳 비교",
         ],
         "travel1-hugo": [
-            "2026 {region} {theme} 일정과 입장료 총정리",
+            "2026 {region} {first_name} 일정과 입장료 총정리",
+            "{region} {first_name} 프로그램과 체험 정리",
+            "{first_name} 일정부터 주차까지 한눈에 보기",
+            "2026 {region} {first_name} 개최 정보 총정리",
+            "{region} {first_name} 교통과 주차 정보 총정리",
+            "{first_name} 방문 전 준비 사항 체크리스트",
+            "{region} {first_name} 주변 가볼만한 곳 정리",
+            "2026 {region} {first_name} 관람 정보와 볼거리",
+            "{first_name} 함께 즐기는 {region} {theme}",
+            "{region} {first_name} 포함 축제 일정 정리",
+            "{region} {theme} 일정과 입장료 총정리",
             "{region} {theme} 가볼만한 곳 {count}선 추천",
-            "{region} {theme} 일정과 체험 프로그램 정리",
             "{region} {theme} 일정부터 주차까지 한눈에 보기",
             "2026 {region} 축제 {count}곳 일정 총정리",
-            "{region} {theme}, 아이와 함께 가기 좋은 {count}곳",
-            "{region} {theme} 교통과 주차 정보 총정리",
             "주말 나들이로 딱! {region} {theme} {count}곳 추천",
             "{region} 무료 축제 {count}곳, 일정과 위치 총정리",
-            "2026 {region} 축제 {count}곳 일정과 위치 정리",
-            "{region} {theme} 주차장 위치와 요금 정리",
-            "{region} {theme} 대중교통 가는 법과 셔틀 안내",
-            "{region} {theme} 체험 프로그램 {count}가지 비교",
-            "비 오는 날에도 즐길 수 있는 {region} {theme} 정리",
-            "{region} {theme} 주요 프로그램과 체험 정리",
             "{region} {theme} 포토존 위치와 인생샷 팁 정리",
-            "올해 처음 열리는 {region} {theme} 일정 총정리",
             "{region} {theme} 야간 프로그램과 조명 행사 안내",
             "{region} {theme}와 묶어 갈 당일치기 코스 추천",
             "{region} {theme} 사전예약과 입장 안내 정리",
@@ -1473,6 +1548,14 @@ def generate_content(data, blog_id="travel-hugo"):
 
     title = sanitize_markdown(title, blog_id=blog_id)
     content = sanitize_markdown(content, blog_id=blog_id)
+
+    # 최종 구조 재검증: 어떤 후처리가 H2를 줄였어도 4개 미만이면 발행 중단 (fail-closed)
+    _final_h2 = len(re.findall(r"^## ", content, re.MULTILINE))
+    _final_h3 = len(re.findall(r"^### ", content, re.MULTILINE))
+    if _final_h2 < 4:
+        logger.error("최종 H2 %d개 (<4) — 구조 미달로 발행 중단 (blog=%s)", _final_h2, blog_id)
+        return None
+    logger.info("최종 구조 확인 (H2:%d, H3:%d)", _final_h2, _final_h3)
 
     return {
         "title": title,

@@ -313,8 +313,6 @@ class CoupangTravel:
         #   &lt;a / &lt;img 로 이스케이프됨 (텍스트 노출).
         # - 해결: 면책문구를 <div> 밖으로 빼서 별도 <p>로 작성하고,
         #   <div ...> 안에는 <a> 제품카드만 둔다.
-        # 참조: tour3.rotcha.kr (Hugo) - coupang-product-grid / coupang-product-card 클래스 사용
-        # Blogger에서는 인라인 스타일로 동일 레이아웃 구현
         disclaimer = '<p style="font-size:0.8em;color:#888;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>'
         lines = [f'\n\n<p><strong>{section_title}</strong></p>\n',
                  disclaimer,

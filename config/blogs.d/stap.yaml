@@ -1,12 +1,4 @@
 blogs:
-# ═══════════════════════════════════════════════════════════════════════════════
-# STAP Funnel: 얕은 금융 → 깊은 투자 (shallow → deep)
-# finance(landing) → stock → dividend/etf → sector → ipo(monetize)
-# bridge_to 없음 — STAP은 RAP bridge의 대상 카테고리. depth_next로 내부 흐름.
-# ═══════════════════════════════════════════════════════════════════════════════
-
-# ── Stage 1: Landing (진입점) ──
-# 금리·예적금 비교 — 가장 얕은 금융 지식, 검색 유입 최대
 - cf_project: finance-hugo
   daily_quota: 5
   domain: finance.techpawz.com
@@ -22,14 +14,11 @@ blogs:
     - '13:32'
     - '16:32'
     - '20:32'
-  status: paused
+  status: active
   theme: blowfish
   site_path: /Users/twinssn/Projects/STAP/finance-hugo
   funnel_stage: landing
   managed_by: pipeline
-
-# ── Stage 2: Bridge — 주식 진입 ──
-# 주식 분석 — 금융 기초에서 주식 투자로 확장
 - cf_project: stock-informationhot
   daily_quota: 5
   domain: stock.informationhot.kr
@@ -46,18 +35,15 @@ blogs:
     - '16:22'
     - '20:22'
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
-  status: paused
+  status: active
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
   depth_next:
-    - id: dividend-hugo
-      topic: "배당주 투자와 수익률 비교"
-    - id: sector-hugo
-      topic: "업종별 주가 동향 분석"
-
-# ── Stage 3: Bridge — 배당/ETF ──
-# 배당주 투자 — 주식에서 배당 중심으로 깊이 확장
+  - id: dividend-hugo
+    topic: 배당주 투자와 수익률 비교
+  - id: sector-hugo
+    topic: 업종별 주가 동향 분석
 - cf_project: dividend-hugo
   daily_quota: 5
   domain: dividend.techpawz.com
@@ -74,16 +60,13 @@ blogs:
     - '16:24'
     - '20:24'
   site_path: /Users/twinssn/Projects/STAP/dividend-hugo
-  status: paused
+  status: active
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
   depth_next:
-    - id: etf-hugo
-      topic: "배당 ETF vs 개별 배당주 비교"
-
-# ── Stage 4: Bridge — ETF ──
-# ETF 투자 — 배당에서 ETF 분산 투자로 확장
+  - id: etf-hugo
+    topic: 배당 ETF vs 개별 배당주 비교
 - cf_project: etf-hugo
   daily_quota: 5
   domain: etf.techpawz.com
@@ -100,16 +83,13 @@ blogs:
     - '16:26'
     - '20:26'
   site_path: /Users/twinssn/Projects/STAP/etf-hugo
-  status: paused
+  status: active
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
   depth_next:
-    - id: sector-hugo
-      topic: "ETF 구성 섹터 분석"
-
-# ── Stage 5: Bridge — 섹터 ──
-# 섹터 분석 — ETF에서 개별 섹터/업종 심층 분석
+  - id: sector-hugo
+    topic: ETF 구성 섹터 분석
 - cf_project: sector-hugo
   daily_quota: 5
   domain: sector.techpawz.com
@@ -126,16 +106,13 @@ blogs:
     - '16:28'
     - '20:28'
   site_path: /Users/twinssn/Projects/STAP/sector-hugo
-  status: paused
+  status: active
   theme: blowfish
   funnel_stage: bridge
   managed_by: pipeline
   depth_next:
-    - id: ipo-hugo
-      topic: "IPO 공모주 섹터별 분석"
-
-# ── Stage 6: Monetize (종착점) ──
-# IPO·공모주 — 가장 깊은 투자 지식, 고단가 콘텐츠
+  - id: ipo-hugo
+    topic: IPO 공모주 섹터별 분석
 - cf_project: ipo-hugo
   daily_quota: 5
   domain: ipo.techpawz.com
@@ -143,7 +120,7 @@ blogs:
   name: IPO·공모주 분석
   pipeline: stock
   platform: hugo
-  status: paused
+  status: active
   repo: ipo-hugo
   schedule:
     times:

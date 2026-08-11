@@ -189,13 +189,15 @@ def _insert_internal_links(body_md, blog_id, slug):
 
 
 def _extract_first_image(body_md):
-    m = re.search(r"!\[.*?\]\((https?://[^)]+)\)", body_md)
-    if not m:
-        return ""
-    url = m.group(1)
-    if "tong.visitkorea.or.kr" in url and url.startswith("http://"):
-        url = url.replace("http://", "https://", 1)
-    return url
+    _skip_domains = ("ads-partners.coupang.com", "link.coupang.com")
+    for m in re.finditer(r"!\[.*?\]\((https?://[^)]+)\)", body_md or ""):
+        url = m.group(1)
+        if any(d in url for d in _skip_domains):
+            continue
+        if "tong.visitkorea.or.kr" in url and url.startswith("http://"):
+            url = url.replace("http://", "https://", 1)
+        return url
+    return ""
 
 
 def _extract_description(body_md):
@@ -972,6 +974,39 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
                 "existing_url": existing_url,
             }
     # ── 중복 방지 끝 ──
+
+    # ── 표준 검증 게이트 (2026-08-12 추가) — TAP 분기는 fail-closed, 기타는 경고 ──
+    # 전수조사로 37,203건 위반을 0건으로 정리한 표준을 신규 발행에도 강제.
+    # travel 계열은 정보형 구조(H2 4~5/H3/표/체크리스트)를 엄격 적용.
+    try:
+        from scripts.verify_blog_standard import check_c2, check_c3, check_c4, check_c6
+    except Exception:
+        check_c2 = check_c3 = check_c4 = check_c6 = None
+
+    _TAP_BLOGS = {"travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"}
+    if check_c2 and blog_id in _TAP_BLOGS and not is_draft:
+        _c2_ok, _c2_msg = check_c2(body_md)
+        _c3_ok, _c3_msg = check_c3(body_md)
+        _c4_ok, _c4_msg = check_c4(body_md)
+        _c6_ok, _c6_msg = check_c6(body_md)
+        _violations = []
+        if not _c2_ok:
+            _violations.append(_c2_msg)
+        if not _c3_ok:
+            _violations.append(_c3_msg)
+        if not _c4_ok:
+            _violations.append(_c4_msg)
+        if not _c6_ok:
+            _violations.append(_c6_msg)
+        if _violations:
+            logger.warning(f"[STANDARD-GATE] {blog_id} 표준 위반 — 발행 중단: {'; '.join(_violations)}")
+            return {
+                "success": False,
+                "reason": "standard_violation",
+                "blog_id": blog_id,
+                "issues": _violations,
+            }
+    # ── 표준 검증 게이트 끝 ──
 
     # ✅ humanize 단계 (2026-06-12 추가) — 한국어 파이프라인 전용
     _KO_PIPELINES = {"rap", "rap2", "rap3", "rap4", "rap5",

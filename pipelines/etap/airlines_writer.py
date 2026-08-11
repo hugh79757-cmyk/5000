@@ -272,8 +272,16 @@ def generate_airline_review(topic):
 STRUCTURE (only include sections where data exists):
 {section_text}
 
+FORMAT (informational style — short paragraphs, tables, clear structure):
+- Opening paragraph: 2-3 sentences stating exactly what this review covers (route network, prices, best months, verdict) and who it is for
+- ## Quick Facts: a markdown table of key data — airline type, country, route count, airports served, cheapest route and price from the data
+- Use the required STRUCTURE sections as H2; inside each, use ### per route group or destination and markdown tables for price comparisons
+- ## Practical Checklist: booking tips as a short bullet list (cheapest month to fly, cheapest route, what to verify before booking)
+- ## Closing verdict: a clear who-should-fly recommendation plus a note to verify current fares and schedules on the airline's official site before booking
+- Keep paragraphs short (2-4 sentences); let tables and ### sub-sections carry price details
+
 RULES:
-- Use ONLY the data above. Do NOT invent baggage policies, meal options, fleet details, or lounge info.
+- Use ONLY the data above. Do NOT invent prices, baggage policies, meal options, fleet details, or lounge info.
 - For routes: group by region/hub, mention specific city pairs with prices.
 - For prices: cite exact dollar amounts and flight numbers from the data.
 - For monthly trends: identify cheapest and most expensive months.

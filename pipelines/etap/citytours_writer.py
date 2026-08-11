@@ -86,10 +86,18 @@ def generate_citytours_guide(topic):
 DATA (use ONLY this data, do NOT invent tours or prices):
 {summary}
 
+FORMAT (informational style — short paragraphs, tables, clear H3 breaks):
+- Opening paragraph: 2-3 sentences telling readers exactly what this guide covers (best city tours, self-guided options, prices) and who it is for
+- ## Quick Facts: a compact markdown table of key data — total tours found, price range, top categories, cheapest and most expensive tour from the data
+- Use the required H2 sections; inside each, use ### per tour with exact name, price, and a short description
+- ## Practical Checklist: a short bullet checklist of what to bring and key tips (timing, shoes, booking advice)
+- ## Closing: best value pick + best splurge pick by name and price, plus a note to re-check prices and availability before booking
+- Keep paragraphs short (2-4 sentences); let tables and ### sub-sections carry the details
+
 RULES:
 - Write 1,200-1,800 words in English
 - Do NOT include any booking links or URLs in the text
-- Do NOT invent tour names, prices, or categories not in the data
+- Do NOT invent tour names, prices, categories, or timings not in the data
 - Title must include "{city}" and relate to city tours and sightseeing
 - Required H2 sections:
 {h2s}

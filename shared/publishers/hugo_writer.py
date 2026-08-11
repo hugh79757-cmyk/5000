@@ -345,6 +345,19 @@ def _clean_body(body_md, site_path=""):
         r"입주 자격", r"신청\s*절차", r"신청\s*방법", r"필요\s*서류",
         r"자격\s*요건", r"당첨", r"주의사항", r"핵심\s*요약",
         r"공고", r"활용\s*팁", r"입찰", r"계약", r"함께 읽으면 좋은 글",
+        # travel/정보전달형 섹션 허용 (정보글 H2: 개요/일정/프로그램/교통/주차/준비/마무리/주변)
+        r"개요", r"일정", r"프로그램", r"체험", r"교통", r"주차",
+        r"준비\s*사항", r"참고", r"마무리", r"마치며", r"주변",
+        r"찾아가는\s*길", r"입장료", r"운영\s*시간", r"이용\s*안내",
+        r"한눈에\s*보기", r"한눈에\s*비교", r"비교표", r"정보\s*한눈",
+        # travel 정보형 H2 추가 (상세/예약/요금/규칙/소개/정리/방법)
+        r"상세\s*정보", r"상세\s*안내", r"소개", r"정리", r"안내",
+        r"예약", r"요금", r"가격", r"이용\s*시간", r"이용\s*규칙", r"규칙",
+        r"방법", r"정보\s*정리", r"한눈에", r"알아보기", r"확인",
+        # 문화유산/여행 H2 (역사적 배경/조형/특징/관람/부재/시대/지정/위치)
+        r"역사적\s*배경", r"조형", r"특징", r"관람\s*포인트", r"관람\s*정보",
+        r"부재", r"시대", r"지정", r"위치", r"입지", r"배경",
+        r"구성", r"구조", r"양식", r"해설", r"가치", r"의미",
     ]
     _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
 
@@ -648,15 +661,34 @@ def sanitize_featureimage_url(url, max_len=200):
     return url
 
 
+def _iter_body_images(body_md):
+    """본문에서 이미지 URL을 순서대로 yield (쿠팡 광고 이미지 제외)."""
+    import re as _re
+    _skip_domains = ("ads-partners.coupang.com", "link.coupang.com")
+    for m in _re.finditer(r"!\[.*?\]\((https?://[^)\s]+)\)", body_md or ""):
+        url = m.group(1)
+        if not any(d in url for d in _skip_domains):
+            yield url
+    for m in _re.finditer(r'<img[^>]+src="(https?://[^"]+)"', body_md or ""):
+        url = m.group(1)
+        if not any(d in url for d in _skip_domains):
+            yield url
+
+
 def _extract_first_image(body_md):
-    """본문에서 첫 번째 이미지 URL 추출"""
+    """본문에서 첫 번째 이미지 URL 추출 (쿠팡 광고 이미지 제외)"""
     import re as _re2
-    m = _re2.search(r"!\[.*?\]\((.*?)\)", body_md or "")
-    if m:
-        return m.group(1)
-    m = _re2.search(r'<img[^>]+src="(.*?)"', body_md or "")
-    if m:
-        return m.group(1)
+    _skip_domains = ("ads-partners.coupang.com", "link.coupang.com")
+    # 마크다운 이미지
+    for m in _re2.finditer(r"!\[.*?\]\((.*?)\)", body_md or ""):
+        url = m.group(1)
+        if not any(d in url for d in _skip_domains):
+            return url
+    # HTML img
+    for m in _re2.finditer(r'<img[^>]+src="(.*?)"', body_md or ""):
+        url = m.group(1)
+        if not any(d in url for d in _skip_domains):
+            return url
     return ""
 
 
@@ -970,7 +1002,19 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     description = _extract_description(body_md)
 
     if not thumbnail_url:
-        thumbnail_url = _extract_first_image(body_md)
+        # featureimage 중복 방지: 이미 사용된(is_image_used) 이미지는 건너뛰고
+        # 본문에서 다음 사용 가능한 이미지를 찾는다.
+        try:
+            from shared.content_store import is_image_used
+        except ImportError:
+            is_image_used = None
+        _bid = (blog_cfg or {}).get("id", "")
+        for _cand in _iter_body_images(body_md):
+            if is_image_used is None or not is_image_used(_cand, blog_id=_bid):
+                thumbnail_url = _cand
+                break
+        if not thumbnail_url:
+            thumbnail_url = _extract_first_image(body_md)
     
     if thumbnail_url and not thumbnail_url.startswith(("http://", "https://")):
         thumbnail_url = "https://img.informationhot.kr/" + thumbnail_url.lstrip("/")

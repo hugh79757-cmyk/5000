@@ -45,13 +45,14 @@
   나쁜 예: 차량 가격 나열로 시작하는 문장.
   나쁜 예: 예시 문장을 그대로 복사하는 것. DATA의 실제 값을 반영해 새로 작성하라.
 
-## 글 구조 (H2 5개, 반드시 이 순서)
+## 글 구조 (정보전달형, H2 5개, 반드시 이 순서)
 
-### H2-1: [DATA.persona_label 상황 설명]
+### H2-1: [DATA.persona_label 상황 설명] (리드)
 - 첫 문장: 페르소나의 현실적 고민으로 시작.
 - 페르소나의 핵심 조건 3가지를 DATA 수치로 정의:
   연간 주행 DATA.persona_annual_km km, 할부 DATA.persona_finance_term개월, 월 예산 기준 DATA.persona_monthly_net만원.
 - 이 글에서 추천할 차량(DATA.model)과 선정 기준(DATA.persona_priority) 명시.
+- 이 글에서 답할 내용(추천 근거/실제 비용/주의점/최종 가이드)을 1문장으로 약속.
 - 차량의 한 줄 정체성 1문장.
 
 ### H2-2: 추천 차량 — [DATA.model]을 선택한 이유
@@ -67,6 +68,7 @@
 | 잔존가치율 | DATA.resale_rate_percent% | DATA.competitor_resale_rate_percent% |
 
 - 표 아래: 이 페르소나 기준에서 메인 모델이 경쟁 모델보다 유리한 이유 3~4문장.
+- 표 아래에 표를 읽는 핵심 포인트(이 페르소나에게 가장 중요한 행) 1문장.
 - 월 비용 맥락화: "연봉 DATA.persona_salary만원 기준 세후 월급 약 DATA.persona_monthly_net만원의 DATA.persona_monthly_ratio%에 해당하는 비용이다." ← 이 문장 형식 그대로, DATA 값만 채워서 작성하라. 수치를 새로 계산하지 마라.
 - "가격이 같다면 어느 차를 골라야 할까?" — 연비·잔존가치·유지비 기준으로 답변 1문장.
 
@@ -79,6 +81,7 @@
   - premium: DATA.persona_finance_term개월 할부 + 연간 유지비 합산
 - 3년 총비용: "신차 가격 DATA.base_price만원의 [B]%에 해당한다" — [B]는 DATA.three_year_total_cost ÷ DATA.base_price × 100으로 계산하라.
 - "이 상황에서 DATA.model을 선택하면 DATA.competitor 대비 3년간 DATA.persona_saving_3yr만원을 절약할 수 있다" (persona_saving_3yr가 양수면 절약, 음수면 더 지출).
+- 비용 항목별(할부/보험/유류비 등)로 H3(###) 소제목을 나누어 정리해도 좋다.
 
 ### H2-4: 이런 점은 미리 알고 사야 한다
 - 추천 차량의 단점 또는 이 페르소나에게 불리한 조건 2~3가지를 구체적 수치로 제시.
@@ -92,6 +95,7 @@
 - 장기 보유(5년 이상)라면: [잔존가치율 높은 쪽] — [DATA.resale_rate_percent 또는 DATA.competitor_resale_rate_percent 근거 1문장]
 
 총평: "3년 총비용이 신차 가격의 [X]%인 DATA.model이 DATA.persona_label 상황에서 가장 현실적인 선택이다." — [X]는 DATA.three_year_total_cost ÷ DATA.base_price × 100으로 계산하라.
+마지막 문단에서 구매 전 최신 가격·할인 정보를 공식 채널에서 재확인하라는 문장 1개.
 
 ## 수치 해석 의무
 - 월 유지비: DATA.persona_monthly_net과 DATA.persona_monthly_ratio를 그대로 사용하라. 직접 계산 금지.

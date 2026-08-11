@@ -101,10 +101,18 @@ def generate_adventure_guide(topic):
 DATA (use ONLY this data, do NOT invent tours or prices):
 {summary}
 
+FORMAT (informational style — short paragraphs, tables, clear H3 breaks):
+- Opening paragraph: 2-3 sentences telling readers exactly what this guide covers (hikes, extreme sports, bike tours, real prices) and who it is for
+- ## Quick Facts: a compact markdown table of key data — total tours found, price range, top categories, cheapest and most expensive tour from the data
+- ## Detailed sections: keep the required H2 sections; inside each, use ### for each individual tour with its exact name, price, and a 1-2 line description
+- ## Practical Checklist: a short bullet checklist of what to bring and key tips (gear, fitness, safety, best season)
+- ## Closing: a clear recommendation (best value pick + best splurge pick by name and price) and a note to re-check current prices and availability before booking
+- Keep paragraphs short (2-4 sentences); let tables and ### sub-sections carry the details
+
 RULES:
 - Write 1,200-1,800 words in English
 - Do NOT include any booking links or URLs in the text
-- Do NOT invent tour names, prices, or categories not in the data
+- Do NOT invent tour names, prices, categories, or timings not in the data
 - Title must include "{city}" and be SEO-friendly
 - Required H2 sections:
   ## Why {city} is an Adventure Hotspot

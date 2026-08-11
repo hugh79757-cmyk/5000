@@ -54,7 +54,7 @@ _global_rules: '- "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 �
 
   - No emoji anywhere
 
-  - No markdown table (use list or paragraph instead)
+  - Use markdown tables for key data (prices, hours, specs); keep paragraphs short (2~3 sentences)
 
 
   [WRITING TONE]
@@ -103,9 +103,7 @@ _global_rules: '- "취소선(~~텍스트~~) 절대 사용 금지. 마크다운 �
   [FORMAT]
 
   - Blank line above and below every heading (## / ###)
-
-  - No markdown tables — use bold list or paragraph
-
+  - Use markdown tables for key data (prices, hours, specs); keep paragraphs short (2~3 sentences)
   - No emoji
 
   '

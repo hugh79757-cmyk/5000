@@ -81,13 +81,13 @@ class TestSanitizeTitle:
     def test_soft_truncation_at_word_boundary(self):
         long_title = "가 나 다 라 마 바 사 아 자 차 카 타 파 하 " * 5
         result = sanitize_title(long_title)
-        assert len(result) <= 66  # 65 + "…"
+        assert len(result) <= 36  # 35 + "…"
         assert result.endswith("…"), f"expected ellipsis, got {result!r}"
 
     def test_soft_truncation_no_space(self):
         long_title = "가나다라마바사" * 12  # 84 chars, no spaces
         result = sanitize_title(long_title)
-        assert len(result) == 65, f"expected 65 chars, got {len(result)}: {result!r}"
+        assert len(result) == 35, f"expected 35 chars, got {len(result)}: {result!r}"
         assert not result.endswith("…")
 
     def test_preserves_short_title(self):

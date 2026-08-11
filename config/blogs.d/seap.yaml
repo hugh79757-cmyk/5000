@@ -14,7 +14,7 @@ blogs:
     - '14:10'
     - '17:10'
     - '21:10'
-  status: paused
+  status: active
 - cf_project: senior-hugo
   daily_quota: 5
   domain: senior.informationhot.kr
@@ -32,6 +32,6 @@ blogs:
     - '16:34'
     - '20:34'
   site_path: /Users/twinssn/Projects/SEAP/senior-hugo
-  status: paused
+  status: active
   theme: blowfish
   funnel_stage: landing

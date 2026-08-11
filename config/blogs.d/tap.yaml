@@ -12,7 +12,7 @@ blogs:
     - 06:00
     - '10:00'
     - '14:00'
-  status: paused
+  status: active
 - cf_project: travel-hugo
   daily_quota: 3
   domain: tour1.rotcha.kr
@@ -35,7 +35,7 @@ blogs:
     - '20:00'
   shortcodes_enabled: true
   site_path: /Users/twinssn/Projects/TAP/travel-hugo
-  status: paused
+  status: active
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -64,7 +64,7 @@ blogs:
     - '16:02'
     - '20:02'
   site_path: /Users/twinssn/Projects/TAP/travel1-hugo
-  status: paused
+  status: active
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -93,7 +93,7 @@ blogs:
     - '16:04'
     - '20:04'
   site_path: /Users/twinssn/Projects/TAP/travel2-hugo
-  status: paused
+  status: active
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -122,7 +122,7 @@ blogs:
     - '16:06'
     - '20:06'
   site_path: /Users/twinssn/Projects/TAP/travel3-hugo
-  status: paused
+  status: active
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -151,7 +151,7 @@ blogs:
     - '16:08'
     - '20:08'
   site_path: /Users/twinssn/Projects/TAP/travel4-hugo
-  status: paused
+  status: active
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: bridge
