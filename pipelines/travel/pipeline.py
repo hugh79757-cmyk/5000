@@ -217,10 +217,15 @@ def _run_single(target_blog_id, blog_cfg=None):
     for _attempt in range(1, _MAX_SIGUNGU_RETRIES + 1):
         data = _fetch_for_blog(target_blog_id)
         if not data:
-            logger.error("No data fetched for " + target_blog_id)
-            if _attempt == 1:
-                tg_error(target_blog_id, "data_fetch", "데이터 수집 실패 (fetcher 반환값 없음)")
-            return None
+            logger.warning(
+                f"No data fetched for {target_blog_id} "
+                f"(attempt {_attempt}/{_MAX_SIGUNGU_RETRIES})"
+            )
+            if _attempt < _MAX_SIGUNGU_RETRIES:
+                continue
+            logger.error("No data fetched after retries for " + target_blog_id)
+            tg_error(target_blog_id, "data_fetch", "data fetch retries exhausted")
+            return {"success": False, "reason": "no_data"}
 
         # ── source_id 기반 중복 발행 방지 ──
         _content_ids = data.get("content_ids", [])

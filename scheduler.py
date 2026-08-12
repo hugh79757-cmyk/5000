@@ -265,6 +265,7 @@ def run_publish(blog_id) -> bool | None:
             cwd=PROJECT_DIR,
             capture_output=True, text=True, timeout=600
         )
+        parsed_success = None
         if result.stdout:
             for line in result.stdout.strip().split("\n")[-3:]:
                 logger.info("  [OUT] " + line)
@@ -272,16 +273,21 @@ def run_publish(blog_id) -> bool | None:
             last_line = result.stdout.strip().split("\n")[-1].strip()
             try:
                 parsed = _json.loads(last_line)
-                if parsed.get("success"):
+                parsed_success = bool(parsed.get("success"))
+                if parsed_success:
                     logger.info(f"[PUBLISH] {blog_id} 발행 성공")
                 else:
                     reason = parsed.get("reason", "unknown")
                     logger.error(f"[PUBLISH] {blog_id} 발행 실패 — stage={reason}")
             except (_json.JSONDecodeError, Exception):
                 pass
-        if result.returncode != 0 and result.stderr:
-            logger.error("  ERR: " + result.stderr[-200:])
-            _tg_error(blog_id, "scheduler", result.stderr[-300:])
+        if result.returncode != 0:
+            error_text = (result.stderr or result.stdout or "dispatcher returned non-zero")
+            logger.error("  ERR: " + error_text[-200:])
+            _tg_error(blog_id, "scheduler", error_text[-300:])
+            return False
+        if parsed_success is not True:
+            logger.error(f"[PUBLISH] {blog_id} dispatcher reported failure or missing JSON")
             return False
         return True
     except subprocess.TimeoutExpired:
@@ -465,6 +471,7 @@ def batch_deploy() -> None:
             ["bash", os.path.join(PROJECT_DIR, "scripts", "batch_push.sh")],
             capture_output=True, text=True, timeout=1800
         )
+        parsed_success = None
         if result.stdout:
             for line in result.stdout.strip().split("\n")[-5:]:
                 logger.info("  " + line)
@@ -491,6 +498,7 @@ def daily_report() -> None:
             cwd=PROJECT_DIR,
             capture_output=True, text=True, timeout=120
         )
+        parsed_success = None
         if result.stdout:
             logger.info("  " + result.stdout.strip()[-200:])
     except Exception as e:

@@ -774,6 +774,16 @@ def fetch_course():
                 pool = filtered
 
         # 랜덤 1개 코스 선택
+        # Prefer cached sub-items so an empty remote detail response does not waste a publish slot.
+        cached_course_ids = {
+            str(row[0])
+            for row in conn.execute("SELECT DISTINCT course_contentid FROM course_sub")
+        }
+        cached_pool = [row for row in pool if str(row["contentid"]) in cached_course_ids]
+        if cached_pool:
+            pool = cached_pool
+            logger.info("course: cached sub-items available for %d candidates", len(pool))
+
         course_row = random.choice(pool)
         course_cid = str(course_row["contentid"])
         course_title = course_row["title"] or ""
@@ -784,22 +794,31 @@ def fetch_course():
         course_mapy = course_row["mapy"] or ""
         area_code = str(course_row["areacode"] or "")
 
-        # On-demand: detailInfo2로 하위 장소 조회
+        # Prefer local cache; call detailInfo only when no cached sub-items exist.
         key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
-        resp2 = req.get(
-            "http://apis.data.go.kr/B551011/KorService2/detailInfo2",
-            params={
-                "serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
-                "_type": "json", "contentId": course_cid, "contentTypeId": 25,
-            },
-            timeout=15,
-        )
-        data2 = resp2.json()
-        sub_items = data2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(sub_items, dict):
-            sub_items = [sub_items]
+        cached_sub_rows = conn.execute(
+            "SELECT subnum, subname, subdetailoverview, subdetailimg, subcontentid "
+            "FROM course_sub WHERE course_contentid=? ORDER BY subnum",
+            (course_cid,),
+        ).fetchall()
+        if cached_sub_rows:
+            sub_items = [dict(row) for row in cached_sub_rows]
+            logger.info("course: %s used %d cached sub-items", course_title, len(sub_items))
+        else:
+            resp2 = req.get(
+                "http://apis.data.go.kr/B551011/KorService2/detailInfo2",
+                params={
+                    "serviceKey": key, "MobileOS": "ETC", "MobileApp": "TAP",
+                    "_type": "json", "contentId": course_cid, "contentTypeId": 25,
+                },
+                timeout=15,
+            )
+            data2 = resp2.json()
+            sub_items = data2.get("response", {}).get("body", {}).get("items", {}).get("item", [])
+            if isinstance(sub_items, dict):
+                sub_items = [sub_items]
         if not sub_items:
-            logger.warning("course detailInfo: %s 하위장소 0건", course_title)
+            logger.warning("course detailInfo: %s had no sub-items", course_title)
             conn.close()
             return None
 
