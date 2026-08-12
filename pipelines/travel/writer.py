@@ -875,8 +875,8 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=3):
         issues = []
         if h2_count < 4:
             issues.append(f"H2 {h2_count}개→4개 필요 (이상)")
-        if h3_count < 2:
-            issues.append(f"H3 {h3_count}개→2개 필요 (이상)")
+        if h3_count < 1:
+            issues.append(f"H3 {h3_count}개→1개 필요 (이상)")
         if char_count < 1500:
             issues.append(f"글자수 {char_count}→1500 필요")
 

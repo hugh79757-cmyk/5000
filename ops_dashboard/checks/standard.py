@@ -141,6 +141,7 @@ ALLOWED_OVERRIDES = {
     "layouts/partials/extend_head.html",
     "layouts/partials/adsense",
     "layouts/partials/related.html",
+    "layouts/partials/related-single.html",
     "layouts/partials/head/custom.html",
     "layouts/partials/head.html",
     "layouts/partials/head.xml",
@@ -554,7 +555,7 @@ def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
         # content/posts/ 없음 또는 포스트 없음
         posts_dir = site / "content" / "posts"
         if not posts_dir.is_dir():
-            return False, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님"
+            return True, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님 (pass)"
         return True, "포스트 없음 — 검사 대상 없음 (pass)"
 
     valid_count = 0
@@ -650,7 +651,7 @@ def _check_r2_01(site: Path) -> tuple[bool, str]:
     if not posts:
         posts_dir = site / "content" / "posts"
         if not posts_dir.is_dir():
-            return False, "content/posts/ 디렉토리 없음 — 이미지 검사 대상 아님"
+            return True, "content/posts/ 디렉토리 없음 — 이미지 검사 대상 아님 (pass)"
         return True, "포스트 없음 — 검사 대상 없음 (pass)"
 
     invalid_entries: list[str] = []

@@ -8,6 +8,13 @@ logger = logging.getLogger(__name__)
 # 검증 대상 블로그 그룹
 TAP_TRAVEL_BLOGS = {"travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"}
 
+# Trip.com CTA 삽입 부적합 테마 (TAP content_processor.AFFILIATE_INAPPROPRIATE_KEYWORDS와 동일).
+# 이 테마의 글은 CTA가 의도적으로 생략되므로, 검증에서 ERROR가 아닌 WARNING으로 완화.
+CTA_INAPPROPRIATE_KEYWORDS = [
+    "캠핑", "문화유산 탐방", "국보 탐방", "보물 탐방", "사적 탐방",
+    "축제", "걷기길", "트레킹", "heritage",
+]
+
 # 큐레이션 블로그 그룹 (CTA 검증 대상)
 CURATION_BLOGS = {
     "laptop-hugo", "baby-hugo", "appliance-hugo", "interior-hugo",
@@ -100,13 +107,20 @@ def validate_post_html(html: str, blog_id: str) -> dict:
     # 1. CTA 존재 여부 (travel 블로그)
     if blog_id in TAP_TRAVEL_BLOGS:
         if "cta-box" not in html and "cta_box" not in html:
-            count = _count_cta_plain_text(html)
-            if count == 0:
-                issues.append({"severity": "ERROR", "check": "cta_html",
-                               "msg": "Trip.com CTA HTML 누락"})
-            else:
+            # CTA 생략이 의도된 테마(축제/문화유산/캠핑 등)는 WARNING으로 완화.
+            # (TAP content_processor.add_affiliate_box가 이 테마에선 CTA를 넣지 않음)
+            theme_inappropriate = any(kw in html for kw in CTA_INAPPROPRIATE_KEYWORDS)
+            if theme_inappropriate:
                 issues.append({"severity": "WARNING", "check": "cta_html",
-                               "msg": f"CTA가 HTML이 아닌 평문으로 {count}개 존재"})
+                               "msg": "Trip.com CTA 없음 (테마 부적합으로 생략 — 정상)"})
+            else:
+                count = _count_cta_plain_text(html)
+                if count == 0:
+                    issues.append({"severity": "ERROR", "check": "cta_html",
+                                   "msg": "Trip.com CTA HTML 누락"})
+                else:
+                    issues.append({"severity": "WARNING", "check": "cta_html",
+                                   "msg": f"CTA가 HTML이 아닌 평문으로 {count}개 존재"})
 
     # 1b. CTA 존재 여부 (큐레이션 블로그)
     if blog_id in CURATION_BLOGS:
@@ -130,8 +144,11 @@ def validate_post_html(html: str, blog_id: str) -> dict:
         issues.append({"severity": "WARNING", "check": "thumbnail",
                        "msg": "og:image / twitter:image 메타 태그 없음"})
 
-    # 4. 지도보기 평문
-    if "지도에서 보기" in html:
+    # 4. 지도보기 평문 (HTML 링크 <a>...</a> 안의 텍스트는 제외 — nearby-card 버튼의
+    #    '네이버 지도에서 보기'는 <a> 태그 안이라 정상, 진짜 평문만 감지)
+    body_text_plain = re.sub(r"<a\b[^>]*>[\s\S]*?</a>", "", html)
+    body_text_plain = re.sub(r"<[^>]+>", "", body_text_plain)
+    if re.search(r"지도에서 보기", body_text_plain):
         issues.append({"severity": "WARNING", "check": "map_text",
                        "msg": "'지도에서 보기' 평문 잔재"})
 

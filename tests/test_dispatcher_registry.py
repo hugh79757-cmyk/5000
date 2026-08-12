@@ -28,6 +28,7 @@ def _load_all_blogs():
 def _pipeline_module_path(blog_id, pipeline):
     ETAP_BLOG_EXCEPTIONS = {
         "flights-hugo": "pipelines.etap.flight_pipeline",
+        "tour-hugo": "pipelines.etap.pipeline",
     }
     if pipeline == "etap":
         if blog_id in ETAP_BLOG_EXCEPTIONS:
