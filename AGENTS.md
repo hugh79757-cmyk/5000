@@ -1522,7 +1522,7 @@ curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
 - **fail 판정 근거 (evidence)**:
   - `_check_c04()` (`ops_dashboard/checks/content_integrity.py:132-142`): C04_KO_PATTERNS + C04_EN_PATTERNS 목록으로 본문 검사. 매치되면 fail.
   - C04_KO_PATTERNS (10개): `생각해보자`, `생각해 보자`, `다음 단계로 넘어`, `단계별로 진행해`, `우선, 우리가 해야`, `우리가 해야 할 것은`, `생각 과정을 통해`, `결론부터 말하면`, `먼저 생각해보자`, `단계별로 생각`.
-  - C04_EN_PATTERNS (10개): `Need to think`, `We need to write`, `Let's think step by step`, `think step by step`, `let's break this down`, `here's the plan`, ` firstly,`, ` secondly,`, `in order to achieve`, `as an AI language model`.
+  - C04_EN_PATTERNS (8개): `Need to think`, `We need to write`, `Let's think step by step`, `think step by step`, `let's break this down`, `here's the plan`, `in order to achieve`, `as an AI language model`. (2026-08-12: firstly/secondly는 오탐 이력으로 제거 — `\bfirstly,?\s+`와 `\b secondly,?\s+`의 `\b` 뒤 공백 오타로 인해 " secondly,"만 잡고 "secondly," 단독은 못 잡는 문제 + 실발행 글에 이 패턴이 실제와 무관하게 검출되는 오탐 빈발)
   - fail 증거: `"C04 위반: 프롬프트 누수 N건 — matched_text"` (예: `"C04 위반: 프롬프트 누수 1건 — 생각해보자"`).
   - check_c04 전체 결과: `"C04 위반 {len(violations)}건: {slug}: {detail}; ..."` (`ops_dashboard/checks/content_integrity.py:302-304`).
   - **leak_detected(C.3)와의 관계**: C04는 "프롬프트/사고문 누수"라는 문제 유형에서 C.3의 leak_detected와 동일 계열. C.3 leak_detected 레시피의 "수정 의도·허용 범위"를 공유한다. C04는 dashboard에서 별도 check_name으로 감지되는 구체적 검사.
@@ -2027,3 +2027,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+## Dashboard Operations Agent Reference
+
+For any dashboard, publishing, deployment, validation, source, duplicate, freshness, or notification signal, read `ops_dashboard/docs/agent-reference/README.md` before proposing or applying a change. It links the required safety protocol, machine-readable signal policy, and error playbooks. Treat Telegram as a notification channel only; use structured events, raw logs, configuration, data stores, and live evidence to determine root cause.

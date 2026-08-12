@@ -111,8 +111,6 @@ EN_PATTERNS = [
     re.compile(r'think\s+step\s+by\s+step', re.I),
     re.compile(r"let\.?s\s+break\s+this\s+down", re.I),
     re.compile(r"here\.?s?\s+the\s+plan", re.I),
-    re.compile(r'firstly,?\s+', re.I),
-    re.compile(r'secondly,?\s+', re.I),
     re.compile(r'in\s+order\s+to\s+achieve', re.I),
     re.compile(r'The\s+user\s+(?:has\s+provided|wants\s+me|said|is\s+asking)', re.I),
     re.compile(r'Let\s+me\s+(?:re-?[Rr]ead|write|check|look|verify|start|create)', re.I),

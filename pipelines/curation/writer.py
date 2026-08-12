@@ -663,7 +663,6 @@ _C04_CLEAR_PATTERNS_EN = [
     r"\bNeed\s+think\b", r"\bWe\s+need\s+to\s+write\b",
     r"Let.s\s+think\s+step\s+by\s+step", r"think\s+step\s+by\s+step",
     r"let.s\s+break\s+this\s+down", r"here.?s\s+the\s+plan",
-    r"firstly,?\s", r"secondly,?\s",
     r"in\s+order\s+to\s+achieve", r"as\s+an\s+AI\s+language\s+model",
 ]
 # 모호한 패턴: 자연어에도 등장 가능 → WARNING 관찰만, 재시도 대상 아님

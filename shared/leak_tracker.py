@@ -38,7 +38,6 @@ _C04_EN_PATTERNS = [
     r"think\s+step\s+by\s+step",
     r"let.s\s+break\s+this\s+down",
     r"here.?s\s+the\s+plan",
-    r"firstly,?\s", r"secondly,?\s",
     r"in\s+order\s+to\s+achieve",
     r"as\s+an\s+AI\s+language\s+model",
     r"I\s+cannot\s+",
