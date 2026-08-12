@@ -32,6 +32,7 @@ class ProblemSpec:
     cooldown_minutes: int = 60
     action: str = ""
     detect_fn: str = ""
+    playbook_ref: str = ""  # 예: "ERROR_PLAYBOOKS.md#p01"
 
 
 @dataclass(frozen=True)
@@ -68,6 +69,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="wrangler 배포 로그 확인 후 재배포",
+    playbook_ref="ERROR_PLAYBOOKS.md#p04",
 ))
 
 _register(ProblemSpec(
@@ -85,6 +87,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="Hugo 테마/themesDir 점검 후 재빌드",
+    playbook_ref="ERROR_PLAYBOOKS.md#p05",
 ))
 
 _register(ProblemSpec(
@@ -102,6 +105,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="batch_thumbnails.py로 썸네일 생성 후 R2 업로드",
+    playbook_ref="ERROR_PLAYBOOKS.md#p06",
 ))
 
 _register(ProblemSpec(
@@ -120,6 +124,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="scan_multilingual_leak.py로 확인 후 재생성",
+    playbook_ref="ERROR_PLAYBOOKS.md#p07",
 ))
 
 _register(ProblemSpec(
@@ -138,6 +143,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="scan_multilingual_leak.py로 확인 후 재생성",
+    playbook_ref="ERROR_PLAYBOOKS.md#p08",
 ))
 
 _register(ProblemSpec(
@@ -156,6 +162,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="이미지 URL 토큰 반복 제거 후 재생성",
+    playbook_ref="ERROR_PLAYBOOKS.md#p09",
 ))
 
 # --- MAJOR (12) — 연속 3회 시 알림 (threshold="consecutive:3") ---
@@ -187,6 +194,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="데이터 수집 소스/API 상태 확인 후 재발행",
+    playbook_ref="ERROR_PLAYBOOKS.md#p01",
 ))
 
 _register(ProblemSpec(
@@ -216,6 +224,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="프롬프트/모델 설정 점검 후 콘텐츠 재생성",
+    playbook_ref="ERROR_PLAYBOOKS.md#p02",
 ))
 
 _register(ProblemSpec(
@@ -234,6 +243,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="키워드별 제목 변형 다양화 검토",
+    playbook_ref="ERROR_PLAYBOOKS.md#p03",
 ))
 
 _register(ProblemSpec(
@@ -252,6 +262,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="제목 템플릿/블랙키워드 점검",
+    playbook_ref="ERROR_PLAYBOOKS.md#p10",
 ))
 
 _register(ProblemSpec(
@@ -270,6 +281,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="제목 생성 프롬프트/모델 확인 후 재생성",
+    playbook_ref="ERROR_PLAYBOOKS.md#p11",
 ))
 
 _register(ProblemSpec(
@@ -292,6 +304,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="콘텐츠 품질 게이트 통과 기준 확인",
+    playbook_ref="ERROR_PLAYBOOKS.md#p12",
 ))
 
 _register(ProblemSpec(
@@ -310,6 +323,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="API 할당량 초기화 후 재시도",
+    playbook_ref="ERROR_PLAYBOOKS.md#p13",
 ))
 
 _register(ProblemSpec(
@@ -334,6 +348,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="수집 소스/필터 기준 점검",
+    playbook_ref="ERROR_PLAYBOOKS.md#p14",
 ))
 
 _register(ProblemSpec(
@@ -352,6 +367,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="검증 항목별 문제 수정 후 재발행",
+    playbook_ref="ERROR_PLAYBOOKS.md#p15",
 ))
 
 _register(ProblemSpec(
@@ -383,6 +399,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="STAP/TAP subprocess 로그 확인 후 재실행",
+    playbook_ref="ERROR_PLAYBOOKS.md#p20",
 ))
 
 _register(ProblemSpec(
@@ -411,6 +428,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="블로그 설정(blogs.d) 확인 후 수정",
+    playbook_ref="ERROR_PLAYBOOKS.md#p21",
 ))
 
 _register(ProblemSpec(
@@ -429,6 +447,7 @@ _register(ProblemSpec(
         "조치: {action}"
     ),
     action="모델 폴백 체인/provider 키 점검",
+    playbook_ref="ERROR_PLAYBOOKS.md#p22",
 ))
 
 # --- MINOR (6) — 로그만 (threshold="quiet") ---
@@ -447,6 +466,7 @@ _register(ProblemSpec(
         "감지 단계: {phase}"
     ),
     action="slug/source_id 중복 제거 후 재발행",
+    playbook_ref="ERROR_PLAYBOOKS.md#p16",
 ))
 
 _register(ProblemSpec(
@@ -471,6 +491,7 @@ _register(ProblemSpec(
         "감지 단계: {phase}"
     ),
     action="일일 할당량 초기화 대기",
+    playbook_ref="ERROR_PLAYBOOKS.md#p17",
 ))
 
 _register(ProblemSpec(
@@ -487,6 +508,7 @@ _register(ProblemSpec(
         "감지 단계: {phase}"
     ),
     action="이전 실행 종료 확인 후 재실행",
+    playbook_ref="ERROR_PLAYBOOKS.md#p18",
 ))
 
 _register(ProblemSpec(
@@ -503,6 +525,7 @@ _register(ProblemSpec(
         "감지 단계: {phase}"
     ),
     action="오래된 데이터 갱신/제거",
+    playbook_ref="ERROR_PLAYBOOKS.md#p19",
 ))
 
 _register(ProblemSpec(
@@ -519,6 +542,7 @@ _register(ProblemSpec(
         "감지 단계: {phase}"
     ),
     action="이미지 URL 길이 축소",
+    playbook_ref="ERROR_PLAYBOOKS.md#p23",
 ))
 
 _register(ProblemSpec(
@@ -535,6 +559,7 @@ _register(ProblemSpec(
         "감지 단계: {phase}"
     ),
     action="검증 함수 자체 점검/수정",
+    playbook_ref="ERROR_PLAYBOOKS.md#p24",
 ))
 
 # --- 미등록 reason용 (25번째) — 로그만 ---
@@ -573,3 +598,61 @@ def lookup_hook(problem_id: str) -> str | None:
     """problem_id의 감지 hook 반환. 미등록이면 None."""
     spec = PROBLEM_REGISTRY.get(problem_id)
     return spec.hook if spec else None
+
+# --- Phase 70: structured operational error events ---
+_register(ProblemSpec(
+    problem_id="P25", name_ko="Scheduler timeout", severity="CRITICAL",
+    reason_keys=("scheduler_timeout", "timeout_600s"), hook="scheduler",
+    threshold="always",
+    alert_template="[CRITICAL] Scheduler timeout\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Review the blocked subprocess and its external request timeouts.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p25",
+))
+_register(ProblemSpec(
+    problem_id="P26", name_ko="Source unavailable", severity="MAJOR",
+    reason_keys=("source_unavailable", "data_fetch_error"), hook="data_fetch",
+    threshold="consecutive:3",
+    alert_template="[MAJOR] Source unavailable\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Check source API, database, or source file availability before retrying.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p26",
+))
+_register(ProblemSpec(
+    problem_id="P27", name_ko="Source exhausted", severity="MAJOR",
+    reason_keys=("source_exhausted", "no_eligible_source"), hook="result_parse",
+    threshold="consecutive:3",
+    alert_template="[MAJOR] Source exhausted\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Refresh the source inventory or relax an eligible-item guard.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p27",
+))
+_register(ProblemSpec(
+    problem_id="P28", name_ko="Invalid pipeline result contract", severity="MAJOR",
+    reason_keys=("invalid_result_contract", "non_dict_result"), hook="result_parse",
+    threshold="consecutive:3",
+    alert_template="[MAJOR] Invalid result contract\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Update the pipeline to return the standard result dictionary.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p28",
+))
+_register(ProblemSpec(
+    problem_id="P29", name_ko="Publisher schema mismatch", severity="CRITICAL",
+    reason_keys=("frontmatter_schema_error", "publisher_schema_error"), hook="publish",
+    threshold="always",
+    alert_template="[CRITICAL] Publisher schema mismatch\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Normalize the content field type before creating front matter.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p29",
+))
+_register(ProblemSpec(
+    problem_id="P30", name_ko="Content generation failure", severity="MAJOR",
+    reason_keys=("content_generation_error", "ai_generation_error"), hook="content_generation",
+    threshold="consecutive:3",
+    alert_template="[MAJOR] Content generation failure\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Check the model response, prompt, and fallback chain before retrying.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p30",
+))
+_register(ProblemSpec(
+    problem_id="P31", name_ko="Telegram delivery failure", severity="MAJOR",
+    reason_keys=("telegram_delivery_error",), hook="notification",
+    threshold="consecutive:3",
+    alert_template="[MAJOR] Telegram delivery failure\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
+    action="Check bot credentials, chat permissions, and Telegram API availability.",
+    playbook_ref="ERROR_PLAYBOOKS.md#p31",
+))

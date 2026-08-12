@@ -13,6 +13,8 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
+from shared.problem_registry import lookup_problem
+
 DB_PATH = Path(__file__).parent / "ops.db"
 PROJECT_ROOT = Path(__file__).parent.parent
 BLOGS_D = PROJECT_ROOT / "config" / "blogs.d"
@@ -1079,7 +1081,10 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
         {"rules": [entry...], "errors": [entry...]}
     각 entry 스키마:
         id, kind, target, status, severity, action, evidence,
-        rule_id, problem_id, bucket, threshold
+        rule_id, problem_id, bucket, threshold, playbook_ref
+    playbook_ref: 플레이북 위치 (예: "ERROR_PLAYBOOKS.md#p01"). P 코드는
+        shared/problem_registry.py의 ProblemSpec.playbook_ref를 따르고,
+        R 코드는 ERROR_PLAYBOOKS.md#{rule_id 소문자}로 구성한다.
     """
     import re as _re
     from ops_dashboard.registry import by_kind
@@ -1152,6 +1157,7 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
 
     def _rule_entry(e, row, sc_row=None):
         determined = _determine_rule_status_from_aggregate(e.id, sc_row)
+        playbook_ref = f"ERROR_PLAYBOOKS.md#{e.id.lower()}"
         if determined is not None:
             # aggregate 기준으로 상태 결정 (경로 Y)
             return {
@@ -1166,6 +1172,7 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
                 "problem_id": "",
                 "bucket": e.bucket,
                 "threshold": e.threshold,
+                "playbook_ref": playbook_ref,
             }
         # 폴백: 기존 로직 (확정된 개별 행이 있으면 그 status, 없으면 unknown)
         return {
@@ -1180,9 +1187,12 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
             "problem_id": "",
             "bucket": e.bucket,
             "threshold": e.threshold,
+            "playbook_ref": playbook_ref,
         }
 
     def _error_entry(e, row):
+        spec = lookup_problem(e.id)
+        playbook_ref = spec.playbook_ref if spec else ""
         return {
             "id": e.id,
             "kind": "error",
@@ -1195,6 +1205,7 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
             "problem_id": e.id,
             "bucket": "",
             "threshold": e.threshold,
+            "playbook_ref": playbook_ref,
         }
 
     # blog_id 필터용 WHERE 절 접미사

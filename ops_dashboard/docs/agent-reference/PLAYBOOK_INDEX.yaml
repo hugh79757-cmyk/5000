@@ -1,0 +1,1009 @@
+version: '1.0'
+generated: '2026-08-12'
+source_files:
+- ops_dashboard/docs/agent-reference/ERROR_PLAYBOOKS.md
+- shared/problem_registry.py
+- ops_dashboard/registry/rules.py
+- ops_dashboard/checks/maintenance.py
+- ops_dashboard/checks/standard.py
+codes:
+- code: P01
+  playbook_ref: ERROR_PLAYBOOKS.md#p01
+  name_ko: 발행 데이터 없음 (no_result)
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 후보 소진인지, 일시 수집 공백인지, 품질·중복 guard 차단인지 구분 후 reason 세분화, 제한된 재시도만
+    적용
+  target_files:
+  - path: dispatcher.py
+    hint: no_result 반환 경로(디스패처 result_parse 단계), _fetch_for_blog 계열 가드 로직
+  - path: config/blogs.d/*.yaml
+    hint: 해당 블로그의 fetch_sources, schedule 정의
+  verify:
+  - GET /api/registry?blog_id={blog_id}에서 해당 problem_id 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P02
+  playbook_ref: ERROR_PLAYBOOKS.md#p02
+  name_ko: 콘텐츠 생성 실패 (no_content)
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 원문 수집 실패, LLM 응답 공백, 콘텐츠 후처리 실패 중 실패 지점별로 오류 전파·fallback·입력 검증
+    보완
+  target_files:
+  - path: dispatcher.py
+    hint: result_parse 단계, no_content reason 처리
+  - path: shared/ai_writer.py
+    hint: GPT 호출·응답 검증 로직
+  - path: pipelines/*/pipeline.py
+    hint: 각 파이프라인 generate/run 함수, 제목/본문 생성 부분
+  verify:
+  - GET /api/registry?blog_id={blog_id}에서 해당 problem_id 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P03
+  playbook_ref: ERROR_PLAYBOOKS.md#p03
+  name_ko: 유사 제목 중복 (similar_title)
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 실제 제목 유사도·비교 대상 범위·언어/템플릿 오탐 확인 후 유사도 비교의 입력 정규화 또는 후보 선택 보정
+  target_files:
+  - path: shared/content_store.py
+    hint: title_similar_exists(), SequenceMatcher 80% 임계값 비교 로직
+  - path: dispatcher.py
+    hint: similar_title reason 처리 경로
+  verify:
+  - GET /api/registry?blog_id={blog_id}에서 해당 problem_id 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P04
+  playbook_ref: ERROR_PLAYBOOKS.md#p04
+  name_ko: 배포 실패 (deploy_error)
+  severity: CRITICAL
+  family: deploy
+  hook: post_deploy
+  automation_level: human_approval
+  one_line_action: 빌드·배포 명령의 실제 실패 지점만 수정; 잘못된 환경변수 참조·경로를 최소 수정
+  target_files:
+  - path: shared/publishers/deploy.py
+    hint: _deploy_site_inner(), wrangler 호출·환경변수 구성
+  - path: dispatcher.py
+    hint: _build_and_deploy_central(), 배포 락·에러 전파
+  - path: wrangler.toml
+    hint: Workers 블로그 설정 (health/pet/kitchen/beauty/camping/baby)
+  verify:
+  - '로컬 Hugo 빌드: HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify
+    --source {site_path}'
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P05
+  playbook_ref: ERROR_PLAYBOOKS.md#p05
+  name_ko: Hugo 빌드 실패
+  severity: CRITICAL
+  family: deploy
+  hook: post_deploy
+  automation_level: human_approval
+  one_line_action: 테마/경로/Front Matter 문법을 원인 파일에 한정해 수정
+  target_files:
+  - path: HUGO_THEMESDIR 환경변수 (/Users/twinssn/Projects/shared-themes)
+    hint: Hugo 테마 경로 설정
+  - path: content/posts/*/index.md
+    hint: .failed 포스트의 frontmatter YAML 문법 확인 (컬론 뒤 공백, 따옴표 등)
+  - path: hugo.toml
+    hint: 테마 설정, params.toml 연동
+  verify:
+  - '로컬 Hugo 빌드: HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify
+    --source {site_path} (에러 0건 확인)'
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P06
+  playbook_ref: ERROR_PLAYBOOKS.md#p06
+  name_ko: 썸네일 404 (broken_featureimage)
+  severity: CRITICAL
+  family: publish
+  hook: post_publish
+  automation_level: human_approval
+  one_line_action: 잘못된 참조 또는 누락된 업로드만 복구; 기존 미디어를 삭제하지 않음 — batch_thumbnails.py로 썸네일
+    생성 후 R2 업로드
+  target_files:
+  - path: scripts/batch_thumbnails.py
+    hint: --slug 인자로 썸네일 생성·R2 업로드·frontmatter 업데이트 실행
+  - path: shared/thumbnail_generator/generator.py
+    hint: 썸네일 이미지 생성 로직
+  - path: shared/r2_uploader.py
+    hint: Cloudflare R2 S3 호환 업로드
+  - path: shared/publishers/hugo_writer.py
+    hint: featureimage frontmatter 업데이트
+  - path: content/posts/{slug}/index.md
+    hint: featureimage 필드가 가리키는 URL 확인 (R2 pub-<hash>.r2.dev/webp 여부)
+  verify:
+  - featureimage URL HTTP HEAD/GET 200 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P07
+  playbook_ref: ERROR_PLAYBOOKS.md#p07
+  name_ko: CJK 누수
+  severity: CRITICAL
+  family: content
+  hook: post_generate
+  automation_level: full_auto
+  one_line_action: 스캐너(scan_multilingual_leak.py)로 확인 후 프롬프트/후처리/차단 로직 수정; 감지기가 맞는지
+    샘플 확인
+  target_files:
+  - path: shared/ai_writer.py
+    hint: GPT 응답 후처리·CJK 필터 로직
+  - path: shared/problem_detectors.py
+    hint: CJK 누수 탐지 함수 (프롬프트 패턴 매칭)
+  - path: scripts/scan_multilingual_leak.py
+    hint: 다국어 누수 스캔 도구
+  - path: config/prompts.yaml
+    hint: AI 글쓰기 프롬프트 — CJK 차단 지시문 확인
+  verify:
+  - 오염·정상 fixture 모두 검사 (스캔 스크립트 실행)
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P08
+  playbook_ref: ERROR_PLAYBOOKS.md#p08
+  name_ko: LLM/CoT 누수
+  severity: CRITICAL
+  family: content
+  hook: post_generate
+  automation_level: full_auto
+  one_line_action: 원문 노출을 막는 후처리·프롬프트 경계 보완; 추론 본문을 저장하지 않음
+  target_files:
+  - path: shared/ai_writer.py
+    hint: LLM 응답에서 CoT/추론 본문 필터링 로직
+  - path: shared/problem_detectors.py
+    hint: CoT 누수 탐지 함수
+  - path: config/prompts.yaml
+    hint: AI 프롬프트 — 추론 과정 출력 방지 지시문 확인
+  verify:
+  - 안전·정상 fixture 테스트 (누수 패턴 포함/미포함)
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P09
+  playbook_ref: ERROR_PLAYBOOKS.md#p09
+  name_ko: 이미지 URL 토큰 반복
+  severity: CRITICAL
+  family: content
+  hook: post_generate
+  automation_level: full_auto
+  one_line_action: URL 토큰 분리·중복 제거 로직을 수정하되 이미지 정책을 우회하지 않음
+  target_files:
+  - path: shared/publishers/hugo_writer.py
+    hint: IMAGE-GUARD, sanitize_featureimage_url(), 이미지 URL 삽입 로직
+  - path: shared/problem_detectors.py
+    hint: image_url_repeat 탐지 함수 (토큰 반복 패턴 매칭)
+  verify:
+  - 반복·정상 URL fixture 검사
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P10
+  playbook_ref: ERROR_PLAYBOOKS.md#p10
+  name_ko: 제목 템플릿 패턴 (title_blocked)
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 제목 생성 규칙·정규식만 최소 수정; 금칙어 완화는 승인 필요
+  target_files:
+  - path: pipelines/*/pipeline.py
+    hint: 제목 생성 함수, 블랙키워드/차단 패턴 정의
+  - path: shared/content_store.py
+    hint: title_blocked 관련 가드 로직 (블로그/템플릿 패턴 차단)
+  verify:
+  - 차단·통과 제목 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P11
+  playbook_ref: ERROR_PLAYBOOKS.md#p11
+  name_ko: 제목 재생성 실패
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: bounded retry와 실패 사유 전파 보완; 무한 재시도 금지
+  target_files:
+  - path: pipelines/*/pipeline.py
+    hint: 제목 재생성 함수, retry budget, fallback 체인
+  - path: shared/ai_writer.py
+    hint: 제목 생성용 GPT 호출·응답 검증
+  verify:
+  - retry budget 테스트 (mock 응답)
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P12
+  playbook_ref: ERROR_PLAYBOOKS.md#p12
+  name_ko: 콘텐츠 품질 게이트 차단
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 생성·후처리 품질 보완 또는 검사기 결함 수정; 품질 게이트 비활성화 금지
+  target_files:
+  - path: pipelines/*/pipeline.py
+    hint: quality gate 체크 함수, 콘텐츠 검증 단계
+  - path: shared/problem_detectors.py
+    hint: content_quality_gate / language_error 탐지 함수
+  verify:
+  - 실패·정상 콘텐츠 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P13
+  playbook_ref: ERROR_PLAYBOOKS.md#p13
+  name_ko: API 차단 (rate_limited)
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: backoff·호출 간격·캐시·작업 큐를 보완; 할당량 증가·키 교체는 승인 필요
+  target_files:
+  - path: shared/ai_writer.py
+    hint: LLM 호출 backoff·rate limit 처리, 모델별 재시도 로직
+  - path: shared/coupang_senior.py
+    hint: Coupang API 호출·rate limit 처리 (해당 파이프라인 경우)
+  verify:
+  - rate-limit mock, 재시도 상한 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P14
+  playbook_ref: ERROR_PLAYBOOKS.md#p14
+  name_ko: 수집/품질 게이트 실패
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 소스·필터를 정확히 보정; 실패 reason을 구체화; 기준 완화는 승인 필요
+  target_files:
+  - path: pipelines/*/pipeline.py
+    hint: 데이터 수집·필터 단계, 후보 유효성 체크, 차단 사유 구체화
+  - path: config/blogs.d/*.yaml
+    hint: 해당 블로그의 fetch_sources, 필터 설정
+  verify:
+  - source fixture + guard 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P15
+  playbook_ref: ERROR_PLAYBOOKS.md#p15
+  name_ko: 발행 후 검증 실패
+  severity: MAJOR
+  family: validation
+  hook: post_validate
+  automation_level: human_approval
+  one_line_action: 검사 항목·라이브 HTML·생성 파일·검사기 자체 오류를 분리; 실제 결함은 콘텐츠·템플릿에 최소 수정, 검사기
+    오탐은 검사기만 수정
+  target_files:
+  - path: shared/problem_detectors.py
+    hint: 발행 후 검증 함수, 검사 항목별 탐지 로직
+  - path: shared/publishers/hugo_writer.py
+    hint: Hugo frontmatter 정리·검증 단계
+  - path: content/posts/{slug}/index.md
+    hint: 실제 생성된 포스트 파일 — 검증 실패 항목 확인
+  verify:
+  - 단위 fixture + 라이브 샘플 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P16
+  playbook_ref: ERROR_PLAYBOOKS.md#p16
+  name_ko: 중복 slug/source_id
+  severity: MINOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 재고 선택·상태 기록·idempotency를 수정; 중복 guard 우회·기존 글 삭제 금지
+  target_files:
+  - path: pipelines/*/pipeline.py
+    hint: slug/source_id 생성·중복 체크 로직, 상태 기록
+  - path: content.db
+    hint: publish_ledger 테이블의 slug/source_id 중복 확인 (SQLite 직접 조회)
+  verify:
+  - 동시 실행·중복 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P17
+  playbook_ref: ERROR_PLAYBOOKS.md#p17
+  name_ko: 일일 할당량 도달
+  severity: MINOR
+  family: scheduler
+  hook: result_parse
+  automation_level: full_auto
+  one_line_action: 정상 상태면 suppressed; 집계 버그만 수정; quota를 오류처럼 재시도하지 않음
+  target_files:
+  - path: dispatcher.py
+    hint: quota_met/daily_quota 처리, suppressed 분기 로직
+  - path: config/blogs.d/*.yaml
+    hint: 해당 블로그의 daily_quota 정의
+  verify:
+  - timezone·경계 시각 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P18
+  playbook_ref: ERROR_PLAYBOOKS.md#p18
+  name_ko: 동시 실행 방지
+  severity: MINOR
+  family: scheduler
+  hook: result_parse
+  automation_level: full_auto
+  one_line_action: stale lock 여부를 증거로 확인한 뒤 정리 로직 보완; 활성 작업 종료는 승인
+  target_files:
+  - path: dispatcher.py
+    hint: already_running 처리, lock 파일 확인·정리 로직
+  - path: /tmp/.lock_{blog_id}
+    hint: 파이프라인 동시 실행 방지 락 파일 (존재 시 stale 여부 확인)
+  verify:
+  - 정상 lock·stale lock 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P19
+  playbook_ref: ERROR_PLAYBOOKS.md#p19
+  name_ko: 오래된/만료 데이터
+  severity: MINOR
+  family: validation
+  hook: post_validate
+  automation_level: human_approval
+  one_line_action: 데이터 유효기간·발행 일정·외부 이벤트 종료일 확인; 실제 stale이면 갱신 작업으로 큐화; 대량 갱신·삭제는
+    승인
+  target_files:
+  - path: shared/problem_detectors.py
+    hint: stale/expired 탐지 함수, 데이터 유효기간 체크
+  - path: pipelines/*/pipeline.py
+    hint: 데이터 소스 갱신 로직, 만료 데이터 처리
+  verify:
+  - 새 데이터·날짜 경계 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P20
+  playbook_ref: ERROR_PLAYBOOKS.md#p20
+  name_ko: subprocess 에러
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 입력 인자·결과 계약·정리를 수정; shell 문자열 조합·광범위 kill 금지
+  target_files:
+  - path: dispatcher.py
+    hint: STAP/TAP subprocess 호출부 (_run_stap, _run_tap 등), exit code·stdout/stderr
+      수집
+  - path: logs/
+    hint: subprocess 실행 로그 (stap_timeout, tap_timeout 등)
+  - path: /Users/twinssn/Projects/STAP
+    hint: STAP subprocess 프로젝트 (별도 venv, 별도 프로세스)
+  - path: /Users/twinssn/Projects/TAP
+    hint: TAP subprocess 프로젝트
+  verify:
+  - subprocess mock·exit code 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P21
+  playbook_ref: ERROR_PLAYBOOKS.md#p21
+  name_ko: 설정 오류 (config_error)
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: full_auto
+  one_line_action: 스키마 검증·명확한 오류 메시지·누락 기본값 보완; 비밀값을 로그·대시보드에 저장 금지
+  target_files:
+  - path: config/blogs.d/*.yaml
+    hint: 블로그 정의 YAML — id, pipeline, platform, schedule, site_path 등 스키마 확인
+  - path: config/blogs.yaml
+    hint: 마스터 스케줄·설정 (blogs.d와 병합됨)
+  - path: dispatcher.py
+    hint: 블로그 설정 로드·스키마 검증, unknown_pipeline/unknown_blog_id/inactive 처리
+  verify:
+  - 유효·누락·잘못된 YAML fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P22
+  playbook_ref: ERROR_PLAYBOOKS.md#p22
+  name_ko: LLM 폴백 체인 전체 실패
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 모델 호출 실패 전파·fallback 순서·입력 제한 보정; 모델 계정·결제·키 변경은 승인
+  target_files:
+  - path: shared/ai_writer.py
+    hint: LLM fallback chain — config/models.yaml tier_order 순차 시도 로직
+  - path: config/models.yaml
+    hint: LLM provider 모델 목록, tier_order, thinking 모드 설정
+  - path: api_keys.yaml
+    hint: API 키 (gitignore됨) — provider 키 존재 여부 확인
+  verify:
+  - 각 fallback mock 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P23
+  playbook_ref: ERROR_PLAYBOOKS.md#p23
+  name_ko: 이미지 URL 길이 초과
+  severity: MINOR
+  family: content
+  hook: post_generate
+  automation_level: full_auto
+  one_line_action: URL 생성기·서명 파라미터·이미지 호스트 정책 확인; 길이 제한을 무시하지 않고 URL 축약 또는 업로드 경로
+    수정
+  target_files:
+  - path: shared/publishers/hugo_writer.py
+    hint: sanitize_featureimage_url() — max_len 파라미터, URL 축약 로직
+  - path: shared/image_handler.py
+    hint: 이미지 URL 생성·서명 파라미터 처리
+  verify:
+  - 최대 길이 fixture, 실제 URL 요청 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P24
+  playbook_ref: ERROR_PLAYBOOKS.md#p24
+  name_ko: 검증 함수 자체 결함
+  severity: MINOR
+  family: validation
+  hook: post_validate
+  automation_level: full_auto
+  one_line_action: 오류가 콘텐츠가 아닌 검사기의 DB·정규식·입력 형태·예외 처리에서 왔는지 확인; 검사 기준 승격·완화는 승인
+  target_files:
+  - path: shared/problem_detectors.py
+    hint: validation_defect 탐지 함수, 검증 로직 자체
+  - path: ops_dashboard/checks/
+    hint: 각종 검사기 함수 (표준.py, content_integrity.py, maintenance.py 등)
+  verify:
+  - 실패 재현 + 정상/오탐 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P25
+  playbook_ref: ERROR_PLAYBOOKS.md#p25
+  name_ko: Scheduler timeout
+  severity: CRITICAL
+  family: scheduler
+  hook: scheduler
+  automation_level: human_approval
+  one_line_action: 병목 단계를 분리하고 단계별 제한·정리·결과 전파를 보완; timeout 상향만으로 해결하지 않음
+  target_files:
+  - path: scheduler.py
+    hint: 스케줄러 루프, 600초 타임아웃 제한, subprocess 실행 관리
+  - path: dispatcher.py
+    hint: 파이프라인 실행 진입점, subprocess 호출·시간 측정
+  verify:
+  - 제한 시간 fixture, 하위 프로세스 정리 테스트, 제한 dry run
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P26
+  playbook_ref: ERROR_PLAYBOOKS.md#p26
+  name_ko: Source unavailable
+  severity: MAJOR
+  family: fetch
+  hook: data_fetch
+  automation_level: human_approval
+  one_line_action: 캐시 우선, bounded retry, 구체적 reason·HTTP 상태 기록; 데이터 고갈과 혼동하지 않음
+  target_files:
+  - path: shared/r2_uploader.py
+    hint: Cloudflare R2 S3 호환 업로드 — 소스 접근 실패 시 탐지
+  - path: shared/blogger_publisher.py
+    hint: Google Blogger API 호출·오류 처리
+  - path: pipelines/*/fetcher.py
+    hint: 데이터 소스 fetch 함수 (API/DB/파일 접근)
+  verify:
+  - 응답 실패/복구 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P27
+  playbook_ref: ERROR_PLAYBOOKS.md#p27
+  name_ko: Source exhausted
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 재고 갱신 작업 제안; 오탐이면 후보 SQL·필터 보정; 기준 완화·과거 글 재사용은 승인
+  target_files:
+  - path: pipelines/*/pipeline.py
+    hint: 후보 재고 관리, 미발행 유효 후보 수 체크, 제외 규칙
+  - path: pipelines/*/data_collector.py
+    hint: get_unused_data() 등 후보 수집 함수 (sector/index/krx 등)
+  verify:
+  - 후보 수·중복 제외 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P28
+  playbook_ref: ERROR_PLAYBOOKS.md#p28
+  name_ko: Invalid pipeline result contract
+  severity: MAJOR
+  family: pipeline
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: 반환 타입·필드 검증, 오류를 성공으로 덮지 않는 전파 수정; 예외를 빈 성공 결과로 변환 금지
+  target_files:
+  - path: dispatcher.py
+    hint: result_parse 단계 — 파이프라인 반환값 스키마 검증, success 필드 전파
+  - path: pipelines/*/pipeline.py
+    hint: run() 함수 반환 타입·필드 (dict, success, reason 등 표준 결과 스키마)
+  verify:
+  - dict/non-dict/success:false fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P29
+  playbook_ref: ERROR_PLAYBOOKS.md#p29
+  name_ko: Publisher schema mismatch
+  severity: CRITICAL
+  family: publish
+  hook: publish
+  automation_level: full_auto
+  one_line_action: 입력 정규화 또는 명시적 검증을 추가; 임의 문자열 변환으로 데이터 의미를 잃지 않음
+  target_files:
+  - path: shared/publishers/hugo_writer.py
+    hint: Hugo frontmatter 생성·타입 변환·스키마 검증
+  - path: shared/publishers/blogger_writer.py
+    hint: Blogger API post 생성·필드 타입 처리
+  - path: shared/publishers/wordpress_writer.py
+    hint: WordPress XML-RPC post 생성·필드 타입 처리
+  verify:
+  - dict/list/string/None fixture, Hugo build 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P30
+  playbook_ref: ERROR_PLAYBOOKS.md#p30
+  name_ko: Content generation failure
+  severity: MAJOR
+  family: generation
+  hook: content_generation
+  automation_level: human_approval
+  one_line_action: 입력 검증·fallback·명확한 실패 구분; 실제 재생성·발행은 승인
+  target_files:
+  - path: shared/ai_writer.py
+    hint: GPT 호출·응답 검증·실패 구분, 모델별 오류 처리
+  - path: pipelines/*/pipeline.py
+    hint: 콘텐츠 생성 진입점, generate_*_article() 함수, fallback 호출
+  - path: config/prompts.yaml
+    hint: AI 글쓰기 프롬프트 — 입력 크기·프롬프트 구조 확인
+  verify:
+  - provider mock + 정상 생성 fixture 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: P31
+  playbook_ref: ERROR_PLAYBOOKS.md#p31
+  name_ko: Telegram delivery failure
+  severity: MAJOR
+  family: notification
+  hook: notification
+  automation_level: human_approval
+  one_line_action: 감사 레코드, HTTP 상태, bot 권한, chat ID, 메시지 길이·parse mode 확인; token·chat
+    변경은 승인
+  target_files:
+  - path: shared/telegram_notifier.py
+    hint: Telegram Bot API 호출, HTTP 상태·에러 처리, 메시지 길이·parse mode
+  - path: api_keys.yaml
+    hint: Telegram bot token (gitignore됨) — 유효 여부 확인
+  verify:
+  - 전송 성공/4xx/5xx mock, 정제 테스트
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M01
+  playbook_ref: ERROR_PLAYBOOKS.md#m01
+  name_ko: 제목 CJK 없음 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 최근 20개 발행 제목에 한자·히라가나·가타카나 포함 시 fail → 제목 재생성(CJK 제거) 필요. 검사기 오탐이면
+    검사기 수정, 실제 결함이면 콘텐츠 재생성. **대량 콘텐츠 재생성은 별도 웨이브 승인 필요.**
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_cjk_in_title() L30-71 — content.db publish_ledger, curation.db publish_log에서
+      최근 제목 20건 조회 후 CJK 패턴([一-鿿぀-ゟ゠-ヿ]) 검사
+  - path: data/content.db
+    hint: publish_ledger 테이블 — 제목·created_at (SQLite 직접 조회)
+  - path: data/curation.db
+    hint: publish_log 테이블 — 제목·published_at (SQLite 직접 조회)
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M01 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M02
+  playbook_ref: ERROR_PLAYBOOKS.md#m02
+  name_ko: 이미지 정상 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 최근 20개 포스트 featureimage 중 동일 URL 3회 이상 반복 시 fail → 중복 이미지 사용 포스트의
+    featureimage 변경. 검사기 오탐이면 검사기 수정, 실제 결함이면 콘텐츠 수정.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_image_repetition() L153-198 — Hugo 사이트 content/posts/{slug}/index.md에서
+      featureimage 추출, 동일 URL 3회 이상 반복 체크
+  - path: '{site_path}/content/posts/*/index.md'
+    hint: featureimage 프론트매터 필드 — 반복된 URL 확인 후 변경
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M02 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M03
+  playbook_ref: ERROR_PLAYBOOKS.md#m03
+  name_ko: 크로스링크 주제 일관 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 내부 링크가 블로그 주제와 무관하지 않은지 검사; fail 시 크로스링크 검토·수정. 콘텐츠 수정 필요 시 별도
+    범위 확인.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_crosslink_relevance() L204-206 — crosslink_check.check_crosslink_consistency()
+      호출
+  - path: ops_dashboard/checks/crosslink.py
+    hint: check_crosslink_consistency() — 크로스링크 일관성 검사 로직
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M03 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M04
+  playbook_ref: ERROR_PLAYBOOKS.md#m04
+  name_ko: 본문 품질 게이트 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: known_issues에서 Q로 시작하고 open 상태인 이슈가 있으면 fail → 해당 Q 이슈 해결. 이슈 종류별
+    조치 상이 (Appendix C.3/C.6 참조).
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_content_quality() L209-225 — known_issues에서 issue_id가 Q로 시작하고 gsd_status=open인
+      이슈 확인
+  - path: ops_dashboard/docs/agent-reference/README.md
+    hint: Q 이슈별 조치 방법 참고 (QA/STRUCT 계열 등)
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M04 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M05
+  playbook_ref: ERROR_PLAYBOOKS.md#m05
+  name_ko: 표준 준수 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 최신 standard_compliance check_results가 fail이면 fail → R01~R12 각 규칙별
+    조치 (Appendix C.2 레시피로 위임). 검사기 오탐이면 검사기 수정, 실제 위반이면 최소 파일 수정.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_standard_compliance() L228-239 — get_latest_check_result(conn, blog_id,
+      "standard_compliance") 조회
+  - path: ops_dashboard/checks/standard.py
+    hint: STANDARD_RULES (L27-124), _CHECK_FUNCTIONS — R01~R12 검사 함수
+  - path: ops_dashboard/registry/rules.py
+    hint: RULES 선언 (L24-175) — R01~R12 target·action·severity 확인
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M05 상태 확인
+  - GET /api/registry?blog_id={blog_id} → R01~R12 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M06
+  playbook_ref: ERROR_PLAYBOOKS.md#m06
+  name_ko: 키워드 잔량 충분 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: defined 키워드 − published_products 사용 < 24개(남은 키워드)면 fail → keywords.py/KEYWORD_MAP에
+    키워드 추가 또는 publish_products 정산.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_keyword_availability() L242-327 — rap.db/content.db/senior.db keywords
+      테이블 또는 curation/kw 파이프라인 keywords.py KEYWORD_MAP 사용
+  - path: pipelines/curation/keywords.py
+    hint: KEYWORD_MAP — curation 블로그 키워드 정의
+  - path: data/rap.db / data/content.db / data/senior.db
+    hint: keywords 테이블 (active=1 카운트), published_products 테이블
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M06 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M07
+  playbook_ref: ERROR_PLAYBOOKS.md#m07
+  name_ko: P03 유사제목 안전 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 최근 7일 내 similar_title 차단 발생(content.db publish_ledger) 시 fail →
+    차단 원인 조사·제목 패턴 조정. P10(title_blocked) 레시피 참조 가능.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_similar_title_safety() L330-357 — content.db publish_ledger에서 blog_id,
+      status='failed', stage='similar_title', 7일 이내 카운트
+  - path: data/content.db
+    hint: publish_ledger 테이블 — stage='similar_title' 실패 행 확인 (SQLite 직접 조회)
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M07 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M08
+  playbook_ref: ERROR_PLAYBOOKS.md#m08
+  name_ko: CoT/프롬프트 누수 없음 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: known_issues에서 P07/P08이 open 상태면 fail → 누수 이슈 해결. P07/P08 개별 playbook
+    + leak_detected 레시피(C.3) 참조. 검사기 오탐이면 검사기만 수정.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_cot_leak() L360-372 — known_issues에서 issue_id가 P08 또는 P07이고 gsd_status=open인
+      이슈 확인
+  - path: ops_dashboard/docs/agent-reference/ERROR_PLAYBOOKS.md
+    hint: P07(CJK 누수), P08(LLM/CoT 누수) 플레이북 참조
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M08 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M09
+  playbook_ref: ERROR_PLAYBOOKS.md#m09
+  name_ko: publish_log 기록 정상 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: content.db publish_ledger 발행 건수 > 0이나 모든 소스 DB(curation.db, stap_content.db,
+    car.db, stock.db, rap.db 등) 로그 0건이면 fail → 소스 DB 로그 기록 누락 원인 조사·수정.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_publish_log_integrity() L375-457 — content.db publish_ledger + 후보
+      소스 DB(curation/stap/car/stock/rap) 로그 확인
+  - path: data/content.db
+    hint: publish_ledger 테이블 — blog_id별 발행 건수 (SQLite 직접 조회)
+  - path: data/curation.db / data/stap_content.db / data/car.db / data/stock.db /
+      data/rap.db
+    hint: 각 파이프라인 소스 DB — publish_log/articles 테이블 로그 기록 확인
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M09 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M10
+  playbook_ref: ERROR_PLAYBOOKS.md#m10
+  name_ko: 도메인 가용성 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 도메인 HTTP HEAD가 200-399 범위 아니면 fail, 연결 실패도 fail → 도메인 상태·배포 확인.
+    코드/콘텐츠 수정 범위 아님 — 인프라 점검.
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_domain_health() L460-482 — get_blog_domain()으로 도메인 조회 후 urllib.request
+      HEAD 요청, 200-399 응답 확인
+  - path: ops_dashboard/db.py
+    hint: get_blog_domain(), get_blog_config_status() — 블로그 도메인·상태 조회
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M10 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: M11
+  playbook_ref: ERROR_PLAYBOOKS.md#m11
+  name_ko: 본문·슬러그 CJK 없음 (운영·정비 검사)
+  severity: MAJOR
+  family: validation
+  hook: maintenance
+  automation_level: human_approval
+  one_line_action: 최근 20개 포스트 본문 또는 슬러그(디렉토리명)에 한자·히라가나·가타카나 포함 시 fail → 본문/슬러그 재생성(CJK
+    제거) 필요. **콘텐츠 재생성 수반 — 별도 웨이브 승인 필요.**
+  target_files:
+  - path: ops_dashboard/checks/maintenance.py
+    hint: _check_cjk_in_body_and_slug() L74-150 — site_path/content/posts/ 하위 최근 20개
+      디렉토리(슬러그) + index.md 본문 CJK 패턴 검사
+  - path: '{site_path}/content/posts/*/index.md'
+    hint: 포스트 본문 + 디렉토리명(슬러그) — CJK 포함 여부 확인 후 재생성
+  verify:
+  - POST /api/maintenance/checklist (JSON body {"blog_id":"{blog_id}"}) → M11 상태 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R01
+  playbook_ref: ERROR_PLAYBOOKS.md#r01
+  name_ko: 'hugo.toml: showTableOfContents — 목차 비활성화'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: showTableOfContents를 false로 설정
+  target_files:
+  - path: '{site_path}/hugo.toml'
+    hint: '[params] 섹션 또는 최상위에 showTableOfContents = false 추가/수정 (테마 기본값 확인 후)'
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R01 status 확인
+  - '로컬 Hugo 빌드 0에러: HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc
+    --minify --source {site_path}'
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R02
+  playbook_ref: ERROR_PLAYBOOKS.md#r02
+  name_ko: 'hugo.toml: [params.advertisement] + AdSense slots'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: Advertisement 섹션에 adsense 슬롯이 필요함 — [params.advertisement] 섹션 +
+    adsense(publisher ID) + topSlot/inArticleSlot 추가
+  target_files:
+  - path: '{site_path}/hugo.toml'
+    hint: '[params.advertisement] 섹션 생성/수정: adsense, topSlot, inArticleSlot 키 설정.
+      publisher ID는 사이트 계열(rotcha=8772, informationhot=6677, aikorea24=5938) 확인'
+  - path: '{site_path}/layouts/partials/adsense/top.html'
+    hint: topSlotID 참조 확인 (hugo.toml의 topSlot 값과 일치해야 함)
+  - path: '{site_path}/layouts/partials/adsense/in-article.html'
+    hint: inArticleSlotID 참조 확인
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R02 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R03
+  playbook_ref: ERROR_PLAYBOOKS.md#r03
+  name_ko: 'extend-head.html: adsbygoogle.js 하드코딩 제거 (site.Params 사용)'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: adsbygoogle.js는 site.Params 사용 (하드코딩 금지) — extend-head.html 내 ca-pub-
+    하드코딩을 site.Params 참조로 교체
+  target_files:
+  - path: '{site_path}/layouts/partials/extend-head.html'
+    hint: adsbygoogle.js 로드 부분의 client 파라미터를 site.Params.AdSense.Client 등으로 변경. 하드코딩된
+      ca-pub- 문자열 제거
+  - path: '{site_path}/hugo.toml'
+    hint: '[params.advertisement.adsense] = publisher ID 설정 확인 (R02와 연계)'
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R03 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R04
+  playbook_ref: ERROR_PLAYBOOKS.md#r04
+  name_ko: 'extend_head.html: GA4 + 모바일 보정 CSS'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: human_approval
+  one_line_action: GA4 + 모바일 보정 CSS 필요 — extend_head.html에 gtag 스니펫(블로그별 측정 ID)과 @media
+    (max-width:767px) 모바일 보정 CSS 추가. GA4 측정 ID는 사람이 제공.
+  target_files:
+  - path: '{site_path}/layouts/partials/extend_head.html'
+    hint: GA4(gtag) 스니펫 추가 + @media (max-width:767px) 모바일 보정 CSS 블록 추가. 측정 ID는 사람
+      제공 필수 (에이전트 임의 생성 금지)
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R04 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: true
+- code: R05
+  playbook_ref: ERROR_PLAYBOOKS.md#r05
+  name_ko: 'adsense/top.html: overflow:hidden;min-height 래퍼 + outside push div'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: overflow:hidden;min-height:100px 래퍼 + outside push div 필요 — top
+    광고 영역에 래퍼 스타일 적용, push 스크립트 div 밖에 배치
+  target_files:
+  - path: '{site_path}/layouts/partials/adsense/top.html'
+    hint: overflow:hidden; min-height:100px 스타일 래퍼 div + <script>push({{}})</script>를
+      래퍼 밖에 배치
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R05 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R06
+  playbook_ref: ERROR_PLAYBOOKS.md#r06
+  name_ko: 'adsense/in-article.html: fluid + in-article format (no auto)'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: human_approval
+  one_line_action: fluid+in-article format (no auto) + outside push div 필요 — data-ad-format="fluid"
+    + data-ad-layout="in-article" 설정, <script>push({{}})</script>를 <ins> 태그 밖에 배치.
+    data-ad-format=auto 제거
+  target_files:
+  - path: '{site_path}/layouts/partials/adsense/in-article.html'
+    hint: data-ad-format="auto" → "fluid" 변경 + data-ad-layout="in-article" 추가 + push
+      script를 <ins> 밖으로 이동. AdSense 계정 슬롯 포맷 정책 확인 필요 가능
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R06 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R07
+  playbook_ref: ERROR_PLAYBOOKS.md#r07
+  name_ko: 'single.html: H2 split injection + prose wrapper'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: H2 split injection + prose wrapper 필요 — single.html 본문 영역에서 H2마다
+    콘텐츠 분할 인젝션 로직 + <section class="... prose ..."> 래퍼 추가
+  target_files:
+  - path: '{site_path}/layouts/_default/single.html'
+    hint: 본문 출력 부분에 H2 분할 인젝션 로직 + <section class="prose"> 래퍼 추가 (테마 기본 single.html
+      구조 참고)
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R07 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R08
+  playbook_ref: ERROR_PLAYBOOKS.md#r08
+  name_ko: 'single.html: Description (lead) 제거'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: Description (lead) 제거 필요 — single.html에서 .Lead/.Description 클래스
+    요소 라인 제거 (Blowfish 테마 기본 첫 문단 과대 표시 방지)
+  target_files:
+  - path: '{site_path}/layouts/_default/single.html'
+    hint: .Lead 또는 .Description 클래스가 있는 라인 제거. 본문 출력 로직 전체는 건드리지 않음
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R08 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R09
+  playbook_ref: ERROR_PLAYBOOKS.md#r09
+  name_ko: 'baseof.html: 커스텀 오버라이드 없음 — 테마 기본값 사용'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: 커스텀 오버라이드 없음 — 테마 기본값 사용 — layouts/_default/baseof.html이 존재하면 삭제
+    (테마 기본값으로 복원)
+  target_files:
+  - path: '{site_path}/layouts/_default/baseof.html'
+    hint: 커스텀 baseof.html 삭제 (테마 기본값으로 대체). 삭제 전 어떤 오버라이드가 필요한지 diff 기억. 필요 여부가 애매하면
+      사용자 확인 1회
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R09 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R10
+  playbook_ref: ERROR_PLAYBOOKS.md#r10
+  name_ko: 'custom.css: 미채움 공간 제거 + 다크모드 + min-height'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: 미채움 공간 제거 + 다크모드 + min-height 규칙 필요 — assets/css/custom.css 생성
+    또는 보완 (unfilled 요소 공간 제거, 다크모드 대응, min-height 조절)
+  target_files:
+  - path: '{site_path}/assets/css/custom.css'
+    hint: '미채움(unfilled) 요소 제거 규칙 + @media (prefers-color-scheme: dark) 다크모드 규칙 +
+      적절한 min-height 조절 추가. 기존에 파일이 없으면 표준 custom.css 생성'
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R10 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R11
+  playbook_ref: ERROR_PLAYBOOKS.md#r11
+  name_ko: 'layouts/: mobile-sticky.html 사용 금지'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: mobile-sticky.html 사용 금지 — layouts/partials/adsense/mobile-sticky.html
+    등 mobile-sticky 광고 파셜이 존재하면 삭제
+  target_files:
+  - path: '{site_path}/layouts/partials/adsense/mobile-sticky.html'
+    hint: 파일 존재 시 삭제. 삭제 대신 비활성화만 하려는 시도는 범위 확인 필요 (레시피는 삭제 지향)
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R11 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: R12
+  playbook_ref: ERROR_PLAYBOOKS.md#r12
+  name_ko: 'layouts/: 허용 집합을 벗어난 오버라이드 파일 없음'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: 허용 집합을 벗어난 오버라이드 파일 없음 — layouts/ 디렉터리에서 허용 집합(standard.py ALLOWED_OVERRIDES)
+    외 오버라이드 파일 삭제 + .DS_Store·.bak·.bak2 등 junk 정리
+  target_files:
+  - path: '{site_path}/layouts/'
+    hint: ALLOWED_OVERRIDES(standard.py L137-160) 집합에 없는 오버라이드 파일 삭제 + junk(.DS_Store,
+      *.bak, *.bak2, ~) 정리. 허용 여부 판단 애매 시 사용자 확인 1회
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R12 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false

@@ -1,0 +1,114 @@
+spec_version: 1.0
+purpose: "Normalize operational signals for evidence-based agent diagnosis and safe remediation."
+source_of_truth:
+  - publish_error_events
+  - dispatcher_result_json
+  - scheduler_and_subprocess_logs
+  - pipeline_configuration
+  - content_and_publish_databases
+  - live_url_and_deploy_evidence
+notification_channel: telegram
+notification_rule: "Telegram is a delivery channel, never the sole source for root-cause classification."
+
+required_event_fields:
+  identifiers: [event_id, occurred_at, run_id, fingerprint]
+  scope: [blog_id, pipeline, stage]
+  classification: [problem_id, reason, severity]
+  retry: [retryable, attempt, max_attempts]
+  dependency_evidence: [source_name, http_status, timeout_seconds]
+  diagnostic_evidence: [detail_redacted]
+  lifecycle: [state]
+
+states:
+  open: "Unverified event; collect evidence before changing code or data."
+  acknowledged: "Cause is under investigation; no external action is implied."
+  resolved: "Root cause has a verified fix and the affected path has passed validation."
+  suppressed: "Normal control flow, intentional hold, or confirmed non-actionable noise."
+
+severity_policy:
+  CRITICAL:
+    default_action: "Immediate evidence capture; block unsafe retries; propose minimal remediation."
+    auto_fix: "Only isolated, reversible code or parser fixes with a reproducing test."
+    human_approval: [publish, deploy, remote_push, delete, credential_change, dns_change, data_migration]
+  MAJOR:
+    default_action: "Diagnose after evidence collection; retry only when idempotent and rate-safe."
+    auto_fix: "Allowed for tested, local, reversible code changes."
+    human_approval: [bulk_retry, publish, deploy, remote_push, external_state_change]
+  MINOR:
+    default_action: "Classify, trend, and queue; do not hide repeated signals."
+    auto_fix: "Only when the signal is a verified parser or validation defect."
+    human_approval: [rule_relaxation, guard_bypass, bulk_content_change]
+
+auto_fix_allowed:
+  - "Add or correct a parser that has a reproducing test and no external side effect."
+  - "Correct a result-contract propagation bug and verify success:false reaches the scheduler."
+  - "Add an idempotent, bounded retry with duplicate and rate-limit tests."
+  - "Correct a dashboard query, event serialization, or redaction defect."
+  - "Fix a validation implementation bug after verifying a live sample or canonical fixture."
+
+auto_fix_forbidden:
+  - "Disable a quality gate, duplicate guard, or validation rule to make an alert disappear."
+  - "Relax source eligibility or freshness criteria without proving that the old criterion is wrong."
+  - "Delete content, database rows, logs, or event history."
+  - "Change secrets, permissions, DNS, billing, model account settings, or provider quotas."
+  - "Publish, republish, deploy, or push remote commits without explicit approval."
+
+remediation_workflow:
+  - validate_event
+  - collect_correlated_evidence
+  - exclude_normal_control_flow_and_false_positives
+  - classify_problem_and_risk
+  - choose_minimal_reversible_change
+  - reproduce_or_select_targeted_test
+  - apply_change_locally
+  - run_targeted_tests_and_dry_run
+  - verify_live_effect_when_approved
+  - record_evidence_change_and_residual_risk
+
+problem_families:
+  deployment:
+    codes: [P04, P05, P25, P29]
+    check_first: [deploy_logs, build_output, subprocess_tree, timeout_seconds, target_environment]
+    never_do: ["blind redeploy", "delete deployment lock", "change DNS without approval"]
+  generation_and_content:
+    codes: [P02, P07, P08, P09, P10, P11, P12, P30]
+    check_first: [source_input, prompt_or_template, generated_artifact, quality_gate_result]
+    never_do: ["bypass quality gate", "publish contaminated content"]
+  source_and_result:
+    codes: [P01, P13, P14, P16, P17, P18, P20, P26, P27, P28]
+    check_first: [candidate_inventory, publication_history, duplicate_guard, api_status, retry_budget]
+    never_do: ["ignore duplicate guard", "unbounded retry", "treat quota as a crash"]
+  validation_and_configuration:
+    codes: [P15, P19, P21, P23, P24]
+    check_first: [canonical_config, validation_input, checker_behavior, live_sample, data_schema]
+    never_do: ["change validation threshold without evidence", "bulk rewrite content before sampling"]
+  notification:
+    codes: [P31]
+    check_first: [telegram_delivery_audit, http_status, bot_permission, message_redaction]
+    never_do: ["store tokens in detail fields", "equate delivery failure with publish failure"]
+
+non_problem_control_flow:
+  - P17
+  - P18
+  - "intentional maintenance hold"
+  - "confirmed quality gate block with valid detection"
+
+dashboard_signals:
+  maintenance_checks: [M01, M02, M03, M04, M05, M06, M07, M08, M09, M10, M11]
+  standards_rules: [R01, R02, R03, R04, R05, R06, R07, R08, R09, R10, R11, R12]
+  interpretation:
+    many_failures: "Validate checker logic and a live sample before bulk content changes."
+    all_pass: "Verify queried tables, columns, and state values; graceful pass can hide a broken checker."
+    stale: "Queue data refresh unless it blocks a time-sensitive publish path."
+    duplicate: "Treat as a guard outcome; repair source inventory or prior state, never bypass the guard."
+
+report_template:
+  required_sections:
+    - event_and_impact
+    - evidence_collected
+    - classification_and_alternatives
+    - proposed_or_applied_change
+    - validation_results
+    - external_action_approval_required
+    - residual_risk_and_next_observation
+  completion_definition: "An event is resolved only after the corrected path no longer reproduces the fault and the required validation has passed."
