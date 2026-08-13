@@ -168,7 +168,7 @@ def run_batch(count=3):
     count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
-        if _run_impl():
+        if _run_impl() is True:
             ok += 1
         time.sleep(5)
     logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")
