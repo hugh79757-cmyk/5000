@@ -104,26 +104,40 @@ def _add_product_cards(article):
         article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
     return article
 
-def _run_impl() -> bool:
+def _run_impl() -> dict | bool:
     topic = pick_topic()
     if not topic:
         logger.info(f"[{BLOG_ID}] No topics")
-        return False
+        return {"success": False, "reason": "no_topic"}
     city = topic.get("city", "")
     country = topic.get("country", "")
     logger.info(f"[{BLOG_ID}] {city} generating")
-    article = generate_dining_guide(topic)
+    try:
+        article = generate_dining_guide(topic)
+    except RuntimeError as e:
+        error_msg = str(e)
+        if "chain_timeout" in error_msg:
+            reason = "chain_timeout"
+        elif "quota" in error_msg.lower() or "429" in error_msg:
+            reason = "ai_quota"
+        else:
+            reason = "ai_generate_error"
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] AI 생성 오류({reason}): {error_msg[:120]}")
+        return {"success": False, "reason": reason}
     if not article:
         from pipelines.etap.topic_manager import mark_published_by_id
         mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
                              topic.get("title",""), topic.get("slug",""))
         logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('city','')}")
-        return False
+        return {"success": False, "reason": "no_data"}
     article["content"], post_issues, is_draft = postprocess_content(article["content"], blog_id=BLOG_ID, slug=article["slug"])
     if is_draft:
         logger.warning(f"[{BLOG_ID}] DRAFT 감지 → 발행 중단: {article['slug']} - {post_issues}")
         send_alert(BLOG_ID, article["slug"], post_issues)
-        return False
+        return {"success": False, "reason": "draft_detected"}
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
