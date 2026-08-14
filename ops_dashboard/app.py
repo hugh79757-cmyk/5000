@@ -7,6 +7,7 @@ import logging
 import os
 import sqlite3
 import time
+from datetime import datetime
 from functools import wraps
 from pathlib import Path
 
@@ -639,6 +640,76 @@ def _register_api_routes(app: Flask) -> None:
         count = sync_blog_lifecycle(conn)
         _touch_sync_marker()
         return jsonify({"synced": count, "status": "ok"})
+
+    @app.route("/api/pending-fixes")
+    @require_auth
+    def api_pending_fixes():
+        """자동수정 파괴등급 영속 승인 큐 조회 (SC-4).
+
+        쿼리 파라미터: blog_id(선택), status(선택). 미지정 시 active(proposed/
+        approved/executing) 행을 최신순으로 노출하고 resolved/failed 이력을 함께
+        확인하려면 status=all 또는 개별 status 를 지정한다.
+        """
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import list_pending_fixes
+        blog_id = request.args.get("blog_id") or None
+        status = request.args.get("status")
+        status = None if status == "all" else status
+        rows = list_pending_fixes(conn, blog_id=blog_id, status=status)
+        # status 미지정 시 active 우선 → 상단 정렬
+        if status is None:
+            _order = {"proposed": 0, "approved": 1, "executing": 2,
+                      "resolved": 3, "failed": 4, "rejected": 5}
+            rows.sort(key=lambda r: (_order.get(r["status"], 9), -r["id"]))
+        return jsonify({"count": len(rows), "items": rows})
+
+    @app.route("/api/pending-fixes/<int:fix_id>/approve", methods=["POST"])
+    @require_auth
+    def api_pending_fix_approve(fix_id: int):
+        """승인 실행 (SC-4 단일 엔드포인트): proposed 행 → fixer 실행 → 재배포 → 재검사.
+
+        dispatcher.execute_pending_fix 를 lazy import 로 호출 (실행 시점에만 무거운
+        dispatcher 의존 로드). 승인 게이트 통과 후 호출되므로 redeploy=True (파괴적
+        재배포 = 사람 승인 대체). 실패 시 상태는 failed 로 전이되고 에러를 JSON 으로 반환.
+        """
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import get_pending_fix
+        row = get_pending_fix(conn, fix_id)
+        if not row:
+            return jsonify({"ok": False, "msg": "pending_fixes 행 없음"}), 404
+        try:
+            from dispatcher import execute_pending_fix
+            from ops_dashboard.db import DB_PATH
+            result = execute_pending_fix(conn, fix_id, redeploy=True,
+                                         ops_db_path=str(DB_PATH))
+        except Exception as e:
+            try:
+                from ops_dashboard.db import set_pending_fix_status
+                set_pending_fix_status(conn, fix_id, "failed",
+                                       diff_ref=f"승인 실행 예외: {e}")
+            except Exception:
+                pass
+            return jsonify({"ok": False, "msg": f"승인 실행 실패: {e}"}), 500
+        return jsonify({"ok": result["ok"], **result})
+
+    @app.route("/api/pending-fixes/<int:fix_id>/reject", methods=["POST"])
+    @require_auth
+    def api_pending_fix_reject(fix_id: int):
+        """승인 거부: proposed 행을 rejected 로 전이 (fixer 실행 없음)."""
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import get_pending_fix, set_pending_fix_status
+        row = get_pending_fix(conn, fix_id)
+        if not row:
+            return jsonify({"ok": False, "msg": "pending_fixes 행 없음"}), 404
+        if row["status"] != "proposed":
+            return jsonify({"ok": False,
+                            "msg": f"상태 {row['status']!r} 에서 거부 불가 (proposed 만 허용)"}), 400
+        set_pending_fix_status(conn, fix_id, "rejected",
+                               resolved_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        return jsonify({"ok": True, "fix_id": fix_id, "status": "rejected"})
 
 
 # ---------------------------------------------------------------------------

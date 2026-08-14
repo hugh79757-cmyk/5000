@@ -25,9 +25,11 @@ def fix_r08_lead(site: Path) -> tuple[bool, str]:
         if stripped.startswith("<!--") or stripped.startswith("//"):
             new_lines.append(line)
             continue
+        # \b\.Lead\b 는 '.' 앞 공백({{ .Lead }})에서 word boundary 미생성 → 미제거
+        # (조용한 실패) 버그. (?<!\w) 로 '.' 앞이 word 문자가 아닌 곳만 매칭.
         if re.search(r'class=["\'][^"\']*\.?(Lead|Description)[^"\']*["\']', line) or \
-           re.search(r'\b\.Lead\b', line) or \
-           re.search(r'\b\.Description\b', line):
+           re.search(r'(?<!\w)\.Lead\b', line) or \
+           re.search(r'(?<!\w)\.Description\b', line):
             removed += 1
             continue
         new_lines.append(line)

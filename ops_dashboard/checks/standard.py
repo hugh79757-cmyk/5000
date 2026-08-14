@@ -806,6 +806,14 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
             failures.append({"rule_id": rule_id, "severity": entry.severity,
                              "detail": detail})
 
+    # fail→pass 전환 및 full-pass 조기 반환 모두에서 stale fail 행 scrub.
+    # Bug B: 기존에는 scrub가 fail 경로 끝에만 있어, full-pass("if not failures")
+    # 조기 반환 시 passes 전체의 기존 fail 개별 행이 남아 phantom(fail)이 됐다.
+    # scrub를 조기 반환 앞으로 이동해 pass 규칙의 stale 행을 항상 제거한다.
+    # 실제 fail 행(aggregate fail 목록의 rule)은 passes에 없으므로 삭제되지 않는다.
+    if passes:
+        _scrub_passed_rules(conn, blog_id, passes)
+
     # Determine overall status
     if not failures:
         return {"status": "pass", "detail": f"All {len(passes)} rules passed"}
@@ -839,11 +847,6 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
     )
     if _is_active:
         _record_failed_rules(conn, blog_id, failures)
-    # fail→pass 전환 시 개별 fail 행 자동 scrub (웨이브3)
-    # passes 목록에 든 rule_id의 기존 fail 행이 남아있으면(stale) 삭제.
-    # 실제 fail 행(aggregate fail 목록의 rule)은 삭제하지 않음.
-    if passes:
-        _scrub_passed_rules(conn, blog_id, passes)
     return {
         "status": "fail",
         "detail": f"{len(failures)}/{len(passes) + len(failures)} rules failed: " + "; ".join(detail_parts[:5]),

@@ -155,6 +155,25 @@ CREATE TABLE IF NOT EXISTS notification_debounce (
     suppressed_count INTEGER DEFAULT 0,
     PRIMARY KEY (blog_id, problem_id, push_date)
 );
+
+-- Phase 71 (SC-4): 자동수정 파괴등급 영속 승인 큐.
+-- 감지 루프(_auto_fix_on_fail)가 파괴등급 fix(사람 승인 필요)를 proposed 로 적재하고,
+-- 사람이 승인 엔드포인트로 approve 하면 fixer 실행 → resolved/failed 로 전이.
+CREATE TABLE IF NOT EXISTS pending_fixes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    blog_id TEXT NOT NULL,
+    rule_id TEXT NOT NULL,
+    problem_id TEXT DEFAULT '',
+    severity TEXT DEFAULT '',
+    action TEXT NOT NULL,
+    evidence TEXT DEFAULT '',
+    diff_ref TEXT DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'proposed',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    resolved_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_pending_blog ON pending_fixes(blog_id);
+CREATE INDEX IF NOT EXISTS idx_pending_status ON pending_fixes(status);
 """)
 
     # Phase 60: 기존 테이블에 새 컬럼 추가 (IF NOT EXISTS는 컬럼 추가 안 됨)
@@ -1141,7 +1160,13 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
     import re as _re
     from ops_dashboard.registry import by_kind
 
-    _RULE_ID_RE = _re.compile(r"\bR\d{2}\b(?=\()")       # R04(MAJOR) → R04
+    # Bug A: \bR\d{2}\b 는 THUMBNAIL-01/R2-01 같은 비 R\d\d 규칙을 놓쳐
+    # aggregate 파싱에서 fail을 놓쳤다. 주 rule 결정은 개별 DB 행(ground truth)을
+    # 우선 신뢰하도록 _rule_entry에서 고쳤지만, 비활성 블로그(_record_failed_rules
+    # 미기록)처럼 개별 행이 없는 폴백 경로와 get_attention_items의 failed_rule_ids
+    # 배지에는 여전히 이 파서가 쓰이므로, 숫자 포함 + '(' 직전 토큰 규칙으로 일반화한다.
+    # R04(MAJOR) → R04, THUMBNAIL-01(MAJOR) → THUMBNAIL-01, R2-01(MAJOR) → R2-01
+    _RULE_ID_RE = _re.compile(r"\b[A-Za-z0-9][A-Za-z0-9-]*\d[A-Za-z0-9-]*\b(?=\()")
     _ALL_PASS_RE = _re.compile(r"^All\s+\d+\s+rules passed$")  # All 14 rules passed
     _RULES_FAILED_RE = _re.compile(
         r"(\d+)/\d+\s+rules failed:\s*(.+)$", _re.DOTALL
@@ -1208,8 +1233,33 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
         return ""
 
     def _rule_entry(e, row, sc_row=None):
-        determined = _determine_rule_status_from_aggregate(e.id, sc_row)
         playbook_ref = f"ERROR_PLAYBOOKS.md#{e.id.lower()}"
+        # Bug A (ground truth 우선): 확정된 개별 rule 행이 있으면 그 status를
+        # 최우선 신뢰한다. check_standard_compliance(_record_failed_rules)는 실패한
+        # 규칙마다 status='fail' 개별 행을 기록하므로, 이 행이 ground truth다.
+        # aggregate detail 파싱(_parse_failed_rule_ids)은 \bR\d{2}\b 정규식이
+        # THUMBNAIL-01/R2-01 같은 비 R\d\d 규칙을 놓쳐 fail을 pass로 오판할 수 있다 —
+        # 확정 개별 행을 먼저 신뢰하면 그 취약성을 우회한다.
+        if row is not None:
+            _row_status = row.get("status")
+            if _row_status in ("pass", "fail"):
+                return {
+                    "id": e.id,
+                    "kind": "rule",
+                    "target": e.target,
+                    "status": _row_status,
+                    "severity": e.severity,
+                    "action": e.action,
+                    "evidence": (row["evidence_url"] or row["detail"] or ""),
+                    "rule_id": e.id,
+                    "problem_id": "",
+                    "bucket": e.bucket,
+                    "threshold": e.threshold,
+                    "playbook_ref": playbook_ref,
+                }
+        # 행 없음(통과 규칙 — check_standard_compliance는 pass 규칙의 개별 행을
+        # 생성하지 않음) 또는 비결정 행 → aggregate 기준으로 pass 마킹 (경로 Y)
+        determined = _determine_rule_status_from_aggregate(e.id, sc_row)
         if determined is not None:
             # aggregate 기준으로 상태 결정 (경로 Y)
             return {
@@ -2092,3 +2142,106 @@ def sync_yaml_to_lifecycle(conn: sqlite3.Connection) -> dict:
         "updated": len(yaml_blog_ids & db_blog_ids),
         "removed": len(removed),
     }
+
+
+# ---------------------------------------------------------------------------
+# pending_fixes — 자동수정 파괴등급 영속 승인 큐 (Phase 71, SC-4)
+# ---------------------------------------------------------------------------
+
+PENDING_STATUSES = ("proposed", "approved", "executing", "resolved", "failed", "rejected")
+
+# 재검사가 반복돼도 동일 rule이 중복 적재되지 않도록 '활성(미완결)'으로 취급하는 상태
+_ACTIVE_PENDING = ("proposed", "approved", "executing")
+
+
+def enqueue_pending_fix(
+    conn: sqlite3.Connection,
+    blog_id: str,
+    rule_id: str,
+    action: str,
+    *,
+    problem_id: str = "",
+    severity: str = "",
+    evidence: str = "",
+    diff_ref: str = "",
+) -> int:
+    """파괴등급(사람 승인 필요) fix를 pending_fixes 에 proposed 로 영속 적재.
+
+    동일 (blog_id, rule_id)에 active(proposed/approved/executing) 행이 이미 있으면
+    중복 INSERT 대신 기존 id 를 반환한다 (매시간 재검사가 실행돼도 큐가 쌓이지 않음).
+    반환: 생성 또는 기존 활성 행의 id.
+    """
+    row = conn.execute(
+        """
+        SELECT id FROM pending_fixes
+        WHERE blog_id = ? AND rule_id = ?
+          AND status IN ('proposed', 'approved', 'executing')
+        ORDER BY id DESC LIMIT 1
+        """,
+        (blog_id, rule_id),
+    ).fetchone()
+    if row is not None:
+        return int(row["id"])
+
+    cur = conn.execute(
+        """
+        INSERT INTO pending_fixes
+            (blog_id, rule_id, problem_id, severity, action, evidence, diff_ref)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (blog_id, rule_id, problem_id, severity, action, evidence, diff_ref),
+    )
+    conn.commit()
+    return int(cur.lastrowid)
+
+
+def get_pending_fix(conn: sqlite3.Connection, fix_id: int) -> dict | None:
+    row = conn.execute(
+        "SELECT * FROM pending_fixes WHERE id = ?", (fix_id,)
+    ).fetchone()
+    return dict(row) if row is not None else None
+
+
+def list_pending_fixes(
+    conn: sqlite3.Connection,
+    blog_id: str | None = None,
+    status: str | None = None,
+) -> list[dict]:
+    """pending_fixes 조회 (선택 필터). status 미지정 시 active(미완결) 행 우선 노출."""
+    sql = "SELECT * FROM pending_fixes WHERE 1=1"
+    params: list = []
+    if blog_id:
+        sql += " AND blog_id = ?"
+        params.append(blog_id)
+    if status:
+        sql += " AND status = ?"
+        params.append(status)
+    sql += " ORDER BY id DESC"
+    return [dict(r) for r in conn.execute(sql, params).fetchall()]
+
+
+def set_pending_fix_status(
+    conn: sqlite3.Connection,
+    fix_id: int,
+    status: str,
+    *,
+    resolved_at: str | None = None,
+    diff_ref: str | None = None,
+) -> bool:
+    """pending_fixes 행 상태 전이 (proposed→approved/executing/resolved/failed/rejected)."""
+    if status not in PENDING_STATUSES:
+        raise ValueError(f"잘못된 pending_fixes 상태: {status!r}")
+    sets = ["status = ?"]
+    params: list = [status]
+    if resolved_at is not None:
+        sets.append("resolved_at = ?")
+        params.append(resolved_at)
+    if diff_ref is not None:
+        sets.append("diff_ref = ?")
+        params.append(diff_ref)
+    params.append(fix_id)
+    cur = conn.execute(
+        f"UPDATE pending_fixes SET {', '.join(sets)} WHERE id = ?", params
+    )
+    conn.commit()
+    return cur.rowcount > 0

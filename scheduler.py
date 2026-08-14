@@ -590,6 +590,24 @@ def _run_recheck_all() -> None:
                 summary.get("fail", 0),
                 summary.get("unknown", 0),
             )
+            # Phase 71 (SC-4): fail 규칙이 있는 블로그의 감지 결과를 폐루프 디스패처로
+            # 전달 (안전 fixer 무인 실행, 파괴등급은 pending_fixes 적재). 발행 훅 외
+            # '재검사 경로'의 2차 안전망. 실패 시 무영향 로깅만 (run_all_checks 결과 보존).
+            failed_blog_ids = [
+                r["blog_id"]
+                for r in conn.execute(
+                    "SELECT DISTINCT blog_id FROM check_results WHERE status='fail'"
+                ).fetchall()
+            ]
+            if failed_blog_ids:
+                try:
+                    from dispatcher import _run_autofix_after_checks
+                except Exception as _impe:
+                    _run_autofix_after_checks = None
+                    logger.warning("[RecheckAll] dispatcher import 실패(재검사 배선 건너뜀): %s", _impe)
+                if _run_autofix_after_checks:
+                    for bid in failed_blog_ids:
+                        _run_autofix_after_checks(conn, bid, str(ops_db))
         finally:
             conn.close()
     except Exception as e:

@@ -820,13 +820,22 @@ def _record_failure(blog_id: str, stage: str, error_msg: str) -> None:
 
 # ─── 발행 성공 후 자동 재검사 훅 (Phase 71, SC-1) ───
 
-def _trigger_post_publish_checks(blog_id: str, ops_db_path: str | None = None) -> None:
+def _trigger_post_publish_checks(
+    blog_id: str,
+    ops_db_path: str | None = None,
+    _run_autofix: bool = True,
+) -> None:
     """발행 성공 직후 해당 blog 체크를 자동 트리거 (수동 호출 불필요).
 
     dispatcher↔ops_dashboard 결합도 리스크 완화를 위해 lazy import + 예외 격리.
     체크 실패가 발행 성공을 훼손하면 안 되므로, 모든 예외는 로깅만 하고
     발행 경로에는 영향 0 (삼킴 금지 → 명시적 경고 로깅).
     ops_db_path 를 주입하면 실제 ops.db 가 아닌 테스트용 DB 를 쓸 수 있음.
+
+    Phase 71 (SC-4) 배선: 재검사 완료 후 해당 blog 의 fail 규칙을
+    _auto_fix_on_fail 로 전달 (안전 fixer 무인 실행, 파괴등급은 pending_fixes 적재).
+    _run_autofix=False 면 자동수정 루프를 건너뛴다 — _auto_fix_on_fail 내부 재검사
+    호출이 재귀 무한루프로 빠지지 않도록 내부 호출이 False 를 넘긴다.
     """
     try:
         from ops_dashboard.checks import run_all_checks
@@ -838,6 +847,8 @@ def _trigger_post_publish_checks(blog_id: str, ops_db_path: str | None = None) -
         conn = get_conn(path)
         try:
             run_all_checks(conn, blog_ids=[blog_id])
+            if _run_autofix:
+                _run_autofix_after_checks(conn, blog_id, path)
         finally:
             conn.close()
         logger.info("[post-publish-check] %s 자동 재검사 완료", blog_id)
@@ -846,6 +857,52 @@ def _trigger_post_publish_checks(blog_id: str, ops_db_path: str | None = None) -
             "[post-publish-check] %s 자동 재검사 실패(발행경로 무영향): %s",
             blog_id, e,
         )
+
+
+def _fetch_failed_rule_ids(conn, blog_id: str) -> list[str]:
+    """run_all_checks 직후 해당 blog 의 실패 규칙 id 목록 조회.
+
+    개별 규칙 행은 check_results 에 check_name=rule_id 로 기록되므로,
+    status='fail' 이고 rule_id 가 채워진 행의 rule_id 를 distinct 로 수집한다.
+    aggregate(standard_compliance) 행은 rule_id 가 NULL 이라 제외된다.
+    """
+    rows = conn.execute(
+        """
+        SELECT DISTINCT rule_id FROM check_results
+        WHERE blog_id = ? AND status = 'fail'
+          AND rule_id IS NOT NULL AND rule_id != ''
+        """,
+        (blog_id,),
+    ).fetchall()
+    return [r["rule_id"] for r in rows]
+
+
+def _run_autofix_after_checks(conn, blog_id: str, ops_db_path: str) -> dict | None:
+    """재검사 결과를 폐루프 디스패처(_auto_fix_on_fail)로 전달 (SC-4 배선).
+
+    감지 루프(check_standard_compliance / run_all_checks)가 쓴 fail rule 행을
+    _auto_fix_on_fail 로 넘긴다. 실패 규칙이 없으면 None. 모든 예외는 격리되어
+    호출자(발행/재검사 경로)를 죽이지 않는다.
+    """
+    try:
+        failed = _fetch_failed_rule_ids(conn, blog_id)
+        if not failed:
+            return None
+        summary = _auto_fix_on_fail(blog_id, failed, conn=conn, ops_db_path=ops_db_path)
+        if summary.get("requires_approval"):
+            logger.info(
+                "[auto-fix] %s 파괴등급 %d건 pending_fixes 적재(승인 대기)",
+                blog_id, len(summary["requires_approval"]),
+            )
+        if summary.get("applied"):
+            logger.info(
+                "[auto-fix] %s 자동수정 적용 %d건: %s",
+                blog_id, len(summary["applied"]), summary["applied"],
+            )
+        return summary
+    except Exception as e:
+        logger.warning("[auto-fix] %s 폐루프 배선 실패(무영향): %s", blog_id, e)
+        return None
 
 
 # ─── 자동 수정 폐루프 (Phase 71, SC-4) ───
@@ -871,6 +928,7 @@ def _auto_fix_on_fail(
     blog_id: str,
     failed_rule_ids: list[str],
     ops_db_path: str | None = None,
+    conn=None,
     approve_non_safe: bool = False,
     redeploy: bool = False,
 ) -> dict:
@@ -881,6 +939,11 @@ def _auto_fix_on_fail(
       - 구현된 fixer 가 있는 규칙만 대상
       - SAFE_ACTIONS 만 기본 무인 실행. 그 외는 approve_non_safe=True 필요
       - redeploy(실발행 재배포 = 파괴적)는 기본 False — 명시적 승인 필요
+
+    Phase 71 (SC-4) 영속화: conn 을 넘기면 파괴등급(사람 승인 필요) fix 를
+    pending_fixes 에 proposed 로 적재하고, 안전 fixer 로 무인 적용된 규칙은
+    resolved/failed 로 적재해 감사 흔적을 남긴다. conn 이 없으면(레거시 호출/테스트)
+    pending_fixes 는 건드리지 않는다 (in-memory summary 만 반환).
 
     반환: {"blog_id", "applied":[...], "requires_approval":[...],
             "skipped":[...], "redeployed": bool, "recheck_triggered": bool}
@@ -903,60 +966,226 @@ def _auto_fix_on_fail(
         return summary
 
     try:
+        from ops_dashboard.db import (
+            enqueue_pending_fix,
+            get_conn,
+            set_pending_fix_status,
+        )
         from ops_dashboard.registry.rules import RULES
         from shared.autofix import FIXERS, backup_blog, get_ga4_id
 
         bucket_by_id = {e.id: e.bucket for e in RULES}
-        ga4_id = get_ga4_id(blog_id, cfg.get("domain", ""))
-
-        # 파괴적 작업 4단계 (1) 백업
+        # pending 적재용 conn: 명시 conn 우선, 없으면 ops_db_path/default 로 연다.
+        pend_conn = conn or get_conn(ops_db_path)
+        need_close = conn is None
         try:
-            backup_blog(site_path, blog_id)
-        except Exception as e:
-            logger.warning("[auto-fix] %s 백업 실패: %s", blog_id, e)
-
-        site = Path(site_path)
-        applied_any = False
-        for rule_id in failed_rule_ids:
-            bucket = bucket_by_id.get(rule_id)
-            if bucket != "actionable":
-                summary["skipped"].append(f"{rule_id}(bucket={bucket})")
-                continue
-            action_key = _AUTOFIX_RULE_TO_ACTION.get(rule_id)
-            fixer = FIXERS.get(action_key) if action_key else None
-            if not fixer:
-                summary["skipped"].append(f"{rule_id}(fixer 없음)")
-                continue
-            if action_key not in _AUTOFIX_SAFE_ACTIONS and not approve_non_safe:
-                summary["requires_approval"].append(f"{rule_id}->{action_key}")
-                continue
-            try:
-                ok, msg = fixer(site, blog_id, ga4_id)
-                if ok:
-                    summary["applied"].append(f"{rule_id}:{msg}")
-                    applied_any = True
-                else:
-                    summary["skipped"].append(f"{rule_id}:{msg}")
-            except Exception as e:
-                logger.warning("[auto-fix] %s %s fixer 실패: %s", blog_id, rule_id, e)
-                summary["skipped"].append(f"{rule_id}(예외:{e})")
-
-        # 파괴적 작업 4단계 (3) 재배포 — 기본 게이팅
-        if applied_any and redeploy:
-            try:
-                _build_and_deploy_central(blog_id)
-                summary["redeployed"] = True
-            except Exception as e:
-                logger.warning("[auto-fix] %s 재배포 실패: %s", blog_id, e)
-            # 파괴적 작업 4단계 (4) 사후대조
-            try:
-                _trigger_post_publish_checks(blog_id, ops_db_path)
-                summary["recheck_triggered"] = True
-            except Exception:
-                pass
+            return _dispatch_auto_fix(
+                summary, blog_id, failed_rule_ids, site_path,
+                bucket_by_id, pend_conn, ops_db_path,
+                approve_non_safe, redeploy,
+            )
+        finally:
+            if need_close:
+                pend_conn.close()
     except Exception as e:
         logger.warning("[auto-fix] %s 디스패치 실패: %s", blog_id, e)
     return summary
+
+
+def _dispatch_auto_fix(
+    summary, blog_id, failed_rule_ids, site_path,
+    bucket_by_id, pend_conn, ops_db_path,
+    approve_non_safe, redeploy,
+) -> dict:
+    """_auto_fix_on_fail 의 본체 — pending 영속화 + fixer 디스패치 분리."""
+    from ops_dashboard.db import (
+        enqueue_pending_fix,
+        set_pending_fix_status,
+    )
+    from ops_dashboard.registry import get_entry
+    from shared.autofix import FIXERS, backup_blog, get_ga4_id
+
+    cfg = get_blog_config(blog_id)
+    ga4_id = get_ga4_id(blog_id, cfg.get("domain", ""))
+
+    # 파괴적 작업 4단계 (1) 백업
+    try:
+        backup_blog(site_path, blog_id)
+    except Exception as e:
+        logger.warning("[auto-fix] %s 백업 실패: %s", blog_id, e)
+
+    site = Path(site_path)
+    applied_any = False
+    for rule_id in failed_rule_ids:
+        bucket = bucket_by_id.get(rule_id)
+        if bucket != "actionable":
+            summary["skipped"].append(f"{rule_id}(bucket={bucket})")
+            continue
+        action_key = _AUTOFIX_RULE_TO_ACTION.get(rule_id)
+        fixer = FIXERS.get(action_key) if action_key else None
+        if not fixer:
+            summary["skipped"].append(f"{rule_id}(fixer 없음)")
+            continue
+        entry = get_entry(rule_id)
+        severity = entry.severity if entry else ""
+        # 사람 승인 필요(파괴등급) — 기본 승인 전까지는 pending_fixes 에 proposed 로 적재
+        if action_key not in _AUTOFIX_SAFE_ACTIONS and not approve_non_safe:
+            summary["requires_approval"].append(f"{rule_id}->{action_key}")
+            try:
+                enqueue_pending_fix(
+                    pend_conn, blog_id, rule_id, action_key,
+                    severity=severity,
+                    evidence=f"감지: {rule_id}(bucket={bucket}) fail — 승인 필요",
+                    diff_ref=action_key,
+                )
+            except Exception as e:
+                logger.warning("[auto-fix] %s %s pending 적재 실패: %s", blog_id, rule_id, e)
+            continue
+        try:
+            ok, msg = fixer(site, blog_id, ga4_id)
+            if ok:
+                summary["applied"].append(f"{rule_id}:{msg}")
+                applied_any = True
+                try:
+                    set_pending_fix_status(
+                        pend_conn, _latest_pending_id(pend_conn, blog_id, rule_id),
+                        "resolved", resolved_at=_now_iso(),
+                        diff_ref=f"{action_key}: {msg}",
+                    )
+                except Exception as e:
+                    logger.warning("[auto-fix] %s %s resolved 기록 실패: %s", blog_id, rule_id, e)
+            else:
+                summary["skipped"].append(f"{rule_id}:{msg}")
+                try:
+                    set_pending_fix_status(
+                        pend_conn, _latest_pending_id(pend_conn, blog_id, rule_id),
+                        "failed", resolved_at=_now_iso(),
+                        diff_ref=f"{action_key}: {msg}",
+                    )
+                except Exception as e:
+                    logger.warning("[auto-fix] %s %s failed 기록 실패: %s", blog_id, rule_id, e)
+        except Exception as e:
+            logger.warning("[auto-fix] %s %s fixer 실패: %s", blog_id, rule_id, e)
+            summary["skipped"].append(f"{rule_id}(예외:{e})")
+
+    # 파괴적 작업 4단계 (3) 재배포 — 기본 게이팅
+    if applied_any and redeploy:
+        try:
+            _build_and_deploy_central(blog_id)
+            summary["redeployed"] = True
+        except Exception as e:
+            logger.warning("[auto-fix] %s 재배포 실패: %s", blog_id, e)
+        # 파괴적 작업 4단계 (4) 사후대조 — 재검사는 _run_autofix=False 로 재귀 차단
+        try:
+            _trigger_post_publish_checks(blog_id, ops_db_path, _run_autofix=False)
+            summary["recheck_triggered"] = True
+        except Exception:
+            pass
+    return summary
+
+
+def _latest_pending_id(conn, blog_id: str, rule_id: str) -> int:
+    """가장 최근 pending_fixes 행 id (safe auto-fix 결과 기록용). 없으면 -1."""
+    row = conn.execute(
+        "SELECT id FROM pending_fixes WHERE blog_id = ? AND rule_id = ? "
+        "ORDER BY id DESC LIMIT 1",
+        (blog_id, rule_id),
+    ).fetchone()
+    return int(row["id"]) if row is not None else -1
+
+
+def _now_iso() -> str:
+    from datetime import datetime
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+def execute_pending_fix(
+    conn,
+    fix_id: int,
+    *,
+    redeploy: bool = True,
+    ops_db_path: str | None = None,
+) -> dict:
+    """승인 엔드포인트에서 호출되는 pending_fixes 실행자 (SC-4 승인 폐루프).
+
+    proposed(또는 approved) 행을 load → executing 전이 → 백업 → 실제 fixer
+    (shared/autofix.FIXERS) 실행 → (redeploy 시) 재배포 + 사후대조 재검사 →
+    resolved/failed 전이. 실제 fixer 를 FIXERS 레지스트리 경유로 실행하므로
+    테스트는 실제 fixer 경로를 검증한다.
+
+    redeploy(실발행 재배포 = 파괴적)는 실행자 기본 True — 승인 엔드포인트가 사람 승인
+    통과 후 호출하므로 승인 게이트를 대신한다. 테스트는 redeploy=False 로 재배포를 끈다.
+
+    반환: {"fix_id", "blog_id", "rule_id", "action", "ok", "msg", "status",
+            "redeployed", "recheck_triggered"}
+    """
+    from ops_dashboard.db import (
+        get_pending_fix,
+        get_conn,
+        set_pending_fix_status,
+    )
+    from shared.autofix import FIXERS, backup_blog, get_ga4_id
+
+    row = get_pending_fix(conn, fix_id)
+    if not row:
+        return {"fix_id": fix_id, "ok": False, "msg": "pending_fixes 행 없음", "status": ""}
+    if row["status"] not in ("proposed", "approved"):
+        return {
+            "fix_id": fix_id, "blog_id": row["blog_id"], "rule_id": row["rule_id"],
+            "action": row["action"], "ok": False,
+            "msg": f"상태 {row['status']!r} 에서 실행 불가 (proposed/approved 만 허용)",
+            "status": row["status"],
+        }
+
+    blog_id = row["blog_id"]
+    rule_id = row["rule_id"]
+    action_key = row["action"]
+    cfg = get_blog_config(blog_id)
+    site_path = cfg.get("site_path", "") if cfg else ""
+    if not site_path or not Path(site_path).is_dir():
+        set_pending_fix_status(conn, fix_id, "failed", resolved_at=_now_iso(),
+                               diff_ref="site_path 없음/미존재")
+        return {
+            "fix_id": fix_id, "blog_id": blog_id, "rule_id": rule_id,
+            "action": action_key, "ok": False, "msg": "site_path 없음",
+            "status": "failed",
+        }
+
+    set_pending_fix_status(conn, fix_id, "executing")
+    ga4_id = get_ga4_id(blog_id, cfg.get("domain", ""))
+    fixer = FIXERS.get(action_key)
+    redeemed = False
+    rechecked = False
+    if fixer is None:
+        result = (False, f"fixer 없음({action_key})")
+    else:
+        try:
+            backup_blog(site_path, blog_id)
+            result = fixer(Path(site_path), blog_id, ga4_id)
+        except Exception as e:
+            result = (False, f"fixer 예외: {e}")
+
+    ok, msg = result
+    if ok and redeploy:
+        try:
+            _build_and_deploy_central(blog_id)
+            redeemed = True
+        except Exception as e:
+            logger.warning("[pending-fix] %s 재배포 실패: %s", blog_id, e)
+        try:
+            _trigger_post_publish_checks(blog_id, ops_db_path, _run_autofix=False)
+            rechecked = True
+        except Exception:
+            pass
+
+    final_status = "resolved" if ok else "failed"
+    set_pending_fix_status(conn, fix_id, final_status, resolved_at=_now_iso(),
+                           diff_ref=f"{action_key}: {msg}")
+    return {
+        "fix_id": fix_id, "blog_id": blog_id, "rule_id": rule_id,
+        "action": action_key, "ok": ok, "msg": msg, "status": final_status,
+        "redeployed": redeemed, "recheck_triggered": rechecked,
+    }
 
 
 # ─── 메인 디스패치 ───
