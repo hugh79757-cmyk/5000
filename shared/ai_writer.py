@@ -363,10 +363,11 @@ def generate(
                 
                 # (B) reasoning 모델 대응: content가 비어있으면 skip → 다음 tier
                 if not content:
-                    reasoning = getattr(message, 'reasoning_content', None)
+                    # Groq GPT OSS는 message.reasoning, 기타 제공자는 message.reasoning_content 사용
+                    reasoning = getattr(message, 'reasoning_content', None) or getattr(message, 'reasoning', None)
                     if reasoning:
-                        # reasoning_content를 사용하지 않음 — 누수 위험
-                        logger.warning(f"[ai_writer] reasoning_content 감지됨 (미사용): {attempt_tier}")
+                        # reasoning 속성을 사용하지 않음 — 누수 위험 (내용 로그에 포함하지 않음)
+                        logger.warning(f"[ai_writer] reasoning 감지됨 (미사용): {attempt_tier}")
                     last_error = f"{attempt_tier}: 빈 응답"
                     logger.warning(f"[ai_writer] {last_error}")
                     continue
