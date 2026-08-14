@@ -106,11 +106,11 @@ def _add_product_cards(article):
         article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
     return article
 
-def _run_impl() -> bool:
+def _run_impl() -> dict | bool:
     topic = pick_topic()
     if not topic:
         logger.info("[airports-hugo] No topics")
-        return False
+        return {"success": False, "reason": "no_topic"}
     logger.info(f"[airports-hugo] {topic.get('iata_code','')} generating")
     article = generate_airport_guide(topic)
     if not article:
@@ -118,7 +118,7 @@ def _run_impl() -> bool:
         mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
                              topic.get("title",""), topic.get("slug",""))
         logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('airline_name','')}")
-        return False
+        return {"success": False, "reason": "ai_generate_failed"}
 
     # Quality guard
     article["content"], _qg_issues, _qg_draft = postprocess_content(
@@ -127,7 +127,7 @@ def _run_impl() -> bool:
     if _qg_draft:
         logger.warning("[%s] DRAFT 감지 → 발행 중단: %s - %s", BLOG_ID, article["slug"], _qg_issues)
         send_alert(BLOG_ID, article["slug"], _qg_issues)
-        return False
+        return {"success": False, "reason": "draft_detected"}
     if _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
@@ -136,7 +136,10 @@ def _run_impl() -> bool:
     iata = article.get("iata", "")
     cover = fetch_city_image(city or iata, country, article["slug"]) if city else None
     body = fetch_body_images(city or iata, country, article["slug"], count=8) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY, is_draft=article.get("_draft", False))
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY, is_draft=article.get("_draft", False))
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
+        return False
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"], "airport in " + city, 60, 1)

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Structured publish and operational errors recorded by the notifier.</p>
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-num">{{ summary.total }}</div><div class="stat-label">Recorded events</div></div>
+  <div class="stat-card"><div class="stat-num">{{ summary.open }}</div><div class="stat-label">Open events</div></div>
+  <div class="stat-card"><div class="stat-num">{{ summary.by_problem|length }}</div><div class="stat-label">Error codes</div></div>
+</div>
+<h2>Error code summary</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Code</th><th>Severity</th><th>Events</th><th>Blogs</th><th>Last seen</th></tr></thead>
+<tbody>
+{% for row in summary.by_problem %}
+<tr><td>{{ row.problem_id }}</td><td>{{ row.severity }}</td><td>{{ row.events }}</td><td>{{ row.blogs }}</td><td>{{ row.last_seen }}</td></tr>
+{% endfor %}
+</tbody>
+</table></div>
+<h2>Recent events</h2>
+<div class="table-wrap"><table>
+<thead><tr><th>Time</th><th>Blog</th><th>Code</th><th>Stage</th><th>Severity</th><th>Retryable</th><th>State</th><th>Detail</th></tr></thead>
+<tbody>
+{% for event in events %}
+<tr><td>{{ event.occurred_at }}</td><td><a href="/blog/{{ event.blog_id }}">{{ event.blog_id }}</a></td><td>{{ event.problem_id }}</td><td>{{ event.stage }}</td><td>{{ event.severity }}</td><td>{{ event.retryable }}</td><td>{{ event.state }}</td><td>{{ event.detail_redacted }}</td></tr>
+{% endfor %}
+</tbody>
+</table></div>
+{% endblock %}

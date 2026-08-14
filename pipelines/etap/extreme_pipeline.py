@@ -128,7 +128,10 @@ def _run_impl(cfg=None) -> bool:
     article = _add_product_cards(article)
     cover = fetch_city_image(city + " extreme sports adventure", country, article["slug"]) if city else None
     body = fetch_body_images(city + " extreme sports rafting zipline", country, article["slug"], count=8) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
+        return False
     mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID, article["title"], article["slug"])
     mark_entity_published(BLOG_ID, article["slug"])
     if city:

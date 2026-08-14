@@ -141,7 +141,10 @@ def _run_impl() -> bool:
     search_term = origin or dest
     cover = fetch_city_image(search_term + " bus station", "", article["slug"]) if search_term else None
     body = fetch_body_images(search_term + " bus travel", "", article["slug"], count=8) if search_term else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
+        return False
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if origin:
         register_entity("city", origin, BLOG_ID, article["slug"], "bus from " + origin, 50, 1)

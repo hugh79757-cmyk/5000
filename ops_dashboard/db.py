@@ -898,7 +898,48 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
         ORDER BY category, issue_id
     """).fetchall()
 
-    # 3) stale 블로그 (active 한정, 변경 없음)
+    # 3) publish_error_events의 open 이벤트도 attention에 포함 (P04 등 post_deploy 오류)
+    pe_rows = conn.execute("""
+        SELECT pe.blog_id, pe.problem_id, pe.stage, pe.state, pe.detail_redacted, pe.occurred_at,
+               bl.config_status, bl.maintenance_status
+        FROM publish_error_events pe
+        LEFT JOIN blog_lifecycle bl ON pe.blog_id = bl.blog_id
+        INNER JOIN (
+            SELECT blog_id, problem_id, MAX(occurred_at) as latest
+            FROM publish_error_events
+            WHERE state = 'open'
+            GROUP BY blog_id, problem_id
+        ) latest ON pe.blog_id = latest.blog_id
+            AND pe.problem_id = latest.problem_id
+            AND pe.occurred_at = latest.latest
+        WHERE pe.state = 'open'
+        ORDER BY pe.occurred_at DESC
+    """).fetchall()
+
+    for pe in pe_rows:
+        cfg = pe["config_status"] or "active"
+        maint = pe["maintenance_status"] or "none"
+        entry = {
+            "blog_id": pe["blog_id"],
+            "check_name": "publish_error",
+            "status": pe["state"],
+            "detail": f"{pe['problem_id']}: {pe['stage']} — {pe['detail_redacted'] or ''}".strip(),
+            "evidence_url": "",
+            "checked_at": pe["occurred_at"],
+            "rule_id": "",
+            "problem_id": pe["problem_id"],
+            "severity": "CRITICAL" if pe["problem_id"] in ("P04", "P05", "P06", "P07", "P08", "P09", "P29") else "MAJOR",
+            "action": "",
+            "failed_rule_ids": [],
+        }
+        if cfg == "active" and maint != "paused":
+            fail_checks.append(entry)
+        else:
+            entry["config_status"] = cfg
+            entry["maintenance_status"] = maint
+            excluded_fail_checks.append(entry)
+
+    # 4) stale 블로그 (active 한정, 변경 없음)
     stale = conn.execute("""
         SELECT blog_id, days_since_last_publish, lifecycle_status
         FROM blog_lifecycle
@@ -1190,17 +1231,56 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
             "playbook_ref": playbook_ref,
         }
 
-    def _error_entry(e, row):
+    def _error_entry(e, row, blog_id=None):
         spec = lookup_problem(e.id)
         playbook_ref = spec.playbook_ref if spec else ""
+        # triage_classifications에서 classification 우선 사용
+        if row and row["classification"]:
+            return {
+                "id": e.id,
+                "kind": "error",
+                "target": e.target or (row["target"] if row else ""),
+                "status": row["classification"],
+                "severity": row["severity"] if row and row["severity"] else e.severity,
+                "action": row["action"] if row and row["action"] else e.action,
+                "evidence": (row["detail"] or row["source"] or "") if row else "",
+                "rule_id": "",
+                "problem_id": e.id,
+                "bucket": "",
+                "threshold": e.threshold,
+                "playbook_ref": playbook_ref,
+            }
+        # triage_classifications 없으면 publish_error_events에서 최신 open 이벤트 상태 사용
+        pe_row = conn.execute(
+            "SELECT state, detail_redacted, occurred_at FROM publish_error_events "
+            "WHERE problem_id = ? AND state = 'open' "
+            f"{'AND blog_id = ?' if blog_id else ''} "
+            "ORDER BY occurred_at DESC LIMIT 1",
+            (e.id, blog_id) if blog_id else (e.id,),
+        ).fetchone()
+        if pe_row:
+            return {
+                "id": e.id,
+                "kind": "error",
+                "target": e.target or "",
+                "status": pe_row["state"],
+                "severity": e.severity,
+                "action": e.action,
+                "evidence": pe_row["detail_redacted"] or "",
+                "rule_id": "",
+                "problem_id": e.id,
+                "bucket": "",
+                "threshold": e.threshold,
+                "playbook_ref": playbook_ref,
+            }
         return {
             "id": e.id,
             "kind": "error",
-            "target": e.target or (row["target"] if row else ""),
-            "status": row["classification"] if row else "unknown",
-            "severity": row["severity"] if row and row["severity"] else e.severity,
-            "action": row["action"] if row and row["action"] else e.action,
-            "evidence": (row["detail"] or row["source"] or "") if row else "",
+            "target": e.target or "",
+            "status": "unknown",
+            "severity": e.severity,
+            "action": e.action,
+            "evidence": "",
             "rule_id": "",
             "problem_id": e.id,
             "bucket": "",
@@ -1243,7 +1323,7 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
             "ORDER BY classified_at DESC LIMIT 1",
             (e.id,),
         ).fetchone()
-        errors.append(_error_entry(e, row))
+        errors.append(_error_entry(e, row, blog_id=blog_id))
 
     return {"rules": rules, "errors": errors}
 

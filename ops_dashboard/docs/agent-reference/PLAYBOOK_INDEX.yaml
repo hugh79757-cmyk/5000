@@ -579,6 +579,26 @@ codes:
   - 전송 성공/4xx/5xx mock, 정제 테스트
   - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
   needs_human: false
+- code: P32
+  playbook_ref: ERROR_PLAYBOOKS.md#p32
+  name_ko: 빈 본문 배포 (empty_content_deployed)
+  severity: MAJOR
+  family: deploy
+  hook: post_deploy
+  automation_level: human_approval
+  one_line_action: publish_log 최근 글의 public HTML 본문 단어수 200 미만 탐지 → topic 재생성 + 재배포.
+    가드(ETAP-GUARD)는 _write_hugo_post_etap 진입부에 적용 완료.
+  target_files:
+  - path: shared/publishers/hugo_writer.py
+    hint: _write_hugo_post_etap() ETAP-GUARD (빈 content/최소 단어수 차단)
+  - path: ops_dashboard/checks/content_integrity.py
+    hint: detect_empty_content_deployed() — public HTML 본문 단어수 감지 함수 (구현 예정)
+  - path: data/travel-en.db
+    hint: publish_log 테이블 — 최근 글의 slug/topic_id/blog_id 조회
+  verify:
+  - 로컬 Hugo 빌드: HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify --source {site_path}
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
 - code: M01
   playbook_ref: ERROR_PLAYBOOKS.md#m01
   name_ko: 제목 CJK 없음 (운영·정비 검사)

@@ -198,6 +198,37 @@ def pick_topic_by_id(topic_table, blog_id):
         conn.close()
 
 
+def get_topic_by_id(topic_table: str, topic_id: int) -> dict | None:
+    """PK로 토픽 1건을 직접 fetch. exhausted/발행 여부 필터링 없음 (force_topic_id 전용).
+
+    Parameters:
+        topic_table: 토픽 테이블명 (예: 'cruise_topics')
+        topic_id: PK 값
+
+    Returns:
+        토픽 dict 또는 None (존재하지 않을 경우)
+    """
+    import re as _re
+    if not isinstance(topic_table, str) or not _re.fullmatch(r"[a-zA-Z_][a-zA-Z0-9_]*", topic_table):
+        raise ValueError(f"get_topic_by_id: invalid topic_table {topic_table!r}")
+    if not isinstance(topic_id, int) or topic_id <= 0:
+        raise ValueError(f"get_topic_by_id: invalid topic_id {topic_id!r}")
+
+    conn = _get_db()
+    try:
+        pk = _get_pk_col(conn, topic_table)
+        row = conn.execute(
+            f"SELECT * FROM {topic_table} WHERE {pk} = ?",
+            (topic_id,)
+        ).fetchone()
+        return dict(row) if row else None
+    except Exception as e:
+        logger.exception(f"get_topic_by_id error: topic_table={topic_table}, topic_id={topic_id}")
+        return None
+    finally:
+        conn.close()
+
+
 def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url="") -> bool | None:
     """PK 기준으로 발행 완료 기록.
 

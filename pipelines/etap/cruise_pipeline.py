@@ -99,6 +99,13 @@ def pick_topic():
     """topic_manager 통합 — PK 기준 중복 방지 + 고갈 체크"""
     return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
 
+
+def get_topic_by_id(topic_id: int) -> dict | None:
+    """PK로 토픽 1건 직접 fetch (force_topic_id 전용). exhausted 필터링 없음."""
+    from pipelines.etap.topic_manager import get_topic_by_id as _gtbi
+    return _gtbi(TOPIC_TABLE, topic_id)
+
+
 def _add_product_cards(article):
     tours = article.get("tours", [])
     if not tours:
@@ -139,12 +146,19 @@ def _add_product_cards(article):
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
-def _run_impl() -> bool:
-    topic = pick_topic()
-    if not topic:
-        logger.info(f"[{BLOG_ID}] No topics")
-        return False
-    logger.info(f"[{BLOG_ID}] {topic.get('city','')} generating")
+def _run_impl(force_topic_id: int | None = None) -> bool:
+    if force_topic_id is not None:
+        topic = get_topic_by_id(force_topic_id)
+        if not topic:
+            logger.warning(f"[{BLOG_ID}] force_topic_id={force_topic_id} not found")
+            return False
+        logger.info(f"[{BLOG_ID}] force_topic_id={force_topic_id} generating (city={topic.get('city','')})")
+    else:
+        topic = pick_topic()
+        if not topic:
+            logger.info(f"[{BLOG_ID}] No topics")
+            return False
+        logger.info(f"[{BLOG_ID}] {topic.get('city','')} generating")
     article = generate_cruise_guide(topic)
     if not article:
         from pipelines.etap.topic_manager import mark_published_by_id
@@ -166,7 +180,10 @@ def _run_impl() -> bool:
     country = article.get("country", "")
     cover = fetch_city_image(city + " shore excursion", country, article["slug"]) if city else None
     body = fetch_body_images(city + " shore excursion", country, article["slug"], count=8) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
+        return False
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"],
@@ -183,7 +200,7 @@ def run():
 
 
 
-def run_batch(count=1):
+def run_batch(count=1, force_topic_id: int | None = None):
     from pipelines.etap.topic_manager import check_daily_quota
     can_pub, today_count = check_daily_quota("cruise-hugo", max_per_day=5)
     if not can_pub:
@@ -193,7 +210,7 @@ def run_batch(count=1):
     count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
-        if _run_impl():
+        if _run_impl(force_topic_id=force_topic_id):
             ok += 1
         time.sleep(5)
     logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")

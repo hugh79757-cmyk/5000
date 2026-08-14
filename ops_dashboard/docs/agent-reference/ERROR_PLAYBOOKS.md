@@ -80,6 +80,8 @@
 | **P24** | validation defect / post-validate | 오류가 콘텐츠가 아닌 검사기의 DB·정규식·입력 형태·예외 처리에서 왔는지 확인한다. | 실패 재현 + 정상/오탐 fixture | 검사 기준 승격·완화는 승인 |
 <a id="p31"></a>
 | **P31** | Telegram delivery / notification | 감사 레코드, HTTP 상태, bot 권한, chat ID, 메시지 길이·parse mode를 확인한다. | 전송 성공/4xx/5xx mock, 정제 테스트 | token·chat 변경은 승인 |
+<a id="p32"></a>
+| **P32** | 빈 본문 배포 / `post_deploy` | publish_log 최근 글의 public HTML 본문 단어수 200 미만, topic의 exhausted=1과 publish_log INSERT 동시 발생 패턴, _write_hugo_post_etap 호출 시 article["content"]가 빈 문자열/공백/200단어 미만 | 가드 통과·차단 dry run, 본문 단어수 계측, H2/disclaimer/adsense 존재 확인 | 가드 변경은 additive; 기존 정상 글 영향 없음 확인. 재생성·배포는 승인 |
 
 ## 4. 대시보드의 비-P 코드 신호
 
@@ -145,3 +147,33 @@ R 규칙은 대체로 구조·템플릿·SEO·운영 표준의 준수 여부를 
 | 잔여 위험 | 재발 가능성, 관찰 기간, 다음 체크 시각 또는 조건 |
 
 > 오류의 “해결”은 대시보드에서 사라지는 것보다, 같은 입력·같은 실행 경로에서 문제가 재현되지 않고 그 결과가 검증되는 것을 의미한다.
+
+## 6. 이벤트 수명 주기 관리
+
+`publish_error_events` 테이블의 이벤트는 `state='open'`으로 생성되고, 원인이 해소되면 `state='closed'`로 변경되어야 한다. open 이벤트가 누적되면 대시보드가 stale 상태로 보이고 알림 소음이 증가한다.
+
+### 이벤트 close가 필요한 상황
+
+| 상황 | close 조건 | 담당 코드 |
+|---|---|---|
+| P04 (배포 실패) | 배포 성공(`deployed: true` 또는 `_build_and_deploy_central` 성공), 또는 `deploy_error` 없는 성공 결과 | `dispatcher.py:dispatch()` 성공 경로 |
+| P25 (스케줄러 timeout) | timeout 후 재시도에서 발행 성공 | `scheduler.py:_track_publish_result()` 성공 경로 |
+| P01/P02 등 재시도 가능 오류 | 재시도 성공 시 (필요 시) | 파이프라인 성공 경로 |
+
+### close 시 주의
+
+- **직전 open 이벤트만 close** — 새 이벤트가 다시 생성될 수 있으므로, close는 최신 1건으로 한정 (`close_publish_error_event`의 LIMIT 1).
+- **before 필터** — 특정 시각 이전의 이벤트만 close해야 할 때 `before` 파라미터 사용 (예: 오늘 이전 이벤트 일괄 close).
+- **close 실패는 비차단** — close 실패가 발행 파이프라인을 중단하지 않아야 함 (예외 무시하고 로그만).
+- **수동 close** — stale 이벤트가 코드 수정 전에 이미 누적되어 있으면 ops.db에서 직접 UPDATE.
+
+### P 코드별 close 책임
+
+| 코드 | 원인 해소 판단 | close 트리거 |
+|---|---|---|
+| P04 | 배포 성공 (HTTP 200, wrangler 성공) | dispatcher 성공 시 |
+| P25 | timeout 후 재시도 성공 | scheduler 성공 시 |
+| P06 | featureimage URL 복구 후 재배포 성공 | 배포 성공 시 |
+| P15 | 검증 통과 콘텐츠 재배포 성공 | 배포 성공 시 |
+
+> **"해결됨"과 "close"는 별도 상태다.** 코드 수정이 완료되었더라도 이벤트가 close되지 않으면 대시보드에 계속 표시된다. 코드 수정 + 이벤트 close + 재검사를 함께 수행해야 완전한 해결이다.

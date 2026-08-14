@@ -52,7 +52,7 @@ def _normalize_result(result) -> dict:
     if result is None:
         return {"success": False, "reason": "no_result"}
     if isinstance(result, bool):
-        return {"success": result}
+        return {"success": result, "reason": "pipeline_returned_false" if not result else "pipeline_success"}
     if isinstance(result, (int, float)):
         return {"success": result > 0}
     return {"success": bool(result), "reason": str(result)}

@@ -157,6 +157,7 @@ ALLOWED_OVERRIDES = {
     "layouts/shortcodes/dual-cta.html",
     "layouts/partials/extend-head-uncached.html",
     "layouts/partials/related-posts.html",
+    "layouts/partials/home/background.html",
 }
 
 # 오버라이드가 아닌 정크 파일: 위반으로 보고하지 않지만 별도로 집계한다.

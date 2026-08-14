@@ -421,6 +421,20 @@ def _register_human_routes(app: Flask) -> None:
             issues=issues,
         )
 
+    @app.route("/publish-errors")
+    @require_auth
+    def publish_errors():
+        conn = _get_db()
+        _ensure_db(conn)
+        from shared.publish_error_events import get_publish_error_events, get_publish_error_summary
+        return render_template(
+            "publish_errors.html",
+            title="Operational Errors",
+            active="publish-errors",
+            summary=get_publish_error_summary(conn),
+            events=get_publish_error_events(conn, limit=200),
+        )
+
     @app.route("/standards")
     @require_auth
     def standards():
@@ -523,10 +537,29 @@ def _register_api_routes(app: Flask) -> None:
         update_maintenance_status(conn, blog_id, status)
         return jsonify({"ok": True, "blog_id": blog_id, "maintenance_status": status})
 
+    @app.route("/api/publish-errors")
+    @require_auth
+    def api_publish_errors():
+        conn = _get_db()
+        _ensure_db(conn)
+        from shared.publish_error_events import get_publish_error_events, get_publish_error_summary
+        limit = request.args.get("limit", 100, type=int)
+        return jsonify({
+            "summary": get_publish_error_summary(conn),
+            "events": get_publish_error_events(
+                conn,
+                limit=limit,
+                blog_id=request.args.get("blog_id", ""),
+                severity=request.args.get("severity", ""),
+                state=request.args.get("state", ""),
+            ),
+        })
+
     @app.route("/api/maintenance/checklist", methods=["POST"])
     @require_auth
     def api_maintenance_checklist_run():
         """특정 블로그의 정비 체크리스트 실행
+
 
         JSON body({"blog_id": "..."}) 또는 form data(blog_id=...) 모두 수용.
         JS fetch 호출(application/json)과 HTML form 제출을 모두 지원.

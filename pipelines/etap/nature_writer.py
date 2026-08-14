@@ -74,7 +74,7 @@ def fetch_tours(city, country=None):
     return [dict(r) for r in rows]
 
 
-def _deduplicate_tours(tours, similarity_threshold=0.65):
+def _deduplicate_tours(tours, similarity_threshold=0.85):
     """유사한 투어를 그룹핑하고 각 그룹에서 대표 1개만 선택."""
     if not tours:
         return []

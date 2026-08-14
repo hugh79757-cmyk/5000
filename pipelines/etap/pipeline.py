@@ -207,22 +207,37 @@ def _get_esim_product(country: str) -> dict:
         return {}
 
 
-def run(cfg: dict) -> dict:
-    """dispatcher에서 호출하는 메인 함수."""
+def run(cfg: dict, force_topic_id: int | None = None) -> dict:
+    """dispatcher에서 호출하는 메인 함수.
+
+    Args:
+        cfg: 블로그 설정 dict (id, site_path, domain, cf_project 등)
+        force_topic_id: 지정 topic_id로 강제 발행 (None이면 정상 pick_topic)
+    """
     blog_id = cfg["id"]
+    topic_table = "topics"  # pipeline.py는 topics 테이블 사용
 
+    # force_topic_id 지정 시 해당 토픽 직접 fetch
+    if force_topic_id is not None:
+        from pipelines.etap.topic_manager import get_topic_by_id
+        topic = get_topic_by_id(topic_table, force_topic_id)
+        if not topic:
+            print(f"[ETAP] {blog_id}: force_topic_id={force_topic_id} not found")
+            return {"status": "skip", "reason": "topic_not_found"}
+        print(f"[ETAP] {blog_id}: force_topic_id={force_topic_id} generating "
+              f"(city={topic.get('city','')}, country={topic.get('country','')})")
+    else:
+        # 고갈 체크
+        can_pub, _remaining = check_exhaustion(topic_table, blog_id)
+        if not can_pub:
+            return {"status": "exhausted", "remaining": 0}
 
-    # 고갈 체크
-    can_pub, _remaining = check_exhaustion("topics", blog_id)
-    if not can_pub:
-        return {"status": "exhausted", "remaining": 0}
+        topic = pick_topic(blog_id)
+        if not topic:
+            print(f"[ETAP] {blog_id}: 발행 가능한 토픽 없음")
+            return {"status": "skip", "reason": "no_topic"}
 
-    topic = pick_topic(blog_id)
-    if not topic:
-        print(f"[ETAP] {blog_id}: 발행 가능한 토픽 없음")
-        return {"status": "skip", "reason": "no_topic"}
-
-    print(f"[ETAP] {blog_id}: {topic['city']}, {topic['country']} 글 생성 시작")
+        print(f"[ETAP] {blog_id}: {topic['city']}, {topic['country']} 글 생성 시작")
 
     article = generate_city_guide(topic)
     article["viator_products"] = _get_viator_products(topic.get("city", ""), blog_id=blog_id)
@@ -269,9 +284,10 @@ def run(cfg: dict) -> dict:
 
 
 
-def run_batch(cfg: dict, count: int = 3) -> list:
-    from pipelines.etap.topic_manager import check_daily_quota
+def run_batch(cfg: dict, count: int = 3, force_topic_id: int | None = None) -> list:
+    from pipelines.etap.topic_manager import check_daily_quota, get_topic_by_id
     blog_id = cfg["id"]
+    topic_table = "topics"
     can_pub, today_count = check_daily_quota(blog_id, max_per_day=cfg.get("daily_quota", 5))
     if not can_pub:
         print(f"[ETAP] {blog_id}: daily quota reached ({today_count})")
@@ -279,16 +295,23 @@ def run_batch(cfg: dict, count: int = 3) -> list:
     count = min(count, cfg.get("daily_quota", 5) - today_count)
     """count건 연속 발행 후 마지막에 1회 빌드+배포."""
     import time
-    blog_id = cfg["id"]
     results = []
 
     for i in range(count):
-        topic = pick_topic(blog_id)
-        if not topic:
-            print(f"[ETAP] {blog_id}: 토픽 소진 (발행 {i}건 후 중단)")
-            break
+        if force_topic_id is not None:
+            topic = get_topic_by_id(topic_table, force_topic_id)
+            if not topic:
+                print(f"[ETAP] {blog_id}: force_topic_id={force_topic_id} not found")
+                break
+            print(f"[ETAP] {blog_id}: [{i+1}/{count}] force_topic_id={force_topic_id} "
+                  f"{topic['city']}, {topic['country']}")
+        else:
+            topic = pick_topic(blog_id)
+            if not topic:
+                print(f"[ETAP] {blog_id}: 토픽 소진 (발행 {i}건 후 중단)")
+                break
 
-        print(f"[ETAP] {blog_id}: [{i+1}/{count}] {topic['city']}, {topic['country']}")
+            print(f"[ETAP] {blog_id}: [{i+1}/{count}] {topic['city']}, {topic['country']}")
 
         article = generate_city_guide(topic)
 

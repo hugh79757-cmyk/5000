@@ -10,6 +10,7 @@ import sys
 import threading
 import time
 from datetime import datetime
+from pathlib import Path
 
 import schedule
 import yaml
@@ -17,6 +18,12 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from shared.paths import FIVEK_ROOT, STAP_ROOT, DATA_DIR
+from shared.publish_slot import (
+    acquire_publish_slot,
+    release_publish_slot,
+    cleanup_stale_slots,
+    MAX_CONCURRENT_PUBLISH,
+)
 
 from dotenv import load_dotenv
 
@@ -259,11 +266,27 @@ def run_publish(blog_id) -> bool | None:
 
     logger.info("Publishing: " + blog_id)
     import json as _json
+
+    # ── 전역 publish 동시성 제한: 슬롯 확보 ──────────────────────
+    slot_id = acquire_publish_slot(blog_id)
+    if slot_id is None:
+        logger.warning(
+            f"[CONCURRENCY] publish 슬롯 풀 소진 "
+            f"(MAX_CONCURRENT={MAX_CONCURRENT_PUBLISH}) — {blog_id} 스킵"
+        )
+        return False
+
     try:
+        # env var로 슬롯 ID 상속 (자식 dispatcher가 이중 acquire 방지)
+        run_env = os.environ.copy()
+        run_env["PUBLISH_SLOT_ID"] = str(slot_id)
+        run_env["PUBLISH_SLOT_BLOG_ID"] = blog_id
+
         result = subprocess.run(
             [PYTHON, "dispatcher.py", blog_id],
             cwd=PROJECT_DIR,
-            capture_output=True, text=True, timeout=600
+            capture_output=True, text=True, timeout=600,
+            env=run_env,
         )
         parsed_success = None
         if result.stdout:
@@ -298,6 +321,10 @@ def run_publish(blog_id) -> bool | None:
         logger.exception(blog_id + " failed: " + str(e))
         _tg_error(blog_id, "scheduler", str(e)[:300])
         return False
+    finally:
+        # 슬롯 반납 (crash-safe: 프로세스가 살아있으면 여기서 반납,
+        # 사망 시 pid 체크로 다른 acquire에서 자동 회수)
+        release_publish_slot(slot_id, blog_id)
 
 
 # ─── 발행 큐 ───
@@ -488,6 +515,54 @@ def _run_quality_scan() -> None:
     except Exception as e:
         logger.exception(f"[QualityScan] 실패: {e}")
         _tg_error("QualityScan 오류", str(e))
+
+
+def _run_p32_scan() -> None:
+    """P32: 배포된 글의 빈 내용 사후 검증 (주기적 스캔, 6시간 간격).
+
+    모든 active 블로그 대상 detect_empty_content_deployed 실행.
+    실HTTP 수행하므로 순차 실행 + 블로그 간 2초 지연(대상 사이트 부하 방지).
+    dry_run에서도 스캔 자체는 실행(알림은 억제됨).
+    """
+    try:
+        import time as _time
+        from shared.publisher import load_blogs
+        from shared.problem_monitor import get_monitor
+
+        blogs = load_blogs()
+        active_blogs = [b for b in blogs if b.get("status") == "active"]
+        logger.info(f"[P32] 스캔 시작: active 블로그 {len(active_blogs)}개")
+
+        monitor = get_monitor()
+        scanned = 0
+        alerted = 0
+        for blog in active_blogs:
+            blog_id = blog.get("id", "")
+            domain = blog.get("domain", "")
+            site_path = blog.get("site_path", "")
+            if not domain or not site_path:
+                continue
+            try:
+                sent = monitor.report_deployed_content(blog_id)
+                scanned += 1
+                if sent:
+                    alerted += 1
+                    logger.info(f"[P32] {blog_id}: 알림 발송 — {sent}")
+                else:
+                    logger.debug(f"[P32] {blog_id}: PASS")
+            except Exception as e:
+                logger.warning(f"[P32] {blog_id} 스캔 예외: {e}")
+            # 2초 지연 — 대상 사이트 동시 HTTP 부하 방지
+            _time.sleep(2)
+
+        logger.info(f"[P32] 스캔 완료: {scanned}개 스캔, {alerted}개 알림")
+    except Exception as e:
+        logger.exception(f"[P32] 스캔 실패: {e}")
+        try:
+            from shared.telegram_notifier import send_error
+            send_error("P32 스캔 오류", str(e))
+        except Exception:
+            pass
 
 
 def daily_report() -> None:
@@ -811,6 +886,10 @@ def register_schedules():
 
     schedule.every().day.at("23:00").do(_run_quality_scan)
     schedule.every().day.at("23:50").do(daily_report)
+    # P32: 배포된 글의 빈 내용 사후 검증 — 6시간 간격 (00:00, 06:00, 12:00, 18:00)
+    for _h in ("00:00", "06:00", "12:00", "18:00"):
+        schedule.every().day.at(_h).do(_run_p32_scan)
+    logger.info(f"P32 scan scheduled every 6h (00:00, 06:00, 12:00, 18:00)")
     job_count += 1
 
     # CUAP weekly off-topic 리포트: 매주 월요일 10:00
@@ -861,6 +940,19 @@ def _track_publish_result(blog_id: str, success: bool) -> None:
     Resets on success. Sends Telegram alert on threshold breach."""
     if success:
         _CONSECUTIVE_FAILURES.pop(blog_id, None)
+        # timeout(P25) 후 재시도 성공 시 stale P25 이벤트 close
+        try:
+            from shared.publish_error_events import close_publish_error_event
+            conn = sqlite3.connect(str(Path(__file__).resolve().parent / "ops_dashboard" / "ops.db"))
+            try:
+                closed = close_publish_error_event(
+                    conn, blog_id=blog_id, problem_id="P25")
+                if closed:
+                    logger.info(f"[scheduler] P25 이벤트 close: {blog_id} ({closed}건)")
+            finally:
+                conn.close()
+        except Exception as _e:
+            logger.warning(f"[scheduler] P25 close 실패: {blog_id}: {_e}")
         return
 
     count = _CONSECUTIVE_FAILURES.get(blog_id, 0) + 1
@@ -886,6 +978,10 @@ def _track_publish_result(blog_id: str, success: bool) -> None:
 def main() -> None:
     logger.info("=== 5000 Scheduler Starting ===")
     _wait_for_network()
+    # stale publish slot 정리 (crash 후 남은 슬롯, TTL 만료 슬롯)
+    cleaned = cleanup_stale_slots()
+    if cleaned:
+        logger.info(f"[CONCURRENCY] startup stale slot 정리: {cleaned}개 제거")
     job_count = register_schedules()
     logger.info(f"Registered {job_count} jobs")
     logger.info(f"Next run: {schedule.next_run()}")

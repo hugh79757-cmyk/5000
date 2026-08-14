@@ -211,8 +211,6 @@ Return ONLY the article in markdown starting with # title"""
     )
 
     content = result["content"].strip()
-
-    content = resp.choices[0].message.content.strip()
     if HAS_PP:
         content = fix_encoding(content)
         content = clean_prompt_leaks(content)

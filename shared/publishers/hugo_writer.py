@@ -358,6 +358,113 @@ def _clean_body(body_md, site_path=""):
         r"역사적\s*배경", r"조형", r"특징", r"관람\s*포인트", r"관람\s*정보",
         r"부재", r"시대", r"지정", r"위치", r"입지", r"배경",
         r"구성", r"구조", r"양식", r"해설", r"가치", r"의미",
+        # ── 영어 여행 콘텐츠 H2 패턴 (ETAP 등) ──
+        r"^[Tt]op\s+.+[Ee]xcursions",     # "Top Shore Excursions in ..."
+        r"^[Bb]est\s+.+[Tt]ours",         # "Best Half-Day Port Tours"
+        r"^[Ff]ull-[Dd]ay\s+.+",          # "Full-Day Excursions Worth the Splurge"
+        r"^[Tt]ips\s+for\s+",             # "Tips for Cruise Passengers in ..."
+        r"^[Bb]udget\s+.+[Tt]rips",       # "Budget Day Trips" 또는 유사
+        r"^[Bb]est\s+[Bb]udget\s+.+[Tt]rips",  # "Best Budget Day Trips"
+        # ── airlines-hugo 동적 H2 ({name} + 항공사명) ──
+        r"^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+at\s+a\s+Glance",                       # "{name} at a Glance"
+        r"^Where\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+[Ff]lies:\s+[Rr]oute\s+[Nn]etwork",  # "Where {name} Flies: Route Network"
+        r"^[Cc]urrent\s+[Pp]rices\s+[Oo]n\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+[Ff]lights",  # "Current Prices on {name} Flights"
+        r"^[Bb]est\s+[Mm]onth\s+[Tt]o\s+[Ff]ly\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*",   # "Best Month to Fly {name}"
+        r"^[Mm]arket\s+[Pp]rices:\s+[Ww]hat\s+[Yy]ou'?ll\s+[Pp]ay\s+[Oo]n\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+[Rr]outes",  # "Market Prices: ... on {name} Routes"
+        r"^[Tt]rending\s+[Rr]outes\s+[Oo]n\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*",        # "Trending Routes on {name}"
+        r"^[Ww]hat\s+[Tt]o\s+[Ee]xpect\s+[Ff]lying\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*", # "What to Expect Flying {name}"
+        r"^[Mm]id-[Rr]ange\s+.+",         # "Mid-Range Excursions Worth the Upgrade"
+        r"^[Pp]remium\s+.+[Ee]xp",        # "Premium Full-Day Experiences"
+        r"^[Pp]lanning\s+Your\s+.+",      # "Planning Your Day Trip"
+        r"^[Dd]ay\s+[Tt]rips?\s+[Ff]rom", # "Day Trips From ..."
+        r"^[Ee]scaping\s+.+",             # "Escaping ..."
+        r"^[Ii]nner\s+[Cc]ities?",        # "Inner Cities"
+        r"^[Cc]ity\s+[Tt]ours?",          # "City Tours"
+        r"^[Ff]light\s+[Gg]uide",         # "Flight Guide"
+        r"^[Aa]irport\s+[Gg]uide",        # "Airport Guide"
+        r"^[Ee][Ss][Ii][Mm]\s+[Gg]uide",    # "eSIM Guide"
+        r"^[Vv]isa\s+[Gg]uide",           # "Visa Guide"
+        r"^[Tt]rain\s+[Gg]uide",          # "Train Guide"
+        r"^[Bb]us\s+[Gg]uide",            # "Bus Guide"
+        r"^[Dd]ining\s+[Gg]uide",         # "Dining Guide"
+        r"^[Cc]ruise\s+[Gg]uide",         # "Cruise Guide"
+        r"^[Mm]ichelin\s+[Gg]uide",       # "Michelin Guide"
+        r"^[Tt]our\s+[Gg]uide",           # "Tour Guide"
+        r"^[Ss]ightseeing",               # "Sightseeing"
+        r"^[Aa]ctivities",                # "Activities"
+        r"^[Ee]xcursions?",               # "Excursions"
+        r"^[Tt]ours?",                    # "Tours"
+        r"^[Bb]est\s+.+[Ee]xcursions",    # "Best Shore Excursions in ..."
+        # ── nature 파이프라인 H2 ──
+        r"^[Tt]op\s+[Nn]ature\s+[Aa]nd\s+[Ww]ildlife\s+[Tt]ours", # "Top Nature and Wildlife Tours in {city}"
+        r"^[Hh]iking\s+[Aa]nd\s+[Oo]utdoor\s+[Aa]dventures",       # "Hiking and Outdoor Adventures"
+        r"^[Bb]udget-[Ff]riendly\s+[Nn]ature",                     # "Budget-Friendly Nature Experiences"
+        r"^[Pp]lanning\s+[Yy]our\s+[Nn]ature\s+[Tt]rip",           # "Planning Your Nature Trip"
+        # ── phototour 파이프라인 H2 ──
+        r"^[Tt]op\s+[Pp]hotography\s+[Tt]ours",                  # "Top Photography Tours in {city}"
+        r"^[Bb]est\s+[Pp]hoto\s+[Ww]alks\s+[Aa]nd\s+[Ww]orkshops", # "Best Photo Walks and Workshops"
+        r"^[Ss]unrise\s+[Aa]nd\s+[Gg]olden\s+[Hh]our\s+[Tt]ours", # "Sunrise and Golden Hour Tours"
+        r"^[Cc]amera\s+[Gg]ear\s+[Aa]nd\s+[Pp]hotography\s+[Tt]ips", # "Camera Gear and Photography Tips for {city}"
+        # ── airlines 파이프라인 H2 ──
+        r"^[Qq]uick\s+[Ff]acts",                                 # "Quick Facts"
+        r"^[Rr]oute\s+[Nn]etwork",                               # "Route Network"
+        r"^[Pp]rices\s+[Aa]nd\s+[Ff]ares",                      # "Prices and Fares"
+        r"^[Cc]abin\s+[Ee]xperience",                            # "Cabin Experience"
+        r"^[Bb]ooking\s+[Tt]ips",                                # "Booking Tips"
+        r"^[Vv]erdict\s*:\s*[Ii]s\s+.+[Ww]orth\s+[Ii]t",        # "Verdict: Is {name} Worth It?"
+        r"^[Pp]ractical\s+[Cc]hecklist",                         # "Practical Checklist"
+        r"^[Cc]losing\s+[Vv]erdict",                             # "Closing verdict"
+        # ── airports 파이프라인 H2 ──
+        r"^[Qq]uick\s+[Ff]acts",                                 # "Quick Facts"
+        r"^[A-Za-z\s]+\s*\([A-Z]{3}\)\s*[Oo]verview",           # "{name} (IATA) Overview"
+        r"^[Aa]irlines\s+[Oo]perating\s+at",                     # "Airlines Operating at {iata}"
+        r"^[Dd]irect\s+[Dd]estinations\s+[Ff]rom",              # "Direct Destinations from {iata}"
+        r"^[Gg]etting\s+[Tt]o\s+[Aa]nd\s+[Ff]rom\s+[Tt]he\s+[Aa]irport", # "Getting To and From the Airport"
+        r"^[Pp]ractical\s+[Tt]ips\s+[Ff]or\s+[Tt]ravelers",     # "Practical Tips for Travelers"
+        r"^[Cc]losing\s*",                                        # "Closing"
+        # ── esim 파이프라인 H2 ──
+        r"^[Ww]hy\s+[Gg]et\s+[Aa]n\s+[Ee][Ss][Ii][Mm]\s+[Ff]or", # "Why Get an eSIM for {country}"
+        r"^[Aa]vailable\s+[Pp]lans\s+[Cc]ompared",              # "Available Plans Compared"
+        r"^[Bb]est\s+[Vv]alue\s*:\s*[Ww]hich\s+[Pp]lan\s+[Ss]aves\s+[Yy]ou\s+[Tt]he\s+[Mm]ost", # "Best Value: Which Plan Saves You the Most"
+        r"^[Hh]ow\s+[Tt]o\s+[Ii]nstall\s+[Yy]our\s+[Ee][Ss][Ii][Mm]\s+[Bb]efore", # "How to Install Your eSIM Before Traveling"
+        r"^[Ee][Ss][Ii][Mm]\s+[Vv]s\s+[Pp]hysical\s+[Ss][Ii][Mm]\s+[Vv]s\s+[Rr]oaming",  # "eSIM vs Physical SIM vs Roaming" (SIM 대소문자 모두 허용)
+        r"^[Tt]ips\s+[Ff]or\s+[Ss]taying\s+[Cc]onnected\s+[Ii]n", # "Tips for Staying Connected in {country}"
+        # ── flights 파이프라인 H2 ──
+        r"^[Cc]urrent\s+[Ff]light\s+[Pp]rices",                 # "Current Flight Prices: {o_city} to {d_city}"
+        r"^[Bb]est\s+[Tt]ime\s+[Tt]o\s+[Bb]ook\s+[Ff]lights\s+[Tt]o", # "Best Time to Book Flights to {d_city}"
+        r"^[Dd]irect\s+[Vv]s\.?\s*[Cc]onnecting\s+[Ff]lights",  # "Direct vs. Connecting Flights"
+        r"^[Ww]hich\s+[Aa]irlines\s+[Ff]ly\s+[Tt]his\s+[Rr]oute", # "Which Airlines Fly This Route?"
+        r"^[Mm]oney-[Ss]aving\s+[Tt]ips\s+[Ff]or",              # "Money-Saving Tips for {o_city} to {d_city} Flights"
+        r"^[Ww]hat\s+[Tt]o\s+[Ee]xpect\s+[Ww]hen\s+[Yy]ou\s+[Aa]rrive\s+[Ii]n", # "What to Expect When You Arrive in {d_city}"
+        # ── michelin 파이프라인 H2 ──
+        r"^[Mm]ichelin\s+[Dd]ining\s+[Ii]n\s+.+[:\s]",   # "Michelin Dining in {city}: An Overview"
+        r"^[Tt]hree-[Ss]tar\s+[Aa]nd\s+[Tt]wo-[Ss]tar\s+[Ee]xcellence", # "Three-Star and Two-Star Excellence"
+        r"^[Oo]ne-[Ss]tar\s+[Gg]ems",                           # "One-Star Gems"
+        r"^[Bb]ib\s+[Gg]ourmand\s*:\s*[Bb]est\s+[Vv]alue\s+[Ff]ine\s+[Dd]ining", # "Bib Gourmand: Best Value Fine Dining"
+        r"^[Cc]uisine\s+[Ss]tyles\s+[Yy]ou\s+[Ww]ill\s+[Ff]ind\s+[Ii]n", # "Cuisine Styles You Will Find in {city}"
+        r"^[Pp]rice\s+[Rr]anges\s+[Aa]nd\s+[Ww]hat\s+[Tt]o\s+[Ee]xpect", # "Price Ranges and What to Expect"
+        r"^[Hh]ow\s+[Tt]o\s+[Bb]ook\s+[Aa]nd\s+[Tt]ips\s+[Ff]or\s+[Dd]ining", # "How to Book and Tips for Dining"
+        # ── visa 파이프라인 H2 ──
+        r"^[^\n]+\s+[Vv]isa\s+[Pp]olicy\s+[Oo]verview",                   # "{passport} Visa Policy Overview" (영문 multi-word + 그리스어·한글·키릴·아랍어 등 비라틴 여권명 포함)
+        r"^[Vv]isa-[Ff]ree\s+[Aa]nd\s+[Vv]isa-[Oo]n-[Aa]rrival\s+[Aa]ccess", # "Visa-Free and Visa-on-Arrival Access"
+        r"^[Ee]-[Vv]isa\s+[Aa]nd\s+[Ee][Tt][Aa]\s+[Oo]ptions", # "e-Visa and ETA Options"
+        r"^[Cc]ountries\s+[Tt]hat\s+[Rr]equire\s+[Aa]\s+[Vv]isa", # "Countries That Require a Visa"
+        r"^[Ee]ntry\s+[Rr]equirements\s+[Aa]nd\s+[Pp]ractical\s+[Tt]ips", # "Entry Requirements and Practical Tips"
+        r"^[^\n]+\s+[Pp]assport\s*:\s*[Tt]ravel\s+[Ff]reedom\s+[Oo]verview", # "{passport} Passport: Travel Freedom Overview" (비라틴 여권명 포함)
+        r"^[Vv]isa-[Ff]ree\s+[Dd]estinations",                  # "Visa-Free Destinations"
+        r"^[Vv]isa\s+[Oo]n\s+[Aa]rrival\s+[Cc]ountries",        # "Visa on Arrival Countries"
+        r"^[Ee]-[Vv]isa\s+[Aa]nd\s+[Ee][Tt][Aa]\s+[Dd]estinations", # "e-Visa and ETA Destinations"
+        r"^[Cc]ountries\s+[Rr]equiring\s+[Aa]\s+[Tt]raditional\s+[Vv]isa", # "Countries Requiring a Traditional Visa"
+        r"^[Tt]ips\s+[Ff]or\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s+[Pp]assport\s+[Hh]olders", # "Tips for {passport} Passport Holders"
+        # ── dining 파이프라인 H2 ──
+        r"^[Tt]he\s+[Dd]ining\s+[Ss]cene\s+[Ii]n\s+[^#]+",   # "The Dining Scene in {city}"
+        r"^[Ff]ine\s+[Dd]ining\s+[Aa]t\s+[Ii]ts\s+[Bb]est\s*:\s*[Mm]ulti-[Ss]tar\s+[Rr]estaurants", # "Fine Dining at Its Best: Multi-Star Restaurants"
+        r"^[Oo]ne-[Ss]tar\s+[Rr]estaurants\s+[Ww]orth\s+[Aa]\s+[Dd]etour", # "One-Star Restaurants Worth a Detour"
+        r"^[Bb]ib\s+[Gg]ourmand\s*:\s*[Gg]reat\s+[Ff]ood\s+[Ww]ithout\s+[Tt]he\s+[Ss]plurge", # "Bib Gourmand: Great Food Without the Splurge"
+        r"^[Gg]reen\s+[Ss]tar\s*:\s*[Ss]ustainable\s+[Dd]ining\s+[Ii]n\s+[^#]+", # "Green Star: Sustainable Dining in {city}"
+        r"^[Cc]uisine\s+[Ss]tyles\s+[Aa]nd\s+[Ww]hat\s+[^#]+\s+[Dd]oes\s+[Bb]est", # "Cuisine Styles and What {city} Does Best"
+        r"^[Pp]rice\s+[Gg]uide\s*:\s*[Ww]hat\s+[Tt]o\s+[Bb]udget\s+[Ff]or\s+[Mm]ichelin\s+[Dd]ining", # "Price Guide: What to Budget for Michelin Dining"
+        r"^[Bb]ooking\s+[Tt]ips\s+[Aa]nd\s+[Ww]hat\s+[Tt]o\s+[Kk]now\s+[Bb]efore\s+[Yy]ou\s+[Gg]o", # "Booking Tips and What to Know Before You Go"
     ]
     _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
 
@@ -1166,12 +1273,25 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             _cross_html = _build_cross(country=_cs_country, city=_cs_city,
                                        exclude_blog=_cs_exclude, max_items=_cs_max)
             if _cross_html:
-                body_md = _insert_cross(_cross_html, _cross_html, position=_cs_position)
+                body_md = _insert_cross(body_md, _cross_html, position=_cs_position)
         except ImportError:
             logger.warning("[PUBLISH] cross-sell modules not available — skipping cross-sell")
 
     schema_json = _build_schema_json(blog_cfg, title, slug, body_md, category, tags, description=description)
     body_md = body_md + "\n\n" + schema_json
+
+    # ── Defense-in-depth: 본문 소실 방지 가드 (크로스셀/카드 삽입 후 재검증) ──
+    # 진입부 가드(L1245-1258)는 article["content"] 초기 상태만 검사하므로,
+    # 이후 삽입 과정에서 본문이 소실된 경우를 여기서 막는다.
+    _body_word_count = len(body_md.split())
+    if _body_word_count < 200:
+        logger.error(
+            f"[ETAP-GUARD] 본문 소실 감지: blog_id={blog_id}, slug={slug}, "
+            f"title={title}, words={_body_word_count} < 200. "
+            f"포스트처리 중 본문이 삭제/소실되었을 가능성이 높습니다. 발행을 거부합니다."
+        )
+        return {"success": False, "error": f"body_md_too_short: {_body_word_count} words"}
+
     content = fm + body_md
 
     # ── C01/C04 원인추적 훅 (c) 저장 직전 ──
@@ -1241,6 +1361,29 @@ def _write_hugo_post_etap(article, cover_image=None, body_images=None, blog_id=N
     slug = article["slug"]
     title = article["title"]
     content = article["content"]
+
+    # ── ETAP-GUARD: 빈 content / 최소 단어수 미달 차단 (2026-08-12 재발 방지) ──
+    if not content or not content.strip():
+        logger.error(
+            f"[ETAP-GUARD] 빈 content 차단: blog_id={blog_id}, slug={slug}, "
+            f"title={title}. article['content']가 비어있어 발행을 거부합니다."
+        )
+        return None
+
+    if len(content.split()) < 200:
+        logger.error(
+            f"[ETAP-GUARD] 최소 단어수 미달 차단: blog_id={blog_id}, slug={slug}, "
+            f"words={len(content.split())} < 200"
+        )
+        return None
+
+    # ── C01 fix: 곡선따옴표 → 직선따옴표 (ETAP 영어 콘텐츠는 humanizer 미적용) ──
+    _C01_CURVED_SINGLE = ["\u2018", "\u2019"]  # ' '
+    _C01_CURVED_DOUBLE = ["\u201c", "\u201d"]  # " "
+    for _c in _C01_CURVED_SINGLE:
+        content = content.replace(_c, "'")
+    for _c in _C01_CURVED_DOUBLE:
+        content = content.replace(_c, '"')
 
     # ── C01/C04 원인추적 훅 (a) ETAP 생성 직후 ──
     try:

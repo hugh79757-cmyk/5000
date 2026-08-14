@@ -75,7 +75,7 @@ def fetch_tours(city, country=None):
     return [dict(r) for r in rows]
 
 
-def _deduplicate_tours(tours, similarity_threshold=0.65):
+def _deduplicate_tours(tours, similarity_threshold=0.85):
     """유사한 투어를 그룹핑하고 각 그룹에서 대표 1개만 선택."""
     if not tours:
         return []
@@ -177,6 +177,10 @@ def _build_summary(tours, city, city_meta):
                 summary += f"\n  Brief: {desc_short}\n"
             summary += "\n"
 
+    # 빈약한 요약이면 AI 호출 전에 조기 실패 (데이터 부족)
+    if len(summary) < 300:
+        logger.warning(f"[cruise] {city}: summary too short ({len(summary)} chars) — 데이터 부족, AI 호출 차단")
+        return None, None
     return summary, picks
 
 

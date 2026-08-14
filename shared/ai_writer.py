@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import time
+import random
+import requests
 
 import yaml
 from openai import OpenAI
@@ -76,7 +78,7 @@ def _clean_ai_output(text: str) -> str:
 
 # BUG-001: 잘림(truncation) 시그니처 — JSON/구조가 연속될 의도로 끝나면 중간 절단으로 판정
 TRUNCATION_SIGNATURES = {",", ":", "{", "[", '"', "\\"}
-TRUNCATION_MAX_TOKENS_CAP = 32000
+TRUNCATION_MAX_TOKENS_CAP = 20000
 
 
 def _is_truncated(content: str, finish_reason=None) -> bool:
@@ -104,6 +106,89 @@ def _is_truncated(content: str, finish_reason=None) -> bool:
     return False
 
 
+# ── 공유 OpenAI 재시도 함수 (STAP 등 여러 writer 공용으로 사용) ────────────────────
+def openai_chat_completions_with_retry(
+    api_key: str,
+    model: str,
+    system_msg: str,
+    user_msg: str,
+    max_tokens: int = 4000,
+    temperature: float = 0.7,
+    timeout: int = 90,
+    max_retries: int = 3,  # 5000 shared MAX_RETRIES(3)과 동일
+) -> requests.Response:
+    """OpenAI chat.completions API 호출 + 429/5xx 재시도.
+
+    순수 HTTP 계층만 감싸며 프롬프트·파싱은 관여하지 않는다.
+    STAP writer의 requests.post()를 대체하는 공유 함수로, 한 곳에 구현하여
+    복붙을 피한다 (DRY).
+
+    동작:
+    - 200: Response 반환 (호출자가 resp.json() 등으로 파싱)
+    - 429: Retry-After 헤더 우선, 없으면 지수 백오프(1→2→4s), 최대 60s cap,
+           여기에 0~1초 균일 지터를 더해 동시 블로그 재시도 겹침 방지
+    - 5xx: 지수 백오프(1→2→4s) + 지터 재시도
+    - 4xx 기타(400, 401, 403 등): 즉시 raise_for_status()로 예외 발생 (재시도 없음)
+    - max_retries 소진 시 마지막 예외를 raise
+    """
+    url = "https://api.openai.com/v1/chat/completions"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    json_body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": user_msg},
+        ],
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+
+    last_exception = None
+    for attempt in range(max_retries):
+        resp = requests.post(url, headers=headers, json=json_body, timeout=timeout)
+        if resp.status_code == 200:
+            return resp
+
+        if resp.status_code == 429:
+            # Retry-After 헤더 우선 존중
+            retry_after = resp.headers.get("Retry-After")
+            if retry_after is not None:
+                try:
+                    wait = float(retry_after)
+                except (ValueError, TypeError):
+                    wait = (2 ** attempt) * 1.0
+            else:
+                wait = (2 ** attempt) * 1.0  # 1s → 2s → 4s
+            wait = min(wait, 60.0)  # 최대 60초 cap
+            wait += random.uniform(0.0, 1.0)  # 0~1초 지터
+            logger.warning(
+                f"[openai_chat_completions_with_retry] 429: {wait:.1f}초 후 재시도 "
+                f"(attempt {attempt+1}/{max_retries}, retry_after={'예' if retry_after else '아니오'})"
+            )
+            time.sleep(wait)
+            last_exception = Exception(f"429 Too Many Requests (retry_after={'yes' if retry_after else 'no'})")
+            continue
+
+        if resp.status_code >= 500:
+            wait = (2 ** attempt) * 1.0
+            wait += random.uniform(0.0, 1.0)
+            logger.warning(
+                f"[openai_chat_completions_with_retry] 5xx({resp.status_code}): {wait:.1f}초 후 재시도 "
+                f"(attempt {attempt+1}/{max_retries})"
+            )
+            time.sleep(wait)
+            last_exception = Exception(f"HTTP {resp.status_code}")
+            continue
+
+        # 4xx 기타 (400, 401, 403 등) → 재시도 없이 즉시 실패
+        resp.raise_for_status()
+
+    # max_retries 소진 → 마지막 예외 재발생
+    if last_exception:
+        raise last_exception
+    raise RuntimeError("openai_chat_completions_with_retry: 예상치 못한 종료")
+
+
 # 재시도 횟수 (글쓰기별)
 MAX_RETRIES = 3
 
@@ -119,6 +204,45 @@ def _get_tier_order(config):
 CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
 CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
+# ── 회전 상태 (프로세스 메모리) ──────────────────────────────────────────
+_ROTATION_STATE = {"last_success_tier": None}
+
+# ── 구조적 오류 cooldown (잠시 내려두기, 영구삭제 아님) ──────────────────────
+_STRUCTURAL_COOLDOWN = {}          # {tier_name: cooldown_until_timestamp}
+_STRUCTURAL_COOLDOWN_SEC = 300     # 5분 후 자동 복귀
+
+# ── 체인 시간 예산 (600초 P25 대신 조기 종료) ───────────────────────────
+CHAIN_TIME_BUDGET = 120            # 초 — 단일 generate() 최대 허용 시간
+
+
+def _is_quota_error(exc: Exception) -> bool:
+    """429 / 무료소진(FreeUsageLimitError) → 회전 대상(즉시 맨 뒤로, 재시도 없음)."""
+    code = getattr(getattr(exc, "response", None), "status_code", None)
+    if code == 429:
+        return True
+    msg = str(exc)
+    return ("429" in msg or "FreeUsageLimitError" in msg
+            or "quota" in msg.lower() or "rate limit" in msg.lower())
+
+
+def _is_structural_error(exc: Exception) -> bool:
+    """재시도해도 의미 없는 구조적 오류 판별 (401/403/404 + 메시지 키워드).
+
+    판정 시 해당 tier는 _STRUCTURAL_COOLDOWN에 기록되어 _STRUCTURAL_COOLDOWN_SEC 동안
+    skip된다. 시간이 지나면 자동 복귀 — 영구 enabled:false 아님.
+    """
+    code = getattr(getattr(exc, "response", None), "status_code", None)
+    if code in (401, 403, 404):
+        return True
+    msg = str(exc).lower()
+    if any(kw in msg for kw in [
+        "not found", "model not found", "invalid api key",
+        "unauthorized", "forbidden", "key missing",
+        "could not find", "no such model",
+    ]):
+        return True
+    return False
+
 
 def generate(
     system_prompt, user_prompt, tier="default", temperature=None, max_tokens=None
@@ -133,6 +257,7 @@ def generate(
     config = load_models_config()
     providers = config["providers"]
     TIER_ORDER = _get_tier_order(config)
+    chain_start = time.time()  # 체인 시간 예산 체크용 시작 시각
 
     # tier 유효성 검증
     if tier not in TIER_ORDER:
@@ -142,19 +267,60 @@ def generate(
     start_idx = 0 if tier == "default" else TIER_ORDER.index(tier)
     attempted_tiers = TIER_ORDER[start_idx:]
 
+    # ── 회전 적용 tier 리스트: enabled:false skip + last_success_tier 1순위 ──
+    active_tiers = []
+    for t in attempted_tiers:
+        if t in config and t != "default":
+            if config[t].get("enabled") is False:
+                logger.info(f"[ai_writer] tier '{t}' enabled:false → skip")
+                continue
+        active_tiers.append(t)
+
+    # 이전 성공 tier가 active_tiers에 있으면 1순위로
+    last_ok = _ROTATION_STATE.get("last_success_tier")
+    if last_ok and last_ok in active_tiers:
+        active_tiers.remove(last_ok)
+        active_tiers.insert(0, last_ok)
+        logger.info(f"[ai_writer] rotation: 이전 성공 tier '{last_ok}' → 1순위 유지")
+
     last_error = None
     any_truncation_failed = False  # 전 tier 걸친 트렁케이션 실패 추적
     _trace_attempts = []  # (tier, model, provider, 폴백사유) 누적 — 추적 로그용
-    for attempt_tier in attempted_tiers:
+    idx = 0
+    while idx < len(active_tiers):
+        # 체인 시간 예산 체크 — 초과 시 RuntimeError로 조기 종료 (garbage 발행 방지)
+        if time.time() - chain_start > CHAIN_TIME_BUDGET:
+            logger.warning(
+                f"[ai_writer] 체인 시간 예산 {CHAIN_TIME_BUDGET}초 초과 "
+                f"(경과 {time.time()-chain_start:.1f}초) — 조기 종료"
+            )
+            raise RuntimeError(f"chain_timeout: LLM 체인 시간 예산 {CHAIN_TIME_BUDGET}초 초과")
+        attempt_tier = active_tiers[idx]
+
+        # 구조적 오류 cooldown 체크 — 잠시 내려둔 tier skip (시간 경과 시 자동 복귀)
+        if attempt_tier in _STRUCTURAL_COOLDOWN:
+            until = _STRUCTURAL_COOLDOWN[attempt_tier]
+            if until > time.time():
+                logger.info(
+                    f"[ai_writer] tier '{attempt_tier}' 구조적 오류 cooldown 중 "
+                    f"(잔여 {until - time.time():.0f}초) — skip"
+                )
+                idx += 1
+                continue
+            else:
+                del _STRUCTURAL_COOLDOWN[attempt_tier]  # cooldown 해제 → 재도전 허용
+
         # Circuit breaker check
         if _circuit_state["open_until"] > time.time():
             logger.warning("[ai_writer] Circuit breaker OPEN — 5분 대기")
             time.sleep(60)
+            idx += 1
             continue
 
         # tier 키 존재 방어 — models.yaml에 없는 tier(예: branch의 fallback1)는 skip
         if attempt_tier not in config:
             logger.warning(f"[ai_writer] tier '{attempt_tier}'가 models.yaml에 없음 — skip")
+            idx += 1
             continue
         tier_config = config[attempt_tier]
 
@@ -178,12 +344,16 @@ def generate(
 
         # Exponential backoff retry per tier
         tier_truncation_failed = False  # 현재 tier 내 트렁케이션 실패
+        tier_truncation_increments = 0   # 현재 tier 내 truncation max_tokens 증분 횟수
+        rotation_quota_break = False     # 429/quota로 break했는지 플래그
+        structural_cooldown_break = False  # 구조적 오류로 cooldown 진입했는지 플래그
         for attempt in range(MAX_RETRIES):
             try:
                 client = get_client(tier_config["provider"], providers)
                 if client is None:
                     last_error = f"{attempt_tier}: API 키 없음 — 다음 tier로 폴백"
                     logger.warning(f"[ai_writer] {last_error}")
+                    rotation_quota_break = False
                     break  # Skip to next tier
                 response = client.chat.completions.create(**kwargs)
                 choice = response.choices[0]
@@ -202,32 +372,30 @@ def generate(
                     continue
 
                 # (A) 트렁케이션 게이트: finish_reason='length' 또는 구조 절단 시 재시도
+                # 최대 2회까지만 max_tokens 증분. 2회 초과 시 tier 실패 → 다음 tier 회전.
                 if _is_truncated(content, finish_reason):
-                    tier_truncation_failed = True
-                    # max_tokens 증분 재시도 (유한: MAX_RETRIES만큼)
-                    kwargs["max_tokens"] = min(
-                        int(kwargs.get("max_tokens", 4000)) * 2 + 512,
-                        TRUNCATION_MAX_TOKENS_CAP,
-                    )
-                    last_error = (
-                        f"{attempt_tier}: 응답 절단 감지 (finish_reason={finish_reason}, "
-                        f"len={len(content)}) — max_tokens {kwargs['max_tokens']}로 재시도"
-                    )
-                    logger.warning(f"[ai_writer] {last_error}")
-                    continue
-
-                # BUG-001: 잘린 조각을 결과로 쓰지 않고 max_tokens를 증분해 재요청 (유한: MAX_RETRIES만큼)
-                if _is_truncated(content, finish_reason):
-                    kwargs["max_tokens"] = min(
-                        int(kwargs["max_tokens"] or 4000) * 2 + 512,
-                        TRUNCATION_MAX_TOKENS_CAP,
-                    )
-                    last_error = (
-                        f"{attempt_tier}: 응답 절단 감지 (finish_reason={finish_reason}, "
-                        f"len={len(content)}) — max_tokens {kwargs['max_tokens']}로 재시도"
-                    )
-                    logger.warning(f"[ai_writer] {last_error}")
-                    continue
+                    if tier_truncation_increments < 2:
+                        tier_truncation_increments += 1
+                        kwargs["max_tokens"] = min(
+                            int(kwargs.get("max_tokens", 4000)) * 2 + 512,
+                            TRUNCATION_MAX_TOKENS_CAP,
+                        )
+                        last_error = (
+                            f"{attempt_tier}: 응답 절단 감지 (finish_reason={finish_reason}, "
+                            f"len={len(content)}, 증분#{tier_truncation_increments}) — "
+                            f"max_tokens {kwargs['max_tokens']}로 재시도"
+                        )
+                        logger.warning(f"[ai_writer] {last_error}")
+                        continue
+                    else:
+                        # 2회 증분 후에도 truncation → tier 실패 처리 → 다음 tier로 회전
+                        tier_truncation_failed = True
+                        last_error = (
+                            f"{attempt_tier}: truncation 증분 2회 상한 도달 "
+                            f"(max_tokens={kwargs['max_tokens']}) — 다음 tier로 폴백"
+                        )
+                        logger.warning(f"[ai_writer] {last_error}")
+                        break  # for 루프 종료 → 다음 tier
 
                 content = _clean_ai_output(content)
 
@@ -251,12 +419,13 @@ def generate(
                     _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": f"leak:{leak_name}"})
                     continue
 
-                # 성공 → circuit breaker 리셋
+                # 성공 → circuit breaker 리셋 + ★ 회전 상태 저장
                 _circuit_state["failures"] = 0
                 _circuit_state["open_until"] = 0.0
+                _ROTATION_STATE["last_success_tier"] = attempt_tier
 
                 logger.info(
-                    f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자)"
+                    f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자) [rotation: 이 tier가 다음 호출 1순위]"
                 )
                 _trace_llm({
                     "event": "success",
@@ -281,21 +450,72 @@ def generate(
                 if _circuit_state["failures"] >= CIRCUIT_BREAKER_THRESHOLD:
                     _circuit_state["open_until"] = time.time() + CIRCUIT_BREAKER_RESET_SEC
                     logger.critical(f"[ai_writer] Circuit breaker OPEN: {_circuit_state['failures']} failures")
-                wait = (2 ** attempt) * 1.0  # 1s, 2s, 4s
-                logger.warning(f"[ai_writer] Retry {attempt+1}/{MAX_RETRIES} after {wait}s: {e}")
-                time.sleep(wait)
-                continue
 
-        # 현재 tier에서 MAX_RETRIES 소진
-        if tier_truncation_failed:
+                # ★ 회전: 429/quota → 즉시 맨 뒤로 이동, 재시도 없이
+                if _is_quota_error(e):
+                    logger.warning(
+                        f"[ai_writer] {attempt_tier}: 429/무료소진 → 재시도 없이 맨 뒤로 회전"
+                    )
+                    active_tiers.pop(idx)  # 현재 위치 제거
+                    active_tiers.append(attempt_tier)  # 맨 뒤 추가
+                    rotation_quota_break = True
+                    break  # MAX_RETRIES 루프 종료 (재시도 없이)
+                elif _is_structural_error(e):
+                    # 구조적 오류(401/403/404/모델없음/키없음) → 재시도 무의미
+                    # → cooldown 기록 후 즉시 다음 tier로 skip (시간 기반 복귀)
+                    _STRUCTURAL_COOLDOWN[attempt_tier] = time.time() + _STRUCTURAL_COOLDOWN_SEC
+                    logger.info(
+                        f"[ai_writer] tier '{attempt_tier}' 구조적 오류 → "
+                        f"{_STRUCTURAL_COOLDOWN_SEC}초 cooldown (이후 자동 복귀)"
+                    )
+                    _trace_attempts.append({
+                        "tier": attempt_tier, "model": tier_config["model"],
+                        "provider": tier_config["provider"], "reason": "structural_cooldown"
+                    })
+                    structural_cooldown_break = True
+                    break  # for 루프 종료 → while 루프에서 idx 증가로 skip
+                else:
+                    # 5xx/timeout/truncation: 기존 재시도 유지 (시간 조이기)
+                    wait = (2 ** attempt) * 0.5  # 0.5s, 1s, 2s
+                    logger.warning(f"[ai_writer] Retry {attempt+1}/{MAX_RETRIES} after {wait}s: {e}")
+                    time.sleep(wait)
+                    continue  # 같은 tier 재시도 계속
+
+        # 현재 tier에서 MAX_RETRIES 소진 / 429 회전 처리
+        if rotation_quota_break:
+            # 429/quota로 break: active_tiers 이미 수정됨, idx 그대로
+            _trace_attempts.append({
+                "tier": attempt_tier, "model": tier_config["model"],
+                "provider": tier_config["provider"], "reason": "quota_rotated"
+            })
+            # idx는 그대로 (다음 while iter에서 idx 위치의 다음 tier 시도)
+            continue
+        elif tier_truncation_failed:
             # 절단으로 인한 재시도 소진 → 다음 tier로 폴백
-            logger.warning(f"[ai_writer] {attempt_tier}: 트렁케이션 재시도 소진 ({MAX_RETRIES}회) — 다음 tier 폴백")
-            _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "truncation_exhausted"})
+            logger.warning(
+                f"[ai_writer] {attempt_tier}: 트렁케이션 재시도 소진 ({MAX_RETRIES}회) — 다음 tier 폴백"
+            )
+            _trace_attempts.append({
+                "tier": attempt_tier, "model": tier_config["model"],
+                "provider": tier_config["provider"], "reason": "truncation_exhausted"
+            })
+            idx += 1
+            continue
+        elif structural_cooldown_break:
+            # 구조적 오류(401/403/404/모델없음/키없음) → cooldown 기록 + skip
+            # (active_tiers는 수정하지 않음 — cooldown 시간은 _STRUCTURAL_COOLDOWN에서 관리)
+            idx += 1
             continue
         else:
             # 절단 아닌 다른 사유로 재시도 소진 → 다음 tier 폴백
-            logger.warning(f"[ai_writer] {attempt_tier}: 재시도 {MAX_RETRIES}회 소진 — 다음 tier 폴백")
-            _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "retries_exhausted"})
+            logger.warning(
+                f"[ai_writer] {attempt_tier}: 재시도 {MAX_RETRIES}회 소진 — 다음 tier 폴백"
+            )
+            _trace_attempts.append({
+                "tier": attempt_tier, "model": tier_config["model"],
+                "provider": tier_config["provider"], "reason": "retries_exhausted"
+            })
+            idx += 1
             continue
 
     # 모든 tier 실패

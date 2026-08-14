@@ -15,6 +15,12 @@ from pathlib import Path
 import yaml
 
 from shared.paths import FIVEK_ROOT, TAP_ROOT, STAP_ROOT
+from shared.publish_slot import (
+    acquire_publish_slot,
+    release_publish_slot,
+    get_inherited_slot_info,
+    MAX_CONCURRENT_PUBLISH,
+)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, TAP_ROOT)
@@ -724,10 +730,14 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         logger.warning(f"[deploy] site_path 없음: {site_path}")
         return False
     try:
+        deploy_env = {k: v for k, v in os.environ.items() if k != "CLOUDFLARE_API_TOKEN"}
+        deploy_env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+        deploy_env["HUGO_THEMESDIR"] = "/Users/twinssn/Projects/shared-themes"
         r1 = subprocess.run(
             [HUGO, "--gc", "--minify"],
             cwd=str(site_path),
-            capture_output=True, text=True
+            capture_output=True, text=True,
+            env=deploy_env
         )
         if r1.returncode != 0:
             logger.error(f"[deploy] Hugo 빌드 실패 {blog_id}\nSTDERR: {r1.stderr[-400:]}")
@@ -751,11 +761,6 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             if not lock_acquired:
                 logger.error(f"[deploy] {blog_id} 락 대기 시간 초과 ({DEPLOY_LOCK_TIMEOUT}초)")
                 return False
-
-            # wrangler auth profile 우선 — CLOUDFLARE_API_TOKEN env var 해제
-            # (agent 세션에서 설정된 token이 profile보다 우선 적용됨)
-            deploy_env = {k: v for k, v in os.environ.items() if k != "CLOUDFLARE_API_TOKEN"}
-            deploy_env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
             if blog_id in WORKERS_BLOGS:
                 r2 = subprocess.run(
@@ -844,7 +849,29 @@ def dispatch(blog_id):
         _record_failure(blog_id, "no_result", "daily cooldown (다음 날 재시작)")
         return {"success": False, "reason": "no_result"}
 
-    result = _run_pipeline(cfg)
+    # ── 전역 publish 동시성 제한: 슬롯 확보 ──────────────────────
+    inherited = get_inherited_slot_info()
+    if inherited:
+        # 부모가 슬롯 확보 (scheduler → env var PUBLISH_SLOT_ID 상속)
+        slot_id = inherited["slot_id"]
+        self_acquired = False
+        logger.debug(f"[CONCURRENCY] 부모 슬롯 상속: slot={slot_id} blog={blog_id}")
+    else:
+        # 직접 호출(외부/수동/cron) — 자체 acquire
+        slot_id = acquire_publish_slot(blog_id)
+        if slot_id is None:
+            logger.warning(
+                f"[CONCURRENCY] publish 슬롯 풀 소진 "
+                f"(MAX_CONCURRENT={MAX_CONCURRENT_PUBLISH}) — {blog_id} 스킵"
+            )
+            return {"success": False, "reason": "concurrency_limit"}
+        self_acquired = True
+
+    try:
+        result = _run_pipeline(cfg)
+    except Exception as e:
+        logger.warning(f"[dispatch] pipeline exception for {blog_id}: {type(e).__name__}: {str(e)[:150]}")
+        result = {"success": False, "reason": f"exception:{type(e).__name__}"}
 
     # 결과 정규화: 모든 pipeline이 dict를 반환하도록
     if result is None:
@@ -858,7 +885,7 @@ def dispatch(blog_id):
         else:
             result = {"success": True, "reason": result}
     elif isinstance(result, bool):
-        result = {"success": result}
+        result = {"success": result, "reason": "pipeline_returned_false" if not result else "pipeline_success"}
     # 성공/실패 기록
     if result.get("success"):
         _record_ledger(blog_id)
@@ -898,6 +925,21 @@ def dispatch(blog_id):
                     f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
                     f"원인: {deploy_err[:200]}\n"
                     f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
+        else:
+            # 성공 + 배포 오류 없음 → stale P04 이벤트 close
+            # (성공했으나 이전에 생성된 P04 open 이벤트가 남아있을 수 있음)
+            try:
+                from shared.publish_error_events import close_publish_error_event
+                ops_conn = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
+                try:
+                    closed = close_publish_error_event(
+                        ops_conn, blog_id=blog_id, problem_id="P04")
+                    if closed:
+                        logger.info(f"[deploy] P04 이벤트 close: {blog_id} ({closed}건)")
+                finally:
+                    ops_conn.close()
+            except Exception as _e:
+                logger.warning(f"[deploy] P04 close 실패: {blog_id}: {_e}")
     else:
         reason = result.get("reason", "unknown")
         if reason not in ("quota_met", "already_running", "duplicate_title"):
@@ -979,6 +1021,10 @@ def dispatch(blog_id):
                     {"reason": reason},
                     phase=_spec.hook,
                     extra={"consecutive_failures": _consec})
+
+    # 슬롯 반납 (self_acquired인 경우만 — 상속 슬롯은 부모가 책임)
+    if self_acquired:
+        release_publish_slot(slot_id, blog_id)
     return result
 
 

@@ -86,3 +86,13 @@ hugo_stats.json
 .DS_Store
 content/.DS_Store
 data/llm_trace/
+
+# Local analytics exports, rollback SQL, session artifacts, and local code backups
+# Do not commit these files to the repository.
+ga4_admin_*.json
+rollback_bouches_log5593.sql
+.gsd/
+.commandcode/
+.bg-shell/
+.planning/
+scripts/master_backup.py.pre-r2-fix-*

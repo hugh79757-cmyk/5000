@@ -141,7 +141,10 @@ def _run_impl() -> bool:
     country = article.get("country", "")
     cover = fetch_city_image(country, "", article["slug"]) if country else None
     body = fetch_body_images(country, "", article["slug"], count=8) if country else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
+        return False
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if country:
         register_entity("country", country, BLOG_ID, article["slug"], country + " eSIM plans", 70, 1)

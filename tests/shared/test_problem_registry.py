@@ -44,22 +44,22 @@ def _load_inventory_reasons(doc_path):
 
 
 class TestRegistryTotals:
-    def test_total_specs_is_25(self):
-        assert len(PROBLEM_REGISTRY) == 25
+    def test_total_specs_includes_operational_extensions(self):
+        assert len(PROBLEM_REGISTRY) == 32
 
-    def test_severity_counts_among_24_problems(self):
+    def test_severity_counts_include_operational_extensions(self):
         problems = [s for s in PROBLEM_REGISTRY.values() if s.problem_id != "unknown_failure"]
-        assert len(problems) == 24
-        assert sum(1 for s in problems if s.severity == "CRITICAL") == 6
-        assert sum(1 for s in problems if s.severity == "MAJOR") == 12
+        assert len(problems) == 31
+        assert sum(1 for s in problems if s.severity == "CRITICAL") == 8
+        assert sum(1 for s in problems if s.severity == "MAJOR") == 17
         assert sum(1 for s in problems if s.severity == "MINOR") == 6
 
     def test_unknown_failure_minor_makes_total_minor_7(self):
         assert sum(1 for s in PROBLEM_REGISTRY.values() if s.severity == "MINOR") == 7
 
-    def test_registry_contains_all_p01_to_p24(self):
+    def test_registry_contains_original_and_operational_codes(self):
         ids = {s.problem_id for s in PROBLEM_REGISTRY.values()}
-        assert {f"P{i:02d}" for i in range(1, 25)} <= ids
+        assert {f"P{i:02d}" for i in range(1, 32)} <= ids
 
 
 class TestReasonCoverage:

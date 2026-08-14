@@ -4,140 +4,159 @@ import os
 import requests
 
 logger = logging.getLogger(__name__)
-
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 API_URL = "https://api.telegram.org/bot" + BOT_TOKEN + "/sendMessage"
 DASHBOARD_URL = os.environ.get("OPS_DASHBOARD_URL", "http://localhost:5060")
 
 
-def send(message, parse_mode="HTML") -> bool | None:
+def _audit_delivery(event_id, message, delivered, message_id="", http_status=None, detail=""):
+    try:
+        from shared.publish_error_events import record_telegram_delivery
+        record_telegram_delivery(
+            event_id, message, delivered=delivered,
+            telegram_message_id=message_id, http_status=http_status, detail=detail,
+        )
+        if not delivered:
+            from shared.publish_error_events import record_publish_error
+            record_publish_error(
+                "ops-dashboard", "notification", detail or "telegram delivery failure",
+                problem_id="P31",
+            )
+    except Exception:
+        pass
+
+
+def send(message, parse_mode="HTML", audit_event_id=None):
+    """Send one Telegram message and save a redacted delivery audit."""
     if not BOT_TOKEN or not CHAT_ID:
         logger.warning("Telegram credentials missing")
+        _audit_delivery(audit_event_id, message, False, detail="credentials missing")
         return False
     try:
-        resp = requests.post(
+        response = requests.post(
             API_URL,
-            json={
-                "chat_id": CHAT_ID,
-                "text": message,
-                "parse_mode": parse_mode,
-            },
+            json={"chat_id": CHAT_ID, "text": message, "parse_mode": parse_mode},
             timeout=10,
         )
-        if resp.status_code == 200:
+        try:
+            payload = response.json() if response.content else {}
+        except ValueError:
+            payload = {}
+        delivered = response.status_code == 200 and bool(payload.get("ok", True))
+        result = payload.get("result") or {}
+        message_id = result.get("message_id", "")
+        detail = "" if delivered else str(payload.get("description") or response.text[:240])
+        _audit_delivery(audit_event_id, message, delivered, message_id, response.status_code, detail)
+        if delivered:
             return True
-        logger.warning("Telegram send failed: " + str(resp.status_code))
+        logger.warning("Telegram send failed: %s", response.status_code)
         return False
-    except requests.RequestException as e:
-        logger.exception(f"[TELEGRAM_ERROR] Request failed: {e}")
+    except requests.RequestException as exc:
+        logger.exception("[TELEGRAM_ERROR] Request failed: %s", exc)
+        _audit_delivery(audit_event_id, message, False, detail=str(exc))
         return False
+
+
+def _record_event(blog_id, stage, error_msg, **kwargs):
+    try:
+        from shared.publish_error_events import record_publish_error
+        return record_publish_error(blog_id, stage, error_msg, **kwargs)
+    except Exception:
+        return {}
+
+
+def _blog_metadata(blog_id):
+    try:
+        from pathlib import Path
+        import yaml
+        blogs_d = Path(__file__).parent.parent / "config" / "blogs.d"
+        for config_path in sorted(blogs_d.glob("*.yaml")) if blogs_d.is_dir() else []:
+            with open(config_path, encoding="utf-8") as source:
+                for blog in (yaml.safe_load(source) or {}).get("blogs", []):
+                    if blog and blog.get("id") == blog_id:
+                        return blog.get("domain", ""), blog.get("repo", "")
+    except Exception as exc:
+        logger.warning("Could not resolve blog metadata: %s", exc)
+    return "", ""
 
 
 def send_error(blog_id, stage, error_msg):
-    # 정상 동작인 quota 초과는 알림 불필요 (로그에만 기록)
-    _SILENT_REASONS = [
-        "quota_met",
-        "quota_exceeded",
-        "daily_quota_exceeded",
-        "daily_quota",
-    ]
-    _err_lower = str(error_msg).lower()
-    if any(reason in _err_lower for reason in _SILENT_REASONS):
-        logger.info(f"[Silent] {blog_id}/{stage}: {error_msg}")
+    """Send one publish error and persist a structured operational event."""
+    silent_reasons = ("quota_met", "quota_exceeded", "daily_quota_exceeded", "daily_quota")
+    if any(reason in str(error_msg).lower() for reason in silent_reasons):
+        logger.info("[Silent] %s/%s: %s", blog_id, stage, error_msg)
         return False
-
-    # blogs.d/*.yaml 전체에서 도메인, 레포 정보 가져오기
-    domain = ""
-    repo = ""
-    try:
-        from pathlib import Path
-
-        import yaml
-
-        config_dir = Path(__file__).parent.parent / "config"
-        all_blogs = []
-        blogs_d = config_dir / "blogs.d"
-        if blogs_d.is_dir():
-            for fpath in sorted(blogs_d.glob("*.yaml")):
-                with open(fpath, encoding="utf-8") as yf:
-                    data = yaml.safe_load(yf) or {}
-                all_blogs.extend(data.get("blogs", []))
-        for blog in all_blogs:
-            if blog and blog.get("id") == blog_id:
-                domain = blog.get("domain", "")
-                repo = blog.get("repo", "")
-                break
-    except (OSError, yaml.YAMLError) as e:
-        logger.exception(f"[CONFIG_ERROR] Failed to load blogs.d: {e}")
-
-    text = "🚨 <b>발행 오류</b>\n"
-    text += "<b>블로그:</b> " + blog_id + "\n"
+    event = _record_event(blog_id, stage, error_msg)
+    domain, repo = _blog_metadata(blog_id)
+    lines = ["[PUBLISH ERROR]", "Blog: " + blog_id]
     if domain:
-        text += "<b>도메인:</b> " + domain + "\n"
+        lines.append("Domain: " + domain)
     if repo:
-        text += "<b>레포:</b> " + repo + "\n"
-    text += "<b>단계:</b> " + stage + "\n"
-    text += "<b>오류:</b> " + str(error_msg)[:500]
-    return send(text)
+        lines.append("Repo: " + repo)
+    lines.append("Stage: " + stage)
+    if event:
+        lines.append("Code: " + event["problem_id"])
+    lines.append("Error: " + str(error_msg)[:500])
+    return send("\n".join(lines), audit_event_id=event.get("event_id"))
 
 
 def send_daily_report(report_text):
     return send(report_text)
 
 
-def send_validation(blog_id: str, title: str, url: str, validation: dict):
-    """발행 후 HTML 검증 결과 전송 (문제 있을 때만)"""
+def send_validation(blog_id, title, url, validation):
+    """Send post-publish validation findings and preserve a structured event."""
     if validation.get("passed", False):
         return False
     issues = validation.get("issues", [])
     if not issues:
         return False
-
-    text = "🔍 <b>발행 품질 검증 실패</b>\n"
-    text += f"<b>블로그:</b> {blog_id}\n"
-    text += f"<b>제목:</b> {title[:80]}\n"
+    details = "; ".join(str(item.get("check", "")) + ": " + str(item.get("msg", "")) for item in issues)
+    event = _record_event(blog_id, "validation", str(title) + ": " + details, reason="validation")
+    lines = ["[PUBLISH VALIDATION]", "Blog: " + blog_id, "Title: " + str(title)[:80]]
     if url:
-        text += f"<b>URL:</b> {url}\n"
-    for i in issues:
-        emoji = "🔴" if i["severity"] == "ERROR" else "🟡"
-        text += f"{emoji} <b>{i['check']}</b>: {i['msg']}\n"
-    return send(text)
+        lines.append("URL: " + url)
+    for item in issues:
+        lines.append("- " + str(item.get("check", "")) + ": " + str(item.get("msg", "")))
+    return send("\n".join(lines), audit_event_id=event.get("event_id"))
 
 
-def send_no_result_alert(blog_id: str, failure_count: int):
-    """no_result 연속 실패 알림 (에스컬레이션)"""
-    text = "⚠️ <b>no_result 연속 실패</b>\n"
-    text += f"<b>블로그:</b> {blog_id}\n"
-    text += f"<b>연속 실패:</b> {failure_count}회\n"
-    text += "<b>조치:</b> 데이터 수집 파이프라인 점검 필요"
-    return send(text)
-
-
-def send_dashboard_alert(blog_id: str, check_name: str, status: str, detail: str) -> bool | None:
-    """Send alert with link to blog detail page on dashboard."""
-    url = f"{DASHBOARD_URL}/blog/{blog_id}"
-    msg = (
-        f"🔴 <b>Ops Alert</b>\n"
-        f"Blog: <code>{blog_id}</code>\n"
-        f"Check: {check_name}\n"
-        f"Status: {status}\n"
-        f"Detail: {detail}\n"
-        f"🔗 <a href=\"{url}\">Dashboard</a>"
+def send_no_result_alert(blog_id, failure_count):
+    event = _record_event(
+        blog_id, "result_parse", "no eligible source data",
+        reason="source_exhausted", attempt=failure_count,
     )
-    return send(msg)
+    text = "[CONSECUTIVE NO-RESULT]\nBlog: " + blog_id
+    text += "\nFailures: " + str(failure_count)
+    text += "\nAction: Check source inventory and source pipeline."
+    return send(text, audit_event_id=event.get("event_id"))
 
 
-def send_standard_violation(blog_id: str, rule_id: str, severity: str, detail: str) -> bool | None:
-    """Send alert for standard compliance violation (CRITICAL only)."""
+def send_dashboard_alert(blog_id, check_name, status, detail):
+    """Send an existing dashboard check alert with its detail-page link."""
+    url = DASHBOARD_URL + "/blog/" + blog_id
+    message = (
+        "[OPS ALERT]\n"
+        "Blog: " + blog_id + "\n"
+        "Check: " + check_name + "\n"
+        "Status: " + status + "\n"
+        "Detail: " + detail + "\n"
+        "Dashboard: " + url
+    )
+    return send(message)
+
+
+def send_standard_violation(blog_id, rule_id, severity, detail):
+    """Send a standard-compliance alert only for a critical violation."""
     if severity != "CRITICAL":
         return None
-    url = f"{DASHBOARD_URL}/blog/{blog_id}"
-    msg = (
-        f"⚠️ <b>Standard Violation</b>\n"
-        f"Blog: <code>{blog_id}</code>\n"
-        f"Rule: {rule_id} ({severity})\n"
-        f"Detail: {detail}\n"
-        f"🔗 <a href=\"{url}\">Dashboard</a>"
+    url = DASHBOARD_URL + "/blog/" + blog_id
+    message = (
+        "[STANDARD VIOLATION]\n"
+        "Blog: " + blog_id + "\n"
+        "Rule: " + rule_id + " (" + severity + ")\n"
+        "Detail: " + detail + "\n"
+        "Dashboard: " + url
     )
-    return send(msg)
+    return send(message)

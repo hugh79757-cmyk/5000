@@ -161,15 +161,41 @@ def _check_c06(file_path: Path, blog_id: str) -> tuple[bool, str]:
 def _check_c07(body_md: str, conn) -> tuple[bool, str]:
     """C07: 죽은 크로스셀 링크.
 
-    실제 구현: data-target-slug 추출 → content.db published 확인 → HTTP HEAD 확인.
-    운영 환경에서는 외부 HTTP 호출이 필요하므로, 여기서는 DB 기반 검사만 수행.
+    실제 구현: data-target-slug 추출 + "More about" 블록(EntityLinker 새 패턴) href 추출
+    → slug 정규화 → content.db published 확인 → HTTP HEAD 확인(운영 환경).
     """
-    # data-target-slug 추출
+    def _extract_slug_from_url(url: str) -> str:
+        """URL에서 publish_ledger slug 컬럼 형식에 맞는 slug 추출.
+        예: https://visafree.techpawz.com/posts/france-visa-free/ → france-visa-free
+             https://tours.techpawz.com/posts/best-tours-bouches-du-rh-ne/ → best-tours-bouches-du-rh-ne
+        """
+        # /posts/SLUG[/] 형태에서 SLUG 추출
+        m = re.search(r'/posts/([^/\s]+)', url)
+        if m:
+            return m.group(1)
+        # /posts/ 접두어 없으면 그대로 사용 (상대 slug)
+        return url.rstrip('/')
+
+    # 패턴 1: 구 data-target-slug (일부 파이프라인) — 이미 slug만 들어 있음
     target_slugs = re.findall(r'data-target-slug=["\']([^"\']+)["\']', body_md)
+
+    # 패턴 2: entity_linker build_cross_sell_html "More about" 블록
+    #    "📌 More about {city}" 헤더 + inline-flex 앵커 href → slug 정규화
+    more_about_match = re.search(r'More about\s*\S+', body_md)
+    if more_about_match:
+        start = more_about_match.start()
+        end = min(start + 2000, len(body_md))
+        section = body_md[start:end]
+        inline_urls = re.findall(
+            r'<a[^>]*href=["\']([^"\']+)["\']', section
+        )
+        for url in inline_urls:
+            target_slugs.append(_extract_slug_from_url(url))
+
     if not target_slugs:
         return True, "크로스셀 링크 없음 (skip)"
 
-    # content.db에서 published 확인
+    # content.db에서 published 확인 (slug 기준)
     try:
         dead = []
         for slug in target_slugs:

@@ -656,3 +656,22 @@ _register(ProblemSpec(
     action="Check bot credentials, chat permissions, and Telegram API availability.",
     playbook_ref="ERROR_PLAYBOOKS.md#p31",
 ))
+_register(ProblemSpec(
+    problem_id="P32",
+    name_ko="빈 본문 배포 (empty_content_deployed)",
+    severity="MAJOR",
+    reason_keys=("empty_content_deployed",),
+    hook="post_deploy",
+    threshold="always",
+    alert_template=(
+        "⚠️ [MAJOR] 빈 본문 배포 감지\n"
+        "블로그: {blog_id}\n"
+        "문제: {problem_id} — {name_ko}\n"
+        "감지 단계: {phase}\n"
+        "영향 글: {matched}\n"
+        "조치: {action}"
+    ),
+    action="publish_log 확인 후 topic 재생성 + 재배포",
+    playbook_ref="ERROR_PLAYBOOKS.md#p32",
+    detect_fn="detect_empty_content_deployed",
+))

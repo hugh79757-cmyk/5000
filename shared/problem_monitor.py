@@ -28,7 +28,9 @@ from shared.problem_registry import (
 from shared.problem_detectors import (
     detect_post_generate,
     detect_validation_issue,
+    detect_empty_content_deployed,
 )
+from shared.publisher import get_blog_config
 from shared.alert_thresholds import ThresholdChecker
 from shared import telegram_notifier
 
@@ -213,7 +215,16 @@ class PublishMonitor:
             logger.info(f"[problem_monitor DRY-RUN] 발송 예정: {blog_id}/{problem_id}\n{message}")
             return message
         try:
-            ok = telegram_notifier.send(message)
+            event = {}
+            try:
+                from shared.publish_error_events import record_publish_error
+                event = record_publish_error(
+                    blog_id, spec.hook, render_ctx.get("matched", ""),
+                    problem_id=problem_id,
+                )
+            except Exception as exc:
+                logger.debug("[problem_monitor] event record failed: %s", exc)
+            ok = telegram_notifier.send(message, audit_event_id=event.get("event_id"))
         except Exception as e:
             logger.error(f"[problem_monitor] 텔레그램 발송 예외: {blog_id}/{problem_id} — {e}")
             return None
@@ -234,6 +245,43 @@ class PublishMonitor:
                 del self._consecutive[key]
             return
         self._consecutive.pop((blog_id, problem_id), None)
+
+    def report_deployed_content(self, blog_id: str) -> list[str]:
+        """P32: 배포된 글의 빈 내용 사후 검증 (주기적 스캔용).
+
+        blog_id → get_blog_config()로 domain, site_path 추출 →
+        detect_empty_content_deployed(blog_id, domain, site_path) 호출.
+
+        실HTTP 수행하므로 dry_run 환경에서도 스캔 자체는 실행 (알림은 dry_run에서 억제됨).
+        예외(네트워크 타임아웃 등)는 '정상 통과'로 간주하지 않고 경고 로그 후 [] 반환.
+        """
+        try:
+            cfg = get_blog_config(blog_id)
+        except ValueError:
+            logger.warning(f"[P32] blog_id={blog_id} 설정 없음 — 건너뜀")
+            return []
+        domain = cfg.get("domain", "")
+        site_path = cfg.get("site_path", "")
+        if not domain or not site_path:
+            logger.warning(f"[P32] blog_id={blog_id} domain/site_path 누락 — 건너뜀")
+            return []
+
+        try:
+            detection = detect_empty_content_deployed(blog_id, domain, site_path)
+        except Exception as e:
+            logger.warning(f"[P32] blog_id={blog_id} HTTP/검증 예외: {e}")
+            return []
+
+        if detection is None:
+            # 정상: 빈 글 아님
+            logger.debug(f"[P32] blog_id={blog_id} PASS (비어있지 않음)")
+            return []
+
+        # P32 감지됨 → 알림 발송
+        sent = self.report(blog_id, {"detection": detection}, "post_deploy")
+        if sent:
+            logger.info(f"[P32] blog_id={blog_id} 알림 발송: {sent}")
+        return sent
 
 
 _monitor = None
