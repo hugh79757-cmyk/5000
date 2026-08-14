@@ -3,20 +3,20 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-09T21:10:00Z"
+last_updated: "2026-08-15T00:00:00Z"
 progress:
   # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
   # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
   total_phases: 32
   completed_phases: 29
-  in_progress_phases: 0
+  in_progress_phases: 1
   planned_phases: 3
   percent: 91
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.**
+**Status:** v1.1 — **Phase 71 진행 중 (Wave 1·2·3 완료, Wave 4·5 스켈레톤+승인게이트 구현 완료, OQ#1/OQ#2 시니어 결정 대기).** Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)

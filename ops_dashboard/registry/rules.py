@@ -172,6 +172,22 @@ RULES: list[UnifiedEntry] = [
         action="모든 이미지 URL을 승인된 R2 버킷(pub-<hash>.r2.dev)으로 설정",
         bucket="actionable",
     ),
+    # Phase 71 (SC-2): C08 — 라이브-파일 불일치 실검사.
+    # 콘텐츠 무결성 검사(C01~C09)의 실행 경로는 content_integrity.check_c08 가 담당.
+    # 여기선 표준 준수 집계(RULES)에 편입시켜 /standards 뷰·registry 에 노출.
+    # bucket="deferred": 표준준수 집계율에서는 제외하되 실제 check 는 run_all_checks 에서
+    #   매 실행되어 실판정(pass/fail)을 기록. 라이브 HTTP 비용 급증 방지는
+    #   content_integrity.check_c08 의 24h 저빈도 캐시로 완화.
+    UnifiedEntry(
+        id="C08",
+        kind="rule",
+        target="live vs file (title/meta/og:image/structure/CoT/ad)",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="_check_c08",
+        action="라이브 페이지 대조 위반 항목별 재조정 (C08_TITLE_MISMATCH/OG_MISSING/OG_MISMATCH/STRUCTURE/COT_LEAK/AD_NOT_RENDERED)",
+        bucket="deferred",
+    ),
 ]
 
 # W6-a: rule↔문제분류(problem_id) 대응 선언.

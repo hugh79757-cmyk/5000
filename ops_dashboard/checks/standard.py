@@ -747,6 +747,17 @@ def _resolve_check_fn(check_fn_name: str):
     return fn
 
 
+def _check_c08(site: Path) -> tuple[bool, str]:
+    """C08 라이브 대조 — 표준준수 집계 경로 위임 래퍼.
+
+    check_standard_compliance(_resolve_check_fn) 가 standard.py 내 함수를 요구하므로
+    동명 함수를 둔다. 실제 라이브 크롤 로직은 content_integrity.check_c08(등록 check)에서
+    수행하므로, 여기선 중복 크롤을 막기 위해 정적 패스만 반환. C08는 bucket="deferred"
+    라 표준준수 집계율에서는 제외된다.
+    """
+    return True, "C08: 라이브 대조는 등록 check c08_live_file_mismatch 에서 수행 (표준집계는 deferred)"
+
+
 @register_check("standard_compliance")
 def check_standard_compliance(conn, blog_id: str) -> dict:
     """Run R01-R12 standard checks for a blog. Returns status dict.

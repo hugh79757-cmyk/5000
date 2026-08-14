@@ -55,7 +55,8 @@ def _check_cjk_in_title(conn: sqlite3.Connection, blog_id: str) -> dict:
                 ORDER BY {date_col} DESC LIMIT 20
             """, (blog_id,)).fetchall()
             db_conn.close()
-        except sqlite3.OperationalError:
+        except sqlite3.OperationalError as e:
+            logger.warning("maintenance check table access failed: %s", e)
             continue
 
         for (title,) in rows:

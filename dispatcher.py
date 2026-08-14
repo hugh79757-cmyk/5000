@@ -818,6 +818,147 @@ def _record_failure(blog_id: str, stage: str, error_msg: str) -> None:
         pass
 
 
+# ─── 발행 성공 후 자동 재검사 훅 (Phase 71, SC-1) ───
+
+def _trigger_post_publish_checks(blog_id: str, ops_db_path: str | None = None) -> None:
+    """발행 성공 직후 해당 blog 체크를 자동 트리거 (수동 호출 불필요).
+
+    dispatcher↔ops_dashboard 결합도 리스크 완화를 위해 lazy import + 예외 격리.
+    체크 실패가 발행 성공을 훼손하면 안 되므로, 모든 예외는 로깅만 하고
+    발행 경로에는 영향 0 (삼킴 금지 → 명시적 경고 로깅).
+    ops_db_path 를 주입하면 실제 ops.db 가 아닌 테스트용 DB 를 쓸 수 있음.
+    """
+    try:
+        from ops_dashboard.checks import run_all_checks
+        from ops_dashboard.db import get_conn
+
+        path = ops_db_path or str(PROJECT_DIR / "ops_dashboard" / "ops.db")
+        # get_conn 은 row_factory=sqlite3.Row 를 설정 — run_all_checks/get_all_blogs
+        # 가 dict(row) 를 가정하므로 반드시 get_conn 을 써야 함 (raw sqlite3.connect X).
+        conn = get_conn(path)
+        try:
+            run_all_checks(conn, blog_ids=[blog_id])
+        finally:
+            conn.close()
+        logger.info("[post-publish-check] %s 자동 재검사 완료", blog_id)
+    except Exception as e:  # 발행 성공 경로 보호 — 체크 실패가 발행을 죽이면 안 됨
+        logger.warning(
+            "[post-publish-check] %s 자동 재검사 실패(발행경로 무영향): %s",
+            blog_id, e,
+        )
+
+
+# ─── 자동 수정 폐루프 (Phase 71, SC-4) ───
+
+# rule_id → agent_action 키 (config/quality_checklist.yaml global_standard 와 1:1)
+_AUTOFIX_RULE_TO_ACTION = {
+    "R04": "fix_r04",
+    "R06": "fix_r06",
+    "R08": "fix_r08",
+    "R12": "fix_r12",
+    "THUMBNAIL-01": "fix_thumbnail_r2",
+    "R2-01": "fix_r2_images",
+}
+
+# OQ#2 (시니어 결정 대기) 승인게이트: 무인 자동 실행 허용 항목(grade A).
+# 썸네일 재생성은 안전으로 분류. 나머지(fix_r04/r06/r08/r12/r2_images)는
+# approve_non_safe=True 가 필요 — 그렇지 않으면 'requires_approval' 으로 분류되어
+# 자동 실행되지 않음 (사람 승인 경로).
+_AUTOFIX_SAFE_ACTIONS = {"fix_thumbnail_r2"}
+
+
+def _auto_fix_on_fail(
+    blog_id: str,
+    failed_rule_ids: list[str],
+    ops_db_path: str | None = None,
+    approve_non_safe: bool = False,
+    redeploy: bool = False,
+) -> dict:
+    """감지된 fail 규칙에 대해 자동수정 시도 (SC-4 폐루프 디스패처).
+
+    게이트 (AGENTS.md 파괴적 작업 + OQ#2 승인게이트):
+      - actionable bucket 규칙만 대상 (deferred R06 / out_of_scope R03,R04 제외)
+      - 구현된 fixer 가 있는 규칙만 대상
+      - SAFE_ACTIONS 만 기본 무인 실행. 그 외는 approve_non_safe=True 필요
+      - redeploy(실발행 재배포 = 파괴적)는 기본 False — 명시적 승인 필요
+
+    반환: {"blog_id", "applied":[...], "requires_approval":[...],
+            "skipped":[...], "redeployed": bool, "recheck_triggered": bool}
+    """
+    summary = {
+        "blog_id": blog_id,
+        "applied": [],
+        "requires_approval": [],
+        "skipped": [],
+        "redeployed": False,
+        "recheck_triggered": False,
+    }
+    if not failed_rule_ids:
+        return summary
+
+    cfg = get_blog_config(blog_id)
+    site_path = cfg.get("site_path", "") if cfg else ""
+    if not site_path or not Path(site_path).is_dir():
+        summary["skipped"].append("site_path 없음")
+        return summary
+
+    try:
+        from ops_dashboard.registry.rules import RULES
+        from shared.autofix import FIXERS, backup_blog, get_ga4_id
+
+        bucket_by_id = {e.id: e.bucket for e in RULES}
+        ga4_id = get_ga4_id(blog_id, cfg.get("domain", ""))
+
+        # 파괴적 작업 4단계 (1) 백업
+        try:
+            backup_blog(site_path, blog_id)
+        except Exception as e:
+            logger.warning("[auto-fix] %s 백업 실패: %s", blog_id, e)
+
+        site = Path(site_path)
+        applied_any = False
+        for rule_id in failed_rule_ids:
+            bucket = bucket_by_id.get(rule_id)
+            if bucket != "actionable":
+                summary["skipped"].append(f"{rule_id}(bucket={bucket})")
+                continue
+            action_key = _AUTOFIX_RULE_TO_ACTION.get(rule_id)
+            fixer = FIXERS.get(action_key) if action_key else None
+            if not fixer:
+                summary["skipped"].append(f"{rule_id}(fixer 없음)")
+                continue
+            if action_key not in _AUTOFIX_SAFE_ACTIONS and not approve_non_safe:
+                summary["requires_approval"].append(f"{rule_id}->{action_key}")
+                continue
+            try:
+                ok, msg = fixer(site, blog_id, ga4_id)
+                if ok:
+                    summary["applied"].append(f"{rule_id}:{msg}")
+                    applied_any = True
+                else:
+                    summary["skipped"].append(f"{rule_id}:{msg}")
+            except Exception as e:
+                logger.warning("[auto-fix] %s %s fixer 실패: %s", blog_id, rule_id, e)
+                summary["skipped"].append(f"{rule_id}(예외:{e})")
+
+        # 파괴적 작업 4단계 (3) 재배포 — 기본 게이팅
+        if applied_any and redeploy:
+            try:
+                _build_and_deploy_central(blog_id)
+                summary["redeployed"] = True
+            except Exception as e:
+                logger.warning("[auto-fix] %s 재배포 실패: %s", blog_id, e)
+            # 파괴적 작업 4단계 (4) 사후대조
+            try:
+                _trigger_post_publish_checks(blog_id, ops_db_path)
+                summary["recheck_triggered"] = True
+            except Exception:
+                pass
+    except Exception as e:
+        logger.warning("[auto-fix] %s 디스패치 실패: %s", blog_id, e)
+    return summary
+
+
 # ─── 메인 디스패치 ───
 
 def dispatch(blog_id):
@@ -940,6 +1081,9 @@ def dispatch(blog_id):
                     ops_conn.close()
             except Exception as _e:
                 logger.warning(f"[deploy] P04 close 실패: {blog_id}: {_e}")
+        # Phase 71 (SC-1): 발행 성공 직후 해당 blog 자동 재검사 트리거.
+        # 예외 격리되어 있으므로 발행 성공 경로에 영향 없음.
+        _trigger_post_publish_checks(blog_id)
     else:
         reason = result.get("reason", "unknown")
         if reason not in ("quota_met", "already_running", "duplicate_title"):

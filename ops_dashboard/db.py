@@ -114,6 +114,10 @@ def init_db(conn: sqlite3.Connection) -> None:
         status TEXT NOT NULL DEFAULT 'unknown',
         detail TEXT DEFAULT '',
         evidence_url TEXT DEFAULT '',
+        rule_id TEXT DEFAULT '',
+        problem_id TEXT DEFAULT '',
+        severity TEXT DEFAULT '',
+        action TEXT DEFAULT '',
         checked_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
@@ -155,6 +159,13 @@ CREATE TABLE IF NOT EXISTS notification_debounce (
 
     # Phase 60: 기존 테이블에 새 컬럼 추가 (IF NOT EXISTS는 컬럼 추가 안 됨)
     _alter_columns(conn)
+
+    # Phase 71 (SC-5): publish_error_events 스키마를 init_db 공식 소유로 편입.
+    # shared.publish_error_events.ensure_schema 는 IF NOT EXISTS 기반이라 멱등하며,
+    # 기존 lazy 생성(get_publish_error_events 등)과 충돌하지 않는다.
+    from shared.publish_error_events import ensure_schema
+
+    ensure_schema(conn)
 
 
 # ---------------------------------------------------------------------------

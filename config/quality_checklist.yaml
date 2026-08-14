@@ -308,3 +308,276 @@ metadata:
     - Phase 42: 퍼널 검증 - 렌더링 결함 0건, 단방향 구조 확정
     - Phase 43: 4개 블로그 확장 - 100% PASS (travel4 재평가 PASS)
     - Phase 44: 6개 블로그 전수조사 + 신규 발행 검증 + 최종 수정
+
+# ─────────────────────────────────────────────────────────────
+# Phase 71 (SC-3): 통일 표준 (Golden Standard)
+#   - global_standard: 85개 블로그 전체 공통 표준 (rule 1:1 + agent_action)
+#   - brand_standards: 브랜드(CAP/CUAP/STAP/TAP/RAP/SEAP/ETAP)별 표준
+#   ※ 각 항목은 registry/rules.py 의 RULES rule_id 와 1:1 매핑.
+#   ※ agent_action 은 Wave 5 자동수정 fixer 키 참조 (shared/autofix/*).
+#   ※ SCAP 분기는 코드상 존재하지 않으므로 제외.
+#   ※ OQ#1 (분기 세분 기준: funnel_stage / managed_by / ETAP업종분할) 은
+#     시니어 결정 대기 → brand 레벨 스켈레톤만 선언 (세부 서브세그먼트 보류).
+#   하위호환: scripts/verify_quality.py 는 global_criteria/blogs 만 읽으므로 영향 없음.
+# ─────────────────────────────────────────────────────────────
+global_standard:
+  - id: R01
+    target: hugo.toml
+    severity: CRITICAL
+    description: "showTableOfContents=false (목차 비활성화)"
+    agent_action: null
+  - id: R02
+    target: hugo.toml
+    severity: CRITICAL
+    description: "[params.advertisement] + adsense/publisher 슬롯"
+    agent_action: null
+  - id: R03
+    target: extend-head.html
+    severity: CRITICAL
+    description: "adsbygoogle.js 사이트.Params 사용 (하드코딩 제거)"
+    agent_action: null
+  - id: R04
+    target: extend_head.html
+    severity: MAJOR
+    description: "GA4 측정 ID + 모바일 보정 CSS"
+    agent_action: fix_r04
+  - id: R05
+    target: adsense/top.html
+    severity: MAJOR
+    description: "overflow:hidden;min-height 래퍼 + outside push div"
+    agent_action: null
+  - id: R06
+    target: adsense/in-article.html
+    severity: CRITICAL
+    description: "fluid + in-article format (auto 금지) + outside push div"
+    agent_action: fix_r06
+  - id: R07
+    target: single.html
+    severity: MAJOR
+    description: "H2 split injection + prose wrapper"
+    agent_action: null
+  - id: R08
+    target: single.html
+    severity: MAJOR
+    description: ".Lead/.Description 제거"
+    agent_action: fix_r08
+  - id: R09
+    target: baseof.html
+    severity: MAJOR
+    description: "커스텀 오버라이드 없음 (테마 기본값)"
+    agent_action: null
+  - id: R10
+    target: custom.css
+    severity: MAJOR
+    description: "미채움 제거 + 다크모드 + min-height"
+    agent_action: null
+  - id: R11
+    target: layouts/
+    severity: MAJOR
+    description: "mobile-sticky.html 사용 금지"
+    agent_action: null
+  - id: R12
+    target: layouts/
+    severity: MAJOR
+    description: "허용 집합 벗어난 오버라이드 없음 (junk 정리)"
+    agent_action: fix_r12
+  - id: THUMBNAIL-01
+    target: content/posts/*/index.md (featureimage)
+    severity: MAJOR
+    description: "featureimage 를 R2 호스팅 webp 로"
+    agent_action: fix_thumbnail_r2
+  - id: R2-01
+    target: content/posts/*/index.md (본문 이미지)
+    severity: MAJOR
+    description: "모든 이미지 URL R2 버킷으로"
+    agent_action: fix_r2_images
+  - id: C01
+    target: frontmatter
+    severity: MAJOR
+    description: "곡선따옴표 금지"
+    agent_action: fix_c01
+  - id: C03
+    target: content/posts/*/index.md (본문)
+    severity: MAJOR
+    description: "프론트매터 키 본문 유출 금지"
+    agent_action: fix_c03
+  - id: C04
+    target: content/posts/*/index.md (본문)
+    severity: MAJOR
+    description: "CoT/프롬프트 유출 금지"
+    agent_action: fix_c04
+  - id: C05
+    target: content/posts/*/index.md (frontmatter)
+    severity: MAJOR
+    description: "draft:true 발행 금지"
+    agent_action: fix_c05
+  - id: C09
+    target: content/posts/*/index.md (frontmatter)
+    severity: MAJOR
+    description: "categories/tags 문자열화 금지"
+    agent_action: fix_c09
+
+# 브랜드별 표준 (brand 레벨 스켈레톤 — OQ#1 세부 서브세그먼트 보류)
+brand_standards:
+  cap:
+    - id: CAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: CAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목"
+      agent_action: null
+    - id: CAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: CAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2
+    - id: CAP_AD_INSERT
+      target: adsense
+      severity: MAJOR
+      description: "광고 삽입 규칙: in-article fluid + top overflow"
+      agent_action: fix_r06
+  cuap:
+    - id: CUAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: CUAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목"
+      agent_action: null
+    - id: CUAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: CUAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2
+    - id: CUAP_AD_INSERT
+      target: adsense
+      severity: MAJOR
+      description: "광고 삽입 규칙: in-article fluid + top overflow"
+      agent_action: fix_r06
+  stap:
+    - id: STAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: STAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목"
+      agent_action: null
+    - id: STAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: STAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2
+    - id: STAP_AD_INSERT
+      target: adsense
+      severity: MAJOR
+      description: "광고 삽입 규칙: in-article fluid + top overflow"
+      agent_action: fix_r06
+  tap:
+    - id: TAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: TAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목 (tour3 H3 코스 구조)"
+      agent_action: null
+    - id: TAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: TAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2
+  rap:
+    - id: RAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: RAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목"
+      agent_action: null
+    - id: RAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: RAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2
+  seap:
+    - id: SEAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: SEAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목"
+      agent_action: null
+    - id: SEAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: SEAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2
+  etap:
+    - id: ETAP_FM_REQUIRED
+      target: frontmatter
+      severity: MAJOR
+      description: "필수 키: title, date, slug, categories, tags, featureimage"
+      agent_action: null
+    - id: ETAP_BODY_ORDER
+      target: content
+      severity: MAJOR
+      description: "본문 구조 순서: 타이틀→설명문→첫 소제목"
+      agent_action: null
+    - id: ETAP_FORBIDDEN
+      target: content
+      severity: MAJOR
+      description: "금지: 곡선따옴표, CoT 잔재, 프론트매터 키 유출, draft:true"
+      agent_action: fix_c04
+    - id: ETAP_THUMB_R2
+      target: featureimage
+      severity: MAJOR
+      description: "featureimage R2 webp + 본문 이미지 R2"
+      agent_action: fix_thumbnail_r2

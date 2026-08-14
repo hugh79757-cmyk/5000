@@ -441,6 +441,11 @@ def _register_human_routes(app: Flask) -> None:
         conn = _get_db()
         _ensure_db(conn)
         from ops_dashboard.db import get_all_blogs
+        from ops_dashboard.registry.rules import RULES
+        from shared.standards_loader import (
+            get_global_standard,
+            get_brand_standards_summary,
+        )
         blogs = get_all_blogs(conn)
         brands = {}
         for b in blogs:
@@ -457,7 +462,18 @@ def _register_human_routes(app: Flask) -> None:
             "standards.html",
             title="Standards",
             active="standards",
-            rules=[],
+            rules=[
+                {
+                    "id": e.id,
+                    "target": e.target,
+                    "severity": e.severity,
+                    "action": e.action,
+                    "bucket": e.bucket,
+                }
+                for e in RULES
+            ],
+            global_standard=get_global_standard(),
+            brand_standards_summary=get_brand_standards_summary(),
             compliance=brands,
         )
 

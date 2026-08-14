@@ -565,6 +565,43 @@ def _run_p32_scan() -> None:
             pass
 
 
+def _run_recheck_all() -> None:
+    """Phase 71 (SC-1): 주기적 전체 재검사 (2차 안전망).
+
+    발행 성공 시점의 훅(_trigger_post_publish_checks) 외에, 주기적으로
+    전체 블로그를 재검사해 check_results 를 갱신한다. 비용 부담을 고려해
+    매시간 1회로 등록(저빈도). run_all_checks 단일 진입점 사용(중복 없음).
+    """
+    try:
+        from ops_dashboard.checks import run_all_checks
+        from ops_dashboard.db import get_conn
+        from pathlib import Path
+
+        ops_db = Path(PROJECT_DIR) / "ops_dashboard" / "ops.db"
+        # get_conn 은 row_factory=sqlite3.Row 설정 — run_all_checks/get_all_blogs 가
+        # dict(row) 를 가정하므로 raw sqlite3.connect 가 아닌 get_conn 사용.
+        conn = get_conn(str(ops_db))
+        try:
+            summary = run_all_checks(conn)
+            logger.info(
+                "[RecheckAll] 완료: total=%d pass=%d fail=%d unknown=%d",
+                summary.get("total", 0),
+                summary.get("pass", 0),
+                summary.get("fail", 0),
+                summary.get("unknown", 0),
+            )
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.exception("[RecheckAll] 실패: %s", e)
+        try:
+            from shared.telegram_notifier import send_error
+
+            send_error("RecheckAll 오류", str(e))
+        except Exception:
+            pass
+
+
 def daily_report() -> None:
     logger.info("Daily report")
     try:
@@ -890,6 +927,11 @@ def register_schedules():
     for _h in ("00:00", "06:00", "12:00", "18:00"):
         schedule.every().day.at(_h).do(_run_p32_scan)
     logger.info(f"P32 scan scheduled every 6h (00:00, 06:00, 12:00, 18:00)")
+    job_count += 1
+
+    # Phase 71 (SC-1): 전체 재검사 — 매시간 1회 (발행훅 외 2차 안전망)
+    schedule.every().hour.do(_run_recheck_all)
+    logger.info("RecheckAll scheduled every hour (ops_dashboard run_all_checks)")
     job_count += 1
 
     # CUAP weekly off-topic 리포트: 매주 월요일 10:00

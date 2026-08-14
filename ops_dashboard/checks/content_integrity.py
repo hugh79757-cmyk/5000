@@ -4,14 +4,18 @@
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import re
 from datetime import datetime
 from pathlib import Path
 
+import httpx
+
 from ops_dashboard.checks import register_check
-from ops_dashboard.db import get_blog_detail, record_check
+from ops_dashboard.checks.render import _check_og_image, _fetch_get
+from ops_dashboard.db import get_blog_detail, get_blog_domain, get_conn, record_check
 
 logger = logging.getLogger(__name__)
 
@@ -263,10 +267,161 @@ def _check_c07(body_md: str, conn) -> tuple[bool, str]:
     return True, "C07 통과 (HTTP 확인은 운영 환경에서)"
 
 
-def _check_c08(site: Path | None, blog_id: str) -> tuple[bool, str]:
-    """C08: 라이브-파일 불일치. 현재 placeholder (라이브 비교 API 연동 필요)."""
-    # TODO: 라이브 사이트 HTML 크롤링 → 제목/og_image 비교
-    return True, "C08: 라이브 비교 미구현 (placeholder)"
+# ─── C08 라이브-파일 대조 (Phase 71, SC-2) ───
+
+# (c) CoT/메타 프롬프트 유출 탐지 패턴 (C04 재사용)
+_C08_COT_KO = [
+    r"생각해보자", r"생각해 보자", r"다음 단계로 넘어", r"단계별로 진행해",
+    r"우선, 우리가 해야", r"우리가 해야 할 것은", r"생각 과정을 통해",
+    r"결론부터 말하면", r"먼저 생각해보자", r"단계별로 생각",
+]
+_C08_COT_EN = [
+    r"Need to think", r"We need to write", r"Let's think step by step",
+    r"think step by step", r"let's break this down", r"here's the plan",
+    r"in order to achieve", r"as an AI language model",
+]
+
+
+def _meta_content(html: str, attr: str, value: str) -> str | None:
+    """<meta attr="value" content="..."> 에서 content 추출."""
+    m = re.search(
+        r'<meta\s+[^>]*' + attr + r'=["\']' + re.escape(value) + r'["\'][^>]*content=["\']([^"\']+)["\']',
+        html, re.IGNORECASE,
+    )
+    if m:
+        return m.group(1)
+    # 역순 (content 먼저)
+    m = re.search(
+        r'<meta\s+[^>]*content=["\']([^"\']+)["\'][^>]*' + attr + r'=["\']' + re.escape(value) + r'["\']',
+        html, re.IGNORECASE,
+    )
+    return m.group(1) if m else None
+
+
+def _title_text(html: str) -> str | None:
+    m = re.search(r"<title[^>]*>(.*?)</title>", html, re.IGNORECASE | re.DOTALL)
+    return m.group(1).strip() if m else None
+
+
+def _strip_tags(html: str) -> str:
+    return re.sub(r"<[^>]+>", " ", html or "")
+
+
+def _compare_live_vs_local(fm: dict, live_html: str) -> list[str]:
+    """라이브 HTML vs 로컬 frontmatter 비교 → 위반 problem_id 리스트.
+
+    (a) 제목/메타설명/og:image 존재·일치
+    (b) 구조 순서(타이틀→설명문→첫 소제목) 유지
+    (c) CoT/메타 프롬프트 유출 본문 노출
+    (d) 광고 블록 실제 렌더링
+    """
+    problems: list[str] = []
+    local_title = (fm.get("title") or "").strip()
+    local_og = (fm.get("og_image") or fm.get("featureimage") or "").strip()
+
+    live_title = _meta_content(live_html, "property", "og:title") or _title_text(live_html)
+    live_desc = (
+        _meta_content(live_html, "name", "description")
+        or _meta_content(live_html, "property", "og:description")
+    )
+    live_og_ok, live_og = _check_og_image(live_html)
+
+    # (a)
+    if local_title and live_title and local_title != live_title:
+        problems.append("C08_TITLE_MISMATCH")
+    if local_og:
+        if not live_og_ok:
+            problems.append("C08_OG_MISSING")
+        elif local_og.rstrip("/") != live_og.rstrip("/"):
+            problems.append("C08_OG_MISMATCH")
+
+    # (b) 구조 순서: 타이틀 텍스트가 첫 h2 보다 먼저 등장해야 함
+    if local_title and live_title:
+        h2_pos = live_html.lower().find("<h2")
+        title_pos = live_html.find(live_title)
+        if h2_pos != -1 and title_pos != -1 and h2_pos < title_pos:
+            problems.append("C08_STRUCTURE")
+
+    # (c) CoT/메타 프롬프트 유출
+    body_text = _strip_tags(live_html)
+    for pat in (_C08_COT_KO + _C08_COT_EN):
+        if re.search(pat, body_text):
+            problems.append("C08_COT_LEAK")
+            break
+
+    # (d) 광고 렌더링 — adsbygoogle.js 로드 또는 <ins class="adsbygoogle"> 존재
+    if (
+        "adsbygoogle" not in live_html
+        and 'class="adsbygoogle"' not in live_html
+        and "adsbygoogle.js" not in live_html
+    ):
+        problems.append("C08_AD_NOT_RENDERED")
+
+    return problems
+
+
+def _crawl_post(blog_id: str, domain: str | None, slug: str) -> str | None:
+    """라이브 포스트 URL GET (render._fetch_get 의 sync 래퍼). 실패 시 None."""
+    if not domain:
+        return None
+    url = f"https://{domain}/{slug}/"
+    try:
+        async def _go() -> tuple:
+            async with httpx.AsyncClient(
+                timeout=10, follow_redirects=True, headers={"User-Agent": "OpsDashboard/1.0"}
+            ) as client:
+                return await _fetch_get(client, url)
+
+        _code, body = asyncio.run(_go())
+        return body
+    except Exception as e:  # 크롤 실패/타임아웃 — 통과가 아닌 명시적 에러 상태로 상위 전달
+        logger.warning("[C08] 라이브 크롤 실패: blog=%s url=%s: %s", blog_id, url, e)
+        return None
+
+
+def _check_c08(
+    site: Path | None, blog_id: str, domain: str | None = None
+) -> tuple[bool, str]:
+    """C08: 라이브-파일 불일치 실검사.
+
+    라이브 URL 크롤 후 (a)제목/메타/og:image 일치, (b)구조 순서,
+    (c)CoT/메타 프롬프트 유출, (d)광고 렌더링 여부를 각각 problem_id 로 기록.
+    크롤 실패/타임아웃은 통과가 아닌 명시적 에러(C08_CRAWL_ERROR, fail) 상태.
+    """
+    if not site:
+        return False, "C08_SITE_UNREACHABLE: site_path 없음 — 라이브 대조 불가"
+    posts = _read_post_files(site)
+    if not posts:
+        return True, "C08 통과: 최근 검사 대상 포스트 없음"
+    if domain is None:
+        _conn = None
+        try:
+            _conn = get_conn()
+            domain = get_blog_domain(_conn, blog_id)
+        except Exception:
+            domain = None
+        finally:
+            if _conn is not None:
+                _conn.close()
+    violations: list[str] = []
+    crawl_errors = 0
+    for path, content in posts:
+        slug = path.parent.name
+        _fm_text, fm = _parse_frontmatter(content)
+        body = _crawl_post(blog_id, domain, slug)
+        if body is None:
+            crawl_errors += 1
+            continue
+        probs = _compare_live_vs_local(fm, body)
+        violations.extend(f"{slug}:{p}" for p in probs)
+    if crawl_errors and not violations:
+        return False, (
+            f"C08_CRAWL_ERROR: {crawl_errors}건 라이브 크롤 실패(타임아웃/네트워크) "
+            f"— 통과 판정 불가 (명시적 에러)"
+        )
+    if violations:
+        return False, f"C08 위반 {len(violations)}건: {'; '.join(violations[:5])}"
+    return True, f"C08 통과 ({len(posts)}건 라이브 대조)"
 
 
 def _check_c09(content: str) -> tuple[bool, str]:
@@ -472,8 +627,45 @@ def check_c07(conn, blog_id: str) -> dict:
 
 @register_check("c08_live_file_mismatch")
 def check_c08(conn, blog_id: str) -> dict:
-    """C08: 라이브-파일 불일치 검사 (placeholder)."""
-    return {"status": "unknown", "detail": "C08: 라이브 비교 미구현 (향후 활성화)"}
+    """C08: 라이브-파일 불일치 실검사.
+
+    라이브 크롤 비용 급증 완화: 24h 이내에 이미 실행됐으면 라이브 크롤을
+    생략하고 이전 결과를 반환(저빈도 분리). 그 외엔 실제 크롤→비교→실판정.
+    크롤 실패는 통과가 아닌 명시적 fail(에러) 상태.
+    """
+    # 저빈도 캐시: 24h 이내 실행 시 라이브 크롤 생략
+    try:
+        last = conn.execute(
+            "SELECT status, detail, checked_at FROM check_results "
+            "WHERE blog_id=? AND check_name='c08_live_file_mismatch' "
+            "ORDER BY checked_at DESC LIMIT 1",
+            (blog_id,),
+        ).fetchone()
+        if last:
+            _ts = datetime.fromisoformat(last["checked_at"])
+            if (datetime.now() - _ts).total_seconds() < 24 * 3600:
+                return {
+                    "status": last["status"],
+                    "detail": last["detail"] + " (캐시: 24h 내 실행됨)",
+                    "evidence_url": "",
+                }
+    except Exception:
+        pass
+
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {
+            "status": "fail",
+            "detail": "C08_SITE_UNREACHABLE: site_path 없음 — 라이브 대조 불가",
+            "evidence_url": "",
+        }
+    domain = get_blog_domain(conn, blog_id)
+    passed, detail = _check_c08(site, blog_id, domain)
+    return {
+        "status": "pass" if passed else "fail",
+        "detail": detail,
+        "evidence_url": "",
+    }
 
 
 @register_check("c09_str_list_categories")
