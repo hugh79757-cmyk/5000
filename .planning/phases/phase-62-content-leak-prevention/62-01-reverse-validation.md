@@ -152,6 +152,18 @@ def check_c02(full_content: str) -> tuple[bool, str]:
 ```
 **주의**: 전체 `---` 홀수 카운트 판정 금지. 본문 내 `---` 수평선과 혼동됨.
 
+**타블로그 변형 실측 (2026-08-14, techpawz-hugo C02 확산 확정)**:
+- **원인**: 닫는 `---`가 개행 없이 본문 첫 문단과 같은 줄에 병합된 형태
+  (`---2026 근로장려금 ...`). 첫 `---`(라인0)는 정상, 두 번째 독립 `---` 줄이
+  없어 `line.strip() == '---'` 매치 실패 → C02 fail + frontmatter 미파싱으로
+  **Hugo가 해당 포스트 페이지 HTML을 생성하지 않음**(라이브 404).
+- **교정 규칙**: `\n---(?=[^\s\n])` 를 `\n---\n` 로 치환(닫는 `---` 뒤 본문 병합
+  분리). 본문 첫 줄 텍스트는 그대로 보존, 최소 변경. hotissue의 여는 쪽
+  `^---[^\n]` 유형과는 배열이 다르므로 카드에 이 유형 명시.
+- **검증**: 교정 후 frontmatter 재파싱 `^---\n.*?\n---\n` 성공 + Hugo 빌드에서
+  해당 포스트 HTML 생성 + title 정상 렌더 + 라이브 HTTP 200 + 대시보드
+  `c02_frontmatter_close` pass(791건).
+
 **C03 — 본문에 프론트매터 키 라인 유출**
 ```python
 def check_c03(body_md: str, frontmatter_keys: list[str]) -> tuple[bool, str]:
