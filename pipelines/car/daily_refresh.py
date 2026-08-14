@@ -9,11 +9,13 @@ import logging
 import re
 import sqlite3
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+from shared.db_paths import ARTICLES_DB
 
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "car.db"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
@@ -26,6 +28,18 @@ def get_conn():
     conn = sqlite3.connect(str(DB_PATH))
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def _articles_exists(blog_id, source_id, prompt_id, cutoff):
+    """stap_content.db articles에 해당 콘텐츠 존재 여부 확인 (publish_log 대체)"""
+    conn = sqlite3.connect(ARTICLES_DB)
+    conn.row_factory = sqlite3.Row
+    row = conn.execute(
+        "SELECT 1 FROM articles WHERE blog_id=? AND source_id=? AND prompt_id=? AND published_at > ?",
+        (blog_id, source_id, prompt_id, cutoff)
+    ).fetchone()
+    conn.close()
+    return row is not None
 
 
 def refresh_trims(conn):
@@ -467,16 +481,17 @@ def replenish_topics(conn, min_pending=50):
             for car_id in ev_cars:
                 if created >= need:
                     break
-                exists = c.execute("""
-                    SELECT 1 FROM topics t
-                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
-                    AND (
-                        t.status = 'pending'
-                        OR (t.status = 'published' AND (
-                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
-                        ) > datetime('now', '-30 days'))
-                    )
-                """, (car_id, post_type, site_id)).fetchone()
+                # 존재 체크: publish_log → articles(stap_content.db) 기반
+                cutoff = (datetime.now() - timedelta(days=30)).isoformat()
+                articles_exists = _articles_exists(f"{site_id}-hugo", car_id, post_type, cutoff)
+                if not articles_exists:
+                    pending_row = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status='pending'",
+                        (car_id, post_type, site_id)
+                    ).fetchone()
+                    exists = pending_row
+                else:
+                    exists = True
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,7,'pending',datetime('now'),?)",
@@ -536,16 +551,17 @@ def replenish_topics(conn, min_pending=50):
                     ).fetchall()
                 ]
                 competitor_id = random.choice(rivals) if rivals else None
-                exists = c.execute("""
-                    SELECT 1 FROM topics t
-                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
-                    AND (
-                        t.status = 'pending'
-                        OR (t.status = 'published' AND (
-                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
-                        ) > datetime('now', '-30 days'))
-                    )
-                """, (car_id, post_type, site_id)).fetchone()
+                # 존재 체크: publish_log → articles(stap_content.db) 기반
+                cutoff = (datetime.now() - timedelta(days=30)).isoformat()
+                articles_exists = _articles_exists(f"{site_id}-hugo", car_id, post_type, cutoff)
+                if not articles_exists:
+                    pending_row = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status='pending'",
+                        (car_id, post_type, site_id)
+                    ).fetchone()
+                    exists = pending_row
+                else:
+                    exists = True
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,?,?,7,'pending',datetime('now'),?)",
@@ -587,16 +603,17 @@ def replenish_topics(conn, min_pending=50):
             for car_id in solos:
                 if created >= need_popular:
                     break
-                exists = c.execute("""
-                    SELECT 1 FROM topics t
-                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
-                    AND (
-                        t.status = 'pending'
-                        OR (t.status = 'published' AND (
-                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
-                        ) > datetime('now', '-30 days'))
-                    )
-                """, (car_id, post_type, site_id)).fetchone()
+                # 존재 체크: publish_log → articles(stap_content.db) 기반
+                cutoff = (datetime.now() - timedelta(days=30)).isoformat()
+                articles_exists = _articles_exists(f"{site_id}-hugo", car_id, post_type, cutoff)
+                if not articles_exists:
+                    pending_row = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status='pending'",
+                        (car_id, post_type, site_id)
+                    ).fetchone()
+                    exists = pending_row
+                else:
+                    exists = True
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,7,'pending',datetime('now'),?)",
@@ -608,16 +625,17 @@ def replenish_topics(conn, min_pending=50):
             for car in unpopular:
                 if unpop_created >= need_unpopular:
                     break
-                exists = c.execute("""
-                    SELECT 1 FROM topics t
-                    WHERE t.car_id=? AND t.post_type=? AND t.site_id=?
-                    AND (
-                        t.status = 'pending'
-                        OR (t.status = 'published' AND (
-                            SELECT MAX(p.published_at) FROM publish_log p WHERE p.topic_id = t.id
-                        ) > datetime('now', '-30 days'))
-                    )
-                """, (car["car_id"], post_type, site_id)).fetchone()
+                # 존재 체크: publish_log → articles(stap_content.db) 기반
+                cutoff = (datetime.now() - timedelta(days=30)).isoformat()
+                articles_exists = _articles_exists(f"{site_id}-hugo", car["car_id"], post_type, cutoff)
+                if not articles_exists:
+                    pending_row = c.execute(
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status='pending'",
+                        (car["car_id"], post_type, site_id)
+                    ).fetchone()
+                    exists = pending_row
+                else:
+                    exists = True
                 if not exists:
                     c.execute(
                         "INSERT INTO topics (car_id, competitor_car_id, post_type, priority, status, created_at, site_id) VALUES (?,NULL,?,5,'pending',datetime('now'),?)",

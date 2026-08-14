@@ -10,6 +10,8 @@ import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from shared.db_paths import ARTICLES_DB
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -51,13 +53,15 @@ def run() -> None:
         if pending:
             continue
 
-        # 3. 최근 30일 내 published 이력 있으면 skip
-        recent = c.execute("""
-            SELECT 1 FROM topics t
-            JOIN publish_log p ON p.topic_id=t.id
-            WHERE t.car_id=? AND t.site_id=? AND t.post_type=?
-              AND t.status='published' AND p.published_at > ?
-        """, (car_id, SITE, POST_TYPE, cutoff)).fetchone()
+        # 3. 최근 30일 내 발행된 콘텐츠 있으면 skip (publish_log → articles 기반)
+        blog_id = f"{SITE}-hugo"
+        stap_conn = sqlite3.connect(ARTICLES_DB)
+        stap_conn.row_factory = sqlite3.Row
+        recent = stap_conn.execute(
+            "SELECT 1 FROM articles WHERE blog_id=? AND source_id=? AND prompt_id=? AND published_at > ?",
+            (blog_id, car_id, POST_TYPE, cutoff)
+        ).fetchone()
+        stap_conn.close()
         if recent:
             continue
 
