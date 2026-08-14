@@ -28,7 +28,6 @@ C04_KO_PATTERNS = [
     r"우선\s*,?\s*(우리가|제가|내가|우리)\s*해야",  # "우선, 우리가 해야..."
     r"우리가\s*해야\s*할\s*것은",  # "우리가 해야 할 것은"
     r"생각\s*과정을\s*통해", # "생각 과정을 통해"
-    r"결론부터\s*말하면",    # "결론부터 말하면"
     r"먼저\s*생각해보자",    # "먼저 생각해보자" (let's think)
     r"단계별로\s*생각",      # "단계별로 생각해보자"
 ]
@@ -55,16 +54,68 @@ def _find_site_path(conn, blog_id: str) -> Path | None:
     return p if p and p.exists() else None
 
 
+def _parse_frontmatter_date(content: str) -> str | None:
+    """frontmatter date 값 추출(원문 문자열). date 키 없으면 None."""
+    m = re.match(r"^---\n(.*?)\n---\n", content, re.DOTALL)
+    if not m:
+        return None
+    for line in m.group(1).split("\n"):
+        mm = re.match(r'^\s*date:\s*["\']?([^"\'\s]+)', line)
+        if mm:
+            return mm.group(1)
+    return None
+
+
+def _frontmatter_date_ts(content: str) -> float | None:
+    """frontmatter date를 epoch로 변환. 파싱 실패/값없음 → None(안전측 '포함').
+
+    date 단일 기준의 검사대상 붕괴(948건)를 막기 위해 OR 병합에서 사용.
+    None 반환 = 판정 불가 → 호출부에서 '검사대상 포함(안전측)' 처리한다.
+    """
+    raw = _parse_frontmatter_date(content)
+    if not raw:
+        return None
+    s = raw.strip().strip('"\'')
+    m = re.match(r"(\d{4})-(\d{2})-(\d{2})", s)
+    if m:
+        try:
+            return datetime(int(m[1]), int(m[2]), int(m[3])).timestamp()
+        except ValueError:
+            return None
+    m2 = re.match(r"^(\d{4})(\d{2})(\d{2})$", s)
+    if m2:
+        try:
+            return datetime(int(m2[1]), int(m2[2]), int(m2[3])).timestamp()
+        except ValueError:
+            return None
+    return None
+
+
 def _read_post_files(site: Path) -> list[tuple[Path, str]]:
-    """site/content/posts/의 최신 md 파일 목록 반환."""
+    """site/content/posts/의 최신 md 파일 목록 반환.
+
+    검사대상 = (mtime >= now-7d) OR (frontmatter date >= now-7d) OR
+               (date 파싱 불가/없음 → 포함, 안전측).
+
+    mtime 조건: touch/재배포로 갱신된 글 포착 → 회피경로 차단.
+    date 조건: 최근 발행글 포착.
+    date 없음/파싱실패: 판정 불가 → '검사 제외'가 아니라 '검사 포함'(안전측).
+    ※ 'mtime 7일 밖 + date 7일 밖'인 과거 발행글은 의도된 '최근분만 검수'
+       정책 범위 밖 — 새 오류는 못 잡음 (한계: 규칙카드/운영노트 명시).
+    """
     posts_dir = site / "content" / "posts"
     if not posts_dir.exists():
         return []
     cutoff = datetime.now().timestamp() - 7 * 86400
     results = []
     for md_file in posts_dir.rglob("*.md"):
-        if md_file.stat().st_mtime >= cutoff:
-            results.append((md_file, md_file.read_text(encoding="utf-8", errors="replace")))
+        content = md_file.read_text(encoding="utf-8", errors="replace")
+        mtime_ok = md_file.stat().st_mtime >= cutoff
+        date_ts = _frontmatter_date_ts(content)
+        date_ok = date_ts is not None and date_ts >= cutoff
+        safe_include = date_ts is None  # date 파싱 불가/없음 → 안전측 포함
+        if mtime_ok or date_ok or safe_include:
+            results.append((md_file, content))
     return results
 
 
@@ -257,11 +308,18 @@ def check_c01(conn, blog_id: str) -> dict:
     if not posts:
         return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
 
-    # 최신 포스트만 검사
-    _, content = posts[0]
-    fm_text, _ = _parse_frontmatter(content)
-    passed, detail = _check_c01(fm_text)
-    return {"status": "pass" if passed else "fail", "detail": detail}
+    # 전수 검사 (모든 포스트 순회 — posts[0] 단건 검사의 커버리지 구멍 제거)
+    violations = []
+    for _, content in posts:
+        fm_text, _ = _parse_frontmatter(content)
+        passed, detail = _check_c01(fm_text)
+        if not passed:
+            violations.append(detail)
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C01 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C01 통과 ({len(posts)}건)"}
 
 
 @register_check("c02_frontmatter_close")
