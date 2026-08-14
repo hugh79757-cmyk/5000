@@ -24,6 +24,7 @@ PROJ_ROOT   = Path.home() / "Projects"
 BACKUP_DIR  = PROJ_ROOT / "5000/data/backups"
 R2_BUCKET   = "hotissue-images"
 RETAIN_DAYS = 7
+R2_ENV_FILE = Path.home() / ".env.common"
 
 BLOGS_D  = PROJ_ROOT / "5000/config/blogs.d"
 SAP_YAML = PROJ_ROOT / "SAP/config/blogs.yaml"
@@ -90,6 +91,48 @@ def upload_r2(r2_path: str, local: Path) -> bool:
 
 
 # ── [1][2] DB 백업 ──────────────────────────────────────
+
+def _load_env_file(path: Path) -> None:
+    """Load only missing R2 environment keys without logging secret values."""
+    if not path.exists():
+        return
+    try:
+        for raw in path.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            if key.startswith("export "):
+                key = key[7:].strip()
+            if not key or not key.startswith("R2_"):
+                continue
+            value = value.strip()
+            if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+                value = value[1:-1]
+            os.environ.setdefault(key, value)
+    except Exception as e:
+        logger.error(f"R2 ;  : {e}")
+
+
+def get_r2_config() -> dict | None:
+    """Return R2 config without exposing secret values in logs."""
+    _load_env_file(R2_ENV_FILE)
+    if not os.environ.get("R2_ENDPOINT") and os.environ.get("R2_ACCOUNT_ID"):
+        os.environ["R2_ENDPOINT"] = (
+            f"https://{os.environ['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com"
+        )
+    required = ("R2_ENDPOINT", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY")
+    missing = [key for key in required if not os.environ.get(key)]
+    if missing:
+        logger.error(f": {', '.join(missing)}")
+        return None
+    return {
+        "endpoint": os.environ["R2_ENDPOINT"],
+        "access_key": os.environ["R2_ACCESS_KEY_ID"],
+        "secret_key": os.environ["R2_SECRET_ACCESS_KEY"],
+        "bucket": os.environ.get("R2_BUCKET_NAME", R2_BUCKET),
+    }
 def run_db_backup() -> dict:
     stats = {}
     for group, targets in DB_TARGETS.items():
@@ -261,47 +304,56 @@ def cleanup_old():
 
 
 
-def cleanup_r2_old():
-    """R2에서 RETAIN_DAYS 초과 백업 파일 삭제"""
-    import boto3
-    from botocore.config import Config
 
-    cutoff = datetime.now() - timedelta(days=RETAIN_DAYS)
-
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=os.environ["R2_ENDPOINT"],
-        aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
-        aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"],
-        config=Config(signature_version="s3v4"),
-    )
-
-    bucket = os.environ["R2_BUCKET_NAME"]
-    prefix = "db-backups/"
-
-    paginator = s3.get_paginator("list_objects_v2")
-    pages = paginator.paginate(Bucket=bucket, Prefix=prefix)
-
-    removed = 0
-    for page in pages:
-        for obj in page.get("Contents", []):
-            key = obj["Key"]
-            name = key.split("/")[-1]
-            stem = name.replace(".db.gz", "").replace(".tar.gz", "").replace(".db", "")
-            date_dt = None
-            for part in reversed(stem.replace("-", "_").split("_")):
-                try:
-                    date_dt = datetime.strptime(part, "%Y%m%d")
-                    break
-                except ValueError:
+def cleanup_r2_old(*, dry_run: bool = True) -> dict:
+    """Report or delete expired backup objects; dry-run is the default."""
+    config = get_r2_config()
+    if not config:
+        return {"status": "skipped_missing_credentials", "scanned": 0, "candidates": 0, "bytes": 0}
+    try:
+        import boto3
+        from botocore.config import Config
+        cutoff = datetime.now() - timedelta(days=RETAIN_DAYS)
+        s3 = boto3.client(
+            "s3",
+            endpoint_url=config["endpoint"],
+            aws_access_key_id=config["access_key"],
+            aws_secret_access_key=config["secret_key"],
+            config=Config(signature_version="s3v4"),
+        )
+        prefix = "db-backups/"
+        scanned = candidates = removed = bytes_total = 0
+        for page in s3.get_paginator("list_objects_v2").paginate(Bucket=config["bucket"], Prefix=prefix):
+            for obj in page.get("Contents", []):
+                scanned += 1
+                key = obj["Key"]
+                name = key.rsplit("/", 1)[-1]
+                stem = name.replace(".db.gz", "").replace(".tar.gz", "")
+                date_dt = None
+                for part in reversed(stem.replace("-", "_").split("_")):
+                    try:
+                        date_dt = datetime.strptime(part, "%Y%m%d")
+                        break
+                    except ValueError:
+                        continue
+                if not date_dt or date_dt >= cutoff:
                     continue
-            if date_dt and date_dt < cutoff:
-                s3.delete_object(Bucket=bucket, Key=key)
-                removed += 1
-                logger.info(f"[R2 삭제] {key}")
 
-    logger.info(f"[R2 정리 완료] {removed}개 삭제")
-
+                candidates += 1
+                size = int(obj.get("Size", 0) or 0)
+                bytes_total += size
+                if dry_run:
+                    logger.info(f"[R2 dry-run]  :::::::::::::::::::::::::::::::::: {key} ({size} bytes)")
+                else:
+                    s3.delete_object(Bucket=config["bucket"], Key=key)
+                    removed += 1
+                    logger.info(f"[r2 ] {key} ({size} bytes)")
+        status = "dry_run" if dry_run else "success"
+        logger.info(f"[R2  {status}] scanned={scanned} candidates={candidates} removed={removed} bytes={bytes_total}")
+        return {"status": status, "scanned": scanned, "candidates": candidates, "removed": removed, "bytes": bytes_total}
+    except Exception as e:
+        logger.exception(f"R2  : {e}")
+        return {"status": "failed", "scanned": 0, "candidates": 0, "bytes": 0, "error": str(e)}
 # ── 텔레그램 ─────────────────────────────────────────────
 def send_summary(db_stats: dict, md_stats: dict):
     try:
@@ -333,10 +385,15 @@ def main():
     db_stats = run_db_backup()
     md_stats = run_content_backup()
     cleanup_old()
-    cleanup_r2_old()
+    cleanup_r2_old(dry_run=False)
     send_summary(db_stats, md_stats)
     logger.info(f"=== 통합 백업 완료 ===")
 
 
 if __name__ == "__main__":
-    main()
+    if "--r2-cleanup-apply" in sys.argv:
+        print(cleanup_r2_old(dry_run=False))
+    elif "--r2-cleanup-dry-run" in sys.argv:
+        print(cleanup_r2_old(dry_run=True))
+    else:
+        main()
