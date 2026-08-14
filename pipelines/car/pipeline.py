@@ -318,11 +318,14 @@ def run(blog_cfg):
         is_draft=_is_draft,
     )
 
+    # ── publish_log INSERT는 성공 시에만 기록 (안-Y: 실패건 누적 방지) ──
+    # UPDATE topics는 성공/실패 공통으로 published 마킹 유지 → 재선택 차단
     c = conn.cursor()
-    c.execute(
-        "INSERT INTO publish_log (topic_id, site, title, slug, published_at, image_url, r2_url) VALUES (?,?,?,?,?,?,?)",
-        (topic["id"], car_site_id, title, slug, datetime.now().isoformat(), origin_url or "", r2_url or "")
-    )
+    if result and result.get("success"):
+        c.execute(
+            "INSERT INTO publish_log (topic_id, site, title, slug, published_at, image_url, r2_url) VALUES (?,?,?,?,?,?,?)",
+            (topic["id"], car_site_id, title, slug, datetime.now().isoformat(), origin_url or "", r2_url or "")
+        )
     c.execute("UPDATE topics SET status='published', published_at=? WHERE id=?",
               (datetime.now().isoformat(), topic["id"]))
     conn.commit()
