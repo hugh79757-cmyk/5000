@@ -1295,8 +1295,22 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
             ).fetchall()
             fails = [r for r in ds_rows if r["status"] == "fail"]
             pass_rows = [r for r in ds_rows if r["status"] == "pass"]
+            # no_source 노출 (additive): detail에 depletion_reason=no_source 마커가
+            # 있는 pass/fail 행에서 도시명을 수집한다. 노드 status는 기존대로
+            # any-fail→fail로 유지 — no_source 노출이 판정을 바꾸지 않는다.
+            no_source_blogs = [
+                r["blog_id"]
+                for r in ds_rows
+                if "depletion_reason=no_source" in (r["detail"] or "")
+            ]
             if fails:
                 affected = sorted({r["blog_id"] for r in fails})
+                _ns = (
+                    f" | no_source {len(no_source_blogs)}블로그: "
+                    + ", ".join(sorted(set(no_source_blogs)))
+                    if no_source_blogs
+                    else ""
+                )
                 return {
                     "id": e.id,
                     "kind": "rule",
@@ -1308,6 +1322,7 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
                         f"브랜드 전체 재고 부족/고갈 {len(fails)}블로그: "
                         + ", ".join(affected)
                         + f" (affected_blogs={len(affected)})"
+                        + _ns
                     ),
                     "rule_id": e.id,
                     "problem_id": "",
@@ -1332,6 +1347,12 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
                     "affected_blogs": [],
                     "playbook_ref": playbook_ref,
                 }
+            _ns_pass = (
+                f" | no_source {len(no_source_blogs)}블로그: "
+                + ", ".join(sorted(set(no_source_blogs)))
+                if no_source_blogs
+                else ""
+            )
             return {
                 "id": e.id,
                 "kind": "rule",
@@ -1342,6 +1363,7 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
                 "evidence": (
                     f"data_stock: 브랜드 전체 재고 충분 "
                     f"({len(ds_rows)}검사, fail 0, pass {len(pass_rows)})"
+                    + _ns_pass
                 ),
                 "rule_id": e.id,
                 "problem_id": "",

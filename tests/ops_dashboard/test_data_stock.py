@@ -150,3 +150,99 @@ def test_registry_view_aggregates_any_fail(tmp_path):
     assert ds is not None
     assert ds["status"] == "fail"
     assert ds["affected_blogs"] == ["finance-hugo"]
+
+
+def test_registry_pass_evidence_includes_no_source(tmp_path):
+    """pass 노드에도 no_source 블로그가 evidence에 additive 노출 (판정은 pass)."""
+    import ops_dashboard.registry as _reg
+    from ops_dashboard.db import get_registry_view
+
+    conn = sqlite3.connect(str(tmp_path / "ops.db"))
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        "CREATE TABLE check_results (blog_id TEXT, check_name TEXT, status TEXT, "
+        "detail TEXT, evidence_url TEXT, rule_id TEXT, problem_id TEXT, "
+        "severity TEXT, action TEXT, checked_at TEXT)"
+    )
+    conn.execute(
+        "CREATE TABLE blog_lifecycle (blog_id TEXT, config_status TEXT, "
+        "maintenance_status TEXT, brand TEXT)"
+    )
+    conn.execute(
+        "INSERT INTO check_results VALUES ('dining-hugo', 'data_stock', 'pass', "
+        "'data_stock: dining-hugo 남은 재고 83건 [브랜드 etap] | "
+        "depletion_reason=no_source — 보충 소스 원천 부재 19건: Lima', "
+        "NULL, NULL, NULL, NULL, NULL, '2026-08-15T12:00:00')"
+    )
+    conn.execute(
+        "INSERT INTO blog_lifecycle (blog_id, config_status, maintenance_status, "
+        "brand) VALUES ('dining-hugo', 'active', 'none', 'etap')"
+    )
+    conn.commit()
+    orig_by_kind = _reg.by_kind
+    _reg.by_kind = lambda kind: (
+        [next(e for e in _reg.RULES if e.id == "data_stock")] if kind == "rule" else []
+    )
+    try:
+        rv = get_registry_view(conn)
+    finally:
+        _reg.by_kind = orig_by_kind
+    ds = next((e for e in rv["rules"] if e["id"] == "data_stock"), None)
+    assert ds is not None
+    assert ds["status"] == "pass"  # 판정 불변
+    assert "no_source 1블로그: dining-hugo" in ds["evidence"]
+
+
+def test_no_source_mapping_declared():
+    """DINING_NO_SOURCE 는 19건 전부 no_source 로 분류."""
+    assert len(DS.DINING_NO_SOURCE) == 19
+    assert all(
+        r == DS.DEPLETION_REASON_NO_SOURCE
+        for r in DS.DINING_NO_SOURCE.values()
+    )
+
+
+def test_etap_no_source_topics_real_db():
+    """실 travel-en.db(read-only)에서 active no_source 토픽 감지 (성능·스모크).
+
+    이 테스트는 실 DB 의존 — 값이 0 이어도 통과(no_source 노출의 존재만 보장).
+    """
+    got = DS._etap_no_source_topics("dining-hugo")
+    assert isinstance(got, list)
+    assert all(c in DS.DINING_NO_SOURCE for c in got)
+
+
+def test_check_embeds_no_source_keep_status_pass(tmp_path, monkeypatch):
+    """dining-hugo data_stock 은 pass 유지 + depletion 필드·마커 병기.
+
+    (게이트: no_source 노출로 판정 불변 — 기존 노드 불변)
+    """
+    ops_conn = sqlite3.connect(str(tmp_path / "ops.db"))
+    ops_conn.execute("CREATE TABLE blog_lifecycle (blog_id TEXT, brand TEXT)")
+    ops_conn.execute("INSERT INTO blog_lifecycle VALUES ('dining-hugo','etap')")
+    ops_conn.commit()
+    monkeypatch.setattr(DS, "_etap_stock", lambda b: 83)  # 충분 재고
+    monkeypatch.setattr(
+        DS, "_etap_no_source_topics", lambda b: ["Lima", "New Delhi"]
+    )
+    res = DS.check_data_stock(ops_conn, "dining-hugo")
+    assert res["status"] == "pass"  # 83 > STOCK_LOW — 판정 불변
+    assert res["depletion_reason"] == DS.DEPLETION_REASON_NO_SOURCE
+    assert sorted(res["depletion_cities"]) == ["Lima", "New Delhi"]
+    assert "depletion_reason=no_source" in res["detail"]
+
+
+def test_no_source_does_not_flip_unknown(tmp_path, monkeypatch):
+    """no_source 노출이 other 브랜드 판정을 바꾸지 않음 (stap 은 노출 없음)."""
+    ops_conn = sqlite3.connect(str(tmp_path / "ops.db"))
+    ops_conn.execute("CREATE TABLE blog_lifecycle (blog_id TEXT, brand TEXT)")
+    ops_conn.execute("INSERT INTO blog_lifecycle VALUES ('stock-hugo','stap')")
+    ops_conn.commit()
+    orig = DS.BRAND_STOCK_FNS
+    DS.BRAND_STOCK_FNS = {"stap": lambda b: 5}  # 부족 → fail
+    try:
+        res = DS.check_data_stock(ops_conn, "stock-hugo")
+    finally:
+        DS.BRAND_STOCK_FNS = orig
+    assert res["status"] == "fail"
+    assert "depletion_reason" not in res  # stap 은 no_source 노출 없음
