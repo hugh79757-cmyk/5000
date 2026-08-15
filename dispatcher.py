@@ -730,7 +730,10 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         logger.warning(f"[deploy] site_path 없음: {site_path}")
         return False
     try:
-        deploy_env = {k: v for k, v in os.environ.items() if k != "CLOUDFLARE_API_TOKEN"}
+        # Phase 71d: wrangler env(CLOUDFLARE_API_TOKEN 제거 + ACCOUNT_ID 복원)를
+        # shared.publishers.deploy.build_wrangler_env()로 위임 (단일 토큰 정책).
+        from shared.publishers.deploy import build_wrangler_env
+        deploy_env = build_wrangler_env()
         deploy_env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
         deploy_env["HUGO_THEMESDIR"] = "/Users/twinssn/Projects/shared-themes"
         r1 = subprocess.run(

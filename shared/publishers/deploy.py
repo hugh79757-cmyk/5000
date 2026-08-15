@@ -5,11 +5,30 @@ import subprocess
 import time
 from pathlib import Path
 
-from dotenv import load_dotenv
-
 from shared.paths import FIVEK_ROOT, SHARED_THEMES, HUGO_PATH, WRANGLER_PATH
 
 logger = logging.getLogger(__name__)
+
+
+def build_wrangler_env() -> dict:
+    """wrangler subprocess용 env 구성 (단일 토큰 정책 소스-of-truth).
+
+    Phase 71d: dispatcher._build_and_deploy_central / deploy.py가 각자 구현하던
+    CLOUDFLARE_API_TOKEN 제거 + CLOUDFLARE_ACCOUNT_ID 복원 규칙을 하나로 중앙화.
+    - wrangler 4.x는 CLOUDFLARE_API_TOKEN env var가 OAuth auth profile보다 우선
+      적용되어 잘못된 계정으로 배포하거나 Authentication error code: 10000을 유발.
+      따라서 반드시 제거한다.
+    - .env.common + 5000/.env를 로드해 계정 ID를 확보하고 복원한다.
+    """
+    from dotenv import load_dotenv
+    load_dotenv(os.path.expanduser("~/.env.common"))
+    load_dotenv(os.path.join(FIVEK_ROOT, ".env"), override=True)
+    env = os.environ.copy()
+    env.pop("CLOUDFLARE_API_TOKEN", None)
+    _cf_account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
+    if _cf_account:
+        env["CLOUDFLARE_ACCOUNT_ID"] = _cf_account
+    return env
 
 
 def _pre_deploy_validate(site: Path) -> None:
@@ -53,9 +72,15 @@ def deploy_site(site_path, cf_project) -> bool:
             except BlockingIOError:
                 time.sleep(1)
         if not _lock_acquired:
-            raise TimeoutError("wrangler deploy lock timeout (60s)")
-    except Exception:
-        pass
+            # Phase 71d: 락 미획득 시 unlock로 진행하던 버그 수정 —
+            # wrangler 동시 실행 방지 직렬화가 무력화되는 것을 방지한다.
+            logger.error("wrangler deploy lock timeout (60s) — 배포 취소")
+            _lock_file.close()
+            return False
+    except Exception as e:
+        logger.exception("wrangler deploy lock 오류 — 배포 취소: %s", e)
+        _lock_file.close()
+        return False
     try:
         _deploy_site_inner(site_path, cf_project)
     finally:
@@ -63,22 +88,15 @@ def deploy_site(site_path, cf_project) -> bool:
             try:
                 _fl.flock(_lock_file, _fl.LOCK_UN)
                 _lock_file.close()
-            except Exception:
-                pass
+            except Exception as e:
+                logger.warning("wrangler deploy lock 해제 실패: %s", e)
     return True
 
 
 def _deploy_site_inner(site_path, cf_project) -> bool:
     site = Path(site_path)
-    load_dotenv(os.path.expanduser("~/.env.common"))
-    load_dotenv(os.path.join(FIVEK_ROOT, ".env"), override=True)
-    _wrangler_env = os.environ.copy()
-    # CLOUDFLARE_API_TOKEN 제거 — agent 세션에서 설정된 token이
-    # wrangler auth profile(OAuth)보다 우선 적용되어 배포 실패를 유발함
-    _wrangler_env.pop("CLOUDFLARE_API_TOKEN", None)
-    _cf_account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
-    if _cf_account:
-        _wrangler_env["CLOUDFLARE_ACCOUNT_ID"] = _cf_account
+    # Phase 71d: CLOUDFLARE_API_TOKEN 제거 + ACCOUNT_ID 복원 → build_wrangler_env() 위임
+    _wrangler_env = build_wrangler_env()
     rogue = site / "content" / "posts" / "index.md"
     if rogue.exists():
         rogue.unlink()

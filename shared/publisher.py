@@ -5,7 +5,7 @@ import os
 from shared.log_config import log_stage
 import re
 import sqlite3
-import subprocess
+
 from datetime import datetime
 from pathlib import Path
 
@@ -27,7 +27,7 @@ def sanitize_featureimage_url(url, max_len=255):
     return url
 
 
-from shared.paths import HUGO_PATH, STAP_ROOT as _STAP_ROOT, TAP_ROOT as _TAP_ROOT
+from shared.paths import STAP_ROOT as _STAP_ROOT, TAP_ROOT as _TAP_ROOT
 STAP_ENTITY_DB = os.path.join(_STAP_ROOT, "data", "stap_entities.db")
 STAP_ENTITY_LINKER_PATH = os.path.join(_STAP_ROOT, "shared")
 STAP_BLOGS = {
@@ -617,159 +617,13 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     return {"success": True, "url": expected_url, "file_path": file_path}
 
 
-def deploy_site(site_path, cf_project) -> bool:
-    Path(site_path)
-    # deploy 직렬화 락 (wrangler 동시 실행 방지, 최대 60초 대기)
-    import fcntl as _fl
-    import time as _lock_time
-    _lock_path = Path("/tmp/wrangler_deploy.lock")
-    _lock_file = open(_lock_path, "w")
-    _lock_acquired = False
-    _deadline = _lock_time.time() + 60
-    try:
-        while _lock_time.time() < _deadline:
-            try:
-                _fl.flock(_lock_file, _fl.LOCK_EX | _fl.LOCK_NB)
-                _lock_acquired = True
-                break
-            except BlockingIOError:
-                _lock_time.sleep(1)
-        if not _lock_acquired:
-            raise TimeoutError("wrangler deploy lock timeout (60s)")
-    except Exception:
-        pass
-    try:
-        _deploy_site_inner(site_path, cf_project)
-    finally:
-        if _lock_acquired:
-            try:
-                _fl.flock(_lock_file, _fl.LOCK_UN)
-                _lock_file.close()
-            except Exception:
-                pass
-    return True
-
-
-def _deploy_site_inner(site_path, cf_project) -> bool:
-    site = Path(site_path)
-    # 5000/.env의 CLOUDFLARE 토큰을 wrangler에 주입 (oauth_token 만료 대응)
-    import os as _os2
-
-    from dotenv import load_dotenv as _ldenv3
-    _ldenv3(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"), override=True)
-    _wrangler_env = _os2.environ.copy()
-    _cf_token = _os2.getenv("CLOUDFLARE_API_TOKEN", "")
-    _cf_account = _os2.getenv("CLOUDFLARE_ACCOUNT_ID", "")
-    if _cf_token:
-        _wrangler_env["CLOUDFLARE_API_TOKEN"] = _cf_token
-    if _cf_account:
-        _wrangler_env["CLOUDFLARE_ACCOUNT_ID"] = _cf_account
-    # leaf bundle 방기: content/posts/index.md 존재 시 삭제
-    rogue = site / "content" / "posts" / "index.md"
-    if rogue.exists():
-        rogue.unlink()
-        print(f"[guard] Removed rogue index.md from {site}")
-
-    # shared themesDir — Hugo v0.160.x에서 config 내 themesDir 미인식 이슈 대응
-    # 로컬 themes/<테마>가 있으면 HUGO_THEMESDIR 설정 안 함 (로컬 우선)
-    _hugo_toml = site / "hugo.toml"
-    _hugo_theme = ""
-    _themes_dir = os.getenv("SHARED_THEMES_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "..", "shared-themes"))
-    if _hugo_toml.exists():
-        try:
-            import re as _toml_re
-            _toml_text = _hugo_toml.read_text(encoding="utf-8")
-            _m_theme = _toml_re.search(r'^theme\s*=\s*["\'](.+?)["\']', _toml_text, _toml_re.MULTILINE)
-            if _m_theme:
-                _hugo_theme = _m_theme.group(1)
-            _m_dir = _toml_re.search(r'^themesDir\s*=\s*["\'](.+?)["\']', _toml_text, _toml_re.MULTILINE)
-            if _m_dir:
-                _themes_dir = _m_dir.group(1)
-        except Exception:
-            pass
-    # 로컬 themes/<테마> 디렉토리가 있으면 HUGO_THEMESDIR 설정하지 않음
-    _local_theme = site / "themes" / _hugo_theme if _hugo_theme else None
-    if not (_local_theme and _local_theme.is_dir()):
-        _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
-
-    log_path = Path(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs", "deploy.log"))
-    with open(log_path, "a") as log_f:
-        result = subprocess.run(
-            [HUGO_PATH, "--gc", "--minify"],
-            cwd=str(site), stdout=log_f, stderr=log_f,
-                         env=_wrangler_env, timeout=120
-        )
-    if result.returncode != 0:
-        raise Exception("Hugo build failed: see deploy.log")
-    index_file = site / "public" / "index.html"
-    if not index_file.exists():
-        raise Exception("Hugo build produced empty site: public/index.html not found")
-
-    # Workers + Assets 감지: wrangler.toml에 [assets] 있으면 workers deploy
-    wf = site / "wrangler.toml"
-    use_workers = wf.exists() and "[assets]" in wf.read_text()
-
-    with open(log_path, "a") as log_f:
-        _deploy_timeout = 120
-        try:
-            if use_workers:
-                result = subprocess.run(
-                    ["/opt/homebrew/bin/wrangler", "deploy",
-                     "--config", str(wf)],
-                    cwd=str(site), stdout=log_f, stderr=log_f,
-                                 env=_wrangler_env, timeout=_deploy_timeout
-                )
-            else:
-                result = subprocess.run(
-                    ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-                     "--project-name=" + cf_project,
-                     "--branch=main",
-                     "--commit-dirty=true",
-                     "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-                    cwd=str(site), stdout=log_f, stderr=log_f,
-                                 env=_wrangler_env, timeout=_deploy_timeout
-                )
-        except subprocess.TimeoutExpired:
-            msg = f"Wrangler deploy timed out ({_deploy_timeout}s)"
-            raise Exception(msg)
-    if result.returncode != 0:
-        # 일시적 네트워크 오류 시 최대 2회 재시도
-        err_text = (result.stderr or "").lower()
-        if "fetch failed" in err_text or "fetch error" in err_text or "network" in err_text:
-            import time as _retry_t
-            for attempt in range(2):
-                _retry_t.sleep(10 * (attempt + 1))
-                print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 (network error)")
-                with open(log_path, "a") as log_f:
-                    try:
-                        if use_workers:
-                            result = subprocess.run(
-                                ["/opt/homebrew/bin/wrangler", "deploy",
-                                 "--config", str(wf)],
-                                cwd=str(site), stdout=log_f, stderr=log_f,
-                                             env=_wrangler_env, timeout=_deploy_timeout
-                            )
-                        else:
-                            result = subprocess.run(
-                                ["/opt/homebrew/bin/wrangler", "pages", "deploy", "./public",
-                                 "--project-name=" + cf_project,
-                                 "--branch=main",
-                                 "--commit-dirty=true",
-                                 "--commit-message=deploy-" + __import__("time").strftime("%Y%m%d%H%M%S")],
-                                cwd=str(site), stdout=log_f, stderr=log_f,
-                                             env=_wrangler_env, timeout=_deploy_timeout
-                            )
-                    except subprocess.TimeoutExpired:
-                        print(f"[deploy] {site.name} 재시도 {attempt + 1}/2 timeout ({_deploy_timeout}s)")
-                        continue
-                if result.returncode == 0:
-                    print(f"[deploy] {site.name} 재시도 성공")
-                    break
-        if result.returncode != 0:
-            raise Exception("Wrangler deploy failed: see deploy.log")
-    return True
-
 # Re-export from sub-modules (overrides local definitions)
+#
+# 참고 (Phase 71d): 아래 배포 로직은 데드코드로 확인되어 제거됨.
+#   - 이 모듈의 deploy_site/_deploy_site_inner 로컬 정의는 원래 '790행 재-export'이
+#     덮어써 runtime에서 절대 호출되지 않았음 (shared/publishers/deploy.py 우선).
+#   - 특히 로컬 버전은 CLOUDFLARE_API_TOKEN을 재-주입해 OAuth profile 우선 규약을
+#     위반하는 drift를 내포. 단일 경로(shared.publishers.deploy)로 일원화함.
 from shared.publishers.hugo_writer import (  # noqa: E402, F811
     _build_frontmatter_blowfish,
     _build_frontmatter_congo,
