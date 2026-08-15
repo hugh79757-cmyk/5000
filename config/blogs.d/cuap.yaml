@@ -32,6 +32,8 @@ blogs:
   pipeline: curation
   platform: hugo
   status: paused
+  maintenance_status: isolated
+  cooldown_until: '2026-08-15'
   daily_quota: 5
   domain: baby.informationhot.kr
   cf_project: baby-hugo
