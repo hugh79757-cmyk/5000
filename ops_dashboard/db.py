@@ -1280,6 +1280,76 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
 
     def _rule_entry(e, row, sc_row=None):
         playbook_ref = f"ERROR_PLAYBOOKS.md#{e.id.lower()}"
+        # DATA-01 특수 집계: data_stock 노드는 _latest_check 단일행 기준이 아닌
+        # "브랜드 전체 any-fail→fail" 집계 + affected_blogs 병기를 수행한다.
+        # 마지막 블로그 상태만 반영되는 문제를 해소하기 위한 additive 보정 —
+        # 타 표준 규칙(R01~R12/C08/THUMBNAIL-01) 동작은 불변이다. 블로그별 상세는
+        # 기존대로 check_results를 참조한다. (phase-71f-data-stock-3)
+        if e.id == "data_stock":
+            ds_rows = conn.execute(
+                "SELECT blog_id, status, detail, checked_at FROM check_results "
+                "WHERE check_name = 'data_stock' "
+                f"{'AND blog_id = ?' if blog_id else ''} "
+                "ORDER BY checked_at DESC",
+                (blog_id,) if blog_id else (),
+            ).fetchall()
+            fails = [r for r in ds_rows if r["status"] == "fail"]
+            pass_rows = [r for r in ds_rows if r["status"] == "pass"]
+            if fails:
+                affected = sorted({r["blog_id"] for r in fails})
+                return {
+                    "id": e.id,
+                    "kind": "rule",
+                    "target": e.target,
+                    "status": "fail",
+                    "severity": e.severity,
+                    "action": e.action,
+                    "evidence": (
+                        f"브랜드 전체 재고 부족/고갈 {len(fails)}블로그: "
+                        + ", ".join(affected)
+                        + f" (affected_blogs={len(affected)})"
+                    ),
+                    "rule_id": e.id,
+                    "problem_id": "",
+                    "bucket": e.bucket,
+                    "threshold": e.threshold,
+                    "affected_blogs": affected,
+                    "playbook_ref": playbook_ref,
+                }
+            if not ds_rows:
+                return {
+                    "id": e.id,
+                    "kind": "rule",
+                    "target": e.target,
+                    "status": "unknown",
+                    "severity": e.severity,
+                    "action": e.action,
+                    "evidence": "data_stock: check_results 이력 없음",
+                    "rule_id": e.id,
+                    "problem_id": "",
+                    "bucket": e.bucket,
+                    "threshold": e.threshold,
+                    "affected_blogs": [],
+                    "playbook_ref": playbook_ref,
+                }
+            return {
+                "id": e.id,
+                "kind": "rule",
+                "target": e.target,
+                "status": "pass",
+                "severity": e.severity,
+                "action": e.action,
+                "evidence": (
+                    f"data_stock: 브랜드 전체 재고 충분 "
+                    f"({len(ds_rows)}검사, fail 0, pass {len(pass_rows)})"
+                ),
+                "rule_id": e.id,
+                "problem_id": "",
+                "bucket": e.bucket,
+                "threshold": e.threshold,
+                "affected_blogs": [],
+                "playbook_ref": playbook_ref,
+            }
         # Bug A (ground truth 우선): 확정된 개별 rule 행이 있으면 그 status를
         # 최우선 신뢰한다. check_standard_compliance(_record_failed_rules)는 실패한
         # 규칙마다 status='fail' 개별 행을 기록하므로, 이 행이 ground truth다.

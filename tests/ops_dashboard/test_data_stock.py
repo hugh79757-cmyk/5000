@@ -93,3 +93,60 @@ def test_registry_rule_declared():
     # standard.py 에 존재하지 않는 check_fn 이름 → standard 준수에서 skip
     from ops_dashboard.checks.standard import _resolve_check_fn
     assert _resolve_check_fn(entry.check_fn) is None
+
+
+def test_registry_view_aggregates_any_fail(tmp_path):
+    """data_stock 노드: 마지막 행이 아닌 '브랜드 전체 any-fail→fail' + affected_blogs.
+
+    (게이트3/위험1 보정) 2블로그 중 1개가 fail이면 노드 status=fail,
+    affected_blogs=[해당 블로그]로 정확히 노출된다.
+    """
+    import ops_dashboard.checks as C
+    conn = sqlite3.connect(str(tmp_path / "ops.db"))
+    conn.row_factory = sqlite3.Row
+    # 필요한 스키마 최소화 (get_registry_view가 의존하는 컬럼만)
+    conn.execute(
+        "CREATE TABLE check_results (blog_id TEXT, check_name TEXT, status TEXT, "
+        "detail TEXT, evidence_url TEXT, rule_id TEXT, problem_id TEXT, "
+        "severity TEXT, action TEXT, checked_at TEXT)"
+    )
+    conn.execute(
+        "CREATE TABLE blog_lifecycle (blog_id TEXT, config_status TEXT, "
+        "maintenance_status TEXT, brand TEXT)"
+    )
+    # 2블로그 기록: 하나 pass, 하나 fail (재고 낮은 것으로 강제 주입)
+    for blog, st in [("finance-hugo", "fail"), ("dining-hugo", "pass")]:
+        conn.execute(
+            "INSERT INTO check_results VALUES (?, 'data_stock', ?, 'd', NULL, NULL, "
+            "NULL, NULL, NULL, '2026-08-15T12:00:00')",
+            (blog, st),
+        )
+    conn.commit()
+    # monkeypatch: blog_lifecycle 조회 + sc_row 등 최소 의존 충족용으로
+    # get_registry_view 를 복제 대신 직접 _rule_entry 경로 검증한다.
+    from ops_dashboard.db import get_registry_view
+
+    # get_registry_view 는 blog_lifecycle 의 세션 존재를 요구하므로 2블로그 등록
+    for blog, brand in [("finance-hugo", "stap"), ("dining-hugo", "etap")]:
+        conn.execute(
+            "INSERT INTO blog_lifecycle (blog_id, config_status, maintenance_status, "
+            "brand) VALUES (?, 'active', 'none', ?)",
+            (blog, brand),
+        )
+    conn.commit()
+
+    import ops_dashboard.registry as _reg
+    import ops_dashboard.db as _db
+    orig_by_kind = _reg.by_kind
+    # data_stock 규칙만으로 범위 한정 → triage_classifications 등 비관련 테이블 제거
+    _reg.by_kind = lambda kind: (
+        [next(e for e in _reg.RULES if e.id == "data_stock")] if kind == "rule" else []
+    )
+    try:
+        rv = get_registry_view(conn)
+    finally:
+        _reg.by_kind = orig_by_kind
+    ds = next((e for e in rv["rules"] if e["id"] == "data_stock"), None)
+    assert ds is not None
+    assert ds["status"] == "fail"
+    assert ds["affected_blogs"] == ["finance-hugo"]
