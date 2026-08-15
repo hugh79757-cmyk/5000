@@ -1177,6 +1177,87 @@ def _run_inner(cfg, blog_id, daily_quota):
         slug = _make_slug(keyword)
         # while 루프 재진입 → _title_is_duplicate 재검사
 
+    # === 본문 구조 정규화 (결정론적 후처리) ===
+    def _normalize_product_blocks(md: str, products=None) -> str:
+        """빈 불릿 제거 + 제휴문구 위치 정규화 + CTA 구조 복원."""
+        DISCLOSURE = "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
+
+        # (1) 값 없는 라벨 불릿 제거:  "- 배송:" / "- 이미지:" 등 콜론 뒤 공백뿐인 줄
+        lines = md.split("\n")
+        cleaned = []
+        for ln in lines:
+            s = ln.strip()
+            # "- 라벨:" 뒤에 값이 없는 경우 (또는 "-" 만 남은 줄) 제거
+            if re.match(r"^-\s*[^:]{0,20}:\s*$", s):
+                continue
+            if s == "-":
+                continue
+            # "- 이미지: <url>" 라벨 불릿은 본문에 노출 불필요 → 제거 (썸네일은 featureimage로 처리)
+            if re.match(r"^-\s*이미지:\s*\S", s):
+                continue
+            cleaned.append(ln)
+        md = "\n".join(cleaned)
+
+        # (2) 상품 블록 안(불릿과 CTA 사이)에 끼어든 제휴문구 제거 → 전부 삭제 후 재삽입
+        md = md.replace(DISCLOSURE, "")
+
+        # (3) CTA div가 여러 줄로 쪼개진 경우 한 줄로 복원
+        #     "<div ...>" \n (빈줄/문단) \n "<a ...>...</a></div>" → 한 줄로 병합
+        md = re.sub(
+            r'(<div style="text-align:center;margin:1\.5rem 0">)\s*\n\s*\n?(<a class="btn-price-check".*?</a></div>)',
+            r'\1\2',
+            md,
+            flags=re.DOTALL,
+        )
+        # (3-b) 리스트 항목(- )에 붙은 CTA 버튼을 독립 블록으로 분리
+        #       "- <div ...btn-price-check...></div>" → 앞의 "- " 제거 + 앞뒤 빈 줄
+        md = re.sub(
+            r'^-\s*(<div style="text-align:center;margin:1\.5rem 0"><a class="btn-price-check".*?</a></div>)\s*$',
+            r'\n\1\n',
+            md,
+            flags=re.MULTILINE,
+        )
+        # 혹시 마크다운 CTA 링크가 div 안에서 쪼개진 잔재 정리 (연속 빈줄 축소)
+        md = re.sub(r"\n{3,}", "\n\n", md)
+
+        # (4) 제휴문구를 첫 상품(## 상품별 상세 비교) 직전 1회 + 글 맨 끝 1회 삽입
+        disc_block = "\n\n" + DISCLOSURE + "\n\n"
+        # 상단: "## 상품별 상세 비교" 앞
+        m = re.search(r"^##\s*상품별 상세", md, flags=re.MULTILINE)
+        if m:
+            md = md[:m.start()] + DISCLOSURE + "\n\n" + md[m.start():]
+        # 하단: 맨 끝에 1회 (cross-sell/cta-box보다 뒤가 아니라, 본문 마지막 문단 뒤)
+        md = md.rstrip() + "\n\n" + DISCLOSURE + "\n"
+        # (4-b) "상품별 상세 비교" 소제목을 H2로 강제 (AI가 strong/bold로 출력하는 문제)
+        md = re.sub(r"^\s*<strong>\s*(상품별 상세 비교)\s*</strong>\s*$", r"## \1", md, flags=re.MULTILINE)
+        md = re.sub(r"^\s*\*\*\s*(상품별 상세 비교)\s*\*\*\s*$", r"## \1", md, flags=re.MULTILINE)
+        # (4-c) 첫 상품 H3 앞에 "상품별 상세 비교" H2가 없으면 삽입
+        if "## 상품별 상세" not in md:
+            m = re.search(r"^###\s+", md, flags=re.MULTILINE)
+            if m:
+                md = md[:m.start()] + "## 상품별 상세 비교\n\n" + md[m.start():]
+
+        # (5) 각 H3 상품 제목 아래에 상품 이미지 삽입 (상품명 앞토큰 매칭)
+        if products:
+            def _key(name):
+                return re.sub(r"[\s\W]+","",(name or "")[:12]).lower()
+            imgmap=[(_key(p.get("product_name","")),p.get("product_image","")) for p in products if p.get("product_image")]
+            out=[]
+            for ln in md.split("\n"):
+                out.append(ln)
+                m=re.match(r"^###\s+(.*)",ln)
+                if m:
+                    hk=re.sub(r"[\s\W]+","",m.group(1)[:12]).lower()
+                    for k,url in imgmap:
+                        if k and k in hk or hk and hk in k:
+                            out.append("")
+                            out.append(f'<img src="{url}" alt="" loading="lazy" style="max-width:100%;height:auto;border-radius:8px">')
+                            out.append("")
+                            break
+            md="\n".join(out)
+        md=re.sub(r"\n{3,}","\n\n",md)
+        return md
+
     # 큐레이션 CTA markdown 링크 → HTML 버튼 변환
     # 재정의: AI 생성 마크다운 CTA 링크를 HTML 버튼으로 변환
     def fix_markdown_cta_links(body_md: str) -> str:
@@ -1201,6 +1282,7 @@ def _run_inner(cfg, blog_id, daily_quota):
 
     # CTA markdown → HTML post-processing
     body_md = fix_markdown_cta_links(body_md)
+    body_md = _normalize_product_blocks(body_md, products)
 
     # CUAP 거미줄 크로스 링크 삽입 (fail-open)
     try:
