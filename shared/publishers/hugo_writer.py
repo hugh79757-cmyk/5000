@@ -465,6 +465,8 @@ def _clean_body(body_md, site_path=""):
         r"^[Cc]uisine\s+[Ss]tyles\s+[Aa]nd\s+[Ww]hat\s+[^#]+\s+[Dd]oes\s+[Bb]est", # "Cuisine Styles and What {city} Does Best"
         r"^[Pp]rice\s+[Gg]uide\s*:\s*[Ww]hat\s+[Tt]o\s+[Bb]udget\s+[Ff]or\s+[Mm]ichelin\s+[Dd]ining", # "Price Guide: What to Budget for Michelin Dining"
         r"^[Bb]ooking\s+[Tt]ips\s+[Aa]nd\s+[Ww]hat\s+[Tt]o\s+[Kk]now\s+[Bb]efore\s+[Yy]ou\s+[Gg]o", # "Booking Tips and What to Know Before You Go"
+        # ── curation 파이프라인 H2 (상품 비교) ──
+        r"^상품별 상세 비교$",                   # "상품별 상세 비교" (curation _normalize_product_blocks 강제 H2)
     ]
     _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
 
