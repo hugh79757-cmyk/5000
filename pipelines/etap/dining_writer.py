@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sqlite3
+import unicodedata
 
 from pipelines.etap.quality_guard import preprocess_restaurants
 from shared.ai_writer import generate as ai_generate
@@ -52,6 +53,18 @@ COUNTRY_ALIASES = {
     "türkiye": "turkey",
     "turkey": "turkey",
 }
+
+# DB city_aliases로 커버되지 않는 실발행 토픽의 도시명 매핑(코드 레벨 폴백).
+# key = (정규화할 alias, 정규화된 country) → canonical 도시명.
+# value에 대한 매칭은 _resolve_city_alias에서 country 하드 게이트를 그대로
+# 유지한다. 해당 국가에 michelin 데이터가 있음을 사전 검증한 경우만 등재.
+# (예: Rīga→Riga 동국가 Latvia 확인, Los Angeles County→Los Angeles 동국가).
+CITY_ALIAS_FALLBACK = {
+    ("riga", "latvia"): "Riga",
+    ("los angeles county", "united states"): "Los Angeles",
+    ("merseyside", "united kingdom"): "Liverpool",
+    ("nevsehir merkez", "turkey"): "Nevşehir",
+}
 _MICHELIN_RESTAURANT_SQL = """
     SELECT name, address, cuisine, price, award, green_star,
            description, url, city, country
@@ -87,7 +100,13 @@ def _resolve_city_alias(conn, city, country):
     for r in rows:
         if r["country"] and _normalize_country(r["country"]) == ref:
             return r["canonical_name"]
-    return None
+    # DB 별칭 부재 시 코드 레벨 폴백(동일 국가 하드 게이트 유지). 소문자·공백
+    # 축약 키로 매칭하고, 발음 구별 부호(예: Rīga→Riga)는 NFD 분해 후 제거해
+    # 표기 변이에 강건하게 처리한다.
+    def _fold(s):
+        return unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    key = (_fold(" ".join((city or "").strip().lower().split())), ref)
+    return CITY_ALIAS_FALLBACK.get(key)
 
 
 def fetch_restaurants(city, country=None, conn=None):

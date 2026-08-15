@@ -102,6 +102,35 @@ class TestAliasMatch:
         assert rows == []
 
 
+class TestCodeFallback:
+    """CITY_ALIAS_FALLBACK 코드 레벨 폴백 (DB city_aliases 부재 시)."""
+
+    def test_fallback_resolves_same_country(self, db):
+        """DB 별칭이 없어도 코드 폴백으로 동국가 canonical 해소."""
+        _seed_michelin(db, [{"name": "Vincents", "city": "Riga", "country": "Latvia"}])
+        rows = fetch_restaurants("Rīga", "Latvia", db)
+        assert len(rows) == 1
+        assert rows[0]["city"] == "Riga"
+
+    def test_fallback_case_insensitive(self, db):
+        _seed_michelin(db, [{"name": "L'Enclume", "city": "Liverpool", "country": "United Kingdom"}])
+        rows = fetch_restaurants("merseyside", "United Kingdom", db)
+        assert len(rows) == 1
+        assert rows[0]["city"] == "Liverpool"
+
+    def test_fallback_wrong_country_rejected(self, db):
+        """코드 폴백도 country 하드 게이트 유지 — 타국가 오매칭 거부."""
+        _seed_alias(db, [{"canonical": "Riga", "alias": "Rīga", "country": "Estonia"}])
+        _seed_michelin(db, [{"name": "X", "city": "Riga", "country": "Latvia"}])
+        rows = fetch_restaurants("Rīga", "France", db)
+        assert rows == []
+
+    def test_fallback_country_with_data_only(self, db):
+        """폴백 대상이 아닌 도시는 빈 결과 유지 (임의 매칭 없음)."""
+        rows = fetch_restaurants("NonRecoverableCity", "Latvia", db)
+        assert rows == []
+
+
 class TestCountryNormalization:
     """국가 표기 차이 브리징 (USA/US/United States 등)."""
 
