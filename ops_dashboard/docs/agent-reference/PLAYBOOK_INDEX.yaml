@@ -1123,3 +1123,18 @@ codes:
   - docs/CONTENT-QUALITY-RUNBOOK.md CQ06 참조
   - .md 소스에서 '<img' 미검출 확인 (figure만 사용)
   needs_human: false
+- code: CQ07
+  playbook_ref: ERROR_PLAYBOOKS.md#cq07
+  name_ko: 상품 설명 문단 소실 (h3 블록에 이미지·CTA만 있고 설명 없음)
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: full_auto
+  one_line_action: 감지 전용·조기경보 — descfix 회귀 시 자동 감지·알림. 교정은 _normalize_product_blocks 설명 보존 로직 점검 필요 (이미지와 설명이 같은 <p> 안이므로 태그가 아닌 텍스트 기준 판정)
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks — 설명 문단 보존 로직 (재발 시 수정 지점)
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ07 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false

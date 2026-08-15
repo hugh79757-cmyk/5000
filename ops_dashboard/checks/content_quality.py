@@ -99,6 +99,31 @@ def _analyze(html: str) -> list[str]:
         if prod_h3 >= 2 and prod_img < prod_h3:
             issues.append(f"[CQ05] 상품 이미지 부족(상품 {prod_h3} vs 이미지 {prod_img})")
 
+    # 7) 상품 설명 문단 소실 — 상품 섹션(룰6과 동일 범위) 내 각 h3 블록에 설명 텍스트가 없는 경우
+    #    (이미지·CTA만 있고 설명 문장(CJK)이 없으면 위반. figure가 <p>에 래핑된 구조라
+    #     태그 유무가 아닌 텍스트 기준으로 판정)
+    m2 = re.search(r"상품별 상세 비교", html)
+    if m2:
+        seg = html[m2.start():]
+        nxt = re.search(r"<h2", seg[10:])            # 다음 h2 전까지가 상품 섹션
+        if nxt:
+            seg = seg[:nxt.start()+10]
+        h3s = list(re.finditer(r"<h3[^>]*>.*?</h3>", seg, re.S))   # h3 전체 요소(제목 포함)
+        missing_desc = 0
+        for _i, _hm in enumerate(h3s):
+            _end = h3s[_i+1].start() if _i+1 < len(h3s) else len(seg)
+            _blk = seg[_hm.end():_end]               # </h3> 다음 ~ 다음 h3(또는 섹션 끝) 구간
+            # 오탐 방지: <img>/<figure>/CTA 없는 빈·부제목 블록은 대상 외 (FAQ h3는 섹션 밖이라 제외됨)
+            if not re.search(r"<img\b|<figure\b|btn-price-check", _blk):
+                continue
+            _txt = re.sub(r"<a\b[^>]*btn-price-check[^>]*>.*?</a>", "", _blk, flags=re.S)  # CTA 링크 텍스트 제외
+            _txt = re.sub(r"<[^>]+>", "", _txt)
+            _txt = re.sub(r"\s+", "", _txt)
+            if not re.search(r"[\uac00-\ud7a3\u4e00-\u9fff]", _txt):   # 설명 문장(CJK) 0자
+                missing_desc += 1
+        if missing_desc:
+            issues.append(f"[CQ07] 상품 설명 문단 소실({missing_desc}개)")
+
     return issues
 
 
