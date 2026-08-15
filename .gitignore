@@ -14,7 +14,8 @@ blogger_token.pickle
 *.db
 public/
 static/images/
-logs/
+logs/*
+!logs/destructive_*.log
 rankingoneto-1-1/
 *.deprecated
 nomad_writer.py.bak
@@ -94,5 +95,7 @@ rollback_bouches_log5593.sql
 .gsd/
 .commandcode/
 .bg-shell/
-.planning/
+.planning/*
+!.planning/worklog/
+!.planning/worklog/WL-*.md
 scripts/master_backup.py.pre-r2-fix-*
