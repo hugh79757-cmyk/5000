@@ -40,20 +40,77 @@ def _get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-def fetch_restaurants(city, country=None):
-    conn = _get_db()
-    rows = conn.execute("""
-        SELECT name, address, cuisine, price, award, green_star,
-               description, url, city, country
-        FROM michelin_restaurants
-        WHERE city = ?
-        ORDER BY CASE award
-            WHEN '3 Stars' THEN 1 WHEN '2 Stars' THEN 2
-            WHEN '1 Star' THEN 3 WHEN 'Bib Gourmand' THEN 4
-            ELSE 5 END
-    """, (city,)).fetchall()
-    conn.close()
-    return [dict(r) for r in rows]
+# 국가명 표기 정규화: michelin_restaurants / dining_topics / city_aliases 간
+# 형식 차이(USA vs United States vs US, UK vs United Kingdom, Türkiye vs
+# Turkey)를 브리징한다. 표기만 다르고 동일 국가를 하나의 정규화 키로 맵핑.
+COUNTRY_ALIASES = {
+    "usa": "united states",
+    "us": "united states",
+    "united states": "united states",
+    "uk": "united kingdom",
+    "united kingdom": "united kingdom",
+    "türkiye": "turkey",
+    "turkey": "turkey",
+}
+_MICHELIN_RESTAURANT_SQL = """
+    SELECT name, address, cuisine, price, award, green_star,
+           description, url, city, country
+    FROM michelin_restaurants
+    WHERE city = ?
+    ORDER BY CASE award
+        WHEN '3 Stars' THEN 1 WHEN '2 Stars' THEN 2
+        WHEN '1 Star' THEN 3 WHEN 'Bib Gourmand' THEN 4
+        ELSE 5 END
+"""
+
+
+def _normalize_country(cntry):
+    """국가명 표기 정규화 키 반환 (없으면 소문자 원본)."""
+    c = (cntry or "").strip()
+    return COUNTRY_ALIASES.get(c.lower(), c.lower())
+
+
+def _resolve_city_alias(conn, city, country):
+    """별칭(city) → 정식 도시명(canonical_name) 해석, country 하드 게이트.
+
+    오매칭 방지를 위해 city_aliases.country가 주어진 topic country와
+    (정규화 후) 일치할 때만 canonical_name을 반환한다. country 불일치(예:
+    이탈리아 토픽의 'TP' → Taipei/Taiwan)는 거부되어 None을 돌려준다.
+    """
+    ref = _normalize_country(country)
+    if not ref:
+        return None
+    rows = conn.execute(
+        "SELECT canonical_name, country FROM city_aliases WHERE lower(alias) = lower(?)",
+        (city,),
+    ).fetchall()
+    for r in rows:
+        if r["country"] and _normalize_country(r["country"]) == ref:
+            return r["canonical_name"]
+    return None
+
+
+def fetch_restaurants(city, country=None, conn=None):
+    """미쉐린 식당 조회.
+
+    기본은 city 정확일치. city 단독으로 결과가 없고 country가 주어진 경우에만
+    city_aliases 별칭 정규화를 통해 canonical 도시명으로 재조회하되, country
+    일치를 하드 게이트로 유지해 타국가 오매칭을 방지한다.
+
+    conn를 넘기면 caller가 소유한 연결로 조회하고 닫지 않는다 (테스트 주입용).
+    """
+    own_conn = conn is None
+    db = conn if conn is not None else _get_db()
+    try:
+        rows = db.execute(_MICHELIN_RESTAURANT_SQL, (city,)).fetchall()
+        if not rows and country:
+            canonical = _resolve_city_alias(db, city, country)
+            if canonical and canonical != city:
+                rows = db.execute(_MICHELIN_RESTAURANT_SQL, (canonical,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        if own_conn:
+            db.close()
 
 def _build_summary(restaurants, city):
     total = len(restaurants)
