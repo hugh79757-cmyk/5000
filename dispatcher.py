@@ -395,6 +395,42 @@ def _record_ledger(blog_id) -> None:
 
 # ─── STAP 모듈 격리 ───
 
+# 발행 실패 계열 P-이벤트 — 발행 성공 시 자동 close 대상 (stale open 누적 방지).
+_PUBLISH_FAILURE_PROBLEM_IDS = ("P01", "P02", "P20", "P26", "P27", "P28", "P30")
+
+
+def _close_publish_failure_events(blog_id: str) -> None:
+    """해당 blog의 open 발행 실패 이벤트(P01/P02/P20 등)를 closed로 전환.
+
+    발행 성공 직후 dispatcher 호출부가 호출한다. 예외는 삼키지 않고 경고로 기록
+    (현재 발행 성공 경로에 영향 없어야 하므로 격리).
+    """
+    from shared.publish_error_events import close_publish_error_event
+    try:
+        _conn = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
+        try:
+            for _pid in _PUBLISH_FAILURE_PROBLEM_IDS:
+                _closed = close_publish_error_event(_conn, blog_id=blog_id, problem_id=_pid)
+                if _closed:
+                    logger.info(f"[pcode] 발행 실패 이벤트 close: {blog_id}/{_pid} ({_closed}건)")
+        finally:
+            _conn.close()
+    except Exception as _e:
+        logger.warning(f"[pcode] 발행 실패 이벤트 close 실패: {blog_id}: {_e}")
+
+
+def _deploy_log_hint(blog_id: str) -> str:
+    """배포 실패 푸시에 알맞은 deploy.log 경로 힌트.
+
+    STAP 계열(주식/배당/ETF/섹터/IPO/금융)은 STAP/logs/deploy.log, 그 외 내부
+    블로그(CAP/SEAP 등)는 5000 중앙 logs/deploy.log를 가리킨다. 하드코딩된
+    'STAP/logs/deploy.log'는 SEAP senior-hugo를 STAP으로 오귀속시키는 부수버그 해소.
+    """
+    if blog_id in STAP_PIPELINE_MAP:
+        return "STAP/logs/deploy.log"
+    return "logs/deploy.log (5000 중앙)"
+
+
 def _run_stap(stap_name, cfg):
     """STAP 파이프라인을 subprocess로 완전 격리 실행 (shared runner 위임)"""
     from shared.paths import STAP_ROOT as _STAP_ROOT
@@ -1270,6 +1306,9 @@ def dispatch(blog_id):
         _record_ledger(blog_id)
         _reset_failure_count(blog_id)
         _reset_extended_failure_keys(blog_id)
+        # P계열 발행 실패 이벤트 자동 close — 해당 blog가 정상 발행 성공하면
+        # stale open 누적을 끊는다 (ERROR_PLAYBOOKS.md L161 "재시도 성공 시 close").
+        _close_publish_failure_events(blog_id)
         if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS:
             deploy_ok = _build_and_deploy_central(blog_id)
             if not deploy_ok:
@@ -1294,7 +1333,7 @@ def dispatch(blog_id):
                     _tg_error(blog_id, "deploy",
                         f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
                         f"원인: {deploy_err[:200]}\n"
-                        f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
+f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                 _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
                     "deploy_error", blog_id)
                 _ops_conn.close()
@@ -1303,7 +1342,7 @@ def dispatch(blog_id):
                 _tg_error(blog_id, "deploy",
                     f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
                     f"원인: {deploy_err[:200]}\n"
-                    f"조치: STAP/logs/deploy.log 확인 후 Hugo 테마/themesDir 점검")
+                    f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
         else:
             # 성공 + 배포 오류 없음 → stale P04 이벤트 close
             # (성공했으나 이전에 생성된 P04 open 이벤트가 남아있을 수 있음)
@@ -1401,7 +1440,8 @@ def dispatch(blog_id):
                     blog_id, reason, _spec.problem_id, _consec)
                 get_monitor().report(
                     blog_id,
-                    {"reason": reason},
+                    {"reason": reason, "stage": reason,
+                     "detail": str(result.get("stderr") or result.get("detail") or reason)},
                     phase=_spec.hook,
                     extra={"consecutive_failures": _consec})
 
