@@ -39,6 +39,20 @@ import tempfile
 _MODULE_SPEC_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$")
 
 
+def _redact_exception(text: str) -> str:
+    """subprocess stderr에서 민감정보(토큰/URL/키)를 마스킹한 뒤 잘라 반환.
+
+    작업3: run_subprocess가 non-zero exit stderr를 보존 시, 다음 실패에서 실제 예외를
+    잡을 수 있게 하되 비밀값이 로그/대시보드에 새지 않도록 공통 시크릿 패턴만 제거한다.
+    publish_error_events.redact_detail을 재사용할 수 있지만 독립성을 위해 경량 패턴만 사용.
+    """
+    masked = re.sub(r"bot\d+:[A-Za-z0-9_-]+", "[REDACTED_BOT_TOKEN]", text)
+    masked = re.sub(r"(?i)(api[_-]?key|token|authorization|bearer)\s*[:=]\s*[^\s,;]+",
+                    r"\1=[REDACTED]", masked)
+    masked = re.sub(r"https?://[^\s'\"]+", "[URL]", masked)
+    return masked[:1000]
+
+
 def run_subprocess(
     project_root: str,
     venv_python: str,
@@ -128,7 +142,13 @@ def run_subprocess(
                 pass
 
     if proc.returncode != 0:
-        return {"success": False, "reason": f"{prefix}_subprocess_error"}
+        # 크래시 원인 캡처: stderr를 보존해 다음 실패 시 실제 예외가 잡히게 한다.
+        # (이전에는 버려져 sector 등 STAP 크래시 원인이 유실됐음 — 작업3).
+        _stderr = (proc.stderr or "").strip()
+        reason = {"success": False, "reason": f"{prefix}_subprocess_error"}
+        if _stderr:
+            reason["stderr"] = _redact_exception(_stderr[-1000:])
+        return reason
 
     for line in reversed(proc.stdout.strip().split("\n")):
         if line.strip().startswith("{"):

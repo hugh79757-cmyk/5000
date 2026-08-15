@@ -82,6 +82,27 @@ class TestNonZero:
         result = run_subprocess(root, "", spec, run_callable="run", cfg={}, prefix="subproc")
         assert result == {"success": False, "reason": "subproc_subprocess_error"}
 
+    def test_run_subprocess_preserves_stderr_on_crash(self, tmp_path):
+        """크래시(stderr)가 버려지지 않고 result['stderr']에 보존 — sector 진단(작업3)."""
+        root, spec = _make_project(
+            tmp_path,
+            "def run(cfg):\n    raise RuntimeError('boom detail')\n",
+        )
+        result = run_subprocess(root, "", spec, run_callable="run", cfg={}, prefix="stap")
+        assert result["reason"] == "stap_subprocess_error"
+        assert "boom detail" in result.get("stderr", ""), "stderr가 보존되어야 함"
+
+    def test_run_subprocess_redacts_secrets_in_stderr(self, tmp_path):
+        """stderr의 봇 토큰은 마스킹되어 대시보드로 새지 않는다."""
+        root, spec = _make_project(
+            tmp_path,
+            "def run(cfg):\n    raise RuntimeError('api_key=sk-secret123 crash')\n",
+        )
+        result = run_subprocess(root, "", spec, run_callable="run", cfg={}, prefix="stap")
+        stderr = result.get("stderr", "")
+        assert "sk-secret123" not in stderr
+        assert "api_key=[REDACTED]" in stderr
+
 
 class TestTokenSafety:
     def test_runner_strips_cloudflare_api_token(self, tmp_path, monkeypatch):
