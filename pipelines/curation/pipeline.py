@@ -1237,24 +1237,62 @@ def _run_inner(cfg, blog_id, daily_quota):
             if m:
                 md = md[:m.start()] + "## 상품별 상세 비교\n\n" + md[m.start():]
 
-        # (5) 각 H3 상품 제목 아래에 상품 이미지 삽입 (상품명 앞토큰 매칭)
+        # (5) 각 H3 상품 제목 아래에 상품 이미지 삽입
+        #     방식A(우선): H3 구간 내 CTA 링크의 pageKey → product_id 1:1 역추적 (무손실)
+        #     방식B(폴백): CTA가 있으나 pageKey 추출 불가/미매칭 구간에서 정규화된
+        #                  상품명/H3제목 서브스트링·토큰(모델코드) 교집합 매칭
         if products:
-            def _key(name):
-                return re.sub(r"[\s\W]+","",(name or "")[:12]).lower()
-            imgmap=[(_key(p.get("product_name","")),p.get("product_image","")) for p in products if p.get("product_image")]
-            out=[]
-            for ln in md.split("\n"):
+            # product_id(str) → product_image 맵 (이미지 있는 상품만)
+            img_by_id = {
+                str(p.get("product_id", "")).strip(): p.get("product_image", "")
+                for p in products
+                if p.get("product_id") and p.get("product_image")
+            }
+            # 방식B 정규화: (a) [ ... ] 접두어 제거 (b) —/–/- 이후 설명 제거 (c) 콤마 뒤 옵션 제거
+            def _norm(name):
+                s = re.sub(r"^\[[^\]]*\]", "", name or "")
+                s = re.split(r"\s*[—–-]\s*", s)[0]
+                s = s.split(",")[0].strip()
+                return re.sub(r"[\s\W]+", "", s).lower()
+            def _tokens(name):
+                s = re.sub(r"^\[[^\]]*\]", "", name or "")
+                s = re.split(r"\s*[—–-]\s*", s)[0]
+                return set(re.findall(r"[a-z0-9]+", s.lower()))
+            imgmap = [
+                (_norm(p.get("product_name", "")), _tokens(p.get("product_name", "")), p.get("product_image", ""))
+                for p in products if p.get("product_image")
+            ]
+            out = []
+            lines = md.split("\n")
+            i = 0
+            while i < len(lines):
+                ln = lines[i]
                 out.append(ln)
-                m=re.match(r"^###\s+(.*)",ln)
+                m = re.match(r"^###\s+(.*)", ln)
                 if m:
-                    hk=re.sub(r"[\s\W]+","",m.group(1)[:12]).lower()
-                    for k,url in imgmap:
-                        if k and k in hk or hk and hk in k:
-                            out.append("")
-                            out.append(f'{{{{< figure src="{url}" alt="{m.group(1)}" >}}}}')
-                            out.append("")
-                            break
-            md="\n".join(out)
+                    title = m.group(1)
+                    j = i + 1
+                    while j < len(lines) and not re.match(r"^#{1,3}\s", lines[j]):
+                        j += 1
+                    section = "\n".join(lines[i:j])
+                    url = None
+                    if "link.coupang.com" in section or "www.coupang.com" in section:
+                        pm = re.search(r"pageKey=(\d+)", section)
+                        if pm and pm.group(1) in img_by_id:
+                            url = img_by_id[pm.group(1)]
+                        else:
+                            hk, ht = _norm(title), _tokens(title)
+                            for k, toks, img in imgmap:
+                                if (k and (k in hk or hk in k)) or (ht and toks and ht & toks):
+                                    url = img
+                                    break
+                    if url:
+                        out.append("")
+                        out.append(f'{{{{< figure src="{url}" alt="{title}" >}}}}')
+                        out.append("")
+                    i = j - 1  # 처리한 구간 건너뛰기 (다음 헤딩부터 재개)
+                i += 1
+            md = "\n".join(out)
         md=re.sub(r"\n{3,}","\n\n",md)
         return md
 
