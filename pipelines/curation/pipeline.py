@@ -1251,7 +1251,7 @@ def _run_inner(cfg, blog_id, daily_quota):
                     for k,url in imgmap:
                         if k and k in hk or hk and hk in k:
                             out.append("")
-                            out.append(f'<img src="{url}" alt="" loading="lazy" style="max-width:100%;height:auto;border-radius:8px">')
+                            out.append(f'{{{{< figure src="{url}" alt="{m.group(1)}" >}}}}')
                             out.append("")
                             break
             md="\n".join(out)
