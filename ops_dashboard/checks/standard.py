@@ -632,7 +632,10 @@ def _load_r2_exempt_domains() -> frozenset[str]:
     if _R2_EXEMPT_LOADED:
         return _R2_EXEMPT_DOMAINS
     _R2_EXEMPT_LOADED = True
-    cfg_path = Path(os.environ.get("FIVEK_ROOT", str(Path(__file__).resolve().parents[2]))) / "config" / "quality_checklist.yaml"
+    # Phase 71d: parents[2] 의존 폴백 대신 shared.paths.CONFIG_DIR 를 단일 소스로 사용.
+    # (ops_dashboard/checks/standard.py → 격리 실행·서버 로드 모두에서 경로 일관성 보장)
+    from shared.paths import CONFIG_DIR
+    cfg_path = Path(CONFIG_DIR) / "quality_checklist.yaml"
     try:
         import yaml as _yaml
     except Exception as e:  # pragma: no cover - yaml 항상 설치됨 (requirements)
