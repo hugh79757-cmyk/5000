@@ -1290,7 +1290,6 @@ def _run_inner(cfg, blog_id, daily_quota):
                         out.append("")
                         out.append(f'{{{{< figure src="{url}" alt="{title}" >}}}}')
                         out.append("")
-                    i = j - 1  # 처리한 구간 건너뛰기 (다음 헤딩부터 재개)
                 i += 1
             md = "\n".join(out)
         md=re.sub(r"\n{3,}","\n\n",md)
