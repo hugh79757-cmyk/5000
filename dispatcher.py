@@ -378,7 +378,8 @@ def _record_ledger(blog_id) -> None:
                     url = row_cu[1] or ""
                     source_id = blog_id
                 conn_cu.close()
-            except Exception:
+            except Exception as e:
+                logger.warning(f"[lead_migration] curation DB close 실패: {e}")
                 pass
 
         conn = sqlite3.connect(str(LEDGER_DB))
@@ -717,7 +718,8 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         try:
             from shared.telegram_notifier import send_error as _tg_error
             _tg_error(f"[deploy blocked] {blog_id}: {_violation_summary}")
-        except Exception:
+        except Exception as e:
+            logger.warning(f"[deploy blocked] 텔레그램 전송 실패: {e}")
             pass
         return False
 
@@ -790,7 +792,8 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                 _fcntl.flock(lock_file, _fcntl.LOCK_UN)
                 lock_file.close()
                 logger.info(f"[deploy] {blog_id} 락 해제")
-            except Exception:
+            except Exception as e:
+                logger.warning(f"[deploy] {blog_id} 락 해제 실패: {e}")
                 pass
 
         if r2.returncode != 0:
@@ -817,7 +820,8 @@ def _record_failure(blog_id: str, stage: str, error_msg: str) -> None:
         )
         conn.commit()
         conn.close()
-    except Exception:
+    except Exception as e:
+        logger.warning(f"[deploy] deploy 실패 이벤트 기록 오류: {e}")
         pass
 
 
@@ -1082,7 +1086,8 @@ def _dispatch_auto_fix(
         try:
             _trigger_post_publish_checks(blog_id, ops_db_path, _run_autofix=False)
             summary["recheck_triggered"] = True
-        except Exception:
+        except Exception as e:
+            logger.warning("[auto-fix] %s 재검사 트리거 실패: %s", blog_id, e)
             pass
     return summary
 
@@ -1178,7 +1183,8 @@ def execute_pending_fix(
         try:
             _trigger_post_publish_checks(blog_id, ops_db_path, _run_autofix=False)
             rechecked = True
-        except Exception:
+        except Exception as e:
+            logger.warning("[pending-fix] %s 재검사 트리거 실패: %s", blog_id, e)
             pass
 
     final_status = "resolved" if ok else "failed"
@@ -1357,7 +1363,8 @@ def dispatch(blog_id):
                     _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
                         "P16", blog_id)
                     _ops_conn.close()
-                except Exception:
+                except Exception as e:
+                    logger.warning("[summary] P16 일일 요약 기록 실패: %s", e)
                     pass
                 # STAP collect_all 자동 실행 (데이터 갱신)
                 try:

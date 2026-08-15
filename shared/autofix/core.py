@@ -64,8 +64,9 @@ def backup_blog(site_path: str, blog_id: str) -> bool:
         if r.returncode == 0:
             logger.info(f"  backup: git tag {BACKUP_TAG_PREFIX}-{blog_id}")
             return True
-    except Exception:
-        pass
+    except Exception as e:
+        # Phase 71d: 조용한 실패 금지 — 백업 실패를 명시적으로 기록
+        logger.warning(f"git tag 백업 실패 ({blog_id}): {e} — file 백업으로 대체")
     layouts = site / "layouts"
     if layouts.is_dir():
         BAK = site / f".bak_layouts_{datetime.now().strftime('%Y%m%d')}"

@@ -114,8 +114,8 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
             _m_dir = re.search(r'^themesDir\s*=\s*["\'](.+?)["\']', _toml_text, re.MULTILINE)
             if _m_dir:
                 _themes_dir = _m_dir.group(1)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("hugo.toml 테마/themesDir 파싱 실패(기본값 사용): %s", e)
     _local_theme = site / "themes" / _hugo_theme if _hugo_theme else None
     if not (_local_theme and _local_theme.is_dir()):
         _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
