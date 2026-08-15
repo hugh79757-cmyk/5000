@@ -10,3 +10,4 @@
 [2026-08-15 13:21:19] feat: data_stock no_source 19건 노출(코드 additive, DB 무정지) | 사전=0건삭제 | 백업=git tag phase-71g-dining-cities-2 | 사후=회귀27실패 동일/신규0, 19/19 감지 | 보존확인=DB변경없음 read-only
 [2026-08-15 14:24:04] 문서 백업 삭제(커밋 후) | 사전카운트=2(ADSENSE-GUIDE.md.bak, Blowfish-...지침서.md.bak) | 백업=커밋 6abfc1666에 원본 포함(복원 가능) | 사후=0건 | 보존확인=두 문서 원본 커밋 반영 확인
 [2026-08-15 15:03] pet-hugo 활성화: cuap.yaml status paused→active, ops.db maintenance_status in_progress→none(resume_ready=0), sync_blog_lifecycle=85rows | 사전카운트=1행 UPDATE | 백업=ops.db.bak_pet_pilot_20260815 | 사후=pet-hugo active/none | 보존확인=다른 14개 CUAP 유지
+[2026-08-15 15:15] pet-hugo 라이브 배포: dispatcher(스케줄러 15:12 트리거) 발행→_build_and_deploy_central(wrangler deploy WORKERS) | 사전=activation완료 | 백업=ops.db.bak_pet_pilot_20260815 | 사후=Version e0f404f4, live HTTP200, ad-slot 2195212287 | 보존확인=14개 CUAP 유지
