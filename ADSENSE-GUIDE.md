@@ -348,11 +348,12 @@ html.dark ins.adsbygoogle {
 - [ ] `layouts/partials/extend_head.html` 생성 (GA4 + 모바일 보정 CSS)
 - [ ] `layouts/partials/adsense/top.html` 생성 (바깥 래퍼 div + div 밖 push)
 - [ ] `layouts/partials/adsense/in-article.html` 생성 (fluid+in-article + div 밖 push)
-- [ ] `layouts/_default/single.html` 오버라이드 (헤더 2슬롯 + 본문 H2 분할 인젝션)
+- [ ] `layouts/_default/single.html` 오버라이드 (헤더 `top.html` 단일 광고 + 본문 H2 분할 인젝션)
 - [ ] `layouts/_default/baseof.html` — **오버라이드하지 않음** (테마 기본 사용)
 - [ ] `assets/css/custom.css`에 `.ad-inarticle`, `.ad-top`, `unfilled`, 다크모드 규칙 포함
 - [ ] Hugo 빌드 정상 확인
 - [ ] 배포 후 광고 노출 확인 (H1 위 + 본문 중간)
+- [ ] freshness 판정 실데이터 확인 (publish_ledger 실시간 재계산으로 pass — 캐시 스테일 아님)
 
 ---
 
@@ -368,6 +369,8 @@ html.dark ins.adsbygoogle {
 8. **Description(lead) 사용 금지** — 광고 레이아웃 방해, 글 잘림 유발
 9. **baseof.html 커스텀 오버라이드 금지** — 테마 기본 사용
 10. **extend-head.html에 하드코딩된 Publisher ID 금지** — 반드시 `site.Params` 사용
+11. **`leaderboardSlot` 등 비표준 키명 금지** — `topSlot`/`inArticleSlot` 단일화 (pet-hugo 파일럿, R02 기준)
+12. **single.html 헤더 내 2번째 in-article 광고·dead TOC 마크업 잔존 금지** — 헤더는 `top.html` 단일, in-article은 본문 H2 분할에서만
 
 ---
 
@@ -412,7 +415,102 @@ html.dark ins.adsbygoogle {
 
 ---
 
-> **요약**: issue-techpawz-hugo가 광고 완벽 노출 검증을 마친 유일한 표준. 헤더 2슬롯 + 본문 H2 분할 인젝션 + `showTableOfContents = false` + adsbygoogle.js 즉시 로드 + `fluid`+`in-article` 포맷이 핵심.
+## 10-3. 대표 확정 5건 (2026-08-15)
+
+> **[대표 확정]** 라벨이 붙은 값은 대표 승인 기준으로, 기존 §3-1·§10-1과 함께 단일 기준으로 취급한다.
+> downstream 규칙(ops_dashboard RULES/preflight) 및 신규 블로그 매핑은 이 값들을 표준으로 따른다.
+
+### ① 날짜 표시 포맷 — 한국식 "2026년 8월 10일"
+
+**[대표 확정]** 날짜는 한국식 `YYYY년 M월 D일` 포맷을 사용한다.
+
+`config/_default/languages.ko.toml` (`[languages.ko]`):
+
+```toml
+dateFormat = "2006년 1월 2일"
+```
+
+- 실제 렌더 결과: `2026년 8월 10일` (pet.informationhot.kr 포스트 화면 확인, HTTP 200)
+- `showDate = true`와 결합하여 발행일을 한국식으로 표시한다.
+
+### ② 읽기시간 삭제 — showReadingTime = false
+
+**[대표 확정]** 읽기시간 표시를 비활성화한다. 광고 레이아웃과 글몫 표시를 깔끔하게 유지하기 위함.
+
+`hugo.toml` `[params.article]` (또는 config/_default/params.toml):
+
+```toml
+showReadingTime = false
+```
+
+### ③ 단어수 삭제 — showWordCount = false
+
+**[대표 확정]** 단어수 표시를 비활성화한다. (pet-hugo 기준값과 일치)
+
+```toml
+showWordCount = false
+```
+
+### ④ 히어로 이미지 — object-fit: contain (여백 허용, 전체 이미지 표시)
+
+**[대표 확정]** 히어로(featured) 이미지는 `object-fit: contain`으로 렌더링한다.
+이미지 원본 비율을 유지하면서 전체 이미지가 잘리지 않도록 하고, 남는 여백은 허용한다.
+(crop/cover로 이미지 일부를 잘라내지 않음)
+
+```css
+/* 히어로 이미지 전용 — 전체 이미지 표시, 잘림 금지 */
+.hero img,
+.article-hero img {
+  object-fit: contain;
+}
+```
+
+### ⑤ 라이트/다크 토글 + pet 방식 글목록
+
+**[대표 확정]** 라이트/다크 토글을 활성화하고, 글목록은 pet 방식을 채택한다.
+
+- **라이트/다크 토글**: `defaultAppearance`와 토글 UI를 통해 사용자가 테마를 전환할 수 있다.
+  (pet-hugo `config/_default/params.toml:4-7`: `defaultAppearance = "light"`, `autoSwitchAppearance = false` 기본값 + 토글 노출)
+- **pet 방식 글목록**(`[list]`): `showCards = true` 카드형 목록을 기본으로 한다.
+
+```toml
+[list]
+  showBreadcrumbs = true
+  showSummary = true
+  showCards = true
+  groupByYear = false
+```
+
+> pet 방식 = 카드형(`showCards=true`) 목록 + 요약(`showSummary=true`). 신규 블로그 글목록은 이 구성을 따른다.
+
+---
+
+### ⑥ pet-hugo 파일럿 확정 규격 (2026-08-15)
+
+**[대표 확정]** pet-hugo(pet.informationhot.kr) 파일럿 활성화로 검증된 규격. 신규·복제 블로그는 아래를 기준으로 한다.
+
+**[대표 확정] topSlot 키명 단일화 — leaderboardSlot 폐기**
+- 광고 슬롯 키명은 `topSlot`(H1 직전 Display), `inArticleSlot`(본문 분할) **두 가지만** 사용한다.
+- `leaderboardSlot` 등 그 외 키명은 **사용 금지(폐기)** — R02 검사가 `topSlot`/`inArticleSlot` 존재만 기준으로 하므로, 다른 키명은 nil 바인딩 → 총 0슬롯 렌더 실패.
+- 파일럿 전 pet-hugo `top.html`에 `leaderboardSlot`(undefined→nil)이 남아있어 광고가 0슬롯 렌더됐고, `topSlot`으로 교체 후 3슬롯 정상 렌더 확인.
+
+**[대표 확정] single.html 헤더: 광고는 `top.html` 단일 + dead TOC 제거**
+- 헤더(`<header id="single_header">`) 광고는 **`adsense/top.html` 1개만** 유지한다.
+  - 파일럿 전 헤더 내 2번째 in-article 광고 + 미사용 TOC(목차) 마크업이 존재해 레이아웃 오염 → `single.html`에서 제거.
+  - 지침: 본문 H2 분할 인젝션용 `in-article.html`은 헤더가 아니라 **본문 `.article-content` 내부**에서만 호출한다.
+- dead TOC(렌더되지 않는 목차 마크업)는 제거한다 (`showTableOfContents = false`와 별개로, 마크업 자체도 남기지 않는다).
+- `single.html` 참조 위치: `layouts/_default/single.html` — `{{ partial "adsense/top.html" . }}`는 `<h1>` 직전, 본문 H2 분할 인젝션은 위치 그대로 유지.
+
+**[대표 확정] freshness 판정은 실데이터(발행 ledger) 재계산 기준**
+- freshness(최근 발행 갱신)는 `content.db publish_ledger`의 `MAX(created_at)`을 **체크 호출 시점에 실시간 재계산**한다 — 대시보드에 캐시된 `days_since_last_publish` 값을 그대로 신뢰하지 않는다.
+- 판정 근거: `Last publish {n}d ago (threshold: {m}d for {brand}) [live, cached={old}]` 형태로 라이브 값이 정확히 표기된다.
+- fresh = 실제 발행이 n일 전임을 실데이터로 검증한 것이며, 허위 fail(캐시 스테일)이 아닌지가 표준 판정의 핵심. pet-hugo 활성화 후 실발행(0d) 기준 pass 확인.
+
+> **확정 요약**: pet-hugo 파일럿이 검증한 표준 = `topSlot` 단일 키명(leaderboardSlot 폐기) + 헤더 `top.html` 단일 광고 + dead TOC 제거 + freshness 실데이터 재계산. 신규/복제 블로그는 이 규격 기준으로 적용한다.
+
+---
+
+> **요약**: issue-techpawz-hugo가 광고 완벽 노출 검증을 마친 유일한 표준. 헤더 2슬롯 + 본문 H2 분할 인젝션 + `showTableOfContents = false` + adsbygoogle.js 즉시 로드 + `fluid`+`in-article` 포맷이 핵심. (2026-08-15 pet-hugo 파일럿으로 `topSlot` 키명 단일화·헤더 단일 광고·freshness 실데이터 재계산이 추가 확정됨 — §⑥ 참조.)
 
 ---
 

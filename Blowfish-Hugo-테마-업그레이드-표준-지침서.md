@@ -399,6 +399,8 @@ html.dark ins.adsbygoogle {
 8. **Description(lead) 사용 금지** — 광고 레이아웃 방해, 글 잘림 유발
 9. **baseof.html 커스텀 오버라이드 금지** — 테마 기본 사용
 10. **extend-head.html에 하드코딩된 Publisher ID 금지** — 반드시 `site.Params` 사용
+11. **`leaderboardSlot` 등 비표준 키명 금지** — 광고 슬롯 키명은 `topSlot`/`inArticleSlot` 단일화. 다른 키명은 nil 바인딩 → 0슬롯 렌더 실패 (pet-hugo 파일럿 확인, 2026-08-15)
+12. **single.html 헤더 내 2번째 in-article 광고·dead TOC 마크업 잔존 금지** — 헤더 광고는 `top.html` 단일, in-article은 본문 H2 분할 인젝션에서만 호출 (pet-hugo 파일럿 확인)
 
 ---
 
@@ -423,6 +425,7 @@ html.dark ins.adsbygoogle {
 | 1.1 | 2026-07-28 | techpawz-hugo + pet-hugo 검증 기반 전면 개정 — Description 제거, baseof.html 커스텀 금지, JS placeholder 로직 금지, 서버사이드 H2 분할 인젝션 표준화 |
 | 1.2 | 2026-07-30 | issue-techpawz-hugo 기준으로 갱신 — in-article 포맷을 `fluid`+`in-article`으로 변경, top.html 래퍼 div 추가, 하드코딩 금지 명시 |
 | 1.3 | 2026-08-15 | ADSENSE-GUIDE 기준으로 정정 — §8 금기#4를 `fluid`+`in-article`(auto 금지)으로 수정, 금기#10(extend-head 하드코딩 Publisher ID 금지) 명시 추가 |
+| 1.4 | 2026-08-15 | pet-hugo 파일럿 확정 규격 반영 — §8 금기#11(`leaderboardSlot` 등 비표준 키명 금지), #12(헤더 내 2번째 in-article·dead TOC 잔존 금지) 추가. freshness 판정은 실데이터(publish_ledger 재계산) 기준, 캐시 미신뢰 |
 
 ---
 
