@@ -320,6 +320,21 @@ metadata:
 #     시니어 결정 대기 → brand 레벨 스켈레톤만 선언 (세부 서브세그먼트 보류).
 #   하위호환: scripts/verify_quality.py 는 global_criteria/blogs 만 읽으므로 영향 없음.
 # ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────
+# R2-01 affiliate hotlink 예외 도메인 (Phase 71c)
+#   - affiliate 카드 shortcode가 주입하는 외부 CDN 이미지는 자체 콘텐츠
+#     이미지가 아니므로 R2 이전 대상에서 제외한다.
+#   - 판정은 도메인(host) 기준 — _check_r2_01 이 config 를 로드해 적용.
+#   - 도메인이 일치하지 않는 (자체/legacy/gov) 이미지는 기존대로 R2 강제 → 위반 유지.
+#   - 제휴사 추가 시 이 리스트만 수정하면 된다 (코드 변경 불필요).
+# ─────────────────────────────────────────────────────────────
+r2_exempt_domains:
+  - media-cdn.tripadvisor.com        # Viator/TripAdvisor 여행 상품 카드
+  - cdn.airalo.com                   # Airalo eSIM
+  - assets.omio.design               # Omio 대중교통
+  - ads-partners.coupang.com         # Coupang Partners (상품 카드)
+  - ads-partners.gnet                # Coupang Partners CDN (Gnet)
+
 global_standard:
   - id: R01
     target: hugo.toml

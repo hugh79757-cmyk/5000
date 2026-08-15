@@ -176,3 +176,68 @@ class TestR12AllowedOverrides:
         ])
         ok, detail = _check_r12(site)
         assert ok is True, detail
+
+
+class TestR2_01AffiliateExempt:
+    """R2-01 affiliate hotlink 예외 (Phase 71c).
+
+    affiliate CDN (config r2_exempt_domains) 이미지는 정상으로 인정,
+    자체 콘텐츠 이미지(featureimage/자체 본문)는 기존대로 R2 강제 유지.
+    """
+
+    _R2 = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/img/cover.webp"
+    _AFFILIATE = "https://assets.omio.design/marketing/x.png"
+    _NONR2 = "https://img.techpawz.com/images/x/thumb_x.webp"
+
+    def _make_post(self, tmp_path, featureimage=None, body_images=None):
+        site = tmp_path / "site"
+        post_dir = site / "content" / "posts" / "sample-post"
+        post_dir.mkdir(parents=True, exist_ok=True)
+        body = ""
+        for u in (body_images or []):
+            body += f"![img]({u})\n"
+        fm_lines = ["---", "title: sample", "date: 2026-08-15"]
+        if featureimage:
+            fm_lines.append(f"featureimage: \"{featureimage}\"")
+        fm_lines.append("---")
+        (post_dir / "index.md").write_text("\n".join(fm_lines) + "\n" + body, encoding="utf-8")
+        return site
+
+    def test_affiliate_image_pass(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r2_01, _load_r2_exempt_domains
+        # affiliate 도메인이 config에서 로드됐는지 확인 (config 무존재 시 적용 불가)
+        assert "assets.omio.design" in _load_r2_exempt_domains(), (
+            "r2_exempt_domains 미로드 — config/quality_checklist.yaml 확인"
+        )
+        site = self._make_post(tmp_path, body_images=[self._AFFILIATE])
+        ok, detail = _check_r2_01(site)
+        assert ok is True, detail
+        assert "affiliate exempt" in detail
+
+    def test_nonr2_self_image_still_fails(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r2_01
+        site = self._make_post(tmp_path, body_images=[self._NONR2])
+        ok, detail = _check_r2_01(site)
+        assert ok is False, "비R2 자체 본문 이미지는 여전히 fail이어야 함"
+        assert "img.techpawz.com" in detail
+
+    def test_r2_self_image_pass(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r2_01
+        site = self._make_post(tmp_path, featureimage=self._R2, body_images=[self._R2])
+        ok, detail = _check_r2_01(site)
+        assert ok is True, detail
+
+    def test_nonr2_featureimage_still_fails(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r2_01
+        # featureimage가 자체이미지(비R2, 비affiliate)면 fail 유지 — 예외로 통과시키면 안 됨
+        site = self._make_post(tmp_path, featureimage=self._NONR2)
+        ok, detail = _check_r2_01(site)
+        assert ok is False, "비R2 자체 featureimage는 여전히 fail이어야 함"
+        assert "/featureimage" in detail
+
+    def test_affiliate_featureimage_exempt(self, tmp_path):
+        from ops_dashboard.checks.standard import _check_r2_01
+        site = self._make_post(tmp_path, featureimage=self._AFFILIATE)
+        ok, detail = _check_r2_01(site)
+        assert ok is True, detail
+        assert "affiliate exempt" in detail

@@ -615,6 +615,52 @@ def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
 
 _R2_DOMAIN_PATTERN = re.compile(r"https?://pub-[0-9a-f]+\.r2\.dev")
 
+# Phase 71c: R2-01 affiliate hotlink 예외 — config/quality_checklist.yaml 의
+# r2_exempt_domains 를 로드해 적용한다. 정적 모듈 상수 대신 설정에서 읽어
+# 제휴사 추가 시 코드 변경 없이 확장 가능하게 한다.
+_R2_EXEMPT_DOMAINS: frozenset[str] = frozenset()
+_R2_EXEMPT_LOADED = False
+
+
+def _load_r2_exempt_domains() -> frozenset[str]:
+    """config/quality_checklist.yaml 의 r2_exempt_domains 를 로드 (1회).
+
+    로드 실패/미설정 시 빈 frozenset 반환 — affiliate 예외 없이 기존 동작 유지.
+    예외 삼키지 않고 logger.warning 로 이유 기록 (조용한 실패 금지).
+    """
+    global _R2_EXEMPT_DOMAINS, _R2_EXEMPT_LOADED
+    if _R2_EXEMPT_LOADED:
+        return _R2_EXEMPT_DOMAINS
+    _R2_EXEMPT_LOADED = True
+    cfg_path = Path(os.environ.get("FIVEK_ROOT", str(Path(__file__).resolve().parents[2]))) / "config" / "quality_checklist.yaml"
+    try:
+        import yaml as _yaml
+    except Exception as e:  # pragma: no cover - yaml 항상 설치됨 (requirements)
+        logger.warning("[R2-01] yaml 로드 불가 — affiliate 예외 미적용: %s", e)
+        return _R2_EXEMPT_DOMAINS
+    try:
+        raw = _yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+        domains = raw.get("r2_exempt_domains", []) or []
+        _R2_EXEMPT_DOMAINS = frozenset(
+            str(d).lower().rstrip("/") for d in domains if d and str(d).strip()
+        )
+        logger.info("[R2-01] affiliate 예외 도메인 %d개 로드: %s", len(_R2_EXEMPT_DOMAINS), sorted(_R2_EXEMPT_DOMAINS))
+    except Exception as e:
+        logger.warning("[R2-01] r2_exempt_domains 로드 실패 — affiliate 예외 미적용: %s", e)
+    return _R2_EXEMPT_DOMAINS
+
+
+def _is_r2_exempt(url: str) -> bool:
+    """URL host 가 affiliate 예외 도메인 목록에 속하는지 (Phase 71c)."""
+    if not _R2_EXEMPT_DOMAINS:
+        return False
+    try:
+        from urllib.parse import urlparse
+        host = (urlparse(url).hostname or "").lower()
+    except Exception:
+        return False
+    return host in _R2_EXEMPT_DOMAINS
+
 
 def _extract_image_urls(content: str) -> list[str]:
     """포스트 본문(content.md)에서 이미지 URL 추출.
@@ -655,8 +701,10 @@ def _check_r2_01(site: Path) -> tuple[bool, str]:
             return True, "content/posts/ 디렉토리 없음 — 이미지 검사 대상 아님 (pass)"
         return True, "포스트 없음 — 검사 대상 없음 (pass)"
 
+    exempt_domains = _load_r2_exempt_domains()
     invalid_entries: list[str] = []
     checked_count = 0
+    exempt_count = 0
 
     for post_dir in posts:
         idx = post_dir / "index.md"
@@ -668,11 +716,13 @@ def _check_r2_01(site: Path) -> tuple[bool, str]:
 
         # 1) frontmatter featureimage
         fm_match = re.search(r"featureimage:\s*[\"']?([^\"'\n]+)[\"']?", content)
-        if fm_match and fm_match.group(1).strip():
-            url = fm_match.group(1).strip()
+        featureimage_url = fm_match.group(1).strip() if fm_match and fm_match.group(1).strip() else None
+        if featureimage_url:
             checked_count += 1
-            if not _R2_DOMAIN_PATTERN.search(url):
-                invalid_entries.append(f"{post_dir.name}/featureimage: {url}")
+            if _is_r2_exempt(featureimage_url):
+                exempt_count += 1
+            elif not _R2_DOMAIN_PATTERN.search(featureimage_url):
+                invalid_entries.append(f"{post_dir.name}/featureimage: {featureimage_url}")
 
         # 2) 본문 이미지 URL (featureimage와 중복 가능 — 중복은 허용)
         body_start = content.find("---", 3)  # 두 번째 --- 이후가 본문
@@ -684,10 +734,12 @@ def _check_r2_01(site: Path) -> tuple[bool, str]:
             if not url:
                 continue
             # featureimage와 중복 제거
-            if fm_match and url == fm_match.group(1).strip():
+            if featureimage_url and url == featureimage_url:
                 continue
             checked_count += 1
-            if not _R2_DOMAIN_PATTERN.search(url):
+            if _is_r2_exempt(url):
+                exempt_count += 1
+            elif not _R2_DOMAIN_PATTERN.search(url):
                 invalid_entries.append(f"{post_dir.name}/body: {url}")
 
     if checked_count == 0:
@@ -695,13 +747,15 @@ def _check_r2_01(site: Path) -> tuple[bool, str]:
 
     if invalid_entries:
         detail = (
-            f"R2 패턴 위반 {len(invalid_entries)}건 / 검사 {checked_count}건: "
+            f"R2 패턴 위반 {len(invalid_entries)}건 / 검사 {checked_count}건"
+            f"{f' (affiliate exempt {exempt_count}건)' if exempt_count else ''}: "
             + "; ".join(invalid_entries[:3])
         )
         if len(invalid_entries) > 3:
             detail += f" 외 {len(invalid_entries) - 3}건"
         return False, detail
-    return True, f"최근 {checked_count}건 전부 R2 도메인 호스팅 (정상)"
+    exempt_note = f" (affiliate exempt {exempt_count}건)" if exempt_count else ""
+    return True, f"최근 {checked_count}건 전부 R2 도메인 호스팅{exempt_note} (정상)"
 
 
 # ---------------------------------------------------------------------------
