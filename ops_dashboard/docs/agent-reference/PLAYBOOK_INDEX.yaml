@@ -6,6 +6,8 @@ source_files:
 - ops_dashboard/registry/rules.py
 - ops_dashboard/checks/maintenance.py
 - ops_dashboard/checks/standard.py
+- ops_dashboard/checks/content_quality.py
+- docs/CONTENT-QUALITY-RUNBOOK.md
 codes:
 - code: P01
   playbook_ref: ERROR_PLAYBOOKS.md#p01
@@ -1026,4 +1028,98 @@ codes:
   verify:
   - GET /api/registry?blog_id={blog_id} → R12 status 확인
   - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: CQ01
+  playbook_ref: ERROR_PLAYBOOKS.md#cq01
+  name_ko: 빈 불릿 (라벨만/빈 리스트 항목)
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: full_auto
+  one_line_action: 값 없는 라벨 불릿·단독 대시 제거는 _normalize_product_blocks(1)이 자동 처리; 반복 시 writer.py 프롬프트에서 빈 필드 미출력 보정
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks (1) 값 없는 라벨 불릿·단독 대시 제거
+  - path: pipelines/curation/writer.py
+    hint: 상품 블록 프롬프트 — 값 없는 필드는 라벨 출력 금지
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ01 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: CQ02
+  playbook_ref: ERROR_PLAYBOOKS.md#cq02
+  name_ko: CTA가 리스트 항목에 갇힘
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: full_auto
+  one_line_action: 리스트에 붙은 CTA 버튼을 독립 블록으로 분리 (_normalize_product_blocks 3-b)
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks (3-b) 앞의 "- " 제거 + 앞뒤 빈 줄로 독립 블록화
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ02 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: CQ03
+  playbook_ref: ERROR_PLAYBOOKS.md#cq03
+  name_ko: 제휴문구 위치·개수 이탈 (0회/3회+)
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: full_auto
+  one_line_action: 제휴문구를 전부 삭제 후 '상품별 상세 비교' 앞 1회 + 글 끝 1회로 고정 (_normalize_product_blocks 2+4)
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks (2) 전체 삭제 + (4) 위치 고정. 상품 블록 중간 삽입 금지
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ03 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: CQ04
+  playbook_ref: ERROR_PLAYBOOKS.md#cq04
+  name_ko: 상품별 상세 비교 h2 아님 (strong/bold)
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: full_auto
+  one_line_action: strong/bold→## 변환은 pipeline.py가 하지만, 발행 시 hugo_writer.py H2-GUARD allow-list에 등재돼야 살아남음 (2곳 짝 필수)
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks (4-b)(4-c) strong/bold→## 변환·누락 시 삽입
+  - path: shared/publishers/hugo_writer.py
+    hint: _ALLOWED_H2_PATTERNS — allow-list에 없는 ##은 발행 시 <strong>으로 되돌림. 강제 h2 문구 반드시 등재
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ04 + '강제 H2 등록 원칙' 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+- code: CQ05
+  playbook_ref: ERROR_PLAYBOOKS.md#cq05
+  name_ko: 상품 이미지 개수 부족 (상품 N vs 이미지 M)
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: human_approval
+  one_line_action: 수집부 문제 — 특정 상품 coupang=SKIP으로 product_image 미수집. 후처리로 못 채움; 이미지 없는 상품 재수집·대체 필요
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: 상품 수집 단계 — product_image 미수집 상품 처리. _normalize_product_blocks (5)는 데이터 있으면 자동 삽입
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ05 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: true
+- code: CQ06
+  playbook_ref: ERROR_PLAYBOOKS.md#cq06
+  name_ko: 이미지 방식 통일 위반 (raw img)
+  severity: MINOR
+  family: content_quality
+  hook: post_generate
+  automation_level: full_auto
+  one_line_action: 상품 이미지는 {{< figure >}} 숏코드로 통일 (cuap 전수조사 figure 83% 우세). raw <img> 잔재는 figure로 치환. 라이브 HTML 감지 불가 → .md 소스 기준 검사
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks (5) — figure 숏코드로 이미지 생성 (raw img 금지)
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ06 참조
+  - .md 소스에서 '<img' 미검출 확인 (figure만 사용)
   needs_human: false

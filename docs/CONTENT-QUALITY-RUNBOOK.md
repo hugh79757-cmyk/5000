@@ -41,7 +41,13 @@
 ### CQ04 — 상품별 상세 비교 h2
 - 규격: `## 상품별 상세 비교` (h2). 그 아래 각 제품은 `###` (h3).
 - 감지: '상품별 상세 비교' 존재하나 `<h2>…` 아님.
-- 조치: 후처리 (4-b)(4-c). CSS로 키우지 말 것 — 소스가 strong이면 h2로 변환이 정답.
+- 조치(**2곳 짝 필수**):
+  1. `pipelines/curation/pipeline.py` `_normalize_product_blocks` (4-b)(4-c) — strong/bold→`##` 변환·누락 시 삽입.
+  2. `shared/publishers/hugo_writer.py` `_ALLOWED_H2_PATTERNS` — 발행 시 H2-GUARD가
+     allow-list에 없는 `##`을 전부 `<strong>`으로 되돌린다. 강제 h2 문구는 반드시 여기 등재.
+- **핵심 함정**: pipeline.py에서 `##`을 만들어도 H2-GUARD allow-list에 없으면 발행 단계에서
+  bold로 무력화된다(2026-08-16 근본원인). pipeline.py만 고치면 라이브에 안 먹음.
+- CSS로 키우지 말 것 — 소스가 strong이면 h2 변환+allow-list 등재가 정답.
 
 ### CQ05 — 상품 이미지 개수 부족
 - 규격: 상품 섹션('상품별 상세 비교' h2 ~ 다음 h2)의 h3 개수 = 이미지 개수.
@@ -54,6 +60,18 @@
 - 근거: cuap 15개 블로그 전수조사 결과 figure 83% 우세 → 단일 규격 확정(2026-08-16).
 - 감지: 라이브 HTML 불가(둘 다 `<img>` 렌더). `.md` 소스에서 `<img` 검출로 판정.
 - 조치: 후처리 (5)가 figure로 생성. 잔재는 raw img → figure 치환.
+
+---
+
+## 강제 H2 등록 원칙 (H2-GUARD 연동)
+
+curation 파이프라인이 강제하는 **모든 h2**는 발행 시 H2-GUARD를 통과해야 살아남는다.
+
+- H2-GUARD 위치: `shared/publishers/hugo_writer.py` `_ALLOWED_H2_PATTERNS` + `_fix_invalid_h2`.
+- 동작: allow-list에 없는 `## 제목`은 발행 시 `<strong>제목</strong>`으로 되돌려 디스크 기록.
+- 규칙: 후처리가 강제 삽입하는 h2 문구는 **반드시 `_ALLOWED_H2_PATTERNS`에 정규식으로 등재**.
+- 현재 등재된 curation 강제 h2: `상품별 상세 비교`.
+- 신규 강제 h2 추가 시: (a) 후처리에서 h2 생성 → (b) allow-list 등재 → (c) 발행 테스트로 h2 유지 확인.
 
 ---
 

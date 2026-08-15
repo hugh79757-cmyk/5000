@@ -83,6 +83,28 @@
 <a id="p32"></a>
 | **P32** | 빈 본문 배포 / `post_deploy` | publish_log 최근 글의 public HTML 본문 단어수 200 미만, topic의 exhausted=1과 publish_log INSERT 동시 발생 패턴, _write_hugo_post_etap 호출 시 article["content"]가 빈 문자열/공백/200단어 미만 | 가드 통과·차단 dry run, 본문 단어수 계측, H2/disclaimer/adsense 존재 확인 | 가드 변경은 additive; 기존 정상 글 영향 없음 확인. 재생성·배포는 승인 |
 
+
+## 5. 콘텐츠 품질 이탈 (CONTENT-QUALITY, 큐레이션 발행물)
+
+> 상세 판정표·해결절차: `docs/CONTENT-QUALITY-RUNBOOK.md` (SSOT).
+> 감지: `ops_dashboard/checks/content_quality.py` `_analyze` (라이브 HTML). 교정: `pipelines/curation/pipeline.py` `_normalize_product_blocks`.
+
+| 코드 | 신호 | 원인 판별 | 안전한 수정 | 검증 | 주의점 |
+|---|---|---|---|---|---|
+<a id="cq01"></a>
+| **CQ01** | 빈 불릿(라벨만)/빈 리스트 항목 | writer 프롬프트가 값 없는 필드도 라벨 출력 | _normalize_product_blocks (1) 자동 제거; writer.py 프롬프트 보정 | 룩북 CQ01 | 정상 불릿까지 지우지 않음 |
+<a id="cq02"></a>
+| **CQ02** | CTA가 `<li>`에 갇힘 | AI가 CTA를 불릿 항목으로 출력 | _normalize_product_blocks (3-b) 독립 블록화 | 룩북 CQ02 | CTA는 항상 리스트 밖 |
+<a id="cq03"></a>
+| **CQ03** | 제휴문구 0회/3회+ | AI가 상품마다 제휴문구 삽입 | (2) 전체 삭제 후 (4) 상세비교 앞 1회+글끝 1회 고정 | 룩북 CQ03 | 정상 2회 초과·미만 금지 |
+<a id="cq04"></a>
+| **CQ04** | 상품별 상세 비교 h2 아님 | AI가 `##` 대신 strong/bold 출력 | pipeline.py (4-b)(4-c) 변환 **+** hugo_writer.py H2-GUARD allow-list 등재(2곳 짝) | 룩북 CQ04, 강제H2원칙 | CSS로 키우지 말 것; allow-list 누락 시 발행 때 bold로 무력화됨 |
+<a id="cq05"></a>
+| **CQ05** | 상품 이미지 개수 부족 | 특정 상품 coupang=SKIP → 이미지 미수집 | **수집부** 재수집·대체. 후처리로 못 채움 | 룩북 CQ05 | 임의 이미지로 채우지 않음; 수집 승인 |
+<a id="cq06"></a>
+| **CQ06** | raw img 방식(figure 미사용) | 과거 raw img 삽입 로직 잔재 | _normalize_product_blocks (5) figure 숏코드로 통일 | 룩북 CQ06(.md 소스 검사) | 라이브 HTML로는 감지 불가 |
+
+
 ## 4. 대시보드의 비-P 코드 신호
 
 ### M01–M11: 운영·정비 검사
