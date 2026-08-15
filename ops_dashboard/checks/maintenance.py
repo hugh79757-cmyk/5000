@@ -313,16 +313,55 @@ def _check_keyword_availability(conn: sqlite3.Connection, blog_id: str) -> dict:
         remaining = defined - used
         remaining_count = len(remaining)
 
+        # M06 보조 지표: 30일 윈도우 실발행 후보 수 (pipeline.py _select_keyword 필터 재현)
+        # pipeline.py:154-209 — 30일 publish_log 제외 + 격리 제외 + 상품 3개 이상 + 14일 카테고리 중복 제외
+        def _cat(kw):
+            tokens = kw.split()
+            return tokens[0] if tokens else kw
+
+        real_candidates_30d = 0
+        if curation_db.exists():
+            c = sqlite3.connect(str(curation_db))
+            try:
+                used_30d = {r[0] for r in c.execute(
+                    "SELECT keyword FROM publish_log"
+                    " WHERE blog_id=? AND published_at > datetime('now', '-30 days')",
+                    (blog_id,),
+                ).fetchall()}
+                recent_cats = {_cat(r[0]) for r in c.execute(
+                    "SELECT keyword FROM publish_log"
+                    " WHERE blog_id=? AND published_at > datetime('now', '-14 days')",
+                    (blog_id,),
+                ).fetchall()}
+                quarantined = {r[0] for r in c.execute(
+                    "SELECT keyword FROM keyword_health"
+                    " WHERE blog_id=? AND quarantined_until IS NOT NULL"
+                    "   AND quarantined_until > datetime('now')",
+                    (blog_id,),
+                ).fetchall()}
+                pool = [k for k in defined
+                        if k not in used_30d
+                        and k not in quarantined
+                        and _cat(k) not in recent_cats]
+                real_candidates_30d = sum(
+                    1 for k in pool
+                    if c.execute("SELECT COUNT(*) FROM products WHERE keyword=?", (k,)).fetchone()[0] >= 3
+                )
+            finally:
+                c.close()
+
         if remaining_count < MIN_REMAINING:
             return {
                 "status": "fail",
                 "detail": f"M06: 잔량 {remaining_count}개 < 기준 {MIN_REMAINING}개 "
                           f"(정의 {len(defined)}개 − 사용 {len(used)}개)",
+                "real_candidates_30d": real_candidates_30d,
             }
 
         return {
             "status": "pass",
             "detail": f"M06: 잔량 {remaining_count}개 (정의 {len(defined)}개 − 사용 {len(used)}개)",
+            "real_candidates_30d": real_candidates_30d,
         }
     except Exception as e:
         return {"status": "unknown", "detail": f"M06: 계산 오류 — {e}"}
