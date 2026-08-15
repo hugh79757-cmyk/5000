@@ -240,6 +240,18 @@ if pending >= 500:
 - **원인**: 키워드 TTL 30일 + 카테고리 14일 중복 억제로 새 키워드 고갈
 - **상태**: ⚠️ 키워드 풀 확대 필요 (특히 pet-hugo, health-hugo)
 
+> **[2026-08-15 read-only 진단 — M06 잔량 지표 측정 왜곡 발견]**
+> 위 3-5의 "TTL 30일 + 카테고리 14일 중복 억제로 고갈" 가설을 재검증한 결과, 근거가 부분만 성립함. 진단은 코드/config/DB 변경 없이 수행.
+
+- **[검증됨] [정정] 발행 후보 풀은 KEYWORD_MAP과 동일 소스**: `ops_dashboard/checks/maintenance.py`의 `_check_keyword_availability`(L242-327)는 잔량을 `KEYWORD_MAP`(정적 Python dict, `pipelines/curation/keywords.py`) 정의수 − `published_products` 사용 distinct 수로 산출. 실제 발행 파이프라인도 `get_keywords(blog_id)` → `KEYWORD_MAP.get(blog_id, [])`(keywords.py:1774-1776)로 동일 소스를 사용. [정정] "파이프라인이 `naver_trending_keywords`를 소비"한다는 2026-08-15 주장은 오류였음.
+- **[검증됨] [정정] 진짜 왜곡 원인은 계산 방식 차이**: 소스 불일치가 아니라, M06은 all-time used 차감(잔량 음수 가능, 예: interior -39)으로 계산하고, 파이프라인 `_select_keyword`(pipeline.py:154-223)는 publish_log 30일 윈도우 중복 제외(pipeline.py:167-171) + 14일 카테고리 억제(173-180,199) + 격리 제외(184) + 상품≥3(206-209)로 재활용하기 때문에 수치가 다름.
+- **[검증됨] [정정] collected_at 기반 30일 TTL은 코드에 없음(미작동)**: `naver_trending_keywords`에서 `collected_at < now-30d`인 행이 514~935개 있으나, TTL로 후보를 삭제/필터하는 코드가 확인되지 않아 "사용 불가 사유로 작용" 여부는 미확정. (3-5의 "TTL 30일로 고갈" 가설은 이 지점에서 근거 부족.)
+- **[검증됨] [정정] 8개 블로그 실발행 가능 후보 수(30일 윈도우, 재현 측정)**: `_select_keyword` 필터(30일 publish_log 제외 + 격리 제외 + 14일 카테고리 억제 + 상품≥3)를 그대로 재현해 `data/curation.db`에서 계산한 결과 — fitness 99, health 85, interior 76, laptop 72, beauty 52, baby 38, kitchen 37, camping 21. 재현 SQL: `SELECT keyword FROM publish_log WHERE blog_id=? AND published_at > datetime('now','-30 days')` (30일 사용분), `... '-14 days'` (카테고리 억제분), `SELECT keyword FROM keyword_health WHERE blog_id=? AND quarantined_until > datetime('now')` (격리분), `SELECT COUNT(*) FROM products WHERE keyword=?` ≥3 (상품분). → camping(21)만 임계 24 미달이고 나머지 7개는 초과.
+- **[검증불가] [정정취소] 직전 초안의 "후보 153~242건" 수치는 재현 불가**: 초안이 적은 interior 194 / laptop 169 / kitchen 161 / beauty 153 / camping 173 / baby 242 / fitness 199 / health 172 는 각 블로그의 `KEYWORD_MAP` **정의 수 자체**(interior 140, laptop 101, kitchen 92, beauty 109, camping 103, baby 149, fitness 180, health 152)를 8개 전부 초과한다. 필터 후 부분집합이 원본 집합보다 클 수 없으므로 이 수치는 KEYWORD_MAP 기반 후보 수가 아니며, 산출 경로를 특정할 수 없어 폐기한다. 위 재현 측정치로 대체.
+- **[검증됨] [보강] M06에 `real_candidates_30d` 병기 필드 추가**: 커밋 `72278e5fc` — 기존 all-time 잔량 필드와 pass/fail 판정은 무변경으로 두고, `_check_keyword_availability`(maintenance.py:316-350)에 30일 윈도우 실발행 후보 수를 병렬 계산해 병기. **상한 추정치 성격**: `_select_keyword`의 relevance gate(pipeline.py:211-217 `score_products`/`passes_gate`)는 재현하지 않으므로 실제 발행 가능 수는 이 값 이하다. 현재 값 = 위 재현 측정치와 일치(fitness 99 / health 85 / interior 76 / laptop 72 / beauty 52 / baby 38 / kitchen 37 / camping 21).
+
+- **결론**: CUAP 블로그 활성화 차단의 근본 원인은 "키워드 소진"이 아니라 "M06 지표가 all-time used 차감 방식으로 계산하는 반면 파이프라인은 30일 윈도우 + 다단 필터로 재활용한다"는 계산 방식 차이. 실제 키워드 소스(KEYWORD_MAP)는 정상 보충 중. 회복 실행은 미수행(판정만).
+
 ---
 
 **3-6. 텔레그램 알림 두절**
