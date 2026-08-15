@@ -1,7 +1,7 @@
-# Blowfish Hugo 테마 업그레이드 표준 지침서 v1.2
+# Blowfish Hugo 테마 업그레이드 표준 지침서 v1.3
 
 > **작성일**: 2026-07-28
-> **최종 갱신**: 2026-07-30
+> **최종 갱신**: 2026-08-15
 > **기반**: issue-techpawz-hugo (issue.techpawz.com) — 광고 완벽 노출 검증 완료
 > **적용 대상**: 모든 Blowfish 테마 사용 Hugo 블로그
 
@@ -392,12 +392,13 @@ html.dark ins.adsbygoogle {
 1. **`showTableOfContents = true` 금지** — 광고 전체 렌더링 실패
 2. **레이지 로드 금지** — adsbygoogle.js는 `<head>`에서 async 즉시 로드
 3. **mobile-sticky.html 사용 금지** — 앵커 광고와 충돌
-4. **in-article에 `data-ad-layout="in-article"` 사용 금지** — `data-ad-format="auto"` 사용
+4. **in-article에 `data-ad-format="auto"` 사용 금지** — `data-ad-format="fluid"` + `data-ad-layout="in-article"` 사용
 5. **`<script>push({})`를 `<div>` 내부에 넣지 말 것** — div 밖에서 push 호출
 6. **숨김 placeholder div (`display:none`) 사용 금지** — 항상 표준 `<ins>` 태그 사용
 7. **JS로 placeholder를 이동하는 로직 사용 금지** — 서버사이드 H2 분할로 인젝션
 8. **Description(lead) 사용 금지** — 광고 레이아웃 방해, 글 잘림 유발
 9. **baseof.html 커스텀 오버라이드 금지** — 테마 기본 사용
+10. **extend-head.html에 하드코딩된 Publisher ID 금지** — 반드시 `site.Params` 사용
 
 ---
 
@@ -421,6 +422,7 @@ html.dark ins.adsbygoogle {
 | 1.0 | 2026-07-28 | 최초 작성 (techpawz-hugo 수정 경험 기반) |
 | 1.1 | 2026-07-28 | techpawz-hugo + pet-hugo 검증 기반 전면 개정 — Description 제거, baseof.html 커스텀 금지, JS placeholder 로직 금지, 서버사이드 H2 분할 인젝션 표준화 |
 | 1.2 | 2026-07-30 | issue-techpawz-hugo 기준으로 갱신 — in-article 포맷을 `fluid`+`in-article`으로 변경, top.html 래퍼 div 추가, 하드코딩 금지 명시 |
+| 1.3 | 2026-08-15 | ADSENSE-GUIDE 기준으로 정정 — §8 금기#4를 `fluid`+`in-article`(auto 금지)으로 수정, 금기#10(extend-head 하드코딩 Publisher ID 금지) 명시 추가 |
 
 ---
 

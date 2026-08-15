@@ -1,6 +1,6 @@
 # 블로우피쉬테마 광고설정 가이드
 
-> 최종 갱신: 2026-07-30
+> 최종 갱신: 2026-08-15
 > 기반: issue-techpawz-hugo (issue.techpawz.com) — 광고 완벽 노출 검증 완료
 > **이 문서가 유일한 표준. 다른 블로그의 광고 설정은 이 가이드를 따를 것.**
 
@@ -382,6 +382,33 @@ html.dark ins.adsbygoogle {
 | 제목 아래 문단이 잘림 | Description(lead) 사용 중 | single.html에서 lead 라인 제거 |
 | 테마 업그레이드 후 광고 깨짐 | 커스텀 baseof.html 잔존 | baseof.html 삭제, 테마 기본 사용 |
 | in-article 광고 포맷 이상 | `data-ad-format="auto"` 사용 중 | `fluid` + `in-article`로 변경 |
+
+---
+
+## 10. params.toml 표준값 (사이트 표시 파라미터 — 단일 기준)
+
+> **이 절은 대표 승인 표준값의 유일한 기준(단일 기준)이다.** 모든 블로그의 `hugo.toml`/`params.toml` 사이트 표시 파라미터와 광고 슬롯 키명은 아래 값을 참조한다. downstream 규칙(ops_dashboard RULES/preflight)이 이 값을 검증 기준으로 쓴다.
+
+### 10-1. 사이트 표시 파라미터 (`hugo.toml` → `[params]`)
+
+| 파라미터 | 표준값 | 의미 | 근거 |
+|----------|--------|------|------|
+| `showTableOfContents` | `false` | 목차 비활성화 (광고 전체 렌더링 실패 방지) | §1, §8 금기#1 |
+| `showDate` | `true` | 발행일자 **표시** | 대표 지시 (2026-08-15) |
+| `showWordCount` | `false` | 단어수 **숨김** | 대표 지시 (2026-08-15) |
+| `showReadingTime` | `false` | 읽기시간 **숨김** | 대표 지시 (2026-08-15) |
+
+### 10-2. 광고 슬롯 키명 표준 (`[params.advertisement]`)
+
+`hugo.toml`의 `[params.advertisement]` 섹션은 다음 키명을 단일 기준으로 사용한다.
+
+| 키 | 용도 | 참조 파셜 |
+|----|------|----------|
+| `adsense` | Publisher ID (`ca-pub-...`, 사이트 계열 매핑 기준) | extend-head.html, adsense/top.html, adsense/in-article.html |
+| `topSlot` | 타이틀 상단 Display 광고 슬롯 ID | adsense/top.html |
+| `inArticleSlot` | 본문 H2 분할 인젝션 슬롯 ID | adsense/in-article.html |
+
+> **금지**: `leaderboardSlot` 등 `topSlot`/`inArticleSlot` 외 키명으로 광고 슬롯을 정의하지 말 것. R02 검사는 `topSlot`/`inArticleSlot` 존재를 기준으로 한다. 단일 키명을 유지해야 downstream 검증(ops_dashboard R02)과 일치한다.
 
 ---
 
