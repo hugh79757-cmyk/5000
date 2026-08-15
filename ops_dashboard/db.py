@@ -822,6 +822,39 @@ def _quality_grade_from_rule_ids(rule_ids: list[str]) -> str:
     return "C"
 
 
+def _resolve_publish_error_meta(problem_id: str) -> tuple[str, str, str]:
+    """P계열 problem_id → (severity, action, playbook_ref).
+
+    PROBLEM_REGISTRY(lookup_problem)에 있으면 그대로, 신규 코드(P25 등)는
+    publish_error_events._NEW_CODES에서 유도한다. 미등록이면 (MAJOR, "", "").
+    """
+    from shared.publish_error_events import _NEW_CODES as _NC
+    spec = lookup_problem(problem_id)
+    if spec is not None:
+        return spec.severity, spec.action, spec.playbook_ref
+    meta = _NC.get(problem_id)
+    if meta is not None:
+        return meta.get("severity", "MAJOR"), meta.get("name", ""), ""
+    return "MAJOR", "", ""
+
+
+def _prior_publish_error_causes(conn: sqlite3.Connection, blog_id: str,
+                                before: str) -> list[str]:
+    """P02의 선행 근본원인 후보 — 해당 blog의 before 시각 이전 open이었던(closed됨) 이벤트 요약.
+
+    재시도 성공으로 close된 선행 P04/P25 등이 어떤 원인이었는지를 attention에서
+    확인할 수 있게 묶어 반환. 없으면 빈 리스트.
+    """
+    rows = conn.execute("""
+        SELECT problem_id, stage, detail_redacted, occurred_at
+        FROM publish_error_events
+        WHERE blog_id = ? AND state = 'closed' AND occurred_at < ?
+        AND problem_id IN ('P01','P02','P04','P05','P20','P25')
+        ORDER BY occurred_at DESC LIMIT 3
+    """, (blog_id, before)).fetchall()
+    return [f"{r['problem_id']}({r['stage']})@{str(r['occurred_at'])[:16]}" for r in rows]
+
+
 def get_attention_items(conn: sqlite3.Connection) -> dict:
     """주의 필요 항목: fail/stale check_results + open known_issues.
 
@@ -949,19 +982,32 @@ def get_attention_items(conn: sqlite3.Connection) -> dict:
     for pe in pe_rows:
         cfg = pe["config_status"] or "active"
         maint = pe["maintenance_status"] or "none"
+        # P계열 근본원인 노출: severity/action/playbook_ref를 PROBLEM_REGISTRY(_NEW_CODES)에서 유도.
+        # 하드코딩 severity 튜플(P04/P05/P06/P07/P08/P09/P29)은 P25 등 신규 코드를 누락하므로 제거.
+        severity, action, playbook_ref = _resolve_publish_error_meta(pe["problem_id"])
         entry = {
             "blog_id": pe["blog_id"],
             "check_name": "publish_error",
             "status": pe["state"],
+            # pe["stage"]는 dispatcher에서 실제 reason을 보존하도록 수정됨
+            # (no_content/stap_subprocess_error 등). 이전엔 result_parse로 뭉개졌음.
             "detail": f"{pe['problem_id']}: {pe['stage']} — {pe['detail_redacted'] or ''}".strip(),
             "evidence_url": "",
             "checked_at": pe["occurred_at"],
             "rule_id": "",
             "problem_id": pe["problem_id"],
-            "severity": "CRITICAL" if pe["problem_id"] in ("P04", "P05", "P06", "P07", "P08", "P09", "P29") else "MAJOR",
-            "action": "",
+            "severity": severity,
+            "action": action,
+            "playbook_ref": playbook_ref,
+            "stage": pe["stage"],
             "failed_rule_ids": [],
         }
+        # P02(콘텐츠 생성 실패)는 가능하면 선행 근본원인 이벤트(선행 closed P04/P25 등)를 묶어 표시.
+        if pe["problem_id"] == "P02":
+            _root_causes = _prior_publish_error_causes(conn, pe["blog_id"], pe["occurred_at"])
+            if _root_causes:
+                entry["root_cause"] = "; ".join(_root_causes)
+                entry["detail"] += f" | 선행근본원인: {entry['root_cause']}"
         if cfg == "active" and maint != "paused":
             fail_checks.append(entry)
         else:

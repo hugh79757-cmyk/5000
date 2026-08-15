@@ -143,11 +143,15 @@ class PublishMonitor:
                 logger.warning(f"[problem_monitor] 미등록 reason: {reason} (blog={blog_id})")
                 return None, {}
             detail = str(result.get("detail", "") or result.get("error_msg", ""))
+            # 실제 스케줄러/파이프라인이 낸 reason(예: no_content, stap_subprocess_error)을
+            # 보존 — DB stage가 spec.hook(=result_parse)로 뭉개지지 않게 한다 (P계열 근본원인 노출).
+            stage = str(result.get("stage", "") or reason)
             context = {
                 "blog_id": blog_id,
                 "problem_id": spec.problem_id,
                 "name_ko": spec.name_ko,
                 "phase": phase,
+                "stage": stage,
                 "pattern": "",
                 "matched": detail[:200],
                 "action": spec.action,
@@ -219,7 +223,8 @@ class PublishMonitor:
             try:
                 from shared.publish_error_events import record_publish_error
                 event = record_publish_error(
-                    blog_id, spec.hook, render_ctx.get("matched", ""),
+                    blog_id, context.get("stage") or spec.hook,
+                    render_ctx.get("matched", ""),
                     problem_id=problem_id,
                 )
             except Exception as exc:
