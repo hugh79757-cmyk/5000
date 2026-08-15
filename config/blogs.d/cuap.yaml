@@ -136,7 +136,7 @@ blogs:
   name: 반려동물용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 5
   domain: pet.informationhot.kr
   cf_project: pet-hugo
