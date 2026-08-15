@@ -15,10 +15,12 @@ from datetime import datetime
 from pathlib import Path
 
 from shared.paths import FIVEK_ROOT  # 5000 루트 (fallback)
+from shared.paths import SHARED_THEMES  # 공유 Hugo 테마 경로 (Phase 71d: 하드코딩 제거)
 
 logger = logging.getLogger("shared.autofix")
 
-WORKSPACE = Path("/Users/twinssn/Projects/5000")
+# Phase 71d: Path("/Users/twinssn/Projects/5000") 하드코딩 → FIVEK_ROOT 상수로 대체
+WORKSPACE = Path(FIVEK_ROOT)
 BACKUP_TAG_PREFIX = "pre-autostd-2026-08-10"
 
 
@@ -102,7 +104,7 @@ def get_ga4_id(blog_id: str, domain: str) -> str | None:
 def build_hugo(site_path: str) -> tuple[bool, str]:
     """Hugo 빌드 (에러 0 확인)."""
     env = os.environ.copy()
-    env["HUGO_THEMESDIR"] = "/Users/twinssn/Projects/shared-themes"
+    env["HUGO_THEMESDIR"] = SHARED_THEMES
     try:
         r = subprocess.run(
             ["hugo", "--gc", "--minify", "--source", site_path],

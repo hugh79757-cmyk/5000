@@ -14,7 +14,7 @@ from pathlib import Path
 
 import yaml
 
-from shared.paths import FIVEK_ROOT, TAP_ROOT, STAP_ROOT
+from shared.paths import FIVEK_ROOT, TAP_ROOT, STAP_ROOT, SHARED_THEMES
 from shared.publish_slot import (
     acquire_publish_slot,
     release_publish_slot,
@@ -735,7 +735,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         from shared.publishers.deploy import build_wrangler_env
         deploy_env = build_wrangler_env()
         deploy_env["PATH"] = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
-        deploy_env["HUGO_THEMESDIR"] = "/Users/twinssn/Projects/shared-themes"
+        deploy_env["HUGO_THEMESDIR"] = SHARED_THEMES
         r1 = subprocess.run(
             [HUGO, "--gc", "--minify"],
             cwd=str(site_path),
