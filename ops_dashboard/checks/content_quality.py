@@ -81,6 +81,24 @@ def _analyze(html: str) -> list[str]:
     if not re.search(r"curation-images|r2\.dev|ads-partners\.coupang\.com|coupangcdn\.com", html):
         issues.append("상품/썸네일 이미지 없음")
 
+
+    # 5) '상품별 상세 비교'가 h2가 아님 (strong/bold/작은 글씨로 렌더)
+    if "상품별 상세 비교" in html:
+        if not re.search(r"<h2[^>]*>\s*상품별 상세 비교", html):
+            issues.append("상품별 상세 비교 h2 아님")
+
+    # 6) 상품 개수 대비 이미지 부족 — '상품별 상세 비교' h2 ~ 다음 h2 구간만 대상
+    m2 = re.search(r"상품별 상세 비교", html)
+    if m2:
+        seg = html[m2.start():]
+        nxt = re.search(r"<h2", seg[10:])            # 다음 h2 전까지가 상품 섹션
+        if nxt:
+            seg = seg[:nxt.start()+10]
+        prod_h3 = len(re.findall(r"<h3[^>]*>", seg))
+        prod_img = len(re.findall(r"<img\b", seg))  # 섹션 내 모든 이미지
+        if prod_h3 >= 2 and prod_img < prod_h3:
+            issues.append(f"상품 이미지 부족(상품 {prod_h3} vs 이미지 {prod_img})")
+
     return issues
 
 
