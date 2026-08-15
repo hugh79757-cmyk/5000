@@ -188,6 +188,24 @@ RULES: list[UnifiedEntry] = [
         action="라이브 페이지 대조 위반 항목별 재조정 (C08_TITLE_MISMATCH/OG_MISSING/OG_MISMATCH/STRUCTURE/COT_LEAK/AD_NOT_RENDERED)",
         bucket="deferred",
     ),
+    # Phase 71 (DATA-01): data_stock — 브랜드별 콘텐츠 재고 임계 검사.
+    # 실제 판정은 data_stock.py 의 등록 체크 @register_check("data_stock") 가 run_all_checks에서
+    # 수행한다 (chat 아니라 conn 기반 sqlite read-only). 여기선 registry·/standards 뷰에 노출만.
+    # check_fn="_check_data_stock": standard.py 에 존재하지 않음 → _resolve_check_fn 이 None
+    #   반환 + 경고 로그 → check_standard_compliance 에서 skip(continue). failures/passes 에
+    #   미포함되어 "All N rules passed" 총량 안 깨짐. (C08 와 달리 site 기반이 아니므로 위임 래퍼를
+    #   두지 않음.)
+    # bucket="deferred": 표준준수 집계율에서 제외하되 registry·attention 에는 노출된다.
+    UnifiedEntry(
+        id="data_stock",
+        kind="rule",
+        target="브랜드별 콘텐츠 재고 (content stock per brand)",
+        severity="MINOR",
+        threshold="always",
+        check_fn="_check_data_stock",
+        action="재고 부족(≤STOCK_LOW=10) 브랜드는 발행 재정비 또는 콘텐츠 소스 보충",
+        bucket="deferred",
+    ),
 ]
 
 # W6-a: rule↔문제분류(problem_id) 대응 선언.

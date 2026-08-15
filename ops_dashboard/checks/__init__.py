@@ -109,3 +109,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import data_stock  # noqa: F401
+except ImportError:
+    pass
+
