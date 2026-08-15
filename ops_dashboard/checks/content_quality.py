@@ -62,30 +62,30 @@ def _analyze(html: str) -> list[str]:
 
     # 1) 빈 리스트 항목 (라벨만 / 완전 빈 <li>)
     if re.search(r"<li>\s*(배송|이미지|쿠팡순위)\s*:\s*</li>", html):
-        issues.append("빈 불릿(라벨만)")
+        issues.append("[CQ01] 빈 불릿(라벨만)")
     if re.search(r"<li>\s*</li>", html):
-        issues.append("빈 리스트 항목")
+        issues.append("[CQ01] 빈 리스트 항목")
 
     # 2) CTA 버튼이 <li> 안에 갇힘 (독립 블록화 실패)
     if re.search(r"<li>[^<]*<[^>]*btn-price-check", html):
-        issues.append("CTA가 리스트 항목에 갇힘")
+        issues.append("[CQ02] CTA가 리스트 항목에 갇힘")
 
     # 3) 제휴문구 개수 (정상 1~2회)
     n = html.count(DISCLOSURE)
     if n == 0:
-        issues.append("제휴문구 누락")
+        issues.append("[CQ03] 제휴문구 누락")
     elif n > 2:
-        issues.append(f"제휴문구 과다({n}회)")
+        issues.append(f"[CQ03] 제휴문구 과다({n}회)")
 
     # 4) 상품/썸네일 이미지 누락 (r2 썸네일 또는 쿠팡 상품 이미지)
     if not re.search(r"curation-images|r2\.dev|ads-partners\.coupang\.com|coupangcdn\.com", html):
-        issues.append("상품/썸네일 이미지 없음")
+        issues.append("[CQ05] 상품/썸네일 이미지 없음")
 
 
     # 5) '상품별 상세 비교'가 h2가 아님 (strong/bold/작은 글씨로 렌더)
     if "상품별 상세 비교" in html:
         if not re.search(r"<h2[^>]*>\s*상품별 상세 비교", html):
-            issues.append("상품별 상세 비교 h2 아님")
+            issues.append("[CQ04] 상품별 상세 비교 h2 아님")
 
     # 6) 상품 개수 대비 이미지 부족 — '상품별 상세 비교' h2 ~ 다음 h2 구간만 대상
     m2 = re.search(r"상품별 상세 비교", html)
@@ -97,7 +97,7 @@ def _analyze(html: str) -> list[str]:
         prod_h3 = len(re.findall(r"<h3[^>]*>", seg))
         prod_img = len(re.findall(r"<img\b", seg))  # 섹션 내 모든 이미지
         if prod_h3 >= 2 and prod_img < prod_h3:
-            issues.append(f"상품 이미지 부족(상품 {prod_h3} vs 이미지 {prod_img})")
+            issues.append(f"[CQ05] 상품 이미지 부족(상품 {prod_h3} vs 이미지 {prod_img})")
 
     return issues
 
