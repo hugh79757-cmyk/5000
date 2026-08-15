@@ -10,7 +10,7 @@ blogs:
   name: 가전제품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 5
   domain: appliance.informationhot.kr
   cf_project: appliance-hugo
