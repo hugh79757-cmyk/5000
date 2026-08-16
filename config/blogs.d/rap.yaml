@@ -5,7 +5,6 @@ blogs:
   platform: hugo
   status: active
   daily_quota: 10
-  force_draft: true
   domain: apt.informationhot.kr
   cf_project: rap-hugo
   repo: rap-hugo
@@ -33,7 +32,6 @@ blogs:
   platform: hugo
   status: active
   daily_quota: 10
-  force_draft: true
   domain: apply.informationhot.kr
   cf_project: rap2-hugo
   repo: rap2-hugo
@@ -58,7 +56,6 @@ blogs:
   platform: hugo
   status: active
   daily_quota: 10
-  force_draft: true
   domain: tax.informationhot.kr
   cf_project: rap3-hugo
   repo: rap3-hugo
@@ -86,7 +83,6 @@ blogs:
   platform: hugo
   status: active
   daily_quota: 10
-  force_draft: true
   domain: rent.informationhot.kr
   cf_project: rap4-hugo
   repo: rap4-hugo
@@ -111,7 +107,6 @@ blogs:
   platform: hugo
   status: active
   daily_quota: 10
-  force_draft: true
   domain: brand.informationhot.kr
   cf_project: rap5-hugo
   repo: rap5-hugo
