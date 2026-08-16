@@ -33,7 +33,13 @@ CREATE TABLE IF NOT EXISTS publish_error_events (
     detail_redacted TEXT NOT NULL DEFAULT '',
     fingerprint TEXT NOT NULL,
     state TEXT NOT NULL DEFAULT 'open',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    incident_key TEXT,
+    key_version INTEGER NOT NULL DEFAULT 2,
+    occurrence_count INTEGER NOT NULL DEFAULT 1,
+    first_seen_at TEXT,
+    last_seen_at TEXT,
+    resolved_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_publish_error_time ON publish_error_events(occurred_at DESC);
 CREATE INDEX IF NOT EXISTS idx_publish_error_blog ON publish_error_events(blog_id, occurred_at DESC);
@@ -79,11 +85,86 @@ def _connect() -> sqlite3.Connection:
     return conn
 
 
+# PR1: incident 단위 집계 컬럼. 기존 행은 incident_key NULL로 유지(자동 삭제/병합 없음).
+# canonical key(v2) = sha256("v2|blog|" + blog_id + "|" + stage + "|" + problem_id + "|" + normalized_reason [+ "|" + resource_id])
+# detail/occurred_at/consecutive는 key에서 제외. 기존 fingerprint(detail 포함)는 호환용으로 유지.
+_INCIDENT_COLUMNS: dict[str, str] = {
+    "incident_key": "TEXT",
+    "key_version": "INTEGER NOT NULL DEFAULT 2",
+    "occurrence_count": "INTEGER NOT NULL DEFAULT 1",
+    "first_seen_at": "TEXT",
+    "last_seen_at": "TEXT",
+    "resolved_at": "TEXT",
+}
+
+# 동시성 안전성: open 상태의 동일 incident는 partial UNIQUE index가 1행으로 강제한다.
+# closed 행은 인덱스에서 빠지므로 재발 시 새 incident 행 생성이 가능하다.
+_OPEN_INCIDENT_INDEX_SQL = (
+    "CREATE UNIQUE INDEX IF NOT EXISTS idx_publish_error_open_incident "
+    "ON publish_error_events(incident_key) "
+    "WHERE state='open' AND incident_key IS NOT NULL"
+)
+
+_REASON_ALIASES = {
+    "no_topic": "no_topics",  # 단수/복수 표현 통일
+}
+
+
+def _normalize_reason(reason: str) -> str:
+    """reason alias 정규화 — 소문자+strip 후 알려진 alias만 통일.
+
+    problem_id로 매핑하지 않는다(no_result/no_topics가 모두 P01이어도
+    본질이 다르므로 서로 다른 incident로 유지한다).
+    """
+    normalized = (reason or "").strip().lower()
+    return _REASON_ALIASES.get(normalized, normalized)
+
+
+def compute_incident_key(
+    blog_id: str,
+    stage: str,
+    problem_id: str,
+    reason: str = "",
+    resource_id: str = "",
+    key_version: int = 2,
+) -> str:
+    """canonical incident key (v2) — 안정적 필드만 사용.
+
+    detail/occurred_at/consecutive는 제외되므로 동일 장애는 항상 같은 key를 가진다.
+    resource_id가 주어지면(공용 소스/파이프라인 단위 root) key에 포함한다.
+    """
+    parts = [
+        f"v{key_version}",
+        "blog",
+        blog_id or "unknown",
+        stage or "unknown",
+        problem_id,
+        _normalize_reason(reason),
+    ]
+    if resource_id:
+        parts.append(resource_id)
+    return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()[:24]
+
+
+def _migrate_schema(conn: sqlite3.Connection) -> None:
+    """PRAGMA table_info + ALTER TABLE 기반 증분 migration — 여러 번 실행해도 안전.
+
+    기존 행은 incident_key=NULL로 남는다(삭제/병합 없음). NULL은 partial index
+    WHERE 절(incident_key IS NOT NULL) 밖이므로 기존 중복과 충돌하지 않는다.
+    """
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(publish_error_events)")}
+    for name, ddl in _INCIDENT_COLUMNS.items():
+        if name not in columns:
+            conn.execute(f"ALTER TABLE publish_error_events ADD COLUMN {name} {ddl}")
+    conn.execute(_OPEN_INCIDENT_INDEX_SQL)
+
+
 def ensure_schema(conn: sqlite3.Connection | None = None) -> None:
     owns_connection = conn is None
     target = conn or _connect()
     try:
         target.executescript(_SCHEMA_SQL)
+        _migrate_schema(target)
         target.commit()
     finally:
         if owns_connection:
@@ -158,13 +239,18 @@ def record_publish_error(
     http_status: int | None = None,
     timeout_seconds: int | None = None,
     state: str = "open",
+    resource_id: str = "",
 ) -> dict[str, Any]:
     safe_detail = redact_detail(detail)
     resolved_problem, severity, retryable = classify_error(stage, safe_detail, reason, problem_id)
     occurred_at = datetime.now(timezone.utc).isoformat()
+    # 기존 fingerprint(detail 포함)는 호환용으로 유지 — incident key로 사용하지 않는다.
     fingerprint = hashlib.sha256(
         f"{blog_id}|{stage}|{resolved_problem}|{safe_detail[:240]}".encode("utf-8")
     ).hexdigest()[:24]
+    incident_key = compute_incident_key(
+        blog_id, stage, resolved_problem, reason=reason, resource_id=resource_id
+    )
     event = {
         "event_id": str(uuid.uuid4()),
         "occurred_at": occurred_at,
@@ -183,6 +269,11 @@ def record_publish_error(
         "detail_redacted": safe_detail,
         "fingerprint": fingerprint,
         "state": state,
+        "incident_key": incident_key,
+        "key_version": 2,
+        "occurrence_count": 1,
+        "first_seen_at": occurred_at,
+        "last_seen_at": occurred_at,
     }
     try:
         conn = _connect()
@@ -193,16 +284,49 @@ def record_publish_error(
                 INSERT INTO publish_error_events (
                     event_id, occurred_at, blog_id, pipeline, stage, problem_id,
                     reason, severity, retryable, attempt, max_attempts, source_name,
-                    http_status, timeout_seconds, detail_redacted, fingerprint, state
+                    http_status, timeout_seconds, detail_redacted, fingerprint, state,
+                    incident_key, key_version, occurrence_count, first_seen_at, last_seen_at
                 ) VALUES (
                     :event_id, :occurred_at, :blog_id, :pipeline, :stage, :problem_id,
                     :reason, :severity, :retryable, :attempt, :max_attempts, :source_name,
-                    :http_status, :timeout_seconds, :detail_redacted, :fingerprint, :state
+                    :http_status, :timeout_seconds, :detail_redacted, :fingerprint, :state,
+                    :incident_key, :key_version, :occurrence_count, :first_seen_at, :last_seen_at
                 )
+                ON CONFLICT(incident_key) WHERE state='open' AND incident_key IS NOT NULL
+                DO UPDATE SET
+                    occurrence_count = occurrence_count + 1,
+                    occurred_at = excluded.occurred_at,
+                    last_seen_at = excluded.occurred_at,
+                    detail_redacted = excluded.detail_redacted,
+                    severity = excluded.severity,
+                    retryable = excluded.retryable,
+                    pipeline = excluded.pipeline,
+                    reason = excluded.reason,
+                    source_name = excluded.source_name,
+                    http_status = excluded.http_status,
+                    timeout_seconds = excluded.timeout_seconds,
+                    attempt = excluded.attempt,
+                    max_attempts = excluded.max_attempts
                 """,
                 event,
             )
             conn.commit()
+            # 반환 event는 실제 DB 행과 일치시킨다 (telegram_delivery_audit FK 정합).
+            # open 행은 partial UNIQUE index로 incident_key당 최대 1개가 보장되므로,
+            # state='open' 필터 + rowid 정렬로 "현재 upsert 대상 open 행"을 결정적으로
+            # 조회한다 (closed/open 이력이 공존해도 closed 행은 반환되지 않는다).
+            row = conn.execute(
+                "SELECT event_id, occurrence_count, first_seen_at, last_seen_at "
+                "FROM publish_error_events "
+                "WHERE incident_key = ? AND state = 'open' "
+                "ORDER BY rowid DESC LIMIT 1",
+                (incident_key,),
+            ).fetchone()
+            if row:
+                event["event_id"] = row["event_id"]
+                event["occurrence_count"] = row["occurrence_count"]
+                event["first_seen_at"] = row["first_seen_at"]
+                event["last_seen_at"] = row["last_seen_at"]
         finally:
             conn.close()
     except Exception:
@@ -296,28 +420,37 @@ def close_publish_error_event(
     blog_id: str,
     problem_id: str,
     before: str | None = None,
+    incident_key: str | None = None,
 ) -> int:
-    """주어진 블로그·문제의 open 이벤트 중 가장 최근 것을 closed로 변경.
+    """조건에 맞는 open incident를 모두 closed로 전환.
 
-    before가 주어지면 해당 시각 이전의 open 이벤트만 대상.
+    - incident_key가 주어지면 해당 incident만 닫는다 (무관한 problem/root를 함께 닫지 않음).
+    - incident_key가 없으면 blog_id+problem_id(+before)에 해당하는 open 전부를 닫는다
+      (기존 caller 호환 — LIMIT 1에 의존하지 않는다).
+    - resolved_at을 함께 갱신하고, occurrence_count/first_seen_at은 보존한다.
+    - 이미 closed인 행은 state='open' 조건으로 제외되므로 재호출이 안전하다.
     반환: 변경된 행 수.
     """
     ensure_schema(conn)
-    # SQLite doesn't support ORDER BY/LIMIT in UPDATE directly - use subquery
-    sql = """
-        UPDATE publish_error_events
-        SET state = 'closed'
-        WHERE event_id = (
-            SELECT event_id FROM publish_error_events
-            WHERE blog_id = ?
+    now = datetime.now(timezone.utc).isoformat()
+    if incident_key:
+        sql = """
+            UPDATE publish_error_events
+            SET state = 'closed', resolved_at = ?
+            WHERE state = 'open' AND incident_key = ?
+        """
+        params: tuple[Any, ...] = (now, incident_key)
+    else:
+        sql = """
+            UPDATE publish_error_events
+            SET state = 'closed', resolved_at = ?
+            WHERE state = 'open'
+              AND blog_id = ?
               AND problem_id = ?
-              AND state = 'open'
               AND (? IS NULL OR occurred_at < ?)
-            ORDER BY occurred_at DESC
-            LIMIT 1
-        )
-    """
-    params = (blog_id, problem_id, before, before) if before else (blog_id, problem_id, None, None)
+        """
+        params = (now, blog_id, problem_id, before, before) if before else (
+            now, blog_id, problem_id, None, None)
     cur = conn.execute(sql, params)
     conn.commit()
     return cur.rowcount
