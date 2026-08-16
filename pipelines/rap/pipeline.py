@@ -6,7 +6,7 @@ import random
 import sqlite3
 from datetime import datetime
 
-from shared.db import get_db_path
+from shared.db import BranchDbMissingError, connect_branch_db, get_db_path
 from shared.validators import assert_korean_or_reject, sanitize_title
 
 logger = logging.getLogger(__name__)
@@ -77,13 +77,24 @@ WP_CATEGORY_MAP = {
 
 def _pick_keyword(blog_id):
     """RAP DB에서 키워드 선택 — 오염 필터 + 중복 발행 방지"""
-    # RAP DB 우선, 없으면 GAP DB 폴백
-    db_path = RAP_DB_PATH if os.path.exists(RAP_DB_PATH) else GAP_DB_PATH
-    conn = sqlite3.connect(db_path, timeout=30)
+    # RAP DB 우선, 없으면 GAP DB 폴백 (둘 다 없으면 크래시 엣지 폐쇄)
+    using_gap = False
+    conn = None
+    try:
+        if os.path.exists(RAP_DB_PATH):
+            conn = connect_branch_db("rap", allow_create=False)
+        else:
+            conn = connect_branch_db("gap", allow_create=False)
+            using_gap = True
+    except BranchDbMissingError:
+        conn = None
+    if conn is None:
+        logger.warning("RAP/GAP DB 둘 다 없음 — 키워드 선택 스킵 (silent-create 방지)")
+        return None, None
     try:
         patterns = BLOG_KEYWORD_FILTER.get(blog_id, [])
 
-        if db_path == RAP_DB_PATH:
+        if not using_gap:
             # RAP DB: blog_target 필터 우선
             rows = conn.execute(
                 "SELECT keyword, category FROM keywords "
@@ -113,13 +124,13 @@ def _pick_keyword(blog_id):
 
         # 3단계: 이미 발행된 키워드 제외 (최근 7일)
         try:
-            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=30) if db_path != RAP_DB_PATH else conn
+            rap_conn = sqlite3.connect(RAP_DB_PATH, timeout=30) if using_gap else conn
             published = {r[0] for r in rap_conn.execute(
                 "SELECT data_key FROM publish_log "
                 "WHERE blog_id=? AND published_at >= datetime('now', '-7 days')",
                 (blog_id,)
             ).fetchall()}
-            if db_path != RAP_DB_PATH:
+            if using_gap:
                 rap_conn.close()
             rows = [(kw, cat) for kw, cat in rows if kw not in published]
         except Exception:

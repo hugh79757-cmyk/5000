@@ -5,6 +5,14 @@ from datetime import datetime, timedelta
 
 import requests
 
+from shared.db import BranchDbMissingError, connect_branch_db
+
+try:
+    from shared.telegram_notifier import send_error as tg_error
+except ImportError:
+    def tg_error(*a, **k) -> None:
+        return None
+
 logger = logging.getLogger(__name__)
 
 # 한국표준산업분류 주요 업종코드 매핑
@@ -142,7 +150,11 @@ def fetch_dividend_info(corp_code, year=None):
 
 
 def get_listed_corps(limit=100):
-    conn = sqlite3.connect(DB_PATH)
+    try:
+        conn = connect_branch_db("stock_metrics", allow_create=False)
+    except BranchDbMissingError:
+        tg_error("stock_metrics DB 누락: get_listed_corps 스킵 (silent-create 방지)")
+        return []
     conn.row_factory = sqlite3.Row
     # 재무 데이터가 있을 가능성 높은 기업 우선 (stock_code 있고, 최근 수정)
     rows = conn.execute(
@@ -298,9 +310,8 @@ def _save_etf_to_db(items):
     """ETF 시세를 DB에 저장 (당일 캐시)"""
     import sqlite3
     from datetime import datetime
-    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
     today = datetime.now().strftime("%Y-%m-%d")
-    conn = sqlite3.connect(db)
+    conn = connect_branch_db("stock_metrics", allow_create=True)
     saved = 0
     for e in items:
         try:
@@ -320,9 +331,12 @@ def _get_etf_from_db():
     """DB에서 당일 ETF 데이터 조회"""
     import sqlite3
     from datetime import datetime
-    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
     today = datetime.now().strftime("%Y-%m-%d")
-    conn = sqlite3.connect(db)
+    try:
+        conn = connect_branch_db("stock_metrics", allow_create=False)
+    except BranchDbMissingError:
+        return None
+    conn.row_factory = sqlite3.Row
     conn.row_factory = sqlite3.Row
     rows = conn.execute("SELECT * FROM etf_daily WHERE date=? ORDER BY change_rate DESC", (today,)).fetchall()
     conn.close()
@@ -335,9 +349,8 @@ def _save_dividend_to_db(rankings):
     """배당 순위를 DB에 저장"""
     import sqlite3
     from datetime import datetime
-    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
     today = datetime.now().strftime("%Y-%m-%d")
-    conn = sqlite3.connect(db)
+    conn = connect_branch_db("stock_metrics", allow_create=True)
     saved = 0
     for r in rankings:
         try:
@@ -357,9 +370,12 @@ def _get_dividend_from_db():
     """DB에서 당일 배당 데이터 조회"""
     import sqlite3
     from datetime import datetime
-    db = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "stock.db")
     today = datetime.now().strftime("%Y-%m-%d")
-    conn = sqlite3.connect(db)
+    try:
+        conn = connect_branch_db("stock_metrics", allow_create=False)
+    except BranchDbMissingError:
+        return None
+    conn.row_factory = sqlite3.Row
     conn.row_factory = sqlite3.Row
     rows = conn.execute("SELECT * FROM dividend_ranking WHERE date=? ORDER BY rank", (today,)).fetchall()
     conn.close()
