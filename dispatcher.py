@@ -958,13 +958,21 @@ _AUTOFIX_RULE_TO_ACTION = {
     "R12": "fix_r12",
     "THUMBNAIL-01": "fix_thumbnail_r2",
     "R2-01": "fix_r2_images",
+    "FM-DRAFT": "fix_draft_true",
+    "FM-FEATUREIMAGE": "fix_featureimage_url_sanitize",
+    "FM-MISSINGKEYS": "fix_frontmatter_missing_keys",
 }
 
 # OQ#2 (시니어 결정 대기) 승인게이트: 무인 자동 실행 허용 항목(grade A).
 # 썸네일 재생성은 안전으로 분류. 나머지(fix_r04/r06/r08/r12/r2_images)는
 # approve_non_safe=True 가 필요 — 그렇지 않으면 'requires_approval' 으로 분류되어
 # 자동 실행되지 않음 (사람 승인 경로).
-_AUTOFIX_SAFE_ACTIONS = {"fix_thumbnail_r2"}
+_AUTOFIX_SAFE_ACTIONS = {
+    "fix_thumbnail_r2",
+    "fix_draft_true",
+    "fix_featureimage_url_sanitize",
+    "fix_frontmatter_missing_keys",
+}
 
 
 def _auto_fix_on_fail(

@@ -1524,6 +1524,24 @@ def get_registry_view(conn: sqlite3.Connection, blog_id: str | None = None) -> d
         ).fetchone()
         errors.append(_error_entry(e, row, blog_id=blog_id))
 
+    # Wave 2d (Phase 72): 각 entry 에 friendly 단일 소스 메타(summary_human/how_to_add/
+    # automation_level) 를 주입 — 값은 config/{problems,rules}.yaml 캐시(get_friendly) 에서.
+    # YAML 누락 시 공란 유지 (기존 필드는 불변). 라이브 크래시 없음.
+    try:
+        from shared.registry_loader import get_friendly
+
+        def _inject_friendly(entries):
+            for _entry in entries:
+                _f = get_friendly(_entry.get("id", ""))
+                _entry["summary_human"] = _f.get("summary_human", "")
+                _entry["how_to_add"] = _f.get("how_to_add", "")
+                _entry["automation_level"] = _f.get("automation_level", "")
+
+        _inject_friendly(rules)
+        _inject_friendly(errors)
+    except Exception as _exc:
+        logger.warning("[db.get_registry_view] friendly 메타 주입 실패 (공란 유지): %s", _exc)
+
     return {"rules": rules, "errors": errors}
 
 

@@ -214,6 +214,14 @@ class PublishMonitor:
         except (KeyError, ValueError, AttributeError) as e:
             logger.error(f"[problem_monitor] 템플릿 렌더 실패: {problem_id} — {e}")
             return None
+        # Wave 2d (Phase 72): friendly 단일 소스 메타를 알림 본문에 덧붙인다.
+        # 사람용 평문(summary_human) + 에이전트 파싱용 JSON(summary_llm). 기존 템플릿은 보존.
+        _summary_human = getattr(spec, "summary_human", "")
+        _summary_llm = getattr(spec, "summary_llm", "")
+        if _summary_human:
+            message += "\n\n" + _summary_human
+            if _summary_llm:
+                message += "\n\n```json\n" + _summary_llm + "\n```"
         message = message[:500]
         if self.dry_run:
             logger.info(f"[problem_monitor DRY-RUN] 발송 예정: {blog_id}/{problem_id}\n{message}")

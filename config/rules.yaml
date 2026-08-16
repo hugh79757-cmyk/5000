@@ -1,0 +1,308 @@
+rules:
+- code: R01
+  name_ko: 'hugo.toml: showTableOfContents — 목차 비활성화'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: showTableOfContents를 false로 설정
+  target_files:
+  - path: '{site_path}/hugo.toml'
+    hint: '[params] 섹션 또는 최상위에 showTableOfContents = false 추가/수정 (테마 기본값 확인 후)'
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R01 status 확인
+  - '로컬 Hugo 빌드 0에러: HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify --source {site_path}'
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r01
+  action: showTableOfContents를 false로 설정
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r01
+  summary_human: 'hugo.toml: showTableOfContents — 목차 비활성화 준수 필요: showTableOfContents를 false로 설정.'
+  summary_llm: '{"problem_id": "R01", "name_ko": "hugo.toml: showTableOfContents — 목차 비활성화", "severity": "CRITICAL", "family": "validation", "one_line_action": "showTableOfContents를 false로 설정", "needs_human": false, "target_files": [{"path": "{site_path}/hugo.toml", "hint": "[params] 섹션 또는 최상위에 showTableOfContents = false 추가/수정 (테마 기본값 확인 후)"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R02
+  name_ko: 'hugo.toml: [params.advertisement] + AdSense slots'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: Advertisement 섹션에 adsense 슬롯이 필요함 — [params.advertisement] 섹션 + adsense(publisher ID) + topSlot/inArticleSlot 추가
+  target_files:
+  - path: '{site_path}/hugo.toml'
+    hint: '[params.advertisement] 섹션 생성/수정: adsense, topSlot, inArticleSlot 키 설정. publisher ID는 사이트 계열(rotcha=8772, informationhot=6677, aikorea24=5938) 확인'
+  - path: '{site_path}/layouts/partials/adsense/top.html'
+    hint: topSlotID 참조 확인 (hugo.toml의 topSlot 값과 일치해야 함)
+  - path: '{site_path}/layouts/partials/adsense/in-article.html'
+    hint: inArticleSlotID 참조 확인
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R02 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r02
+  action: Advertisement 섹션에 adsense 슬롯이 필요함
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r02
+  summary_human: 'hugo.toml: [params.advertisement] + AdSense slots 준수 필요: Advertisement 섹션에 adsense 슬롯이 필요함.'
+  summary_llm: '{"problem_id": "R02", "name_ko": "hugo.toml: [params.advertisement] + AdSense slots", "severity": "CRITICAL", "family": "validation", "one_line_action": "Advertisement 섹션에 adsense 슬롯이 필요함 — [params.advertisement] 섹션 + adsense(publisher ID) + topSlot/inArticleSlot 추가", "needs_human": false, "target_files": [{"path": "{site_path}/hugo.toml", "hint": "[params.advertisement] 섹션 생성/수정: adsense, topSlot, inArticleSlot 키 설정. publisher ID는 사이트 계열(rotcha=8772, informationhot=6677, aikorea24=5938) 확인"}, {"path": "{site_path}/layouts/partials/adsense/top.html", "hint": "topSlotID 참조 확인 (hugo.toml의 topSlot 값과 일치해야 함)"}, {"path": "{site_path}/layouts/partials/adsense/in-article.html", "hint": "inArticleSlotID 참조 확인"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R03
+  name_ko: 'extend-head.html: adsbygoogle.js 하드코딩 제거 (site.Params 사용)'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: adsbygoogle.js는 site.Params 사용 (하드코딩 금지) — extend-head.html 내 ca-pub- 하드코딩을 site.Params 참조로 교체
+  target_files:
+  - path: '{site_path}/layouts/partials/extend-head.html'
+    hint: adsbygoogle.js 로드 부분의 client 파라미터를 site.Params.AdSense.Client 등으로 변경. 하드코딩된 ca-pub- 문자열 제거
+  - path: '{site_path}/hugo.toml'
+    hint: '[params.advertisement.adsense] = publisher ID 설정 확인 (R02와 연계)'
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R03 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r03
+  action: adsbygoogle.js는 site.Params 사용 (하드코딩 금지)
+  bucket: out_of_scope
+  playbook_ref: ERROR_PLAYBOOKS.md#r03
+  summary_human: 'extend-head.html: adsbygoogle.js 하드코딩 제거 (site.Params 사용) 준수 필요: adsbygoogle.js는 site.Params 사용 (하드코딩 금지).'
+  summary_llm: '{"problem_id": "R03", "name_ko": "extend-head.html: adsbygoogle.js 하드코딩 제거 (site.Params 사용)", "severity": "CRITICAL", "family": "validation", "one_line_action": "adsbygoogle.js는 site.Params 사용 (하드코딩 금지) — extend-head.html 내 ca-pub- 하드코딩을 site.Params 참조로 교체", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/partials/extend-head.html", "hint": "adsbygoogle.js 로드 부분의 client 파라미터를 site.Params.AdSense.Client 등으로 변경. 하드코딩된 ca-pub- 문자열 제거"}, {"path": "{site_path}/hugo.toml", "hint": "[params.advertisement.adsense] = publisher ID 설정 확인 (R02와 연계)"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R04
+  name_ko: 'extend_head.html: GA4 + 모바일 보정 CSS'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: human_approval
+  one_line_action: GA4 + 모바일 보정 CSS 필요 — extend_head.html에 gtag 스니펫(블로그별 측정 ID)과 @media (max-width:767px) 모바일 보정 CSS 추가. GA4 측정 ID는 사람이 제공.
+  target_files:
+  - path: '{site_path}/layouts/partials/extend_head.html'
+    hint: GA4(gtag) 스니펫 추가 + @media (max-width:767px) 모바일 보정 CSS 블록 추가. 측정 ID는 사람 제공 필수 (에이전트 임의 생성 금지)
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R04 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: true
+  threshold: always
+  check_fn: _check_r04
+  action: GA4 + 모바일 보정 CSS 필요
+  bucket: out_of_scope
+  playbook_ref: ERROR_PLAYBOOKS.md#r04
+  summary_human: 'extend_head.html: GA4 + 모바일 보정 CSS 준수 필요: GA4 + 모바일 보정 CSS 필요.'
+  summary_llm: '{"problem_id": "R04", "name_ko": "extend_head.html: GA4 + 모바일 보정 CSS", "severity": "MAJOR", "family": "validation", "one_line_action": "GA4 + 모바일 보정 CSS 필요 — extend_head.html에 gtag 스니펫(블로그별 측정 ID)과 @media (max-width:767px) 모바일 보정 CSS 추가. GA4 측정 ID는 사람이 제공.", "needs_human": true, "target_files": [{"path": "{site_path}/layouts/partials/extend_head.html", "hint": "GA4(gtag) 스니펫 추가 + @media (max-width:767px) 모바일 보정 CSS 블록 추가. 측정 ID는 사람 제공 필수 (에이전트 임의 생성 금지)"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R05
+  name_ko: 'adsense/top.html: overflow:hidden;min-height 래퍼 + outside push div'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: overflow:hidden;min-height:100px 래퍼 + outside push div 필요 — top 광고 영역에 래퍼 스타일 적용, push 스크립트 div 밖에 배치
+  target_files:
+  - path: '{site_path}/layouts/partials/adsense/top.html'
+    hint: overflow:hidden; min-height:100px 스타일 래퍼 div + <script>push({{}})</script>를 래퍼 밖에 배치
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R05 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r05
+  action: overflow:hidden;min-height:100px 래퍼 + outside push div 필요
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r05
+  summary_human: 'adsense/top.html: overflow:hidden;min-height 래퍼 + outside push div 준수 필요: overflow:hidden;min-height:100px 래퍼 + outside push div 필요.'
+  summary_llm: '{"problem_id": "R05", "name_ko": "adsense/top.html: overflow:hidden;min-height 래퍼 + outside push div", "severity": "MAJOR", "family": "validation", "one_line_action": "overflow:hidden;min-height:100px 래퍼 + outside push div 필요 — top 광고 영역에 래퍼 스타일 적용, push 스크립트 div 밖에 배치", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/partials/adsense/top.html", "hint": "overflow:hidden; min-height:100px 스타일 래퍼 div + <script>push({{}})</script>를 래퍼 밖에 배치"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R06
+  name_ko: 'adsense/in-article.html: fluid + in-article format (no auto)'
+  severity: CRITICAL
+  family: validation
+  hook: standard_compliance
+  automation_level: human_approval
+  one_line_action: fluid+in-article format (no auto) + outside push div 필요 — data-ad-format="fluid" + data-ad-layout="in-article" 설정, <script>push({{}})</script>를 <ins> 태그 밖에 배치. data-ad-format=auto 제거
+  target_files:
+  - path: '{site_path}/layouts/partials/adsense/in-article.html'
+    hint: data-ad-format="auto" → "fluid" 변경 + data-ad-layout="in-article" 추가 + push script를 <ins> 밖으로 이동. AdSense 계정 슬롯 포맷 정책 확인 필요 가능
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R06 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r06
+  action: fluid+in-article format (no auto) + outside push div 필요
+  bucket: deferred
+  playbook_ref: ERROR_PLAYBOOKS.md#r06
+  summary_human: 'adsense/in-article.html: fluid + in-article format (no auto) 준수 필요: fluid+in-article format (no auto) + outside push div 필요.'
+  summary_llm: '{"problem_id": "R06", "name_ko": "adsense/in-article.html: fluid + in-article format (no auto)", "severity": "CRITICAL", "family": "validation", "one_line_action": "fluid+in-article format (no auto) + outside push div 필요 — data-ad-format=\"fluid\" + data-ad-layout=\"in-article\" 설정, <script>push({{}})</script>를 <ins> 태그 밖에 배치. data-ad-format=auto 제거", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/partials/adsense/in-article.html", "hint": "data-ad-format=\"auto\" → \"fluid\" 변경 + data-ad-layout=\"in-article\" 추가 + push script를 <ins> 밖으로 이동. AdSense 계정 슬롯 포맷 정책 확인 필요 가능"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R07
+  name_ko: 'single.html: H2 split injection + prose wrapper'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: H2 split injection + prose wrapper 필요 — single.html 본문 영역에서 H2마다 콘텐츠 분할 인젝션 로직 + <section class="... prose ..."> 래퍼 추가
+  target_files:
+  - path: '{site_path}/layouts/_default/single.html'
+    hint: 본문 출력 부분에 H2 분할 인젝션 로직 + <section class="prose"> 래퍼 추가 (테마 기본 single.html 구조 참고)
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R07 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r07
+  action: H2 split injection + prose wrapper 필요
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r07
+  summary_human: 'single.html: H2 split injection + prose wrapper 준수 필요: H2 split injection + prose wrapper 필요.'
+  summary_llm: '{"problem_id": "R07", "name_ko": "single.html: H2 split injection + prose wrapper", "severity": "MAJOR", "family": "validation", "one_line_action": "H2 split injection + prose wrapper 필요 — single.html 본문 영역에서 H2마다 콘텐츠 분할 인젝션 로직 + <section class=\"... prose ...\"> 래퍼 추가", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/_default/single.html", "hint": "본문 출력 부분에 H2 분할 인젝션 로직 + <section class=\"prose\"> 래퍼 추가 (테마 기본 single.html 구조 참고)"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R08
+  name_ko: 'single.html: Description (lead) 제거'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: Description (lead) 제거 필요 — single.html에서 .Lead/.Description 클래스 요소 라인 제거 (Blowfish 테마 기본 첫 문단 과대 표시 방지)
+  target_files:
+  - path: '{site_path}/layouts/_default/single.html'
+    hint: .Lead 또는 .Description 클래스가 있는 라인 제거. 본문 출력 로직 전체는 건드리지 않음
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R08 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r08
+  action: Description (lead) 제거 필요
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r08
+  summary_human: 'single.html: Description (lead) 제거 준수 필요: Description (lead) 제거 필요.'
+  summary_llm: '{"problem_id": "R08", "name_ko": "single.html: Description (lead) 제거", "severity": "MAJOR", "family": "validation", "one_line_action": "Description (lead) 제거 필요 — single.html에서 .Lead/.Description 클래스 요소 라인 제거 (Blowfish 테마 기본 첫 문단 과대 표시 방지)", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/_default/single.html", "hint": ".Lead 또는 .Description 클래스가 있는 라인 제거. 본문 출력 로직 전체는 건드리지 않음"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R09
+  name_ko: 'baseof.html: 커스텀 오버라이드 없음 — 테마 기본값 사용'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: 커스텀 오버라이드 없음 — 테마 기본값 사용 — layouts/_default/baseof.html이 존재하면 삭제 (테마 기본값으로 복원)
+  target_files:
+  - path: '{site_path}/layouts/_default/baseof.html'
+    hint: 커스텀 baseof.html 삭제 (테마 기본값으로 대체). 삭제 전 어떤 오버라이드가 필요한지 diff 기억. 필요 여부가 애매하면 사용자 확인 1회
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R09 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r09
+  action: 커스텀 오버라이드 없음 — 테마 기본값 사용
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r09
+  summary_human: 'baseof.html: 커스텀 오버라이드 없음 — 테마 기본값 사용 준수 필요: 커스텀 오버라이드 없음 — 테마 기본값 사용.'
+  summary_llm: '{"problem_id": "R09", "name_ko": "baseof.html: 커스텀 오버라이드 없음 — 테마 기본값 사용", "severity": "MAJOR", "family": "validation", "one_line_action": "커스텀 오버라이드 없음 — 테마 기본값 사용 — layouts/_default/baseof.html이 존재하면 삭제 (테마 기본값으로 복원)", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/_default/baseof.html", "hint": "커스텀 baseof.html 삭제 (테마 기본값으로 대체). 삭제 전 어떤 오버라이드가 필요한지 diff 기억. 필요 여부가 애매하면 사용자 확인 1회"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R10
+  name_ko: 'custom.css: 미채움 공간 제거 + 다크모드 + min-height'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: 미채움 공간 제거 + 다크모드 + min-height 규칙 필요 — assets/css/custom.css 생성 또는 보완 (unfilled 요소 공간 제거, 다크모드 대응, min-height 조절)
+  target_files:
+  - path: '{site_path}/assets/css/custom.css'
+    hint: '미채움(unfilled) 요소 제거 규칙 + @media (prefers-color-scheme: dark) 다크모드 규칙 + 적절한 min-height 조절 추가. 기존에 파일이 없으면 표준 custom.css 생성'
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R10 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r10
+  action: 미채움 공간 제거 + 다크모드 + min-height 규칙 필요
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r10
+  summary_human: 'custom.css: 미채움 공간 제거 + 다크모드 + min-height 준수 필요: 미채움 공간 제거 + 다크모드 + min-height 규칙 필요.'
+  summary_llm: '{"problem_id": "R10", "name_ko": "custom.css: 미채움 공간 제거 + 다크모드 + min-height", "severity": "MAJOR", "family": "validation", "one_line_action": "미채움 공간 제거 + 다크모드 + min-height 규칙 필요 — assets/css/custom.css 생성 또는 보완 (unfilled 요소 공간 제거, 다크모드 대응, min-height 조절)", "needs_human": false, "target_files": [{"path": "{site_path}/assets/css/custom.css", "hint": "미채움(unfilled) 요소 제거 규칙 + @media (prefers-color-scheme: dark) 다크모드 규칙 + 적절한 min-height 조절 추가. 기존에 파일이 없으면 표준 custom.css 생성"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R11
+  name_ko: 'layouts/: mobile-sticky.html 사용 금지'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: mobile-sticky.html 사용 금지 — layouts/partials/adsense/mobile-sticky.html 등 mobile-sticky 광고 파셜이 존재하면 삭제
+  target_files:
+  - path: '{site_path}/layouts/partials/adsense/mobile-sticky.html'
+    hint: 파일 존재 시 삭제. 삭제 대신 비활성화만 하려는 시도는 범위 확인 필요 (레시피는 삭제 지향)
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R11 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r11
+  action: mobile-sticky.html 사용 금지
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r11
+  summary_human: 'layouts/: mobile-sticky.html 사용 금지 준수 필요: mobile-sticky.html 사용 금지.'
+  summary_llm: '{"problem_id": "R11", "name_ko": "layouts/: mobile-sticky.html 사용 금지", "severity": "MAJOR", "family": "validation", "one_line_action": "mobile-sticky.html 사용 금지 — layouts/partials/adsense/mobile-sticky.html 등 mobile-sticky 광고 파셜이 존재하면 삭제", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/partials/adsense/mobile-sticky.html", "hint": "파일 존재 시 삭제. 삭제 대신 비활성화만 하려는 시도는 범위 확인 필요 (레시피는 삭제 지향)"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R12
+  name_ko: 'layouts/: 허용 집합을 벗어난 오버라이드 파일 없음'
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: full_auto
+  one_line_action: 허용 집합을 벗어난 오버라이드 파일 없음 — layouts/ 디렉터리에서 허용 집합(standard.py ALLOWED_OVERRIDES) 외 오버라이드 파일 삭제 + .DS_Store·.bak·.bak2 등 junk 정리
+  target_files:
+  - path: '{site_path}/layouts/'
+    hint: ALLOWED_OVERRIDES(standard.py L137-160) 집합에 없는 오버라이드 파일 삭제 + junk(.DS_Store, *.bak, *.bak2, ~) 정리. 허용 여부 판단 애매 시 사용자 확인 1회
+  verify:
+  - GET /api/registry?blog_id={blog_id} → R12 status 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
+  threshold: always
+  check_fn: _check_r12
+  action: 허용 집합을 벗어난 오버라이드 파일 없음
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r12
+  summary_human: 'layouts/: 허용 집합을 벗어난 오버라이드 파일 없음 준수 필요: 허용 집합을 벗어난 오버라이드 파일 없음.'
+  summary_llm: '{"problem_id": "R12", "name_ko": "layouts/: 허용 집합을 벗어난 오버라이드 파일 없음", "severity": "MAJOR", "family": "validation", "one_line_action": "허용 집합을 벗어난 오버라이드 파일 없음 — layouts/ 디렉터리에서 허용 집합(standard.py ALLOWED_OVERRIDES) 외 오버라이드 파일 삭제 + .DS_Store·.bak·.bak2 등 junk 정리", "needs_human": false, "target_files": [{"path": "{site_path}/layouts/", "hint": "ALLOWED_OVERRIDES(standard.py L137-160) 집합에 없는 오버라이드 파일 삭제 + junk(.DS_Store, *.bak, *.bak2, ~) 정리. 허용 여부 판단 애매 시 사용자 확인 1회"}], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: THUMBNAIL-01
+  name_ko: content/posts/*/index.md (frontmatter featureimage)
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: human_approval
+  one_line_action: featureimage를 R2(pub-<hash>.r2.dev) 호스팅 webp로 설정
+  target_files: []
+  verify: []
+  needs_human: false
+  threshold: always
+  check_fn: _check_thumbnail_01
+  action: featureimage를 R2(pub-<hash>.r2.dev) 호스팅 webp로 설정
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#thumbnail-01
+  summary_human: 'content/posts/*/index.md (frontmatter featureimage) 준수 필요: featureimage를 R2(pub-<hash>.r2.dev) 호스팅 webp로 설정.'
+  summary_llm: '{"problem_id": "THUMBNAIL-01", "name_ko": "content/posts/*/index.md (frontmatter featureimage)", "severity": "MAJOR", "family": "validation", "one_line_action": "featureimage를 R2(pub-<hash>.r2.dev) 호스팅 webp로 설정", "needs_human": false, "target_files": [], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: R2-01
+  name_ko: content/posts/*/index.md (featureimage + 본문 이미지 URL)
+  severity: MAJOR
+  family: validation
+  hook: standard_compliance
+  automation_level: human_approval
+  one_line_action: 모든 이미지 URL을 승인된 R2 버킷(pub-<hash>.r2.dev)으로 설정
+  target_files: []
+  verify: []
+  needs_human: false
+  threshold: always
+  check_fn: _check_r2_01
+  action: 모든 이미지 URL을 승인된 R2 버킷(pub-<hash>.r2.dev)으로 설정
+  bucket: actionable
+  playbook_ref: ERROR_PLAYBOOKS.md#r2-01
+  summary_human: 'content/posts/*/index.md (featureimage + 본문 이미지 URL) 준수 필요: 모든 이미지 URL을 승인된 R2 버킷(pub-<hash>.r2.dev)으로 설정.'
+  summary_llm: '{"problem_id": "R2-01", "name_ko": "content/posts/*/index.md (featureimage + 본문 이미지 URL)", "severity": "MAJOR", "family": "validation", "one_line_action": "모든 이미지 URL을 승인된 R2 버킷(pub-<hash>.r2.dev)으로 설정", "needs_human": false, "target_files": [], "how_to_add": "config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
+  how_to_add: 'config/rules.yaml 의 rules: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'

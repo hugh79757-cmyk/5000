@@ -1,0 +1,9 @@
+# Phase 72 파괴적 작업 로그 (2026-08-16)
+# 형식: [시각] 명령 | 사전카운트= | 백업= | 사후= | 보존확인=
+# 민감정보(토큰/비밀번호) 마스킹 필수
+[2026-08-16 17:39:38] launchctl load com.5000.scheduler (+watchdog) | 사전카운트=0(기동) | 백업=N/A | 사후=42575	0	com.5000.scheduler-watchdog 37973	0	com.5000.scheduler  | 보존확인=heartbeat mtime 갱신됨(age 70s<120s)
+[2026-08-16 17:42:44] Wave2b: _AUTOFIX_SAFE_ACTIONS +3 (FM-DRAFT/FM-FEATUREIMAGE/FM-MISSINGKEYS) | 사전카운트=1(기존 fix_thumbnail_r2) | 백업=git stash/dispatcher.py+rules.py | 사후=import OK, 3 fixer 등록 | 보존확인=기존 fix_thumbnail_r2 유지
+[2026-08-16 17:44:32] Wave2c: 신규 detect-only checks (indexnow/semantic/adsense-ca-pub) + indexnow.py 경고 | 사전카운트=0 | 백업=git stash relevant files | 사후=import OK, 3 check 등록 | 보존확인=기존 checks 유지, 자동수정 없음
+[17:46] Wave2d: config/problems.yaml+rules.yaml 단일소스 + registry_loader 오버레이 배선(problem_registry.py import hook) | 사전카운트=P01-32+R01-12 | 백업=cp shared/problem_registry.py,ops_dashboard/registry/__init__.py → /tmp/*.bak_20260816 | 사후=import OK, fallback 유지, P33추가증명 OK | 보존확인=기존 32 P-code 동작 동일(diff 0, regression PASS)
+[2026-08-16 17:50:29] Wave2a: ETAP 잔여 정비(안전등급) | 사전카운트={"blogs":36,"posts":5154,"posts_lt70":363,"blogs_lt70":34,"safe":{"draft_true":7},"body":{"word_count":216,"h2_count":299,"image":308,"disclaimer":239,"bad_url":248,"data_error":45,"banned":33}} | 백업=/tmp/etap-wave2a-backup-20260816-174947 | 사후={"posts_lt70":361,"blogs_lt70":34,"safe":{},"body":{"word_count":216,"h2_count":298,"image":308,"disclaimer":239,"bad_url":246,"data_error":44,"banned":33}} | 보존확인=본문 미편집(프론트매터 draft 키 삭제만 7건), 위험등급/본문이슈는 pending 유지, YAML 파싱 이상 없음
+[2026-08-16 17:53:41] GAP-close: checks/frontmatter.py 추가(FM-DRAFT/FM-MISSINGKEYS/FM-FEATUREIMAGE 감지→자동수정 라우팅) | 사전카운트=0 | 백업=git stash checks/__init__.py | 사후=import OK, 등록확인 | 보존확인=기존 checks 유지

@@ -206,6 +206,40 @@ RULES: list[UnifiedEntry] = [
         action="재고 부족(≤STOCK_LOW=10) 브랜드는 발행 재정비 또는 콘텐츠 소스 보충",
         bucket="deferred",
     ),
+    # Phase 72 (Wave 2b, SC-3): 프론트매터 전용 안전등급 자동수정 3종.
+    # 본문 미변경, git 롤백 가능, 재검사로 해결 입증 → _AUTOFIX_SAFE_ACTIONS 편입.
+    # 실제 탐지 훅(checks/frontmatter.py)은 차기 웨이브에서 run_all_checks 편입 예정 —
+    # 여기선 registry·/standards 뷰 노출 + rule→action 매핑(_AUTOFIX_RULE_TO_ACTION)만 선언.
+    UnifiedEntry(
+        id="FM-DRAFT",
+        kind="rule",
+        target="content/posts/*/index.md (frontmatter draft)",
+        severity="MINOR",
+        threshold="always",
+        check_fn="_check_frontmatter",
+        action="draft:true 프론트매터 키 제거",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="FM-FEATUREIMAGE",
+        kind="rule",
+        target="content/posts/*/index.md (frontmatter featureimage)",
+        severity="MINOR",
+        threshold="always",
+        check_fn="_check_frontmatter",
+        action="featureimage URL을 IMAGE-GUARD 규칙으로 정화",
+        bucket="actionable",
+    ),
+    UnifiedEntry(
+        id="FM-MISSINGKEYS",
+        kind="rule",
+        target="content/posts/*/index.md (frontmatter keys)",
+        severity="MINOR",
+        threshold="always",
+        check_fn="_check_frontmatter",
+        action="title/description/date/slug/tags 누락 시 파생값으로 보강",
+        bucket="actionable",
+    ),
 ]
 
 # W6-a: rule↔문제분류(problem_id) 대응 선언.

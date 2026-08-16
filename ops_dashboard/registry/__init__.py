@@ -13,9 +13,23 @@
 """
 from __future__ import annotations
 
+import logging
+
 from ops_dashboard.registry.schema import UnifiedEntry, KIND, SEVERITY, THRESHOLD, BUCKET, validate_entry
+
+logger = logging.getLogger(__name__)
 from ops_dashboard.registry.rules import RULES
 from ops_dashboard.registry.errors import ERRORS
+
+# Wave 2d (Phase 72): config/rules.yaml 에 선언된 신규 rule id 만 RULES 에 append
+# (idempotent — 기존 R01~R12/THUMBNAIL-01/R2-01/FM-*/C08 등 코드 선언과 중복 시 skip).
+try:
+    from shared.registry_loader import apply_rule_yaml
+    _added = apply_rule_yaml()
+    if _added:
+        logger.info("[registry] rules.yaml 오버레이 적용: %s", [e.id for e in _added])
+except Exception as exc:  # YAML 누락/오류는 경고만, 코드 RULES 로 동작
+    logger.warning("[registry] rules.yaml 오버레이 적용 실패 (코드 RULES fallback): %s", exc)
 
 __all__ = [
     "UnifiedEntry",

@@ -115,3 +115,18 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import indexnow  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from ops_dashboard.checks import semantic  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from ops_dashboard.checks import frontmatter  # noqa: F401
+except ImportError:
+    pass
+

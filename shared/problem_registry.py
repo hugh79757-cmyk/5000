@@ -33,6 +33,11 @@ class ProblemSpec:
     action: str = ""
     detect_fn: str = ""
     playbook_ref: str = ""  # 예: "ERROR_PLAYBOOKS.md#p01"
+    # Wave 2d (Phase 72): friendly 단일 소스 YAML 오버레이용 선택 필드. 기본값 "" 으로
+    # 기존 코드 dict 호환 유지 — config/problems.yaml 이 채우지 않으면 공란.
+    summary_human: str = ""
+    summary_llm: str = ""
+    how_to_add: str = ""
 
 
 @dataclass(frozen=True)
@@ -675,3 +680,15 @@ _register(ProblemSpec(
     playbook_ref="ERROR_PLAYBOOKS.md#p32",
     detect_fn="detect_empty_content_deployed",
 ))
+
+
+# --- Wave 2d (Phase 72): 단일 소스 YAML 오버레이 ---
+# config/problems.yaml 이 PROBLEM_REGISTRY 를 YAML 우선 오버라이드한다. YAML 누락/오류 시
+# 기존 코드 dict 가 fallback 으로 남는다 (라이브 크래시 없음).
+try:
+    from shared.registry_loader import apply_problem_yaml
+    _applied = apply_problem_yaml()
+    if _applied:
+        logger.info("[problem_registry] problems.yaml 오버레이 적용: %d건", _applied)
+except Exception as exc:  # 조용한 실패 금지 — YAML 문제는 경고만, 코드 dict 로 동작
+    logger.warning("[problem_registry] problems.yaml 오버레이 적용 실패 (코드 dict fallback): %s", exc)

@@ -1,11 +1,45 @@
 import glob
+import json
 import os
 import sqlite3
+import sys
 import xml.etree.ElementTree as ET
 from datetime import datetime
 
 import requests
 import yaml
+
+STATE_PATH = os.path.join(BASE_DIR, "data", "indexnow_last_status.json")
+
+
+def _load_indexnow_state():
+    """data/indexnow_last_status.json 로드 (없으면 기본 구조)."""
+    try:
+        with open(STATE_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {"updated_at": None, "domains": {}, "any_failure": False}
+
+
+def _save_indexnow_state(state):
+    """data/indexnow_last_status.json 기록 (실패해도 크래시 없이 pass)."""
+    try:
+        os.makedirs(os.path.dirname(STATE_PATH), exist_ok=True)
+        with open(STATE_PATH, "w", encoding="utf-8") as f:
+            json.dump(state, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+
+def _alert_indexnow(msg):
+    """기존 텔레그램 헬퍼로 IndexNow 실패 경고 발송 (신규 함수 미생성, 크래시 금지)."""
+    try:
+        if BASE_DIR not in sys.path:
+            sys.path.insert(0, BASE_DIR)
+        from shared.telegram_notifier import send_dashboard_alert
+        send_dashboard_alert("indexnow", "indexnow_submission", "fail", msg)
+    except Exception:
+        pass
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH  = os.path.join(BASE_DIR, "data", "indexnow.db")
@@ -122,6 +156,15 @@ def submit(domain, urls):
         "urlList": urls[:10000],
     }
     ok = 0
+    failures_this = []  # (engine, status_or_error)
+
+    # 연속 실패 추적을 위한 상태 로드 (도메인별 엔진별 consecutive_failures)
+    state = _load_indexnow_state()
+    dom = state.setdefault("domains", {}).setdefault(
+        domain, {"engines": {}}
+    )
+    engines_state = dom.setdefault("engines", {})
+
     for engine in ENGINES:
         try:
             r = requests.post(
@@ -129,11 +172,38 @@ def submit(domain, urls):
                 headers={"Content-Type": "application/json; charset=utf-8"},
                 timeout=15
             )
-            print(f"    {engine} -> {r.status_code}")
-            if r.status_code in (200, 202):
+            code = r.status_code
+            print(f"    {engine} -> {code}")
+            if code in (200, 202):
                 ok += 1
+                engines_state[engine] = {"consecutive_failures": 0, "last_status": code}
+            else:
+                failures_this.append((engine, code))
+                prev = engines_state.get(engine, {})
+                cf = prev.get("consecutive_failures", 0) + 1
+                engines_state[engine] = {"consecutive_failures": cf, "last_status": code}
         except Exception as e:
             print(f"    {engine} -> {e}")
+            failures_this.append((engine, str(e)))
+            prev = engines_state.get(engine, {})
+            cf = prev.get("consecutive_failures", 0) + 1
+            engines_state[engine] = {"consecutive_failures": cf, "last_status": "error"}
+
+    # 경고 게이팅: 사고 발생 시점(첫 403) 또는 연속실패 3회 도달 시 1회 발송
+    # (매 회차 반복 발송 방지 — detect-only, 재시도/자동수정 없음)
+    alert_lines = []
+    for engine, code in failures_this:
+        cf = engines_state[engine]["consecutive_failures"]
+        if (code == 403 and cf == 1) or cf == 3:
+            alert_lines.append(f"{engine} status={code} consecutive={cf}")
+    if alert_lines:
+        _alert_indexnow(
+            f"domain={domain} IndexNow 제출 실패: " + "; ".join(alert_lines)
+        )
+
+    state["updated_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    state["any_failure"] = bool(state.get("any_failure", False) or failures_this)
+    _save_indexnow_state(state)
     return ok
 
 

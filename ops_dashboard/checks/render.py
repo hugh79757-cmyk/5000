@@ -125,6 +125,51 @@ def _check_adsbygoogle(html: str) -> bool:
     return "adsbygoogle" in html and ("adsbygoogle.js" in html or "googlesyndication.com" in html)
 
 
+# AdSense Publisher ID ↔ 도메인 계열 매핑 (AGENTS.md 섹션 1 규칙)
+# 한 HTML 페이지 = 하나의 Publisher ID. 계열별 고정 ID.
+_ADSENSE_FAMILY: dict[str, str] = {
+    "rotcha.kr": "ca-pub-8772455780561463",
+    "techpawz.com": "ca-pub-8772455780561463",
+    "informationhot.kr": "ca-pub-6677996696534146",
+    "aikorea24.kr": "ca-pub-5938862195544185",
+}
+
+_PUB_RE = re.compile(r"ca-pub-\d+")
+
+
+def _expected_pub_id(domain: str) -> str | None:
+    """도메인 접미사로 계열 매핑된 기대 Publisher ID 반환 (미등록 계열은 None)."""
+    for suffix, pub in _ADSENSE_FAMILY.items():
+        if domain == suffix or domain.endswith("." + suffix):
+            return pub
+    return None
+
+
+def _check_adsense_publisher_id(html: str, domain: str) -> tuple[bool, str | None]:
+    """라이브 HTML의 ca-pub-* 가 도메인 계열 매핑(AGENTS.md §1)과 일치하는지 교차검증.
+
+    - loader: adsbygoogle.js?client=ca-pub-XXXX
+    - slot:   data-ad-client="ca-pub-XXXX"
+    기대 ID(_expected_pub_id)가 None 이면 미등록 계열 → 검사 생략(pass).
+    ca-pub 가 전혀 없으면 AdSense 미사용 → pass (부재는 _check_adsbygoogle 가 다룸).
+    loader 또는 slot 중 하나라도 기대 ID와 다르면 ADSENSE-ID-MISMATCH 로 fail.
+    자동수정은 하지 않는다(detect-only).
+    """
+    expected = _expected_pub_id(domain)
+    if expected is None:
+        return True, None
+    clients = set(_PUB_RE.findall(html))
+    if not clients:
+        return True, None
+    # 기대 ID 부재 → 도메인 계열과 불일치 (공백/잘못된 계정)
+    if expected not in clients:
+        return False, f"ADSENSE-ID-MISMATCH observed={sorted(clients)} expected={expected}"
+    # 페이지 내 여러 ca-pub 혼재 → 불일치
+    if len(clients) > 1:
+        return False, f"ADSENSE-ID-MISMATCH multiple ca-pub in page={sorted(clients)} expected={expected}"
+    return True, None
+
+
 async def _check_single_blog(client: httpx.AsyncClient, semaphore: asyncio.Semaphore, blog_id: str, domain: str) -> dict:
     """단일 블로그 render_health 검사 (비동기)."""
     async with semaphore:
@@ -155,6 +200,8 @@ async def _check_single_blog(client: httpx.AsyncClient, semaphore: asyncio.Semap
         og_checked_on = "homepage"
         og_ok = False
         og_url = None
+        post_status = None
+        post_html = ""
         if post_url:
             post_status, post_html = await _fetch_get(client, post_url)
             if post_status and 200 <= post_status < 400:
@@ -172,6 +219,12 @@ async def _check_single_blog(client: httpx.AsyncClient, semaphore: asyncio.Semap
             failures.append("og:image missing or inaccessible")
         else:
             evidence_urls.append(f"og:image: {og_url} (OK, from {og_checked_on})")
+
+        # 3b. AdSense Publisher-ID ↔ 도메인 계열 교차검증 (detect-only)
+        combined_html = html + "\n" + post_html
+        ok_pub, pub_detail = _check_adsense_publisher_id(combined_html, domain)
+        if not ok_pub:
+            failures.append(pub_detail or "ADSENSE-ID-MISMATCH")
 
         if failures:
             return {
