@@ -565,6 +565,42 @@ def _run_p32_scan() -> None:
             pass
 
 
+def _snapshot_check_fails(conn) -> set:
+    """현재 check_results 에서 fail 상태인 (blog_id, check_name) 집합 스냅샷.
+
+    record_check 는 UPSERT(최신 상태만 보관, 이력 없음)라, 실행 전 스냅샷과
+    실행 후 집합을 대조해야 '신규 FAIL' 만 골라낼 수 있다.
+    """
+    rows = conn.execute(
+        "SELECT blog_id, check_name FROM check_results WHERE status='fail'"
+    ).fetchall()
+    return {(r["blog_id"], r["check_name"]) for r in rows}
+
+
+def _alert_new_check_fails(conn, before_fails: set) -> None:
+    """직전 스냅샷 대비 신규 FAIL 만 텔레그램으로 요약 발송 (fail-soft).
+
+    - 신규 FAIL 없으면 아무것도 안 함 (지속 FAIL 재알림 없음).
+    - 같은 날 이미 fleet 알림을 보냈으면 디바운스로 억제 (이어지는 FAIL 노이즈 방지).
+    - 알림 실패는 로그만 남기고 run-checks 흐름을 막지 않음.
+    """
+    try:
+        from shared.notification_debounce import init_debounce_tables, should_push
+        from shared.telegram_notifier import send_dashboard_alert
+
+        new_fails = sorted(_snapshot_check_fails(conn) - before_fails)
+        if not new_fails:
+            return
+        init_debounce_tables(conn)
+        if not should_push(conn, "fleet", "new_check_fail"):
+            logger.info("[RecheckAll] 신규 FAIL %d건 디바운스 억제", len(new_fails))
+            return
+        detail = "\n".join(f"• {bid} / {check}" for bid, check in new_fails)
+        send_dashboard_alert("fleet", f"new_check_fail ({len(new_fails)}건)", "fail", detail)
+    except Exception:
+        logger.exception("[RecheckAll] 신규 FAIL 알림 실패 (무시 — run-checks 지속)")
+
+
 def _run_recheck_all() -> None:
     """Phase 71 (SC-1): 주기적 전체 재검사 (2차 안전망).
 
@@ -582,6 +618,9 @@ def _run_recheck_all() -> None:
         # dict(row) 를 가정하므로 raw sqlite3.connect 가 아닌 get_conn 사용.
         conn = get_conn(str(ops_db))
         try:
+            # 실행 전 fail 쌍 스냅샷 — record_check(UPSERT)는 이력이 없어
+            # 직전 상태를 in-memory diff 로만 알 수 있음. 신규 FAIL 알림 기준.
+            before_fails = _snapshot_check_fails(conn)
             summary = run_all_checks(conn)
             logger.info(
                 "[RecheckAll] 완료: total=%d pass=%d fail=%d unknown=%d",
@@ -590,6 +629,8 @@ def _run_recheck_all() -> None:
                 summary.get("fail", 0),
                 summary.get("unknown", 0),
             )
+            # 신규 FAIL → 텔레그램 [OPS ALERT] 1회 (디바운스/fail-soft)
+            _alert_new_check_fails(conn, before_fails)
             # Phase 71 (SC-4): fail 규칙이 있는 블로그의 감지 결과를 폐루프 디스패처로
             # 전달 (안전 fixer 무인 실행, 파괴등급은 pending_fixes 적재). 발행 훅 외
             # '재검사 경로'의 2차 안전망. 실패 시 무영향 로깅만 (run_all_checks 결과 보존).

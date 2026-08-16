@@ -83,7 +83,14 @@ def _blog_metadata(blog_id):
 
 def send_error(blog_id, stage, error_msg):
     """Send one publish error and persist a structured operational event."""
-    silent_reasons = ("quota_met", "quota_exceeded", "daily_quota_exceeded", "daily_quota")
+    silent_reasons = (
+        "quota_met",
+        "quota_exceeded",
+        "daily_quota_exceeded",
+        "daily_quota",
+        # post_validator 의 "정상" WARNING 마커 ("생략 — 정상") — 발송 백스톱 드롭
+        "생략 — 정상",
+    )
     if any(reason in str(error_msg).lower() for reason in silent_reasons):
         logger.info("[Silent] %s/%s: %s", blog_id, stage, error_msg)
         return False

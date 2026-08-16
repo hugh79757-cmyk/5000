@@ -715,17 +715,34 @@ def validate_post_extended(
         except Exception as e:
             logger.debug(f"파이프라인 검증 오류 ({pl}): {e}")
 
-    # 추가 이슈가 있으면 알림 갱신
+    # 추가 이슈가 있으면 알림 갱신 (CRITICAL 즉시, WARNING 은 ops.db 디바운스로 하루 1건)
     if issues:
         has_critical = any("[CRITICAL]" in i for i in issues)
-        try:
-            from shared.notify import alert
-            severity = "🚨 CRITICAL" if has_critical else "⚠️ WARNING"
-            detail = f"blog: {blog_id}\npipeline: {pl}\ntitle: {title[:50]}\n"
-            detail += "\n".join(f"• {i}" for i in issues)
-            alert(f"[Validate] {severity} — {len(issues)}건", detail)
-        except Exception:
-            pass
+        _suppressed = False
+        if not has_critical:
+            try:
+                from shared.notification_debounce import init_debounce_tables, should_push
+                _ops_db = os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    "ops_dashboard", "ops.db",
+                )
+                _conn = sqlite3.connect(_ops_db)
+                try:
+                    init_debounce_tables(_conn)
+                    _suppressed = not should_push(_conn, "__fleet__", "validate_warning")
+                finally:
+                    _conn.close()
+            except Exception:
+                _suppressed = False  # 디바운스 실패 시 기존 동작(발송) 유지
+        if not _suppressed:
+            try:
+                from shared.notify import alert
+                severity = "🚨 CRITICAL" if has_critical else "⚠️ WARNING"
+                detail = f"blog: {blog_id}\npipeline: {pl}\ntitle: {title[:50]}\n"
+                detail += "\n".join(f"• {i}" for i in issues)
+                alert(f"[Validate] {severity} — {len(issues)}건", detail)
+            except Exception:
+                pass
 
 
     # ── 검증: 빈 섹션 (## 헤딩 뒤 내용 없음) ──

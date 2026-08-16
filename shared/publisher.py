@@ -724,12 +724,27 @@ def _run_validation(site_path, slug, blog_id, title, result):
 
     if v["issues"]:
         from shared.telegram_notifier import send_error as _tg_err
-        emoji = "🔴" if not v["passed"] else "🟡"
-        msg = f"[{emoji} VALIDATION] {blog_id}: {title}\n"
-        for i in v["issues"]:
-            sev = "🔴" if i["severity"] == "ERROR" else "🟡"
-            msg += f"{sev} {i['check']}: {i['msg']}\n"
-        _tg_err(blog_id, "validation", msg)
+        # 노이즈 억제: "생략 — 정상" 마커(WARNING, 정상 케이스)는 발송 제외.
+        # ERROR 는 즉시 발송, 비정상 WARNING 만 있으면 🟡 요약 1건, 정상만 있으면 발송 안 함.
+        errors = [i for i in v["issues"] if i["severity"] == "ERROR"]
+        warnings = [
+            i for i in v["issues"]
+            if i["severity"] != "ERROR" and "생략 — 정상" not in i.get("msg", "")
+        ]
+        if errors:
+            msg = f"[🔴 VALIDATION] {blog_id}: {title}\n"
+            for i in errors:
+                msg += f"🔴 {i['check']}: {i['msg']}\n"
+            if warnings:
+                msg += f"🟡 경고 {len(warnings)}건 (요약 생략)\n"
+            _tg_err(blog_id, "validation", msg)
+        elif warnings:
+            msg = f"[🟡 VALIDATION] {blog_id}: {title}\n"
+            for i in warnings[:5]:
+                msg += f"🟡 {i['check']}: {i['msg']}\n"
+            if len(warnings) > 5:
+                msg += f"🟡 외 {len(warnings) - 5}건\n"
+            _tg_err(blog_id, "validation", msg)
     logger.info(f"[VALIDATE] {blog_id} {'✅' if v['passed'] else '⚠️'} ({len(v['issues'])} issues)")
 
     # ── Phase 58 P06 썸네일 404 확인 (post_publish — 발행 직후 1회만, 배치 스캔 금지) ──
