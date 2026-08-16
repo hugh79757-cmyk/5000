@@ -95,6 +95,7 @@ def run_subprocess(
         f"sys.path.insert(0, {project_root!r})",
         f"os.chdir({project_root!r})",
         # CLOUDFLARE_API_TOKEN 제거 — wrangler OAuth profile 우선 적용을 위해 (deploy.py 동일 규칙)
+        # G3 refuted 2026-08-16 (Phase 73 SC-2): in-process token strip is inherited by grandchild wrangler (STAP/TAP) — no token leak.
         "os.environ.pop('CLOUDFLARE_API_TOKEN', None)",
         "try:",
         "    from dotenv import load_dotenv",
