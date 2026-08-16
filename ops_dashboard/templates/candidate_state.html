@@ -24,9 +24,9 @@
   {% set _ = blog_avail.__setitem__(row.blog_id, row) %}
 {% endfor %}
 {% for blog in blogs %}
-  {% set av = blog_avail.get(blog.id) %}
+  {% set av = blog_avail.get(blog.blog_id) %}
   <tr>
-    <td><a href="/blog/{{ blog.id }}">{{ blog.id }}</a></td>
+    <td><a href="/blog/{{ blog.blog_id }}">{{ blog.blog_id }}</a></td>
     <td>
       {% if not av %}<span class="state-unknown">UNKNOWN (미검사)</span>
       {% elif av.state == 'healthy' %}<span class="state-healthy">HEALTHY</span>
