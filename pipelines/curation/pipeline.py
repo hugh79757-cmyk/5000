@@ -1062,6 +1062,17 @@ def _run_inner(cfg, blog_id, daily_quota):
                 continue
         except Exception as e:
             # Fail open: scoring exception should not block publication
+            # (2026-08-16) fail-closed 전환 전 빈도 수집: scheduler가 폐기하지 않는 파일 로그
+            try:
+                _failopen_log = PROJECT_DIR / "logs" / "relevance_failopen.log"
+                _failopen_log.parent.mkdir(exist_ok=True)
+                with open(_failopen_log, "a", encoding="utf-8") as _fo:
+                    _fo.write(
+                        f"[{datetime.now().isoformat(timespec='seconds')}] blog_id={blog_id} keyword={keyword} "
+                        f"attempt={attempt} exception={e!r}\n"
+                    )
+            except Exception as _foe:
+                logger.warning(f"[{blog_id}] fail-open 로그 기록 실패: {_foe}")
             logger.warning(f"[{blog_id}] 관련성 점수 계산 실패 (fail-open): {e}")
             scores = {"avg": 1.0, "min": 1.0, "scores": [], "blog_id": blog_id, "threshold": 1.0}
             break
@@ -1152,6 +1163,24 @@ def _run_inner(cfg, blog_id, daily_quota):
         collect_keyword(keyword)
         products = get_products(keyword, limit=10)
         products = _filter_used_products(blog_id, products)
+        # ── 게이트 사각 차단 (2026-08-16): fallback 교체 상품도 정상 경로(1059)와 동일하게
+        #    카테고리 필터 + 관련성 게이트 재적용 — 무관 상품 발행(avg=0.0) 방지 ──
+        products = _filter_irrelevant_products(blog_id, keyword, products)
+        if len(products) < 3:
+            logger.warning(f"[{blog_id}] fallback 카테고리 필터 후 상품 부족 ({len(products)}개) — 다음 시도")
+            continue
+        scores = score_products(products, blog_id)
+        try:
+            from shared.relevance_scorer import get_adaptive_threshold
+            scores["threshold"] = get_adaptive_threshold(DB_PATH, blog_id, scores["threshold"])
+        except Exception:
+            pass
+        passed, reason = passes_gate(scores)
+        if not passed:
+            logger.warning(f"[{blog_id}] fallback 관련성 미달 (차단): avg={scores['avg']:.2f} < {scores['threshold']}")
+            _record_failure(blog_id, "low_relevance", f"fallback 관련성 미달: avg={scores['avg']:.2f}", keyword)
+            return {"success": False, "reason": "low_relevance", "keyword": keyword}
+        logger.info(f"[{blog_id}] fallback 관련성 통과: avg={scores['avg']:.2f}, min={scores['min']:.2f}, 임계값={scores['threshold']}")
         if len(products) < 3:
             logger.warning(f"[{blog_id}] fallback 키워드 상품 부족 ({len(products)}개) — 다음 시도")
             continue
