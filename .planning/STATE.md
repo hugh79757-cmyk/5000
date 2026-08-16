@@ -16,7 +16,7 @@ progress:
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 71 진행 중 (Wave 1·2·3 완료, Wave 4·5 스켈레톤+승인게이트 구현 완료, OQ#1/OQ#2 시니어 결정 대기).** Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
+**Status:** v1.1 — **Phase 71 진행 중 (Wave 1·2·3 완료, Wave 4·5 스켈레톤+승인게이트 구현 완료, OQ#1/OQ#2 시니어 결정 대기).** Phase 73 실행 완료 (SC-1/2/3/5/7/8 적용; SC-4 사용자 skip, SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -421,4 +421,33 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
-*Last updated: 2026-08-09 - Phase 68 PPM-5 완료 (images:// URL 정규식 검증 추가). Phase 67 완료. Phase 52 Wave 5 진행 중.*
+## Phase 73: Other-Branch Unattended Application (2026-08-16)
+
+**Status:** ◆ Executed (6/8 SC 적용; SC-4 사용자 skip, SC-7 investigate-only 이월) — 커밋 완료, push 안 함, wrangler deploy 안 함.
+
+**실행 파형:** Wave1(SC-1·2) → Wave2(SC-3·5·7) → Wave3(SC-8) → Wave4(검증 스윕). SC-4(CAP ad config)는 slot 값 미확정으로 사용자가 skip 결정.
+
+**커밋:**
+- `f7e41ca37` SC-2: G3 refuted 문서화 + TAP N/A 분류 (subprocess_runner.py:99 주석 + SC2-classification.md)
+- `de207f90f` SC-3: FM-THUMBNAIL 스캔+정화 (frontmatter.py + autofix + test 4passed)
+- `d103016e0` SC-7: RAP C03 leak 감사 + rap_leak detect-only check (CHECK 등록)
+- `b547c596d` SC-8: AGENTS.md Workers(11) 정정 + deploy_type 키 80건 (AGENTS.md는 사전 condensation 포함 커밋 주의)
+- `8d9190358` (5000) + `781ddf9016` (STAP): SC-1 STAP P04 reroute + SC-3 dispatcher 등록 + SC-8 deploy_type dispatch
+- `9602c8534` (5000 rap.yaml) + RAP submodule 5건 (rap-hugo 1e6fff28, rap2 0f4faec3, rap3 a37208fa, rap4 4f628d1a, rap5 e715a855): SC-5 topSlot=3403350155(5건) + force_draft 사이클 제거
+
+**검증 (측정):**
+- SC-1: `STAP_PIPELINE_BLOGS` 정의(:95)+조건편입(:1331); 실패경로 `deploy_error`→P04 분기(:1385) 존재. STAP publisher.py:295/313 raise→return string. pytest 사전 baseline 27실패 동일(무회귀).
+- SC-2: `os.environ.pop('CLOUDFLARE_API_TOKEN'`(:99) 존재; STAP publisher.py:297 env= 없음; TAP app.py:602-720 hugo/wrangler 0건.
+- SC-3: `FM-THUMBNAIL` dispatcher 등록(:972,:984); thumbnail 스캔/정화 코드 존재; pytest 4passed.
+- SC-5: `force_draft` rap.yaml 0건; 5 RAP hugo.toml에 3403350155(×3 슬롯) 확인; 2195212287 0건; 6677(Publisher-ID) 미변경.
+- SC-7: `rap_leak in CHECKS: True`; 유출 샘플 1건(하남시 미사강변) + 근본원인(_parse_article 2nd-block, publisher.py:585 verbatim write) 식별.
+- SC-8: `deploy_type` blogs.d 80건; `WORKERS_BLOGS` 11개(:571); AGENTS.md 11 Workers 명시 + 토큰 strip 정정.
+
+**잔존 위험 / 이월:**
+- SC-4(CAP ad config) skip → CAP 8블로그 blank-ad 갭 잔존 (slot 값 미확정, 별도 세션).
+- SC-7 RAP C03 유출 본문 재조합 근본수정 이월(위험등급, 사람 승인 별도 phase).
+- STAP_PIPELINE_BLOGS=set(.values())는 pipeline명 보유 → :1331 조건은 STAP blog-id에 no-op, 실제 P04는 실패경로 분기(:1385)가 담당. STAP 실제 deploy는 기존 publisher.py 경유(중앙 deploy 미이전) — plan shape A 준수.
+- `pytest` 27실패는 사전 baseline(test_alert_wiring.py 누락 schedule 모듈), Phase 73 무관.
+- AGENTS.md 커밋(b547c596d)에 사전 working-tree condensation(1246행 삭제)가 함께 반영됨 — §1 Publisher-ID 매핑은 global `/Users/twinssn/.config/opencode/AGENTS.md`에 위치(본 repo 파일엔 본래 없음), SC-8 영향 없음.
+
+*Last updated: 2026-08-16 - Phase 73 실행 완료 (SC-1/2/3/5/7/8 적용, SC-4 skip, SC-7 이월).*
