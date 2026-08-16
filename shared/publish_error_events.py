@@ -58,6 +58,20 @@ CREATE TABLE IF NOT EXISTS telegram_delivery_audit (
     FOREIGN KEY(event_id) REFERENCES publish_error_events(event_id)
 );
 CREATE INDEX IF NOT EXISTS idx_tda_event ON telegram_delivery_audit(event_id, sent_at DESC);
+
+CREATE TABLE IF NOT EXISTS resource_health (
+    resource_id TEXT PRIMARY KEY,
+    job_name TEXT NOT NULL DEFAULT '',
+    last_started_at TEXT,
+    last_completed_at TEXT,
+    last_success_at TEXT,
+    last_failure_at TEXT,
+    last_error_reason TEXT NOT NULL DEFAULT '',
+    duration_seconds REAL,
+    rows_inserted INTEGER,
+    heartbeat_at TEXT,
+    state TEXT NOT NULL DEFAULT 'unknown'
+);
 """
 
 _NEW_CODES: dict[str, dict[str, Any]] = {
@@ -95,6 +109,28 @@ _INCIDENT_COLUMNS: dict[str, str] = {
     "first_seen_at": "TEXT",
     "last_seen_at": "TEXT",
     "resolved_at": "TEXT",
+}
+
+# PR2 (Phase 74): root/symptom/amplifier 관계 + retry 제어. UI는 detail 파싱 대신
+# 구조화 컬럼만 사용한다. retry_count/retry_blocked는 upsert(DO UPDATE)에서 제외 —
+# 누적/제어 전용이며 record_publish_error 재호출로 초기화되지 않는다.
+_PR2_COLUMNS: dict[str, str] = {
+    "relation_type": "TEXT NOT NULL DEFAULT ''",
+    "root_incident_key": "TEXT",
+    "resource_id": "TEXT NOT NULL DEFAULT ''",
+    "retry_blocked": "INTEGER NOT NULL DEFAULT 0",
+    "retry_count": "INTEGER NOT NULL DEFAULT 0",
+    "metadata_json": "TEXT",
+}
+
+# PR2 안정화: resource_health bootstrap 이력. first_observed_at/first_failure_at은
+# 첫 관측 시각(COALESCE로 한 번만 기록) — 파일 mtime 등 비구조화 근거로 백필하지 않는다.
+# health_confidence: unknown(이력 전무) / observed(실행 시작·실패 관측) / confirmed(성공 확인).
+_RESOURCE_HEALTH_COLUMNS: dict[str, str] = {
+    "first_observed_at": "TEXT",
+    "first_failure_at": "TEXT",
+    "evidence_source": "TEXT NOT NULL DEFAULT ''",
+    "health_confidence": "TEXT NOT NULL DEFAULT 'unknown'",
 }
 
 # 동시성 안전성: open 상태의 동일 incident는 partial UNIQUE index가 1행으로 강제한다.
@@ -156,7 +192,14 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     for name, ddl in _INCIDENT_COLUMNS.items():
         if name not in columns:
             conn.execute(f"ALTER TABLE publish_error_events ADD COLUMN {name} {ddl}")
+    for name, ddl in _PR2_COLUMNS.items():
+        if name not in columns:
+            conn.execute(f"ALTER TABLE publish_error_events ADD COLUMN {name} {ddl}")
     conn.execute(_OPEN_INCIDENT_INDEX_SQL)
+    rh_columns = {row[1] for row in conn.execute("PRAGMA table_info(resource_health)")}
+    for name, ddl in _RESOURCE_HEALTH_COLUMNS.items():
+        if name not in rh_columns:
+            conn.execute(f"ALTER TABLE resource_health ADD COLUMN {name} {ddl}")
 
 
 def ensure_schema(conn: sqlite3.Connection | None = None) -> None:
@@ -240,9 +283,16 @@ def record_publish_error(
     timeout_seconds: int | None = None,
     state: str = "open",
     resource_id: str = "",
+    retryable: bool | None = None,
+    relation_type: str = "",
+    root_incident_key: str = "",
+    retry_blocked: int = 0,
+    metadata_json: str = "",
 ) -> dict[str, Any]:
     safe_detail = redact_detail(detail)
-    resolved_problem, severity, retryable = classify_error(stage, safe_detail, reason, problem_id)
+    resolved_problem, severity, resolved_retryable = classify_error(stage, safe_detail, reason, problem_id)
+    if retryable is not None:
+        resolved_retryable = retryable
     occurred_at = datetime.now(timezone.utc).isoformat()
     # 기존 fingerprint(detail 포함)는 호환용으로 유지 — incident key로 사용하지 않는다.
     fingerprint = hashlib.sha256(
@@ -260,7 +310,7 @@ def record_publish_error(
         "problem_id": resolved_problem,
         "reason": reason or "",
         "severity": severity,
-        "retryable": int(retryable),
+        "retryable": int(resolved_retryable),
         "attempt": attempt,
         "max_attempts": max_attempts,
         "source_name": source_name or "",
@@ -274,6 +324,12 @@ def record_publish_error(
         "occurrence_count": 1,
         "first_seen_at": occurred_at,
         "last_seen_at": occurred_at,
+        "relation_type": relation_type or "",
+        "root_incident_key": root_incident_key or "",
+        "resource_id": resource_id or "",
+        "retry_blocked": int(retry_blocked),
+        "retry_count": 0,
+        "metadata_json": metadata_json or "",
     }
     try:
         conn = _connect()
@@ -285,12 +341,14 @@ def record_publish_error(
                     event_id, occurred_at, blog_id, pipeline, stage, problem_id,
                     reason, severity, retryable, attempt, max_attempts, source_name,
                     http_status, timeout_seconds, detail_redacted, fingerprint, state,
-                    incident_key, key_version, occurrence_count, first_seen_at, last_seen_at
+                    incident_key, key_version, occurrence_count, first_seen_at, last_seen_at,
+                    relation_type, root_incident_key, resource_id, retry_blocked, retry_count, metadata_json
                 ) VALUES (
                     :event_id, :occurred_at, :blog_id, :pipeline, :stage, :problem_id,
                     :reason, :severity, :retryable, :attempt, :max_attempts, :source_name,
                     :http_status, :timeout_seconds, :detail_redacted, :fingerprint, :state,
-                    :incident_key, :key_version, :occurrence_count, :first_seen_at, :last_seen_at
+                    :incident_key, :key_version, :occurrence_count, :first_seen_at, :last_seen_at,
+                    :relation_type, :root_incident_key, :resource_id, :retry_blocked, :retry_count, :metadata_json
                 )
                 ON CONFLICT(incident_key) WHERE state='open' AND incident_key IS NOT NULL
                 DO UPDATE SET
@@ -306,7 +364,11 @@ def record_publish_error(
                     http_status = excluded.http_status,
                     timeout_seconds = excluded.timeout_seconds,
                     attempt = excluded.attempt,
-                    max_attempts = excluded.max_attempts
+                    max_attempts = excluded.max_attempts,
+                    relation_type = excluded.relation_type,
+                    root_incident_key = excluded.root_incident_key,
+                    resource_id = excluded.resource_id,
+                    metadata_json = excluded.metadata_json
                 """,
                 event,
             )
@@ -454,3 +516,457 @@ def close_publish_error_event(
     cur = conn.execute(sql, params)
     conn.commit()
     return cur.rowcount
+
+
+# --- PR2 (Phase 74): refresh health + root/symptom/amplifier 관계 + catchup retry 제어 ---
+
+DEFAULT_STALLED_RESOURCE_ID = "car.db/daily_refresh"
+
+# resource_health 이력의 근거 출처 — bootstrap/백필 시 근거 시각+source를 함께 남긴다.
+EVIDENCE_SOURCE = "scheduler._run_car_refresh"
+
+
+def _row_to_dict(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    return dict(row) if row is not None else None
+
+
+def record_resource_start(resource_id: str, job_name: str = "") -> None:
+    """refresh job 시작 기록 — state='running', last_started_at/heartbeat_at 갱신.
+
+    first_observed_at는 최초 관측 시각만 유지(COALESCE), health_confidence='observed'.
+    """
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            now = datetime.now(timezone.utc).isoformat()
+            conn.execute(
+                """
+                INSERT INTO resource_health (
+                    resource_id, job_name, last_started_at, heartbeat_at, state,
+                    first_observed_at, evidence_source, health_confidence
+                )
+                VALUES (?, ?, ?, ?, 'running', ?, ?, 'observed')
+                ON CONFLICT(resource_id) DO UPDATE SET
+                    job_name = excluded.job_name,
+                    last_started_at = excluded.last_started_at,
+                    heartbeat_at = excluded.heartbeat_at,
+                    state = 'running',
+                    first_observed_at = COALESCE(resource_health.first_observed_at, excluded.first_observed_at),
+                    evidence_source = excluded.evidence_source,
+                    health_confidence = 'observed'
+                """,
+                (resource_id, job_name or "", now, now, now, EVIDENCE_SOURCE),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def record_resource_heartbeat(resource_id: str) -> None:
+    """refresh 실행 중 heartbeat 갱신 (watchdog stale 방지 보조). 실패는 무시."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            now = datetime.now(timezone.utc).isoformat()
+            conn.execute(
+                "UPDATE resource_health SET heartbeat_at = ? WHERE resource_id = ?",
+                (now, resource_id),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def _record_resource_finish(
+    resource_id: str,
+    state: str,
+    *,
+    rows_inserted: int | None = None,
+    duration_seconds: float | None = None,
+    error_reason: str = "",
+) -> None:
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            now = datetime.now(timezone.utc).isoformat()
+            sets = ["state = ?", "last_completed_at = ?", "heartbeat_at = ?", "last_error_reason = ?"]
+            params: list[Any] = [state, now, now, (error_reason or "")[:500]]
+            if state == "success":
+                sets.append("last_success_at = ?")
+                params.append(now)
+                sets.append("health_confidence = 'confirmed'")
+            else:
+                # first_failure_at은 최초 실패 시각만 유지 (재실패로 갱신되지 않음).
+                sets.append("last_failure_at = ?")
+                params.append(now)
+                sets.append("first_failure_at = COALESCE(first_failure_at, ?)")
+                params.append(now)
+                sets.append("health_confidence = 'observed'")
+            if rows_inserted is not None:
+                sets.append("rows_inserted = ?")
+                params.append(int(rows_inserted))
+            if duration_seconds is not None:
+                sets.append("duration_seconds = ?")
+                params.append(float(duration_seconds))
+            params.append(resource_id)
+            conn.execute(
+                f"UPDATE resource_health SET {', '.join(sets)} WHERE resource_id = ?",
+                params,
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def record_resource_success(
+    resource_id: str, *, rows_inserted: int | None = None, duration_seconds: float | None = None
+) -> None:
+    _record_resource_finish(resource_id, "success", rows_inserted=rows_inserted, duration_seconds=duration_seconds)
+
+
+def record_resource_failure(resource_id: str, *, error_reason: str = "", duration_seconds: float | None = None) -> None:
+    _record_resource_finish(resource_id, "failed", error_reason=error_reason, duration_seconds=duration_seconds)
+
+
+def record_resource_timeout(resource_id: str, *, duration_seconds: float | None = None) -> None:
+    _record_resource_finish(resource_id, "timeout", error_reason="timeout", duration_seconds=duration_seconds)
+
+
+def get_resource_health(resource_id: str) -> dict[str, Any] | None:
+    """resource_health 행 반환 — 없으면 None. 읽기 전용."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            row = conn.execute(
+                "SELECT * FROM resource_health WHERE resource_id = ?", (resource_id,)
+            ).fetchone()
+            return _row_to_dict(row)
+        finally:
+            conn.close()
+    except Exception:
+        return None
+
+
+def get_open_incident(
+    blog_id: str,
+    problem_id: str,
+    reason: str = "",
+    resource_id: str = "",
+    conn: sqlite3.Connection | None = None,
+) -> dict[str, Any] | None:
+    """open 상태 incident 1건 조회 — 없으면 None. conn 미지정 시 자동 연결(읽기 전용)."""
+    owns = conn is None
+    target = conn or _connect()
+    try:
+        ensure_schema(target)
+        where = ["state = 'open'", "blog_id = ?", "problem_id = ?"]
+        params: list[Any] = [blog_id, problem_id]
+        if reason:
+            # 저장된 reason은 원본 그대로이므로 정규화 전/후 모두 매치한다 (no_topic/no_topics).
+            norm = _normalize_reason(reason)
+            where.append("(reason = ? OR reason = ?)")
+            params.extend([norm, reason])
+        if resource_id:
+            where.append("resource_id = ?")
+            params.append(resource_id)
+        row = target.execute(
+            f"SELECT * FROM publish_error_events WHERE {' AND '.join(where)} "
+            "ORDER BY rowid DESC LIMIT 1",
+            params,
+        ).fetchone()
+        return _row_to_dict(row)
+    finally:
+        if owns:
+            target.close()
+
+
+def get_open_root_incident(resource_id: str) -> dict[str, Any] | None:
+    """resource 단위 공용 root open incident 조회 (blog별 3건 중복 방지)."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            row = conn.execute(
+                "SELECT * FROM publish_error_events "
+                "WHERE state = 'open' AND relation_type = 'root' AND resource_id = ? "
+                "ORDER BY rowid DESC LIMIT 1",
+                (resource_id,),
+            ).fetchone()
+            return _row_to_dict(row)
+        finally:
+            conn.close()
+    except Exception:
+        return None
+
+
+def get_catchup_retry_state(blog_id: str) -> dict[str, Any] | None:
+    """blog의 open no_topics symptom retry 상태 — 없으면 None.
+
+    반환: incident_key / retry_count / retry_blocked / root_incident_key.
+    ops.db SSOT 기반이라 scheduler 재시작 후에도 유지된다.
+    """
+    incident = get_open_incident(blog_id, "P01", reason="no_topics")
+    if not incident:
+        return None
+    return {
+        "incident_key": incident.get("incident_key"),
+        "retry_count": incident.get("retry_count") or 0,
+        "retry_blocked": bool(incident.get("retry_blocked")),
+        "root_incident_key": incident.get("root_incident_key") or "",
+    }
+
+
+def increment_incident_retry(blog_id: str, problem_id: str, reason: str = "") -> bool:
+    """open incident의 retry_count를 1 증가 (catchup 재실행 횟수 — occurrence_count와 별개)."""
+    incident = get_open_incident(blog_id, problem_id, reason=reason)
+    if not incident or not incident.get("incident_key"):
+        return False
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            conn.execute(
+                "UPDATE publish_error_events SET retry_count = retry_count + 1 "
+                "WHERE state = 'open' AND incident_key = ?",
+                (incident["incident_key"],),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        return False
+    return True
+
+
+def set_incident_retry_blocked(blog_id: str, problem_id: str, blocked: bool, reason: str = "") -> bool:
+    """open incident의 retry_blocked 설정 — pending 복구/symptom close 시 해제(False)."""
+    incident = get_open_incident(blog_id, problem_id, reason=reason)
+    if not incident or not incident.get("incident_key"):
+        return False
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            conn.execute(
+                "UPDATE publish_error_events SET retry_blocked = ? "
+                "WHERE state = 'open' AND incident_key = ?",
+                (int(bool(blocked)), incident["incident_key"]),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        return False
+    return True
+
+
+def link_incident_to_root(conn: sqlite3.Connection, incident_key: str, root_incident_key: str) -> None:
+    """symptom/amplifier incident를 root incident key에 연결 (root 확인 후에만)."""
+    try:
+        conn.execute(
+            "UPDATE publish_error_events SET root_incident_key = ? WHERE incident_key = ?",
+            (root_incident_key or "", incident_key),
+        )
+        conn.commit()
+    except Exception:
+        pass
+
+
+def record_retry_amplification(blog_id: str, root_incident_key: str = "") -> dict[str, Any]:
+    """retry 제한 초과 시 amplifier(P34) incident upsert.
+
+    incident_key는 blog_id 단위로 고정 → open 1행 유지 (매 5분 신규 행 생성 금지).
+    """
+    return record_publish_error(
+        blog_id,
+        "catchup",
+        "retry_amplification: 동일 candidate_exhausted catchup 3회 초과 — 해당 incident 자동 제외",
+        reason="retry_amplification",
+        problem_id="P34",
+        relation_type="amplifier",
+        retry_blocked=1,
+        root_incident_key=root_incident_key,
+        retryable=False,
+    )
+
+
+def evaluate_and_open_root_stalled(
+    resource_id: str = DEFAULT_STALLED_RESOURCE_ID,
+    sla_hours: int = 36,
+    now: str | None = None,
+) -> dict[str, Any] | None:
+    """SLA 위반 3조건(A+B+C) 모두 충족 시 P33 root incident upsert (멱등).
+
+    A. 마지막 성공(last_success_at)이 sla_hours 초과 또는 성공 기록 없음
+       - 성공 기록도 없고 실패 관측(first_failure_at)도 없으면(UNKNOWN) 판정 불가 → None
+       - 성공 기록 없이 실패 관측만 있으면(OBSERVED) 실패 관측(first_failure_at)과
+         마지막 실패(last_failure_at) 중 더 오래된 시각 기준으로 SLA 판정
+    B. 마지막 실행이 success가 아님(running/failed/timeout) 또는 완료 증거(last_completed_at) 없음
+    C. 마지막 성공 rows_inserted == 0 또는 NULL (신규 candidate 유입 0)
+    실행 기록 자체가 없으면 None (단독 근거 금지 — 파일 mtime 등 비구조화 근거로 생성하지 않는다).
+    """
+    health = get_resource_health(resource_id)
+    if health is None:
+        return None
+    now_dt = datetime.fromisoformat(now) if now else datetime.now(timezone.utc)
+    last_success = health.get("last_success_at")
+    first_failure = health.get("first_failure_at")
+    condition_a = False
+    if last_success:
+        try:
+            condition_a = (now_dt - datetime.fromisoformat(last_success)).total_seconds() > sla_hours * 3600
+        except ValueError:
+            condition_a = False
+    elif first_failure:
+        # bootstrap: 성공 이력 없는 자원은 실패 관측(first_failure_at)과 마지막
+        # 실패(last_failure_at) 중 더 오래된 시각부터 정체로 간주 (둘 다 없을 수 없음 —
+        # first_failure_at 존재가 전제). last_success가 없으면 그 사이 성공이 없었다는
+        # 뜻이므로 first_failure_at이 오래됐으면 정체 지속으로 본다.
+        stall_candidates = [
+            ts for ts in (health.get("first_failure_at"), health.get("last_failure_at")) if ts
+        ]
+        stall_since = min(stall_candidates)
+        try:
+            condition_a = (now_dt - datetime.fromisoformat(stall_since)).total_seconds() > sla_hours * 3600
+        except ValueError:
+            condition_a = False
+    else:
+        # UNKNOWN — 이력 전무. 판정 불가 → root 생성 금지.
+        return None
+    state = health.get("state") or "unknown"
+    condition_b = state != "success" or not health.get("last_completed_at")
+    condition_c = (health.get("rows_inserted") or 0) == 0
+    if not (condition_a and condition_b and condition_c):
+        return None
+    existing = get_open_root_incident(resource_id)
+    if existing:
+        return existing
+    root = record_publish_error(
+        "resource",
+        "resource_refresh",
+        f"source_refresh_stalled: {resource_id} last_success={last_success}, "
+        f"state={state}, rows_inserted={health.get('rows_inserted')}",
+        reason="source_refresh_stalled",
+        problem_id="P33",
+        resource_id=resource_id,
+        relation_type="root",
+        retryable=False,
+    )
+    if root:
+        _link_open_symptoms_to_root(root.get("incident_key"))
+    return root
+
+
+def _link_open_symptoms_to_root(root_incident_key: str | None) -> None:
+    """root 생성 시 open candidate_exhausted(P01) symptom들을 root_incident_key로 연결.
+
+    root가 확인된 symptom만 연결한다 (아직 root가 없는 독립 symptom은 그대로 둔다).
+    """
+    if not root_incident_key:
+        return
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            conn.execute(
+                "UPDATE publish_error_events SET root_incident_key = ? "
+                "WHERE state = 'open' AND problem_id = 'P01' "
+                "AND (root_incident_key IS NULL OR root_incident_key = '')",
+                (root_incident_key,),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        pass
+
+
+def close_root_stalled_if_healthy(resource_id: str = DEFAULT_STALLED_RESOURCE_ID) -> int:
+    """refresh 성공이 확인되면 open P33 root close (발행 성공과 무관 — refresh 성공 증거로만).
+
+    rows_inserted=0이어도 close 가능(정상 소진) — candidate symptom은 별개로 유지된다.
+    """
+    health = get_resource_health(resource_id)
+    if not health or health.get("state") != "success":
+        return 0
+    root = get_open_root_incident(resource_id)
+    if not root:
+        return 0
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            now = datetime.now(timezone.utc).isoformat()
+            cur = conn.execute(
+                "UPDATE publish_error_events SET state = 'closed', resolved_at = ? "
+                "WHERE state = 'open' AND incident_key = ?",
+                (now, root["incident_key"]),
+            )
+            conn.commit()
+            return cur.rowcount
+        finally:
+            conn.close()
+    except Exception:
+        return 0
+
+
+def set_incident_retry_count(blog_id: str, problem_id: str, count: int, reason: str = "") -> bool:
+    """open incident의 retry_count 설정 (해제 시 0으로 리셋)."""
+    incident = get_open_incident(blog_id, problem_id, reason=reason)
+    if not incident or not incident.get("incident_key"):
+        return False
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            conn.execute(
+                "UPDATE publish_error_events SET retry_count = ? "
+                "WHERE state = 'open' AND incident_key = ?",
+                (max(0, int(count)), incident["incident_key"]),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        return False
+    return True
+
+
+def release_blog_retry_state(blog_id: str) -> bool:
+    """해당 blog의 retry 제한 상태 해제 — P01 symptom close + P34 amplifier close +
+    retry_blocked 해제 + retry_count 리셋.
+
+    pending 복구(신규 candidate 유입) 또는 발행 성공 시에만 호출한다.
+    root(P33)는 건드리지 않는다 — root close는 refresh 성공 증거로만 가능.
+    """
+    ok = True
+    # setter들은 open incident를 대상으로 하므로 close 전에 먼저 해제한다.
+    ok = set_incident_retry_blocked(blog_id, "P01", False) and ok
+    ok = set_incident_retry_count(blog_id, "P01", 0) and ok
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            now = datetime.now(timezone.utc).isoformat()
+            for problem_id in ("P01", "P34"):
+                conn.execute(
+                    "UPDATE publish_error_events SET state = 'closed', resolved_at = ? "
+                    "WHERE state = 'open' AND blog_id = ? AND problem_id = ?",
+                    (now, blog_id, problem_id),
+                )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        ok = False
+    return ok

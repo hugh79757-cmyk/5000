@@ -704,8 +704,12 @@ def detect_price_changes(conn):
     return events_created
 
 
-def run_refresh() -> None:
-    """전체 갱신 실행 (하루 1회)"""
+def run_refresh() -> dict:
+    """전체 갱신 실행 (하루 1회).
+
+    반환: {"success": bool, "rows_inserted": int(신규 토픽 수), "completed_at": str, "reason": str}
+    rows_inserted=0 은 데이터 소스에 신규 후보가 없는 정상 상태일 수 있다.
+    """
     conn = get_conn()
     c = conn.cursor()
 
@@ -714,7 +718,7 @@ def run_refresh() -> None:
     if already:
         logger.info("오늘 이미 데이터 갱신 완료 - 스킵")
         conn.close()
-        return
+        return {"success": True, "rows_inserted": 0, "completed_at": datetime.now().isoformat(), "reason": "already_done"}
 
     logger.info("=== CAP 데이터 갱신 시작 ===")
 
@@ -770,6 +774,8 @@ def run_refresh() -> None:
 
     logger.info(f"=== 갱신 완료: 차량 {total_cars}대, 트림 {total_trims}개, 이미지 {total_imgs}장, 대기토픽 {pending}개, 신규토픽 {topics_created}개 ===")
     conn.close()
+
+    return {"success": True, "rows_inserted": topics_created, "completed_at": datetime.now().isoformat(), "reason": ""}
 
 
 if __name__ == "__main__":

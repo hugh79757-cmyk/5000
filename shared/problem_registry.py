@@ -680,6 +680,43 @@ _register(ProblemSpec(
     playbook_ref="ERROR_PLAYBOOKS.md#p32",
     detect_fn="detect_empty_content_deployed",
 ))
+# PR2 (Phase 74): 근본 장애 + 재시도 증폭 관리. P33=source_refresh_stalled (root, scope=resource),
+# P34=retry_amplification (amplifier, scope=blog+incident). registry 자체엔 retryable 필드가 없으므로
+# retryable/relation 은 publish_error_events.py 의 _NEW_CODES/_PR2_CODES 로 관리한다.
+_register(ProblemSpec(
+    problem_id="P33",
+    name_ko="후보 공급 refresh 정체 (source_refresh_stalled)",
+    severity="MAJOR",
+    reason_keys=("source_refresh_stalled",),
+    hook="resource_refresh",
+    threshold="always",
+    alert_template=(
+        "[MAJOR] 후보 공급 refresh 정체\n"
+        "blog: {blog_id}\n"
+        "problem: {problem_id} — {name_ko}\n"
+        "stage: {phase}\n"
+        "action: {action}"
+    ),
+    action="refresh 재실행은 사용자 승인 필요 — job state/timeout/last success/rows_inserted 진단 후 수동 refresh",
+    playbook_ref="ERROR_PLAYBOOKS.md#p33",
+))
+_register(ProblemSpec(
+    problem_id="P34",
+    name_ko="재시도 증폭 (retry_amplification)",
+    severity="MAJOR",
+    reason_keys=("retry_amplification",),
+    hook="catchup",
+    threshold="always",
+    alert_template=(
+        "[MAJOR] 재시도 증폭 — catchup 자동 제외\n"
+        "blog: {blog_id}\n"
+        "problem: {problem_id} — {name_ko}\n"
+        "stage: {phase}\n"
+        "action: {action}"
+    ),
+    action="동일 unresolved symptom catchup 3회 초과 — 해당 incident에 한해 catchup 자동 제외 유지, 블로그 pause 금지, root/symptom 해결 시 자동 해제",
+    playbook_ref="ERROR_PLAYBOOKS.md#p34",
+))
 
 
 # --- Wave 2d (Phase 72): 단일 소스 YAML 오버레이 ---

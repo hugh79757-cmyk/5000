@@ -1469,6 +1469,21 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                     "[problem_monitor] result_parse 매핑: blog=%s reason=%s "
                     "problem_id=%s consecutive=%s",
                     blog_id, reason, _spec.problem_id, _consec)
+                # PR2: candidate_exhausted(no_topics) symptom을 알림 발송과 무관하게
+                # 항상 ops.db SSOT에 기록 (root 판정/retry 제한의 근거).
+                # monitor.report는 consecutive:3 미만이면 기록하지 않으므로 별도 경로.
+                if reason in ("no_topics", "no_topic"):
+                    try:
+                        from shared import publish_error_events as _events
+                        _events.record_publish_error(
+                            blog_id, "result_parse",
+                            str(result.get("stderr") or result.get("detail") or reason),
+                            reason=reason, problem_id="P01", relation_type="symptom",
+                            retryable=False,
+                        )
+                    except Exception:
+                        # SSOT 기록 실패가 발행 흐름을 막지 않음 (조용히 통과)
+                        pass
                 get_monitor().report(
                     blog_id,
                     {"reason": reason, "stage": reason,

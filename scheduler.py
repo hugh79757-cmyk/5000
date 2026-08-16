@@ -222,6 +222,9 @@ def _update_heartbeat() -> None:
         pass
 
 MAX_CATCHUP_PER_BLOG = 3
+# PR2: 동일 unresolved candidate_exhausted(no_topics) symptom에 대한
+# scheduler catchup 재시도 허용 상한 (ops.db SSOT retry_count 기준)
+MAX_CATCHUP_RETRY = 3
 PUBLISH_DELAY = 60  # 블로그 간 딜레이(초)
 
 
@@ -440,6 +443,34 @@ def _catchup_missed_inner() -> None:
         if attempts >= MAX_CATCHUP_PER_BLOG:
             continue
 
+        # PR2: unresolved candidate_exhausted(no_topics) symptom retry 제한 (ops.db SSOT)
+        from shared import publish_error_events as _events
+        try:
+            _retry_state = _events.get_catchup_retry_state(blog_id)
+        except Exception as e:
+            # fail-open/fail-closed 금지: 해당 blog catchup만 안전하게 skip
+            logger.warning(f"CATCHUP: {blog_id} retry 상태 조회 실패 — 해당 blog만 skip: {e}")
+            continue
+        if _retry_state:
+            if _retry_state.get("retry_blocked"):
+                logger.info(
+                    f"CATCHUP: {blog_id} retry block 유지 — catchup 제외 "
+                    f"(retry_count={_retry_state.get('retry_count', 0)})"
+                )
+                continue
+            if _retry_state.get("retry_count", 0) >= MAX_CATCHUP_RETRY:
+                try:
+                    _events.record_retry_amplification(
+                        blog_id, root_incident_key=_retry_state.get("root_incident_key") or ""
+                    )
+                except Exception as e:
+                    logger.warning(f"CATCHUP: {blog_id} amplifier 기록 실패: {e}")
+                logger.warning(
+                    f"CATCHUP: {blog_id} retry_count={_retry_state.get('retry_count')} "
+                    f">= {MAX_CATCHUP_RETRY} — catchup 제외 (retry_amplification open)"
+                )
+                continue
+
         # daily_quota 체크 — quota 도달 시 skip
         daily_quota = blog.get("daily_quota", 50)
         actual = _get_ledger_count(blog_id, today_str)
@@ -480,10 +511,27 @@ def _catchup_missed_inner() -> None:
             f"missed={missed} quota={daily_quota} attempt={attempts + 1}/{MAX_CATCHUP_PER_BLOG}"
         )
         try:
+            before = _events.get_open_incident(blog_id, "P01", reason="no_topics")
+            before_occurrences = before.get("occurrence_count", 0) if before else 0
             success = run_publish(blog_id)
             _track_publish_result(blog_id, bool(success))
             if not success:
                 logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
+                after = _events.get_open_incident(blog_id, "P01", reason="no_topics")
+                if after and after.get("occurrence_count", 0) > before_occurrences:
+                    # 실제 pipeline 실행에서 no_topics 재발 — catchup 재시도로만 누적
+                    _events.increment_incident_retry(blog_id, "P01")
+                    logger.warning(
+                        f"CATCHUP: {blog_id} no_topics 재발 — retry_count 증가 "
+                        f"(occurrence_count={after.get('occurrence_count')})"
+                    )
+            else:
+                # 발행 성공 → P01 symptom close + P34 close + retry block 해제 + retry reset
+                try:
+                    _events.release_blog_retry_state(blog_id)
+                    logger.info(f"CATCHUP: {blog_id} 발행 성공 — no_topics symptom close + P34 close + retry reset")
+                except Exception as e:
+                    logger.warning(f"CATCHUP: {blog_id} retry state 해제 실패: {e}")
         except Exception as e:
             logger.exception(f"CATCHUP: {blog_id} 예외: {e}")
         time.sleep(5)
@@ -691,9 +739,136 @@ def _run_gap_keyword_sync() -> None:
 
 
 def _run_car_refresh() -> None:
-    subprocess.run([sys.executable, "pipelines/car/daily_refresh.py"],
-                   cwd=os.path.dirname(os.path.abspath(__file__)))
-    logger.info("CAR daily_refresh completed")
+    """CAR daily_refresh subprocess 실행 + resource health를 ops.db SSOT에 기록.
+
+    - Popen poll loop로 실행 중에도 heartbeat를 갱신해 watchdog kickstart 루프 방지.
+    - timeout 시 process group 전체(killpg)를 정리한다 — 예외를 빈 성공으로 처리하지 않는다.
+    """
+    import re
+    import signal
+    import tempfile
+    from shared import publish_error_events as _events
+
+    resource_id = _events.DEFAULT_STALLED_RESOURCE_ID
+    job_name = "pipelines/car/daily_refresh.py"
+    started = time.time()
+    refresh_timeout = int(os.environ.get("CAR_REFRESH_TIMEOUT_SEC", "3600"))
+    deadline = started + refresh_timeout
+
+    try:
+        _events.record_resource_start(resource_id, job_name=job_name)
+    except Exception as e:
+        logger.warning(f"CAR daily_refresh resource start 기록 실패: {e}")
+
+    # 파일 리다이렉트 (PIPE 대신) → pipe deadlock 방지. start_new_session → killpg로 후손 정리 가능.
+    stdout_tmp = tempfile.TemporaryFile(mode="w+", encoding="utf-8")
+    stderr_tmp = tempfile.TemporaryFile(mode="w+", encoding="utf-8")
+    timed_out = False
+    try:
+        proc = subprocess.Popen(
+            [sys.executable, "pipelines/car/daily_refresh.py"],
+            cwd=os.path.dirname(os.path.abspath(__file__)),
+            stdout=stdout_tmp, stderr=stderr_tmp, text=True,
+            start_new_session=True,
+        )
+        while proc.poll() is None:
+            try:
+                _update_heartbeat()
+                _events.record_resource_heartbeat(resource_id)
+            except Exception:
+                pass  # heartbeat 실패가 refresh 결과를 왜곡하지 않는다
+            if time.time() > deadline:
+                timed_out = True
+                break
+            time.sleep(30)
+
+        if timed_out:
+            # process group 전체 정리 (자식/손자 포함) — 10초 대기 후 강제 kill
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+            except Exception:
+                proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except Exception:
+                try:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                except Exception:
+                    proc.kill()
+                proc.wait()
+
+        stdout_tmp.seek(0)
+        stdout = stdout_tmp.read()
+        stderr_tmp.seek(0)
+        stderr = stderr_tmp.read()
+
+        duration = time.time() - started
+        if timed_out:
+            _events.record_resource_timeout(resource_id, duration_seconds=duration)
+            logger.error(f"CAR daily_refresh timed out ({refresh_timeout}s) — process group killed")
+        elif proc.returncode == 0:
+            m = re.search(r"신규토픽 (\d+)개", stdout or "")
+            rows_inserted = int(m.group(1)) if m else 0
+            _events.record_resource_success(
+                resource_id, rows_inserted=rows_inserted, duration_seconds=duration
+            )
+            logger.info(f"CAR daily_refresh completed (exit=0, rows_inserted={rows_inserted})")
+            # 신규 candidate 유입 → pending>0인 blog들의 retry block 해제
+            if rows_inserted > 0:
+                _release_pending_blog_retry_states(_events)
+        else:
+            detail = (stderr or stdout or "").strip()[:500]
+            _events.record_resource_failure(
+                resource_id, error_reason=detail or f"exit={proc.returncode}",
+                duration_seconds=duration,
+            )
+            logger.error(f"CAR daily_refresh failed (exit={proc.returncode}): {detail}")
+    except Exception as e:
+        duration = time.time() - started
+        try:
+            _events.record_resource_failure(
+                resource_id, error_reason=str(e)[:500], duration_seconds=duration
+            )
+        except Exception:
+            pass
+        logger.exception(f"CAR daily_refresh error: {e}")
+    finally:
+        stdout_tmp.close()
+        stderr_tmp.close()
+
+    # SLA(36h) 위반 시 공용 resource root incident 열기 (멱등)
+    try:
+        _events.evaluate_and_open_root_stalled()
+    except Exception as e:
+        logger.warning(f"CAR root stalled 평가 실패: {e}")
+
+
+def _release_pending_blog_retry_states(_events) -> None:
+    """car.db에 pending>0인 blog들의 retry 상태만 해제 (pending=0인 blog 유지).
+
+    root(P33)는 건드리지 않는다 — root close는 refresh 성공 증거로만 가능.
+    """
+    car_db = os.path.join(PROJECT_DIR, "data", "car.db")
+    try:
+        conn = sqlite3.connect(f"file:{car_db}?mode=ro", uri=True, timeout=5)
+        try:
+            rows = conn.execute(
+                "SELECT DISTINCT site_id FROM topics WHERE status = 'pending'"
+            ).fetchall()
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.warning(f"CAR pending blog 조회 실패: {e}")
+        return
+    for row in rows:
+        blog_id = row[0]
+        if not blog_id:
+            continue
+        try:
+            _events.release_blog_retry_state(blog_id)
+            logger.info(f"CAR refresh 유입 복구 — {blog_id} retry block 해제 (pending>0)")
+        except Exception as e:
+            logger.warning(f"CAR refresh {blog_id} retry state 해제 실패: {e}")
 
 
 def _run_stap_collector() -> None:

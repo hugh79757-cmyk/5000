@@ -83,6 +83,16 @@
 <a id="p32"></a>
 | **P32** | 빈 본문 배포 / `post_deploy` | publish_log 최근 글의 public HTML 본문 단어수 200 미만, topic의 exhausted=1과 publish_log INSERT 동시 발생 패턴, _write_hugo_post_etap 호출 시 article["content"]가 빈 문자열/공백/200단어 미만 | 가드 통과·차단 dry run, 본문 단어수 계측, H2/disclaimer/adsense 존재 확인 | 가드 변경은 additive; 기존 정상 글 영향 없음 확인. 재생성·배포는 승인 |
 
+## 3-b. 후보 공급 refresh 정체 / 재시도 증폭 (PR2, ops.db SSOT)
+
+> root/amplifier는 `publish_error_events`의 `relation_type`(root/symptom/amplifier)과 `resource_health` 테이블로 관리한다.
+> 관계: ROOT(`source_refresh_stalled`, resource_id=`car.db/daily_refresh`) ← SYMPTOM(`no_topics`/P01, blog별) ← AMPLIFIER(`retry_amplification`, blog별).
+
+<a id="p33"></a>
+| **P33** | source_refresh_stalled / `resource_refresh` | 진단: `resource_health`의 job state, timeout, last_success_at(36h SLA), rows_inserted(유입 0). 단독 근거 금지: pending=0만, no_topics만, 로그 부재만, scheduler 재시작만. 3조건(A=last_success 36h 초과, B=완료 증거 없음·실패/timeout, C=유입 0) 모두 충족 시 root open | **자동수리 기본값: proposed.** refresh 재실행은 사용자 승인 필요. timeout/lock/중복실행 방지 후 실행, 실행 후 resource health·candidate 회복 검증. refresh 성공(rows_inserted=0 포함)이 유일한 close 증거 — 발행 성공으로 close 금지 | SLA 경계 fixture(36h 전후), timeout fixture, rows_inserted 0/양수 fixture | refresh 재실행·스케줄 변경은 승인 |
+<a id="p34"></a>
+| **P34** | retry_amplification / `catchup` | 동일 unresolved candidate_exhausted(no_topics) symptom에 대해 scheduler catchup 재시도가 정책 허용량(3회) 초과 → 해당 blog catchup 자동 제외(블로그 pause 아님) + amplifier open | catchup 제외는 자동 허용. root 또는 symptom 해결(발행 성공/pending 복구) 시 retry_blocked 해제·amplifier close | retry_count 1~3 허용, 4회째 amplifier 1건(5분 중복 행 없음), 재시작 후 block 유지 fixture | 블로그 pause·삭제 금지; 정규 schedule·refresh는 차단 금지 |
+
 
 ## 5. 콘텐츠 품질 이탈 (CONTENT-QUALITY, 큐레이션 발행물)
 
