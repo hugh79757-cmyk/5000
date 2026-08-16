@@ -131,7 +131,7 @@ description: "{article['description']}"
 {tags_str}
 categories:
   - "Travel Guide"
-showTableOfContents: true
+showTableOfContents: false
 {draft_line}---
 
 {credit_line}"""

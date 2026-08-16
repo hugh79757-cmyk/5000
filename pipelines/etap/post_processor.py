@@ -183,39 +183,11 @@ def insert_cross_sell_block(content: str, cross_html: str, position: str = "top"
 
 
 # ── AdSense 본문 광고 삽입 ──
-ADSENSE_BLOCK = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8772455780561463"
-     crossorigin="anonymous"></script>
-<!-- ETAP -->
-<ins class="adsbygoogle"
-     style="display:block"
-     data-ad-client="ca-pub-8772455780561463"
-     data-ad-slot="4276065235"
-     data-ad-format="auto"
-     data-full-width-responsive="true"></ins>
-<script>
-     (adsbygoogle = window.adsbygoogle || []).push({});
-</script>"""
-
+# 인라인 삽입 폐기: ADSENSE-GUIDE.md §5-1 / §8-4(auto) / §8-10(하드코딩 ID) / §10-2(비표준
+# 슬롯 4276065235) 단일 표준 위반. 본문 광고는 테마 single.html의 H2 분할 파셜(adsense/*)
+# 로만 주입되므로 인라인 블록은 제거. insert_adsense는 호환성 보존용 no-op.
 def insert_adsense(content: str) -> str:
-    """첫 번째 단락 하단과 두 번째 H2 아래에 AdSense 광고 블록을 삽입합니다."""
-    import re as _re
-    if "<!-- ETAP -->" in content:
-        return content
-
-    # 광고 위치 1: 첫 번째 빈 줄(단락 구분) 뒤
-    first_para = _re.search(r"\n\n", content)
-    if first_para:
-        pos1 = first_para.end()
-        content = content[:pos1] + "\n" + ADSENSE_BLOCK + "\n\n" + content[pos1:]
-
-    # 광고 위치 2: 두 번째 H2 아래
-    h2_list = [m.start() for m in _re.finditer(r"^## ", content, _re.MULTILINE)]
-    if len(h2_list) >= 2:
-        h2_start = h2_list[1]
-        h2_end = content.index("\n", h2_start)
-        pos2 = h2_end + 1
-        content = content[:pos2] + "\n" + ADSENSE_BLOCK + "\n\n" + content[pos2:]
-
+    """AdSense 본문 광고는 파셜(adsense/*) 단일 표준으로 위임. 인라인 삽입 폐기."""
     return content
 
 
