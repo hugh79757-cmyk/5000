@@ -174,13 +174,34 @@ def _search_with_fallback(query, per_page=15, city="", country=""):
 
 def _upload_to_r2(r2_key, image_url, force=False):
     from shared.r2_uploader import file_exists, upload_bytes
+    # N3: webp 단일 포맷 (THUMBNAIL-01 준수 + 용량 최적화). jpg 폴백 금지.
+    r2_key = r2_key.replace(".jpg", ".webp")
     if not force and file_exists(r2_key):
         return f"{R2_BASE}/{r2_key}"
     img_data = requests.get(image_url, timeout=15).content
-    upload_bytes(img_data, r2_key, content_type="image/jpeg")
+    webp_data = _to_webp(img_data)  # 인코딩 실패 시 raise (jpg 폴백 없음)
+    upload_bytes(webp_data, r2_key, content_type="image/webp")
     r2_url = f"{R2_BASE}/{r2_key}"
     logger.info("R2 upload: %s", r2_url)
     return r2_url
+
+
+def _to_webp(raw_bytes, quality=85, method=6):
+    """Pillow 재인코딩 → webp. 실패 시 예외 전파(jpg 폴백 금지).
+
+    RGB/RGBA는 webp 지원 그대로. P/CMYK/LAB는 RGB로, LA는 RGBA로 변환
+    (누락 시 OSError: cannot write mode P as WEBP).
+    """
+    from io import BytesIO
+    from PIL import Image
+    img = Image.open(BytesIO(raw_bytes))
+    if img.mode in ("P", "CMYK", "LAB"):
+        img = img.convert("RGB")
+    elif img.mode == "LA":
+        img = img.convert("RGBA")
+    buf = BytesIO()
+    img.save(buf, "WEBP", quality=quality, method=method)
+    return buf.getvalue()
 
 
 def _trigger_unsplash_download(photo) -> None:
