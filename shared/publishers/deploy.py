@@ -55,7 +55,7 @@ def _run_hugo_build(site: Path, env: dict, log_path: Path) -> bool:
     return False
 
 
-def deploy_site(site_path, cf_project) -> bool:
+def deploy_site(site_path, cf_project, deploy_type=None) -> bool:
     Path(site_path)
     import fcntl as _fl
 
@@ -82,7 +82,7 @@ def deploy_site(site_path, cf_project) -> bool:
         _lock_file.close()
         return False
     try:
-        _deploy_site_inner(site_path, cf_project)
+        _deploy_site_inner(site_path, cf_project, deploy_type=deploy_type)
     finally:
         if _lock_acquired:
             try:
@@ -93,7 +93,7 @@ def deploy_site(site_path, cf_project) -> bool:
     return True
 
 
-def _deploy_site_inner(site_path, cf_project) -> bool:
+def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
     site = Path(site_path)
     # Phase 71d: CLOUDFLARE_API_TOKEN 제거 + ACCOUNT_ID 복원 → build_wrangler_env() 위임
     _wrangler_env = build_wrangler_env()
@@ -127,6 +127,11 @@ def _deploy_site_inner(site_path, cf_project) -> bool:
 
     wf = site / "wrangler.toml"
     use_workers = wf.exists() and "[assets]" in wf.read_text()
+    # Phase 73 SC-8: deploy_type 설정 키 우선, 없으면 기존 [assets] 휴리스틱 폴백.
+    if deploy_type == "workers":
+        use_workers = True
+    elif deploy_type == "pages":
+        use_workers = False
 
     with open(log_path, "a") as log_f:
         _deploy_timeout = 120

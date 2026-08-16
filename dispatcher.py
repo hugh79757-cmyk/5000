@@ -91,6 +91,9 @@ STAP_PIPELINE_MAP = {
     "finance-hugo": "finance",
 }
 
+# Phase 73 SC-1: STAP 파이프라인 이름 집합 (중앙 배포 경로 포함용, 1회 정의).
+STAP_PIPELINE_BLOGS = set(STAP_PIPELINE_MAP.values())
+
 # --- no_result backoff (30분 쿨다운) ---
 _COOLDOWN_FILE = os.path.join(FIVEK_ROOT, "data", "cooldown.json")
 _COOLDOWN_MINUTES = 30
@@ -803,7 +806,13 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                 logger.error(f"[deploy] {blog_id} 락 대기 시간 초과 ({DEPLOY_LOCK_TIMEOUT}초)")
                 return False
 
-            if blog_id in WORKERS_BLOGS:
+            # Phase 73 SC-8: deploy_type 설정 키 우선, 없으면 WORKERS_BLOGS 휴리스틱 폴백.
+            _deploy_type = _cfg.get("deploy_type")
+            _use_workers = (
+                _deploy_type == "workers"
+                or (_deploy_type is None and blog_id in WORKERS_BLOGS)
+            )
+            if _use_workers:
                 r2 = subprocess.run(
                     [WRANGLER, "deploy",
                      "--config", str(site_path / "wrangler.toml")],
@@ -960,6 +969,7 @@ _AUTOFIX_RULE_TO_ACTION = {
     "R2-01": "fix_r2_images",
     "FM-DRAFT": "fix_draft_true",
     "FM-FEATUREIMAGE": "fix_featureimage_url_sanitize",
+    "FM-THUMBNAIL": "fix_featureimage_url_sanitize",
     "FM-MISSINGKEYS": "fix_frontmatter_missing_keys",
 }
 
@@ -971,6 +981,7 @@ _AUTOFIX_SAFE_ACTIONS = {
     "fix_thumbnail_r2",
     "fix_draft_true",
     "fix_featureimage_url_sanitize",
+    "FM-THUMBNAIL",
     "fix_frontmatter_missing_keys",
 }
 
@@ -1317,7 +1328,7 @@ def dispatch(blog_id):
         # P계열 발행 실패 이벤트 자동 close — 해당 blog가 정상 발행 성공하면
         # stale open 누적을 끊는다 (ERROR_PLAYBOOKS.md L161 "재시도 성공 시 close").
         _close_publish_failure_events(blog_id)
-        if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS:
+        if blog_id in ETAP_PIPELINE_BLOGS or blog_id in WORKERS_BLOGS or blog_id in STAP_PIPELINE_BLOGS:
             deploy_ok = _build_and_deploy_central(blog_id)
             if not deploy_ok:
                 # Phase 58 Task 5: ETAP/Workers 배포 실패 캡처 — P04 (hook=post_deploy).
@@ -1371,6 +1382,18 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
         _trigger_post_publish_checks(blog_id)
     else:
         reason = result.get("reason", "unknown")
+        # Phase 73 SC-1: STAP 배포 실패 → P04 deploy_error 로우팅.
+        # STAP pipeline이 success=False + deploy_error 를 반환하면 배포 실패로
+        # 분류해 중앙 P04 경로로 유도 (기존 opaque reason 대체).
+        _deploy_err = result.get("deploy_error")
+        if _deploy_err:
+            logger.warning(
+                "[problem_monitor] STAP 배포 실패 캡처: blog=%s reason=deploy_error "
+                "problem_id=P04 phase=post_deploy",
+                blog_id)
+            get_monitor().report(
+                blog_id, {"reason": "deploy_error"}, phase="post_deploy", extra={})
+            _record_failure(blog_id, "deploy", _deploy_err[:300])
         if reason not in ("quota_met", "already_running", "duplicate_title"):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
             # no_result/no_content — 실제 파이프라인 실패 → 실시간 푸시 + 요약 기록
