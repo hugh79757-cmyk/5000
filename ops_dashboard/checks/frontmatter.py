@@ -29,8 +29,9 @@ REQUIRED_KEYS = ["title", "description", "date", "slug", "tags"]
 _TOKEN_REPEAT = re.compile(r"(.{4,})\1{2,}")
 
 
-def _featureimage_bad(url: str) -> tuple[bool, str | None]:
-    """featureimage URL이 IMAGE-GUARD 정화 기준을 벗어하는지 판정.
+def _fm_url_bad(url: str, key: str) -> tuple[bool, str | None]:
+    """프론트매터 URL 키(featureimage/thumbnail)가 IMAGE-GUARD 정화 기준을
+    벗어하는지 판정.
 
     위반: 길이 > 200 / 토큰 반복 / 비정상 문자(공백·백슬래시).
     비어있으면 위반 아님(누락은 FM-MISSINGKEYS 영역).
@@ -38,12 +39,17 @@ def _featureimage_bad(url: str) -> tuple[bool, str | None]:
     if not url:
         return False, None
     if len(url) > 200:
-        return True, f"featureimage URL 길이 {len(url)}>200"
+        return True, f"{key} URL 길이 {len(url)}>200"
     if _TOKEN_REPEAT.search(url):
-        return True, "featureimage URL 토큰 반복(LLM 아티팩트)"
+        return True, f"{key} URL 토큰 반복(LLM 아티팩트)"
     if re.search(r"[\s\\]", url):
-        return True, "featureimage URL 비정상 문자(공백/백슬래시)"
+        return True, f"{key} URL 비정상 문자(공백/백슬래시)"
     return False, None
+
+
+def _featureimage_bad(url: str) -> tuple[bool, str | None]:
+    """featureimage URL IMAGE-GUARD 위반 판정 (FM-FEATUREIMAGE). _fm_url_bad 위임."""
+    return _fm_url_bad(url, "featureimage")
 
 
 @register_check("frontmatter")
@@ -54,6 +60,7 @@ def check_frontmatter(conn, blog_id: str) -> dict:
       - draft:true → FM-DRAFT
       - title/description/date/slug/tags 누락 → FM-MISSINGKEYS
       - featureimage 가 IMAGE-GUARD 기준 위반 → FM-FEATUREIMAGE
+      - thumbnail 가 IMAGE-GUARD 기준 위반 → FM-THUMBNAIL
     단건 포스트 파싱/검사 오류는 스킵(로그) — RecheckAll 전체를 죽이지 않는다.
     """
     site = _find_site_path(conn, blog_id)
@@ -88,6 +95,15 @@ def check_frontmatter(conn, blog_id: str) -> dict:
                 if bad:
                     triggered.setdefault(
                         "FM-FEATUREIMAGE", f"{path.parent.name}: {why}"
+                    )
+
+            # FM-THUMBNAIL: stock-hugo Blowfish variant uses `thumbnail:` 키
+            thumb = (fm.get("thumbnail") or "").strip()
+            if thumb:
+                bad, why = _fm_url_bad(thumb, "thumbnail")
+                if bad:
+                    triggered.setdefault(
+                        "FM-THUMBNAIL", f"{path.parent.name}: {why}"
                     )
         except Exception as e:
             logger.warning("[frontmatter] 검사 스킵: %s: %s", path, e)
