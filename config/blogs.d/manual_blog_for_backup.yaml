@@ -1,6 +1,7 @@
 blogs:
 - domain: rotcha.kr
   id: rotcha-blog
+  deploy_type: pages
   cf_project: rotcha-blog
   name: 로차 블로그
   platform: hugo
@@ -11,6 +12,7 @@ blogs:
 
 - domain: informationhot.kr
   id: informationhot-hugo
+  deploy_type: pages
   cf_project: informationhot-hugo
   name: 인포메이션핫
   platform: hugo
@@ -21,6 +23,7 @@ blogs:
 
 - domain: techpawz.com
   id: techpawz-hugo
+  deploy_type: pages
   cf_project: techpawz-hugo
   name: 테크포즈
   platform: hugo
@@ -31,6 +34,7 @@ blogs:
 
 - domain: biz.techpawz.com
   id: biz-techpawz-hugo
+  deploy_type: pages
   cf_project: biz-techpawz
   name: 테크포즈 비즈
   platform: hugo
@@ -41,6 +45,7 @@ blogs:
 
 - domain: issue.techpawz.com
   id: issue-techpawz-hugo
+  deploy_type: pages
   cf_project: issue-techpawz-hugo
   name: 테크포즈 이슈
   platform: hugo

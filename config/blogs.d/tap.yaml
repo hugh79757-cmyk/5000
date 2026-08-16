@@ -1,5 +1,6 @@
 blogs:
 - id: tap-blogger
+  deploy_type: pages
   name: travel.rotcha.kr (Blogger)
   pipeline: travel
   platform: blogger
@@ -20,6 +21,7 @@ blogs:
   - type: camping
     weight: 1.0
   id: travel-hugo
+  deploy_type: pages
   name: 캠핑·아웃도어
   pipeline: travel
   platform: hugo
@@ -49,6 +51,7 @@ blogs:
   - type: festival
     weight: 1.0
   id: travel1-hugo
+  deploy_type: pages
   name: 축제·행사
   pipeline: travel
   platform: hugo
@@ -78,6 +81,7 @@ blogs:
   - type: heritage
     weight: 1.0
   id: travel2-hugo
+  deploy_type: pages
   name: 문화유산
   pipeline: travel
   platform: hugo
@@ -107,6 +111,7 @@ blogs:
   - type: food
     weight: 1.0
   id: travel3-hugo
+  deploy_type: pages
   name: 맛집·카페
   pipeline: travel
   platform: hugo
@@ -136,6 +141,7 @@ blogs:
   - type: course
     weight: 1.0
   id: travel4-hugo
+  deploy_type: pages
   name: 여행코스
   pipeline: travel
   platform: hugo
