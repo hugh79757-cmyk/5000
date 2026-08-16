@@ -251,8 +251,105 @@ def load_config():
 
 # ─── 발행 실행 ───
 
+def _resource_id(blog_cfg) -> str:
+    """availability key용 resource_id — car면 car.db (후보 소스)."""
+    pipeline = blog_cfg.get("pipeline", "")
+    return f"{pipeline}.db" if pipeline else ""
+
+
+def _candidate_type(blog_cfg) -> str:
+    """availability key용 candidate_type — post_type list는 콤마 조인."""
+    pt = blog_cfg.get("post_type")
+    if isinstance(pt, list):
+        return ",".join(str(x) for x in pt if str(x).strip())
+    return str(pt) if pt else ""
+
+
+def _open_root_key(_events, blog_cfg) -> str:
+    """해당 resource의 open root incident key — P33 stalled 등."""
+    try:
+        resource_id = _resource_id(blog_cfg)
+        if not resource_id:
+            return ""
+        root = _events.get_open_root_incident(resource_id)
+        return (root or {}).get("incident_key", "") or ""
+    except Exception:
+        return ""
+
+
+def _availability_gate(blog_cfg) -> bool:
+    """PR3: candidate availability gate — 후보가 없으면 dispatcher 실행 금지.
+
+    - car: pending=0 → waiting_for_candidates 상태 기록 후 실행 생략.
+    - checker 오류: 전체 중단도 fail-open도 금지 → 해당 blog 1회 안전 skip.
+    - 미지원 pipeline: state=unknown 기록, 기존 실행 유지 (후보 없음으로 단정 금지).
+    - P33 root open → blocked_by_source 전환.
+    반환: True=실행 허용 / False=dispatcher 실행 생략 (run_publish는 None 반환).
+    """
+    blog_id = blog_cfg.get("id", "?")
+    pipeline = blog_cfg.get("pipeline", "")
+    try:
+        from shared import candidate_availability, publish_error_events as _events
+        root_key = _open_root_key(_events, blog_cfg)
+        info = candidate_availability.check_availability(
+            blog_cfg, linked_incident_key=root_key,
+        )
+    except Exception as e:
+        logger.warning(f"AVAILABILITY: {blog_id} checker 오류 — 정규 schedule 1회 skip: {e}")
+        try:
+            from shared import publish_error_events as _events
+            _events.upsert_availability(
+                blog_id, pipeline=pipeline, resource_id=_resource_id(blog_cfg),
+                candidate_type=_candidate_type(blog_cfg), state="checker_error",
+                available_count=-1, reason=f"checker_error: {e}",
+            )
+        except Exception:
+            pass
+        return False
+
+    try:
+        from shared import publish_error_events as _events
+        _events.upsert_availability(
+            blog_id, pipeline=pipeline, resource_id=_resource_id(blog_cfg),
+            candidate_type=_candidate_type(blog_cfg), state=info.get("state", "unknown"),
+            available_count=info.get("available_count", 0), reason=info.get("reason", ""),
+            source_health_state=info.get("source_health_state", ""),
+            linked_incident_key=info.get("linked_incident_key", ""),
+            next_check_at=info.get("next_check_at", ""),
+        )
+    except Exception:
+        pass
+
+    if info.get("state") == "unknown":
+        return True  # 미지원 pipeline — 기존 실행 유지
+    if candidate_availability.is_blocked(info):
+        logger.info(
+            f"AVAILABILITY: {blog_id} state={info.get('state')} "
+            f"available={info.get('available_count')} — dispatcher 실행 생략"
+        )
+        return False
+    return True
+
+
+def _upsert_availability_healthy(blog_cfg) -> None:
+    """발행 성공 → state=healthy 기록 (PHASE 4: RECOVERING → HEALTHY)."""
+    try:
+        from shared import publish_error_events as _events
+        _events.upsert_availability(
+            blog_cfg.get("id", "?"), pipeline=blog_cfg.get("pipeline", ""),
+            resource_id=_resource_id(blog_cfg), candidate_type=_candidate_type(blog_cfg),
+            state="healthy", available_count=1, reason="published",
+        )
+    except Exception:
+        pass
+
+
 def run_publish(blog_id) -> bool | None:
-    """dispatcher를 subprocess로 실행 (quota 게이트 포함)"""
+    """dispatcher를 subprocess로 실행 (quota 게이트 포함)
+
+    반환: True=성공 / False=실패 / None=실행 생략 (availability gate 차단)
+    """
+    blog_cfg = None
     # 중앙 quota 체크: ledger 기준으로 초과 시 skip
     try:
         config = load_config()
@@ -266,6 +363,10 @@ def run_publish(blog_id) -> bool | None:
                 return True  # 성공으로 처리 (재시도 방지)
     except Exception as e:
         logger.warning(f"Quota check failed for {blog_id}: {e}")
+
+    # PR3: candidate availability gate — 후보 없으면 dispatcher 실행 금지
+    if blog_cfg is not None and not _availability_gate(blog_cfg):
+        return None
 
     logger.info("Publishing: " + blog_id)
     import json as _json
@@ -315,6 +416,8 @@ def run_publish(blog_id) -> bool | None:
         if parsed_success is not True:
             logger.error(f"[PUBLISH] {blog_id} dispatcher reported failure or missing JSON")
             return False
+        if blog_cfg is not None:
+            _upsert_availability_healthy(blog_cfg)
         return True
     except subprocess.TimeoutExpired:
         logger.exception(blog_id + " timeout (600s)")
@@ -371,7 +474,8 @@ def _drain_queue() -> None:
         logger.info(f"Queue executing: {blog_id} (remaining: {len(_publish_queue)})")
         try:
             _success = run_publish(blog_id)
-            _track_publish_result(blog_id, bool(_success))
+            if _success is not None:
+                _track_publish_result(blog_id, bool(_success))
         except Exception as e:
             logger.exception(f"Queue publish failed: {blog_id} - {e}")
             _track_publish_result(blog_id, False)
@@ -514,6 +618,10 @@ def _catchup_missed_inner() -> None:
             before = _events.get_open_incident(blog_id, "P01", reason="no_topics")
             before_occurrences = before.get("occurrence_count", 0) if before else 0
             success = run_publish(blog_id)
+            if success is None:
+                # availability gate 차단 (후보 없음) — 실패로 집계하지 않는다
+                logger.info(f"CATCHUP: {blog_id} 후보 없음 — 보충 생략")
+                continue
             _track_publish_result(blog_id, bool(success))
             if not success:
                 logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
@@ -816,6 +924,8 @@ def _run_car_refresh() -> None:
             # 신규 candidate 유입 → pending>0인 blog들의 retry block 해제
             if rows_inserted > 0:
                 _release_pending_blog_retry_states(_events)
+            # refresh 결과를 availability 상태에 반영 (pending>0 → recovering, pending=0 → waiting 유지)
+            _evaluate_car_availability_after_refresh(_events)
         else:
             detail = (stderr or stdout or "").strip()[:500]
             _events.record_resource_failure(
@@ -869,6 +979,63 @@ def _release_pending_blog_retry_states(_events) -> None:
             logger.info(f"CAR refresh 유입 복구 — {blog_id} retry block 해제 (pending>0)")
         except Exception as e:
             logger.warning(f"CAR refresh {blog_id} retry state 해제 실패: {e}")
+
+
+def _evaluate_car_availability_after_refresh(_events) -> None:
+    """refresh 성공 후 car blog availability 재평가 (PHASE 4 상태 전이).
+
+    - pending>0: waiting/blocked였던 blog는 recovering로 전이 (다음 발행 성공 시 healthy).
+    - pending=0: waiting_for_candidates 유지 (rows_inserted=0이어도 source는 정상).
+    - P33 root open이면 blocked_by_source 반영.
+    """
+    try:
+        config = load_config()
+        blogs = config.get("blogs", [])
+    except Exception as e:
+        logger.warning(f"AVAILABILITY: refresh 후 blog 목록 조회 실패: {e}")
+        return
+    try:
+        from shared import candidate_availability
+    except Exception as e:
+        logger.warning(f"AVAILABILITY: candidate_availability import 실패: {e}")
+        return
+    for blog in blogs:
+        if not isinstance(blog, dict) or blog.get("pipeline") != "car":
+            continue
+        blog_id = blog.get("id", "")
+        if not blog_id:
+            continue
+        try:
+            root_key = _open_root_key(_events, blog)
+            info = candidate_availability.check_availability(blog, linked_incident_key=root_key)
+            prev = _events.get_availability(
+                blog_id, pipeline="car",
+                resource_id=_resource_id(blog), candidate_type=_candidate_type(blog),
+            )
+            prev_state = (prev or {}).get("state")
+            if info.get("state") == "healthy":  # pending>0
+                # refresh 후 후보 복구 — waiting/blocked/recovering였으면 recovering 유지,
+                # 이미 healthy였으면 healthy 유지
+                new_state = (
+                    "recovering"
+                    if prev_state in ("waiting_for_candidates", "blocked_by_source", "recovering")
+                    else "healthy"
+                )
+            else:
+                new_state = info.get("state", "waiting_for_candidates")  # pending=0 → waiting 유지
+            _events.upsert_availability(
+                blog_id, pipeline="car", resource_id=_resource_id(blog),
+                candidate_type=_candidate_type(blog), state=new_state,
+                available_count=info.get("available_count", 0),
+                reason=info.get("reason", ""),
+                source_health_state=info.get("source_health_state", ""),
+                linked_incident_key=info.get("linked_incident_key", ""),
+                next_check_at=info.get("next_check_at", ""),
+            )
+            if new_state == "recovering":
+                logger.info(f"AVAILABILITY: {blog_id} refresh 후 후보 복구 — RECOVERING")
+        except Exception as e:
+            logger.warning(f"AVAILABILITY: {blog_id} refresh 후 평가 실패: {e}")
 
 
 def _run_stap_collector() -> None:

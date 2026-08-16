@@ -18,6 +18,7 @@ PublishMonitor은 dispatcher 결과 dict(`reason`) 또는 Detection 객체를 Pr
 
 import logging
 import os
+from dataclasses import replace
 
 from shared.problem_registry import (
     ProblemSpec,
@@ -156,6 +157,14 @@ class PublishMonitor:
                 "matched": detail[:200],
                 "action": spec.action,
             }
+            # PR3: reason별 presentation override (예: no_topics → INFO + quiet)
+            override = spec.reason_overrides.get(reason) if spec.reason_overrides else None
+            if override:
+                patch = {k: v for k, v in override.items() if hasattr(spec, k)}
+                spec = replace(spec, **patch)
+                for ctx_key in ("name_ko", "action"):
+                    if ctx_key in override:
+                        context[ctx_key] = override[ctx_key]
             return spec, context
 
         logger.warning(f"[problem_monitor] result 형식 미지원 (blog={blog_id}): {result}")

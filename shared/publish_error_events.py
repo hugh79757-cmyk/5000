@@ -72,6 +72,24 @@ CREATE TABLE IF NOT EXISTS resource_health (
     heartbeat_at TEXT,
     state TEXT NOT NULL DEFAULT 'unknown'
 );
+
+-- PR3: 후보 가용성 SSOT (candidate availability).
+-- key = blog_id + pipeline + resource_id + candidate_type. 중복 상태 저장소 없이
+-- ops.db 한 곳에서 healthy/waiting_for_candidates/blocked_by_source/recovering/unknown 관리.
+CREATE TABLE IF NOT EXISTS pipeline_availability (
+    blog_id TEXT NOT NULL,
+    pipeline TEXT NOT NULL DEFAULT '',
+    resource_id TEXT NOT NULL DEFAULT '',
+    candidate_type TEXT NOT NULL DEFAULT '',
+    state TEXT NOT NULL DEFAULT 'unknown',
+    available_count INTEGER NOT NULL DEFAULT 0,
+    reason TEXT NOT NULL DEFAULT '',
+    source_health_state TEXT NOT NULL DEFAULT '',
+    linked_incident_key TEXT NOT NULL DEFAULT '',
+    checked_at TEXT NOT NULL,
+    next_check_at TEXT NOT NULL DEFAULT '',
+    PRIMARY KEY (blog_id, pipeline, resource_id, candidate_type)
+);
 """
 
 _NEW_CODES: dict[str, dict[str, Any]] = {
@@ -657,6 +675,22 @@ def get_resource_health(resource_id: str) -> dict[str, Any] | None:
         return None
 
 
+def get_resource_health_rows() -> list[dict[str, Any]]:
+    """resource_health 전체 행 반환 — PR3 대시보드 refresh 상태 표시용. 읽기 전용."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            rows = conn.execute(
+                "SELECT * FROM resource_health ORDER BY resource_id"
+            ).fetchall()
+            return [_row_to_dict(r) for r in rows]
+        finally:
+            conn.close()
+    except Exception:
+        return []
+
+
 def get_open_incident(
     blog_id: str,
     problem_id: str,
@@ -709,20 +743,101 @@ def get_open_root_incident(resource_id: str) -> dict[str, Any] | None:
         return None
 
 
+def get_open_root_incidents() -> list[dict[str, Any]]:
+    """전체 open root incident 목록 (P33 source_refresh_stalled 등).
+
+    PR3 대시보드의 'OPEN ROOT INCIDENTS' 요약과 incident 화면에서 사용한다.
+    """
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            rows = conn.execute(
+                "SELECT * FROM publish_error_events "
+                "WHERE state = 'open' AND relation_type = 'root' "
+                "ORDER BY rowid DESC"
+            ).fetchall()
+            return [_row_to_dict(r) for r in rows]
+        finally:
+            conn.close()
+    except Exception:
+        return []
+
+
+def get_linked_open_events(root_incident_key: str) -> list[dict[str, Any]]:
+    """root incident에 연결된 open symptom/amplifier 목록.
+
+    root_incident_key가 일치하는 open 이벤트를 relation_type(amplifier 우선) 순으로
+    반환한다. legacy 행(relation_type NULL, incident_key 없음)은 제외된다.
+    """
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            rows = conn.execute(
+                "SELECT * FROM publish_error_events "
+                "WHERE state = 'open' AND root_incident_key = ? "
+                "ORDER BY CASE relation_type WHEN 'amplifier' THEN 0 ELSE 1 END, rowid",
+                (root_incident_key,),
+            ).fetchall()
+            return [_row_to_dict(r) for r in rows]
+        finally:
+            conn.close()
+    except Exception:
+        return []
+
+
+def get_retry_blocked_count() -> int:
+    """retry_blocked=1인 open incident 수 (catchup 차단 중인 blog 규모)."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            row = conn.execute(
+                "SELECT COUNT(*) FROM publish_error_events "
+                "WHERE state = 'open' AND retry_blocked = 1"
+            ).fetchone()
+            return int(row[0]) if row else 0
+        finally:
+            conn.close()
+    except Exception:
+        return 0
+
+
 def get_catchup_retry_state(blog_id: str) -> dict[str, Any] | None:
     """blog의 open no_topics symptom retry 상태 — 없으면 None.
 
     반환: incident_key / retry_count / retry_blocked / root_incident_key.
     ops.db SSOT 기반이라 scheduler 재시작 후에도 유지된다.
+
+    같은 blog에 open no_topics incident가 여러 개여도(legacy/신규 incident_key
+    분리로 retry_blocked가 행마다 다를 수 있음) retry_blocked=1인 행이 하나라도
+    있으면 그 행을 우선 반환한다. 정규 schedule 실패가 새 incident(retry_blocked=0)를
+    만들더라도 기존 차단이 무력화되지 않도록 blocked 행을 최신 행보다 우선한다.
     """
-    incident = get_open_incident(blog_id, "P01", reason="no_topics")
-    if not incident:
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            row = conn.execute(
+                "SELECT incident_key, retry_count, retry_blocked, root_incident_key "
+                "FROM publish_error_events "
+                "WHERE state = 'open' AND blog_id = ? AND problem_id = 'P01' "
+                "AND (reason = 'no_topics' OR reason = 'no_topic') "
+                "ORDER BY retry_blocked DESC, rowid DESC LIMIT 1",
+                (blog_id,),
+            ).fetchone()
+        finally:
+            conn.close()
+    except Exception:
+        return None
+    if not row:
         return None
     return {
-        "incident_key": incident.get("incident_key"),
-        "retry_count": incident.get("retry_count") or 0,
-        "retry_blocked": bool(incident.get("retry_blocked")),
-        "root_incident_key": incident.get("root_incident_key") or "",
+        "incident_key": row["incident_key"],
+        "retry_count": row["retry_count"] or 0,
+        "retry_blocked": bool(row["retry_blocked"]),
+        "root_incident_key": row["root_incident_key"] or "",
     }
 
 
@@ -970,3 +1085,118 @@ def release_blog_retry_state(blog_id: str) -> bool:
     except Exception:
         ok = False
     return ok
+
+
+# ─── PR3: pipeline_availability (candidate availability SSOT) ───
+
+_AVAILABILITY_STATES = (
+    "healthy", "waiting_for_candidates", "blocked_by_source",
+    "recovering", "unknown", "checker_error",
+)
+
+
+def upsert_availability(
+    blog_id: str,
+    pipeline: str = "",
+    resource_id: str = "",
+    candidate_type: str = "",
+    state: str = "unknown",
+    available_count: int = 0,
+    reason: str = "",
+    source_health_state: str = "",
+    linked_incident_key: str = "",
+    next_check_at: str = "",
+) -> bool:
+    """pipeline_availability upsert — 반복 호출해도 행은 1개 유지 (멱등)."""
+    if state not in _AVAILABILITY_STATES:
+        state = "unknown"
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            conn.execute(
+                """
+                INSERT INTO pipeline_availability (
+                    blog_id, pipeline, resource_id, candidate_type, state,
+                    available_count, reason, source_health_state,
+                    linked_incident_key, checked_at, next_check_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(blog_id, pipeline, resource_id, candidate_type) DO UPDATE SET
+                    state = excluded.state,
+                    available_count = excluded.available_count,
+                    reason = excluded.reason,
+                    source_health_state = excluded.source_health_state,
+                    linked_incident_key = excluded.linked_incident_key,
+                    checked_at = excluded.checked_at,
+                    next_check_at = excluded.next_check_at
+                """,
+                (
+                    blog_id, pipeline, resource_id, candidate_type, state,
+                    int(available_count), reason, source_health_state,
+                    linked_incident_key,
+                    datetime.now(timezone.utc).isoformat(), next_check_at,
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        return False
+    return True
+
+
+def get_availability(
+    blog_id: str,
+    pipeline: str = "",
+    resource_id: str = "",
+    candidate_type: str = "",
+) -> dict | None:
+    """pipeline_availability 1건 조회 (없으면 None)."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            row = conn.execute(
+                "SELECT * FROM pipeline_availability "
+                "WHERE blog_id = ? AND pipeline = ? AND resource_id = ? AND candidate_type = ?",
+                (blog_id, pipeline, resource_id, candidate_type),
+            ).fetchone()
+        finally:
+            conn.close()
+    except Exception:
+        return None
+    return dict(row) if row else None
+
+
+def get_availability_all() -> list[dict]:
+    """전체 pipeline_availability 행 — 대시보드/API용 (blog_id 순)."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            rows = conn.execute(
+                "SELECT * FROM pipeline_availability ORDER BY blog_id"
+            ).fetchall()
+        finally:
+            conn.close()
+    except Exception:
+        return []
+    return [dict(r) for r in rows]
+
+
+def get_availability_summary() -> dict[str, int]:
+    """상태별 행 수 요약 — healthy/waiting/blocked/recovering/unknown/checker_error."""
+    summary = {s: 0 for s in _AVAILABILITY_STATES}
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            for row in conn.execute(
+                "SELECT state, COUNT(*) AS c FROM pipeline_availability GROUP BY state"
+            ):
+                summary[row["state"]] = row["c"]
+        finally:
+            conn.close()
+    except Exception:
+        pass
+    return summary

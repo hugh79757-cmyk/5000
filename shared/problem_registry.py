@@ -38,6 +38,10 @@ class ProblemSpec:
     summary_human: str = ""
     summary_llm: str = ""
     how_to_add: str = ""
+    # PR3 (candidate state): reason별 presentation override —
+    # 같은 problem_id여도 reason에 따라 severity/threshold/alert_template를 재정의.
+    # 예: no_topics(정상 후보 소진) → INFO + quiet (MAJOR 알림 금지).
+    reason_overrides: dict = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -200,6 +204,22 @@ _register(ProblemSpec(
     ),
     action="데이터 수집 소스/API 상태 확인 후 재발행",
     playbook_ref="ERROR_PLAYBOOKS.md#p01",
+    # PR3: no_topics는 정상 후보 소진(WAITING) — MAJOR 반복 알림 금지, INFO + quiet
+    reason_overrides={
+        "no_topics": {
+            "name_ko": "발행 후보 대기",
+            "severity": "INFO",
+            "threshold": "quiet",
+            "action": "refresh 상태 감시 (수동 조치 불필요)",
+            "alert_template": (
+                "ℹ️ [INFO] 발행 후보 대기\n"
+                "블로그: {blog_id}\n"
+                "문제: {problem_id} — {name_ko}\n"
+                "상태: 현재 발행 가능한 후보가 없어 다음 데이터 보충(refresh)을 기다리는 중\n"
+                "조치: {action}"
+            ),
+        },
+    },
 ))
 
 _register(ProblemSpec(

@@ -63,6 +63,7 @@ def load_problems_yaml(path: str = DEFAULT_PROBLEMS_YAML) -> dict:
                 summary_human=item.get("summary_human", ""),
                 summary_llm=item.get("summary_llm", ""),
                 how_to_add=item.get("how_to_add", ""),
+                reason_overrides=item.get("reason_overrides", {}) or {},
             )
         except Exception as exc:
             logger.warning("[registry_loader] problem 항목 파싱 실패 %s: %s", code, exc)
@@ -70,12 +71,26 @@ def load_problems_yaml(path: str = DEFAULT_PROBLEMS_YAML) -> dict:
 
 
 def apply_problem_yaml(path: str = DEFAULT_PROBLEMS_YAML) -> int:
-    """PROBLEM_REGISTRY 를 YAML 우선 오버라이드. 반환: 오버라이드/등록된 코드 수."""
+    """PROBLEM_REGISTRY 를 YAML 우선 오버라이드. 반환: 오버라이드/등록된 코드 수.
+
+    PR3: YAML spec 이 reason_overrides 를 갖고 있지 않으면 코드 dict 의 reason_overrides 를
+    병합한다 — no_topics(WAITING) 같은 코드 전용 presentation override 가 YAML 오버라이드로
+    유실되지 않도록 한다 (YAML 에 명시하면 YAML 값이 우선).
+    """
+    from dataclasses import replace
+
     from shared.problem_registry import PROBLEM_REGISTRY
 
     specs = load_problems_yaml(path)
     count = 0
     for code, spec in specs.items():
+        existing = PROBLEM_REGISTRY.get(code)
+        if (
+            existing is not None
+            and not spec.reason_overrides
+            and getattr(existing, "reason_overrides", None)
+        ):
+            spec = replace(spec, reason_overrides=existing.reason_overrides)
         PROBLEM_REGISTRY[code] = spec  # 코드 dict 있든 없든 YAML 우선 (신규 P33 등 확장)
         count += 1
     return count

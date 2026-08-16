@@ -1463,6 +1463,9 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                     # {blog_id}를 이미 증분 — 이중 증분을 피하고 확장 키만 동기화 (W-1).
                     _increment_extended_failure_count(blog_id, _spec.problem_id)
                     _consec = _get_failure_counts().get(blog_id, 0)
+                elif reason in ("no_topics", "no_topic"):
+                    # PR3: no_topics는 정상 후보 소진(WAITING) — failure_count 증분 금지
+                    _consec = 0
                 else:
                     _consec = _increment_failure_count(blog_id, _spec.problem_id)
                 logger.warning(
@@ -1476,7 +1479,7 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                     try:
                         from shared import publish_error_events as _events
                         _events.record_publish_error(
-                            blog_id, "result_parse",
+                            blog_id, reason,
                             str(result.get("stderr") or result.get("detail") or reason),
                             reason=reason, problem_id="P01", relation_type="symptom",
                             retryable=False,
