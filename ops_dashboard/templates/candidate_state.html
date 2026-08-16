@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<p>발행 후보 가용성 상태 — pending 후보가 없어도 오류가 아니라 <em>대기(WAITING)</em>로 구분합니다.</p>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-num">{{ summary.get('healthy', 0) }}</div><div class="stat-label">HEALTHY</div></div>
+  <div class="stat-card"><div class="stat-num">{{ summary.get('waiting_for_candidates', 0) }}</div><div class="stat-label">WAITING</div></div>
+  <div class="stat-card"><div class="stat-num">{{ summary.get('blocked_by_source', 0) }}</div><div class="stat-label">BLOCKED</div></div>
+  <div class="stat-card"><div class="stat-num">{{ summary.get('recovering', 0) }}</div><div class="stat-label">RECOVERING</div></div>
+  <div class="stat-card"><div class="stat-num">{{ summary.get('unknown', 0) }}</div><div class="stat-label">UNKNOWN</div></div>
+  <div class="stat-card"><div class="stat-num">{{ roots|length }}</div><div class="stat-label">OPEN ROOT INCIDENTS</div></div>
+  <div class="stat-card"><div class="stat-num">{{ retry_blocked }}</div><div class="stat-label">RETRY BLOCKED</div></div>
+</div>
+
+<h2>블로그 발행 상태</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+  <th>블로그</th><th>발행상태</th><th>후보 수</th><th>source 상태</th>
+  <th>마지막 성공</th><th>다음 검사</th><th>근본 장애</th><th>이유</th>
+</tr></thead>
+<tbody>
+{% set blog_avail = {} %}
+{% for row in availability %}
+  {% set _ = blog_avail.__setitem__(row.blog_id, row) %}
+{% endfor %}
+{% for blog in blogs %}
+  {% set av = blog_avail.get(blog.id) %}
+  <tr>
+    <td><a href="/blog/{{ blog.id }}">{{ blog.id }}</a></td>
+    <td>
+      {% if not av %}<span class="state-unknown">UNKNOWN (미검사)</span>
+      {% elif av.state == 'healthy' %}<span class="state-healthy">HEALTHY</span>
+      {% elif av.state == 'waiting_for_candidates' %}<span class="state-waiting">WAITING — 후보 0 · 다음 refresh 대기</span>
+      {% elif av.state == 'blocked_by_source' %}<span class="state-blocked">BLOCKED — source 장애</span>
+      {% elif av.state == 'recovering' %}<span class="state-recovering">RECOVERING</span>
+      {% elif av.state == 'checker_error' %}<span class="state-error">CHECKER ERROR</span>
+      {% else %}<span class="state-unknown">{{ av.state }}</span>{% endif %}
+    </td>
+    <td>{{ av.available_count if av else '-' }}</td>
+    <td>{{ av.source_health_state or '-' }}</td>
+    <td>{{ av.checked_at[:16] if av and av.checked_at else '-' }}</td>
+    <td>{{ av.next_check_at[:16] if av and av.next_check_at else '-' }}</td>
+    <td>
+      {% if av and av.linked_incident_key %}
+        <a href="/issues">{{ av.linked_incident_key[:12] }}…</a>
+      {% else %}-{% endif %}
+    </td>
+    <td>{{ av.reason or '-' }}</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table></div>
+
+<h2>OPEN ROOT INCIDENTS (P33 등 근본 장애)</h2>
+{% if roots %}
+{% for root in roots %}
+<div class="incident-card">
+  <p><strong>{{ root.problem_id }} — {{ root.reason }}</strong>
+    <span class="state-blocked">ROOT</span>
+    ({{ root.incident_key[:16] }}…)</p>
+  <p>발생: {{ root.occurred_at }} · 마지막: {{ root.last_seen_at }} · occurrence: {{ root.occurrence_count }} ·
+     retry_blocked: {{ root.retry_blocked }} · resource: {{ root.resource_id }}</p>
+  <p>detail: {{ root.detail_redacted }}</p>
+</div>
+{% endfor %}
+{% else %}
+<p>열린 근본 장애 없음.</p>
+{% endif %}
+
+<h2>resource health (refresh)</h2>
+<div class="table-wrap"><table>
+<thead><tr>
+  <th>resource</th><th>state</th><th>last_started</th><th>last_completed</th>
+  <th>last_success</th><th>last_failure</th><th>rows_inserted</th><th>duration(초)</th><th>error</th>
+</tr></thead>
+<tbody>
+{% for r in resources %}
+<tr>
+  <td>{{ r.resource_id }}</td>
+  <td>{{ r.state }}</td>
+  <td>{{ r.last_started_at or '-' }}</td>
+  <td>{{ r.last_completed_at or '-' }}</td>
+  <td>{{ r.last_success_at or '-' }}</td>
+  <td>{{ r.last_failure_at or '-' }}</td>
+  <td>{{ r.rows_inserted or 0 }}</td>
+  <td>{{ r.duration_seconds or '-' }}</td>
+  <td>{{ r.last_error_reason or '-' }}</td>
+</tr>
+{% else %}
+<tr><td colspan="9">resource_health 기록 없음 — 다음 daily_refresh(06:30) 후 표시됩니다.</td></tr>
+{% endfor %}
+</tbody>
+</table></div>
+
+<p class="muted">WAITING은 정상 조건 미충족(후보 소진) 상태이며 수동 조치가 필요하지 않습니다. refresh 후 후보가 생기면 자동으로 RECOVERING → HEALTHY로 전이됩니다.</p>
+{% endblock %}

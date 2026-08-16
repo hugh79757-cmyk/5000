@@ -436,6 +436,32 @@ def _register_human_routes(app: Flask) -> None:
             events=get_publish_error_events(conn, limit=200),
         )
 
+    @app.route("/candidate-state")
+    @require_auth
+    def candidate_state():
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import (
+            get_availability_summary,
+            get_open_root_incidents,
+            get_pipeline_availability,
+            get_resource_health_all,
+            get_retry_blocked_count,
+        )
+        from ops_dashboard.db import get_all_blogs
+        blogs = get_all_blogs(conn)
+        return render_template(
+            "candidate_state.html",
+            title="Candidate State",
+            active="candidate-state",
+            blogs=blogs,
+            availability=get_pipeline_availability(),
+            summary=get_availability_summary(),
+            roots=get_open_root_incidents(),
+            resources=get_resource_health_all(),
+            retry_blocked=get_retry_blocked_count(),
+        )
+
     @app.route("/standards")
     @require_auth
     def standards():
@@ -570,6 +596,33 @@ def _register_api_routes(app: Flask) -> None:
                 severity=request.args.get("severity", ""),
                 state=request.args.get("state", ""),
             ),
+        })
+
+    @app.route("/api/candidate-state")
+    @require_auth
+    def api_candidate_state():
+        """PR3 — 후보 가용성 상태 (SSOT: ops.db pipeline_availability).
+
+        응답 구조(하위 호환: 기존 필드에 추가만 함):
+          summary: state별 COUNT
+          availability: pipeline_availability 행 목록
+          roots: open root incident 목록 (P33 등)
+          resources: resource_health 행 목록
+          retry_blocked: retry_blocked=1 open incident 수
+        """
+        from ops_dashboard.db import (
+            get_availability_summary,
+            get_open_root_incidents,
+            get_pipeline_availability,
+            get_resource_health_all,
+            get_retry_blocked_count,
+        )
+        return jsonify({
+            "summary": get_availability_summary(),
+            "availability": get_pipeline_availability(),
+            "roots": get_open_root_incidents(),
+            "resources": get_resource_health_all(),
+            "retry_blocked": get_retry_blocked_count(),
         })
 
     @app.route("/api/maintenance/checklist", methods=["POST"])

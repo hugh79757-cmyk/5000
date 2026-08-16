@@ -2401,3 +2401,43 @@ def set_pending_fix_status(
     )
     conn.commit()
     return cur.rowcount > 0
+
+
+# ---------------------------------------------------------------------------
+# PR3 — candidate availability (SSOT: shared/publish_error_events + ops.db)
+# ---------------------------------------------------------------------------
+
+def get_pipeline_availability() -> list[dict]:
+    """pipeline_availability 전체 행 (PR3 대시보드 블로그 목록용)."""
+    from shared.publish_error_events import get_availability_all
+    return get_availability_all()
+
+
+def get_availability_summary() -> dict:
+    """state별 COUNT (HEALTHY/WAITING/BLOCKED/RECOVERING/UNKNOWN)."""
+    from shared.publish_error_events import get_availability_summary
+    return get_availability_summary()
+
+
+def get_open_root_incidents() -> list[dict]:
+    """open root incident 전체 (P33 등)."""
+    from shared.publish_error_events import get_open_root_incidents
+    return get_open_root_incidents()
+
+
+def get_linked_open_events(root_incident_key: str) -> list[dict]:
+    """root에 연결된 open symptom/amplifier."""
+    from shared.publish_error_events import get_linked_open_events
+    return get_linked_open_events(root_incident_key)
+
+
+def get_retry_blocked_count() -> int:
+    """retry_blocked=1 open incident 수."""
+    from shared.publish_error_events import get_retry_blocked_count
+    return get_retry_blocked_count()
+
+
+def get_resource_health_all() -> list[dict]:
+    """resource_health 전체 행 (refresh 상태 표시용)."""
+    from shared.publish_error_events import get_resource_health_rows
+    return get_resource_health_rows()
