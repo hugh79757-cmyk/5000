@@ -451,4 +451,29 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 - `pytest` 27실패는 사전 baseline(test_alert_wiring.py 누락 schedule 모듈), Phase 73 무관.
 - AGENTS.md 커밋(b547c596d)에 사전 working-tree condensation(1246행 삭제)가 함께 반영됨 — §1 Publisher-ID 매핑은 global `/Users/twinssn/.config/opencode/AGENTS.md`에 위치(본 repo 파일엔 본래 없음), SC-8 영향 없음.
 
-*Last updated: 2026-08-16 - Phase 73 실행 완료 (SC-1/2/3/5/7/8 적용, SC-4 skip, SC-7 이월).*
+---
+
+## Phase 74: Branch DB Resilience & Restore Framework (2026-08-16)
+
+**Status:** ✅ Executed (7/7 SC, 4 Wave) — 전부 additive/non-destructive, 커밋 완료, push 안 함, DB 파일 변경 0건, wrangler deploy 안 함.
+
+**커밋:**
+- W1 `2b5ebd240`: shared/db.py `connect_branch_db(allow_create=False)`+`BranchDbMissingError`(additive) + stock/fetcher.py(5 sites)·rap/pipeline.py(:81-82) 크래시 경로 가드 교체. stock↔stock_metrics name-collision(F1) 양등록 해소.
+- W2 `59e5f6e36`: master_backup.py DB_TARGETS["5000"]에 senior/course/gap 3종 추가(14→17) + DB_ATTRIBUTION.md(26개 귀속, class-A 미백업 0).
+- W3 `84c544f05`: BRANCH_DB_RUNBOOK.md(등급 A/B/C + destructive-ops 4단계 + content.db source='' 보존 절차).
+- W4 `45f328a1e`: tests/test_branch_db_guard.py(5passed) + crash-read 사이트 0 입증.
+
+**검증:**
+- 가드: 누락 파일/미등록 branch → BranchDbMissingError raise (테스트 통과). legacy get_connection/get_db_path 보존.
+- 백업: class-A 미백업 0 (senior/course/gap 추가). 26 DB 전수 귀속(backed 14 / self-heal 6 / orphan 6).
+- 런북: source='' 8회 명시 + A/B/C + 4단계 통합.
+- crash-read sweep: stock/fetcher.py·rap/pipeline.py migrated sites unprotected sqlite3.connect 0건.
+- pytest: 신규 5passed 추가, 사전 27실패 동일(무관).
+
+**잔존 위험 / 이월:**
+- RETAIN_DAYS=7(class-B 보존기간 부족 가능) — 런북 명시, 별도 세션.
+- 재수집 소스 생존 불확실(course/gap/travel-en→A→B 전이) — 런북 명시.
+- 236개 무방어 connect 전수 리팩터는 Non-Goal(본 phase는 최고위험 2곳만). 나머지 crash-safe 경로는 문서화.
+- SC-7 본문 재조합(Phase 73 RAP C03)과 별개 — Phase 74 scope 아님.
+
+*Last updated: 2026-08-16 - Phase 73(SC-4 적용 완료) + Phase 74 실행 완료 (7/7 SC, additive/non-destructive).*
