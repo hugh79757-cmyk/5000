@@ -69,7 +69,7 @@ Blowfish의 sticky TOC (`showTableOfContents = true`)는 `order-first lg:ms-auto
 
 ### 3-3. layouts/partials/extend_head.html (GA4 + 모바일 보정)
 
-> underscore(`_`) 버전. hyphen(`-`) 버전과 **별도 파일**로 존재.
+> underscore(`_`) 버전은 Blowfish가 **로드하지 않는다** (DEAD/legacy). GA4 + 모바일 보정 CSS는 `extend-head.html`(hyphen)에 함께 둔다.
 
 ```html
 <!-- GA4 -->
@@ -105,8 +105,8 @@ Blowfish의 sticky TOC (`showTableOfContents = true`)는 `order-first lg:ms-auto
 </style>
 ```
 
-> **두 파일(extend-head.html + extend_head.html) 모두 Blowfish가 로드한다.**
-> hyphen 버전: adsense.js 로드. underscore 버전: GA4 + 모바일 CSS 보정.
+> **Blowfish는 `extend-head.html`(hyphen) 하나만 로드한다** (`layouts/partials/head.html`의 `partialCached "extend-head.html"`).
+> `extend_head.html`(underscore)은 **로드되지 않는다(DEAD)** — 생성하지 말 것. GA4 + 모바일 보정 CSS는 `extend-head.html` 안에 함께 둔다.
 
 ---
 
@@ -345,7 +345,7 @@ html.dark ins.adsbygoogle {
 - [ ] `hugo.toml`: `showTableOfContents = false` 설정
 - [ ] `hugo.toml`: `[params.advertisement]` 섹션에 `adsense`, `inArticleSlot`, `topSlot` 정의
 - [ ] `layouts/partials/extend-head.html` 생성 (adsbygoogle.js 즉시 로드)
-- [ ] `layouts/partials/extend_head.html` 생성 (GA4 + 모바일 보정 CSS)
+- [ ] `extend_head.html`(underscore)은 **생성 금지** — Blowfish가 로드하지 않음(DEAD). GA4 + 모바일 보정 CSS는 `extend-head.html`(hyphen)에 포함
 - [ ] `layouts/partials/adsense/top.html` 생성 (바깥 래퍼 div + div 밖 push)
 - [ ] `layouts/partials/adsense/in-article.html` 생성 (fluid+in-article + div 밖 push)
 - [ ] `layouts/_default/single.html` 오버라이드 (헤더 `top.html` 단일 광고 + 본문 H2 분할 인젝션)
