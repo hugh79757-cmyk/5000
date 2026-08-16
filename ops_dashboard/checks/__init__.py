@@ -130,3 +130,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import rap_leak  # noqa: F401
+except ImportError:
+    pass
+
