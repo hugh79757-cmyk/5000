@@ -1264,9 +1264,15 @@ def _run_inner(cfg, blog_id, daily_quota):
             ]
             out = []
             lines = md.split("\n")
+            _skip_img_lines_until = 0   # 상품 figure 삽입 후 그 h3 구간의 AI 마크다운 이미지 줄 스킵 경계
             i = 0
             while i < len(lines):
                 ln = lines[i]
+                # 방식A/B 매칭 성공으로 figure를 삽입한 h3 구간 안의 순수 마크다운 이미지 줄(![..](..)) 제거
+                # → 상품당 figure 1장만 남김 (AI 이미지 + pipeline figure 이중 삽입 방지, CQ08)
+                if i < _skip_img_lines_until and re.match(r"^\s*!\[[^\]]*\]\([^)]*\)\s*$", ln):
+                    i += 1
+                    continue
                 out.append(ln)
                 m = re.match(r"^###\s+(.*)", ln)
                 if m:
@@ -1287,6 +1293,7 @@ def _run_inner(cfg, blog_id, daily_quota):
                                     url = img
                                     break
                     if url:
+                        _skip_img_lines_until = j   # 이 h3 구간 내 이미지 줄은 위에서 스킵
                         out.append("")
                         out.append(f'{{{{< figure src="{url}" alt="{title}" >}}}}')
                         out.append("")

@@ -124,6 +124,26 @@ def _analyze(html: str) -> list[str]:
         if missing_desc:
             issues.append(f"[CQ07] 상품 설명 문단 소실({missing_desc}개)")
 
+    # 8) 상품당 이미지 1장 규격 — 상품 섹션(룰6과 동일 범위) 내 각 h3 블록에 이미지가 2장 이상이면 위반
+    #    (figure 숏코드는 <figure><img>로 렌더되므로 <img> 개수 = 실제 이미지 수. gallery는
+    #     figure 나열로 렌더되어 자연히 2장 이상으로 잡힘. FAQ h3는 섹션 밖이라 대상 외)
+    m2 = re.search(r"상품별 상세 비교", html)
+    if m2:
+        seg = html[m2.start():]
+        nxt = re.search(r"<h2", seg[10:])            # 다음 h2 전까지가 상품 섹션
+        if nxt:
+            seg = seg[:nxt.start()+10]
+        h3s = list(re.finditer(r"<h3[^>]*>.*?</h3>", seg, re.S))   # h3 전체 요소(제목 포함)
+        max_imgs = 0
+        for _i, _hm in enumerate(h3s):
+            _end = h3s[_i+1].start() if _i+1 < len(h3s) else len(seg)
+            _blk = seg[_hm.end():_end]               # </h3> 다음 ~ 다음 h3(또는 섹션 끝) 구간
+            _cnt = len(re.findall(r"<img\b", _blk))
+            if _cnt > max_imgs:
+                max_imgs = _cnt
+        if max_imgs > 1:
+            issues.append(f"[CQ08] 상품 이미지 중복(상품당 {max_imgs}장, 규격 1장)")
+
     return issues
 
 

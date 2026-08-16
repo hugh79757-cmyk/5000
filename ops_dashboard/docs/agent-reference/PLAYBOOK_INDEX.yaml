@@ -1138,3 +1138,18 @@ codes:
   - docs/CONTENT-QUALITY-RUNBOOK.md CQ07 참조
   - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
   needs_human: false
+- code: CQ08
+  playbook_ref: ERROR_PLAYBOOKS.md#cq08
+  name_ko: 상품 이미지 중복 (상품당 N장, 규격 1장)
+  severity: MAJOR
+  family: content_quality
+  hook: post_publish
+  automation_level: full_auto
+  one_line_action: 이중삽입 제거 — AI가 쓴 마크다운 이미지 + 후처리(5) figure가 같은 상품에 중복. 방식A/B 매칭 성공 시 h3 구간 내 순수 마크다운 이미지 줄 제거 → 상품당 figure 1장만. url 미매칭 폴백 시 AI 이미지 유지(0장 방지)
+  target_files:
+  - path: pipelines/curation/pipeline.py
+    hint: _normalize_product_blocks (5) — _skip_img_lines_until로 매칭 성공 h3 구간의 AI 마크다운 이미지 줄 스킵
+  verify:
+  - docs/CONTENT-QUALITY-RUNBOOK.md CQ08 참조
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: false
