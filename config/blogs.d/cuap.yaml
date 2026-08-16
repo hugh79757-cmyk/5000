@@ -31,9 +31,7 @@ blogs:
   name: 유아용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
-  maintenance_status: isolated
-  cooldown_until: '2026-08-15'
+  status: active
   daily_quota: 5
   domain: baby.informationhot.kr
   cf_project: baby-hugo
@@ -201,7 +199,7 @@ blogs:
   name: 캠핑/아웃도어 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 5
   domain: camping.informationhot.kr
   cf_project: camping-hugo
@@ -222,7 +220,7 @@ blogs:
   name: 안마의자 헬스케어가전 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 1
   domain: massage.informationhot.kr
   cf_project: massage-hugo
@@ -241,7 +239,7 @@ blogs:
   name: 자동차용품 전자기기 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 1
   domain: car.informationhot.kr
   cf_project: car-hugo
@@ -260,7 +258,7 @@ blogs:
   name: 프리미엄 대형가전 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 1
   domain: homeappliance.informationhot.kr
   cf_project: homeappliance-hugo
@@ -279,7 +277,7 @@ blogs:
   name: 골프용품 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 1
   domain: golf.informationhot.kr
   cf_project: golf-hugo
@@ -298,7 +296,7 @@ blogs:
   name: 전기자전거 자전거 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 1
   domain: bike.informationhot.kr
   cf_project: bike-hugo
