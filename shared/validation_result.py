@@ -14,6 +14,7 @@ ValidationResult 계약으로 묶는 어댑터 계층. report-only 기본값(blo
 from dataclasses import dataclass, field
 
 from shared.pipeline_result import _sanitize_evidence
+from shared.problem_registry import lookup_reason
 
 
 @dataclass
@@ -57,6 +58,43 @@ class ValidationResult:
                 for i in self.issues
             ],
             "reason": "" if self.passed else "validation_failed",
+        }
+
+    def to_incident(self, reason_key: str, stage: str) -> dict:
+        """incident 계약 — reason/stage/detail 3요소 + pcode 채움 경로.
+
+        - reason: reason_key (등록된 reason 어휘 폐쇄 유지)
+        - stage: 안정 stage 문자열 (호출 측이 명시)
+        - detail: issues[:5] 를 "; " 로 join 후 _sanitize_evidence (≤500자, 비밀 마스킹)
+        - pcode: lookup_reason(reason_key) → problem_id. 미등록이면 "" — never raise.
+        실제 incident 호출(Telegram 등)은 Phase 63. 이 메서드는 dict 생성 계약만 제공.
+        """
+        spec = lookup_reason(reason_key)
+        pcode = spec.problem_id if spec else ""
+        detail = _sanitize_evidence(
+            "; ".join(f"[{i.severity}] {i.msg}" for i in self.issues[:5])
+        )
+        return {"reason": reason_key, "stage": stage, "detail": detail, "pcode": pcode}
+
+    def as_pipeline_extra(self) -> dict:
+        """dispatcher 정규화(:1321-1333) extra passthrough 계약.
+
+        {"validation": {"passed", "issues": [{severity,check,msg}...],
+                        "scope", "family", "block"}}
+        success/reason 최상위 키 불변 — report-only(block=False)는 절대
+        차단 상태(blocked/publish_blocked)로 매핑하지 않는다.
+        """
+        return {
+            "validation": {
+                "passed": self.passed,
+                "issues": [
+                    {"severity": i.severity, "check": i.check, "msg": i.msg}
+                    for i in self.issues
+                ],
+                "scope": self.scope,
+                "family": self.family,
+                "block": self.block,
+            }
         }
 
 
