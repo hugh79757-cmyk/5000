@@ -520,10 +520,32 @@ def get_publish_error_summary(conn: sqlite3.Connection) -> dict[str, Any]:
     return {"total": total, "open": open_count, "by_problem": by_problem}
 
 
+def get_publish_error_events_count(
+    conn: sqlite3.Connection,
+    *,
+    blog_id: str = "",
+    severity: str = "",
+    state: str = "",
+) -> int:
+    """동일 필터의 전체 건수 (pagination total 산출용, 읽기 전용)."""
+    ensure_schema(conn)
+    where: list[str] = []
+    params: list[Any] = []
+    for column, value in (("blog_id", blog_id), ("severity", severity), ("state", state)):
+        if value:
+            where.append(f"{column} = ?")
+            params.append(value)
+    sql = "SELECT COUNT(*) FROM publish_error_events"
+    if where:
+        sql += " WHERE " + " AND ".join(where)
+    return conn.execute(sql, params).fetchone()[0]
+
+
 def get_publish_error_events(
     conn: sqlite3.Connection,
     *,
     limit: int = 100,
+    offset: int = 0,
     blog_id: str = "",
     severity: str = "",
     state: str = "",
@@ -538,8 +560,9 @@ def get_publish_error_events(
     sql = "SELECT * FROM publish_error_events"
     if where:
         sql += " WHERE " + " AND ".join(where)
-    sql += " ORDER BY occurred_at DESC LIMIT ?"
+    sql += " ORDER BY occurred_at DESC LIMIT ? OFFSET ?"
     params.append(max(1, min(int(limit), 500)))
+    params.append(max(0, int(offset)))
     return [dict(row) for row in conn.execute(sql, params).fetchall()]
 
 
