@@ -1491,11 +1491,14 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                 if reason in ("no_topics", "no_topic"):
                     try:
                         from shared import publish_error_events as _events
+                        # state stays 'open' so incident_key partial-index merge
+                        # works; WAITING is represented by reason='no_topics'+P01
+                        # (Dashboard presentation of WAITING is out of scope here).
                         _events.record_publish_error(
                             blog_id, reason,
                             str(result.get("stderr") or result.get("detail") or reason),
                             reason=reason, problem_id="P01", relation_type="symptom",
-                            retryable=False,
+                            retryable=False, pipeline=cfg.get("pipeline", ""),
                         )
                     except Exception:
                         # SSOT 기록 실패가 발행 흐름을 막지 않음 (조용히 통과)
