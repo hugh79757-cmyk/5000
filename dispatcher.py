@@ -1320,6 +1320,19 @@ def dispatch(blog_id):
             result = {"success": True, "reason": result}
     elif isinstance(result, bool):
         result = {"success": result, "reason": "pipeline_returned_false" if not result else "pipeline_success"}
+
+    # ── PR-CAP-1: backward-compatible Pipeline Result Contract enrichment ──
+    # Adds `pipeline_status` to the result dict only. `success`/`reason` and all
+    # downstream control flow (failure_count, cooldown, DB writes, deploy) are
+    # UNCHANGED. Wrapped so a contract import failure is a safe no-op.
+    try:
+        from shared.pipeline_result import from_legacy as _from_legacy_result
+        _contract_ctx = {"pipeline": cfg.get("pipeline", ""), "blog": blog_id, "stage": ""}
+        _contract = _from_legacy_result(result, _contract_ctx)
+        result["pipeline_status"] = _contract.status.value
+    except Exception:
+        pass
+
     # 성공/실패 기록
     if result.get("success"):
         _record_ledger(blog_id)
