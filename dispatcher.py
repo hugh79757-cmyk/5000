@@ -548,6 +548,17 @@ def _run_pipeline(cfg):
     return _resolve_pipeline(blog_id, pipeline, cfg)
 
 
+def _resolved_pipeline_for(blog_id: str, cfg: dict) -> str:
+    """실제 실행된 pipeline 값 (cfg의 빈 fallback 대신 사용).
+
+    - STAP 블로그는 cfg.pipeline("stock")이 아니라 실제 실행 모듈 파이프라인
+      이름(STAP_PIPELINE_MAP 값, 예: sector-hugo → "sector")을 반환.
+    - 그 외 블로그는 cfg의 pipeline (CAP car 블로그는 "car").
+    - 어느 쪽에도 없으면 "" (해당 블로그에 해석 가능한 pipeline 부재).
+    """
+    return STAP_PIPELINE_MAP.get(blog_id) or cfg.get("pipeline") or ""
+
+
 
 # ─── ETAP 중앙 빌드/배포 ───────────────────────────────────
 from shared.paths import ETAP_ROOT as _ETAP_ROOT, HUGO_PATH as _HUGO_PATH, WRANGLER_PATH as _WRANGLER_PATH
@@ -1491,14 +1502,17 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                 if reason in ("no_topics", "no_topic"):
                     try:
                         from shared import publish_error_events as _events
-                        # state stays 'open' so incident_key partial-index merge
-                        # works; WAITING is represented by reason='no_topics'+P01
-                        # (Dashboard presentation of WAITING is out of scope here).
+                        # state stays 'open' — incident lifecycle이므로 유지
+                        # (incident_key partial-index merge 보존, 스키마 변경 없음).
+                        # reason='no_topics' 유지. WAITING 경계: M4 Dashboard가
+                        # (reason='no_topics' + problem_id='P01' + retryable=0)을
+                        # execution status=WAITING_FOR_CANDIDATES로 표시한다.
+                        # Dashboard 구현은 본 브랜치 범위 밖.
                         _events.record_publish_error(
                             blog_id, reason,
                             str(result.get("stderr") or result.get("detail") or reason),
                             reason=reason, problem_id="P01", relation_type="symptom",
-                            retryable=False, pipeline=cfg.get("pipeline", ""),
+                            retryable=False, pipeline=_resolved_pipeline_for(blog_id, cfg),
                         )
                     except Exception:
                         # SSOT 기록 실패가 발행 흐름을 막지 않음 (조용히 통과)

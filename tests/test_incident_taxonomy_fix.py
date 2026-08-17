@@ -5,14 +5,19 @@ Locks the behavior that new publish_error_events rows have:
   A (close path): resolved_at is set on close
   B (#3): no_topics is recorded as P01, never falling back to P02
   B (#4): no_topics reason is unified ('no_topics'), not empty
-  B (#6): pipeline is populated (dispatcher passes cfg['pipeline'])
+  B (#6): pipeline is populated (dispatcher passes the resolved pipeline)
   B (#2): no_topics is WAITING semantics (retryable=False, not failure-amplifying)
+
+Boundary (M4): no_topics keeps state='open' (lifecycle) + reason='no_topics' +
+P01; the M4 Dashboard is expected to present execution status=
+WAITING_FOR_CANDIDATES derived from that combination. No Dashboard change here.
 
 Uses an isolated temp ops.db (zero real ops-DB access). No scheduler import,
 no subprocess, no external calls.
 """
 import pytest
 
+from dispatcher import _resolved_pipeline_for
 from shared import publish_error_events as events
 
 
@@ -107,3 +112,32 @@ def test_zero_real_ops_db_access(tmp_path, monkeypatch):
     monkeypatch.setattr(events, "OPS_DB_PATH", tmp_path / "ops.db")
     events.record_publish_error(**_no_topics_kwargs())
     assert events.OPS_DB_PATH != real
+
+
+# --- Sub-plan B (defect #6 wiring): dispatcher resolved-pipeline + lifecycle ---
+
+def test_B5_resolved_pipeline_cap_car_non_empty():
+    # 신규 CAP/car 이벤트의 pipeline이 빈 문자열이 되지 않아야 한다.
+    assert _resolved_pipeline_for("car-hugo", {"pipeline": "car"}) == "car"
+    assert _resolved_pipeline_for("hotissue-hugo", {"pipeline": "car"}) == "car"
+    assert _resolved_pipeline_for("compare-hugo", {"pipeline": "car"}) == "car"
+
+
+def test_B6_resolved_pipeline_stap_uses_module_name():
+    # STAP 블로그는 cfg.pipeline("stock")이 아니라 실제 실행 모듈 파이프라인 이름.
+    assert _resolved_pipeline_for("sector-hugo", {"pipeline": "stock"}) == "sector"
+    assert _resolved_pipeline_for("ipo-hugo", {"pipeline": "stock"}) == "ipo"
+
+
+def test_B7_resolved_pipeline_no_cfg_fallback_for_cap():
+    # cfg에 pipeline 키가 없어도 STAP 매핑에 있으면 그 값 사용 (빈 문자열 금지).
+    assert _resolved_pipeline_for("etf-hugo", {}) == "etf"
+
+
+def test_B8_no_topics_state_stays_open(isolated_events):
+    # state='open'은 incident lifecycle — WAITING 표현을 위해 오버로드하지 않는다.
+    e = isolated_events.record_publish_error(**_no_topics_kwargs(pipeline="car"))
+    assert e["state"] == "open"
+    assert e["reason"] == "no_topics"
+    assert e["problem_id"] == "P01"
+    assert isolated_events.get_open_incident("car-z", "P01", reason="no_topics") is not None
