@@ -72,6 +72,48 @@ def test_publish_errors_pagination(isolated_ops_db):
     assert "페이지 3/3".encode("utf-8") in clamped.data
 
 
+def test_publish_errors_api_filter_total_matches_events(isolated_ops_db):
+    """필터 적용 시 API total == 필터링된 events 수 (회귀: total이 비필터였던 결함)."""
+    from shared import publish_error_events as events
+
+    for i in range(5):
+        events.record_publish_error(
+            blog_id="blog-a-hugo", stage="publish", detail=f"a open {i}",
+            reason=f"reason-a-{i}", problem_id="P02", state="open",
+        )
+    for i in range(3):
+        events.record_publish_error(
+            blog_id="blog-b-hugo", stage="publish", detail=f"b open {i}",
+            reason=f"reason-b-{i}", problem_id="P02", state="open",
+        )
+    for i in range(2):
+        events.record_publish_error(
+            blog_id="blog-a-hugo", stage="deploy", detail=f"a closed {i}",
+            reason="deploy", problem_id="P04", state="closed",
+        )
+
+    from ops_dashboard.app import create_app
+
+    client = create_app().test_client()
+
+    all_resp = client.get("/api/publish-errors?limit=50", headers=_auth_header()).get_json()
+    assert all_resp["total"] == 10 and len(all_resp["events"]) == 10
+
+    blog_a = client.get(
+        "/api/publish-errors?blog_id=blog-a-hugo&limit=50", headers=_auth_header()
+    ).get_json()
+    assert blog_a["total"] == 7 and len(blog_a["events"]) == 7
+
+    open_resp = client.get("/api/publish-errors?state=open&limit=50", headers=_auth_header()).get_json()
+    assert open_resp["total"] == 8 and len(open_resp["events"]) == 8
+
+    combo = client.get(
+        "/api/publish-errors?blog_id=blog-a-hugo&state=open&limit=50",
+        headers=_auth_header(),
+    ).get_json()
+    assert combo["total"] == 5 and len(combo["events"]) == 5
+
+
 def test_publish_errors_classification(isolated_ops_db):
     from shared import publish_error_events as events
 

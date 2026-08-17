@@ -641,18 +641,23 @@ def _register_api_routes(app: Flask) -> None:
         )
         limit = request.args.get("limit", 100, type=int)
         offset = request.args.get("offset", 0, type=int) or 0
+        blog_id = request.args.get("blog_id", "")
+        severity = request.args.get("severity", "")
+        state = request.args.get("state", "")
         return jsonify({
             "summary": get_publish_error_summary(conn),
-            "total": get_publish_error_events_count(conn),
+            "total": get_publish_error_events_count(
+                conn, blog_id=blog_id, severity=severity, state=state
+            ),
             "events": [
                 _event_view(e)
                 for e in get_publish_error_events(
                     conn,
                     limit=limit,
                     offset=offset,
-                    blog_id=request.args.get("blog_id", ""),
-                    severity=request.args.get("severity", ""),
-                    state=request.args.get("state", ""),
+                    blog_id=blog_id,
+                    severity=severity,
+                    state=state,
                 )
             ],
         })
