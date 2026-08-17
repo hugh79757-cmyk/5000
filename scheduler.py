@@ -487,8 +487,6 @@ def _drain_queue() -> None:
 
 # ─── Catchup (중앙 ledger 기반) ───
 
-_catchup_attempts = {}
-_catchup_date = None
 _catchup_lock = threading.Lock()  # catchup 중복 실행 방지
 
 
@@ -511,7 +509,6 @@ def catchup_missed() -> None:
     if not _catchup_lock.acquire(blocking=False):
         logger.debug("Catchup already running, skipping")
         return
-    global _catchup_attempts, _catchup_date
     try:
         _catchup_missed_inner()
     finally:
@@ -520,17 +517,12 @@ def catchup_missed() -> None:
 
 def _catchup_missed_inner() -> None:
     """Catchup 실제 로직"""
-    global _catchup_attempts, _catchup_date
+    from shared import publish_error_events as _events
 
     config = load_config()
     blogs = config.get("blogs", [])
     now = datetime.now()
     today_str = now.strftime("%Y-%m-%d")
-
-    # 날짜 바뀌면 카운터 초기화
-    if _catchup_date != today_str:
-        _catchup_attempts = {}
-        _catchup_date = today_str
 
     # 스케줄러 시작 직후 보호: 첫 스케줄 시각 이전이면 catchup 안 함
     first_schedule_hour = 7
@@ -542,13 +534,12 @@ def _catchup_missed_inner() -> None:
             continue
         blog_id = blog["id"]
 
-        # 일일 catchup 상한
-        attempts = _catchup_attempts.get(blog_id, 0)
+        # 일일 catchup 상한 (ops.db 영속화 — 재시작 후에도 유지)
+        attempts = _events.get_catchup_attempts(blog_id, today_str)
         if attempts >= MAX_CATCHUP_PER_BLOG:
             continue
 
         # PR2: unresolved candidate_exhausted(no_topics) symptom retry 제한 (ops.db SSOT)
-        from shared import publish_error_events as _events
         try:
             _retry_state = _events.get_catchup_retry_state(blog_id)
         except Exception as e:
@@ -609,7 +600,7 @@ def _catchup_missed_inner() -> None:
             if blog_id in _publish_queue:
                 continue
 
-        _catchup_attempts[blog_id] = attempts + 1
+        _events.set_catchup_attempts(blog_id, today_str, attempts + 1)
         logger.info(
             f"CATCHUP: {blog_id} expected={expected} actual={actual} "
             f"missed={missed} quota={daily_quota} attempt={attempts + 1}/{MAX_CATCHUP_PER_BLOG}"

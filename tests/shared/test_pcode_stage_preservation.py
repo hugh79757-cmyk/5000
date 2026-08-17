@@ -18,10 +18,11 @@ class TestStagePreservation:
         """no_content가 P02(result_parse)로 매핑되되, stage는 'no_content'로 보존돼야 한다."""
         captured = {}
 
-        def _fake_record(blog_id, stage, detail, problem_id=""):
+        def _fake_record(blog_id, stage, detail, problem_id="", reason=""):
             captured["stage"] = stage
             captured["detail"] = detail
             captured["problem_id"] = problem_id
+            captured["reason"] = reason
             return {"event_id": 1}
 
         with patch(SEND_PATH, return_value=True), \
@@ -37,15 +38,18 @@ class TestStagePreservation:
         # 핵심: DB stage가 spec.hook 'result_parse'가 아니라 실제 reason 'no_content'
         assert captured["stage"] == "no_content"
         assert captured["problem_id"] == "P02"
+        # send_problem_alert가 reason을 record로 전달 (incident key 일치를 위한 커밋 B 변경)
+        assert captured["reason"] == "no_content"
 
     def test_stap_subprocess_error_reason_preserved_as_stage(self):
         """STAP subprocess 크래시(stap_subprocess_error)도 stage로 보존 — sector 진단 캡처."""
         captured = {}
 
-        def _fake_record(blog_id, stage, detail, problem_id=""):
+        def _fake_record(blog_id, stage, detail, problem_id="", reason=""):
             captured["stage"] = stage
             captured["detail"] = detail
             captured["problem_id"] = problem_id
+            captured["reason"] = reason
             return {"event_id": 1}
 
         with patch(SEND_PATH, return_value=True), \
@@ -62,3 +66,4 @@ class TestStagePreservation:
         assert captured["stage"] == "stap_subprocess_error"
         # detail(Traceback)이 matched로 넘어가 record detail에 캡처되어야 한다
         assert "Traceback" in captured["detail"]
+        assert captured["reason"] == "stap_subprocess_error"

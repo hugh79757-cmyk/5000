@@ -73,6 +73,16 @@ CREATE TABLE IF NOT EXISTS resource_health (
     state TEXT NOT NULL DEFAULT 'unknown'
 );
 
+-- Catchup 재시도 횟수 영속화: scheduler 재시작 시에도 일일 블로그별 시도 횟수 유지.
+-- attempt_date 키로 새 날짜가 되면 자동으로 새 window (리셋 효과).
+CREATE TABLE IF NOT EXISTS catchup_attempts (
+    blog_id TEXT NOT NULL,
+    attempt_date TEXT NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (blog_id, attempt_date)
+);
+
 -- PR3: 후보 가용성 SSOT (candidate availability).
 -- key = blog_id + pipeline + resource_id + candidate_type. 중복 상태 저장소 없이
 -- ops.db 한 곳에서 healthy/waiting_for_candidates/blocked_by_source/recovering/unknown 관리.
@@ -878,6 +888,42 @@ def get_catchup_retry_state(blog_id: str) -> dict[str, Any] | None:
         "retry_blocked": bool(row["retry_blocked"]),
         "root_incident_key": row["root_incident_key"] or "",
     }
+
+
+def get_catchup_attempts(blog_id: str, attempt_date: str) -> int:
+    """일일 블로그별 catchup 시도 횟수 — ops.db SSOT 기반이라 재시작 후에도 유지."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            row = conn.execute(
+                "SELECT attempts FROM catchup_attempts WHERE blog_id=? AND attempt_date=?",
+                (blog_id, attempt_date),
+            ).fetchone()
+        finally:
+            conn.close()
+    except Exception:
+        return 0
+    return int(row["attempts"]) if row else 0
+
+
+def set_catchup_attempts(blog_id: str, attempt_date: str, attempts: int) -> None:
+    """catchup 시도 횟수 기록 (UPSERT — 새 날짜면 자동으로 새 window)."""
+    try:
+        conn = _connect()
+        try:
+            ensure_schema(conn)
+            conn.execute(
+                "INSERT INTO catchup_attempts (blog_id, attempt_date, attempts) VALUES (?, ?, ?) "
+                "ON CONFLICT(blog_id, attempt_date) DO UPDATE SET "
+                "attempts=excluded.attempts, updated_at=CURRENT_TIMESTAMP",
+                (blog_id, attempt_date, attempts),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        return None
 
 
 def increment_incident_retry(blog_id: str, problem_id: str, reason: str = "") -> bool:

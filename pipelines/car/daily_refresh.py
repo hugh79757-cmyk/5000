@@ -6,14 +6,21 @@
 - publish.py 실행 전 호출됨
 """
 import logging
+import os
 import re
 import sqlite3
+import sys
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+
+# scheduler가 subprocess로 실행할 때 sys.path[0]이 스크립트 디렉토리
+# (pipelines/car/)로 설정되어 프로젝트 루트의 shared가 import되지 않는다.
+# cwd는 sys.path에 자동 추가되지 않으므로 명시적으로 루트를 삽입한다.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from shared.db_paths import ARTICLES_DB
 

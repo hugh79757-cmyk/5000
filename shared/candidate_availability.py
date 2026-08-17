@@ -62,14 +62,39 @@ def _car_db_path(car_db_path: str | Path | None = None) -> Path:
 
 
 def _count_pending(conn: sqlite3.Connection, site_id: str, post_types: list[str]) -> int:
-    """site_id(+post_type별) pending 토픽 수. post_types가 비면 site_id 전체 pending."""
+    """site_id(+post_type별) pending 토픽 수. post_types가 비면 site_id 전체 pending.
+
+    persona_pick 단독 구성은 effective availability 적용: 빌더와 동일한 SSOT 헬퍼
+    (data_builder.persona_pick_eligibility)로 eligible 후보만 카운트한다.
+    SQL EXISTS로는 빌더의 fuel 조건(대표 트림)을 재현할 수 없어 Python 루프를 쓴다.
+    다른 post_type(조합 포함)은 기존 raw pending 카운트를 유지한다.
+    """
     if post_types:
         placeholders = ",".join("?" for _ in post_types)
-        row = conn.execute(
-            f"SELECT COUNT(*) FROM topics WHERE site_id = ? "
-            f"AND status = 'pending' AND post_type IN ({placeholders})",
-            (site_id, *post_types),
-        ).fetchone()
+        params: list[Any] = [site_id, *post_types]
+        if post_types == ["persona_pick"]:
+            # SSOT 헬퍼로 eligible만 카운트 (read-only conn, car_id NULL은 제외).
+            from pipelines.car.data_builder import persona_pick_eligibility
+
+            rows = conn.execute(
+                f"SELECT car_id FROM topics t WHERE t.site_id = ? "
+                f"AND t.status = 'pending' AND t.post_type IN ({placeholders})",
+                params,
+            ).fetchall()
+            eligible = 0
+            for r in rows:
+                car_id = r[0]
+                if car_id is None:
+                    continue
+                ok, _reason = persona_pick_eligibility(conn, car_id)
+                if ok:
+                    eligible += 1
+            return eligible
+        sql = (
+            f"SELECT COUNT(*) FROM topics t WHERE t.site_id = ? "
+            f"AND t.status = 'pending' AND t.post_type IN ({placeholders})"
+        )
+        row = conn.execute(sql, params).fetchone()
     else:
         row = conn.execute(
             "SELECT COUNT(*) FROM topics WHERE site_id = ? AND status = 'pending'",

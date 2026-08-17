@@ -94,7 +94,7 @@ def send_error(blog_id, stage, error_msg):
     if any(reason in str(error_msg).lower() for reason in silent_reasons):
         logger.info("[Silent] %s/%s: %s", blog_id, stage, error_msg)
         return False
-    event = _record_event(blog_id, stage, error_msg)
+    event = _record_event(blog_id, stage, error_msg, reason=stage)
     domain, repo = _blog_metadata(blog_id)
     lines = ["[PUBLISH ERROR]", "Blog: " + blog_id]
     if domain:

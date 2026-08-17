@@ -675,9 +675,48 @@ PERSONA_CONFIGS = {
 }
 
 
+def persona_pick_eligibility(conn, car_id):
+    """persona_pick 빌더 실행 가능 여부 판정 (SSOT — availability/builder 공용).
+
+    build_persona_pick_input의 skip 조건을 단일 predicate로 추출:
+    (1) cars 행 존재, (2) 시판 trims 중 price>=500 존재, (3) 대표 트림 fuel 존재.
+
+    반환: (eligible: bool, reason: str)
+      reason: "ok" | "no_car" | "no_eligible_trim" | "no_fuel_efficiency"
+    """
+    c = conn.cursor()
+    # 호출자(availability checker 등)가 row_factory를 설정하지 않은 conn으로
+    # 넘길 수 있으므로 cursor-level로 강제한다 (conn 상태 변경 없음).
+    c.row_factory = sqlite3.Row
+    car_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (car_id,)).fetchone()
+    if not car_row:
+        return False, "no_car"
+    car = dict(car_row)
+    trims_raw = c.execute(
+        "SELECT * FROM trims WHERE car_id = ? AND status = '시판' ORDER BY price",
+        (car["car_id"],),
+    ).fetchall()
+    trims = [dict(t) for t in trims_raw if t["price"] and t["price"] >= 500]
+    if not trims:
+        return False, "no_eligible_trim"
+    idx = select_representative_trim(trims)
+    main_trim = trims[idx]
+    fuel_eff = main_trim.get("fuel_efficiency")
+    if not fuel_eff or fuel_eff == 0:
+        fuel_eff = lookup_fuel_efficiency(conn, car["brand"], car["model"], car["displacement"])
+    if not fuel_eff or fuel_eff == 0:
+        return False, "no_fuel_efficiency"
+    return True, "ok"
+
+
 def build_persona_pick_input(conn, topic, db_path):
     """페르소나 기반 차량 추천 데이터 빌드"""
     c = conn.cursor()
+
+    # SSOT eligibility — availability checker와 동일 predicate로 skip 판정.
+    eligible, _reason = persona_pick_eligibility(conn, topic["car_id"])
+    if not eligible:
+        return None
 
     car_row = c.execute("SELECT * FROM cars WHERE car_id = ?", (topic["car_id"],)).fetchone()
     if not car_row:

@@ -153,6 +153,7 @@ class PublishMonitor:
                 "name_ko": spec.name_ko,
                 "phase": phase,
                 "stage": stage,
+                "reason": reason,
                 "pattern": "",
                 "matched": detail[:200],
                 "action": spec.action,
@@ -243,6 +244,7 @@ class PublishMonitor:
                     blog_id, context.get("stage") or spec.hook,
                     render_ctx.get("matched", ""),
                     problem_id=problem_id,
+                    reason=context.get("reason", ""),
                 )
             except Exception as exc:
                 logger.debug("[problem_monitor] event record failed: %s", exc)
