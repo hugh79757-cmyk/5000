@@ -112,8 +112,14 @@ _SECRET_PATTERNS = (
 def _connect() -> sqlite3.Connection:
     conn = sqlite3.connect(str(OPS_DB_PATH), timeout=5)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA journal_mode=WAL")
+    # busy_timeout을 먼저 설정해야 WAL 전환 pragma가 lock 대기를 할 수 있다.
     conn.execute("PRAGMA busy_timeout=5000")
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+    except sqlite3.OperationalError:
+        # DB가 이미 WAL이거나 다른 연결이 쓰기 중이면 전환 요청이 lock으로
+        # 실패할 수 있다 — WAL 유지 상태에서는 무해하므로 무시한다.
+        pass
     return conn
 
 
@@ -163,6 +169,10 @@ _REASON_ALIASES = {
     "no_topic": "no_topics",  # 단수/복수 표현 통일
 }
 
+# incident upsert의 일시적 lock/busy 실패 허용 횟수. busy_timeout(5s)이
+# 대부분의 대기를 흡수하므로 재시도는 짧고 제한적으로만 둔다.
+_MAX_RECORD_ATTEMPTS = 3
+
 
 def _normalize_reason(reason: str) -> str:
     """reason alias 정규화 — 소문자+strip 후 알려진 alias만 통일.
@@ -200,6 +210,22 @@ def compute_incident_key(
     return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()[:24]
 
 
+def _add_column_if_missing(
+    conn: sqlite3.Connection, table: str, name: str, ddl: str
+) -> None:
+    """ALTER TABLE ADD COLUMN은 IF NOT EXISTS가 없다.
+
+    병렬 migration에서 두 연결이 같은 컬럼을 동시에 추가하면
+    "duplicate column name"이 난다 — 이미 다른 스레드가 추가한 것이므로
+    그 경우만 무시하고, 다른 오류는 그대로 전파한다.
+    """
+    try:
+        conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}")
+    except sqlite3.OperationalError as exc:
+        if "duplicate column" not in str(exc).lower():
+            raise
+
+
 def _migrate_schema(conn: sqlite3.Connection) -> None:
     """PRAGMA table_info + ALTER TABLE 기반 증분 migration — 여러 번 실행해도 안전.
 
@@ -209,15 +235,15 @@ def _migrate_schema(conn: sqlite3.Connection) -> None:
     columns = {row[1] for row in conn.execute("PRAGMA table_info(publish_error_events)")}
     for name, ddl in _INCIDENT_COLUMNS.items():
         if name not in columns:
-            conn.execute(f"ALTER TABLE publish_error_events ADD COLUMN {name} {ddl}")
+            _add_column_if_missing(conn, "publish_error_events", name, ddl)
     for name, ddl in _PR2_COLUMNS.items():
         if name not in columns:
-            conn.execute(f"ALTER TABLE publish_error_events ADD COLUMN {name} {ddl}")
+            _add_column_if_missing(conn, "publish_error_events", name, ddl)
     conn.execute(_OPEN_INCIDENT_INDEX_SQL)
     rh_columns = {row[1] for row in conn.execute("PRAGMA table_info(resource_health)")}
     for name, ddl in _RESOURCE_HEALTH_COLUMNS.items():
         if name not in rh_columns:
-            conn.execute(f"ALTER TABLE resource_health ADD COLUMN {name} {ddl}")
+            _add_column_if_missing(conn, "resource_health", name, ddl)
 
 
 def ensure_schema(conn: sqlite3.Connection | None = None) -> None:
@@ -349,69 +375,82 @@ def record_publish_error(
         "retry_count": 0,
         "metadata_json": metadata_json or "",
     }
-    try:
-        conn = _connect()
+    # identity는 DB가 최종 권위자다. caller가 미리 만든 uuid4를 성공 ID로
+    # 반환하지 않는다 — upsert+commit 후 실제 open 행의 event_id로 교체하고,
+    # 확정하지 못하면 event_id를 ""(명시적 실패 신호)로 둔다.
+    persisted = False
+    for _attempt in range(_MAX_RECORD_ATTEMPTS):
         try:
-            ensure_schema(conn)
-            conn.execute(
-                """
-                INSERT INTO publish_error_events (
-                    event_id, occurred_at, blog_id, pipeline, stage, problem_id,
-                    reason, severity, retryable, attempt, max_attempts, source_name,
-                    http_status, timeout_seconds, detail_redacted, fingerprint, state,
-                    incident_key, key_version, occurrence_count, first_seen_at, last_seen_at,
-                    relation_type, root_incident_key, resource_id, retry_blocked, retry_count, metadata_json
-                ) VALUES (
-                    :event_id, :occurred_at, :blog_id, :pipeline, :stage, :problem_id,
-                    :reason, :severity, :retryable, :attempt, :max_attempts, :source_name,
-                    :http_status, :timeout_seconds, :detail_redacted, :fingerprint, :state,
-                    :incident_key, :key_version, :occurrence_count, :first_seen_at, :last_seen_at,
-                    :relation_type, :root_incident_key, :resource_id, :retry_blocked, :retry_count, :metadata_json
+            conn = _connect()
+            try:
+                ensure_schema(conn)
+                conn.execute(
+                    """
+                    INSERT INTO publish_error_events (
+                        event_id, occurred_at, blog_id, pipeline, stage, problem_id,
+                        reason, severity, retryable, attempt, max_attempts, source_name,
+                        http_status, timeout_seconds, detail_redacted, fingerprint, state,
+                        incident_key, key_version, occurrence_count, first_seen_at, last_seen_at,
+                        relation_type, root_incident_key, resource_id, retry_blocked, retry_count, metadata_json
+                    ) VALUES (
+                        :event_id, :occurred_at, :blog_id, :pipeline, :stage, :problem_id,
+                        :reason, :severity, :retryable, :attempt, :max_attempts, :source_name,
+                        :http_status, :timeout_seconds, :detail_redacted, :fingerprint, :state,
+                        :incident_key, :key_version, :occurrence_count, :first_seen_at, :last_seen_at,
+                        :relation_type, :root_incident_key, :resource_id, :retry_blocked, :retry_count, :metadata_json
+                    )
+                    ON CONFLICT(incident_key) WHERE state='open' AND incident_key IS NOT NULL
+                    DO UPDATE SET
+                        occurrence_count = occurrence_count + 1,
+                        occurred_at = excluded.occurred_at,
+                        last_seen_at = excluded.occurred_at,
+                        detail_redacted = excluded.detail_redacted,
+                        severity = excluded.severity,
+                        retryable = excluded.retryable,
+                        pipeline = excluded.pipeline,
+                        reason = excluded.reason,
+                        source_name = excluded.source_name,
+                        http_status = excluded.http_status,
+                        timeout_seconds = excluded.timeout_seconds,
+                        attempt = excluded.attempt,
+                        max_attempts = excluded.max_attempts,
+                        relation_type = excluded.relation_type,
+                        root_incident_key = excluded.root_incident_key,
+                        resource_id = excluded.resource_id,
+                        metadata_json = excluded.metadata_json
+                    """,
+                    event,
                 )
-                ON CONFLICT(incident_key) WHERE state='open' AND incident_key IS NOT NULL
-                DO UPDATE SET
-                    occurrence_count = occurrence_count + 1,
-                    occurred_at = excluded.occurred_at,
-                    last_seen_at = excluded.occurred_at,
-                    detail_redacted = excluded.detail_redacted,
-                    severity = excluded.severity,
-                    retryable = excluded.retryable,
-                    pipeline = excluded.pipeline,
-                    reason = excluded.reason,
-                    source_name = excluded.source_name,
-                    http_status = excluded.http_status,
-                    timeout_seconds = excluded.timeout_seconds,
-                    attempt = excluded.attempt,
-                    max_attempts = excluded.max_attempts,
-                    relation_type = excluded.relation_type,
-                    root_incident_key = excluded.root_incident_key,
-                    resource_id = excluded.resource_id,
-                    metadata_json = excluded.metadata_json
-                """,
-                event,
-            )
-            conn.commit()
-            # 반환 event는 실제 DB 행과 일치시킨다 (telegram_delivery_audit FK 정합).
-            # open 행은 partial UNIQUE index로 incident_key당 최대 1개가 보장되므로,
-            # state='open' 필터 + rowid 정렬로 "현재 upsert 대상 open 행"을 결정적으로
-            # 조회한다 (closed/open 이력이 공존해도 closed 행은 반환되지 않는다).
-            row = conn.execute(
-                "SELECT event_id, occurrence_count, first_seen_at, last_seen_at "
-                "FROM publish_error_events "
-                "WHERE incident_key = ? AND state = 'open' "
-                "ORDER BY rowid DESC LIMIT 1",
-                (incident_key,),
-            ).fetchone()
-            if row:
-                event["event_id"] = row["event_id"]
-                event["occurrence_count"] = row["occurrence_count"]
-                event["first_seen_at"] = row["first_seen_at"]
-                event["last_seen_at"] = row["last_seen_at"]
-        finally:
-            conn.close()
-    except Exception:
-        # Error telemetry must never interrupt publishing or alert delivery.
-        pass
+                conn.commit()
+                # 반환 event는 실제 DB 행과 일치시킨다 (telegram_delivery_audit FK 정합).
+                # open 행은 partial UNIQUE index로 incident_key당 최대 1개가 보장되므로,
+                # state='open' 필터 + rowid 정렬로 "현재 upsert 대상 open 행"을 결정적으로
+                # 조회한다 (closed/open 이력이 공존해도 closed 행은 반환되지 않는다).
+                row = conn.execute(
+                    "SELECT event_id, occurrence_count, first_seen_at, last_seen_at "
+                    "FROM publish_error_events "
+                    "WHERE incident_key = ? AND state = 'open' "
+                    "ORDER BY rowid DESC LIMIT 1",
+                    (incident_key,),
+                ).fetchone()
+                if row:
+                    event["event_id"] = row["event_id"]
+                    event["occurrence_count"] = row["occurrence_count"]
+                    event["first_seen_at"] = row["first_seen_at"]
+                    event["last_seen_at"] = row["last_seen_at"]
+                    persisted = True
+                # row가 없으면 upsert는 커밋됐으나 동시 close로 open 행이 소멸한 것 —
+                # 성공 ID로 확정할 수 없으므로 persisted=False로 두고 event_id를 비운다.
+            finally:
+                conn.close()
+            break
+        except Exception:
+            # 일시적 lock/busy는 짧고 제한적으로 재시도한다. 재시도 소진 시
+            # phantom uuid4 대신 event_id=""로 명시적 실패를 반환한다
+            # (Error telemetry must never interrupt publishing or alert delivery).
+            continue
+    if not persisted:
+        event["event_id"] = ""
     return event
 
 
