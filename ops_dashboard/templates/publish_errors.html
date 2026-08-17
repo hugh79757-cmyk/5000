@@ -4,6 +4,7 @@
 <div class="stats-grid">
   <div class="stat-card"><div class="stat-num">{{ summary.total }}</div><div class="stat-label">Recorded events</div></div>
   <div class="stat-card"><div class="stat-num">{{ summary.open }}</div><div class="stat-label">Open events</div></div>
+  <div class="stat-card"><div class="stat-num">{{ waiting_count }}</div><div class="stat-label">WAITING for candidates</div></div>
   <div class="stat-card"><div class="stat-num">{{ summary.by_problem|length }}</div><div class="stat-label">Error codes</div></div>
 </div>
 <h2>Error code summary</h2>
@@ -15,13 +16,20 @@
 {% endfor %}
 </tbody>
 </table></div>
-<h2>Recent events</h2>
+<h2>Recent events <small>(총 {{ total }}건 · 페이지 {{ page }}/{{ total_pages }})</small></h2>
 <div class="table-wrap"><table>
-<thead><tr><th>Time</th><th>Blog</th><th>Code</th><th>Stage</th><th>Severity</th><th>Retryable</th><th>State</th><th>Detail</th></tr></thead>
+<thead><tr><th>Time</th><th>Blog</th><th>Code</th><th>Status</th><th>Stage</th><th>Reason</th><th>Pipeline</th><th>Retryable</th><th>Retry blocked</th><th>Detail</th></tr></thead>
 <tbody>
 {% for event in events %}
-<tr><td>{{ event.occurred_at }}</td><td><a href="/blog/{{ event.blog_id }}">{{ event.blog_id }}</a></td><td>{{ event.problem_id }}</td><td>{{ event.stage }}</td><td>{{ event.severity }}</td><td>{{ event.retryable }}</td><td>{{ event.state }}</td><td>{{ event.detail_redacted }}</td></tr>
+<tr><td>{{ event.occurred_at }}</td><td><a href="/blog/{{ event.blog_id }}">{{ event.blog_id }}</a></td><td>{{ event.problem_id }}</td><td>{{ event.execution_status }}{% if event.incident_label == "LEGACY_UNMERGED" %} ({{ event.incident_label }}){% endif %}</td><td>{{ event.stage }}</td><td>{{ event.reason }}</td><td>{{ event.pipeline_label }}</td><td>{{ event.retryable }}</td><td>{{ event.retry_blocked }}</td><td>{{ event.detail_redacted }}</td></tr>
 {% endfor %}
 </tbody>
 </table></div>
+{% if total_pages > 1 %}
+<p>
+  {% for p in range(1, total_pages + 1) %}
+    {% if p == page %}<b>{{ p }}</b>{% else %}<a href="/publish-errors?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>{% endif %}
+  {% endfor %}
+</p>
+{% endif %}
 {% endblock %}

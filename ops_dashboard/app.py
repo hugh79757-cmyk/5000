@@ -135,6 +135,28 @@ def _ensure_db(conn: sqlite3.Connection) -> None:
     seed_maintenance_status(conn)
 
 
+def _event_view(event: dict) -> dict:
+    """표시 계층 분류 (DB 쓰기 없음 — Phase69-C M4 계약).
+
+    - reason=no_topics + problem_id=P01 + retryable=0 → WAITING_FOR_CANDIDATES
+      (후보 대기 = 실행 상태, incident lifecycle state는 open 유지)
+    - incident_key가 NULL/빈 값 → LEGACY_UNMERGED (임의 hash 병합 금지)
+    - pipeline 빈 값 → UNKNOWN
+    """
+    view = dict(event)
+    if (
+        event.get("reason") == "no_topics"
+        and event.get("problem_id") == "P01"
+        and event.get("retryable") == 0
+    ):
+        view["execution_status"] = "WAITING_FOR_CANDIDATES"
+    else:
+        view["execution_status"] = "OPEN" if event.get("state") == "open" else "CLOSED"
+    view["incident_label"] = "LEGACY_UNMERGED" if not event.get("incident_key") else "INCIDENT"
+    view["pipeline_label"] = event.get("pipeline") or "UNKNOWN"
+    return view
+
+
 def _sync_yaml_if_needed(conn: sqlite3.Connection) -> bool:
     """YAML이 새로 수정됐으면 blog_lifecycle 동기화.
 
@@ -427,13 +449,40 @@ def _register_human_routes(app: Flask) -> None:
     def publish_errors():
         conn = _get_db()
         _ensure_db(conn)
-        from shared.publish_error_events import get_publish_error_events, get_publish_error_summary
+        from shared.publish_error_events import (
+            get_publish_error_events,
+            get_publish_error_events_count,
+            get_publish_error_summary,
+        )
+        try:
+            page = max(1, int(request.args.get("page", "1")))
+        except ValueError:
+            page = 1
+        try:
+            per_page = max(1, min(int(request.args.get("per_page", "50")), 200))
+        except ValueError:
+            per_page = 50
+        total = get_publish_error_events_count(conn)
+        total_pages = max(1, -(-total // per_page))
+        page = min(page, total_pages)
+        events = get_publish_error_events(
+            conn, limit=per_page, offset=(page - 1) * per_page
+        )
+        waiting_count = conn.execute(
+            "SELECT COUNT(*) FROM publish_error_events "
+            "WHERE reason='no_topics' AND problem_id='P01' AND retryable=0"
+        ).fetchone()[0]
         return render_template(
             "publish_errors.html",
             title="Operational Errors",
             active="publish-errors",
             summary=get_publish_error_summary(conn),
-            events=get_publish_error_events(conn, limit=200),
+            events=[_event_view(e) for e in events],
+            waiting_count=waiting_count,
+            total=total,
+            page=page,
+            per_page=per_page,
+            total_pages=total_pages,
         )
 
     @app.route("/candidate-state")
@@ -585,17 +634,27 @@ def _register_api_routes(app: Flask) -> None:
     def api_publish_errors():
         conn = _get_db()
         _ensure_db(conn)
-        from shared.publish_error_events import get_publish_error_events, get_publish_error_summary
+        from shared.publish_error_events import (
+            get_publish_error_events,
+            get_publish_error_events_count,
+            get_publish_error_summary,
+        )
         limit = request.args.get("limit", 100, type=int)
+        offset = request.args.get("offset", 0, type=int) or 0
         return jsonify({
             "summary": get_publish_error_summary(conn),
-            "events": get_publish_error_events(
-                conn,
-                limit=limit,
-                blog_id=request.args.get("blog_id", ""),
-                severity=request.args.get("severity", ""),
-                state=request.args.get("state", ""),
-            ),
+            "total": get_publish_error_events_count(conn),
+            "events": [
+                _event_view(e)
+                for e in get_publish_error_events(
+                    conn,
+                    limit=limit,
+                    offset=offset,
+                    blog_id=request.args.get("blog_id", ""),
+                    severity=request.args.get("severity", ""),
+                    state=request.args.get("state", ""),
+                )
+            ],
         })
 
     @app.route("/api/candidate-state")
