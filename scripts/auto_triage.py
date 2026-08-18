@@ -40,7 +40,7 @@ SYNC_DB_PATH = FIVEK_ROOT / "data" / "content.db"
 # 인증 (대시보드 Basic Auth)
 # ---------------------------------------------------------------------------
 DASHBOARD_USER = os.environ.get("OPS_USER", "ops")
-DASHBOARD_PASS = os.environ.get("OPS_PASSWORD", "112233")
+DASHBOARD_PASS = os.environ.get("OPS_PASSWORD")
 
 
 # ---------------------------------------------------------------------------

@@ -1,8 +1,11 @@
 import base64
+import os
 
 
 def _auth_header():
-    token = base64.b64encode(b"ops:112233").decode("ascii")
+    token = base64.b64encode(
+        f"{os.environ.get('OPS_USER', 'ops')}:{os.environ.get('OPS_PASSWORD', '')}".encode()
+    ).decode("ascii")
     return {"Authorization": "Basic " + token}
 
 

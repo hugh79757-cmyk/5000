@@ -90,10 +90,12 @@ def fix_thumbnail_r2_checks():
 
 # ── 4. 대시보드 재검사 트리거 ────────────────────────────────────────────
 def trigger_full_recheck():
+    import os
     import subprocess
     try:
         r = subprocess.run(
-            ["curl", "-s", "-X", "POST", "-u", "ops:112233",
+            ["curl", "-s", "-X", "POST", "-u",
+             f"{os.environ.get('OPS_USER', 'ops')}:{os.environ.get('OPS_PASSWORD', '')}",
              "http://localhost:5060/api/run-checks"],
             capture_output=True, text=True, timeout=30
         )

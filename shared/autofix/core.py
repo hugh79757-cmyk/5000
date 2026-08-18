@@ -121,7 +121,8 @@ def trigger_recheck(blog_id: str) -> bool:
     """POST /api/run-checks?blog_id={blog_id} 호출."""
     try:
         r = subprocess.run(
-            ["curl", "-s", "-X", "POST", "-u", "ops:112233",
+            ["curl", "-s", "-X", "POST", "-u",
+             f"{os.environ.get('OPS_USER', 'ops')}:{os.environ.get('OPS_PASSWORD', '')}",
              f"http://localhost:5060/api/run-checks?blog_id={blog_id}"],
             capture_output=True, text=True, timeout=30
         )

@@ -17,7 +17,7 @@
     R12  layouts/shortcodes/dday.html 등 — 맞춤형 shortcode인지 확인 후 판단
 """
 
-import sys, re, shutil
+import sys, os, re, shutil
 from pathlib import Path
 sys.path.insert(0, '/Users/twinssn/Projects/5000')
 
@@ -188,7 +188,8 @@ def recheck(blog_id: str) -> bool:
     import subprocess
     try:
         r = subprocess.run(
-            ["curl", "-s", "-X", "POST", "-u", "ops:112233",
+            ["curl", "-s", "-X", "POST", "-u",
+             f"{os.environ.get('OPS_USER', 'ops')}:{os.environ.get('OPS_PASSWORD', '')}",
              f"http://localhost:5060/api/run-checks?blog_id={blog_id}"],
             capture_output=True, text=True, timeout=30
         )
