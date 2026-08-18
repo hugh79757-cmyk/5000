@@ -249,35 +249,44 @@ class TestPersonaPickSuccessSkipsFallback:
 
     def test_persona_pick_success_no_fallback(self, sim_dbs, monkeypatch):
         """persona_pick이 데이터를 반환하면 top5_rank fallback을 시도하지 않음"""
-        from pipelines.car.data_builder import build_persona_pick_input
+        from unittest.mock import patch, call
+        import pipelines.car.data_builder as db_mod
 
-        conn = sqlite3.connect(str(sim_dbs["car"]))
-        conn.row_factory = sqlite3.Row
+        fake_data = {
+            "type": "persona_pick",
+            "persona_type": "commuter",
+            "model": "합성 테스트 차량",
+            "base_price": 3500,
+            "segment": "중형세단",
+            "fuel_efficiency": 15.0,
+            "monthly_total": 800000,
+        }
 
-        # trims 있는 topic 찾기
-        topics = conn.execute("""
-            SELECT t.id, t.car_id, t.post_type, t.site_id, t.competitor_car_id, t.priority,
-                   (SELECT COUNT(*) FROM trims WHERE car_id=t.car_id AND status='시판' AND price>=500) as trim_count
-            FROM topics t WHERE t.status='pending' AND t.post_type='persona_pick'
-        """).fetchall()
+        with patch.object(db_mod, "build_persona_pick_input", return_value=fake_data) as mock_pp, \
+             patch.object(db_mod, "build_top5_rank_input", return_value=None) as mock_top5:
+            conn = sqlite3.connect(str(sim_dbs["car"]))
+            conn.row_factory = sqlite3.Row
 
-        eligible = [t for t in topics if t["trim_count"] > 0]
-        if not eligible:
-            pytest.skip("trims 있는 topic 없음")
+            # eligibility이 True인 topic 존재 확인
+            topics = conn.execute("""
+                SELECT t.id, t.car_id, t.post_type, t.site_id, t.competitor_car_id, t.priority,
+                       (SELECT COUNT(*) FROM trims WHERE car_id=t.car_id AND status='시판' AND price>=500) as trim_count
+                FROM topics t WHERE t.status='pending' AND t.post_type='persona_pick'
+            """).fetchall()
+            eligible = [t for t in topics if t["trim_count"] > 0]
+            assert eligible, "eligibility True인 topic이 DB에 없음 — fixture 필요"
 
-        topic = dict(eligible[0])
-        topic["persona_type"] = "commuter"
+            topic = dict(eligible[0])
+            topic["persona_type"] = "commuter"
 
-        # build_persona_pick_input이 데이터를 반환하는지 확인
-        data = build_persona_pick_input(conn, topic, str(sim_dbs["car"]))
-        if data is None:
-            pytest.skip("build_persona_pick_input이 None 반환 — fuel_efficiency 없음")
+            # build_persona_pick_input이 데이터를 반환하면 fallback 미실행
+            data = db_mod.build_persona_pick_input(conn, topic, str(sim_dbs["car"]))
+            assert data is fake_data, "mock이 설정된 build_persona_pick_input이 데이터를 반환해야 함"
 
-        # 성공 시 data가 truthy → fallback 블록 진입하지 않음
-        assert data, "persona_pick이 데이터를 반환해야 함"
-        assert "model" in data or "base_price" in data, "data에 model 또는 base_price 포함"
+            # top5_rank fallback이 호출되지 않았는지 확인
+            mock_top5.assert_not_called()
 
-        conn.close()
+            conn.close()
 
 
 class TestPersonaPickFailThenTop5RankSuccess:
