@@ -1,8 +1,9 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-08-08
+**Last updated:** 2026-08-18
 **코드 기준 실제 상태:** Phase 1~17, 24, 28, 49, 50, 52(Wave 1~4), 56, 58, 59, 61, 62, 63, 64, 66, 67 실행 완료. Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55. 문서 갱신 필요(Phase 18~21, 44 상태 불명확).
 **현재 대시보드:** http://localhost:5060 (ops_dashboard, Phase 59 산출물)
+**조건부 최종 로드맵:** Reliability Critical Path M1~M7 (본 문서 하단) — M1~M4 COMPLETED, M5 IN_PROGRESS/ACTIVE_WAITING, M6·M7 BLOCKED_BY_M5. next_action = 2026-08-21 Interior sitemap experiment Day 3 checkpoint.
 
 ---
 
@@ -714,3 +715,61 @@ Total in 898 ms +
 
 - `.planning/phases/61-pipeline-standardization-branch-renewal/CONTEXT.md` — 논의 확정 사항
 - `.planning/phases/61-pipeline-standardization-branch-renewal/PLAN.md` — 단계별 실행 계획
+
+---
+
+## Phase 69: Incident Integrity & Dashboard SSOT
+
+**Status:** 🔒 PLANNED_BLOCKED (2026-08-17)
+**Prerequisite:** PR-CAP-1 commit `21c83c9` (Pipeline Result Contract) 리뷰·병합
+**Successor:** Phase 70 P25 예외 표준화
+**Precedes:** Phase 60 incident 기반 분석 (신뢰 가능한 SSOT 선결조건)
+**Owner:** CAP 신뢰성 감사 파생 (PR-CAP-2 범위, 미등록 GSD phase)
+**Goal:** 확정된 Dashboard/incident 6결함을 수정해 `ops_dashboard/ops.db` + Dashboard를 신뢰 가능한 SSOT로 만듦.
+**Ownership (6 defects):**
+1. `incident_key` NULL 97.6% → 병합 실패
+2. `WAITING_FOR_CANDIDATES` 0건 (no_topics 대기 미표현)
+3. empty-reason `P02` 오분류 (known problem_id 있는데 P02 fallback)
+4. `no_topics` 이중 taxonomy (dispatcher 단일경로 vs monitor)
+5. Dashboard `LIMIT 200` + `reason`/`retry_blocked` 미노출
+6. `pipeline` 빈문자열 기록 (451/451)
+**Sub-plans:** A=Incident identity/merge/lifecycle · B=WAITING/taxonomy/pipeline 정규화 · C=Dashboard pagination/field 노출 (0 schema change, 0 backfill, 0 deploy)
+**Exclusions:** Phase 70 P25 예외경계 · Phase 71 remediation · 품질 validator · 기존행 backfill·운영DB 변경 · 배포
+**Source:** 감사 산출물 `cap_dashboard_snapshot_reverification.md`(b3), `cap_final_interpretation_addendum.md`(b2), PR-CAP-1 리뷰(b9)
+
+---
+
+## Reliability Critical Path (M1–M7)
+
+> CAP/automotive family + dashboard incident 신뢰성 복구 마일스톤 체인. 동시 진행 금지(하나씩). 미완료 계획은 READY 금지.
+
+**의존성:** M1 → M2 → M3 → M4 → M5 → M6 → M7
+
+| Milestone | 범위 | 상태 | 선행 | 비고 |
+|---|---|---|---|---|
+| M1 | PR-CAP-1 Result Contract | COMPLETED | — | merged @ `7253f0524` |
+| M2 | Phase71 car 복구 | COMPLETED | M1 | merged @ 75e7f968c · 후속 Phase69 sub-plan A+B |
+| M3 | Phase69 incident/taxonomy wiring | COMPLETED | Phase71 car-recovery merge(0879d258e) 완료 | merged @ f03acaa4c · 6결함 fix(sub-plan A/B) · 후속 Phase67/71 remediation |
+| M4 | Phase69-C Dashboard SSOT | COMPLETED | M3 | merged @ 403f7fba3 · pagination + reason/retry_blocked 노출 · WAITING_FOR_CANDIDATES/LEGACY_UNMERGED/UNKNOWN 표시 |
+| M5 | Phase 62~64 Quality Blocking | IN_PROGRESS / ACTIVE_WAITING | M4 | 아래 "M5 상세 상태" 참조 |
+| M6 | Phase 67/71 Limited Remediation | BLOCKED_BY_M5 | M5 | allowlist + circuit breaker — M5가 SCALE_CANDIDATE일 때만 진행 |
+| M7 | Phase 61/43 Family Rollout | BLOCKED_BY_M5 | M6 | 8분기 표준 골격 확산 — M5가 SCALE_CANDIDATE일 때만 진행 |
+
+### M5 상세 상태 (2026-08-18)
+
+| 내부 작업 | 상태 | 근거 |
+|---|---|---|
+| Phase 62-QB (CAP blocking 품질게이트) | ✅ 완료 | CQ-UNIT/TEMPLATE/NUMERIC 게이트 구현·배선 |
+| M5-KA1 (Knowledge Asset Qualification) | READY_WITH_GAPS | 360개 자산 전수 검증 → 4개 통합 파일 초안 + 충실도 감사. auto_true=324 / POLICY_CLAIM=149, 파일럿 선택 풀=179 |
+| M5-KA2 (Traffic Validation Pilot) — T1 | INSUFFICIENT_BASELINE | gsc_pages 0행 + ga4_pages curation 미커버 → 블로그 선택·C/T 배정·baseline 불가 |
+| Interior sitemap experiment | ACTIVE_WAITING | **Day 3 (2026-08-21) · Day 7 (2026-08-25) · Day 14 (2026-09-01)** 체크포인트 대기 중 |
+
+**Interior sitemap experiment 분기 (Day 3·7·14 결과로 판정):**
+- **discovery 성공** (treatment URL이 unknown → INDEXED/발견 전환): sitemap 신호 유효 → **트래픽 파일럿 개방** (KA2 재개)
+- **약한 신호** (sitemap은 재다운로드됐으나 URL 발견 0건 지속): sitemap만으로는 부족 → 진입점 다양화(내부 링크 등) 별도 승인 후 재시도 (ITERATE 최대 1회)
+- **효과 없음** (control과 동일하게 0건): sitemap 신호 무효 → **NO_EFFECT_STOP** — 확장 종료, 근본 원인(도메인 수준) 재조사
+
+**트래픽 파일럿 개방 조건 (KA2 재개):** discovery 성공 + **28일 baseline 확보**(글당 노출·클릭 + 색인 성공률) 후에만. Phase 64·M6·M7은 트래픽 파일럿이 **SCALE_CANDIDATE** 판정일 때만 진행.
+**ITERATE 제한:** 최대 1회. NO_EFFECT_STOP / HARM_STOP 판정 시 확장 종료 (커밋·배포 불가).
+
+**현재 next_action:** 2026-08-21 Interior sitemap experiment **Day 3 checkpoint** (URL Inspection 20개 재조회, treatment vs control 탈출 건수 집계)

@@ -3,20 +3,20 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-15T00:00:00Z"
+last_updated: "2026-08-18T00:00:00Z"
 progress:
   # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
   # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
-  total_phases: 32
+  total_phases: 33
   completed_phases: 29
   in_progress_phases: 1
-  planned_phases: 3
-  percent: 91
+  planned_phases: 4
+  percent: 88
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **Phase 71 진행 중 (Wave 1·2·3 완료, Wave 4·5 스켈레톤+승인게이트 구현 완료, OQ#1/OQ#2 시니어 결정 대기).** Phase 73 실행 완료 (SC-1/2/3/4/5/7/8 적용; SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
+**Status:** v1.1 — **M5 조건부 최종 로드맵 적용 중 (IN_PROGRESS/ACTIVE_WAITING).** M5-KA1 READY_WITH_GAPS, M5-KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING (Day 3 = 2026-08-21 체크포인트). Phase 73 실행 완료 (SC-1/2/3/4/5/7/8 적용; SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -77,6 +77,7 @@ progress:
 | 53 | Complete Phase 52 Wave 6: Build and Deploy | 📋 Planned | 미시작. Phase 52 Wave 5 완료 후 실행. 36개 블로그 Hugo 빌드 + wrangler 배포 + 라이브 검증. ROADMAP Phase 53 참조. |
 | 54 | Curation Title Generation Hardening (제목 fallback 제거) | 📋 Planned | 미시작. `.planning/phase-54-title-hardening/PLAN.md` 존재. writer.py:538-539 하드코딩 fallback 제거 + H1 형식 강제 + CoT/프롬프트 누출 차단. "추천 TOP5 (연도년)" 패턴 134건 재발 중 — 시급. |
 | 55 | Curation Content Quality Diagnostics | 📋 Planned | 미시작. `.planning/phase-55-curation-quality-diagnostics/CONTEXT.md` 존재. 경험 허위 주장·소 스불명 수치·건강 효능 단정 측정(read-only). Phase 54 이후. |
+| 69 | Incident Integrity & Dashboard SSOT | ✅ COMPLETED | M3 merged @ f03acaa4c, M4(Phase69-C Dashboard SSOT) merged @ 403f7fba3 · WAITING_FOR_CANDIDATES(no_topics+P01+retryable=0)/LEGACY_UNMERGED/UNKNOWN 표시 + pagination · next_action=M5 품질 게이트 계획 |
 
 **참고 — 문서상 미정리 잔여:**
 - Phase 44 (전수조사 및 전체 수정): 44-01~03 완료, 44-04~05(프롬프트 보완 + 마무리) 미완료. ROADMAP Phase 44 참조.
@@ -476,4 +477,35 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 - 236개 무방어 connect 전수 리팩터는 Non-Goal(본 phase는 최고위험 2곳만). 나머지 crash-safe 경로는 문서화.
 - SC-7 본문 재조합(Phase 73 RAP C03)과 별개 — Phase 74 scope 아님.
 
-*Last updated: 2026-08-16 - Phase 73(SC-4 적용 완료) + Phase 74 실행 완료 (7/7 SC, additive/non-destructive).*
+---
+
+## Reliability Critical Path (M1–M7) 상태표
+
+**의존성:** M1 → M2 → M3 → M4 → M5 → M6 → M7 (동시 진행 금지)
+
+| M | 범위 | 상태 |
+|---|---|---|
+| M1 | PR-CAP-1 Result Contract | COMPLETED |
+| M2 | Phase71 car 복구 | COMPLETED |
+| M3 | Phase69 incident/taxonomy wiring | COMPLETED |
+| M4 | Phase69-C Dashboard SSOT | COMPLETED |
+| M5 | Phase 62~64 Quality Blocking | IN_PROGRESS / ACTIVE_WAITING |
+| M6 | Phase 67/71 Limited Remediation | BLOCKED_BY_M5 |
+| M7 | Phase 61/43 Family Rollout | BLOCKED_BY_M5 |
+
+### M5 내부 상태 (2026-08-18)
+
+- **Phase 62-QB:** ✅ 완료 (CQ-UNIT/TEMPLATE/NUMERIC 게이트)
+- **M5-KA1 (Knowledge Asset Qualification):** READY_WITH_GAPS — 360개 자산 검증 완료, 파일럿 선택 풀=179
+- **M5-KA2-T1 (Traffic Validation Pilot baseline):** INSUFFICIENT_BASELINE — gsc_pages 0행 + ga4_pages curation 미커버로 블로그 선정·C/T 배정 불가
+- **Interior sitemap experiment:** ACTIVE_WAITING — Day 3 (2026-08-21) · Day 7 (2026-08-25) · Day 14 (2026-09-01) 체크포인트 대기
+
+**분기 규칙:**
+- **discovery 성공** (treatment가 unknown 탈출) → 트래픽 파일럿 개방 (KA2 재개, 28일 baseline 확보 조건)
+- **약한 신호** (sitemap 재다운로드만, URL 발견 0건) → 진입점 다양화 후 **ITERATE 최대 1회**
+- **효과 없음** (control과 동일) → **NO_EFFECT_STOP** — 확장 종료, 도메인 수준 재조사
+- 트래픽 파일럿은 discovery 성공 + 28일 baseline 확보 후에만 개방. **Phase 64·M6·M7은 SCALE_CANDIDATE일 때만 진행.** NO_EFFECT_STOP / HARM_STOP 시 확장 종료.
+
+**next_action:** 2026-08-21 Interior sitemap experiment Day 3 checkpoint
+
+*Last updated: 2026-08-18 - M5 조건부 최종 로드맵 반영 (KA1 READY_WITH_GAPS, KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING, Day 3/7/14 체크포인트 + SCALE_CANDIDATE/ITERATE(1회)/NO_EFFECT_STOP/HARM_STOP 분기).*
