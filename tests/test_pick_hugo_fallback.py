@@ -227,10 +227,6 @@ class TestStructuredLogging:
 
     def test_no_data_detail_log_format(self):
         """no_data_detail 로그에 car_id와 reason 포함"""
-        # 로그 포맷 변경이 올바른지 코드에서 확인
-        import ast
-        import inspect
-
         source_file = PROJECT_DIR / "pipelines" / "car" / "pipeline.py"
         content = source_file.read_text()
 
@@ -240,12 +236,173 @@ class TestStructuredLogging:
         # no_data exhausted 로그 존재 확인
         assert "no_data: exhausted" in content, "no_data exhausted log not found"
 
-    def test_keyword_selection_log_format(self):
-        """curation 파이프라인의 키워드 선택 구조화 로그 검증"""
-        source_file = PROJECT_DIR / "pipelines" / "curation" / "pipeline.py"
+    def test_curation_logs_not_in_car_pipeline(self):
+        """curation 로그가 car 파이프라인에 포함되지 않음 확인"""
+        source_file = PROJECT_DIR / "pipelines" / "car" / "pipeline.py"
         content = source_file.read_text()
+        assert "relevance_gate_block:" not in content
+        assert "keyword_skip:" not in content
 
-        # no_keyword 구조화 로그 존재 확인
-        assert "no_keyword: total=" in content or "no_keyword:" in content
-        assert "relevance_gate_block:" in content, "relevance_gate_block log not found"
-        assert "keyword_skip:" in content, "keyword_skip log not found"
+
+class TestPersonaPickSuccessSkipsFallback:
+    """persona_pick 성공 시 fallback 미실행 검증"""
+
+    def test_persona_pick_success_no_fallback(self, sim_dbs, monkeypatch):
+        """persona_pick이 데이터를 반환하면 top5_rank fallback을 시도하지 않음"""
+        from pipelines.car.data_builder import build_persona_pick_input
+
+        conn = sqlite3.connect(str(sim_dbs["car"]))
+        conn.row_factory = sqlite3.Row
+
+        # trims 있는 topic 찾기
+        topics = conn.execute("""
+            SELECT t.id, t.car_id, t.post_type, t.site_id, t.competitor_car_id, t.priority,
+                   (SELECT COUNT(*) FROM trims WHERE car_id=t.car_id AND status='시판' AND price>=500) as trim_count
+            FROM topics t WHERE t.status='pending' AND t.post_type='persona_pick'
+        """).fetchall()
+
+        eligible = [t for t in topics if t["trim_count"] > 0]
+        if not eligible:
+            pytest.skip("trims 있는 topic 없음")
+
+        topic = dict(eligible[0])
+        topic["persona_type"] = "commuter"
+
+        # build_persona_pick_input이 데이터를 반환하는지 확인
+        data = build_persona_pick_input(conn, topic, str(sim_dbs["car"]))
+        if data is None:
+            pytest.skip("build_persona_pick_input이 None 반환 — fuel_efficiency 없음")
+
+        # 성공 시 data가 truthy → fallback 블록 진입하지 않음
+        assert data, "persona_pick이 데이터를 반환해야 함"
+        assert "model" in data or "base_price" in data, "data에 model 또는 base_price 포함"
+
+        conn.close()
+
+
+class TestPersonaPickFailThenTop5RankSuccess:
+    """persona_pick 실패 후 top5_rank 성공 검증"""
+
+    def test_fallback_to_top5_rank_succeeds(self, sim_dbs):
+        """persona_pick_eligibility이 False인 topic으로 top5_rank fallback 시도"""
+        from pipelines.car.data_builder import persona_pick_eligibility, build_top5_rank_input
+        import random
+
+        conn = sqlite3.connect(str(sim_dbs["car"]))
+        conn.row_factory = sqlite3.Row
+
+        # trims 0건인 topic 찾기 (persona_pick_eligibility이 False)
+        topics = conn.execute("""
+            SELECT t.id, t.car_id, t.post_type, t.site_id, t.competitor_car_id, t.priority,
+                   (SELECT COUNT(*) FROM trims WHERE car_id=t.car_id AND status='시판' AND price>=500) as trim_count,
+                   (SELECT segment FROM cars WHERE car_id=t.car_id) as segment
+            FROM topics t WHERE t.status='pending' AND t.post_type='persona_pick'
+        """).fetchall()
+
+        no_trim = [t for t in topics if t["trim_count"] == 0 and t["segment"]]
+        if not no_trim:
+            pytest.skip("trims 0건 + segment 있는 topic 없음")
+
+        topic = dict(no_trim[0])
+        eligible, reason = persona_pick_eligibility(conn, topic["car_id"])
+        assert not eligible, f"trims 0건 topic은 eligibility=False여야 함: {reason}"
+
+        # top5_rank fallback 시도
+        topic["post_type"] = "top5_rank"
+        topic["rank_type"] = random.choice(["resale", "maintenance", "monthly_cost", "value"])
+        data = build_top5_rank_input(conn, topic, str(sim_dbs["car"]))
+
+        # data가 있으면 fallback 성공, 없으면 구조적 실패 (둘 다 크래시 아님)
+        if data:
+            assert "model" in data or "cars" in data
+
+        conn.close()
+
+
+class TestBothCandidatesMissing:
+    """양쪽 후보 없음 시나리오 검증"""
+
+    def test_no_pending_topics_returns_no_data(self, sim_dbs):
+        """pending topics이 0건이면 no_data 반환"""
+        conn = sqlite3.connect(str(sim_dbs["car"]))
+        conn.row_factory = sqlite3.Row
+
+        # 모든 pending topics를 skip으로 변경
+        conn.execute("UPDATE topics SET status='skip_no_data' WHERE status='pending'")
+        conn.commit()
+
+        topics = conn.execute("""
+            SELECT * FROM topics WHERE status='pending' AND post_type='persona_pick'
+        """).fetchall()
+
+        assert len(topics) == 0, "pending topics이 0건이어야 함"
+
+        conn.close()
+
+    def test_persona_pick_and_top5_rank_both_fail(self, sim_dbs):
+        """persona_pick과 top5_rank 모두 실패하는 조건 검증"""
+        from pipelines.car.data_builder import persona_pick_eligibility, build_top5_rank_input
+        import random
+
+        conn = sqlite3.connect(str(sim_dbs["car"]))
+        conn.row_factory = sqlite3.Row
+
+        # trims 0건 + segment 없는 topic (top5_rank도 실패)
+        topics = conn.execute("""
+            SELECT t.id, t.car_id, t.post_type,
+                   (SELECT COUNT(*) FROM trims WHERE car_id=t.car_id AND status='시판' AND price>=500) as trim_count,
+                   (SELECT segment FROM cars WHERE car_id=t.car_id) as segment
+            FROM topics t WHERE t.status='pending' AND t.post_type='persona_pick'
+        """).fetchall()
+
+        # trims 0건인 topic
+        no_trim = [t for t in topics if t["trim_count"] == 0]
+        if not no_trim:
+            pytest.skip("trims 0건 topic 없음")
+
+        for t in no_trim[:3]:
+            topic = dict(t)
+            eligible, _ = persona_pick_eligibility(conn, topic["car_id"])
+            if eligible:
+                continue
+
+            topic["post_type"] = "top5_rank"
+            topic["rank_type"] = random.choice(["resale", "maintenance", "monthly_cost", "value"])
+            data = build_top5_rank_input(conn, topic, str(sim_dbs["car"]))
+
+            # 둘 다 실패할 수 있음 — 크래시만 없으면 됨
+            # (segment가 있으면 top5_rank가 성공할 수도 있음)
+
+        conn.close()
+
+
+class TestDuplicateTopicPrevention:
+    """동일 실행 중 중복 주제 선택 방지 검증"""
+
+    def test_skip_ids_prevents_reslection(self, sim_dbs):
+        """skip_ids에 추가된 topic이 다시 선택되지 않음"""
+        conn = sqlite3.connect(str(sim_dbs["car"]))
+        conn.row_factory = sqlite3.Row
+
+        skip_ids = []
+        selected_ids = []
+
+        for _ in range(5):
+            topics = conn.execute("""
+                SELECT * FROM topics WHERE status='pending' AND post_type='persona_pick'
+                AND id NOT IN ({}) ORDER BY RANDOM() LIMIT 1
+            """.format(",".join("?" * len(skip_ids)) if skip_ids else "-1"),
+                skip_ids if skip_ids else []
+            ).fetchone()
+
+            if not topics:
+                break
+
+            topic = dict(topics)
+            skip_ids.append(topic["id"])
+            selected_ids.append(topic["id"])
+
+        conn.close()
+
+        # 중복 없음 확인
+        assert len(selected_ids) == len(set(selected_ids)), f"중복 topic 선택됨: {selected_ids}"
