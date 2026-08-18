@@ -159,9 +159,9 @@ cp ops_dashboard/ops.db ops_dashboard/ops.db.bak_onboard_{YYYYMMDD}
 **화면 반영 (매 등록 후):**
 ```bash
 # 신규 블로그 검사 실행 → 화면 즉시 갱신
-curl -s -X POST -u ops:112233 "http://localhost:5060/api/run-checks?blog_id={blog_id}"
+curl -s -X POST -u "${OPS_USER}:${OPS_PASSWORD}" "http://localhost:5060/api/run-checks?blog_id={blog_id}"
 # 또는 전체 (기존 블로그 영향 감안)
-curl -s -X POST -u ops:112233 http://localhost:5060/api/run-checks
+curl -s -X POST -u "${OPS_USER}:${OPS_PASSWORD}" http://localhost:5060/api/run-checks
 ```
 - 반영 확인: `/api/attention`·`/api/registry`·`/blog/{blog_id}` 페이지에서 새 blog_id의 검사 결과 확인.
 

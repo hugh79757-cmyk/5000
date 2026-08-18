@@ -291,14 +291,14 @@ python3 dispatcher.py {blog_id}
 **대시보드 재검사**:
 
 ```bash
-curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD}" \
   "http://localhost:5060/api/run-checks?blog_id={blog_id}"
 ```
 
 **P04 상태 확인**:
 
 ```bash
-curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD}" \
   "http://localhost:5060/api/registry?blog_id={blog_id}" | python3 -c "
 import sys,json
 d=json.load(sys.stdin)
@@ -467,7 +467,7 @@ HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes \
 # python3 dispatcher.py esim-hugo
 
 # 7. (배포 후) 검증
-# curl -s -X POST -u ops:112233 "http://localhost:5060/api/run-checks?blog_id=esim-hugo"
-# curl -s -u ops:112233 "http://localhost:5060/api/registry?blog_id=esim-hugo" → P04 status=unknown
+# curl -s -X POST -u "${OPS_USER}:${OPS_PASSWORD}" "http://localhost:5060/api/run-checks?blog_id=esim-hugo"
+# curl -s -u "${OPS_USER}:${OPS_PASSWORD}" "http://localhost:5060/api/registry?blog_id=esim-hugo" → P04 status=unknown
 # curl -s -o /dev/null -w "%{http_code}" https://esim.techpawz.com/ → 200
 ```

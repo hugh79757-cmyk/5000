@@ -207,15 +207,15 @@ HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify --source
 ### 재배포 후 검증
 ```bash
 # 1. 대시보드 재검사 트리거
-curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD}" \
   "http://localhost:5060/api/run-checks?blog_id={blog_id}"
 
 # 2. /api/registry에서 P04 상태 확인
-curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD}" \
   "http://localhost:5060/api/registry?blog_id={blog_id}" | python3 -m json.tool | grep -A3 '"problem_id": "P04"'
 
 # 3. /api/attention에서 fail_checks 확인
-curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD}" \
   "http://localhost:5060/api/attention" | python3 -m json.tool | grep "{blog_id}"
 ```
 

@@ -56,8 +56,8 @@
 2. **로컬 Hugo 빌드 0에러**: `HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify --source /경로/블로그`. 에러 있으면 중단·롤백.
 3. **배포**: `dispatcher.py`로 블로그별 1회 배포. 수동 wrangler·`--commit-dirty=true`·git push 금지. Workers 블로그(health/pet/kitchen/beauty/camping/baby)는 `wrangler deploy --config wrangler.toml`, 그 외 Pages는 `wrangler pages deploy` — dispatcher.py가 자동 구분.
 4. **재검사 트리거 (필수, 누락 금지)**: 코드 수정·배포 후 화면이 갱신되려면 반드시 수동 재검사 호출이 필요하다. 대시보드에는 자동 재검사 스케줄이 없으므로, **POST /api/run-checks?blog_id={blog_id}**(개별 블로그) 또는 **POST /api/run-checks**(전체)를 호출하지 않으면 `/api/registry`·`/api/attention`·블로그 상세 페이지에 수정 결과가 반영되지 않는다.
-   - 개별 블로그 FIX 후: `curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" "http://localhost:5060/api/run-checks?blog_id={blog_id}"` → 반환 직후 check_results 갱신. 그 다음에 `/api/registry` status 확인.
-   - 정비 체크리스트 항목(M01~M10) FIX 후: `curl -s -X POST -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" -H "Content-Type: application/json" -d "{\"blog_id\":\"{blog_id}\"}" "http://localhost:5060/api/maintenance/checklist"` → 정비 체크리스트 재실행.
+   - 개별 블로그 FIX 후: `curl -s -X POST -u "${OPS_USER}:${OPS_PASSWORD}" "http://localhost:5060/api/run-checks?blog_id={blog_id}"` → 반환 직후 check_results 갱신. 그 다음에 `/api/registry` status 확인.
+   - 정비 체크리스트 항목(M01~M10) FIX 후: `curl -s -X POST -u "${OPS_USER}:${OPS_PASSWORD}" -H "Content-Type: application/json" -d "{\"blog_id\":\"{blog_id}\"}" "http://localhost:5060/api/maintenance/checklist"` → 정비 체크리스트 재실행.
    - **경고**: 이 호출 없이는 FAIL→PASS를 확인할 수 없다. 체크 결과를 "믿고" 완료 보고하는 것은 금지.
 5. **재검증 FAIL→PASS 확인**: 재검사 트리거 호출 후 `/api/registry`에서 해당 rule_id의 status가 `"fail"` → `"pass"` 또는 `"unknown"`(체크 미실행 상태로 전환)으로 바뀌었는지 확인. 예: R04 fix 후 `/api/registry` → R04 status=`"pass"`, evidence에 `"extend_head: GA4 + mobile CSS found"` 등. **FAIL→PASS 확인 없이 완료 보고 금지.**
 6. **로그**: 파괴적 작업 포함 시 `logs/destructive_YYYY-MM-DD.log`에 한 줄 append. 민감정보 마스킹.

@@ -70,7 +70,7 @@ PLAYBOOK_INDEX.yaml의 `verify` 항목에 명시된 방법으로 검증:
    ```
    POST /api/run-checks?blog_id={blog_id}
    ```
-   (인증: OPS_USER/OPS_PASSWORD 환경변수, 없으면 ops/112233)
+   (인증: OPS_USER/OPS_PASSWORD 환경변수 필수 — 없으면 RuntimeError)
 
 2. /api/registry 상태 확인:
    ```

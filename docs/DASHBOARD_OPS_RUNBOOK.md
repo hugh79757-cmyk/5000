@@ -16,18 +16,18 @@
 
 **자격 정보 (평문 하드코딩 금지)**:
 - 환경변수 `OPS_USER` / `OPS_PASSWORD`가 있으면 그 값으로 인증.
-- 없으면 기본값 `ops` / `112233` 사용 (앱 기본값).
+- 없으면 앱은 RuntimeError 발생 (fail-closed). 반드시 환경변수 설정 필요.
 - **스킬 본문에 평문 비밀번호를 하드코딩하지 말 것** — 항상 환경변수 우선, fallback은 "기본값 사용"이라고만 명시.
 
 **핵심 엔드포인트 (GET, 인증 필요)**:
 
 ```bash
 # 현재 fail·issue 목록 (알림 대상)
-curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -u "${OPS_USER}:${OPS_PASSWORD}" \
   http://localhost:5060/api/attention
 
 # 규칙 14개 + 오류 25개 선언 + 실데이터를 단일 스키마로
-curl -s -u "${OPS_USER:-ops}:${OPS_PASSWORD:-112233}" \
+curl -s -u "${OPS_USER}:${OPS_PASSWORD}" \
   http://localhost:5060/api/registry | python3 -m json.tool
 ```
 
