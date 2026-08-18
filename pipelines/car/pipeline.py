@@ -177,6 +177,26 @@ def run(blog_cfg):
                     logger.info(f"persona_pick: {topic['car_id']} 가격 {_price}만원 → {topic['persona_type']}")
                     data = build_persona_pick_input(conn, topic, CAR_DB_PATH)
 
+                    # ── persona_pick 실패 시 top5_rank fallback (persona 후보 0건일 때만) ──
+                    if not data:
+                        _fallback_reason = "persona_pick_no_data"
+                        try:
+                            from pipelines.car.data_builder import build_top5_rank_input
+                            fallback_topic = dict(topic)
+                            fallback_topic["post_type"] = "top5_rank"
+                            fallback_topic["rank_type"] = _rnd.choice(["resale", "maintenance", "monthly_cost", "value"])
+                            data = build_top5_rank_input(conn, fallback_topic, CAR_DB_PATH)
+                            if data:
+                                _fallback_reason = "persona_pick_fallback_top5_rank"
+                                logger.info(f"[{blog_id}] persona_pick → top5_rank fallback: {topic['car_id']}")
+                            else:
+                                _fallback_reason = "persona_pick_and_top5_rank_both_failed"
+                        except Exception as _fb_e:
+                            _fallback_reason = f"persona_pick_fallback_exception:{_fb_e}"
+                            data = None
+                        if not data:
+                            logger.warning(f"[{blog_id}] no_data_detail: car_id={topic['car_id']} reason={_fallback_reason}")
+
 
                 elif post_type == "price_trend":
                     from pipelines.car.data_builder import build_price_trend_input
@@ -205,6 +225,8 @@ def run(blog_cfg):
 
     if not data:
         conn.close()
+        _skip_summary = ", ".join(str(s) for s in skip_ids[-5:]) if skip_ids else "none"
+        logger.warning(f"[{blog_id}] no_data: exhausted {len(skip_ids)} candidates (last_ids=[{_skip_summary}])")
         return {"success": False, "reason": "no_data"}
 
     logger.info(data["model"] + " " + data.get("trim", "") + " (" + str(data.get("base_price", "")) + "만원)")

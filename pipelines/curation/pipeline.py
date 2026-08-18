@@ -159,6 +159,7 @@ def _select_keyword(blog_id):
     """
     keywords = get_keywords(blog_id)
     if not keywords:
+        logger.warning(f"[{blog_id}] no_keyword: KEYWORD_MAP에 키워드 없음")
         return None
 
     import sqlite3 as _sq
@@ -180,20 +181,26 @@ def _select_keyword(blog_id):
     recent_cats = {_extract_category(r[0]) for r in recent_rows}
 
     available = [k for k in keywords if k not in used_set]
+    _after_30d_dedup = len(available)
     # 격리된 키워드 제외
     available = [k for k in available if not health_store.is_quarantined(blog_id, k)]
+    _after_quarantine = len(available)
     # 최근 14일 내 low_relevance 실패 키워드 제외 (Phase 10-1 pre-collect gate)
     try:
         low_relevance_failed = health_store.get_recent_failed_keywords(blog_id, "low_relevance", days=14)
         available = [k for k in available if k not in set(low_relevance_failed)]
     except Exception:
         pass
+    _after_low_relevance = len(available)
     if not available:
         conn.close()
-        if len(keywords) > 0:
-            logger.warning(f"[{blog_id}] 모든 키워드 30일 내 사용 완료 또는 격리 중 — 발행 중단")
-        else:
-            logger.warning(f"[{blog_id}] 모든 키워드 30일 내 사용 완료 — 발행 중단")
+        _blocked_kw = [k for k in keywords if k in used_set]
+        _quarantined_kw = [k for k in keywords if k not in used_set and health_store.is_quarantined(blog_id, k)]
+        logger.warning(
+            f"[{blog_id}] no_keyword: total={len(keywords)} after_30d_dedup={_after_30d_dedup}"
+            f" after_quarantine={_after_quarantine} after_low_relevance={_after_low_relevance}"
+            f" used_30d={_blocked_kw} quarantined={_quarantined_kw}"
+        )
         return None  # 강제 fallback 금지, 사용자 알림 대기
 
     cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
@@ -201,25 +208,27 @@ def _select_keyword(blog_id):
 
     conn = _sq.connect(str(DB_PATH))
     # candidates → available → 전체 순으로 상품 3개 이상인 키워드 탐색
-    for pool in [candidates, available]:
+    for pool_name, pool in [("cat_filtered", candidates), ("available", available)]:
         for kw in pool:
             cnt = conn.execute(
                 "SELECT COUNT(*) FROM products WHERE keyword=?", (kw,)
             ).fetchone()[0]
-            if cnt >= 3:
-                # Relevance gate: 샘플 제품 3개의 평균 relevance가 threshold 미만이면 스킵
-                from shared.relevance_scorer import score_products, passes_gate
-                sample = get_products(kw, limit=3)
-                if sample:
-                    scores = score_products(sample, blog_id)
-                    if not passes_gate(scores)[0]:
-                        logger.debug(f"[{blog_id}] relevance gate 통과 실패: {kw} (avg={scores['avg']:.2f} < threshold={scores['threshold']:.2f})")
-                        continue
-                conn.close()
-                return kw
+            if cnt < 3:
+                logger.debug(f"[{blog_id}] keyword_skip: {kw} products={cnt} < 3 (pool={pool_name})")
+                continue
+            # Relevance gate: 샘플 제품 3개의 평균 relevance가 threshold 미만이면 스킵
+            from shared.relevance_scorer import score_products, passes_gate
+            sample = get_products(kw, limit=3)
+            if sample:
+                scores = score_products(sample, blog_id)
+                if not passes_gate(scores)[0]:
+                    logger.info(f"[{blog_id}] relevance_gate_block: {kw} avg={scores['avg']:.2f} threshold={scores['threshold']:.2f}")
+                    continue
+            conn.close()
+            return kw
     conn.close()
     # 상품 있는 키워드가 하나도 없음
-    logger.warning(f"[{blog_id}] 모든 키워드 상품 부족 — 발행 중단")
+    logger.warning(f"[{blog_id}] no_keyword: all {len(available)} candidates blocked (products<3 or relevance_gate)")
     return None
 
 
@@ -1103,12 +1112,12 @@ def _run_inner(cfg, blog_id, daily_quota):
         logger.error(f"[{blog_id}] {_lang_err}")
         return {"success": False, "reason": "language_error"}
 
-    title = sanitize_title(article["title"])
+    title = normalize_title(sanitize_title(article["title"]), language="ko")
     body_md = article["body_md"]
     description = article.get("description", "")
     if description:
         body_md = f"<!-- DESC: {description} -->\n\n{body_md}"
-    slug = _make_slug(keyword)
+    slug = preserve_slug(article.get("slug"), title, _make_slug)
 
     # 제목 품질 검증 — 문맥 확인 후 blocked 키워드 차단
     # 제목에 allowed 키워드가 하나라도 있으면 (캠핑 맥락) 차단 스킵
@@ -1198,12 +1207,12 @@ def _run_inner(cfg, blog_id, daily_quota):
         if _lang_err:
             logger.warning(f"[{blog_id}] fallback 언어 오류 — 다음 시도")
             continue
-        title = sanitize_title(article["title"])
+        title = normalize_title(sanitize_title(article["title"]), language="ko")
         body_md = article["body_md"]
         description = article.get("description", "")
         if description:
             body_md = f"<!-- DESC: {description} -->\n\n{body_md}"
-        slug = _make_slug(keyword)
+        slug = preserve_slug(article.get("slug"), title, _make_slug)
         # while 루프 재진입 → _title_is_duplicate 재검사
 
     # === 본문 구조 정규화 (결정론적 후처리) ===
