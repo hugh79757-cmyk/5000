@@ -75,14 +75,19 @@ def _touch_sync_marker() -> None:
 # Auth helpers
 # ---------------------------------------------------------------------------
 
-_DEFAULT_USER = "ops"
-_DEFAULT_PASSWORD = "112233"
-
-
 def _get_auth_credentials() -> tuple[str, str]:
-    """Read OPS_USER / OPS_PASSWORD from environment."""
-    user = os.environ.get("OPS_USER", _DEFAULT_USER)
-    password = os.environ.get("OPS_PASSWORD", _DEFAULT_PASSWORD)
+    """Read OPS_USER / OPS_PASSWORD from environment.
+
+    Fail-closed: env var가 없으면 서비스 시작 거부.
+    """
+    user = os.environ.get("OPS_USER")
+    password = os.environ.get("OPS_PASSWORD")
+    if not user or not password:
+        raise RuntimeError(
+            "CRITICAL: OPS_USER and OPS_PASSWORD environment variables are required. "
+            "Service cannot start without credentials. "
+            "Set them in .env or launchd plist."
+        )
     return user, password
 
 
@@ -653,8 +658,8 @@ def create_app() -> Flask:
         template_folder="templates",
         static_folder="static",
     )
-    app.config["OPS_USER"] = os.environ.get("OPS_USER", _DEFAULT_USER)
-    app.config["OPS_PASSWORD"] = os.environ.get("OPS_PASSWORD", _DEFAULT_PASSWORD)
+    app.config["OPS_USER"] = os.environ.get("OPS_USER") or ""
+    app.config["OPS_PASSWORD"] = os.environ.get("OPS_PASSWORD") or ""
 
     _register_human_routes(app)
     _register_api_routes(app)
