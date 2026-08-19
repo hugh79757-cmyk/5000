@@ -167,15 +167,15 @@ expected_incremental_revenue(후보 키워드)
 
 ```
 recommendation_score = w1 × expected_incremental_revenue
-                     − w2 × content_cost_estimate
                      − w3 × risk_score
    (신뢰도 낮음이면 score × 0.5 페널티, guardrail G8/G9 위반 시 risk_score 증가)
 
-초기 가중치: w1=1.0, w2=0.3, w3=0.2 (config에서 조정 가능)
+초기 가중치: w1=1.0, w3=0.2 (config에서 조정 가능)
+content_cost_estimate: Phase 2 전까지 추천 점수에서 제외.
+  Phase 2 구현 시점에 조사·작성·검수 비용 기반 1~3등급 rubric을 정의한 뒤 점수에 추가한다.
 ```
 
 - `expected_incremental_revenue`: 2-3 정의 (증분 클릭 × 블로그 단가 — 이중 곱 금지).
-- `content_cost_estimate`: 주제 난이도/길이 기반 (초기엔 단순 등급 1~3).
 - `risk_score`: cannibalization 위험(G8), 색인 위험(G9), 경쟁 강도(기존 상위 순위 글 존재 여부).
 - 점수는 **대시보드 추천 카드에 표시**하고, 근거(각 구성요소 값)를 함께 노출한다.
 
@@ -287,7 +287,7 @@ recommendation_score = w1 × expected_incremental_revenue
 | AC-6 | guardrail 적용 | G1(클릭<3 숨김), G3(28일), G4(지연 마커), G8(cannibalization), G9(색인 플래그) 동작 | 통합 테스트 |
 | AC-7 | true EPC 미표시 | attribution 데이터 부재 상태에서 true EPC 필드 미노출 (추정 금지) | 대시보드 스모크 테스트 |
 | AC-8 | Phase 0 게이트 | Q1~Q6 전부 통과 로그 기록 (부분 통과 시 실패 항목 명시) | 실행 로그 |
-| AC-9 | 추천 점수 | 3-3 점수식 구성요소(증분수익, 비용, 리스크, 신뢰도) 모두 표시 | API 응답 검사 |
+| AC-9 | 추천 점수 | 3-3 점수식 구성요소(증분수익, 리스크, 신뢰도) 모두 표시, content_cost_estimate는 Phase 2 전까지 점수에 미포함 | API 응답 검사 |
 
 ## 참조 문서
 
