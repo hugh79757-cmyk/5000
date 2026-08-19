@@ -95,10 +95,62 @@
 - GSC 데이터가 14일분(얇음)이라 초기 분면 판정 신뢰도 낮음 → Phase 0에서 AdSense 수집 복구 + GSC 수집 지속 필요.
 - 추정치 기반 "추천"은 참고용, 최종 판단은 사람.
 
+## 섹션 4: AdSense 수집 복구 (Phase 0 전제) [승인됨]
+
+### 4-1. 문제 요약 (감사에서 검증됨)
+- 데이터 공백 3주: `adsense_daily` 최신 데이터 2026-07-28.
+- 원인 판정: OAuth 만료 아님 (토큰 8/18~8/19 갱신 중). GA4 토큰 갱신 시 `oauth2.googleapis.com DNS 해석 실패` 반복 + 8/11 이후 launchd 프로세스 hang (PID 746 등 5개 프로세스 8/11 상태로 생존).
+- 계정 누락: `analytics_collector.py:644` `for account_num in [1, 2]:` — 계정3(aikorea24) 수집 안 됨.
+- 매핑 부재: `adsense_daily.domain` → blog_id 매핑 없음 (섹션 1 Phase 1 필요).
+
+### 4-2. 복구 작업 정의
+
+| # | 작업 | 설명 | 위험 |
+|---|------|------|------|
+| R1 | hang 프로세스 정리 | 8/11 hang된 PID 746/738/948/859/950 kill + watchdog/launchd 재시작 | 낮음 |
+| R2 | DNS/네트워크 확인 | oauth2.googleapis.com 해석 실패 원인 확인 (네트워크/프록시) | 정보 수집 |
+| R3 | 수집 복구 | `collect_analytics.sh` 수동 1회 실행 → 성공/실패 확인 | 낮음 — GET 전용 |
+| R4 | 계정3 추가 | collector loop에 account 3 (aikorea24) 포함 | 중간 — 토큰/시크릿 이미 존재 |
+| R5 | 도메인→blog_id 매핑 | `adsense_daily.domain` ↔ `blog_lifecycle` 매핑 (config/blogs.d 기반) | 중간 — 인벤토리 밖 도메인 분리 필요 |
+| R6 | 소급 데이터 | GSC 16개월 조회 API로 부분 복구. AdSense는 API 조회 기간 제한 확인 후 가능 범위만 | 정보 수집 |
+
+### 4-3. 실행 경계
+- R1~R3: full_auto 가능 (수집 파이프라인 복구, 낮은 위험)
+- R4~R6: human_approval (계정 추가·매핑 로직은 코드 변경)
+
+### 4-4. 완료 기준
+- `adsense_daily`에 07-28 이후 데이터 적재
+- 계정3(aikorea24) 행 포함
+- domain→blog_id 매핑 테이블 존재 (대시보드 조인 가능)
+
+## 섹션 5: 구현 범위/우선순위 [승인됨]
+
+### 5-1. 구현 순서 (감사 우선순위 A→F 기반)
+
+| Phase | 범위 | 내용 |
+|-------|------|------|
+| Phase 0 | 수집 복구 | 섹션 4 R1~R6 (AdSense 3주 공백 + 계정3 + 매핑) |
+| Phase 1 | 분석 대시보드 | domain→blog_id 매핑, L1~L3 지표 API·화면 (키워드 EPC 랭킹, "추정 수익" 라벨, 클릭<3 숨김, 28일 기본) |
+| Phase 2 | 발행 전략 엔진 | 4분면 분류, 발행 추천 카드 (제안만, human_approval) |
+| Phase 3 | 피드백 루프 | 추천→발행→28일 재평가 주기 (L4 수익 최적화) |
+| Phase 4 | (후속) | 제휴 subId+reporting, A/B 실험 (감사 ②⑤ 항목) |
+
+### 5-2. 중복 개발 금지 (감사 ⑦ 확인)
+- AdSense 수집 파이프라인 (기존 `com.5000.analytics` + `analytics_collector.py` 재사용)
+- data/dashboard revenue API·화면 (기존 5050 대시보드 확장 — 신규 대시보드 아님)
+- coupang_* 링크 생성 (기존 재사용, subId만 추가)
+- funnel_tracking 스키마 (기존 재사용)
+- blog_efficiency (기존 재사용)
+- scheduler/dispatcher/플레이북 구조 (기존 재사용)
+
+### 5-3. 완료 기준 (전체)
+- 대시보드에 키워드별 추정 수익·EPC·클릭·CTR·평균순위 표시
+- 발행 추천 카드가 EPC 기반 4분면으로 생성
+- 추천→발행→재평가 루프가 28일 주기로 동작
+
 ## 미결정 (다음 섹션)
 
-- 섹션 4: AdSense 수집 복구 (3주 공백, 계정3 aikorea24 누락) — Phase 0 전제 조건.
-- 섹션 5: 구현 범위/우선순위.
+- 없음 — 전체 설계 승인 완료. 다음 단계: 스펙 셀프 리뷰 → 사용자 리뷰 → writing-plans로 구현 계획.
 
 ## 참조 문서
 
