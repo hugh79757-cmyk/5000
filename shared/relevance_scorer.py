@@ -14,6 +14,7 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "kitchen-hugo": {"threshold": 0.65},
     "pet-hugo": {"threshold": 0.55},
     "appliance-hugo": {"threshold": 0.65},    # Phase 10: NEW — was using default 0.75
+    "golf-hugo": {"threshold": 0.50},         # golf products use brand names, default 0.75 blocks all
 }
 
 OFFTOPIC_THRESHOLD = 0.20
