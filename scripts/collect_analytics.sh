@@ -52,7 +52,7 @@ run_source() {
   local name="$1"; shift
   local start; start=$(date '+%Y-%m-%d %H:%M:%S')
   local rc=0
-  timeout "$API_TIMEOUT" "$PY" -c "$@" >> "$LOG_FILE" 2>&1 || rc=$?
+  /opt/homebrew/bin/timeout "$API_TIMEOUT" "$PY" -c "$@" >> "$LOG_FILE" 2>&1 || rc=$?
   local end; end=$(date '+%Y-%m-%d %H:%M:%S')
   local st
   if [ "$rc" -eq 0 ]; then

@@ -31,6 +31,11 @@ else
   RID=$( "$PY" -c "import json;print(json.load(open('$STATUS')).get('last_run_id',''))" )
   LST=$( "$PY" -c "import json;print(json.load(open('$STATUS')).get('last_success_ts',''))" )
   note "run_id=$RID  last_success_ts=$LST"
+  if [ -z "$LST" ]; then
+    bad "heartbeat 부재 (last_success_ts 공백) — 성공 기록 없음"
+  else
+    ok "heartbeat 존재: $LST"
+  fi
   if grep -q "수집 완료 (성공" "$LOG" || grep -q "수집 종료 (rc=" "$LOG"; then
     ok "로그 포맷 = 신버전 (rc 표시됨)"
   else
@@ -43,31 +48,37 @@ else
   fi
 fi
 
-echo "=== ② source별 vs status.json 일치 (조회만) ==="
+echo "=== ② source별 rc!=0 → FAIL (조회만) ==="
 if [ -f "$STATUS" ]; then
-  "$PY" - <<'PY'
+  RC_RES=$( "$PY" - <<'PY'
 import json
 d = json.load(open("/Users/twinssn/Projects/5000/data/analytics_status.json"))
 sources = d.get('sources', {})
-allok = True
+fail = False
 for s in ('ga4','gsc','adsense','efficiency'):
     st = sources.get(s, {})
-    print(f"  • {s}: status={st.get('status')} rc={st.get('exit_code')} start={st.get('started')} end={st.get('finished')}")
-    if st.get('status') not in ('ok', None):
-        allok = False
+    rc = st.get('exit_code') or 0
+    print(f"  • {s}: status={st.get('status')} rc={rc} start={st.get('started')} end={st.get('finished')}")
+    if rc != 0 or st.get('status') != 'ok':
+        fail = True
 oc = d.get('overall_exit_code')
 print(f"  • OVERALL_RC={oc}")
-if allok and oc == 0:
-    print("  ✅ 모든 source ok + OVERALL_RC=0")
-elif oc is not None:
-    print(f"  ⚠️  OVERALL_RC={oc} — 부분/실패 (상세는 ISSUES 확인)")
+print("GATE2_5_RC_FAIL" if (fail or (oc is not None and oc != 0)) else "GATE2_5_RC_OK")
 PY
+)
+  echo "$RC_RES"
+  if echo "$RC_RES" | grep -q "GATE2_5_RC_FAIL"; then
+    bad "rc!=0 또는 source 실패 — 수집 실패 (rc!=0는 FAIL)"
+  else
+    ok "모든 source ok + OVERALL_RC=0"
+  fi
 fi
 
-echo "=== ③ DB vs 기준선 (SELECT만) ==="
+echo "=== ③ DB vs 기준선 + 무증분 → FAIL (SELECT만) ==="
 if [ -f "$BASELINE" ]; then
-  "$PY" - <<'PY'
+  DBRES=$( "$PY" - <<'PY'
 import sqlite3, json
+from datetime import date
 db = "/Users/twinssn/Projects/5000/data/analytics.db"
 base = json.load(open("/Users/twinssn/Projects/5000/data/gate25_baseline.json"))
 def q(sql):
@@ -85,7 +96,18 @@ for (tbl, cols) in [("adsense_daily","account,domain,date"),("gsc_keywords","blo
     print(f"  • {tbl} 중복 unique key: {dup}건")
 c = sqlite3.connect(db); integ = c.execute("PRAGMA integrity_check;").fetchone(); c.close()
 print(f"  • integrity_check: {integ[0]} (read-only)")
+today = date.today().isoformat()
+amax = q("SELECT MAX(date) FROM adsense_daily;")[0]
+print(f"  • TODAY={today} adsense_max={amax}")
+print("GATE2_5_DB_FAIL" if (amax is None or amax < today) else "GATE2_5_DB_OK")
 PY
+)
+  echo "$DBRES"
+  if echo "$DBRES" | grep -q "GATE2_5_DB_FAIL"; then
+    bad "DB 무증분 (adsense_daily에 today 데이터 없음)"
+  else
+    ok "DB 증분 확인 (adsense_daily에 today 데이터 존재)"
+  fi
 else
   bad "기준선 파일 없음 — DB 비교 불가"
 fi
