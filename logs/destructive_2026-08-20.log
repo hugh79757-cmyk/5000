@@ -1,0 +1,5 @@
+[2026-08-20 14:33:15] PROTOCOL_START GATE2.5 recovery | 사전카운트=analytics:unloaded(-1), watchdog:loaded(0) | 백업=logs/launchd_state_20260820_143315.txt + scripts/*.bak_GATE25_20260820_143315 | 대상=unload watchdog + edit 2 scripts + load/start analytics
+[2026-08-20 14:36:46] LAUNCHD_UNLOAD com.5000.analytics.watchdog | 사전카운트=loaded(exit0,StartInterval=1800) | 백업=logs/launchd_state_20260820_143315.txt | 사후=unloaded | 보존확인=YES (analytics 그대로 unloaded 유지)
+[2026-08-20 14:37:46] LAUNCHD_LOAD com.5000.analytics | 사전카운트=unloaded(-1) | 백업=logs/launchd_state_20260820_143315.txt | 사후=loaded | 보존확인=YES
+[2026-08-20 14:37:46] LAUNCHD_START com.5000.analytics | 관측대상=정규 run 1회 | 방식=launchctl start (plist 직접 트리거, collect_analytics.sh 수동 직접호출 아님) | 대기=완료폴링
+[2026-08-20 14:38:30] OBSERVE_RUN com.5000.analytics run_id=20260820_143746_43308 | 사전카운트=adsense_daily max=2026-08-19(2521행) | 방식=launchctl start | 사후=rc=0(성공), 4 source ok, last_success_ts=2026-08-20 14:37:46(heartbeat set), lock cleared, adsense_daily max=2026-08-19(=yesterday, 기대치 일치) | 보존확인=YES (DB 무결성 ok, 중복 0)
