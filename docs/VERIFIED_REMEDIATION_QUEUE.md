@@ -11,6 +11,15 @@
 > 원본 큐의 FP 합계·제거 가능 건수를 DB 직접 조회 + 표본 재검증으로 확정.
 > 코드·콘텐츠·DB·설정·pending-fix 변경 없음 (READ-ONLY).
 
+### Baseline 변경 이력
+
+| 버전 | TP | FP | EA | UNC | 합계 | Precision | 비고 |
+|---|---|---|---|---|---|---|---|
+| v1 (교정본) | 212 | 196 | 5 | 25 | 438 | 52.0% | 부모집계 제거 + c01·c06 재판정 |
+| **v2 (권위본)** | 212 | 207 | 8 | 11 | 438 | **50.6%** | semantic 11건 FP→UNC, R2-01 3건 UNC→EA |
+
+v1→v2 변경: semantic SEM-Q2 11건(Viator 상품카드 할인배지/자연조언) FP 확정, R2-01 techpawz 3건 blogsmith r2_uploader 확인→EA. 본 문서의 수치는 **v2(authoritative)** 기준.
+
 ### 교정 전후 비교
 
 | 항목 | 교정 전 | 교정 후 (최종) | 변경 |
@@ -177,20 +186,26 @@ These are all genuine — fix as capacity allows.
 | P6 | c06 INFO 등급 전환 | 10 | 30 min |
 | P3 | R2-01 exempt list update | 0 (EA이므로 제거 대상 아님) | 5 min |
 | P4 | SEM-Q2 threshold review | TBD | 1 hr |
-| **Total P0+P5+P1+P2+P6** | | **195** | **~2.5 hr** |
+| **Total P0+P5+P1+P2+P6** | | **187** | **~2.5 hr** |
 
-**After P0+P5+P1+P2+P6:** FP 196→1, precision 52.0% → **99.5%** (212/213, semantic detect-only 제외).
+**After P0+P5+P1+P2+P6:** FP 196→20, precision 52.0% → **91.4%** (212/232, semantic detect-only 제외).
+
+> **187건 산출:** c08 net FP 제거 76건(84 FP 중 8건은 404→UNC 이동) + c01 47 + FM 40 + CQ 14 + c06 10 = 187. 잔존 FP 20 = semantic 11 + c04 1 + c08 UNC 8.
+>
+> **별도 범위 (전체 FP 제거):** c04(1) + semantic FP(11)까지 포함 시 96.4%(212/220, c08 UNC 8건 잔존). 별도 규칙 변경 필요하므로 본 큐의 primary projection에서 분리.
 
 ### 교정 전후 예상 confusion matrix
 
 | 구분 | 교정 전 (현재) | P0~P2 패치 후 (예상) | P0~P2+P5+P6 패치 후 (예상) |
 |---|---|---|---|
 | TP | 212 | 212 | 212 |
-| FP | 196 | 58 | 1 |
+| FP | 196 | 58 | 20 |
 | EA | 5 | 5 | 5 |
 | UNC | 25 | 25 | 25 |
-| **Precision** | **52.0%** | **78.5%** | **99.5%** |
+| **Precision** | **52.0%** | **78.5%** | **91.4%** |
 | G5 충족? | — | ❌ | ✅ |
+
+> 별도 범위(전체 FP 제거): FP 196→12, precision 96.4%(212/220). c04+semantic FP 포함 규칙 변경 필요. c08 UNC 8건 잔존으로 상한.
 
 ### 재검사 승인 게이트
 
@@ -200,4 +215,4 @@ These are all genuine — fix as capacity allows.
 | G2 | c08 fixture 회귀 없음 확인 | ⏳ 미설계 |
 | G3 | FM-MISSINGKEYS fixture ETAP _index.md 제외 확인 | ⏳ 미설계 |
 | G4 | CQ skip 설정 CUAP/CAP/STAP 적용 확인 | ⏳ 미설계 |
-| G5 | 패치 후 precision ≥ 90% (P0+P5+P1+P2+P6 적용 시 99.5% 예상) | ⏳ 패치 후 측정 |
+| G5 | 패치 후 precision ≥ 90% (P0+P5+P1+P2+P6 적용 시 91.4% 예상) | ⏳ 패치 후 측정 |

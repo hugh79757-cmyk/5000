@@ -99,6 +99,15 @@ P   c04:               1 FP  (escape-hugo 자연어)
 | 미배분 | 204 (오류) | **0** | 합계 일치 확인 (556 = 118 + 438) |
 | **Precision (TP/TP+FP)** | 59.6% | **52.0%** | TP/FP 재분류 반영 (212/408) |
 
+### Baseline 변경 이력
+
+| 버전 | TP | FP | EA | UNC | 합계 | Precision | 비고 |
+|---|---|---|---|---|---|---|---|
+| v1 (교정본) | 212 | 196 | 5 | 25 | 438 | 52.0% | 부모집계 제거 + c01·c06 재판정 |
+| **v2 (권위본)** | 212 | 207 | 8 | 11 | 438 | **50.6%** | semantic 11건 FP→UNC, R2-01 3건 UNC→EA |
+
+v1→v2 변경: semantic SEM-Q2 11건(Viator 상품카드 할인배지/자연조언) FP 확정, R2-01 techpawz 3건 blogsmith r2_uploader 확인→EA. 본 문서의 수치는 **v2(authoritative)** 기준.
+
 > ⚠️ 이전 보정판의 TP 232 / FP 135 / EXCLUDED 47 / 합계 444는 **내부 산식 오류**였다:
 > - check별 상세 표의 TP열 합계 271 ≠ 기재 232 (FP열 139 ≠ 135) — 표와 합계 불일치
 > - frontmatter 71행은 444에 포함시키지 않았는데 EXCLUDED 47로만 기재 → 556과 불일치
@@ -265,16 +274,17 @@ def test_curation_blog_flags_cq03():
 | FP | 196 | 58 (c08 84 + FM 40 + CQ 14 제거) | 1 (c01 47 + c06 10 추가 제거) |
 | EA | 5 | 5 | 5 |
 | UNC | 25 | 25 | 25 |
-| **Precision** | **52.0%** | **78.5%** (212/270) | **99.5%** (212/213) |
+| **Precision** | **52.0%** | **78.5%** (212/270) | **91.4%** (212/232) |
 | G5 충족? | — | ❌ 90% 미달 | ✅ 90% 초과 |
 
-> **핵심:** G5(≥90%)는 P0~P2만으로는 달성 불가. c01(곡선따옴표 자연어 오탐)과 c06(transient mtime)까지 패치해야 99.5% 도달. c01은 체크 규칙 완화(자연어 문맥 제외), c06은 INFO 등급 전환(APPENDIX_C_C06 참조)이 필요.
+> **핵심:** G5(≥90%)는 P0~P2만으로는 달성 불가. c01(곡선따옴표 자연어 오탐)과 c06(transient mtime)까지 패치해야 91.4% 도달. c01은 체크 규칙 완화(자연어 문맥 제외), c06은 INFO 등급 전환(APPENDIX_C_C06 참조)이 필요.
+> **별도 범위 (전체 FP 제거):** P0~P5+P1+P2+P6 외 c04(1)+semantic FP(11)까지 포함한 전 범위 패치 시 96.4%(212/220, c08 UNC 8건 잔존) — 본 문서의 primary projection이 아닌 별도 범위.
 
 **Gate 통과 절차:**
 1. 사용자가 본 보고서의 교정 분류를 검토하고 승인
 2. 각 fixture를 실행하여 회귀 없는지 확인
 3. 패치 적용 후 `RecheckAll` 실행
-4. 새 confusion matrix 산출 → G5 충족 여부 확인 (예상: P0~P2+c01+c06 시 99.5%)
+4. 새 confusion matrix 산출 → G5 충족 여부 확인 (예상: P0~P2+c01+c06 시 91.4%)
 
 ---
 
@@ -563,7 +573,11 @@ def test_curation_blog_flags_cq03():
 | **P3** | R2-01: Add travel external domains to exempt list | **5** | Low (config change) |
 | **P4** | SEM-Q2: Review threshold for product review percentages | **TBD** | Medium (threshold tuning) |
 
-**FP 제거 누적: P0~P2 = 138건 → precision 78.5% (G5 미달). P0~P2+P5+P6 = 195건 → precision 99.5% (G5 달성).**
+**FP 제거 누적: P0~P2 = 138건 → precision 78.5% (G5 미달). P0~P2+P5+P6 = 187건 → precision 91.4% (G5 달성). 별도 범위(전체 FP 제거) = 96.4% (212/220, c08 UNC 8건 잔존).**
+
+> **187건 산출:** c08 패치 후 잔존 UNC 8건(404/SITE_UNREACHABLE) 포함 → c08 net FP 제거 76건. 76+47(c01)+40(FM)+14(CQ)+10(c06) = 187. 잔존 FP 20 = semantic 11 + c04 1 + c08 UNC 8.
+>
+> **96.4% 별도 범위:** c04(1건, escape-hugo 자연어)과 semantic FP(11건, Viator 상품카드)까지 패치할 때 도달 가능하나, 이는 별도 규칙 변경이 필요. c08 UNC 8건(404 포스트)은 패치로 제거 불가하므로 상한 96.4%.
 
 ---
 

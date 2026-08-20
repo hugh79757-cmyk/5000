@@ -4,6 +4,15 @@
 > Source: DASHBOARD_TRUST_GATE_REPORT.md 교정본 (b4/b6) + 구현 결과
 > Status: 패치 구현 + 회귀 테스트 12/12 PASS. 운영 DB·pending-fix·콘텐츠·배포·push 미변경.
 
+### Baseline 변경 이력
+
+| 버전 | TP | FP | EA | UNC | 합계 | Precision | 비고 |
+|---|---|---|---|---|---|---|---|
+| v1 (교정본) | 212 | 196 | 5 | 25 | 438 | 52.0% | 부모집계 제거 + c01·c06 재판정 |
+| **v2 (권위본)** | 212 | 207 | 8 | 11 | 438 | **50.6%** | semantic 11건 FP→UNC, R2-01 3건 UNC→EA |
+
+v1→v2 변경: semantic SEM-Q2 11건(Viator 상품카드 할인배지/자연조언) FP 확정, R2-01 techpawz 3건 blogsmith r2_uploader 확인→EA. 본 문서의 수치는 **v2(authoritative)** 기준.
+
 ---
 
 ## 1. 패치 목록 (구현 완료 — 코드만 변경, 콘텐츠 자동수선 없음)
@@ -40,22 +49,24 @@ FP 207 구성: c08 84 + c01 47 + FM-MISSINGKEYS 40 + CQ03/CQ05 14 + c06 10 + sem
 | 항목 | 패치 전 | 패치 후 | 근거 |
 |---|---|---|---|
 | TP | 212 | 212 | FP 제거만, FN 증가 없음 |
-| FP | 207 | **12** | 195 FP 제거 (c08 84 + c01 47 + FM 40 + CQ 14 + c06 10) |
+| FP | 207 | **20** | 187 FP 제거 (c08 net 76 + c01 47 + FM 40 + CQ 14 + c06 10) |
 | EA | 8 | 8 | R2-01 재분류 완료 (techpawz 3 + 관광 CDN 5) |
-| UNC | 11 | 12 | semantic 10 + finance 1(404) + travel3 1(404→SITE_UNREACHABLE) |
+| UNC | 11 | 19 | semantic 10 + finance 1(404) + travel3 1(404→SITE_UNREACHABLE) + c08 UNC 8 |
 | 합계 | 438 | 438 | ✓ |
-| **precision** | **50.6%** | **94.6%** | 212/(212+12) |
+| **precision** | **50.6%** | **91.4%** | 212/(212+20) |
 | TP recall | 100% | 100% | FN 증가 없음 (FP 제거만) |
 | G5 게이트 (≥90%) | 미달 | **달성** | |
+
+> **별도 범위 (전체 FP 제거):** c04(1)+semantic FP(11)까지 포함 시 96.4%(212/220, c08 UNC 8건 잔존). 별도 규칙 변경 필요.
 
 ### Python 검증 (산출 근거)
 
 ```
-baseline: 438 = TP212+FP207+EA8+UNC11, precision 212/419 = 50.6%
+baseline (v2): 438 = TP212+FP207+EA8+UNC11, precision 212/419 = 50.6%
 FP 구성 합: 84+47+40+14+10+11+1 = 207 ✓
-패치 제거 FP: 84+47+40+14+10 = 195
-잔존 FP: 207-195 = 12 (semantic 11 + c04 1 — 패치 대상 아님)
-precision after: 212/(212+12) = 94.6% ✓
+패치 제거 FP: 76(c08 net, 84-8 UNC) + 47(c01) + 40(FM) + 14(CQ) + 10(c06) = 187
+잔존 FP: 207-187 = 20 (semantic 11 + c04 1 + c08 UNC 8 — 패치 대상 아님)
+precision after: 212/(212+20) = 91.4% ✓
 TP recall: 212/(212+0) = 100% ✓
 ```
 
@@ -101,13 +112,13 @@ TP recall: 212/(212+0) = 100% ✓
 | G2 패치 단위 회귀 | 패치별 fixture 12/12 + 기존 22 passed | **통과** |
 | G3 운영 재검사 | scheduler RecheckAll 다음 사이클 | 대기 — 운영 DB 쓰기 금지 상태 |
 | G4 precision 재산출 | 재검사 결과로 실제 confusion matrix 갱신 | 대기 |
-| G5 precision ≥ 90% | 예상 94.6% | **달성 예상** (실제 재검사로 확정) |
+| G5 precision ≥ 90% | 예상 91.4% | **달성 예상** (실제 재검사로 확정) |
 
 ---
 
 ## 7. 잔존 위험
 
-1. **예상 수치는 표본 기반** — 실제 재검사(RecheckAll) 전까지 precision 94.6%는 추정치. c08의 404 포스트 수(SITE_UNREACHABLE)가 많으면 fail 수가 늘 수 있음 (그러나 그건 정당한 신호).
+1. **예상 수치는 표본 기반** — 실제 재검사(RecheckAll) 전까지 precision 91.4%는 추정치. c08의 404 포스트 수(SITE_UNREACHABLE)가 많으면 fail 수가 늘 수 있음 (그러나 그건 정당한 신호). 별도 범위(전체 FP 제거) 시 96.4% 가능하나 c04+semantic FP 규칙 변경 필요.
 2. **semantic 11 FP + 10 UNC 미해결** — 패치 범위 밖. 사람 리뷰 또는 문맥 화이트리스트 필요.
 3. **c06 PENDING은 status='unknown'으로 기록** — 대시보드 필터에 unknown 노출 여부 확인 필요.
 4. **`_parse_frontmatter` YAML 전환의 광범위 영향** — frontmatter.py 등 공용 함수 사용처에 값 타입 변화(list/bool) 가능. 문자열 정규화로 완충했으나, C09 등 yaml 자체 파싱 체크와의 중복 경로 확인 권장.
