@@ -97,9 +97,11 @@ for (tbl, cols) in [("adsense_daily","account,domain,date"),("gsc_keywords","blo
 c = sqlite3.connect(db); integ = c.execute("PRAGMA integrity_check;").fetchone(); c.close()
 print(f"  • integrity_check: {integ[0]} (read-only)")
 today = date.today().isoformat()
+yesterday = (date.today() - __import__('datetime').timedelta(days=1)).isoformat()
 amax = q("SELECT MAX(date) FROM adsense_daily;")[0]
-print(f"  • TODAY={today} adsense_max={amax}")
-print("GATE2_5_DB_FAIL" if (amax is None or amax < today) else "GATE2_5_DB_OK")
+print(f"  • TODAY={today} YESTERDAY={yesterday} adsense_max={amax}")
+# collect_adsense() 는 end_date=today-1 까지만 수집 → 정상 시 max>=yesterday 가 기대값
+print("GATE2_5_DB_FAIL" if (amax is None or amax < yesterday) else "GATE2_5_DB_OK")
 PY
 )
   echo "$DBRES"
