@@ -209,3 +209,5 @@ where the representative surfaced a problem.
 ## Pre-flight Required Skills
 - `data-sufficiency-audit` — before any family generation
 - `gate-integrity` — before trusting pass rate
+
+- 측정 원칙: 렌더 레이어 산출물(광고·어필리에이트·메타·이미지)은 소스 파일로 판정하지 않는다. 라이브 curl 바이트로만 측정.
