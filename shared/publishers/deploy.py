@@ -38,6 +38,30 @@ def _pre_deploy_validate(site: Path) -> None:
         raise Exception("Hugo build produced empty site: public/index.html not found")
 
 
+def _is_robots_only_fm_change(site: Path) -> bool:
+    """P0(2026-08-21): 배포 diff가 front-matter robots 키 변경만 포함하면
+    이미지 게이트 우회(색인차단 배포). 본문 1바이트라도 변경되면 False."""
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(site), "diff", "--unified=0", "--", "content"],
+            capture_output=True, text=True, timeout=20,
+        )
+    except Exception:
+        return False
+    if r.returncode != 0 or not r.stdout.strip():
+        return False
+    changed = [l for l in r.stdout.splitlines()
+               if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
+    if not changed:
+        return False
+    for l in changed:
+        if re.match(r"^[\+\-]\s*(robots|noindex):\s*(true|false|noindex|index|follow|nofollow)", l):
+            continue
+        return False
+    return True
+
+
 def _pre_deploy_image_gate(site: Path) -> None:
     """W5 (2026-08-21): 이미지 회귀 발행 차단 게이트.
 
@@ -55,6 +79,9 @@ def _pre_deploy_image_gate(site: Path) -> None:
     import datetime as _dt
     posts_dir = site / "content" / "posts"
     if not posts_dir.is_dir():
+        return
+    # P0(2026-08-21): robots 전용 FM 변경 배포는 이미지 게이트 우회
+    if _is_robots_only_fm_change(site):
         return
 
     _today = _dt.date.today()
