@@ -1,5 +1,7 @@
 # ETAP 자동 발행 분기 Discovery — 2026-08-20
 
+**Part of:** Track C (branch investigation — ETAP = branch 1 of N)
+
 > **상태**: DISCOVERY ONLY (설계/계획/코드수정/commit 없음 — 승인 대기)
 > **작성 근거**: `config/blogs.d/etap.yaml` 정적 파싱 + `pipelines/etap/*_writer.py`·`*_pipeline.py` grep + 라이브 최신글 curl 점검
 > **범위 제외**: 코드/DB 실행·수정·git 작업 일절 없음 (읽기/grep/curl 전용)
@@ -58,13 +60,13 @@
 | 26 | watersports | watersports.techpawz.com | SG-A |
 | 27 | luxury | luxury.techpawz.com | SG-A2 |
 | 28 | citytours | citytours.techpawz.com | SG-A2 |
-| 29 | watertours | watertours.techpawz.com | SG-A |
-| 30 | hiking | hiking.techpawz.com | SG-A |
-| 31 | escape | escape.techpawz.com | SG-A |
+| 29 | watertours | watertours.techpawz.com | SG-A2 |
+| 30 | hiking | hiking.techpawz.com | SG-A2 |
+| 31 | escape | escape.techpawz.com | SG-A2 |
 | 32 | extreme | extreme.techpawz.com | SG-A2 |
-| 33 | nightlife | nightlife.techpawz.com | SG-A |
-| 34 | ghost | ghost.techpawz.com | SG-A |
-| 35 | layover | layover.techpawz.com | SG-A |
+| 33 | nightlife | nightlife.techpawz.com | SG-A2 |
+| 34 | ghost | ghost.techpawz.com | SG-A2 |
+| 35 | layover | layover.techpawz.com | SG-A2 |
 
 *(제외: nomad-hugo — `status: paused`)*
 
@@ -94,7 +96,7 @@
 | multiday | Viator | viator_tours | Book Now+비교표 | raw deep_link | 없음 | multiday_pipeline.py:63 |
 | nature | Viator | viator_tours, viator_destinations | Book Now+비교표 | raw | 없음 | nature_pipeline.py:72 |
 | phototour | Viator | viator_tours, viator_destinations | Book Now+비교표 | raw | 없음 | phototour_pipeline.py:72 |
-| tour | Viator(+tracking) | viator_tours (base 폴백) | Book Now | `_affiliate_link` 주입 | 없음 | pipeline.py:166-167 |
+| tour | Viator(+tracking) | viator_tours (base 폴백) | Book Now | `_affiliate_link` 인라인 주입 (`pipeline.py:42-67`) | 없음 | pipeline.py:42-67(tracking), :166-167(deploy) |
 | tours | Viator | viator_tours | Book Now | raw | 없음 | tours_pipeline.py:61 |
 | trains | Omio | omio_routes | 비교표+Omio카드 | link_url 통과 | 없음 | trains_pipeline.py:62 |
 | transfers | Viator | viator_tours | Book Now | raw(미주입) | 없음 | transfers_pipeline.py:61 |
@@ -102,15 +104,15 @@
 | visafree | Airalo+Viator | airalo_esim, viator_tours | Airalo+Viator 카드 | raw | 없음 | visafree_pipeline.py |
 | walking | Viator | viator_tours | Book Now+산문CTA | raw | 없음 | walking_pipeline.py |
 | watersports | Viator | viator_tours | Book Now+산문CTA | raw | 없음 | watersports_pipeline.py |
-| luxury | Viator(+tracking) | viator_tours | Book Now | `_affiliate_link` 주입 | 없음 | luxury_pipeline.py |
+| luxury | Viator(+tracking) | viator_tours | Book Now | `_affiliate_link` 주입 | 없음 | luxury_pipeline.py:69-75 |
 | citytours | Viator(+tracking) | viator_tours | Book Now+비교표 | `_affiliate_link` 주입 | 없음 | citytours_pipeline.py:61,69 |
-| watertours | Viator | viator_tours | 산문CTA | raw | 없음 | watertours_pipeline.py |
-| hiking | Viator | viator_tours | 산문CTA | raw | 없음 | hiking_pipeline.py |
-| escape | Viator | viator_tours | 산문CTA | raw | 없음 | escape_pipeline.py |
+| watertours | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | watertours_pipeline.py:69-75 |
+| hiking | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | hiking_pipeline.py:69-75 |
+| escape | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | escape_pipeline.py:69-75 |
 | extreme | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | extreme_pipeline.py:69-75 |
-| nightlife | Viator | viator_tours | 산문CTA | raw | 없음 | nightlife_pipeline.py |
-| ghost | Viator | viator_tours | 산문CTA | raw | 없음 | ghost_pipeline.py |
-| layover | Viator | viator_tours | 산문CTA | raw | 없음 | layover_pipeline.py |
+| nightlife | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | nightlife_pipeline.py:69-75 |
+| ghost | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | ghost_pipeline.py:69-75 |
+| layover | Viator(+tracking) | viator_tours | 산문CTA | `_affiliate_link` 주입 | 없음 | layover_pipeline.py:69-75 |
 
 > 미확인→확정 정정 내역: michelin(추정 Viator → 실제 `michelin_restaurants`·SG-E), tour(전용 모듈 없음 → base `pipeline.py` 폴백·SG-A2), citytours(추정 Viator → `_affiliate_link` 확인·SG-A2), trains(추정 Omio → 확인·SG-C).
 
@@ -122,15 +124,16 @@
 
 | Subgroup | 구성 블로그 | affiliate 공급자 | tracking 주입 | CTA 카드 | 비고 |
 |---|---|---|---|---|---|
-| **SG-A** (Viator raw) | adventure, cruise, culture, daytrips, foodtour, multiday, nature, phototour, tours, walking, watersports, watertours, hiking, escape, nightlife, ghost, layover, airlines(크로스셀), transfers (19개) | Viator | **없음** (`deep_link` 그대로) | Book Now / 산문 CTA | `_affiliate_link` 함수 부재 |
-| **SG-A2** (Viator +tracking) | luxury, extreme, citytours, tour(base 폴백) (4개) | Viator | **있음** (`_affiliate_link`: pid/mcid/medium=link/campaign={BLOG_ID}) | Book Now / 산문 CTA | `pipeline.py:166`, `*_pipeline.py:69-75` |
+| **SG-A** (Viator raw) | adventure, cruise, culture, daytrips, foodtour, multiday, nature, phototour, tours, walking, watersports, airlines(크로스셀), transfers (13개) | Viator | **없음** (`deep_link` 그대로) | Book Now / 산문 CTA | `_affiliate_link` 함수 부재 — 13개 전부 `grep _affiliate_link` 0건 검증 |
+| **SG-A2** (Viator +tracking) | luxury, extreme, citytours, tour(base 폴백), watertours, hiking, escape, nightlife, ghost, layover (10개) | Viator | **있음** (`_affiliate_link`: pid/mcid/medium=link/campaign={BLOG_ID}) | Book Now / 산문 CTA | `pipeline.py:42-67`(tour 인라인), `*_pipeline.py:69-75`(9개 함수형) |
 | **SG-B** (Airalo 단독) | esim (1개) | Airalo | collectors 주입 추정(미확인) | Airalo 플랜 카드 | |
 | **SG-C** (Omio) | bus, eurail, ferry, trains (4개) | Omio | link_url 통과(collectors 주입) | 비교표+단일 카드 | 라이브에서 sjv.io 추적 확인 |
 | **SG-D** (Airalo+Viator) | airports, visa, visafree (3개) | Airalo+Viator | raw(미주입) | 혼합 카드 | |
 | **SG-E** (affiliate 없음) | deals, dining, flights, michelin (4개) | none | 해당없음 | 레스토랑 카드(michelin/dining) 또는 없음 | michelin/dining은 카드 있으나 추적/제휴 링크 아님 |
 
 **구현 차이 요약**
-- SG-A vs SG-A2: **유일한 차이 = `_affiliate_link()` 런타임 추적 파라미터 주입 유무**. 그 외 DB·prompt·thumbnail·entity·deploy·FM 전부 동일.
+- SG-A vs SG-A2: **유일한 차이 = `_affiliate_link()` 런타임 추적 파라미터 주입 유무**(SG-A2 9개=함수형, tour=인라인 `pipeline.py:42-67` `if pid and "pid=" not in link`). 그 외 DB·prompt·thumbnail·entity·deploy·FM 전부 동일.
+- **정정 이력(2026-08-21 재검증)**: 문서 초판은 SG-A 19/SG-A2 4로 기재했으나, `grep -ln _affiliate_link` 결과 watertours/hiking/escape/nightlife/ghost/layover 6개가 SG-A2임이 확인되어 13/10으로 정정. 합계 35 유지.
 - SG-C(Omio)만 라이브에서 실제 추적 링크(sjv.io) 확인됨.
 - SG-B/SG-D(Airalo)는 라이브에서 airalo 링크는 렌더링되나 추적 파라미터 미확인.
 - SG-E는 제휴 링크 자체가 없음(deals/flights) 또는 미추적 레스토랑 URL(dining/michelin).
@@ -149,26 +152,31 @@
 > - §"Cloudflare Wrangler Auth Profile" (약 line 469):
 >   **"1. 절대 `CLOUDFLARE_API_TOKEN`를 wrangler subprocess에 전달하지 말 것 — profile이 무시됨"**
 
-### ETAP 코드 (실제)
+### ETAP 코드 (실제) — 2026-08-21 재검증 갱신
 - 기본 모듈: `pipelines/etap/pipeline.py:166-167`
   ```python
   deploy = subprocess.run(
       ["/opt/homebrew/bin/wrangler", "pages", "deploy", "public", "--project-name", cf_project],
+      # env= 인자 없음 → CLOUDFLARE_API_TOKEN 상속됨
   ```
-- 개별 모듈(예: `multiday_pipeline.py:63`, `nature_pipeline.py:72`, `citytours_pipeline.py:61`, `trains_pipeline.py:62`, `michelin_pipeline.py:61` 등 36개 전체): 동일 패턴 `subprocess.run([wrangler, "pages", "deploy", "public", "--project-name", blog_id])`
-- **`env -u CLOUDFLARE_API_TOKEN` 미사용** — subprocess 호출 어디에도 없음.
+  + tracking은 `pipeline.py:42-67` 인라인 `_affiliate_link` 상당 로직 (별도 함수 아님)
+- 개별 모듈(예: `multiday_pipeline.py:63`, `nature_pipeline.py:72`, `citytours_pipeline.py:61`, `trains_pipeline.py:62` 등): `def _build_and_deploy` 정의는 31개 파일에 존재하나 **호출 0건(dead code)**. 호출이 있는 live 경로는 `pipeline.py:268/366` 1곳뿐. `adventure/airlines/airports/flight_pipeline.py` 4개는 wrangler 문자열 자체 없음.
+- **`env -u CLOUDFLARE_API_TOKEN` 미사용** — ETAP 모듈 어디에도 없음. `shared/publishers/deploy.py:13-27 pop("CLOUDFLARE_API_TOKEN")` + `dispatcher.py:785 build_wrangler_env` 는 존재하나 ETAP에서 import 0건.
+- **중앙 경유**: `dispatcher.py:1356` `ETAP_PIPELINE_BLOGS` 35개 전부 `_build_and_deploy_central(blog_id)` 경유 → `pipeline.py:167` fallback 도달 블로그 0개 (검증 스크립트 `[]`).
 
-### 판정
-- **[위반 감지]**: ETAP 36개 모듈 전부가 AGENTS.md 배포 규칙(절대 수동 wrangler 금지 + CLOUDFLARE_API_TOKEN 제거 + dispatcher 경유)을 위반. dispatcher/deploy.py(`shared/publishers/deploy.py`)를 거치지 않고 직접 `wrangler pages deploy`를 호출하며, env var 제거도 없음. → 권위 규칙 대비 명확한 위반.
+### 판정 — 2026-08-21 정정
+- **[위반 감지 — live 1건]**: `pipelines/etap/pipeline.py:166-167` fallback 경로는 AGENTS.md 배포 규칙(절대 수동 wrangler + env 제거 + dispatcher 경유) 위반. 신규 `{stem}_pipeline.py` 없는 ETAP 블로그 추가 시 즉시 live 위반 재발. (초판 "36개 전부 live 위반" → 정정: live 1 + dead 31)
+- **[위반 감지 — dead code 31건]**: 31개 `*_pipeline.py`의 `def _build_and_deploy` 정의는 호출 0이나 grep 감사 노이즈 + 복붙 재사용 시 위반 부활 위험 → B 단계에서 제거 대상. (초판 36개 live로 집계한 것은 dead/live 미분리로 인한 과다 집계)
+- **[검증됨 — 중앙 우회로 무력화]**: 현재 35 active ETAP 블로그는 dispatcher 중앙 배포가 정상 동작 중 — `build_wrangler_env()`가 토큰 제거 담당.
 
 ---
 
 ## 5. 확인된 사실 / UNVERIFIED / UNKNOWN
 
-### CONFIRMED (확정 사실)
+### CONFIRMED (확정 사실) — 2026-08-21 정정 반영
 1. 자동 발행 정본 = ETAP 35개 (nomad-hugo paused 제외).
-2. Subgroup 분류 SG-A(19)/SG-A2(4)/SG-B(1)/SG-C(4)/SG-D(3)/SG-E(4) = 35.
-3. **deploy 위반**: 36개 ETAP 모듈 전부 subprocess 직접 호출 + env -u 누락 (§4).
+2. Subgroup 분류 SG-A(13)/SG-A2(10)/SG-B(1)/SG-C(4)/SG-D(3)/SG-E(4) = 35. *(초판 19/4 → 재검증 grep으로 13/10 정정 — §3 참조)*
+3. **deploy 위반**: live 1건(`pipeline.py:166-167` fallback, env -u 누락) + dead code 31건(`def _build_and_deploy` 정의 잔존). 중앙 35개는 dispatcher `_build_and_deploy_central` 경유로 무력화 — §4 정정 참조. *(초판 "36개 전부 live" → dead/live 분리 정정)*
 4. **라이브 렌더링 관찰** (curl, 2026-08-20):
    | subgroup 대표 | 도메인 링크 렌더링 | 추적 파라미터 | 고지문 텍스트 |
    |---|---|---|---|
@@ -215,5 +223,13 @@
 
 ## 7. 잔존 위험 (이 Discovery 한정)
 - 라이브 점검은 각 subgroup 대표 1~2글 샘플에 국한. 전수 렌더링 검증 아님 (특히 trains/flights/michelin 최신 글은 카드 없어 판정 보류).
--deploy 위반은 코드 정적 확인으로 CONFIRMED이나, "실제 배포 실패/오동작" 여부는 런타임 점검 없음 → 영향은 UNVERIFIED.
+- deploy 위반은 코드 정적 확인으로 CONFIRMED이나, "실제 배포 실패/오동작" 여부는 런타임 점검 없음 → 영향은 UNVERIFIED. 2026-08-21 재검증으로 live 1 + dead 31 + 중앙 무력화로 세분화됨 — dead 31은 B 단계 제거 대상.
 - 외부 법규(FTC 등) 적합성은 본 문서 범위 밖.
+
+---
+## 8. 재검증 이력 (2026-08-21)
+
+- **재검증 범위**: etap.yaml 정본 카운트, SG-A/A2 `grep _affiliate_link`, wrangler 호출 dead/live 분리, 라이브 2건 재curl, `VIATOR_PID/MCID` env 확인 — 3 병렬 read-only 작업
+- **정정 3건**: §1/§2/§3 SG-A 19→13 / SG-A2 4→10 (watertours/hiking/escape/nightlife/ghost/layover 6개 이동), §4 deploy 36 live→live 1+dead 31+중앙 무력화로 정정, tour SG-A2 근거 `pipeline.py:166`→`42-67` 인라인으로 정정
+- **미변경 유지**: affiliate 고지문 0건·Viator tracking 미주입·Omio만 sjv.io 귀속 — 코드·라이브 양측 재확인으로 위반 미해소 상태 유지
+- **후속**: B 단계에서 dead code 31건 제거 + `pipeline.py` fallback 정상화 예정

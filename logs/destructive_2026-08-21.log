@@ -1,0 +1,1 @@
+[2026-08-21 08:26:36] ETAP branch 1 A/B — doc patch + dead code 31 remove + pipeline.py fallback delegate | 사전카운트=dead31+live1 | 백업=git diff staged (33 files) | 사후=grep wrangler 0, py_compile OK, defs 32→1 | 보존확인=active 35 정본 유지, pipeline.py fallback deploy_site 위임
