@@ -48,7 +48,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
         if image_url:
             img_tag = f"[![{name}]({image_url})]({link})\n\n"
 
-        lines.append(f"{img_tag}**[{name}]({link})**{discount_badge}\n\n")
+        lines.append(f'{img_tag}<a href="{link}" rel="sponsored" target="_blank">**{name}**</a>{discount_badge}\n\n')
         if category:
             lines.append(f"_{category}_\n\n")
         if price:
@@ -64,7 +64,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
             except (ValueError, TypeError):
                 pass
             lines.append(f"From **{ps}**\n\n")
-        lines.append(f"[Book Now]({link})\n\n---\n\n")
+        lines.append(f'<a href="{link}" rel="sponsored" target="_blank">Book Now</a>\n\n---\n\n')
 
     lines.append("</div>\n")
     card_block = "".join(lines)
@@ -125,7 +125,7 @@ def insert_comparison_table(content: str, products: list, max_rows: int = 5) -> 
                 ps = f"${round(_pv2)}"
             except (ValueError, TypeError):
                 pass
-        table_lines.append(f"| [{name}]({link}) | {ps} | {discount_str} | [Book]({link}) |\n")
+        table_lines.append(f'| <a href="{link}" rel="sponsored" target="_blank">{name}</a> | {ps} | {discount_str} | <a href="{link}" rel="sponsored" target="_blank">Book</a> |\n')
 
     table_lines.append("\n")
     table_block = "".join(table_lines)

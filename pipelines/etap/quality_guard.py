@@ -493,8 +493,41 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
 
 </div>
 """
+    # ── S2: affiliate disclosure — 공통 레이어 (모든 ETAP, 파일럿 예외 아님) ──
+    _aff_domains = ("viator.com", "sjv.io", "airalo", "link.coupang.com")
+    if any(d in content for d in _aff_domains) and "etap-affiliate-disclosure" not in content:
+        _aff_disclosure = """
+<div class="etap-affiliate-disclosure">
+
+> **Disclosure:** This page contains affiliate links. If you book through them, we may earn a commission at no extra cost to you.
+
+</div>
+"""
+        # 첫 제휴 링크보다 위 — product-cards 블록 직전, 없으면 본문 첫 H2 직후
+        if '<div class="etap-product-cards">' in content:
+            content = content.replace('<div class="etap-product-cards">', _aff_disclosure + '\n<div class="etap-product-cards">', 1)
+        elif "viator.com" in content or "sjv.io" in content:
+            # affiliate <a> 앞 — 첫 http 링크 직전에 삽입
+            m = re.search(r"https?://[^\s\)]+(?:viator\.com|sjv\.io)[^\s\)]*", content)
+            if m:
+                content = content[: m.start()] + _aff_disclosure + "\n" + content[m.start() :]
+            else:
+                content = _aff_disclosure + "\n" + content
+        else:
+            content = _aff_disclosure + "\n" + content
+
     if "etap-disclaimer-card" not in content:
         content = content + disclaimer
+
+    # ── affiliate 링크 rel=sponsored 보강 (markdown → HTML 변환 전 보강) ──
+    # 남은 markdown 링크 [text](https://...viator.com...) 형태를 HTML로 변환 시 rel 부여는
+    # post_processor에서 처리되나, writer가 직접 넣은 markdown viator 링크도 여기서 HTML로 교체
+    def _add_rel(m):
+        txt, url = m.group(1), m.group(2)
+        if any(d in url for d in ("viator.com", "sjv.io")):
+            return f'<a href="{url}" rel="sponsored" target="_blank">{txt}</a>'
+        return m.group(0)
+    content = re.sub(r"\[([^\]]+)\]\((https?://[^\s\)]+)\)", _add_rel, content)
 
     return content, issues, is_draft
 
