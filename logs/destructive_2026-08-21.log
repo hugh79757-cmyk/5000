@@ -1,2 +1,8 @@
 [2026-08-21 08:26:36] ETAP branch 1 A/B — doc patch + dead code 31 remove + pipeline.py fallback delegate | 사전카운트=dead31+live1 | 백업=git diff staged (33 files) | 사후=grep wrangler 0, py_compile OK, defs 32→1 | 보존확인=active 35 정본 유지, pipeline.py fallback deploy_site 위임
 [2026-08-21 08:43:09] KILL-SWITCH airports-hugo pause | 사전카운트=active35 paused1 -> active34 paused2 | 백업=git diff config/blogs.d/etap.yaml 1 line | 사후=active34 paused2 schedulable34 확인 | 보존확인=기존 발행글 미변경, 파이프라인 코드 보존
+[2026-08-21 09:35:13] 스냅샷 ETAP extend-head.html 35개 tar=/tmp/etap_hyphen_backup_20260821.tgz | underscore .bak 35개는 dead code 백업(테마 미로드)으로 무의미 — 하이픈이 진짜 백업
+[2026-08-21 10:29:25] Backup moved /tmp/etap_hyphen_backup_20260821.tgz -> .planning/backups/etap_hyphen_backup_20260821.tgz (ETAP outside git, persistent)
+
+[2026-08-21 10:32:40] Step1 bolzano single-file ETAP block removal (full ins+loader) | before_len=10543 after_len=9652 diff=891 | backup=/Users/twinssn/Projects/5000/.planning/backups/michelin_posts_backup_20260821_step1.tgz
+[2026-08-21 10:34:42] Step2 michelin 84 files ETAP block full removal (ins+loader) | before blocks avg 2 per file diff ~891 | backup .planning/backups/michelin_posts_backup_20260821_step1.tgz | local loader 1 ins 4 | deployed
+[2026-08-21 11:13:19] P0-1 airports noindex 15 files | lille melilla verification noindex
