@@ -1198,7 +1198,9 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             img = body_images[idx]
             img_url = img.get("url", "")
             img_credit = img.get("credit", "")
-            img_block = f"\n\n![Photo]({img_url})\n*{img_credit}*\n"
+            # M3.2(2026-08-21): alt="Photo" 하드코딩 금지 — 문맥(글 제목) 기반 alt
+            alt_text = (article.get("title") or img_credit or "Photo") or "Photo"
+            img_block = f"\n\n![{alt_text}]({img_url})\n*{img_credit}*\n"
             h2_line_end = body_md.index("\n", h2_positions[idx]) + 1
             next_pp = body_md.find("\n\n", h2_line_end)
             if next_pp == -1:

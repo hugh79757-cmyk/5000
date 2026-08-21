@@ -95,7 +95,9 @@ def _pre_deploy_image_gate(site: Path) -> None:
         _tc = re.search(r"twitter[_:]?card:\s*[\"']?([^\s\"'\n]+)", text, re.IGNORECASE)
         if _tc and _tc.group(1).strip('"\'') != "summary_large_image":
             _failures.append(f"{name}: R17 twitter:card={_tc.group(1)}")
-        elif not _tc and site.name == "airports-hugo":
+        elif not _tc:
+            # M3(2026-08-21): R17 전사 승격 — airports 한정 해제, twitter:card 키
+            # 미보유 시 모든 블로그 차단 (템플릿이 summary_large_image 주입 권장)
             _failures.append(f"{name}: R17 twitter_card 키 누락")
         for k in _req_parity:
             if k not in fm:
