@@ -843,7 +843,10 @@ def _check_c08(site: Path) -> tuple[bool, str]:
     수행하므로, 여기선 중복 크롤을 막기 위해 정적 패스만 반환. C08는 bucket="deferred"
     라 표준준수 집계율에서는 제외된다.
     """
-    return True, "C08: 라이브 대조는 등록 check c08_live_file_mismatch 에서 수행 (표준집계는 deferred)"
+    # C6(2026-08-21): 단일 상태 원칙 — C08의 권위 상태는 등록 check
+    # c08_live_file_mismatch(325건 fail 보고) 단 1곳. 표준루프 래퍼는 패스/페일
+    # 어느 쪽도 주장하지 않고 N/A(미적용)로 빠져 중복 상태를 제거한다.
+    return None, "C08: 표준루프는 N/A — 권위 상태는 c08_live_file_mismatch"
 
 
 @register_check("standard_compliance")

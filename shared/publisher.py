@@ -853,9 +853,10 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         check_c2 = check_c3 = check_c4 = check_c6 = None
 
     _TAP_BLOGS = {"travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"}
-    # W5 (2026-08-21): airports-hugo도 이미지 회귀 차단용 fail-closed 승격.
-    # PoC writer가 publish()를 우회해 직접 content/posts를 쓴 회귀 재발 방지.
-    _IMAGE_BLOCK_BLOGS = {"airports-hugo"}
+    # C2(2026-08-21): airports-hugo 이미지 차단은 deploy._pre_deploy_image_gate
+    # (Hugo 배포 경로 단일 초크포인트) 로 통합. publish() 경로는 Hugo 미사용이라
+    # 해당 게이트는 죽은 분기 — airports-hugo 항목 제거.
+    _IMAGE_BLOCK_BLOGS = set()
     if check_c2 and blog_id in _TAP_BLOGS and not is_draft:
         _c2_ok, _c2_msg = check_c2(body_md)
         _c3_ok, _c3_msg = check_c3(body_md)

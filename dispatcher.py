@@ -761,55 +761,9 @@ def preflight_check(blog_id: str) -> dict:
         except Exception:
             pass  # YAML 파싱 실패 시 C09 검사는 skip (C02에서 이미 걸렸을 가능성)
 
-        # --- X5(2026-08-21): R16/R17/R13 배포 차단 + 프런트매터 패리티 게이트 ---
-        try:
-            import yaml as _yaml_x5
-            _fmx_body = '\n'.join(lines[1:second_dash]) if second_dash else ''
-            _fmx_dict = _yaml_x5.safe_load(_fmx_body) or {}
-            if isinstance(_fmx_dict, dict):
-                # R16: featureimage 필수 (og:image 결핍 차단)
-                _fi = _fmx_dict.get('featureimage')
-                if not (_fi and str(_fi).strip()):
-                    violations.append({"rule_id": "R16", "slug": slug,
-                                        "severity": "MAJOR",
-                                        "detail": "featureimage 누락 (og:image 결핍)",
-                                        "file": str(md_file)})
-                    blocked = True
-                # R17: twitter:card = summary_large_image
-                # 단, airports-hugo는 deploy.py:98 이 빌드 시 자동 주입하므로
-                # 소스 부재는 차단하지 않음(오탐 방지).
-                _tc = _fmx_dict.get('twitter_card') or _fmx_dict.get('twitter:card')
-                _tc_params = (_fmx_dict.get('params') or {}).get('twitter_card') \
-                    if isinstance(_fmx_dict.get('params'), dict) else None
-                _tc_val = _tc or _tc_params
-                if _tc_val != 'summary_large_image':
-                    violations.append({"rule_id": "R17", "slug": slug,
-                                        "severity": "MAJOR",
-                                        "detail": f"twitter:card 비일치 ({_tc_val})",
-                                        "file": str(md_file)})
-                    if blog_id != 'airports-hugo':
-                        blocked = True
-                # R13: 본문 삽입이미지 ≥1장
-                _bstart = content.find('---\n', 4)
-                _body = content[_bstart:] if _bstart > 0 else content
-                _has_img = bool(re.search(r"!\[[^\]]*\]\(|<img\s", _body))
-                if not _has_img:
-                    violations.append({"rule_id": "R13", "slug": slug,
-                                        "severity": "MAJOR",
-                                        "detail": "본문 삽입이미지 0장",
-                                        "file": str(md_file)})
-                    blocked = True
-                # 패리티 게이트: 기존 키 집합 누락 시 차단
-                if _baseline_keys:
-                    _missing = _baseline_keys - set(_fmx_dict.keys())
-                    if _missing:
-                        violations.append({"rule_id": "PARITY", "slug": slug,
-                                            "severity": "MAJOR",
-                                            "detail": f"프런트매터 키 누락 vs 기존 집합: {sorted(_missing)}",
-                                            "file": str(md_file)})
-                        blocked = True
-        except Exception:
-            pass
+        # --- C2(2026-08-21): 이미지 배포 차단 게이트는 deploy._pre_deploy_image_gate
+        #     (shared/publishers/deploy.py:41) 로 단일 초크포인트 통합.
+        #     deploy_site()가 dispatcher·etap pipeline 양 경로 공용이라 중복 제거. ---
 
     # 결과 기록 (logs/c01_c04_preflight.json)
     logs_dir = Path(__file__).parent / "logs"
