@@ -75,3 +75,5 @@ Status: DESIGN → family map DISCOVERY, airports PoC DESIGN, harness corpus PLA
 - 2026-08-21: 라이브 근거는 `curl -sL` 원본 바이트만, 마크다운 변환본 인용 금지
 
 - 2026-08-21: 정직단어수 게이트 도입 — total이 아니라 재서술·보일러플레이트 제외 후 400 판정
+- 2026-08-21: airports 발행 중단(자료 한계)
+- 2026-08-21: 기준선은 미쉐린 라이브 하한으로 통일 → ROADMAP: docs/superpowers/ROADMAP-2026Q3.md
