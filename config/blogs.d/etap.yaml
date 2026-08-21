@@ -50,7 +50,7 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: active
+  status: paused
   daily_quota: 5
   domain: airports.techpawz.com
   cf_project: airports-hugo

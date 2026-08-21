@@ -17,3 +17,9 @@
 ## 잔존 위험
 - 4개 파일(adventure/airlines/airports/flight)도 wrangler 없으나 subprocess import 잔존 → harmless
 - 신규 {stem}_pipeline.py 없는 ETAP 블로그 추가 시 dispatcher 미등록이면 pipeline.py fallback 재확인 필요 (현재 0개)
+
+## 2026-08-21 KILL-SWITCH (senior review)
+- 조치: airports-hugo paused (etap.yaml:53)
+- 근거: stansted 0/0 허위, 빈 배열 사실 단정
+- 검증: 35->34, skip:paused
+- 한계: 기존 0/0 페이지 라이브 잔존, 별도 안건
