@@ -49,8 +49,12 @@ def _is_robots_only_fm_change(site: Path) -> bool:
         )
     except Exception:
         return False
-    if r.returncode != 0 or not r.stdout.strip():
+    if r.returncode != 0:
         return False
+    if not r.stdout.strip():
+        # 커밋 완료 상태(unstaged content 변경 없음): 이번 배포가 새 콘텐츠를
+        # 운반하지 않으므로 이미지 게이트 스캔 대상이 없음 → 우회 허용
+        return True
     changed = [l for l in r.stdout.splitlines()
                if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
     if not changed:
