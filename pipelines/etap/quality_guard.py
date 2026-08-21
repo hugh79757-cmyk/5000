@@ -464,6 +464,25 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
     elif word_count < 500:
         issues.append(f"Word count low: {word_count} - will be supplemented with cards, images, and cross-links")
 
+    # ── S0: LaTeX + 0허위 게이트 (Track C 2026-08-21) ──
+    # LaTeX $\rightarrow$ 누수 치환
+    if re.search(r"\$\\rightarrow\$|\\rightarrow", content):
+        content = re.sub(r"\$\\rightarrow\$", "→", content)
+        content = re.sub(r"\\rightarrow", "→", content)
+        issues.append("Auto-replaced: LaTeX $\\rightarrow$ → →")
+    # 빈 데이터 허위 단정 차단 — count 0을 사실로 렌더
+    _zero_pats = [
+        r"\|\s*(Airlines operating|Direct destinations|Route Count|Airports Served)[^|]*\|\s*0\s*\|",
+        r"there are no airlines[^.\n]*operating",
+        r"Route Count\s*0",
+        r"Airports Served\s*0",
+    ]
+    for _pat in _zero_pats:
+        if re.search(_pat, content, re.IGNORECASE):
+            issues.append(f"[CRITICAL] empty-data hallucination: count=0 rendered as fact")
+            is_draft = True
+            break
+
     # Append disclaimer card if not already present
     disclaimer = """
 <div class="etap-disclaimer-card">
