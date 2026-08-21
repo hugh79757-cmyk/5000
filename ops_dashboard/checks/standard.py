@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import os
 import re
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from ops_dashboard.checks import register_check
@@ -520,22 +521,49 @@ def _check_r12(site: Path) -> tuple[bool, str]:
 _R2_PATTERN = re.compile(r"pub-[0-9a-f]+\.r2\.dev")
 
 
-def _recent_posts(site: Path, n: int = 10) -> list[Path]:
-    """content/posts/에서 mtime 기준 최신 n개 포스트 디렉토리를 반환 (W7-b sortfix).
+def _today_start() -> float:
+    """KST(UTC+9) 자정 타임스탬프 — 오늘 발행분 전수 창 기준."""
+    utc_now = datetime.now(timezone.utc)
+    kst = utc_now + timedelta(hours=9)
+    kst_midnight = kst.replace(hour=0, minute=0, second=0, microsecond=0)
+    return kst_midnight.timestamp()
 
-    포스트는 하위 디렉토리 단위로 저장되므로, 각 디렉토리의 mtime을 기준으로
-    최신순으로 정렬한다. 포스트 수가 n 미만이면 전체 반환.
+
+def _content_mtime(p: Path) -> float:
+    """index.md mtime 우선 (디렉토리 mtime은 갱신 안 됨 — W7-c)."""
+    idx = p / "index.md"
+    return idx.stat().st_mtime if idx.exists() else p.stat().st_mtime
+
+
+def _post_date_ts(p: Path, fallback: float) -> float:
+    """프런트매터 date/lastmod/publishDate 우선, 부재 시 index.md mtime."""
+    idx = p / "index.md"
+    if idx.exists():
+        try:
+            m = re.search(r"^(?:date|publishDate|lastmod):\s*([^\s#]+)", idx.read_text(errors="replace"), re.M)
+            if m:
+                return datetime.fromisoformat(m.group(1).strip().strip("'\"")).timestamp()
+        except (ValueError, OSError):
+            pass
+        return idx.stat().st_mtime
+    return fallback
+
+
+def _recent_posts(site: Path, n: int = 10, since: float | None = None) -> list[Path]:
+    """content/posts/에서 포스트 디렉토리를 반환.
+
+    since 가 None → index.md mtime 기준 최신 n개 (W7-c, W7-b sortfix).
+    since 지정 → 프런트매터 date 기준 오늘 발행분 전수 (n 무시).
     포스트가 없거나 content/posts/가 없으면 빈 리스트 반환.
-
-    slug 언어에 관계없이 실제 최근 포스트가 뽑히도록 sorted() 알파벳순 대신
-    mtime 기준 정렬을 사용한다 (THUMBNAIL-01 정렬 결함 수정, W7-b sortfix).
     """
     posts_dir = site / "content" / "posts"
     if not posts_dir.is_dir():
         return []
     posts = [d for d in posts_dir.iterdir() if d.is_dir()]
-    posts.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-    return posts[:n]
+    if since is None:
+        posts.sort(key=_content_mtime, reverse=True)
+        return posts[:n]
+    return [p for p in posts if _post_date_ts(p, 0.0) >= since]
 
 
 def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
@@ -548,16 +576,16 @@ def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
     조건 미충족 URL이 1건이라도 있으면 fail, 전부 충족 또는 featureimage 없는
     포스트만 있으면 pass. featureimage가 아예 없는 포스트 수는 detail에 집계한다.
 
-    검사 대상 포스트는 _recent_posts(site, 10)로 mtime 기준 최신 10개를 사용한다
+    검사 대상 포스트는 _recent_posts(site, 10, since=_today_start())로 mtime 기준 최신 10개를 사용한다
     (sorted() 알파벳순 대신 mtime 기준 — W7-b sortfix).
     """
-    posts = _recent_posts(site, 10)
+    posts = _recent_posts(site, 10, since=_today_start())
     if not posts:
         # content/posts/ 없음 또는 포스트 없음
         posts_dir = site / "content" / "posts"
         if not posts_dir.is_dir():
-            return True, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님 (pass)"
-        return True, "포스트 없음 — 검사 대상 없음 (pass)"
+            return None, "content/posts/ 디렉토리 없음 — 썸네일 검사 대상 아님 (N/A)"
+        return None, "포스트 없음 — 검사 대상 없음 (N/A)"
 
     valid_count = 0
     invalid_entries = []
@@ -585,22 +613,25 @@ def _check_thumbnail_01(site: Path) -> tuple[bool, str]:
                 reason.append("webp 아님")
             invalid_entries.append(f"{post_dir.name}: {url} ({', '.join(reason)})")
 
-    total_checked = valid_count + len(invalid_entries)
-    if total_checked == 0:
-        return True, f"최근 {len(posts)}개 포스트 전부 featureimage 없음 (pass — 썸네일 위반 아님)"
+    # X3(2026-08-21): featureimage 전부 부재 = 썸네일 결핍 결함.
+    # silent PASS(빈==빈) 금지 — C08와 동일 결함 클래스. FAIL로 교정.
+    if valid_count == 0 and not invalid_entries:
+        return False, (
+            f"최근 {len(posts)}건 전부 featureimage 부재 "
+            f"(썸네일 결핍 — og:image/R16 연동 결함, FAIL)"
+        )
 
-    if invalid_entries:
+    # missing_count(부재)도 결함으로 집계 — silent pass 금지
+    if invalid_entries or missing_count:
         detail = (
-            f"썸네일 위반 {len(invalid_entries)}건 / 검사 {total_checked}건 "
-            f"(유효 {valid_count}, 누락 {missing_count}): "
+            f"썸네일 위반 {len(invalid_entries) + missing_count}건 / 검사 {len(posts)}건 "
+            f"(유효 {valid_count}, 미보유 {missing_count}, 비정상 {len(invalid_entries)}): "
             + "; ".join(invalid_entries[:3])
         )
         if len(invalid_entries) > 3:
             detail += f" 외 {len(invalid_entries) - 3}건"
         return False, detail
-    return True, (
-        f"최근 {total_checked}건 전부 R2+webp 충족 (누락 {missing_count}건 — featureimage 없음)"
-    )
+    return True, f"최근 {len(posts)}건 전부 R2+webp 충족"
 
 
 # ---------------------------------------------------------------------------
@@ -697,12 +728,12 @@ def _check_r2_01(site: Path) -> tuple[bool, str]:
       - THUMBNAIL-01: featureimage만 대상, R2 + webp 모두 요구
       - R2-01: featureimage + 본문 이미지 전체 대상, R2 도메인만 요구(webp 무관)
     """
-    posts = _recent_posts(site, 10)
+    posts = _recent_posts(site, 10, since=_today_start())
     if not posts:
         posts_dir = site / "content" / "posts"
         if not posts_dir.is_dir():
-            return True, "content/posts/ 디렉토리 없음 — 이미지 검사 대상 아님 (pass)"
-        return True, "포스트 없음 — 검사 대상 없음 (pass)"
+            return None, "content/posts/ 디렉토리 없음 — 이미지 검사 대상 아님 (N/A)"
+        return None, "포스트 없음 — 검사 대상 없음 (N/A)"
 
     exempt_domains = _load_r2_exempt_domains()
     invalid_entries: list[str] = []
@@ -839,6 +870,7 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
 
     failures = []
     passes = []
+    na = []  # V3(2026-08-21): 미적용(N/A) 규칙 — 집계 분모에서 제외
 
     for entry in RULES:
         rule_id = entry.id
@@ -857,11 +889,15 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
                              "detail": f"Check error: {e}"})
             continue
 
-        if passed:
+        # V3 삼상태: passed is True → pass, False → fail, None → N/A(미적용)
+        if passed is True:
             passes.append(rule_id)
-        else:
+        elif passed is False:
             failures.append({"rule_id": rule_id, "severity": entry.severity,
                              "detail": detail})
+        else:
+            na.append({"rule_id": rule_id, "severity": entry.severity,
+                       "detail": detail})
 
     # fail→pass 전환 및 full-pass 조기 반환 모두에서 stale fail 행 scrub.
     # Bug B: 기존에는 scrub가 fail 경로 끝에만 있어, full-pass("if not failures")
@@ -873,7 +909,8 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
 
     # Determine overall status
     if not failures:
-        return {"status": "pass", "detail": f"All {len(passes)} rules passed"}
+        return {"status": "pass",
+                "detail": f"All {len(passes)} applicable rules passed ({len(na)} N/A)"}
 
     # Check for CRITICAL failures → 기록만, 실시간 푸시는 Part 3에서 전환
     # (2026-08-06 Part 1: 표준 위반 실시간 푸시 비활성화 — ops.db 기록 유지)
@@ -906,7 +943,10 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
         _record_failed_rules(conn, blog_id, failures)
     return {
         "status": "fail",
-        "detail": f"{len(failures)}/{len(passes) + len(failures)} rules failed: " + "; ".join(detail_parts[:5]),
+        "detail": (
+            f"{len(failures)}/{len(passes) + len(failures)} applicable rules failed "
+            f"({len(na)} N/A): " + "; ".join(detail_parts[:5])
+        ),
     }
 
 
@@ -963,3 +1003,498 @@ def _scrub_passed_rules(conn, blog_id: str, passes: list[str]) -> None:
             "DELETE FROM check_results WHERE blog_id = ? AND check_name = ? AND status = 'fail'",
             (blog_id, rule_id),
         )
+
+# ---------------------------------------------------------------------------
+# R13-R23: 2026-08-21 airports 품질 점검 규칙
+# ---------------------------------------------------------------------------
+
+# R19 금지 표현 블랙리스트
+_R19_BANNED_PATTERNS = [
+    re.compile(r"이\s*글은\s*AI로\s*작성", re.IGNORECASE),
+    re.compile(r"AI가\s*작성한", re.IGNORECASE),
+    re.compile(r"generated\s+by\s+AI", re.IGNORECASE),
+    re.compile(r"AI-generated", re.IGNORECASE),
+    re.compile(r"ChatGPT", re.IGNORECASE),
+    re.compile(r"GPT-4", re.IGNORECASE),
+    re.compile(r"Claude", re.IGNORECASE),
+    re.compile(r"LLM", re.IGNORECASE),
+]
+
+# R20 분류코드 원문 패턴 (large_airport, medium_airport, small_airport, IATA 코드 등)
+_R20_CLASSIFICATION_CODES = [
+    re.compile(r"\b(large_airport|medium_airport|small_airport|closed_airport)\b"),
+    re.compile(r"\b(CIVIL|MILITARY|JOINT_USE|PRIVATE)\b(?=\s+airport)"),
+]
+
+# R15 보일러플레이트 제외 패턴 (네비게이션, 푸터, CTA 등)
+# X1(2026-08-21): R15 정직단어수 = 렌더 본문에서 보일러플레이트 제외 후 재계산.
+# 5개 범주: (1)공통 팁 문단 (2)금지표현 문장 (3)좌표·고도·IATA/ICAO 재서술
+#          (4)출처·라이선스 푸터 (5)Route Snapshot 면책 문장
+_R15_BOILERPLATE_PATTERNS = [
+    # 기존 내비/푸터
+    re.compile(r"^(?:Read more|더 읽기|바로가기|Click here|홈으로|목록으로)\s*$", re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^(?:Related posts|관련 글|이전 글|다음 글)\s*$", re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^(?:Share|공유|Tweet|Pin)\s*$", re.IGNORECASE | re.MULTILINE),
+    re.compile(r"^(?:Subscribe|구독|Newsletter|뉴스레터)\s*$", re.IGNORECASE | re.MULTILINE),
+    re.compile(r"©\s*\d{4}", re.IGNORECASE),
+    re.compile(r"All rights reserved", re.IGNORECASE),
+    # (2) 금지 표현 문장 (R19 목록과 동일) — AI 생성 흔적
+    re.compile(r"\b(?:ai[- ]?generated|chatgpt|gpt[- ]?4|claude|llm)\b", re.IGNORECASE),
+    # (3) 좌표·고도·IATA/ICAO 재서술 (템플릿 filler)
+    re.compile(r"\belevation\b", re.IGNORECASE),
+    re.compile(r"\biata\b", re.IGNORECASE),
+    re.compile(r"\bicao\b", re.IGNORECASE),
+    re.compile(r"coordinates?\b", re.IGNORECASE),
+    re.compile(r"key gateway for its region", re.IGNORECASE),
+    re.compile(r"multiple runways and terminals", re.IGNORECASE),
+    re.compile(r"large airport this facility", re.IGNORECASE),
+    re.compile(r"regional context", re.IGNORECASE),
+    # (4) 출처·라이선스 푸터
+    re.compile(r"\blicense\b", re.IGNORECASE),
+    re.compile(r"\bcc by\b", re.IGNORECASE),
+    re.compile(r"출처", re.IGNORECASE),
+    re.compile(r"라이선스", re.IGNORECASE),
+    # (5) Route Snapshot 면책 문장
+    re.compile(r"route snapshot", re.IGNORECASE),
+    re.compile(r"면책", re.IGNORECASE),
+    re.compile(r"disclaimer", re.IGNORECASE),
+    re.compile(r"정확성.*보장", re.IGNORECASE),
+    # (1) 공통 팁 문단 (STN↔LHR 거의 동일)
+    re.compile(r"practical tips", re.IGNORECASE),
+    re.compile(r"유용한 팁", re.IGNORECASE),
+    re.compile(r"여행 팁", re.IGNORECASE),
+    # 테마 크롬 누수 차단 (본문 텍스트에 섞인 내비/출처/메타)
+    re.compile(r"skip to main content", re.IGNORECASE),
+    re.compile(r"airport data:", re.IGNORECASE),
+    re.compile(r"route data:", re.IGNORECASE),
+    re.compile(r"ourairports", re.IGNORECASE),
+    re.compile(r"openflights", re.IGNORECASE),
+    re.compile(r"scheduled service flag", re.IGNORECASE),
+    re.compile(r"official website is", re.IGNORECASE),
+]
+
+
+def _strip_frontmatter(content: str) -> str:
+    """마크다운에서 YAML frontmatter 제거."""
+    if content.startswith("---"):
+        end = content.find("---", 3)
+        if end != -1:
+            return content[end + 3:].lstrip("\n")
+    return content
+
+
+def _strip_html(html: str) -> str:
+    """HTML 태그 제거."""
+    return re.sub(r"<[^>]+>", " ", html or "")
+
+
+def _word_count(text: str) -> int:
+    """텍스트의 단어 수 계산 (공백 기준 분리)."""
+    return len(text.split())
+
+
+def _check_r13(site: Path) -> tuple[bool, str]:
+    """R13: 본문 삽입이미지 최소 1장."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    no_image_posts = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        body = _strip_frontmatter(content)
+        has_img = bool(re.search(r"<img\s", body)) or bool(re.search(r"!\[[^\]]*\]\(", body))
+        if not has_img:
+            no_image_posts.append(post_dir.name)
+
+    if no_image_posts:
+        return False, (
+            f"삽입이미지 0장 포스트 {len(no_image_posts)}건 / {len(posts)}건: "
+            + ", ".join(no_image_posts[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 삽입이미지 1장 이상 보유"
+
+
+# V2(2026-08-21): R14/R15는 렌더링 본문(JSON-LD wordCount) 기준 측정.
+# 소스 마크다운 토큰수는 렌더링과 달라(PEK 소스408/렌더374 등) 오통과 유발 — 수정.
+_JSONLD_WC_RE = re.compile(r'"wordCount"\s*:\s*"?(\d+)"?')
+
+
+def _rendered_word_count(site: Path, slug: str) -> int | None:
+    """빌드본 public/posts/{slug}/index.html 의 JSON-LD wordCount (Hugo .WordCount).
+    빌드본 부재 시 None — 호출자는 소스 기준값으로 폴백.
+    """
+    p = site / "public" / "posts" / slug / "index.html"
+    if not p.exists():
+        return None
+    try:
+        html = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    m = _JSONLD_WC_RE.search(html)
+    return int(m.group(1)) if m else None
+
+
+def _rendered_honest_word_count(site: Path, slug: str) -> int | None:
+    """렌더 본문에서 보일러플레이트(5범주) 제외 후 정직 단어수.
+    public/posts/{slug}/index.html 기준. 부재 시 None(소스 폴백).
+    """
+    p = site / "public" / "posts" / slug / "index.html"
+    if not p.exists():
+        return None
+    try:
+        html = p.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    html = re.sub(r"<script[\s\S]*?</script>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<style[\s\S]*?</style>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<nav[\s\S]*?</nav>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<header[\s\S]*?</header>", " ", html, flags=re.IGNORECASE)
+    html = re.sub(r"<footer[\s\S]*?</footer>", " ", html, flags=re.IGNORECASE)
+    text = _strip_html(html)
+    # 문장 분리(마침표/느낌표/물음표 뒤 공백 또는 줄바꿈)
+    sentences = re.split(r"(?<=[\.\!\?])\s+|\n+", text)
+    kept = []
+    for s in sentences:
+        s = s.strip()
+        if not s:
+            continue
+        if any(pat.search(s) for pat in _R15_BOILERPLATE_PATTERNS):
+            continue
+        kept.append(s)
+    return _word_count(" ".join(kept))
+
+
+def _check_r14(site: Path) -> tuple[bool, str]:
+    """R14: 렌더 본문 wordCount >= 400 (JSON-LD 기준)."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    short_posts = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        slug = post_dir.name
+        wc = _rendered_word_count(site, slug)
+        fallback = False
+        if wc is None:
+            # 빌드본 부재 → 소스 기준 (마크다운 토큰수, 오차 있음)
+            content = _read_file_safe(idx)
+            wc = _word_count(_strip_html(_strip_frontmatter(content)))
+            fallback = True
+        if wc < 400:
+            short_posts.append(f"{slug}({wc}{'·소스기준' if fallback else ''})")
+
+    if short_posts:
+        return False, (
+            f"wordCount < 400 포스트 {len(short_posts)}건 / {len(posts)}건: "
+            + ", ".join(short_posts[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 wordCount >= 400"
+
+
+def _check_r15(site: Path) -> tuple[bool, str]:
+    """R15: 정직 단어수(보일러플레이트 제외) >= 400.
+
+    R14와 구분: R14는 렌더 본문 총단어수(JSON-LD), R15는 보일러플레이트
+    제외 정직 단어수. 두 값이 같으면 게이트 소실 → 구현 실패.
+    """
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    short_posts = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        slug = post_dir.name
+        wc = _rendered_honest_word_count(site, slug)
+        fallback = False
+        if wc is None:
+            # 빌드본 부재 → 소스 기준 보일러플레이트 제외
+            content = _read_file_safe(idx)
+            body_text = _strip_html(_strip_frontmatter(content))
+            sentences = re.split(r"(?<=[\.\!\?])\s+|\n+", body_text)
+            kept = [s for s in sentences if s.strip()
+                    and not any(p.search(s) for p in _R15_BOILERPLATE_PATTERNS)]
+            wc = _word_count(" ".join(kept))
+            fallback = True
+        if wc < 400:
+            short_posts.append(f"{slug}({wc}{'·소스기준' if fallback else ''})")
+
+    if short_posts:
+        return False, (
+            f"정직 단어수 < 400 포스트 {len(short_posts)}건 / {len(posts)}건: "
+            + ", ".join(short_posts[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 정직 단어수 >= 400"
+
+
+def _check_r16(site: Path) -> tuple[bool, str]:
+    """R16: og:image(featureimage 또는 og_image) 존재."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    missing = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        has_og = (
+            bool(re.search(r"featureimage:\s*\S", content))
+            or bool(re.search(r"og_image:\s*\S", content))
+        )
+        if not has_og:
+            missing.append(post_dir.name)
+
+    if missing:
+        return False, (
+            f"og:image 누락 포스트 {len(missing)}건 / {len(posts)}건: "
+            + ", ".join(missing[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 og:image 존재"
+
+
+def _check_r17(site: Path) -> tuple[bool, str]:
+    """R17: twitter:card = summary_large_image."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    wrong = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        # frontmatter에서 twitter_card 또는 params.twitter_card 확인
+        tc_match = re.search(r"twitter[_:]?card:\s*[\"']?([^\s\"'\n]+)", content, re.IGNORECASE)
+        if tc_match:
+            val = tc_match.group(1).strip('"\'')
+            if val != "summary_large_image":
+                wrong.append(f"{post_dir.name}({val})")
+        else:
+            # twitter:card 없으면 params下面에서 확인
+            params_match = re.search(r"\[params\]\s*\ntwitter[_:]?card\s*=\s*[\"']?([^\s\"'\n]+)", content, re.IGNORECASE)
+            if params_match:
+                val = params_match.group(1).strip('"\'')
+                if val != "summary_large_image":
+                    wrong.append(f"{post_dir.name}({val})")
+            else:
+                wrong.append(f"{post_dir.name}(없음)")
+
+    if wrong:
+        return False, (
+            f"twitter:card 비일치 {len(wrong)}건 / {len(posts)}건: "
+            + ", ".join(wrong[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 twitter:card=summary_large_image"
+
+
+def _check_r18(site: Path) -> tuple[bool, str]:
+    """R18: 생성 초안과 배포본 해시 일치.
+
+    local index.md의 해시와 ops.db의 배포 기록 해시를 비교.
+    배포 기록이 없으면 pass(초안 상태).
+    """
+    import hashlib
+    try:
+        from ops_dashboard.db import get_conn
+        conn = get_conn()
+        rows = conn.execute(
+            "SELECT blog_id, detail FROM check_results WHERE check_name = 'deploy_hash'"
+        ).fetchall()
+        conn.close()
+    except Exception:
+        return None, "배포 해시 테이블 없음 - R18 검사 불가 (N/A)"
+
+    if not rows:
+        return None, "배포 해시 기록 없음 - 검사 대상 없음 (N/A)"
+
+    mismatches = []
+    for row in rows:
+        detail = row[1] if isinstance(row, (tuple, list)) else row.get("detail", "")
+        # detail 형식: "slug=xxx hash=abc123"
+        slug_m = re.search(r"slug=(\S+)", detail)
+        hash_m = re.search(r"hash=(\S+)", detail)
+        if not slug_m or not hash_m:
+            continue
+        slug = slug_m.group(1)
+        stored_hash = hash_m.group(1)
+        idx = site / "content" / "posts" / slug / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        local_hash = hashlib.sha256(content.encode()).hexdigest()[:16]
+        if local_hash != stored_hash:
+            mismatches.append(slug)
+
+    if mismatches:
+        return False, (
+            f"해시 불일치 {len(mismatches)}건: " + ", ".join(mismatches[:5])
+        )
+    return True, "전부 해시 일치"
+
+
+def _check_r19(site: Path) -> tuple[bool, str]:
+    """R19: 금지 표현 블랙리스트 0건."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    violations = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        body = _strip_frontmatter(content)
+        for pat in _R19_BANNED_PATTERNS:
+            m = pat.search(body)
+            if m:
+                violations.append(f"{post_dir.name}:{m.group(0)[:30]}")
+                break  # 포스트당 1건만 기록
+
+    if violations:
+        return False, (
+            f"금지 표현 위반 {len(violations)}건 / {len(posts)}건: "
+            + "; ".join(violations[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 금지 표현 0건"
+
+
+def _check_r20(site: Path) -> tuple[bool, str]:
+    """R20: 분류코드 원문 노출 0건."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    violations = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        body = _strip_frontmatter(content)
+        for pat in _R20_CLASSIFICATION_CODES:
+            m = pat.search(body)
+            if m:
+                violations.append(f"{post_dir.name}:{m.group(0)[:30]}")
+                break
+
+    if violations:
+        return False, (
+            f"분류코드 노출 {len(violations)}건 / {len(posts)}건: "
+            + "; ".join(violations[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 분류코드 원문 노출 0건"
+
+
+def _check_r21(site: Path) -> tuple[bool, str]:
+    """R21: 동일 포스트 내 문단 중복률 상한."""
+    DUPLICATION_THRESHOLD = 0.3  # 30% 이상 중복 시 fail
+
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    dup_posts = []
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        body = _strip_frontmatter(content)
+        body_text = _strip_html(body)
+
+        # 문단 분리 (빈 줄 기준)
+        paragraphs = [p.strip() for p in re.split(r"\n\s*\n", body_text) if len(p.strip()) > 50]
+        if len(paragraphs) < 2:
+            continue
+
+        unique = set(paragraphs)
+        dup_rate = 1.0 - (len(unique) / len(paragraphs))
+        if dup_rate >= DUPLICATION_THRESHOLD:
+            dup_posts.append(f"{post_dir.name}({dup_rate:.0%})")
+
+    if dup_posts:
+        return False, (
+            f"문단 중복률 상한 초과 {len(dup_posts)}건 / {len(posts)}건: "
+            + ", ".join(dup_posts[:5])
+        )
+    return True, f"최근 {len(posts)}건 전부 문단 중복률 정상"
+
+
+def _check_r22(site: Path) -> tuple[bool, str]:
+    """R22: 배치 내 robots 값 일관성."""
+    posts = _recent_posts(site, 10, since=_today_start())
+    if not posts:
+        return None, "포스트 없음 - 검사 대상 없음 (N/A)"
+
+    robots_values = {}  # slug -> robots value
+    for post_dir in posts:
+        idx = post_dir / "index.md"
+        if not idx.exists():
+            continue
+        content = _read_file_safe(idx)
+        # frontmatter에서 robots 값 확인
+        robots_match = re.search(r"robots:\s*[\"']?([^\s\"'\n]+)", content, re.IGNORECASE)
+        if robots_match:
+            robots_values[post_dir.name] = robots_match.group(1).strip('"\'')
+        else:
+            robots_values[post_dir.name] = "index,follow"  # 기본값
+
+    if not robots_values:
+        return None, "robots 값 없음 - 검사 대상 없음 (N/A)"
+
+    # 값 분포 확인
+    from collections import Counter
+    value_counts = Counter(robots_values.values())
+    most_common_val, most_common_count = value_counts.most_common(1)[0]
+
+    inconsistent = [s for s, v in robots_values.items() if v != most_common_val]
+    if inconsistent:
+        return False, (
+            f"robots 불일치 {len(inconsistent)}건 (기준={most_common_val}): "
+            + ", ".join(inconsistent[:5])
+        )
+    return True, f"전부 robots={most_common_val} 일관"
+
+
+def _check_r23(site: Path) -> tuple[bool, str]:
+    """R23: 배포 시점 사람 승인 상태 기록 존재."""
+    try:
+        from ops_dashboard.db import get_conn
+        conn = get_conn()
+        #最近 배포 기록 확인
+        rows = conn.execute(
+            "SELECT blog_id, status, detail FROM publish_log "
+            "WHERE blog_id LIKE '%airport%' ORDER BY published_at DESC LIMIT 5"
+        ).fetchall()
+        conn.close()
+    except Exception:
+        return None, "배포 테이블 없음 - R23 검사 불가 (N/A)"
+
+    if not rows:
+        return None, "배포 기록 없음 - 검사 대상 없음 (N/A)"
+
+    no_approval = []
+    for row in rows:
+        blog_id = row[0] if isinstance(row, (tuple, list)) else row.get("blog_id", "")
+        detail = row[2] if isinstance(row, (tuple, list)) else row.get("detail", "")
+        if "approved_by" not in detail.lower() and "승인" not in detail:
+            no_approval.append(blog_id)
+
+    if no_approval:
+        return False, (
+            f"승인 기록 누락 {len(no_approval)}건: " + ", ".join(no_approval[:5])
+        )
+    return True, "전부 배포 승인 기록 존재"

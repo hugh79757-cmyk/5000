@@ -204,3 +204,8 @@ where the representative surfaced a problem.
 - `config/quality_checklist.yaml:578-598` — ETAP content checks
 - `config/blogs.d/etap.yaml:1-802` — 35 ETAP blog definitions
 - `/Users/twinssn/Projects/ETAP/ETAP-BODY-STANDARD.md` — body template (template mode)
+
+
+## Pre-flight Required Skills
+- `data-sufficiency-audit` — before any family generation
+- `gate-integrity` — before trusting pass rate

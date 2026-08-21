@@ -853,6 +853,9 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
         check_c2 = check_c3 = check_c4 = check_c6 = None
 
     _TAP_BLOGS = {"travel-hugo", "travel1-hugo", "travel2-hugo", "travel3-hugo", "travel4-hugo"}
+    # W5 (2026-08-21): airports-hugo도 이미지 회귀 차단용 fail-closed 승격.
+    # PoC writer가 publish()를 우회해 직접 content/posts를 쓴 회귀 재발 방지.
+    _IMAGE_BLOCK_BLOGS = {"airports-hugo"}
     if check_c2 and blog_id in _TAP_BLOGS and not is_draft:
         _c2_ok, _c2_msg = check_c2(body_md)
         _c3_ok, _c3_msg = check_c3(body_md)
@@ -876,6 +879,25 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
                 "issues": _violations,
             }
     # ── 표준 검증 게이트 끝 ──
+
+    # ── W5 이미지 회귀 차단 게이트 (airports-hugo fail-closed) ──
+    # R13(본문 삽입이미지≥1) + R16(og:image=thumbnail_url) 미충족 시 발행 중단.
+    if blog_id in _IMAGE_BLOCK_BLOGS and not is_draft:
+        _img_violations = []
+        if not (re.search(r"<img\s", body_md or "")
+                or re.search(r"!\[[^\]]*\]\(", body_md or "")):
+            _img_violations.append("R13 본문삽입이미지 0장")
+        if not (thumbnail_url or "").strip():
+            _img_violations.append("R16 og:image(thumbnail_url) 누락")
+        if _img_violations:
+            logger.warning(f"[W5-IMAGE-GATE] {blog_id} 이미지 회귀 — 발행 중단: {'; '.join(_img_violations)}")
+            return {
+                "success": False,
+                "reason": "image_regression_blocked",
+                "blog_id": blog_id,
+                "issues": _img_violations,
+            }
+    # ── W5 이미지 회귀 차단 게이트 끝 ──
 
     # ✅ humanize 단계 (2026-06-12 추가) — 한국어 파이프라인 전용
     _KO_PIPELINES = {"rap", "rap2", "rap3", "rap4", "rap5",

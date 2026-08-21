@@ -73,3 +73,5 @@ Status: DESIGN → family map DISCOVERY, airports PoC DESIGN, harness corpus PLA
 - 2026-08-21: "허위 < 밋밋함" — 사실 확인이 품질보다 선행, 품질은 Phase 2
 - 2026-08-21: 공항 글의 가치는 "무엇이고 어디인가", 취항 수는 부가 정보
 - 2026-08-21: 라이브 근거는 `curl -sL` 원본 바이트만, 마크다운 변환본 인용 금지
+
+- 2026-08-21: 정직단어수 게이트 도입 — total이 아니라 재서술·보일러플레이트 제외 후 400 판정

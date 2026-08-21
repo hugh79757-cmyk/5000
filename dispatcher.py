@@ -597,6 +597,34 @@ DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
 DEPLOY_LOCK_TIMEOUT = 600
 
 
+def _compute_baseline_keys(posts_dir: "Path") -> set:
+    """해당 블로그 전체 포스트에서 ≥80% 출현하는 프런트매터 키 집합.
+
+    패리티 게이트 기준: 신규 포스트가 이 집합의 키를 누락하면 차단.
+    """
+    from collections import Counter
+    import yaml as _y
+    cnt = Counter()
+    total = 0
+    for md in posts_dir.rglob("*.md"):
+        try:
+            txt = md.read_text(encoding="utf-8", errors="replace")
+            i = txt.find("---")
+            j = txt.find("---", i + 3)
+            if i < 0 or j < 0:
+                continue
+            fm = _y.safe_load(txt[i + 3:j]) or {}
+            if isinstance(fm, dict):
+                total += 1
+                for k in fm.keys():
+                    cnt[k] += 1
+        except Exception:
+            pass
+    if total == 0:
+        return set()
+    return {k for k, c in cnt.items() if c / total >= 0.8}
+
+
 def preflight_check(blog_id: str) -> dict:
     """배포 전 콘텐츠 무결성 프리플라이트 체크.
 
@@ -630,6 +658,9 @@ def preflight_check(blog_id: str) -> dict:
     if not posts_dir.exists():
         return {"blocked": False, "violations": [],
                 "reason": f"posts_dir 없음: {posts_dir}"}
+
+    # X5(2026-08-21): 패리티 기준 키 집합 (블로그 전체 포스트 ≥80% 출현)
+    _baseline_keys = _compute_baseline_keys(posts_dir)
 
     # 최근 7일 내 생성된 포스트 추출 (파일 mtime 기준)
     cutoff = datetime.now().timestamp() - 7 * 86400
@@ -729,6 +760,56 @@ def preflight_check(blog_id: str) -> dict:
                             break  # 한 포스트당 1건만 기록
         except Exception:
             pass  # YAML 파싱 실패 시 C09 검사는 skip (C02에서 이미 걸렸을 가능성)
+
+        # --- X5(2026-08-21): R16/R17/R13 배포 차단 + 프런트매터 패리티 게이트 ---
+        try:
+            import yaml as _yaml_x5
+            _fmx_body = '\n'.join(lines[1:second_dash]) if second_dash else ''
+            _fmx_dict = _yaml_x5.safe_load(_fmx_body) or {}
+            if isinstance(_fmx_dict, dict):
+                # R16: featureimage 필수 (og:image 결핍 차단)
+                _fi = _fmx_dict.get('featureimage')
+                if not (_fi and str(_fi).strip()):
+                    violations.append({"rule_id": "R16", "slug": slug,
+                                        "severity": "MAJOR",
+                                        "detail": "featureimage 누락 (og:image 결핍)",
+                                        "file": str(md_file)})
+                    blocked = True
+                # R17: twitter:card = summary_large_image
+                # 단, airports-hugo는 deploy.py:98 이 빌드 시 자동 주입하므로
+                # 소스 부재는 차단하지 않음(오탐 방지).
+                _tc = _fmx_dict.get('twitter_card') or _fmx_dict.get('twitter:card')
+                _tc_params = (_fmx_dict.get('params') or {}).get('twitter_card') \
+                    if isinstance(_fmx_dict.get('params'), dict) else None
+                _tc_val = _tc or _tc_params
+                if _tc_val != 'summary_large_image':
+                    violations.append({"rule_id": "R17", "slug": slug,
+                                        "severity": "MAJOR",
+                                        "detail": f"twitter:card 비일치 ({_tc_val})",
+                                        "file": str(md_file)})
+                    if blog_id != 'airports-hugo':
+                        blocked = True
+                # R13: 본문 삽입이미지 ≥1장
+                _bstart = content.find('---\n', 4)
+                _body = content[_bstart:] if _bstart > 0 else content
+                _has_img = bool(re.search(r"!\[[^\]]*\]\(|<img\s", _body))
+                if not _has_img:
+                    violations.append({"rule_id": "R13", "slug": slug,
+                                        "severity": "MAJOR",
+                                        "detail": "본문 삽입이미지 0장",
+                                        "file": str(md_file)})
+                    blocked = True
+                # 패리티 게이트: 기존 키 집합 누락 시 차단
+                if _baseline_keys:
+                    _missing = _baseline_keys - set(_fmx_dict.keys())
+                    if _missing:
+                        violations.append({"rule_id": "PARITY", "slug": slug,
+                                            "severity": "MAJOR",
+                                            "detail": f"프런트매터 키 누락 vs 기존 집합: {sorted(_missing)}",
+                                            "file": str(md_file)})
+                        blocked = True
+        except Exception:
+            pass
 
     # 결과 기록 (logs/c01_c04_preflight.json)
     logs_dir = Path(__file__).parent / "logs"

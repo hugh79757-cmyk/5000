@@ -329,11 +329,11 @@ def _compare_live_vs_local(fm: dict, live_html: str) -> list[str]:
     # (a)
     if local_title and live_title and local_title != live_title:
         problems.append("C08_TITLE_MISMATCH")
-    if local_og:
-        if not live_og_ok:
-            problems.append("C08_OG_MISSING")
-        elif local_og.rstrip("/") != live_og.rstrip("/"):
-            problems.append("C08_OG_MISMATCH")
+    # 존재 검사 먼저: 파일 또는 라이브 어느 한쪽이라도 og:image 없으면 fail
+    if not local_og or not live_og_ok:
+        problems.append("C08_OG_MISSING")
+    elif local_og.rstrip("/") != live_og.rstrip("/"):
+        problems.append("C08_OG_MISMATCH")
 
     # (b) 구조 순서: 타이틀 텍스트가 첫 h2 보다 먼저 등장해야 함
     if local_title and live_title:
