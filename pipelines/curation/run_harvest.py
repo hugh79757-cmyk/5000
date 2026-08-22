@@ -65,9 +65,20 @@ def main() -> int:
         return 0
 
     log_path = f"{LOG_DIR}/harvest_{datetime.now(KST):%Y%m%d}.log"
+    handlers = [logging.StreamHandler(sys.stdout)]
+    try:
+        handlers.append(logging.FileHandler(log_path))
+    except OSError:
+        # macOS /var/log는 root 전용(drwxr-xr-x) — launchd user agent는 신규 파일 생성 불가.
+        # 프로젝트 logs/로 폴백 (2026-08-23 03:00 첫 실행 PermissionError 조용한 스킵 사고 수정)
+        from pathlib import Path
+        alt_dir = Path(__file__).resolve().parents[2] / "logs"
+        alt_dir.mkdir(exist_ok=True)
+        log_path = str(alt_dir / f"harvest_{datetime.now(KST):%Y%m%d}.log")
+        handlers.append(logging.FileHandler(log_path))
     logging.basicConfig(
         level=logging.INFO,
-        handlers=[logging.StreamHandler(sys.stdout), logging.FileHandler(log_path)],
+        handlers=handlers,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
     logger = logging.getLogger("run_harvest")
