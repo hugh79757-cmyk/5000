@@ -23,6 +23,7 @@ VALID_ACTIONS = {
     "RECHECK_FAIL",
     "ROLLED_BACK",
     "VERIFIED",
+    "ABSTAINED",
 }
 
 
@@ -41,7 +42,12 @@ class HistoryEntry:
 
 
 def _slug_from_post_path(post_path: str) -> str:
-    return Path(post_path).stem
+    # {slug}/index.md 경로에서 slug는 부모 디렉토리명 (stem은 'index'가 됨)
+    # 단일 파일 경로(테스트 등)는 파일명 stem 사용
+    p = Path(post_path)
+    if p.name == "index.md":
+        return p.parent.name
+    return p.stem
 
 
 def _sidecar_path(blog_id: str, post_path: str) -> Path:
