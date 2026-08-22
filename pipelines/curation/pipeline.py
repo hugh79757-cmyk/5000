@@ -242,7 +242,7 @@ def _upload_thumbnail(image_url, product_id=None):
 # ── 카테고리별 허용/차단 키워드 (상품 필터) ──
 CATEGORY_FILTERS = {
     "massage-hugo": {
-        "allowed": ["안마의자", "마사지건", "발마사지기", "안마기", "목마사지기", "종아리마사지기", "두피마사지기", "눈마사지기", "어깨마사지기", "전신안마기", "마사지쿠션", "온열안마기", "안마", "마사지", "안마의자"],
+        "allowed": ["안마의자", "마사지건", "발마사지기", "안마기", "목마사지기", "종아리마사지기", "두피마사지기", "눈마사지기", "어깨마사지기", "전신안마기", "마사지쿠션", "온열안마기", "안마", "마사지", "무릎마사지기", "허리마사지기", "휴대용 마사지건", "미니 마사지건", "셀프 마사지기", "경추 안마기", "발바닥 마사지기", "지압기", "마사지볼", "폼롤러 마사지", "온열 목 안마기", "안마의자 미니", "레그마사지기"],
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구"],
     },
     "car-hugo": {
@@ -250,7 +250,7 @@ CATEGORY_FILTERS = {
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구", "의류"],
     },
     "homeappliance-hugo": {
-        "allowed": ["김치냉장고", "의류관리기", "식기세척기", "인덕션", "전기레인지", "벽걸이에어컨", "스탠드에어컨", "워시타워", "드럼세탁기", "건조기", "양문형냉장고", "광파오븐", "가전", "냉장고", "세탁기", "에어컨"],
+        "allowed": ["김치냉장고", "의류관리기", "식기세척기", "인덕션", "전기레인지", "벽걸이에어컨", "스탠드에어컨", "워시타워", "드럼세탁기", "건조기", "양문형냉장고", "광파오븐", "가전", "냉장고", "세탁기", "에어컨", "미니냉장고", "제습기", "가습기", "공기청정기", "전기포트", "에어프라이어", "전기밥솥", "로봇청소기", "핸드스틱청소기", "살균건조기", "이동식 에어컨", "커피머신"],
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구", "의류"],
     },
     "golf-hugo": {
@@ -699,6 +699,14 @@ def _record_publish(blog_id, keyword, title, slug) -> None:
         "INSERT INTO publish_log (blog_id, keyword, title, slug, published_at) VALUES (?,?,?,?,?)",
         (blog_id, keyword, title, slug, datetime.utcnow().isoformat())
     )
+    # keyword_pool 이중마킹(확인용, 무해) — get_keywords에서 이미 used=1 처리됨
+    try:
+        conn.execute(
+            "UPDATE keyword_pool SET used=1, used_at=datetime('now') WHERE keyword=? AND used=0",
+            (keyword,)
+        )
+    except sqlite3.OperationalError:
+        pass  # keyword_pool 테이블 미생성 환경 — 무시
     conn.commit()
     conn.close()
 
@@ -1411,8 +1419,9 @@ def _run_inner(cfg, blog_id, daily_quota):
             return {"success": False, "reason": "c09_violation"}
         else:
             logger.error(f"[{blog_id}] 발행 실패: {title}")
-            _record_failure(blog_id, "publish_error", f"Hugo 발행 실패: {title}", keyword)
-            return {"success": False, "reason": "publish_error"}
+            _reason = result.get("reason") or "publish_error"
+            _record_failure(blog_id, _reason, f"발행 실패({_reason}): {title}", keyword)
+            return {"success": False, "reason": _reason}
 
     # 발행 기록 (관련성 점수 포함)
     from shared.relevance_scorer import log_publish_audit

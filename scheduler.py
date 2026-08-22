@@ -1313,6 +1313,17 @@ def register_schedules():
     schedule.every().day.at("02:00").do(_run_keyword_expander)
     logger.info("CUAP keyword_expander scheduled daily at 02:00")
 
+    # CUAP keyword_harvester: 매일 03:00 (윈도우 게이트는 run_harvest 내부 이중 확인)
+    def _run_cuap_harvest() -> None:
+        try:
+            from pipelines.curation.run_harvest import main as harvest_main
+            harvest_main()
+        except Exception as e:
+            logger.exception(f"CUAP keyword_harvester error: {e}")
+
+    schedule.every().day.at("03:00").do(_run_cuap_harvest)
+    logger.info("CUAP keyword_harvester scheduled daily at 03:00")
+
     schedule.every().day.at("23:00").do(_run_quality_scan)
     schedule.every().day.at("23:50").do(daily_report)
     # P32: 배포된 글의 빈 내용 사후 검증 — 6시간 간격 (00:00, 06:00, 12:00, 18:00)
