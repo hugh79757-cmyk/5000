@@ -124,18 +124,48 @@ def _read_post_files(site: Path) -> list[tuple[Path, str]]:
 
 
 def _parse_frontmatter(content: str) -> tuple[str | None, dict]:
-    """frontmatter 파싱 (단순 regex)."""
+    """frontmatter 파싱 (python-frontmatter 기반, block-style YAML 지원).
+
+    반환 시그니처 유지: (fm_text, dict).
+    호출부(`.get(k) or ""` + `.strip()/.lower()` 패턴) 호환을 위해
+    값을 문자열/None 안전 형태로 정규화:
+      - None        → ""   (누락 = 빈값, 기존 동작 유지)
+      - bool        → "true"/"false"
+      - list/dict   → str(value)  (block-style tags 등 → 비어있지 않은 문자열)
+      - 기타/str    → str(value) 또는 그대로
+    → 단순 regex 가 block-style `tags:` 를 빈값으로 읽던 FM-MISSINGKEYS
+      FALSE-POSITIVE 해소. import 실패 시 기존 regex 로 fallback.
+    """
     m = re.match(r"^---\n(.*?)\n---\n", content, re.DOTALL)
     if not m:
         return None, {}
     fm_text = m.group(1)
-    fm = {}
-    for line in fm_text.split("\n"):
-        if ":" in line:
-            k, v = line.split(":", 1)
-            k, v = k.strip(), v.strip().strip("'\"")
-            fm[k] = v
-    return fm_text, fm
+    try:
+        import frontmatter as _fm
+
+        parsed = _fm.loads(content).metadata
+        fm: dict = {}
+        for k, v in parsed.items():
+            if v is None:
+                fm[k] = ""
+            elif isinstance(v, bool):
+                fm[k] = "true" if v else "false"
+            elif isinstance(v, (list, dict)):
+                fm[k] = str(v)
+            elif isinstance(v, str):
+                fm[k] = v
+            else:
+                fm[k] = str(v)
+        return fm_text, fm
+    except Exception:
+        # fallback: 기존 regex (graceful degradation)
+        fm = {}
+        for line in fm_text.split("\n"):
+            if ":" in line:
+                k, v = line.split(":", 1)
+                k, v = k.strip(), v.strip().strip("'\"")
+                fm[k] = v
+        return fm_text, fm
 
 
 def _check_c01(fm_text: str | None) -> tuple[bool, str]:

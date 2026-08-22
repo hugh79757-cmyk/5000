@@ -42,6 +42,11 @@ def _strip_nonascii(content: str) -> str:
     return content.encode("ascii", "ignore").decode("ascii")
 
 
+def _remove_draft(content: str) -> str:
+    # FM-DRAFT fixer 의도적 동작: draft 키 제거
+    return "\n".join(l for l in content.splitlines() if not l.startswith("draft:"))
+
+
 def test_safe_fixer():
     p = _make_post(POST)
     r = va.dry_apply("b1", p, "FM-MISSINGKEYS", _add_description)
@@ -78,10 +83,29 @@ def test_encoding_change_detected():
     assert "encoding_changed" in r.side_effects
 
 
+def test_draft_removal_allowed():
+    draft_post = POST.replace("tags: [\"x\"]\n", "tags: [\"x\"]\ndraft: true\n")
+    p = _make_post(draft_post)
+    r = va.dry_apply("b1", p, "FM-DRAFT", _remove_draft)
+    # draft 제거는 의도적 allowlist → 안전
+    assert r.safe_to_apply is True, r.side_effects
+    assert not any(s.startswith("unexpected_field_removed:draft") for s in r.side_effects)
+
+
+def test_non_draft_key_removal_still_blocked():
+    # title 제거는 allowlist 외 → 여전히 차단 (기존 보호 유지)
+    p = _make_post(POST)
+    r = va.dry_apply("b1", p, "FM-MISSINGKEYS", _remove_title)
+    assert r.safe_to_apply is False
+    assert any(s.startswith("unexpected_field_removed:title") for s in r.side_effects)
+
+
 if __name__ == "__main__":
     test_safe_fixer()
     test_original_unchanged()
     test_malicious_deletes_all()
     test_key_removal_detected()
     test_encoding_change_detected()
+    test_draft_removal_allowed()
+    test_non_draft_key_removal_still_blocked()
     print("test_verify_before_apply: PASS")

@@ -14,6 +14,10 @@ from pathlib import Path
 FILE_SIZE_DELTA_THRESHOLD = 0.5   # 원본 대비 ±50% 초과 시 의심
 MAX_DIFF_LINES = 30              # diff 라인 수 상한 초과 시 excessive_changes
 
+# 의도적 키 제거 allowlist (FM-DRAFT의 draft 제거 등)
+# 이 키를 fixer가 제거해도 부작용으로 판단하지 않음 (안전망 오탐 방지)
+INTENTIONAL_REMOVAL_KEYS = {"draft"}
+
 
 @dataclass
 class VerifyResult:
@@ -63,6 +67,7 @@ def dry_apply(
 
     # a. 예상치 못한 필드 제거 (frontmatter key 사라짐)
     removed = _detect_removed_frontmatter_keys(original, simulated)
+    removed = [k for k in removed if k not in INTENTIONAL_REMOVAL_KEYS]
     if removed:
         side_effects.append(f"unexpected_field_removed:{','.join(removed)}")
 
