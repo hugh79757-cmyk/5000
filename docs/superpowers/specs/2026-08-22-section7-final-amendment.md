@@ -202,3 +202,19 @@ g5_stance: >-
   Section 7 설계에서는 rule_id→rule_version 연결 부재를 "version: absent"로 명시적 수용하며,
   Experiment 0는 version 없이 동작하도록 설계하고, G5는 Experiment 1 진입 전제(블로커)로 분리한다.
 ```
+
+---
+
+## Exp1 End-to-End 실증 결과 (2026-08-22, 별도 커밋 이력)
+
+> 본 절은 설계 외부 기록. Track A Exp1의 처음→끝(VERIFIED) 실증 완료 선언용.
+
+- **Round1** (3건: adventure/airlines/appliance): 0 files modified. airlines·appliance는 stale(draft 이미 소스 반영) → VERIFIED(no-op); adventure는 `_parse_frontmatter` 블록스타일 버그로 FM-MISSINGKEYS FALSE-POSITIVE → ABSTAINED. 파일 0 드리프트. (후속 post-mortem)
+- **Post-mortem**: `ops_dashboard/exp1_selector.py`(stale·FP 필터) + parser-bug doc 작성. live 선별 시 FM-DRAFT 실제 위반 1건(issue-techpawz)만 잔존, 나머지 29건 stale.
+- **Round2** (1건: issue-techpawz FM-DRAFT): `dry_apply`가 frontmatter 키 제거를 무조건 오류로 플래그 → 의도적 `draft` 제거까지 차단 → ABSTAINED (안전 게이트 자체 false-positive). 파일 미수정.
+- **Exp2** (3 fix, commit ec0f5ba8b): ① verify_before_apply 의도제거 allowlist(`draft`) ② fix_draft_true flat-file glob(`*.md`+`_index` 제외) ③ `_parse_frontmatter` python-frontmatter 채택(값 stringify로 caller 호환). 전 테스트 PASS, 통합 dry-run 무변경.
+- **Round3** (1건: issue-techpawz FM-DRAFT, EXECUTE): 최초 실제 파일 변경 + VERIFIED.
+  - 절차: rollback_point 생성 → dry_apply safe=True(Exp2 allowlist) → 1-line diff(draft 제거, 나머지 키 보존) 적용 → record_fix(APPLIED) → targeted_recheck passed=True → record_fix(RECHECK_PASS).
+  - 결과: `final_state=VERIFIED`, `recheck_passed=true`, `rollback_used=false`, `files_modified=1`(issue-techpawz-hugo 포스트, 미커밋·deploy 미호출).
+  - 산출물: `/tmp/exp1_round3_result.md`, fix_history sidecar `ops_dashboard/fix_history/issue-techpawz-hugo/애드센스로-월-100만-원-만들기.json`.
+- **결론**: §9 rollback·§8 targeted recheck·§7 sidecar·§4 non-destructive verify 4개 안전망이 실제 적용에서 정상 작동 입증. Exp1 전제 블로커(BLK-3/4/5/6) 해소 확인.

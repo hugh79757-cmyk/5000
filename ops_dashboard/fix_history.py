@@ -24,6 +24,7 @@ VALID_ACTIONS = {
     "ROLLED_BACK",
     "VERIFIED",
     "ABSTAINED",
+    "DEPLOYED",
 }
 
 
