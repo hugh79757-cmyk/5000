@@ -16,6 +16,10 @@ sys.path.insert(0, "/Users/twinssn/Projects/5000")
 from shared.ai_writer import generate as ai_generate
 from shared.prompt_builder import build as build_prompt
 from pipelines.travel.area_codes import validate_display_region
+from shared.title_core import (
+    build_title_prompt, validate_and_retry, make_fallback,
+    extract_place_names, TRAVEL_TITLE_TEMPLATES,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -190,6 +194,10 @@ def _build_data_block(data):
         lines.append(f"[장소 {i}]")
         lines.append(f"이름: {item.get('facltNm', item.get('title', ''))}")
         lines.append(f"주소: {item.get('addr1', item.get('addr', ''))}")
+        # 이미지 URL 전달 (웰니스/관광/캠핑 공통) — AI가 ![대체텍스트](URL)로 본문에 삽입
+        _img = item.get("firstimage") or item.get("firstImageUrl") or item.get("image") or ""
+        if _img:
+            lines.append(f"이미지: {_img}")
 
         if item.get("lineIntro"):
             lines.append(f"한줄소개: {item['lineIntro']}")
@@ -574,7 +582,7 @@ def _enrich_with_nearby_restaurants_only(data, html):
     if not restaurants:
         return html
 
-    nearby_html = "\n\n"
+    nearby_html = '\n\n<h3 style="color:#FF5722;margin-top:20px;margin-bottom:15px;">주변 맛집</h3>\n'
     for r in restaurants[:5]:
         name = r.get("title", "")
         if not name:
@@ -625,7 +633,7 @@ def _enrich_with_nearby(data, html):
 
     attractions = nearby_data.get("attractions", [])
     if attractions:
-        nearby_html += "\n\n"
+        nearby_html += '\n\n<h3 style="color:#FF5722;margin-top:20px;margin-bottom:15px;">주변에 가볼 만한 곳</h3>\n'
         for a in attractions[:3]:
             name = a.get("title", "")
             if not name:
@@ -639,7 +647,7 @@ def _enrich_with_nearby(data, html):
     _nearby_total = len([a for a in attractions[:3] if a.get("title")])
     _restaurant_limit = max(0, 6 - _nearby_total)
     if restaurants and _restaurant_limit > 0:
-        nearby_html += "\n\n"
+        nearby_html += '\n\n<h3 style="color:#FF5722;margin-top:20px;margin-bottom:15px;">주변 맛집</h3>\n'
         for r in restaurants[:min(3, _restaurant_limit)]:
             name = r.get("title", "")
             if not name:
@@ -721,10 +729,11 @@ def _post_process(content):
         _ct = CoupangTravel()
         if _ct.is_configured():
             _blog_id = getattr(_inject_entity_cards, "_current_blog_id", "travel-hugo")
-            # GPT가 생성한 plain text disclaimer 제거 (get_product_cards에서 HTML로 추가하므로 중복 방지)
-            _disclaimer_pattern = r'\n*이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다\.\s*'
+            # GPT가 생성한 disclaimer 제거 (쿠팡 HTML에서 카드 하단에 1회 추가하므로 중복 방지)
+            # HTML 태그 포함 또는 plain text 모두 매칭
+            _disclaimer_pattern = r'\n*(?:<[^>]*>)?\s*이 포스팅은\s*(?:쿠팡\s*파트너스|쿠팡파트너스)\s*활동의 일환으로,?\s*이에 따른\s*일정액의\s*수수료를\s*제공받습니다\.?\s*(?:</[^>]*>)?\s*'
             content = re.sub(_disclaimer_pattern, '\n\n', content)
-            _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=3)
+            _coupang_html = _ct.get_product_cards(blog_id=_blog_id, count=4)
             if _coupang_html:
                 # 프롬프트가 이미 마무리/결론 H2를 생성한 경우 중복 삽입 방지
                 _has_closing = bool(re.search(r"^##\s*(마무리|마치며|정리|결론|마지막)", content, re.MULTILINE))
@@ -755,6 +764,20 @@ def _post_process(content):
                             _lines.insert(_insert_pos, "")
                             _lines.insert(_insert_pos, "## 마무리")
                             _lines.insert(_insert_pos, "")
+                    # 마무리 H2 뒤에 본문이 없는 경우(제목만 있고 본문 비어있는 상태) 기본 본문 삽입
+                    _rejoined = "\n".join(_lines)
+                    _closing_match = re.search(r"^##\s*(마무리|마치며|정리|결론|마지막)[^\n]*\n", _rejoined, re.MULTILINE)
+                    if _closing_match:
+                        _after = _rejoined[_closing_match.end():].lstrip("\n").lstrip()
+                        # 다음 헤딩이나 쿠팡 시작까지 본문이 없으면 기본 마무리 문장 삽입
+                        if not _after or _after.startswith("## ") or _after.startswith("### ") or _after.startswith("<"):
+                            _default_closing = (
+                                "위에서 소개한 장소들은 각기 특색이 있는 여행지입니다. "
+                                "방문 전 운영 시간과 예약 여부를 확인하시고, "
+                                "날씨와 계절에 맞는 준비를 하시면 더욱 즐거운 여행이 될 것입니다. "
+                                "좋은 여행 되세요."
+                            )
+                            _lines.insert(_closing_match.end(), _default_closing + "\n")
                     content = "\n".join(_lines) + "\n\n" + _coupang_html
                 else:
                     content = content.rstrip() + ("\n\n## 마무리\n\n" if not _has_closing else "\n\n") + _coupang_html
@@ -1260,99 +1283,9 @@ def generate_content(data, blog_id="travel-hugo"):
     # 실제 다룬 장소 수는 items 기준으로만 결정 (H3 수에 영향받지 않음)
     _body_place_count = len(items) if len(items) > 0 else 1
 
-    TITLE_TEMPLATES = {
-        "travel-hugo": [
-            "{region} {angle} {first_camp} 포함 {count}곳 시설 비교",
-            "{region} {first_camp} 포함 {theme} {count}곳 총정리",
-            "{region} {angle} 캠핑장 {first_camp} 등 {count}곳 비교",
-            "{region} {first_camp}부터 {last_camp}까지 {count}곳 정리",
-            "{region} {theme} {first_camp} 주변 {count}곳 추천",
-            "{region} {angle} {first_camp} 시설과 예약 정보 정리",
-            "{region} {theme} {count}곳 {first_camp} 포함 비교",
-            "{region} {angle} {first_camp} 포함 캠핑장 {count}곳 리뷰",
-            "{region} {angle} {count}곳 {first_camp} 등 시설 총정리",
-            "{region} {first_camp} 예약 전 알아둘 것과 {count}곳 비교",
-        ],
-        "travel1-hugo": [
-            "2026 {region} {first_name} 일정과 입장료 총정리",
-            "{region} {first_name} 프로그램과 체험 정리",
-            "{first_name} 일정부터 주차까지 한눈에 보기",
-            "2026 {region} {first_name} 개최 정보 총정리",
-            "{region} {first_name} 교통과 주차 정보 총정리",
-            "{first_name} 방문 전 준비 사항 체크리스트",
-            "{region} {first_name} 주변 가볼만한 곳 정리",
-            "2026 {region} {first_name} 관람 정보와 볼거리",
-            "{first_name} 함께 즐기는 {region} {theme}",
-            "{region} {first_name} 포함 축제 일정 정리",
-            "{region} {theme} 일정과 입장료 총정리",
-            "{region} {theme} 가볼만한 곳 {count}선 추천",
-            "{region} {theme} 일정부터 주차까지 한눈에 보기",
-            "2026 {region} 축제 {count}곳 일정 총정리",
-            "주말 나들이로 딱! {region} {theme} {count}곳 추천",
-            "{region} 무료 축제 {count}곳, 일정과 위치 총정리",
-            "{region} {theme} 포토존 위치와 인생샷 팁 정리",
-            "{region} {theme} 야간 프로그램과 조명 행사 안내",
-            "{region} {theme}와 묶어 갈 당일치기 코스 추천",
-            "{region} {theme} 사전예약과 입장 안내 정리",
-        ],
-        "travel2-hugo": [
-            "{region} {first_name}의 역사와 건축 양식 정리",
-            "{region} {first_name}, 방문 전 알아야 할 역사 정리",
-            "{first_name}의 시대적 배경과 건축적 특징 분석",
-            "{region} {theme} {first_name}, 지정 배경과 가치 해설",
-            "{first_name} 탐방 가이드, 역사와 볼거리 총정리",
-            "{region} {first_name} 역사 해설과 방문 정보",
-            "{region} {theme} {first_name} 양식과 특징 비교",
-            "{first_name}이 {theme}로 지정된 이유와 역사",
-            "{region} {first_name} 완전 해설, 시대부터 양식까지",
-            "{region} {theme} {first_name} 탐방과 주변 정보",
-        ],
-        "travel3-hugo": [
-            "{region} {theme} 현지인이 추천하는 식당 {count}곳",
-            "{region}에 가면 꼭 먹어야 할 {theme} {count}선",
-            "{region} {theme} 가성비 식당 {count}곳 메뉴와 위치 정리",
-            "현지인만 아는 {region} {theme} {count}곳 총정리",
-            "{region} {theme} 웨이팅 없는 식당 {count}곳 추천",
-            "{region} 로컬 맛집 {count}곳 메뉴와 영업 정보 정리",
-            "{region} {theme} 혼밥하기 좋은 식당 {count}곳",
-            "여행 중 들르기 좋은 {region} {theme} {count}곳",
-            "주말 {region} {theme} {count}곳 총정리",
-            "{region} {angle} 맛집 {count}곳, 영업시간과 휴무일 정리",
-            "{region} {theme} 가성비 식당 {count}곳 비교",
-            "{region} {theme} 주차 가능한 식당 {count}곳 정리",
-            "아이와 가기 좋은 {region} {theme} {count}곳",
-            "{region} {theme} 오래된 노포 {count}곳 탐방",
-            "{region} {theme} 점심 특선 메뉴 비교 {count}곳",
-            "관광지 근처 {region} {theme} {count}곳 동선 정리",
-            "{region} {theme} 예약 필수 식당 {count}곳과 연락처",
-            "{region} 새벽이나 심야 영업 {theme} {count}곳",
-            "{region} {theme} 테라스와 뷰 좋은 식당 {count}곳 비교",
-            "포장이나 배달 가능한 {region} {theme} {count}곳",
-        ],
-        "travel4-hugo": [
-            "{region} {first_name} 포함 여행코스 {count}곳 정리",
-            "{region} {theme} {first_name}부터 {last_camp}까지 코스 정리",
-            "{region} {theme} 추천 코스 {count}곳 총정리",
-            "{region} 당일치기 여행코스 {first_name} 포함 {count}곳",
-            "{region} {theme} {count}곳 코스 동선과 볼거리 정리",
-            "{region} {first_name} 주변 여행코스 {count}곳 추천",
-            "주말 {region} {theme} 코스 {count}곳 총정리",
-            "{region} {theme} 코스 {first_name} 등 {count}곳 비교",
-            "{region} 여행코스 {first_name}과 {last_camp} 포함 정리",
-            "{region} {theme} {count}곳 코스 순서와 볼거리 총정리",
-        ],
-    }
+    TITLE_TEMPLATES = TRAVEL_TITLE_TEMPLATES
 
 
-    import random as _rand
-    templates = TITLE_TEMPLATES.get(blog_id, TITLE_TEMPLATES.get("travel2-hugo") if source_type == "heritage" else TITLE_TEMPLATES["travel-hugo"])
-    # 1곳일 때 "{count}" 포함 템플릿 제외 (제목-본문 불일치 방지)
-    # _body_place_count 대신 len(items) 사용 — 본문 생성 전 결정 가능한 기준
-    if len(items) <= 1:
-        _filtered = [t for t in templates if "{count}" not in t and "{count}선" not in t]
-        if _filtered:
-            templates = _filtered
-    template = _rand.choice(templates) if templates else TITLE_TEMPLATES.get(blog_id, [""])[0]
     # region/theme 빈값 보호
     if not display_region or len(display_region) < 2:
         display_region = data.get("display_region", data.get("region", "전국"))
@@ -1361,161 +1294,34 @@ def generate_content(data, blog_id="travel-hugo"):
     if not theme or len(theme) < 2:
         theme = "여행"
 
-    # 캠핑장 실명 변수 추출
     _camp_names = [i.get("title", i.get("facltNm", ""))[:15] for i in items if i.get("title") or i.get("facltNm")]
-    first_camp = _camp_names[0] if _camp_names else theme
-    last_camp = _camp_names[-1] if len(_camp_names) > 1 else first_camp
-    first_name = first_camp  # travel2용 호환
-
-    fallback_title = template.format(
-        region=display_region,
-        theme=theme,
-        angle=angle,
-        count=str(_body_place_count),
-        first_camp=first_camp,
-        last_camp=last_camp,
-        first_name=first_name,
-    )
+    fallback_title = make_fallback(display_region, theme, _body_place_count, _camp_names, blog_id)
     title = fallback_title
 
-    place_names = ", ".join([i.get("title", i.get("facltNm", ""))[:12] for i in items[:3]])
+    place_names = extract_place_names(items)
+    title_prompt = build_title_prompt(display_region, theme, place_names, source_type, blog_id)
 
-    # blog_id별 제목 프롬프트 분기 (tap-blogger도 heritage 콘텐츠면 travel2-hugo 프롬프트 사용)
-    if blog_id == "travel2-hugo" or (blog_id == "tap-blogger" and source_type == "heritage"):
-        title_prompt = f"""자연스럽고 클릭하고 싶은 한국어 블로그 제목 1개만 출력하세요. 따옴표 없이 제목만.
-
-지역: {display_region}
-테마: {theme}
-문화유산: {place_names}
-
-핵심 원칙: 지역명과 문화유산 실제 이름을 앞쪽에 넣고, 역사·건축·가치 등 성격이 드러나게. 군더더기 없이 25~40자.
-특수기호(콜론/느낌표/하이픈)와 가격 표현만 금지. 어순·표현은 가장 자연스럽게 자유롭게.
-
-좋은 제목 예시 (그대로 베끼지 말고 톤과 감각만 참고):
-- 경주 불국사 다보탑 석조 기법과 지정 배경
-- 강화 전등사의 시대적 배경과 건축적 가치
-- 서울 숭례문 복원 과정과 국보의 의미
-- 안동 봉정사 극락전, 최고 목조건축의 양식 해설
-- 제주 관덕정의 역사와 건축 양식 정리
-- 부여 정림사지 오층석탑이 국보가 된 이유
-- 수원 화성 성곽의 축조 기술과 방어 구조
-- 공주 무령왕릉 출토 유물과 백제의 문화
-- 경복궁 근정전의 구조와 조선 왕실의 상징
-- 합천 해인사 장경판전과 팔만대장경의 보존
-"""
-    else:
-        title_prompt = f"""자연스럽고 클릭하고 싶은 한국어 블로그 제목 1개만 출력하세요. 따옴표 없이 제목만.
-
-지역: {display_region}
-테마: {theme}
-
-대표 장소: {place_names}
-
-핵심 원칙: 검색되는 말(지역+주제)을 앞쪽에, 실제 장소 이름을 하나 넣고, 클릭할 이유가 보이게. 군더더기 없이 25~35자.
-특수기호(콜론/느낌표/하이픈)와 가격 표현만 금지. 그 외 어순·표현은 가장 자연스럽게 자유롭게.
-
-좋은 제목 예시 (그대로 베끼지 말고 톤과 감각만 참고):
-[캠핑]
-- 강원도 오호 캠핑장 등 불멍 명당 3곳 비교
-- 충남 태안 해솔오토캠핑장 글램핑 3곳 시설 정리
-- 경남 지리산 당근오토캠핑장 계곡 캠핑 3곳 추천
-- 주말에 딱, 강원 별빛야영장 등 노지 캠핑 3곳
-- 반려견과 강원 홍천 솔숲캠핑장 등 3곳 정리
-- 물놀이 좋은 경기 가평 계곡 캠핑장 3곳 비교
-- 초보 캠퍼를 위한 충북 오토캠핑장 3곳 추천
-- 예약 서두를 강원 인기 글램핑 3곳 시설 정리
-- 가을 단풍 명당, 전북 무주 캠핑장 3곳 총정리
-- 바다 앞 노을 명소, 강릉 오토캠핑장 3곳 비교
-[축제]
-- 2026 수원 화성문화제 일정과 입장료 총정리
-- 아이와 가기 좋은 경기 축제 3곳, 프로그램 정리
-- 비 와도 즐기는 부산 실내 축제 3곳 총정리
-- 야경이 예쁜 서울 빛 축제 3곳 일정 정리
-- 무료로 즐기는 경남 봄꽃 축제 3곳 위치 정리
-- 주차 걱정 없는 대구 축제 3곳 교통 안내
-- 2026 진주 남강유등축제 일정과 볼거리 정리
-- 커플 데이트 좋은 전주 야간 축제 3곳 추천
-- 먹거리 풍성한 강원 지역 축제 3곳 총정리
-- 당일치기로 딱, 충남 가을 축제 3곳 정리
-[맛집]
-- 부산 돼지국밥 노포 3곳, 현지인 단골집 정리
-- 웨이팅 없는 전주 한옥마을 맛집 3곳 추천
-- 제주 흑돼지 가성비 식당 3곳 메뉴와 위치 정리
-- 혼밥하기 좋은 서울 을지로 노포 3곳 정리
-- 아이와 가기 좋은 경기 브런치 맛집 3곳 비교
-- 심야 영업 대구 국밥집 3곳 영업시간 정리
-- 여행 중 들르기 좋은 강릉 회 맛집 3곳 추천
-- 예약 필수 광주 한정식집 3곳 메뉴와 연락처
-- 뷰 좋은 통영 바다 카페 3곳 비교 정리
-- 관광지 근처 경주 쌈밥 맛집 3곳 동선 정리
-[여행코스]
-- 경주 당일치기 여행코스, 불국사 포함 3곳 정리
-- 여수 밤바다 코스 3곳, 동선과 볼거리 총정리
-- 부산 1박2일 여행코스 감천마을 포함 3곳 추천
-- 아이와 가는 강원 체험 코스 3곳 동선 정리
-- 비 오는 날 서울 실내 코스 3곳 총정리
-- 전주 한옥마을 반나절 코스 3곳 볼거리 정리
-- 뚜벅이도 좋은 제주 동부 코스 3곳 추천
-- 커플 데이트 코스, 인천 차이나타운 등 3곳
-- 가을 단풍 명소 경북 드라이브 코스 3곳 비교
-- 당일치기 강화도 역사 코스 3곳 순서 정리
-"""
-
-    # Enhanced title generation with fallback mechanism
-    import time
-    start_time = time.time()
-    title_result = None
-    
-    # Try AI generation with timeout protection
     try:
-        title_result = ai_generate(
+        _ai_result = ai_generate(
             "블로그 제목 생성 전문가. 제목 1개만 출력.",
             title_prompt,
             tier="default",
             temperature=0.6
         )
+        if _ai_result and _ai_result.get("content"):
+            generated_title = _ai_result["content"].strip().strip('"').strip("'")
+            generated_title = re.sub(r"^(제목[:\s]*|Title[:\s]*)", "", generated_title).strip()
+            generated_title = validate_and_retry(generated_title, title_prompt, ai_generate, max_len=35)
+            # 고유명사(첫 장소명)가 있으면 타이틀에 반드시 포함되도록 검증
+            # — AI가 지역명만 넣고 고유명사는 빠뜨리는 경우를 방지(fallback은 포함하므로)
+            _proper = place_names[0] if place_names else ""
+            _has_proper = (not _proper) or (_proper and _proper in generated_title)
+            if (len(generated_title) >= 15 and display_region
+                    and len(display_region) >= 2 and display_region in generated_title
+                    and _has_proper):
+                title = generated_title
     except Exception as e:
         logger.warning(f"AI title generation failed: {e}")
-        title_result = None
-    
-    # Check if AI generation succeeded and result is valid
-    if title_result and title_result.get("content") and len(title_result.get("content", "").strip()) > 0:
-        generated_title = title_result["content"].strip().strip('"').strip("'").strip()
-        generated_title = re.sub(r"^(제목[:\s]*|Title[:\s]*)", "", generated_title).strip()
-        
-        # "1곳" 어색한 제목 보정 (regex 기반, 단독 단어 "1곳"만 제거)
-        if "1곳" in generated_title:
-            generated_title = _re.sub(r'\b1곳\b', ' ', generated_title).strip()
-            # 연속 공백 정리
-            generated_title = _re.sub(r'\s{2,}', ' ', generated_title)
-        
-        if len(generated_title) > 5:
-            import random as _r
-            import re as _re
-            ban_endings = ["소개", "알아보기", "만나보기", "살펴보기", "확인하기", "코스 안내", "안내"]
-            ban_phrases = ["에서 즐기는", "에서 만나는", "에서 즐길 수 있는"]
-            for ban in ban_endings:
-                if generated_title.endswith(ban):
-                    replacements = ["추천", "한눈에 보기", "메뉴 비교", "코스 추천", "비교", "체크리스트", "방문 전 필독"]
-                    generated_title = generated_title[:-len(ban)].rstrip() + " " + _r.choice(replacements)
-                    break
-            for bp in ban_phrases:
-                if bp in generated_title:
-                    generated_title = generated_title.replace(bp, " ")
-                    generated_title = " ".join(generated_title.split())
-            long_words = _re.findall(r"[가-힣]{12,}", generated_title)
-            if long_words:
-                generated_title = fallback_title
-            if len(generated_title) > 45 or len(generated_title) < 15:
-                generated_title = fallback_title
-            # region 포함 검증: 지역명이 빠지면 fallback
-            if display_region and len(display_region) >= 2 and display_region not in generated_title:
-                generated_title = fallback_title
-            title = generated_title
-    else:
-        # AI generation failed, use fallback title
-        logger.info(f"AI title generation failed or returned empty content. Using fallback title: {fallback_title}")
-        title = fallback_title
 
     validated_region = validate_display_region(display_region)
     if display_region and not validated_region:

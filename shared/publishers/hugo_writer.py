@@ -1199,7 +1199,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             img_url = img.get("url", "")
             img_credit = img.get("credit", "")
             # M3.2(2026-08-21): alt="Photo" 하드코딩 금지 — 문맥(글 제목) 기반 alt
-            alt_text = (article.get("title") or img_credit or "Photo") or "Photo"
+            alt_text = (title or img_credit or "Photo") or "Photo"
             img_block = f"\n\n![{alt_text}]({img_url})\n*{img_credit}*\n"
             h2_line_end = body_md.index("\n", h2_positions[idx]) + 1
             next_pp = body_md.find("\n\n", h2_line_end)
@@ -1226,15 +1226,17 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     )
 
     def _needs_disclaimer(body: str) -> bool:
-        """상단 30% 내에 면책이 이미 있으면 False.
-        면책 시작 문구('이 포스팅은 쿠팡 파트너스')만 감지해도 충분."""
+        """본문 어디에든 면책이 이미 있으면 False.
+
+        ⚠️ 상단 30%만 검사하면 쿠팡 그리드(<div>) 안에 plain text 면책을
+        중복 삽입하게 되어 Goldmark raw-HTML 블록이 끊긴다.
+        (Goldmark가 문단을 <p>로 재감싸며 style 따옴표를 벗기고 그리드를 해체
+        → 카드가 가로 정렬되지 않음)
+        coupon_travel.get_product_cards()가 이미 그리드 뒤에 <p> 면책을 1회
+        추가하므로, 본문 전체에 면책 문구가 있으면 여기서는 스킵한다."""
         if not body:
             return False
-        # 상단 30% + 최소 200자로 체크 (짧은 글도 커버)
-        check_len = max(200, len(body) // 3)
-        first_chunk = body[:check_len]
-        # 면책 시작 문구 감지 (전체 문장 completes 아니어도 됨)
-        return not re.search(r'이 포스팅은 쿠팡 파트너스 활동의 일환으로', first_chunk)
+        return not re.search(r'이 포스팅은 쿠팡 파트너스 활동의 일환으로', body)
 
     def _insert_disclaimer_before_first_affiliate(body: str) -> tuple[str, bool, str]:
         """첫 제휴 링크 앞에 면책 삽입. 성공 시 (body, True, ''), 실패 시 (body, False, 사유)."""
