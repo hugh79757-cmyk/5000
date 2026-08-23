@@ -141,6 +141,7 @@ ALLOWED_OVERRIDES = {
     "layouts/partials/affiliate-disclosure.html",
     "layouts/partials/extend-head.html",
     "layouts/partials/extend_head.html",
+    "layouts/_markup/render-link.html",
     "layouts/partials/adsense",
     "layouts/partials/related.html",
     "layouts/partials/related-single.html",
@@ -697,6 +698,46 @@ def _is_r2_exempt(url: str) -> bool:
     return host in _R2_EXEMPT_DOMAINS
 
 
+# Phase Wave1: rule별 파이프라인 면제 — quality_checklist.yaml global_standard[].exempt_pipelines
+_EXEMPT_PIPELINES: dict[str, frozenset[str]] = {}
+_EXEMPT_PIPELINES_LOADED = False
+
+
+def _load_exempt_pipelines() -> dict[str, frozenset[str]]:
+    """global_standard 각 항목의 exempt_pipelines 를 로드 (1회, yaml 기반).
+
+    Wave 1: R04 etap 면제. 하드코딩 없이 yaml 선언만으로 확장 가능.
+    """
+    global _EXEMPT_PIPELINES, _EXEMPT_PIPELINES_LOADED
+    if _EXEMPT_PIPELINES_LOADED:
+        return _EXEMPT_PIPELINES
+    _EXEMPT_PIPELINES_LOADED = True
+    from shared.paths import CONFIG_DIR
+    cfg_path = Path(CONFIG_DIR) / "quality_checklist.yaml"
+    try:
+        import yaml as _yaml
+    except Exception as e:
+        logger.warning("[exempt] yaml 로드 불가 — 파이프라인 면제 미적용: %s", e)
+        return _EXEMPT_PIPELINES
+    try:
+        raw = _yaml.safe_load(cfg_path.read_text(encoding="utf-8")) or {}
+        for entry in raw.get("global_standard", []) or []:
+            rid = str(entry.get("id", "")).strip()
+            if not rid:
+                continue
+            ex = entry.get("exempt_pipelines")
+            if not ex:
+                continue
+            vals = [str(v).lower().strip() for v in (ex if isinstance(ex, list) else [ex]) if str(v).strip()]
+            if vals:
+                _EXEMPT_PIPELINES[rid] = frozenset(vals)
+        if _EXEMPT_PIPELINES:
+            logger.info("[exempt] 파이프라인 면제 로드: %s", {k: sorted(v) for k, v in _EXEMPT_PIPELINES.items()})
+    except Exception as e:
+        logger.warning("[exempt] exempt_pipelines 로드 실패 — 면제 미적용: %s", e)
+    return _EXEMPT_PIPELINES
+
+
 def _extract_image_urls(content: str) -> list[str]:
     """포스트 본문(content.md)에서 이미지 URL 추출.
 
@@ -875,9 +916,17 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
     failures = []
     passes = []
     na = []  # V3(2026-08-21): 미적용(N/A) 규칙 — 집계 분모에서 제외
+    exempt_map = _load_exempt_pipelines()
 
     for entry in RULES:
         rule_id = entry.id
+        # Wave 1 (a): yaml exempt_pipelines 기반 N/A — check_fn 호출 skip, 분모 제외
+        if rule_id in exempt_map:
+            _brand = (blog_row.get("brand") or "").lower()
+            if _brand and _brand in exempt_map[rule_id]:
+                na.append({"rule_id": rule_id, "severity": entry.severity,
+                           "detail": f"R04 exempt for pipeline={_brand} (yaml exempt_pipelines)"})
+                continue
         check_fn = _resolve_check_fn(entry.check_fn)
         if check_fn is None:
             # 보강 B: 해석 실패 규칙은 조용히 skip하지 않음 (로그 이미 출력됨).

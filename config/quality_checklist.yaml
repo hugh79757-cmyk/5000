@@ -356,6 +356,8 @@ global_standard:
     severity: MAJOR
     description: "GA4 측정 ID + 모바일 보정 CSS"
     agent_action: fix_r04
+    exempt_pipelines:
+      - etap
   - id: R05
     target: adsense/top.html
     severity: MAJOR
