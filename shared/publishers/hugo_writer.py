@@ -465,8 +465,99 @@ def _clean_body(body_md, site_path=""):
         r"^[Cc]uisine\s+[Ss]tyles\s+[Aa]nd\s+[Ww]hat\s+[^#]+\s+[Dd]oes\s+[Bb]est", # "Cuisine Styles and What {city} Does Best"
         r"^[Pp]rice\s+[Gg]uide\s*:\s*[Ww]hat\s+[Tt]o\s+[Bb]udget\s+[Ff]or\s+[Mm]ichelin\s+[Dd]ining", # "Price Guide: What to Budget for Michelin Dining"
         r"^[Bb]ooking\s+[Tt]ips\s+[Aa]nd\s+[Ww]hat\s+[Tt]o\s+[Kk]now\s+[Bb]efore\s+[Yy]ou\s+[Gg]o", # "Booking Tips and What to Know Before You Go"
+        # ── michelin 신규 strict 4-H2 구조 (michelin_writer.py 필수 H2, 2026-08-23 추가) ──
+        r"^At\s+a\s+Glance$",   # "At a Glance" 요약 테이블
+        r"^Where\s+to\s+Eat$",  # "Where to Eat" 식당별 H3 상세
+        r"^Compare$",           # "Compare" 비교 테이블
+        r"^FAQ$",               # "FAQ"
+        # ── nomad 파이프라인 H2 (nomad_writer.py 필수 7종 중 미매칭 4종, 2026-08-23 추가) ──
+        r"^Internet\s+[Ss][Ii][Mm]\s+[Cc]ards\s+[Aa]nd\s+[Cc]onnectivity$",  # "Internet SIM Cards and Connectivity"
+        r"^Cost\s+[Oo]f\s+[Ll]iving\s+[Ff]or\s+[Nn]omads\s+[Ii]n",          # "Cost of Living for Nomads in {city}"
+        r"^Visa\s+[Aa]nd\s+[Ss]tay\s+[Oo]ptions$",                          # "Visa and Stay Options"
+        r"^Neighborhoods\s+[Aa]nd\s+[Ww]here\s+[Tt]o\s+[Ss]tay$",           # "Neighborhoods and Where to Stay"
+        # ── foodtour 파이프라인 H2 ──
+        r"^[Ww]hy\s+.+\s+is\s+a\s+[Ff]ood\s+[Ll]over'?s?\s+[Pp]aradise",  # "Why {city} is a Food Lover's Paradise"
+        r"^[Bb]est\s+[Ss]treet\s+[Ff]ood\s+[Tt]ours",                       # "Best Street Food Tours"
+        r"^[Hh]ands-[Oo]n\s+[Cc]ooking\s+[Cc]lasses",                        # "Hands-On Cooking Classes"
+        r"^[Ff]ine\s+[Dd]ining\s+[Ee]xperiences",                            # "Fine Dining Experiences"
+        r"^[Bb]est\s+[Dd]eals\s+on\s+[Ff]ood\s+[Tt]ours",                   # "Best Deals on Food Tours"
+        r"^[Tt]ips\s+for\s+[Ff]ood\s+[Tt]ours\s+in",                        # "Tips for Food Tours in {city}"
+        r"^[Tt]he\s+[Ff]ood\s+[Ss]cene\s+in",                                # "The Food Scene in {city}"
+        r"^[Ww]here\s+to\s+[Ee]at\s+in",                                     # "Where to Eat in {city}"
         # ── curation 파이프라인 H2 (상품 비교) ──
         r"^상품별 상세 비교$",                   # "상품별 상세 비교" (curation _normalize_product_blocks 강제 H2)
+        r"^구매 전 체크리스트$",                 # "구매 전 체크리스트" (curation writer.py 시스템 프롬프트 필수 H2, 2026-08-22 추가)
+        # ── rap 파이프라인 H2 (부동산) ──
+        # 근거: 발행 표본 2413개 H2 중 미등록 강등 193종 실측 (2026-08-23, /tmp/rap_phase0_inventory.md)
+        # ponytail: 부동산 도메인 명사 허용 방식이라 서술형 소제목 일부 통과 가능 — 재발 시 형태 제한으로 조임
+        r"^요약",
+        r"체크리스트",                           # 매수 전/절세 체크리스트 등
+        r"지역 특성",                             # 지역 특성 분석 / 및 인프라 환경
+        r"거래",                                  # 거래 분석/내역/현황/사례/동향, 단지 거래
+        r"단지",                                  # 단지별/단지 상세/기타 단지
+        r"시세", r"실거래가?", r"매매가", r"전세가", r"전세가율",
+        r"시장", r"추정", r"환산",                # 시장 동향, 전세 시세 추정, 월세 환산
+        r"프리미엄", r"비브랜드",                 # 브랜드 프리미엄 분석 (rap5)
+        r"분양", r"입주",                         # 분양 및 입주 현황 (rap5)
+        r"세금|절세|취득세|양도세|양도소득세|재산세|보유세",  # rap3 세금 계열
+        r"시뮬레이션",                            # 세금/취득세 시뮬레이션
+        r"^결론",                                 # 실측 1건 (rap)
+        r"팁",                                    # 실전 팁 / 절세 팁
+        r"비교$",                                 # "~와 비교" 꼬리
+        r"동향",                                  # "~동향" 꼬리 (청주 전세 및 월세 동향)
+        # ── stap/seap 파이프라인 H2 (주식·예적금·복지) ──
+        # 근거: 발행 표본 7블로그×80 포스트 2413 H2 중 미등록 강등 781종 실측 (2026-08-23,
+        #       /tmp/stap_phase0_inventory.md·/tmp/seap_phase0_inventory.md)
+        # ponytail: 도메인 명사 허용 방식이라 서술형 소제목 일부 통과 가능 — 재발 시 형태 제한으로 조임
+        r"^함께\s*읽어",                          # 함께 읽어보기 (finance/etf/ipo/sector 최다 빈도)
+        r"^관련\s*글$",                            # 관련글 / 관련 글
+        r"^면책조항$",
+        r"배당",                                   # dividend 전 카테고리 (배당률/배당컷/배당성향 등)
+        r"ETF",
+        r"공모가|주관사|보호예수|희석|증자",         # ipo
+        r"업종",                                   # sector 업종 분석 계열
+        r"실적|재무|매출|영업이익|순이익",           # 재무·실적 섹션
+        r"리스크",
+        r"전망|가능성|원인",                        # 향후 전망 / 반등 가능성 / 부진 원인
+        r"예금|적금|금리|이자|실수령액|우대",        # finance 예적금 카테고리
+        r"수익률",
+        r"전략",
+        r"종목|대장주|수혜주",
+        r"(지원|서비스|혜택)\s*내용|보장\s*금액|적용\s*범위",  # senior 복지 혜택
+        r"제도",                                   # 같이 신청하면 좋은 제도 등
+        r"조건",                                   # 대상자/우대 조건
+        r"주의할\s*점",                            # 이용 시 주의할 점
+        r"(유리한가|유리할까|될까|어땠나|무엇인가|다를까|맞는가|맞을까|어디인가|어떤가)",  # 의문형 소제목
+        r"추적오차",                               # etf
+        r"하는\s*일$",                             # 이 회사가 하는 일
+        r"매력도",                                 # 투자 매력도(평가)
+        r"적합한\s*사람|부적합한\s*사람",
+        r"\svs\s",                                # A vs B 비교형
+        r"분석$",                                  # "~분석" 꼬리
+        r"SPAC|스팩",
+        r"^서론$",
+        r"청약",
+        r"데이터",
+        # ── cap/car 파이프라인 H2 (자동차 비교·TCO·프로모션) ──
+        # 근거: car writer 필수 H2 구조 (prompts/{guide,tco,deal,hotissue,compare,ev,rank,pick}),
+        #       2026-08-23. re.search 부분일치 — 서술형 소제목은 강등 유지.
+        r"기본\s*정보와\s*트림별\s*가격",     # 전 트림 가격 비교 계열
+        r"트림별\s*가격",                      # 트림별 가격 / 가격 변동
+        r"전\s*트림\s*가격",                   # 전 트림 가격과 가성비 분석
+        r"월\s*유지비",                        # 월 유지비 시뮬레이션
+        r"유지비",                             # 연간 유지비 상세 분석 / 유지비 총정리
+        r"총\s*비용|총\s*소유비용|소유\s*비용",# 3년 보유 총비용 / 총 소유비용
+        r"에너지\s*비용|보유\s*비용|실질\s*비용|전환\s*비용|실제\s*비용\s*계산",
+        r"잔존가치",                           # 연차별 잔존가치 / 구조적 요인
+        r"가성비",                             # 가성비 분석 / 가성비 트림
+        r"경쟁\s*모델",                        # 경쟁 모델 비교
+        r"TOP5|랭킹|순위",                     # TOP5 종합 랭킹표
+        r"구매\s*타이밍|구매\s*판단|구매\s*결론|구매\s*가이드",
+        r"어울리는\s*사람",                    # 이 차가 어울리는 사람, 어울리지 않는 사람
+        r"경제성",                             # 하이브리드의 경제성
+        r"혜택",                               # 세금·보험 혜택
+        r"미리\s*알고",                        # 이런 점은 미리 알고 사야 한다
+        r"(괜찮을까|진짜일까|싶을까|있을까|바뀌었나|얼마나|되나|될까|기다려야\s*하나)",  # 의문형 리드·판단 H2
     ]
     _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
 
@@ -1081,6 +1172,25 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         logger.error(f"[PUBLISH] slug가 비어있어 발행 중단: title={title}")
         return {"success": False, "error": "empty slug"}
 
+    # ── C01 사전 정규화 (2026-08-22 Paris 재발행 실패 근본 수정) ──
+    # 곡선따옴표(’ ‘ ”)를 fm 빌드 전에 직선화한다. _sanitize_yaml_value는
+    # 직선 ' 유무로 단일/이중 인용 전략을 결정하므로, 곡선따옴표가 남은 채
+    # 빌드되면 'A Food Lover's ...' 형태의 단일따옴표 YAML이 만들어지고,
+    # 이후 C01 치환이 그 내부를 직선화해 invalid_frontmatter로 쓰기 차단됨.
+    # title/body를 여기서 1회 정규화하면 description(_extract_description 결과)
+    # 까지 자동 정규화되고, fm 후처리 치환은 불필요해짐.
+    def _c01_straight(_s):
+        if not isinstance(_s, str):
+            return _s
+        for _q in ("\u2018", "\u2019"):
+            _s = _s.replace(_q, "'")
+        for _q in ("\u201c", "\u201d"):
+            _s = _s.replace(_q, '"')
+        return _s
+
+    title = _c01_straight(title)
+    body_md = _c01_straight(body_md)
+
     # locale 감지 (schema_json 오염 전 — 본문 기준으로만 결정)
     _locale = _detect_locale(body_md)
 
@@ -1198,7 +1308,9 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             img = body_images[idx]
             img_url = img.get("url", "")
             img_credit = img.get("credit", "")
-            img_block = f"\n\n![Photo]({img_url})\n*{img_credit}*\n"
+            # M3.2(2026-08-21): alt="Photo" 하드코딩 금지 — 문맥(글 제목) 기반 alt
+            alt_text = (title or img_credit or "Photo") or "Photo"
+            img_block = f"\n\n![{alt_text}]({img_url})\n*{img_credit}*\n"
             h2_line_end = body_md.index("\n", h2_positions[idx]) + 1
             next_pp = body_md.find("\n\n", h2_line_end)
             if next_pp == -1:
@@ -1224,15 +1336,17 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     )
 
     def _needs_disclaimer(body: str) -> bool:
-        """상단 30% 내에 면책이 이미 있으면 False.
-        면책 시작 문구('이 포스팅은 쿠팡 파트너스')만 감지해도 충분."""
+        """본문 어디에든 면책이 이미 있으면 False.
+
+        ⚠️ 상단 30%만 검사하면 쿠팡 그리드(<div>) 안에 plain text 면책을
+        중복 삽입하게 되어 Goldmark raw-HTML 블록이 끊긴다.
+        (Goldmark가 문단을 <p>로 재감싸며 style 따옴표를 벗기고 그리드를 해체
+        → 카드가 가로 정렬되지 않음)
+        coupon_travel.get_product_cards()가 이미 그리드 뒤에 <p> 면책을 1회
+        추가하므로, 본문 전체에 면책 문구가 있으면 여기서는 스킵한다."""
         if not body:
             return False
-        # 상단 30% + 최소 200자로 체크 (짧은 글도 커버)
-        check_len = max(200, len(body) // 3)
-        first_chunk = body[:check_len]
-        # 면책 시작 문구 감지 (전체 문장 completes 아니어도 됨)
-        return not re.search(r'이 포스팅은 쿠팡 파트너스 활동의 일환으로', first_chunk)
+        return not re.search(r'이 포스팅은 쿠팡 파트너스 활동의 일환으로', body)
 
     def _insert_disclaimer_before_first_affiliate(body: str) -> tuple[str, bool, str]:
         """첫 제휴 링크 앞에 면책 삽입. 성공 시 (body, True, ''), 실패 시 (body, False, 사유)."""
@@ -1293,6 +1407,16 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
             f"포스트처리 중 본문이 삭제/소실되었을 가능성이 높습니다. 발행을 거부합니다."
         )
         return {"success": False, "error": f"body_md_too_short: {_body_word_count} words"}
+
+    # ── C01 fix (defense-in-depth): 본문만 치환 (2026-08-22 수정) ──
+    # title/description은 위 _c01_straight()로 fm 빌드 전 정규화되므로 fm은
+    # 이미 안전함. 여기서 fm을 치환하면 _sanitize_yaml_value가 단일따옴표로
+    # 감싼 값 내부가 직선화되어 invalid_frontmatter 쓰기 차단이 재발함.
+    # (humanizer 우회 경로 등 본문 잔존 곡선따옴표 대비 — body_md만 치환)
+    for _c in ["\u2018", "\u2019"]:
+        body_md = body_md.replace(_c, "'")
+    for _c in ["\u201c", "\u201d"]:
+        body_md = body_md.replace(_c, '"')
 
     content = fm + body_md
 

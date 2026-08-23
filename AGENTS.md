@@ -298,6 +298,8 @@
 | -------- | ------------------------------ | ---------------------------- | ----- |
 | **CAP**  | 5000 내부                        | curation, gap, car, senior 등 | 20+   |
 | **TAP**  | `/Users/twinssn/Projects/TAP`  | travel                       | 5+    |
+
+> **TAP 여행 블로그 단일 기준**: 본문 구조·이미지·예약표·타이틀·쿠팡 그리드는 `/Users/twinssn/Projects/TAP/TAP_여행블로그_콘텐츠_구조_기준.md`(v1.0, 2026-08-22)를 참조할 것. TAP 산하 모든 Hugo 여행 블로그에 적용한다.
 | **STAP** | `/Users/twinssn/Projects/STAP` | stock                        | 6     |
 | **CUAP** | `/Users/twinssn/Projects/CUAP` | curation (상품 큐레이션)           | 10    |
 | **SEAP** | 5000 내부                        | senior                       | ~5    |

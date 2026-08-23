@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p><a href="/schema">← 전체 목록</a></p>
+
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <strong style="font-size:1.1rem">{{ row.blog_id }}</strong>
+    {% if state == 'ok' %}<span class="badge badge-pass">완전 표준화</span>
+    {% elif state == 'attention' %}<span class="badge badge-warn">주의</span>
+    {% else %}<span class="badge badge-unknown">비활성</span>{% endif %}
+  </div>
+  {% if reasons %}
+  <p>사유: {{ reasons|join(', ') }}</p>
+  {% endif %}
+</div>
+
+<table>
+  <tbody>
+    <tr><th>분기</th><td>{{ row.branch }}</td></tr>
+    <tr><th>스키마 버전</th><td><code>{{ row.schema_version }}</code></td></tr>
+    <tr><th>필수 frontmatter</th><td>{{ row.required_frontmatter }}</td></tr>
+    <tr><th>선택 frontmatter</th><td>{{ row.optional_frontmatter }}</td></tr>
+    <tr><th>GA4 ID</th><td>{{ row.ga4_id or '—' }}</td></tr>
+    <tr><th>H2-GUARD</th><td>{{ 'ON' if row.h2_guard_enabled else 'OFF' }}</td></tr>
+    <tr><th>빌드 상태</th><td>{{ row.build_status }}</td></tr>
+    <tr><th>마지막 동기화</th><td>{{ row.last_synced_at }}</td></tr>
+  </tbody>
+</table>
+
+<h2>raw_schema</h2>
+<pre class="card" style="white-space:pre-wrap;font-size:.8rem">{{ raw_pretty }}</pre>
+
+{% endblock %}

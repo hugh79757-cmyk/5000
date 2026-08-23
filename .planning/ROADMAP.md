@@ -773,3 +773,12 @@ Total in 898 ms +
 **ITERATE 제한:** 최대 1회. NO_EFFECT_STOP / HARM_STOP 판정 시 확장 종료 (커밋·배포 불가).
 
 **현재 next_action:** 2026-08-21 Interior sitemap experiment **Day 3 checkpoint** (URL Inspection 20개 재조회, treatment vs control 탈출 건수 집계)
+
+### M5 — Track C (2026-08-21)
+- Session: `specs/2026-08-21-track-c-session-state.md` (IN_PROGRESS — 22/64, next 30)
+- Charter: `docs/superpowers/track-c-charter.md` (13 families, Layer1 CC0 / Layer2 ODbL historical, 3 unresolved)
+- Docs: `specs/2026-08-21-etap-false-positives.md` (RETROSPECTIVE, 6 cases) | `specs/2026-08-21-etap-family-map.md` (DISCOVERY) | `specs/2026-08-21-etap-audit-playbook.md` (DISCOVERY) | `plans/2026-08-21-etap-quality-overhaul.md` (PLAN) | Skill `etap-live-verification`
+- Pilots: airports STN/LIL/KDL (STN/LIL 428/427 words pass, KDL 357 draft) live 6-checks pending
+- Charter: `docs/superpowers/track-c-charter.md` (Cross-Branch Investigation & Synthesis, branch `track-c-etap-quality-overhaul`)
+- ETAP branch 1: 35→34 (airports paused), 36/36 hugo build ok, snapshot `/tmp/etap_hyphen_backup_20260821.tgz`, GA fallback G-N4Q99745QT (12 sites 신규 측정), disclosure+rel 렌더 레이어 이전 (재빌드=백필)
+- Next: S1 michelin 6-checks → S2 34-blog batch rebuild → S3 live curl verify; deals-hugo 106d stall 별도 진단

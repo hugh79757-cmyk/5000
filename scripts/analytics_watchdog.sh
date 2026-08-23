@@ -102,19 +102,31 @@ else
     echo "[$TS] ⚠️ auto_triage 로그 파일 없음 ($TRIAGE_LOG) — 실행 이력 없음" >> "$LOG_FILE"
 fi
 
-# ── 2. Analytics 수집 미실행 감지 (기존 로직) ──
-LAST_LOG=$(tail -50 /Users/twinssn/Projects/5000/logs/analytics_collect.log 2>/dev/null | grep "완료" | tail -1)
-if echo "$LAST_LOG" | grep -q "완료"; then
-    LAST_TS=$(echo "$LAST_LOG" | awk '{print $1" "$2}')
-    NOW_EPOCH=$(date +%s)
-    LAST_EPOCH=$(date -j -f "%Y-%m-%d %H:%M:%S" "$LAST_TS" +%s 2>/dev/null || echo 0)
-    DIFF=$(( (NOW_EPOCH - LAST_EPOCH) / 3600 ))
-    if [ "$DIFF" -lt 8 ]; then
-        : # analytics 정상
-    fi
-fi
+# ── 2. Analytics 수집 미실행 감지 (heartbeat/status 파일 기반) ──
+# 로그 파일명 의존 폐기: collect/recover 가 공통으로 갱신하는
+# data/analytics_status.json 의 last_success_ts / overall_exit_code / lock 기준으로 판단.
+source /Users/twinssn/Projects/5000/scripts/analytics_common.sh
 
-# 8시간 이상 미실행 → 강제 실행
-echo "[$TS] ⚠️ 수집 미실행 감지 (8h+), 강제 실행" >> "$LOG_FILE"
-bash /Users/twinssn/Projects/5000/scripts/collect_analytics.sh
-echo "[$TS] ✅ Watchdog 복구 완료" >> "$LOG_FILE"
+ANALYTICS_STALE_HOURS=8
+FORCED_RUN=0
+
+# (a) 이미 실행 중이면 중복 실행 0회
+if is_locked; then
+    echo "[$TS] ⏸️ analytics 실행 중 (lock 존재) — 강제수집 생략 (중복방지)" >> "$LOG_FILE"
+else
+    # (b) stale / 실패 판단
+    STALE_STATE=$(check_stale "$ANALYTICS_STALE_HOURS")
+    case "$STALE_STATE" in
+        fresh)
+            # success timestamp 가 임계 내 → 강제수집 0회
+            echo "[$TS] ✅ analytics 최근 성공 (fresh) — 강제수집 생략" >> "$LOG_FILE"
+            ;;
+        stale|unknown)
+            # 8h+ 미실행 또는 성공 이력 없음 → 1회만 강제 실행
+            echo "[$TS] ⚠️ analytics 미실행/실패 감지 ($STALE_STATE, 임계 ${ANALYTICS_STALE_HOURS}h) — 강제수집 1회" >> "$LOG_FILE"
+            bash /Users/twinssn/Projects/5000/scripts/collect_analytics.sh >> "$LOG_FILE" 2>&1
+            FORCED_RUN=1
+            echo "[$TS] ✅ Watchdog 강제수집 완료 (forced_run=$FORCED_RUN)" >> "$LOG_FILE"
+            ;;
+    esac
+fi

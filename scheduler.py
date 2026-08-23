@@ -1232,6 +1232,14 @@ def _run_indexnow() -> None:
     except Exception as e:
         logger.exception(f"IndexNow 실패: {e}")
 
+def _run_schema_sync() -> None:
+    try:
+        from ops_dashboard.schema_registry import sync_all_schemas
+        result = sync_all_schemas()
+        logger.info(f"Schema registry sync 완료: {result['inserted']}/{result['total']}")
+    except Exception as e:
+        logger.exception(f"Schema registry sync 실패: {e}")
+
 # ─── 스케줄 등록 ───
 
 def register_schedules():
@@ -1288,6 +1296,9 @@ def register_schedules():
     schedule.every().day.at("06:45").do(_run_indexnow)
     logger.info("IndexNow scheduled at 06:45")
 
+    schedule.every().day.at("09:00").do(_run_schema_sync)
+    logger.info("Schema registry sync scheduled at 09:00")
+
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
 
@@ -1304,14 +1315,76 @@ def register_schedules():
 
     # CUAP keyword_expander: 매일 02:00에 실행 (동적 키워드 확장)
     def _run_keyword_expander() -> None:
+        """keyword_expander subprocess 격리 + deadline (CAR daily_refresh 동일 패턴).
+
+        - in-process 호출 시 네트워크/DNS 블록이 스케줄러 루프 전체를 정지시킴
+          (2026-08-23 02:00→06:59 침묵사 원인) → subprocess + start_new_session 격리.
+        - Popen poll 중 heartbeat 갱신 → watchdog kickstart 루프 방지.
+        - deadline 초과 시 process group 전체(killpg) 정리.
+        """
+        import signal
+        import tempfile
+
+        timeout_sec = int(os.environ.get("EXPANDER_TIMEOUT_SEC", "1800"))
+        started = time.time()
+        deadline = started + timeout_sec
+        stdout_tmp = tempfile.TemporaryFile(mode="w+", encoding="utf-8")
+        stderr_tmp = tempfile.TemporaryFile(mode="w+", encoding="utf-8")
+        timed_out = False
         try:
-            from pipelines.curation.keyword_expander import run_all
-            run_all()
+            proc = subprocess.Popen(
+                [sys.executable, "-m", "pipelines.curation.keyword_expander", "all"],
+                cwd=os.path.dirname(os.path.abspath(__file__)),
+                stdout=stdout_tmp, stderr=stderr_tmp, text=True,
+                start_new_session=True,
+            )
+            while proc.poll() is None:
+                try:
+                    _update_heartbeat()
+                except Exception:
+                    pass  # heartbeat 실패가 expander 결과를 왜곡하지 않는다
+                if time.time() > deadline:
+                    timed_out = True
+                    break
+                time.sleep(30)
+
+            if timed_out:
+                logger.error(f"keyword_expander DEADLINE exceeded ({timeout_sec}s), killing process group")
+                try:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                    proc.wait(timeout=10)
+                except Exception:
+                    try:
+                        os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                    except Exception:
+                        pass
+            rc = proc.returncode
+            stdout_tmp.seek(0)
+            stderr_tmp.seek(0)
+            tail = (stderr_tmp.read() or stdout_tmp.read())[-2000:]
+            if timed_out or rc != 0:
+                logger.warning(f"keyword_expander rc={rc} timed_out={timed_out}\n{tail}")
+            else:
+                logger.info(f"keyword_expander completed in {time.time()-started:.0f}s")
         except Exception as e:
             logger.exception(f"CUAP keyword_expander error: {e}")
+        finally:
+            stdout_tmp.close()
+            stderr_tmp.close()
 
     schedule.every().day.at("02:00").do(_run_keyword_expander)
     logger.info("CUAP keyword_expander scheduled daily at 02:00")
+
+    # CUAP keyword_harvester: 매일 03:00 (윈도우 게이트는 run_harvest 내부 이중 확인)
+    def _run_cuap_harvest() -> None:
+        try:
+            from pipelines.curation.run_harvest import main as harvest_main
+            harvest_main()
+        except Exception as e:
+            logger.exception(f"CUAP keyword_harvester error: {e}")
+
+    schedule.every().day.at("03:00").do(_run_cuap_harvest)
+    logger.info("CUAP keyword_harvester scheduled daily at 03:00")
 
     schedule.every().day.at("23:00").do(_run_quality_scan)
     schedule.every().day.at("23:50").do(daily_report)

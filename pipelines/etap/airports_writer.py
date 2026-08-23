@@ -54,6 +54,9 @@ def generate_airport_guide(topic):
     if not airport_data:
         logger.warning(f"No airport data for {iata}")
         return None
+    if len(airlines) == 0 or len(destinations) == 0:
+        logger.warning(f"No airline/routes data for {iata} — skip generation (source empty)")
+        return None
     name = airport_data.get("name", iata)
     tz = airport_data.get("timezone", "")
     summary = f"Airport: {name} ({iata})\n"

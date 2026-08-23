@@ -144,35 +144,28 @@ showTableOfContents: false
 
 
 def _build_and_deploy(cfg: dict) -> bool:
-    """Hugo 빌드 + Wrangler 배포."""
-    import subprocess
+    """Hugo 빌드 + Wrangler 배포 — shared/publishers/deploy.py 위임 (정규 경로).
+
+    ETAP fallback(tour-hugo 등 base 폴백)용. 직접 wrangler 호출 대신
+    deploy_site()가 build_wrangler_env()(CLOUDFLARE_API_TOKEN 제거),
+    HUGO_THEMESDIR, 직렬화 락, 재시도를 모두 처리한다.
+    """
+    try:
+        from shared.publishers.deploy import deploy_site
+    except Exception as e:
+        print(f"[ETAP] deploy import failed: {e}")
+        return False
     site_path = cfg["site_path"]
     cf_project = cfg.get("cf_project") or cfg.get("repo") or cfg["id"]
-
-    # leaf bundle 방지: content/posts/index.md 존재 시 삭제
-    rogue = Path(site_path) / "content" / "posts" / "index.md"
-    if rogue.exists():
-        rogue.unlink()
-        print(f"[guard] Removed rogue index.md from {site_path}")
-
-    build = subprocess.run(
-        ["/opt/homebrew/bin/hugo", "--gc", "--minify"],
-        cwd=site_path, capture_output=True, text=True, timeout=120
-    )
-    if build.returncode != 0:
-        print(f"[ETAP] Hugo build failed: {build.stderr}")
+    try:
+        # deploy_site가 HUGO_THEMESDIR / env 정리 / 락 / 빌드+배포 전부 담당
+        ok = deploy_site(site_path, cf_project, deploy_type=cfg.get("deploy_type"))
+        if ok:
+            print(f"[ETAP] Deployed to {cfg['domain']}")
+        return bool(ok)
+    except Exception as e:
+        print(f"[ETAP] Deploy failed: {e}")
         return False
-
-    deploy = subprocess.run(
-        ["/opt/homebrew/bin/wrangler", "pages", "deploy", "public", "--project-name", cf_project],
-        cwd=site_path, capture_output=True, text=True, timeout=120
-    )
-    if deploy.returncode != 0:
-        print(f"[ETAP] Wrangler deploy failed: {deploy.stderr}")
-        return False
-
-    print(f"[ETAP] Deployed to {cfg['domain']}")
-    return True
 
 
 def _get_esim_product(country: str) -> dict:

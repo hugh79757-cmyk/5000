@@ -1,0 +1,25 @@
+# manual/schema.yaml — MANUAL 분기 스키마
+# 상속: _base/default.yaml (deep-merge)
+# 근거: 표본 informationhot-hugo(40), rotcha-blog 등 (2026-08-22)
+#   - featureimage 존재율: 1/40 — 거의 없음 → 필수 아님 (allow)
+#   - title: 잘림 23/40 (58%) — 기존 발행물이 '…'로 잘린 형식 다수 → forbid_ellipsis=false,
+#     allow_suffix: ["…"] (cap과 동일 정책. 단, 신규 발행은 잘림 지양 — TODO: writer 개선 후 재검토)
+#   - OG: featureimage 대신 cover/image 키 사용 (1/40만 featureimage) — og_image_source: cover 후보
+#   - manual 분기는 site_path 없는 blogger 블로그(tvshow-blogger, ud-blogger) 포함 — 이들은 N/A
+
+required_frontmatter: [title, description, date, slug, tags]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+  - "https://[a-z0-9-]+\\.(techpawz|informationhot|rotcha)\\.kr/.+"
+  - "https://[a-z0-9-]+\\.(techpawz|informationhot|rotcha)\\.com/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: false         # 기존 발행물 58%가 '…' 잘림 형식 (표본 정보)
+  allow_suffix: ["…"]
+live_og_format_rule: contains    # cap과 동일 — 카테고리/접미사 붙는 형식
+og_rule:
+  og_image_required: false       # featureimage 거의 없음 (1/40)
+  og_image_source: featureimage  # TODO: cover/image 키와 우선순위 결정 필요
+empty_value_policy:
+  featureimage: allow
+  description: allow             # 일부 구형 포스트 description 생략 (조사 중 확인)

@@ -458,11 +458,47 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
 
     # Word count check
     word_count = len(content.split())
-    if word_count < 400:
+    # Honest word count: subtract common tips boilerplate and forbidden rephrase duplicates
+    _honest = word_count
+    # Subtract common tips section words (if present)
+    import re as _re
+    _tips_m = _re.search(r'## Practical Tips for Travelers.*?(?=\n## |\Z)', content, _re.S)
+    if _tips_m:
+        _honest -= len(_tips_m.group(0).split()) * 0  # keep tips as honest? Actually tips are boilerplate, subtract 50
+        # count common tip sentences
+        _common = ["Check the airport's official website", "Arrive with sufficient time", "Verify visa"]
+        for _c in _common:
+            if _c in content:
+                _honest -= 12  # approximate per sentence
+    # Forbidden phrases
+    for _phrase in ["typically","in its regional context","reflecting local terrain","As a large airport","generally has"]:
+        _honest -= content.lower().count(_phrase.lower()) * 4
+    # Coordinate rephrase duplicate: sentences containing lat/lng/elev + rephrase
+    honest_word_count = max(0, _honest)
+    if honest_word_count < 400:
         issues.append(f"Word count too low: {word_count} (minimum 400)")
         is_draft = True
     elif word_count < 500:
         issues.append(f"Word count low: {word_count} - will be supplemented with cards, images, and cross-links")
+
+    # ── S0: LaTeX + 0허위 게이트 (Track C 2026-08-21) ──
+    # LaTeX $\rightarrow$ 누수 치환
+    if re.search(r"\$\\rightarrow\$|\\rightarrow", content):
+        content = re.sub(r"\$\\rightarrow\$", "→", content)
+        content = re.sub(r"\\rightarrow", "→", content)
+        issues.append("Auto-replaced: LaTeX $\\rightarrow$ → →")
+    # 빈 데이터 허위 단정 차단 — count 0을 사실로 렌더
+    _zero_pats = [
+        r"\|\s*(Airlines operating|Direct destinations|Route Count|Airports Served)[^|]*\|\s*0\s*\|",
+        r"there are no airlines[^.\n]*operating",
+        r"Route Count\s*0",
+        r"Airports Served\s*0",
+    ]
+    for _pat in _zero_pats:
+        if re.search(_pat, content, re.IGNORECASE):
+            issues.append(f"[CRITICAL] empty-data hallucination: count=0 rendered as fact")
+            is_draft = True
+            break
 
     # Append disclaimer card if not already present
     disclaimer = """
@@ -474,8 +510,16 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
 
 </div>
 """
+    # ── S2: affiliate disclosure — DISABLED (템플릿 레이어로 이동, 2026-08-21)
+    # 기존 글 재빌드 1회로 전 페이지 적용하려면 Hugo 파셜(affiliate-disclosure.html)에서
+    # 렌더 시 출력해야 함. 본문에 박으면 신규 글만 고쳐져 34/34 미고지 그대로 남음.
+    # → 중복 방지 위해 본문 삽입 무력화, 템플릿이 책임짐.
+
     if "etap-disclaimer-card" not in content:
         content = content + disclaimer
+
+    # ── affiliate rel — DISABLED (render-link.html 훅이 담당, sponsored noopener)
+    # 본문에서 직접 <a rel> 박으면 훅과 중복. 훅이 렌더 시 일괄 부여하므로 본문 변환은 제거.
 
     return content, issues, is_draft
 

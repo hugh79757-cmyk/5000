@@ -26,6 +26,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
+from googleapiclient.errors import HttpError
 
 # ── Path setup (shared/ 기준 상대 경로) ──
 _SHARED_DIR = Path(__file__).parent
@@ -334,7 +335,18 @@ def _db() -> sqlite3.Connection:
 import functools
 
 
+def _is_auth_error(e: Exception) -> bool:
+    """인증/권한 오류(재시도 금지 대상): 401/403."""
+    if isinstance(e, HttpError):
+        return e.status_code in (401, 403)
+    return False
+
+
 def retry(max_attempts=3, delay_seconds=5):
+    """일시 네트워크/DNS 오류에만 제한된 재시도 (bounded exponential backoff).
+
+    인증/권한 오류(HttpError 401/403)는 재시도하지 않고 즉시 상위로 전파.
+    """
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -344,11 +356,16 @@ def retry(max_attempts=3, delay_seconds=5):
                     return func(*args, **kwargs)
                 except Exception as e:
                     last_exception = e
+                    if _is_auth_error(e):
+                        logger.error(
+                            f"[RETRY] {func.__name__} 인증/권한 오류 — 재시도 안 함: {e}"
+                        )
+                        raise
                     if attempt < max_attempts:
                         wait = delay_seconds * (2 ** (attempt - 1))
                         logger.warning(
                             f"[RETRY] {func.__name__} ({attempt}/{max_attempts}) "
-                            f"실패: {e}. {wait:.0f}초 후 재시도..."
+                            f"일시 오류: {e}. {wait:.0f}초 후 재시도..."
                         )
                         _time.sleep(wait)
                     else:
@@ -474,6 +491,11 @@ def collect_ga4(days: int = 3) -> dict:
             logger.info(f"  [{blog_id}] {site_rows}건 (PV {pv:,}, Rev ${revenue:.2f})")
 
         except Exception as e:
+            if _is_auth_error(e):
+                logger.error(
+                    f"ANALYTICS_AUTH_ERROR: GA4 {blog_id} "
+                    f"status={getattr(e, 'status_code', '?')} — 사이트 skip"
+                )
             errors.append(f"{blog_id}: {e}")
             logger.error(f"  [{blog_id}] 오류: {e}")
 
@@ -593,8 +615,14 @@ def collect_gsc(days: int = 1) -> dict:
                 )
 
             except Exception as e:
+                if _is_auth_error(e):
+                    # 사이트 권한/인증 오류(403 등): 해당 사이트만 skip + 분류 마커
+                    logger.error(
+                        f"ANALYTICS_AUTH_ERROR: GSC {blog_id} "
+                        f"status={getattr(e, 'status_code', '?')} — 사이트 skip"
+                    )
                 errors.append(f"계정{account_num}/{blog_id}: {str(e)[:100]}")
-                # 403 = 계정 권한 없음 → 무시하고 다음 계정에서 시도하게 둠
+                # 권한 오류는 재시도하지 않고 다음 사이트로 진행
                 continue
 
     conn.commit()
@@ -707,6 +735,13 @@ def collect_adsense(days: int = 3) -> dict:
                     total_earnings += earnings
 
         except Exception as e:
+            if _is_auth_error(e):
+                # 인증/권한 오류: 재시도 불가 → 분류 마커 + rc=23 로 shell 전달
+                logger.error(
+                    f"ANALYTICS_AUTH_ERROR: AdSense account-{account_num} "
+                    f"status={getattr(e, 'status_code', '?')} — 재시도 안 함"
+                )
+                sys.exit(23)
             err_msg = f"account-{account_num}: {e}"
             errors.append(err_msg)
             logger.error(f"  AdSense 계정 {account_num} 오류: {e}")

@@ -558,6 +558,28 @@ def _register_human_routes(app: Flask) -> None:
             compliance=brands,
         )
 
+    @app.route("/schema")
+    @require_auth
+    def schema_overview():
+        from ops_dashboard.views.schema_view import render_schema_summary
+        ctx = render_schema_summary()
+        return render_template("schema.html", title="Schema", active="schema", **ctx)
+
+    @app.route("/schema/<blog_id>")
+    @require_auth
+    def schema_detail(blog_id: str):
+        import json as _json
+
+        from ops_dashboard.views.schema_view import render_schema_detail
+        ctx = render_schema_detail(blog_id)
+        if not ctx:
+            return f"Unknown blog: {blog_id}", 404
+        raw_pretty = _json.dumps(
+            _json.loads(ctx["row"]["raw_schema"]), ensure_ascii=False,
+            indent=2, sort_keys=True)
+        return render_template("schema_detail.html", title=f"Schema — {blog_id}",
+                               active="schema", raw_pretty=raw_pretty, **ctx)
+
 
 # ---------------------------------------------------------------------------
 # JSON API routes

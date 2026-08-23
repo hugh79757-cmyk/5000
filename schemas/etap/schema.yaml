@@ -1,0 +1,20 @@
+# etap/schema.yaml — ETAP 분기 스키마
+# 상속: _base/default.yaml (deep-merge) — 분기 고유 오버라이드만 선언
+# 근거: 검증 표본 tour-hugo/trains-hugo/ferry-hugo 실제 frontmatter 패턴 (2026-08-22)
+#   - title이 말줄임표(…)로 잘려 저장되는 실결함 → forbid_ellipsis 유지
+#   - featureimage는 pub-*.r2.dev/etap/{slug}/cover.jpg 형식 (필수)
+#   - 라이브 og:title은 로컬 title과 정확히 일치해야 정상 (exact_match)
+
+required_frontmatter: [title, description, date, slug, tags, featureimage]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/etap/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: true   # ETAP writer가 title을 잘라 '…' 저장하는 실결함 차단
+  allow_suffix: null
+live_og_format_rule: exact_match
+og_rule:
+  og_image_required: true
+  og_image_source: featureimage   # og:image = featureimage와 동일해야 함
+empty_value_policy:
+  featureimage: disallow

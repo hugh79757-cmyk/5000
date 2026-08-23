@@ -597,6 +597,34 @@ DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
 DEPLOY_LOCK_TIMEOUT = 600
 
 
+def _compute_baseline_keys(posts_dir: "Path") -> set:
+    """해당 블로그 전체 포스트에서 ≥80% 출현하는 프런트매터 키 집합.
+
+    패리티 게이트 기준: 신규 포스트가 이 집합의 키를 누락하면 차단.
+    """
+    from collections import Counter
+    import yaml as _y
+    cnt = Counter()
+    total = 0
+    for md in posts_dir.rglob("*.md"):
+        try:
+            txt = md.read_text(encoding="utf-8", errors="replace")
+            i = txt.find("---")
+            j = txt.find("---", i + 3)
+            if i < 0 or j < 0:
+                continue
+            fm = _y.safe_load(txt[i + 3:j]) or {}
+            if isinstance(fm, dict):
+                total += 1
+                for k in fm.keys():
+                    cnt[k] += 1
+        except Exception:
+            pass
+    if total == 0:
+        return set()
+    return {k for k, c in cnt.items() if c / total >= 0.8}
+
+
 def preflight_check(blog_id: str) -> dict:
     """배포 전 콘텐츠 무결성 프리플라이트 체크.
 
@@ -630,6 +658,9 @@ def preflight_check(blog_id: str) -> dict:
     if not posts_dir.exists():
         return {"blocked": False, "violations": [],
                 "reason": f"posts_dir 없음: {posts_dir}"}
+
+    # X5(2026-08-21): 패리티 기준 키 집합 (블로그 전체 포스트 ≥80% 출현)
+    _baseline_keys = _compute_baseline_keys(posts_dir)
 
     # 최근 7일 내 생성된 포스트 추출 (파일 mtime 기준)
     cutoff = datetime.now().timestamp() - 7 * 86400
@@ -729,6 +760,10 @@ def preflight_check(blog_id: str) -> dict:
                             break  # 한 포스트당 1건만 기록
         except Exception:
             pass  # YAML 파싱 실패 시 C09 검사는 skip (C02에서 이미 걸렸을 가능성)
+
+        # --- C2(2026-08-21): 이미지 배포 차단 게이트는 deploy._pre_deploy_image_gate
+        #     (shared/publishers/deploy.py:41) 로 단일 초크포인트 통합.
+        #     deploy_site()가 dispatcher·etap pipeline 양 경로 공용이라 중복 제거. ---
 
     # 결과 기록 (logs/c01_c04_preflight.json)
     logs_dir = Path(__file__).parent / "logs"

@@ -244,17 +244,32 @@ class CoupangTravel:
         return unique
 
     def _distribute_by_category(self, products: list, count: int) -> list:
-        """카테고리별 1개씩 우선 배정, 부족하면 나머지 채움"""
-        # TRAVEL_KEYWORD_MAP의 카테고리 구조를 이용해 매핑
-        # 단순화: 순서대로 골라서 분배 시도
+        """카테고리(_category)별 1개씩 우선 배정, 부족하면 가격 높은 순으로 채움 (균등 분배)."""
         if len(products) <= count:
             return products
-        
+
+        # 1차: 카테고리별 대표(최고가) 1개씩 선정 — 텐트/의자/랜턴이 섞이도록
         result = []
-        # 카테고리 키워드와 매칭되는 것부터 우선 선택
-        # 나머지는 가격 높은 순으로 채움
-        products.sort(key=lambda x: x.get("productPrice", 0), reverse=True)
-        return products[:count]
+        by_category = {}
+        for p in products:
+            cat = p.get("_category", "")
+            if not cat:
+                continue
+            by_category.setdefault(cat, []).append(p)
+        for cat, items in by_category.items():
+            items.sort(key=lambda x: x.get("productPrice", 0), reverse=True)
+            result.append(items[0])
+            if len(result) >= count:
+                return result
+
+        # 2차: 카테고리가 모자라면 남은 상품을 가격 높은 순으로 채움
+        if len(result) < count:
+            _used = set(id(p) for p in result)
+            remaining = [p for p in products if id(p) not in _used]
+            remaining.sort(key=lambda x: x.get("productPrice", 0), reverse=True)
+            result.extend(remaining[: count - len(result)])
+
+        return result[:count]
 
     def get_product_cards(self, blog_id: str = "travel-hugo", count: int = 3) -> str:
         """
@@ -304,7 +319,7 @@ class CoupangTravel:
         if not final_products:
             return ""
         
-        # 섹션 제목 — TAP 본문 규격 §2.5: <p><strong>...</strong></p> (H2 아님)
+        # 섹션 제목 — 근처 가볼만한곳과 동일한 <h3> 태그 사용 (Blowfish 자동 밑줄 적용)
         section_title = SECTION_TITLES.get(blog_id, "여행 준비에 도움되는 추천 용품")
         
         # 재발 방지: Goldmark raw HTML 블록 인식 문제 방지 구조
@@ -313,10 +328,8 @@ class CoupangTravel:
         #   &lt;a / &lt;img 로 이스케이프됨 (텍스트 노출).
         # - 해결: 면책문구를 <div> 밖으로 빼서 별도 <p>로 작성하고,
         #   <div ...> 안에는 <a> 제품카드만 둔다.
-        disclaimer = '<p style="font-size:0.8em;color:#888;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>'
-        lines = [f'\n\n<p><strong>{section_title}</strong></p>\n',
-                 disclaimer,
-                 '<div style="display:flex;flex-wrap:wrap;gap:12px;">']
+        lines = [f'\n\n<h3 style="color:#FF5722;margin-top:20px;margin-bottom:15px;">{section_title}</h3>\n',
+                 '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">']
         
         for p in final_products:
             pid = p.get("productId")
@@ -330,28 +343,30 @@ class CoupangTravel:
             
             price_str = f'{price:,}원'
             
-            # CSS로 이미지 크기 고정 (Blogger에서 size 파라미터 무시함)
-            style = ('style="display:flex;align-items:center;gap:8px;'
-                     'padding:8px;background:#f5f5f5;border-radius:8px;'
-                     'text-decoration:none;color:#333;"')
+            # 카드 HTML — grid cell에서 균일 폭, ellipsis로 긴 이름 처리
+            card_style = ('style="display:flex;align-items:center;gap:10px;'
+                         'padding:10px;background:#f5f5f5;border-radius:8px;'
+                         'text-decoration:none;color:#333;overflow:hidden;"')
             
             if image:
                 img_style = ('style="width:80px;height:80px;object-fit:cover;'
                             'border-radius:6px;flex-shrink:0;"')
-                lines.append(f'<a href="{link}" target="_blank" rel="nofollow" {style}>'
+                lines.append(f'<a href="{link}" target="_blank" rel="nofollow" {card_style}>'
                              f'<img src="{image}" alt="{name}" loading="lazy" {img_style}>'
-                             f'<div style="line-height:1.3;min-width:0;">'
-                             f'<div style="font-size:13px;font-weight:500;word-break:break-all;">{name}</div>'
-                             f'<div style="font-size:12px;color:#666;">{price_str}</div>'
+                             f'<div style="flex:1;min-width:0;line-height:1.4;">'
+                             f'<div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{name}</div>'
+                             f'<div style="font-size:12px;color:#e74c3c;font-weight:bold;margin-top:2px;">{price_str}</div>'
                              f'</div></a>')
             else:
-                lines.append(f'<a href="{link}" target="_blank" rel="nofollow" {style}>'
-                             f'<div style="line-height:1.3;">'
-                             f'<div style="font-size:13px;font-weight:500;">{name}</div>'
-                             f'<div style="font-size:12px;color:#666;">{price_str}</div>'
+                lines.append(f'<a href="{link}" target="_blank" rel="nofollow" {card_style}>'
+                             f'<div style="flex:1;min-width:0;line-height:1.4;">'
+                             f'<div style="font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{name}</div>'
+                             f'<div style="font-size:12px;color:#e74c3c;font-weight:bold;margin-top:2px;">{price_str}</div>'
                              f'</div></a>')
         
         lines.append('</div>')
+        # 면책문구는 카드 리스트 하단에 1회만 표시
+        lines.append('<p style="font-size:0.8em;color:#888;margin-top:8px;">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>')
         
         return "\n".join(lines)
 

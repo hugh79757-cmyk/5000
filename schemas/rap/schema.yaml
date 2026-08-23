@@ -1,0 +1,24 @@
+# rap/schema.yaml — RAP 분기 스키마
+# 상속: _base/default.yaml (deep-merge)
+# 근거: 표본 rap-hugo(40), rap3-hugo(40) frontmatter (2026-08-22)
+#   - featureimage 존재율: 40/40, 39/40 — 필수
+#   - title: 잘림 2/40 (낮음) — forbid_ellipsis 유지
+#   - OG: featureimage 필수 + thumbnail 키 존재 (rap-hugo 9/40, rap3-hugo 7/40)
+#   - _base와의 차이: featureimage required + thumbnail 허용
+
+required_frontmatter: [title, description, date, slug, tags, featureimage]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+  - "https://[a-z0-9-]+\\.informationhot\\.kr/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: true
+  allow_suffix: null
+live_og_format_rule: exact_match
+og_rule:
+  og_image_required: true        # 표본 39~40/40 필수
+  og_image_source: featureimage
+empty_value_policy:
+  featureimage: disallow
+template_constraints:
+  thumbnail_allowed: true        # Blowfish thumbnail 키 허용 (rap-hugo 9/40)

@@ -11,10 +11,23 @@ from shared.autofix.core import logger
 
 
 def _iter_posts(site: Path):
+    """content/posts 아래 포스트 순회.
+
+    - flat 파일: content/posts/<name>.md (issue-techpawz 등)
+    - 디렉터리형: content/posts/<slug>/index.md
+    - Hugo 섹션 파일 _index.md 는 제외
+    """
     posts = site / "content" / "posts"
     if not posts.is_dir():
         return []
-    return sorted(posts.glob("*/index.md"))
+    out = []
+    for p in sorted(posts.glob("*.md")):
+        if p.name.startswith("_index"):
+            continue
+        out.append(p)
+    for p in sorted(posts.glob("*/index.md")):
+        out.append(p)
+    return sorted(out)
 
 
 def fix_draft_true(site: Path, blog_id: str) -> tuple[bool, str]:

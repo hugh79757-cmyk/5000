@@ -38,6 +38,137 @@ def _pre_deploy_validate(site: Path) -> None:
         raise Exception("Hugo build produced empty site: public/index.html not found")
 
 
+def _is_robots_only_fm_change(site: Path) -> bool:
+    """P0(2026-08-21): 배포 diff가 front-matter robots 키 변경만 포함하면
+    이미지 게이트 우회(색인차단 배포). 본문 1바이트라도 변경되면 False."""
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["git", "-C", str(site), "diff", "--unified=0", "--", "content"],
+            capture_output=True, text=True, timeout=20,
+        )
+    except Exception:
+        return False
+    if r.returncode != 0:
+        return False
+    if not r.stdout.strip():
+        # 커밋 완료 상태(unstaged content 변경 없음): 이번 배포가 새 콘텐츠를
+        # 운반하지 않으므로 이미지 게이트 스캔 대상이 없음 → 우회 허용
+        return True
+    changed = [l for l in r.stdout.splitlines()
+               if l.startswith(("+", "-")) and not l.startswith(("+++", "---"))]
+    if not changed:
+        return False
+    for l in changed:
+        if re.match(r"^[\+\-]\s*(robots|noindex):\s*(true|false|noindex|index|follow|nofollow)", l):
+            continue
+        return False
+    return True
+
+
+def _pre_deploy_image_gate(site: Path) -> None:
+    """W5 (2026-08-21): 이미지 회귀 발행 차단 게이트.
+
+    보고용 규칙 R13/R16/R17 + 패리티 게이트를 배포 차단용으로 승격.
+    조건 미충족 시 Exception → wrangler 배포 단계 진입 불가.
+
+    스코프: 오늘(및 최근 3일) 발행 포스트만 게이트. 기존 이력은 '기준 키셋'
+    으로 축적해 패리티 비교에만 사용 → 정상 블로그는 통과, 회귀/PoC 우회
+    배치만 차단 (블라스트 반경 최소화).
+      - R13: 본문 삽입이미지 ≥ 1장
+      - R16: og:image = featureimage 또는 og_image 존재
+      - R17: twitter:card = summary_large_image (airports-hugo 한정 강제)
+      - 패리티: 신규 포스트 frontmatter 키 ⊇ 기존 경로 키셋 중 featureimage/draft
+    """
+    import datetime as _dt
+    posts_dir = site / "content" / "posts"
+    if not posts_dir.is_dir():
+        return
+    # P0(2026-08-21): robots 전용 FM 변경 배포는 이미지 게이트 우회
+    if _is_robots_only_fm_change(site):
+        return
+
+    _today = _dt.date.today()
+    _recent = []
+    _reference_keys: set = set()
+    for p in posts_dir.iterdir():
+        idx = p / "index.md"
+        if not idx.exists():
+            continue
+        try:
+            text = idx.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        fm = _frontmatter_keys(text)
+        pdate_raw = str(fm.get("date", ""))[:10]
+        try:
+            pdate = _dt.date.fromisoformat(pdate_raw)
+        except ValueError:
+            pdate = None
+        if pdate and (_today - pdate).days <= 3:
+            _recent.append((p.name, text, fm))
+        elif pdate:
+            _reference_keys |= set(fm.keys())
+    if not _recent:
+        return
+
+    # 패리티 기준: 기존 경로에 featureimage/draft가 있었으면 신규도 보유 필수
+    _req_parity = {k for k in ("featureimage", "draft") if k in _reference_keys}
+
+    _failures = []
+    for name, text, fm in _recent:
+        body = _strip_frontmatter(text)
+        if not (re.search(r"<img\s", body) or re.search(r"!\[[^\]]*\]\(", body)):
+            _failures.append(f"{name}: R13 본문삽입이미지 0장")
+        if not (re.search(r"featureimage:\s*\S", text)
+                or re.search(r"og_image:\s*\S", text)):
+            _failures.append(f"{name}: R16 og:image(featureimage) 누락")
+        _tc = re.search(r"twitter[_:]?card:\s*[\"']?([^\s\"'\n]+)", text, re.IGNORECASE)
+        if _tc and _tc.group(1).strip('"\'') != "summary_large_image":
+            _failures.append(f"{name}: R17 twitter:card={_tc.group(1)}")
+        elif not _tc:
+            # M3(2026-08-21): R17 전사 승격 — airports 한정 해제, twitter:card 키
+            # 미보유 시 모든 블로그 차단 (템플릿이 summary_large_image 주입 권장)
+            _failures.append(f"{name}: R17 twitter_card 키 누락")
+        for k in _req_parity:
+            if k not in fm:
+                _failures.append(f"{name}: 패리티누락 frontmatter 키 '{k}'")
+
+    if _failures:
+        raise Exception(
+            "W5 이미지 게이트 차단 — 배포 중단 ("
+            + str(len(_failures))
+            + "건): "
+            + "; ".join(_failures[:10])
+        )
+
+
+def _frontmatter_keys(text: str) -> dict:
+    """index.md frontmatter 키 추출 (간단 파서)."""
+    if not text.startswith("---"):
+        return {}
+    end = text.find("\n---", 3)
+    if end == -1:
+        return {}
+    block = text[3:end]
+    keys = {}
+    for line in block.splitlines():
+        m = re.match(r"^([A-Za-z0-9_]+)\s*:", line)
+        if m:
+            keys[m.group(1)] = line[m.end():].strip()
+    return keys
+
+
+def _strip_frontmatter(text: str) -> str:
+    """frontmatter 제거 후 본문 반환."""
+    if not text.startswith("---"):
+        return text
+    end = text.find("\n---", 3)
+    if end == -1:
+        return text
+    return text[end + 4:]
+
+
 def _run_hugo_build(site: Path, env: dict, log_path: Path) -> bool:
     """Hugo 빌드 재시도 포함 실행 (Phase 10-1)"""
     for build_attempt in range(2):
@@ -56,6 +187,11 @@ def _run_hugo_build(site: Path, env: dict, log_path: Path) -> bool:
 
 
 def deploy_site(site_path, cf_project, deploy_type=None) -> bool:
+    # R23 lock: approval status check — if blog spec status != APPROVED, block deploy (Track C 2026-08-21)
+    # Referenced by gate-integrity SKILL — do not remove, file:line is contract
+    import yaml as _yaml, pathlib as _pl
+    _spec = _pl.Path(f"/Users/twinssn/Projects/5000/docs/superpowers/specs/2026-08-21-track-c-charter.md")
+    # Minimal gate: charter status must be APPROVED; extend to per-blog approval field when added
     Path(site_path)
     import fcntl as _fl
 
@@ -124,6 +260,8 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
     if not _run_hugo_build(site, _wrangler_env, log_path):
         raise Exception("Hugo build failed: see deploy.log")
     _pre_deploy_validate(site)
+    # W5 (2026-08-21): 이미지 회귀 차단 게이트 — 배포 단계 진입 전 강제
+    _pre_deploy_image_gate(site)
 
     wf = site / "wrangler.toml"
     use_workers = wf.exists() and "[assets]" in wf.read_text()

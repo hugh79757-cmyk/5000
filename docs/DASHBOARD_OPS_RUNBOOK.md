@@ -162,6 +162,9 @@ curl -s -u "${OPS_USER}:${OPS_PASSWORD}" \
    - 예: R04 fix 후 `/api/registry` → R04 status=`"pass"`, evidence에 `"extend_head: GA4 + mobile CSS found"` 등.
    - **FAIL→PASS 확인 없이 완료 보고 금지.**
 
+ⓔ **변경과 검사 범위가 겹치는 기존 PASS 규칙도 재검증** (2026-08-21 추가):
+   - 수정한 코드/콘텐츠의 검사 범위와 겹치는 규칙이 예전에 PASS였더라도, 재검사 전 PASS 주장 금지 — 반드시 `POST /api/run-checks?blog_id={blog_id}` 재실행 후 before/after를 보고에 함께 기재.
+
 **게이트 실패 시**:
 - 빌드 에러 → 원복구 (git checkout 또는 백업 복원) 후 재구성.
 - 배포 실패 → dispatcher 로그 확인, 재시도하지 말고 원인 보고.

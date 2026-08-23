@@ -1,0 +1,22 @@
+# cap/schema.yaml — CAP 분기 스키마
+# 상속: _base/default.yaml (deep-merge) — 분기 고유 오버라이드만 선언
+# 근거: 검증 표본 pick-hugo/hotissue-hugo 실제 frontmatter 패턴 (2026-08-22)
+#   - featureimage: pick 29/30, hotissue 16/30 포스트에만 존재 — 필수 아님 (선택)
+#     (required에 넣으면 기존 콘텐츠 다수가 위반 → empty_value_policy로 관리)
+#   - title: cap은 '…' 접미사 허용 (기존 발행물 다수, forbid_ellipsis=false)
+#   - 라이브 og:title은 local title을 포함하면 정상 (contains — 카테고리/접미사 붙는 형식)
+
+required_frontmatter: [title, description, date, slug, tags]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/car-images/.+"
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: false        # cap은 '…' 접미사 허용
+  allow_suffix: ["…"]
+live_og_format_rule: contains   # 라이브 og:title이 local title 포함 시 정상
+og_rule:
+  og_image_required: false      # featureimage는 선택 (표본: pick 29/30, hotissue 16/30)
+  og_image_source: featureimage # 있으면 og:image와 일치해야 함
+empty_value_policy:
+  featureimage: allow           # 빈 값 허용 (없는 포스트 정상)
