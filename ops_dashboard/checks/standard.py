@@ -138,6 +138,7 @@ STANDARD_RULES: list[dict] = [
 ALLOWED_OVERRIDES = {
     "layouts/_default/single.html",
     "layouts/archives/single.html",
+    "layouts/partials/affiliate-disclosure.html",
     "layouts/partials/extend-head.html",
     "layouts/partials/extend_head.html",
     "layouts/partials/adsense",
