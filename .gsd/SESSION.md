@@ -2,13 +2,13 @@
 > 이 파일은 세션 간 맥락 전달의 SSOT이다.
 > 새 세션 시작 시 이 파일을 먼저 읽어라.
 
-## 1. 현재 상태 (Last Updated: 2026-08-24 15:30 KST)
+## 1. 현재 상태 (Last Updated: 2026-08-24 17:10 KST)
 
-- **Phase:** Phase Wave 1 — Golden Standard 단일 판정 기준 구현 (Wave 1: ETAP 13 DB pass 전환)
-- **Status:** Wave 1 완료 — R12 ALLOWED + R04 etap 면제 병합, ETAP 13 재검사 12/13 pass (michelin R05 잔존). 문서 Planned / Phase 71 미커밋은 잔존
-- **Blocker:** michelin-hugo R05 잔존 / OQ#1 (분기 세분) / Wave 2 대기 (CQ 신규 5 rule + N/A 체계 + 단어수 1100)
+- **Phase:** Phase Wave 2 — 81 pass 목표 (85 중 Blogger 4 제외) — Wave 2-A 완료, 2-B 부분 완료
+- **Status:** Wave 2-A 완료 (michelin R05 top.html 복원 → ETAP 36/36 pass) / Wave 2-B 7건 즉시 해소(compare R01, pet R06+R04, informationhot R07/R08/R12, senior/issue-techpawz R12, camping/interior R19) → 70 pass / 11 fail / 4 unknown. 잔존 11건은 콘텐츠 트랙(R13/R17/THUMBNAIL/R2-01)
+- **Blocker:** 11 fail (STAP R13/R17, RAP R13, TAP THUMBNAIL/R2, pet 해결됨) — 콘텐츠 이미지/R2/트위터 파이프라인 보강 필요 / OQ#1 / Wave 3 콘텐츠 QC 대기
 - **진입점:** `ops_dashboard/app.py:create_app()` → `python -m ops_dashboard.app` (:5060, Basic Auth)
-- **SSOT DB:** `ops_dashboard/ops.db` (17 테이블, ETAP 13 `standard_compliance` 2026-08-24 15:xx 재검사 배치, 12 pass/1 fail)
+- **SSOT DB:** `ops_dashboard/ops.db` (17 테이블, 전체 85 재검사, 70 pass/11 fail/4 unknown, ETAP 36 전원 pass)
 
 ## 2. 완료된 것 (Done)
 
@@ -25,6 +25,9 @@
 | 2026-08-23 | 85개 블로그 마스터 목록 확정 | `config/blogs.d/*.yaml` 9개 활성, 85개 엔트리 / `ops.db check_results DISTINCT blog_id` 85 일치 | `grep -c "  - id:" config/blogs.d/*.yaml` 합산 |
 | 2026-08-24 | Wave 1: R12 ALLOWED 확장 (affiliate-disclosure.html + _markup/render-link.html) | `ops_dashboard/checks/standard.py:138 ALLOWED_OVERRIDES` | `dbf877522` / `python -c "import ops_dashboard.checks.standard"` OK, ETAP 13 R12 fail 해소 |
 | 2026-08-24 | Wave 1: R04 etap 파이프라인 면제 (yaml exempt_pipelines + _load_exempt_pipelines) | `config/quality_checklist.yaml:359 R04 exempt_pipelines` + `ops_dashboard/checks/standard.py:701 _load_exempt_pipelines` + loop N/A 분기 | `8b8ed653a` / `check_standard_compliance(foodtour-hugo)` N/A 전이 확인, ETAP 13 재검사 12/13 pass |
+| 2026-08-24 | Wave 2-A: michelin R05 top.html overflow+min-height 복원 | `ETAP/michelin-hugo/layouts/partials/adsense/top.html` (foodtour 복사) | `_check_r05` True + `run_all_checks(michelin-hugo)` pass, ETAP 36/36 완성 (`a852f83` michelin) |
+| 2026-08-24 | Wave 2-B: R12 ALLOWED 8개 추가 + R04 legacy params.toml + R19 word boundary | `ops_dashboard/checks/standard.py` ALLOWED 8개(btn/dday 등+informationhot 5) + R04 params.toml 경로 + R19 \\bLLM | `6790a1e66` / 재검사 7개 pass (compare/informationhot/senior/issue-techpawz/camping/interior) |
+| 2026-08-24 | Wave 2-B: 템플릿 즉시해소 7건 (R01/R06/R07/R08) | `cap/compare-hugo/hugo.toml` false, `cuap/pet-hugo/in-article.html` fluid, `informationhot single.html` prose+h2 | 재검사 pass, pet R04는 standard.py legacy 경로로 해소 |
 
 ## 3. 진행 중인 것 (In Progress)
 
