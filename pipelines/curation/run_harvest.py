@@ -95,8 +95,9 @@ def main() -> int:
     # STAP/SEAP Phase 2B — bestcategories 순환 분류 코드 (additive).
     # Coupang OpenAPI 표준 분류 트리: 1006 생활용품, 1008 가전디지털(계산기),
     # 1013 문구/오피스(가계부·서류정리), 1015 헬스(시니어 혈압계·보행보조기).
+    # CAP Phase 2B — 1002 자동차용품 (차량 액세서리·관리용품).
     # "" = 루트(기존 동작 유지). 잘못된 코드는 빈 data 반환 → harmless skip.
-    category_cycle = ["", "1008", "1013", "1015", "1006"]
+    category_cycle = ["", "1008", "1013", "1015", "1006", "1002"]
     cycle_idx = {"i": 0}
 
     def fetch_fn(source: str) -> dict:
