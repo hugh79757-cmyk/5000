@@ -1,0 +1,23 @@
+# _base/default.yaml — 모든 분기가 상속하는 공통 폴백 스키마
+# 참조: docs/superpowers/specs/2026-08-22-schema-as-code-design.md
+# 상속 규칙: blog-overrides/{blog_id}.yaml > {branch}/schema.yaml > _base/default.yaml (deep-merge)
+# 필드 정의 레퍼런스: schemas/README.md
+
+required_frontmatter: [title, description, date, slug, tags]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: true
+  allow_suffix: null
+live_og_format_rule: exact_match
+empty_value_policy: {}  # 기본: 모든 required 필드 disallow empty
+directory_layout:
+  content_root: "content/"
+  post_pattern: "{slug}/index.md"
+disclosure_rules:
+  required: true
+  position: bottom
+rel_rules:
+  affiliate_links: "nofollow sponsored"
+template_constraints: {}

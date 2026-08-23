@@ -1,0 +1,33 @@
+# tap/schema.yaml — TAP 분기 스키마
+# 상속: _base/default.yaml (deep-merge)
+# 동기화: 2026-08-22 — tap 구조 통일 완료 반영
+# 근거: 전수 스캔 (travel-hugo 674 / travel1 488 / travel2 655 / travel3 708 / travel4 640)
+#   - featureimage 존재율: 671/674, 484/488, 646/655, 704/708, 629/640 (전 브랜치 98~99%)
+#     → 필수 유지. 누락 11건(travel4)은 미정합 포스트(스키마 오류 아님).
+#   - title ellipsis('…') 사용율: 98/674, 10/488, 67/655, 7/708, 41/640
+#     (travel-hugo 14.5%, travel2 10%) → tap 표준 타이틀 잘림 패턴이므로 forbid_ellipsis=false 로 오탐 제거
+#   - twitter_card 존재율: 7/674, 4/488, 7/655, 5/708, 0/640 (<1.5%) → 표준 아님, twitter_card_required=false
+#   - 디렉토리: 5개 블로그 모두 {slug}/index.md 가 98~99% → _base 상속({slug}/index.md) 유지
+#   - OG: featureimage가 og:image 소스, 외부 호스트(visitkorea.or.kr/gocamping.or.kr/khs.go.kr) 사용 →
+#     allowed_og_patterns 를 실제 호스트로 확장 (r2.dev 단독은 오탐 유발)
+#   - disclosure/rel/internal-link: frontmatter 키 없음(본문 레벨) → _base 상속 유지, 변경 없음
+#   - 새 필드 없음
+
+required_frontmatter: [title, description, date, slug, tags, featureimage]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+  - "https://tong\\.visitkorea\\.or\\.kr/.+"
+  - "https://gocamping\\.or\\.kr/.+"
+  - "https://www\\.khs\\.go\\.kr/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: false        # tap 표준 타이틀 잘림 패턴('…') 수용 — 오탐 제거
+  allow_suffix: null
+live_og_format_rule: exact_match
+og_rule:
+  og_image_required: true        # 전 브랜치 98~99% 존재 — 필수 유지
+  og_image_source: featureimage
+empty_value_policy:
+  featureimage: disallow
+template_constraints:
+  twitter_card_required: false   # twitter_card는 <1.5%만 보유 — 표준 아님 (제거됨)

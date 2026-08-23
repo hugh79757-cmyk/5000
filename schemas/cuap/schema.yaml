@@ -1,0 +1,25 @@
+# cuap/schema.yaml — CUAP 분기 스키마
+# 상속: _base/default.yaml (deep-merge)
+# 근거: 표본 appliance-hugo(40), beauty-hugo(40), camping-hugo(40) frontmatter (2026-08-22)
+#   - featureimage 존재율: 31/40, 38/40, 40/40 — 불균일 → 필수 아님 (allow)
+#   - title: 잘림 0% — 완전형 유지. forbid_ellipsis 유지
+#   - OG: featureimage 외 cover/image 키도 사용됨 (featureimage 우선)
+#   - _base와의 차이: featureimage 빈 값 허용 + OG 패턴에 informationhot 계열
+# 기준 블로그: pet-hugo (pet.informationhot.kr) — 2026-08-22 확정 (cuap-blog-spec 스킬 참조)
+#   - GA4: hugo.toml [services.googleAnalytics] ID 단일 주입 (extend-head 하드코딩 금지)
+#   - extend-head.html(hyphen): twitter:card summary_large_image + 모바일 광고 보정 CSS
+#   - 본문 H2: 한눈에 보는 비교표 / 상품별 상세 비교 / 구매 전 체크리스트 / 자연문장형 마무리
+required_frontmatter: [title, description, date, slug, tags]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+  - "https://[a-z0-9-]+\\.informationhot\\.kr/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: true
+  allow_suffix: null
+live_og_format_rule: exact_match
+og_rule:
+  og_image_required: false       # featureimage 부분 존재 (표본 31~40/40)
+  og_image_source: featureimage
+empty_value_policy:
+  featureimage: allow            # 없는 포스트 정상 (appliance 9/40 없음)
