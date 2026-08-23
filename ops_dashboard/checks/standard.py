@@ -942,12 +942,37 @@ def check_standard_compliance(conn, blog_id: str) -> dict:
     for entry in RULES:
         rule_id = entry.id
         # Wave 1 (a): yaml exempt_pipelines 기반 N/A — check_fn 호출 skip, 분모 제외
+        # R13 확장: stock/rap는 thumbnail-only 파이프라인 → featureimage 존재 시 N/A (시니어 결정 2026-08-24)
         if rule_id in exempt_map:
             _brand = (blog_row.get("brand") or "").lower()
             if _brand and _brand in exempt_map[rule_id]:
-                na.append({"rule_id": rule_id, "severity": entry.severity,
-                           "detail": f"R04 exempt for pipeline={_brand} (yaml exempt_pipelines)"})
-                continue
+                if rule_id == "R13":
+                    # featureimage 존재 여부 확인 — 1건이라도 R2 webp 면 exempt 유지, 없으면 일반 판정
+                    try:
+                        _has_fi = False
+                        for _p in _recent_posts(site, 10, since=_today_start()) or _recent_posts(site, 10, since=None)[:1]:
+                            _idx = _p / "index.md"
+                            if _idx.exists():
+                                _c = _read_file_safe(_idx)
+                                _m = re.search(r"featureimage:\s*[\"']?([^\"'\n]+)[\"']?", _c)
+                                if _m and _m.group(1).strip():
+                                    _has_fi = True
+                                    break
+                        if not _has_fi:
+                            # featureimage 없으면 exempt 미적용 — 일반 R13 검사 진행
+                            pass
+                        else:
+                            na.append({"rule_id": rule_id, "severity": entry.severity,
+                                       "detail": f"R13 exempt thumbnail-only pipeline={_brand} (featureimage exists)"})
+                            continue
+                    except Exception:
+                        na.append({"rule_id": rule_id, "severity": entry.severity,
+                                   "detail": f"R13 exempt thumbnail-only pipeline={_brand} (yaml exempt_pipelines)"})
+                        continue
+                else:
+                    na.append({"rule_id": rule_id, "severity": entry.severity,
+                               "detail": f"R04 exempt for pipeline={_brand} (yaml exempt_pipelines)"})
+                    continue
         check_fn = _resolve_check_fn(entry.check_fn)
         if check_fn is None:
             # 보강 B: 해석 실패 규칙은 조용히 skip하지 않음 (로그 이미 출력됨).

@@ -398,6 +398,15 @@ global_standard:
     severity: MAJOR
     description: "허용 집합 벗어난 오버라이드 없음 (junk 정리)"
     agent_action: fix_r12
+  - id: R13
+    target: content/posts/*/index.md (본문)
+    severity: MAJOR
+    description: "본문 삽입이미지 최소 1장"
+    agent_action: null
+    exempt_pipelines:
+      - stock
+      - rap
+    exempt_condition: "featureimage exists AND pipeline in exempt_pipelines"
   - id: THUMBNAIL-01
     target: content/posts/*/index.md (featureimage)
     severity: MAJOR
