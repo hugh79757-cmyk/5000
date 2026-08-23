@@ -25,7 +25,13 @@ def _pool_db():
 
 
 def _save_to_pool(keywords, source_tag="harvest") -> int:
-    """수확 키워드를 keyword_pool에 INSERT OR IGNORE. 실패해도 harvest 결과에 영향 없음."""
+    """수확 키워드를 keyword_pool에 INSERT OR IGNORE. 실패해도 harvest 결과에 영향 없음.
+
+    blog_id 배정 규칙 (Phase 2B 결정, 기존 설계 유지): 항상 범용('')으로 저장한다.
+    블로그 배정은 소비 시점(keywords._get_from_pool: blog_id 전용 → 범용 순차 조회)
+    및 하류 CATEGORY_FILTERS/validate_keyword 게이트가 담당. 사전 배정(preassign)은
+    harvester가 블로그 주제 매핑을 알아야 해서 결합도 증가 — 채택하지 않음.
+    """
     saved = 0
     try:
         conn = sqlite3.connect(_pool_db())
@@ -86,10 +92,18 @@ def main() -> int:
     from pipelines.curation.coupang_client import get_best_categories, get_goldbox
     from pipelines.curation.keyword_harvester import KeywordHarvester
 
+    # STAP/SEAP Phase 2B — bestcategories 순환 분류 코드 (additive).
+    # Coupang OpenAPI 표준 분류 트리: 1006 생활용품, 1008 가전디지털(계산기),
+    # 1013 문구/오피스(가계부·서류정리), 1015 헬스(시니어 혈압계·보행보조기).
+    # "" = 루트(기존 동작 유지). 잘못된 코드는 빈 data 반환 → harmless skip.
+    category_cycle = ["", "1008", "1013", "1015", "1006"]
+    cycle_idx = {"i": 0}
+
     def fetch_fn(source: str) -> dict:
         # Coupang returns {"status_code": int, "body": {...}}; map to harvester contract.
         if source == "bestcategories":
-            resp = get_best_categories()
+            resp = get_best_categories(category_id=category_cycle[cycle_idx["i"] % len(category_cycle)])
+            cycle_idx["i"] += 1
         else:
             resp = get_goldbox()
         body = resp.get("body") or {}
