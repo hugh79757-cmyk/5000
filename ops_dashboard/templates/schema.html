@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>분기별 표준화 스키마 현황 — SSOT <code>schemas/*.yaml</code> 스냅샷 (매일 09:00 동기화).</p>
+
+<div class="card">
+  <div class="card-grid">
+    <div class="stat-card"><span class="num">{{ summary.total }}</span><span class="label">전체</span></div>
+    <div class="stat-card"><span class="num" style="color:var(--pass)">{{ summary.ok }}</span><span class="label">완전 표준화</span></div>
+    <div class="stat-card"><span class="num" style="color:var(--warn)">{{ summary.attention }}</span><span class="label">주의</span></div>
+    <div class="stat-card"><span class="num" style="color:var(--muted)">{{ summary.inactive }}</span><span class="label">비활성</span></div>
+  </div>
+</div>
+
+<h2>분기별</h2>
+<table>
+  <thead><tr><th>분기</th><th>전체</th><th>완전</th><th>주의</th><th>비활성</th><th>GA4</th><th>빌드 PASS</th><th>마지막 동기화</th></tr></thead>
+  <tbody>
+  {% for b in branches %}
+    <tr>
+      <td>{{ b.branch }}</td>
+      <td>{{ b.total }}</td>
+      <td style="color:var(--pass)">{{ b.ok }}</td>
+      <td>{{ b.attention or '' }}</td>
+      <td>{{ b.inactive or '' }}</td>
+      <td>{{ b.with_ga4 }}</td>
+      <td>{{ b.build_pass }}</td>
+      <td>{{ b.last_synced_at[:16] if b.last_synced_at }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>블로그 상태</h2>
+<table>
+  <thead><tr><th>블로그</th><th>분기</th><th>상태</th><th>사유</th><th>GA4 ID</th><th>동기화</th></tr></thead>
+  <tbody>
+  {% for r in blogs %}
+    <tr>
+      <td><a href="/schema/{{ r.blog_id }}">{{ r.blog_id }}</a></td>
+      <td>{{ r.branch }}</td>
+      <td>{% if r.state == 'ok' %}<span class="badge badge-pass">완전</span>
+          {% elif r.state == 'attention' %}<span class="badge badge-warn">주의</span>
+          {% else %}<span class="badge badge-unknown">비활성</span>{% endif %}</td>
+      <td>{{ r.reasons|join(', ') }}</td>
+      <td>{{ r.ga4_id or '—' }}</td>
+      <td>{{ r.last_synced_at[:16] if r.last_synced_at }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<p class="empty" style="font-size:.85rem">참고: 일회성 감사 결과(H2 구형글 샘플링 등)는 내구 신호가 아니므로 이 수치에 반영되지 않는다.</p>
+
+{% endblock %}

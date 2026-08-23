@@ -1232,6 +1232,14 @@ def _run_indexnow() -> None:
     except Exception as e:
         logger.exception(f"IndexNow 실패: {e}")
 
+def _run_schema_sync() -> None:
+    try:
+        from ops_dashboard.schema_registry import sync_all_schemas
+        result = sync_all_schemas()
+        logger.info(f"Schema registry sync 완료: {result['inserted']}/{result['total']}")
+    except Exception as e:
+        logger.exception(f"Schema registry sync 실패: {e}")
+
 # ─── 스케줄 등록 ───
 
 def register_schedules():
@@ -1287,6 +1295,9 @@ def register_schedules():
 
     schedule.every().day.at("06:45").do(_run_indexnow)
     logger.info("IndexNow scheduled at 06:45")
+
+    schedule.every().day.at("09:00").do(_run_schema_sync)
+    logger.info("Schema registry sync scheduled at 09:00")
 
     logger.info("CAR daily_refresh scheduled at 06:30")
     job_count += 1
