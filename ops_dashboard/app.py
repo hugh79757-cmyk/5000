@@ -318,6 +318,14 @@ def _build_unpause_checklist(
 
 
 def _register_human_routes(app: Flask) -> None:
+    @app.route("/lookbook")
+    @require_auth
+    def lookbook():
+        # 룩북 링크(index.html) 대상 — markdown 파일 그대로 서빙, 기능 없음
+        from flask import send_file
+        p = Path(__file__).resolve().parent.parent / "docs" / "lookbook" / "ERROR_LOOKBOOK.md"
+        return send_file(p, mimetype="text/plain") if p.exists() else ("lookbook not found", 404)
+
     @app.route("/")
     @require_auth
     def index():
