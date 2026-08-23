@@ -1,0 +1,6 @@
+PROCESSED=100 FAILED=0 AVG=88.9 CRITICAL=24
+  LOW biz-techpawz-hugo/teest3 score=42 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW bus-hugo/maastricht-to-brussels-bus score=68 crit=['TEMPLATE_LEAK']
+  LOW travel4-hugo/충북에서-금강-따라-흐르는-자연-속-여행코스-5곳-정리 score=72 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW beauty-hugo/화장수-추천-top5-2026년 score=74 crit=['TEMPLATE_LEAK']
+  LOW homeappliance-hugo/주방-인덕션-화력별-특징과-설치-전-필수-체크리스트 score=76 crit=['TEMPLATE_LEAK']

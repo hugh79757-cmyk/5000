@@ -290,5 +290,24 @@ def fetch_body_images(city, country, slug, count=3, force=False):
                 logger.warning("[Image] body upload error: %s", e)
                 continue
 
+    # 관련성 필터로 전멸한 경우(소도시 등 alt에 도시명 부재), 필터 없이 재시도 (cover 폴백과 대칭)
+    if not collected:
+        logger.warning("[Image] No relevant body images for %s, trying without filter", slug)
+        results = _search_with_fallback(f"{city} travel", per_page=15, city="", country="")
+        for photo in results:
+            if len(collected) >= count:
+                break
+            if not force and _is_image_used(photo["url"], slug):
+                continue
+            r2_key = "etap/%s/body_%d.jpg" % (slug, len(collected) + 1)
+            try:
+                r2_url = _upload_to_r2(r2_key, photo["url"], force=force)
+                _trigger_unsplash_download(photo)
+                _mark_image_used(photo["url"], photo["photographer"], photo["source"], slug, "body")
+                collected.append({"url": r2_url, "credit": photo["credit"]})
+            except Exception as e:
+                logger.warning("[Image] body upload error: %s", e)
+                continue
+
     logger.info("[Image] %s body images: %d", slug, len(collected))
     return collected

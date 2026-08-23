@@ -1,0 +1,767 @@
+[
+ {
+  "id": "compare-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "compare.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/cap/compare-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "deal-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "deal.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/cap/deal-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "ev-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "ev.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/cap/ev-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "guide-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "guide.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/cap/guide-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "hotissue-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "hotissue.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/cap/hotissue-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "tco-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "tco.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/cap/tco-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "rank-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "rank.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cap/rank-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "pick-hugo",
+  "pipeline": "car",
+  "platform": "hugo",
+  "domain": "pick.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cap/pick-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "appliance-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "appliance.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/appliance-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "baby-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "baby.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/baby-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "fitness-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "fitness.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/fitness-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "interior-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "interior.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/interior-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "laptop-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "laptop.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/laptop-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "health-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "health.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/health-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "pet-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "pet.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/pet-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "kitchen-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "kitchen.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/kitchen-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "beauty-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "beauty.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/beauty-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "camping-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "camping.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/camping-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "massage-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "massage.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/massage-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "car-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "car.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/car-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "homeappliance-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "homeappliance.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/homeappliance-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "golf-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "golf.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/golf-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "bike-hugo",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "domain": "bike.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/cuap/bike-hugo",
+  "status": "active",
+  "deploy_type": "workers"
+ },
+ {
+  "id": "adventure-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "adventure.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/adventure-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "airlines-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "airlines.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/airlines-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "airports-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "airports.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/airports-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "bus-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "bus.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/bus-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "cruise-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "cruise.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/cruise-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "culture-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "culture.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/culture-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "daytrips-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "daytrips.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/daytrips-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "deals-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "deals.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/deals-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "dining-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "dining.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/dining-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "esim-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "esim.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/esim-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "eurail-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "eurail.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/eurail-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "ferry-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "ferry.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/ferry-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "flights-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "flights.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/flights-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "foodtour-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "foodtour.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/foodtour-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "michelin-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "michelin.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/michelin-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "multiday-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "multiday.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/multiday-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "nature-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "nature.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/nature-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "phototour-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "phototour.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/phototour-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "tour-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "tour.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/tour-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "tours-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "tours.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/tours-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "trains-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "trains.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/trains-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "transfers-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "transfers.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/transfers-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "visa-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "visa.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/visa-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "visafree-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "visafree.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/visafree-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "walking-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "walking.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/walking-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "watersports-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "watersports.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/watersports-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "luxury-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "luxury.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/luxury-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "citytours-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "citytours.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/citytours-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "watertours-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "watertours.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/watertours-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "hiking-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "hiking.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/hiking-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "escape-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "escape.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/escape-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "extreme-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "extreme.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/extreme-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "nightlife-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "nightlife.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/nightlife-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "ghost-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "ghost.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/ghost-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "layover-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "layover.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/layover-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "nomad-hugo",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "domain": "nomad.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/ETAP/nomad-hugo",
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "rotcha-blog",
+  "pipeline": null,
+  "platform": "hugo",
+  "domain": "rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/rotcha-blog",
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "informationhot-hugo",
+  "pipeline": null,
+  "platform": "hugo",
+  "domain": "informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/informationhot-hugo",
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "techpawz-hugo",
+  "pipeline": null,
+  "platform": "hugo",
+  "domain": "techpawz.com",
+  "site_path": "/Users/twinssn/Projects/techpawz-hugo",
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "biz-techpawz-hugo",
+  "pipeline": null,
+  "platform": "hugo",
+  "domain": "biz.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/biz.techpawz-hugo",
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "issue-techpawz-hugo",
+  "pipeline": null,
+  "platform": "hugo",
+  "domain": "issue.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/issue-techpawz-hugo",
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "tvshow-blogger",
+  "pipeline": "travel",
+  "platform": "blogger",
+  "domain": "tv-show.informationhot.kr",
+  "site_path": null,
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "ud-blogger",
+  "pipeline": "travel",
+  "platform": "blogger",
+  "domain": "ud.informationhot.kr",
+  "site_path": null,
+  "status": "paused",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "rap-hugo",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "domain": "apt.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/RAP/rap-hugo",
+  "status": "active",
+  "deploy_type": null
+ },
+ {
+  "id": "rap2-hugo",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "domain": "apply.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/RAP/rap2-hugo",
+  "status": "active",
+  "deploy_type": null
+ },
+ {
+  "id": "rap3-hugo",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "domain": "tax.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/RAP/rap3-hugo",
+  "status": "active",
+  "deploy_type": null
+ },
+ {
+  "id": "rap4-hugo",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "domain": "rent.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/RAP/rap4-hugo",
+  "status": "active",
+  "deploy_type": null
+ },
+ {
+  "id": "rap5-hugo",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "domain": "brand.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/RAP/rap5-hugo",
+  "status": "active",
+  "deploy_type": null
+ },
+ {
+  "id": "senior-blogger",
+  "pipeline": "senior",
+  "platform": "blogger",
+  "domain": "2.techpawz.com",
+  "site_path": null,
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "senior-hugo",
+  "pipeline": "senior",
+  "platform": "hugo",
+  "domain": "senior.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/SEAP/senior-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "finance-hugo",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "domain": "finance.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/STAP/finance-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "stock-hugo",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "domain": "stock.informationhot.kr",
+  "site_path": "/Users/twinssn/Projects/STAP/stock-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "dividend-hugo",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "domain": "dividend.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/STAP/dividend-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "etf-hugo",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "domain": "etf.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/STAP/etf-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "sector-hugo",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "domain": "sector.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/STAP/sector-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "ipo-hugo",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "domain": "ipo.techpawz.com",
+  "site_path": "/Users/twinssn/Projects/STAP/ipo-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "tap-blogger",
+  "pipeline": "travel",
+  "platform": "blogger",
+  "domain": "travel.rotcha.kr",
+  "site_path": null,
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "travel-hugo",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "domain": "tour1.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/TAP/travel-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "travel1-hugo",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "domain": "travel1.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/TAP/travel1-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "travel2-hugo",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "domain": "travel2.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/TAP/travel2-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "travel3-hugo",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "domain": "tour2.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/TAP/travel3-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ },
+ {
+  "id": "travel4-hugo",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "domain": "tour3.rotcha.kr",
+  "site_path": "/Users/twinssn/Projects/TAP/travel4-hugo",
+  "status": "active",
+  "deploy_type": "pages"
+ }
+]

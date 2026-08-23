@@ -67,9 +67,14 @@ python3 dispatcher.py travel-hugo
 
 오늘 이미 3건 발행되어 쿼터가 소진된 경우, 우회하여 추가 발행 가능.
 
-### 방법 1: 직접 파이프라인 호출 (권장)
+`scripts/force_publish_travel.py` 로직을 전 분기로 일반화한 `shared/quota_bypass.py`
+(쿼터우회)를 참고한다. 이 공용 스크립트는 `force_publish_travel.py` 와 동일하게
+**daily_quota=999 만 우회**하고 중복 가드(사진/장소명/title)는 유지한다.
 
-`scripts/force_publish_travel.py` 스크립트 사용:
+### 방법 1: `scripts/force_publish_travel.py` 사용 (권장)
+
+> **force_publish_travel.py 사용을 권장함** — 소스 코드를 건드리지 않는
+> 런타임 패치 방식이라 원복 불필요. travel-hugo 전용.
 
 ```bash
 cd /Users/twinssn/Projects/5000
@@ -81,9 +86,25 @@ python3 scripts/force_publish_travel.py
 - pipeline 내부 quota 체크 우회 (`blog_cfg["daily_quota"] = 999`)
 - `_run_single()` 직접 호출
 
+### 방법 1-1: `shared/quota_bypass.py` — 전 분기 쿼터우회 (Generalized)
+
+travel 뿐 아니라 car/rap/senior/curation/etap 등 모든 **in-process** 분기에 동일하게 적용.
+`dispatcher.dispatch()` 를 재사용하므로 ledger 기록·cooldown·Hugo 배포·post-check 가 그대로 동작.
+
+```bash
+cd /Users/twinssn/Projects/5000
+python3 shared/quota_bypass.py travel-hugo   # travel/1/2/3/4-hugo 등
+python3 shared/quota_bypass.py --list        # 지원 분기 목록
+```
+
+- daily_quota=999 만 우회 (중복 가드 유지)
+- STAP(주식)/TAP(블로그) subprocess 격리 분기는 미지원 — 에러 안내
+
 ### 방법 2: 코드 수정으로 5곳 우회
 
-`quota-bypass-publish` 스킬 참조. 5곳 우회를 적용 후 발급:
+`quota-bypass-publish` 스킬 참조. 5곳 우회를 적용 후 발급.
+> ⚠️ 소스 코드를 임시로 고치는 방식이라 **반드시 원복**해야 하며, `_used_places`
+> 가드까지 풀려 중복 발행 위험이 있다. 가능하면 위 방법 1/1-1(런타임 패치)을 사용.
 
 ```bash
 cd /Users/twinssn/Projects/5000
@@ -194,14 +215,15 @@ head -15 /Users/twinssn/Projects/TAP/travel-hugo/content/posts/<slug>/index.md
 
 ## 주의사항
 
-- 쿼터 우회 발행 후 **반드시 원복**할 것
-- `_used_places` 우회 시 중복 콘텐츠 발행 가능성 있음
+- 쿼터 우회 발행 후 **반드시 원복**할 것 (방법 2, 코드 수정 방식에만 해당)
+- `_used_places` 우회 시 중복 콘텐츠 발행 가능성 있음 (방법 2에만 해당)
+- 방법 1 / 1-1(런타임 패치)은 원복이 불필요하며 중복 가드가 유지됨
 - 우회 발행은 테스트/디버깅 목적으로만 사용
 - 일일 3건 제한을 반드시 지켜야 하는 경우 우회 금지
 
 ## 관련 스킬
 
-- `quota-bypass-publish` — 일반 쿼터 우회 방법 (5곳)
+- `quota-bypass-publish` — 쿼터우회 발행 공용 스킬 (`shared/quota_bypass.py` 상세 사용법)
 - `tap-blog-spec` — TAP 블로그 본문 규격
 - `hugo-blowfish-standardization` — Hugo 블로그 표준화
 - `wrangler-deployment-patterns` — Cloudflare Pages 배포 패턴

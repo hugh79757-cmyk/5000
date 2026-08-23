@@ -76,8 +76,9 @@ DATA (use ONLY this data):
 {summary}
 
 RULES:
-- Write 1,000-1,500 words in English
-- Title must include "{country}" and "eSIM"
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2)
+- Write MINIMUM 1,100 words, target 1,200-1,600 words in English. Articles under 1,000 words are rejected. Expand each section into 2-3 full paragraphs
+- Title must include "{country}" and "eSIM". Title must NOT contain the phrases "A Practical Guide" or "A Comprehensive Guide"
 - - If a section has 0 matching data items, OMIT that H2 section entirely. Do NOT write filler content.
 - Do NOT include any URLs or links
 - Do NOT invent plans not in the data
@@ -95,7 +96,7 @@ RULES:
 Return ONLY the article in markdown starting with # title"""
 
     result = ai_generate(
-    "You are a tech travel writer. Use only provided data. Never fabricate plans or prices. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0.",
+    "You are a tech travel writer. Use only provided data. Never fabricate plans or prices. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0. 4) NEVER bold an entire paragraph or write label-style bold leads like '**Option:**' — bold is for short phrases only (max 10 words).",
     prompt,
     temperature=0.5,
     max_tokens=3500,

@@ -1,0 +1,50 @@
+[
+ {
+  "code": "TEMPLATE_LEAK",
+  "title": "미치환 템플릿/쇼트코드 잔여",
+  "affected_posts": 5097,
+  "severity": "HIGH",
+  "recommendation": "생성 파이프라인에서 shortcode 미처리 — HUMAN_REVIEW_REQUIRED 대상 확인 후 수정",
+  "examples": []
+ },
+ {
+  "code": "NO_H2",
+  "title": "H2 헤딩 없음",
+  "affected_posts": 3667,
+  "severity": "MEDIUM",
+  "recommendation": "구조 개선(목차/소제목)",
+  "examples": []
+ },
+ {
+  "code": "NO_INTERNAL_LINKS",
+  "title": "내부 링크 0건",
+  "affected_posts": 18542,
+  "severity": "MEDIUM",
+  "recommendation": "크로스링크 삽입 — 디스커버리 개선",
+  "examples": []
+ },
+ {
+  "code": "TOO_SHORT_BODY",
+  "title": "본문 1500자 미만",
+  "affected_posts": 1396,
+  "severity": "HIGH",
+  "recommendation": "콘텐츠 확충 또는 통합 후보",
+  "examples": []
+ },
+ {
+  "code": "DUPLICATE_BODY",
+  "title": "본문 md5 중복",
+  "affected_posts": 263,
+  "severity": "HIGH",
+  "recommendation": "중복 발행 정리 — 통합/noindex 후보",
+  "examples": []
+ },
+ {
+  "code": "LONG_TITLE",
+  "title": "제목 60자 초과",
+  "affected_posts": 352,
+  "severity": "LOW",
+  "recommendation": "제목 간결화",
+  "examples": []
+ }
+]

@@ -101,7 +101,19 @@ def _run_impl() -> dict | bool:
     # country 자리에 origin 도시명을 넣어 관련성 필터 통과율 향상
     cover = fetch_city_image(origin + " airport travel", origin, article["slug"]) if origin else None
     body = fetch_body_images(origin + " city travel", origin, article["slug"], count=8) if origin else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    # cross-sell: base pipeline 표준 블록 (deals는 도시 기반 — origin을 city로 사용)
+    cross_html = build_cross_sell_html(
+        country=article.get("country", ""),
+        city=origin,
+        exclude_blog=BLOG_ID, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
+    article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
+    # write-fail 가드 (multiday 패턴): 쓰기 실패 시 mark_published 스킵 → DB/디스크 불일치(팬텀 행) 방지
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] Hugo 쓰기 실패 → 발행 차단: {article['slug']}")
+        return {"success": False, "reason": "write_failed"}
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if origin:
         register_entity("city", origin, BLOG_ID, article["slug"], "flight deals from " + origin, 50, 1)

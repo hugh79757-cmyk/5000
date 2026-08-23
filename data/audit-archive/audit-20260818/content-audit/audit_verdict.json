@@ -1,0 +1,38 @@
+{
+ "audit": "EXECUTE_ALL_BLOG_CONTENT_QUALITY_AUDIT",
+ "final_verdict": "AUDIT_COMPLETE_WITH_GAPS",
+ "reason": "기계적 검사는 24,986개 전수 완료, 의미 평가는 표본 794개(3.2%)만 수행 — 미평가 포스트는 UNVERIFIED. Blogger 4개는 로컬 경로 없어 기계적 검사 제외(공개 HTML fetch 미수행).",
+ "blogs": 85,
+ "posts_found": 22685,
+ "posts_audited_mechanical": 24986,
+ "posts_audited_semantic": 794,
+ "failed": 0,
+ "missing": {
+  "blogger_no_local_path": 4,
+  "semantic_unverified": 21891
+ },
+ "avg_score": 87.1,
+ "score_distribution": {
+  "90_plus": 488,
+  "80_89": 180,
+  "70_79": 113,
+  "60_69": 8,
+  "below_60": 5
+ },
+ "critical_issues": 230,
+ "frozen_urls": 20,
+ "top_issues": [
+  "TEMPLATE_LEAK 5,097 (20.4%)",
+  "NO_INTERNAL_LINKS 18,542 (74.2%)",
+  "NO_H2 3,667",
+  "TOO_SHORT_BODY 1,396",
+  "DUPLICATE_BODY 263"
+ ],
+ "human_review_required": [
+  "biz-techpawz-hugo test1/test2/teest3 (테스트 글 42점)",
+  "travel1-hugo 충북-청주-국가유산-야행 60점",
+  "travel3-hugo 충남-아산시-해어름 56점",
+  "bus-hugo /posts/ slug 오탐 후보",
+  "duplicate body 263개 통합/noindex 후보"
+ ]
+}

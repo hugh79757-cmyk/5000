@@ -1,0 +1,6 @@
+PROCESSED=100 FAILED=0 AVG=87.0 CRITICAL=28
+  LOW biz-techpawz-hugo/test1 score=42 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW rotcha-blog/남양주-물의-정원-20260817-s1 score=67 crit=['TEMPLATE_LEAK']
+  LOW rotcha-blog/테라-토마토-맥주-20260817-s1 score=70 crit=['TEMPLATE_LEAK']
+  LOW pet-hugo/반려동물안전-추천-top5-2026년 score=70 crit=['TEMPLATE_LEAK']
+  LOW camping-hugo/선풍기-추천-top5-2026년 score=70 crit=['TEMPLATE_LEAK']

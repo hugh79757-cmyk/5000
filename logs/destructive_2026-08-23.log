@@ -4,3 +4,6 @@
 [2026-08-23 08:37] phase2 ETAP 36블로그 표준파일 확산 | 사전카운트=40복사+9airports+2hugo.toml파라미터 | 백업=*.bak_phase2(+git) | 상태=빌드36/36통과후 배포진행중
 [2026-08-23 08:52] phase2 배포 완료 | 사후=35/36배포성공(flights W5게이트차단-기존콘텐츠문제) | 라이브검증13/13 ads로더확인(airports 신규활성화) | 보존확인=michelin top.html·extend-head 미변경
 [2026-08-23 09:22] flights 이미지보강+재배포 | 사전카운트=2건(R13 0장) | 백업=index.md.bak_img_fix x2 | 사후=R2 webp 200x2, 라이브 <img> 1개씩 확인, 배포 OK | 보존확인=michelin 무변경
+[2026-08-23T13:55+09:00] schema_registry INSERT OR REPLACE sync | 사전카운트=0(테이블 신규) | 백업=ops_dashboard/ops.db.bak_schema_registry_20260823(4.2MB) | 사후=85행(etap36/cuap15/cap13/tap8/stap6/rap5/seap2) | 보존확인=check_results=2000,blog_lifecycle=85,standard_rules=20 불변
+[13:32] GA4 provision | ops.db UPDATE 7행 (schema_registry.ga4_id) | 백업=/tmp/opencode/ops_db_bak_ga4update.sqlite3 | 사후=7건 확인+NULL 0건 | 보존확인=타 테이블 미접촉
+[2026-08-23 14:22:59] git stash push -u + checkout main + merge --no-ff track-c-cap-standardization(66 commits) + stash pop | 사전카운트=dirty194 HEAD=f4040a234@branch | 백업=stash ffd61670(auto-drop후 reflog) + main사전커밋 06b1c2e0e | 사후=dirty194 동일, main=9b09c9f28, f4040a234 포함 | 보존확인=OK

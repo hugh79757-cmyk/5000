@@ -1,0 +1,2 @@
+[2026-08-09T12:04:05.761216] inactive전부 active 변경 | 대상=62건 (paused+inactive+disabled) | backup=/Users/twinssn/Projects/5000/ops_dashboard/ops.db.bak_20260809_120405 | maintenance포함=예 | 사전전체=85 비active=62
+[2026-08-09T12:04:05.762396] 완료 | updated=62 | 사후전체=85 사후비active=0 | 검증=전체불변/비active0

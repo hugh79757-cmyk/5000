@@ -1,0 +1,11 @@
+[
+  {
+    "blog_id": "adventure-hugo",
+    "post_path": "/Users/twinssn/Projects/ETAP/adventure-hugo/content/posts/%E0%B8%AD%E0%B9%80%E0%B8%A1%E0%B8%AD%E0%B8%87%E0%B9%80%E0%B8%8A%E0%B8%A2%E0%B8%87%E0%B8%A3%E0%B8%B2%E0%B8%A2-adventure/index.md",
+    "check_name": "FM-MISSINGKEYS",
+    "action": "ABSTAINED",
+    "detail": "recheck FAILS missing ['tags'] but checker _parse_frontmatter fails to read block-style YAML tags lists; python-frontmatter confirms tags present. 133 adventure-hugo rows are checker false-positives. 0 file change. Escalate: fix checker parser, do not mass-normalize 133 posts.",
+    "timestamp": "2026-08-22T09:24:29.783923+00:00",
+    "actor": "agent"
+  }
+]

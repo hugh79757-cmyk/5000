@@ -34,11 +34,12 @@ def fetch_airport_data(iata_code):
         WHERE ar.origin = ? OR ar.destination = ?
         ORDER BY a.name
     """, (iata_code, iata_code)).fetchall()
-    # 연결 도시
+    # 연결 도시 (양방향 — 인바운드 전용 공항도 실재 노선으로 커버)
     destinations = conn.execute("""
-        SELECT DISTINCT destination FROM airline_routes
-        WHERE origin = ? LIMIT 30
-    """, (iata_code,)).fetchall()
+        SELECT DISTINCT CASE WHEN origin = ? THEN destination ELSE origin END
+        FROM airline_routes
+        WHERE origin = ? OR destination = ? LIMIT 30
+    """, (iata_code, iata_code, iata_code)).fetchall()
     conn.close()
     return (
         dict(airport) if airport else None,
@@ -83,7 +84,8 @@ FORMAT (informational style — short paragraphs, tables, clear structure):
 - Keep paragraphs short (2-4 sentences); put structured facts in tables
 
 RULES:
-- Write 800-1,200 words in English
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2)
+- Write MINIMUM 1,100 words, target 1,200-1,500 words in English. Articles under 1,000 words are rejected. Expand sections with general travel advice (transport options, timing, connections, packing), NOT invented facts
 - Title must include the airport name and IATA code ({iata})
 - Do NOT invent terminal names, lounge names, restaurant names, services, prices, or schedules
 - ONLY write about what the data confirms

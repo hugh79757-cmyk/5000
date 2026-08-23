@@ -1,0 +1,50 @@
+{
+ "unverified_dims_with_scores": [
+  "intent_score",
+  "trust_score",
+  "ad_score"
+ ],
+ "semantic_eval_scoring_evidence": "semantic_eval.py는 intent/trust/ad에 규칙 기반 점수를 부여하지만 로컬 md 한정 — verification=UNVERIFIED 마킹됨. GSC/라이브 데이터 없이 검증 불가.",
+ "template_leak_high_score_examples": [
+  {
+   "blog": "rap2-hugo",
+   "slug": "통영양산-lh-임대아파트-신청자격-소득기준-접수중-11곳",
+   "score": 86,
+   "title": ""
+  },
+  {
+   "blog": "rap2-hugo",
+   "slug": "청주지북-b1블록-공공분양-잔여세대-자격완화-신청조건",
+   "score": 86,
+   "title": ""
+  },
+  {
+   "blog": "rap-hugo",
+   "slug": "성북구-꿈의숲대명루첸아파트-2026년-8월-실거래가-분석",
+   "score": 86,
+   "title": ""
+  },
+  {
+   "blog": "rap5-hugo",
+   "slug": "은평구-폭포동4단지힐스테이트-브랜드-가치-및-시세-분석",
+   "score": 86,
+   "title": ""
+  },
+  {
+   "blog": "rap-hugo",
+   "slug": "현대3차-영등포구-실거래가-2026년-8월-기준-분석",
+   "score": 86,
+   "title": ""
+  },
+  {
+   "blog": "rap2-hugo",
+   "slug": "울산-다운2지구-신혼희망타운-선착순-동호지정-신청자격-총정리",
+   "score": 86,
+   "title": ""
+  }
+ ],
+ "template_leak_high_score_count": 6,
+ "avg_871_provisional": "PROVISIONAL_NOT_TRAFFIC_VALIDATED",
+ "note": "원본 post_audit_results.jsonl 점수는 덮어쓰지 않음. 이 파일이 QA overlay.",
+ "score_formula": "total = title_score(20) + info_score(25) + intent_score(15) + struct_score(15) + trust_score(10) + link_score(10) + ad_score(5). 감점: TEMPLATE_LEAK -10, NO_H2 -6, H2<3 -2, 내부링크0 -6, 내부링크<2 -3, 외부링크0 -2, TOO_SHORT -대폭, 과장표현 -감점. intent/trust/ad는 규칙 기반 추정."
+}

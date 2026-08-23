@@ -1,0 +1,22 @@
+{
+ "final_verdict": "CHANGES_REQUIRED_AUDIT_DATA",
+ "tasks": {
+  "t1_checksums": "PASS — 3/3 일치, 민감정보 0건",
+  "t2_blog_count": "PASS — 85개 유지 (pipeline 합계 85, curation 15, pipeline 미지정 5)",
+  "t3_post_reconciliation": "PASS — 2,301 차이 완전 설명 (mech_only 2,770 − inv_only 458 − dup 11)",
+  "t4_sample": "PASS_WITH_GAPS — 794 = 31×25+19, 부족 16 설명, 최신5 100% 재현, 랜덤5 UNVERIFIED (선정 스크립트 미보존)",
+  "t5_exact_counts": "PASS — 기계적 HIGH 5,332 (전수) vs 의미 critical 230 (표본), HRR 230, 중첩 230",
+  "t6_scoring": "CHANGES_REQUIRED — UNVERIFIED 차원 3종에 점수 부여됨 (overlay로 기록), TEMPLATE_LEAK&≥85 6건, avg 87.1 PROVISIONAL",
+  "t7_template_leak_live": "PASS — 104개 표본: LIVE_TEMPLATE_LEAK 2 (≈1.9%), SOURCE_ONLY 100, AMBIGUOUS 2 → TEMPLATE_LEAK 5,097건은 대부분 오탐 성격",
+  "t8_internal_links": "PASS — 40개 표본: ORPHAN_INBOUND 37 (92.5%) → NO_INTERNAL_LINKS 18,542건 신뢰성 높음",
+  "t9_frozen": "PASS — frozen 20/20 유지, 읽기 전용, Day 3 대기 (not_before=2026-08-21T06:31:54Z)"
+ },
+ "required_changes": [
+  "score 수정 시 UNVERIFIED 차원(intent/trust/ad) 점수 제외 또는 별도 표시 — scoring_qa_overlay.json 기준",
+  "TEMPLATE_LEAK 5,097건은 라이브 유출 아님 — issue_clusters.json의 HIGH 등급을 DOWNGRADE하거나 재검증 기준 명시",
+  "표본 선정 스크립트 재현 불가 — 향후 감사는 배치 파일 고정 + 선정 코드 저장 필수",
+  "NO_INTERNAL_LINKS 18,542건은 ORPHAN 실증 (37/40) — 최우선 수선 후보로 승격"
+ ],
+ "blockers": [],
+ "next_action": "REMEDIATION_PLANNING (approve 후) — priority_queue.csv + internal_link_findings 기반, frozen 20개 제외"
+}

@@ -1,0 +1,29 @@
+[
+  {
+    "blog_id": "travel3-hugo",
+    "post_path": "/Users/twinssn/Projects/TAP/travel3-hugo/content/posts/충남-아산시-재벌짬뽕-포함-맛집-3곳-꿀팁/index.md",
+    "check_name": "content_quality",
+    "action": "APPLIED",
+    "detail": "CQ03 제휴공시 삽입/정리",
+    "timestamp": "2026-08-22T15:18:44.049847+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "travel3-hugo",
+    "post_path": "/Users/twinssn/Projects/TAP/travel3-hugo/content/posts/충남-아산시-재벌짬뽕-포함-맛집-3곳-꿀팁/index.md",
+    "check_name": "content_quality",
+    "action": "RECHECK_PASS",
+    "detail": "공시문구 확인",
+    "timestamp": "2026-08-22T15:18:44.050075+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "travel3-hugo",
+    "post_path": "content/posts/충남-아산시-재벌짬뽕-포함-맛집-3곳-꿀팁/index.md",
+    "check_name": "content_quality",
+    "action": "DEPLOYED",
+    "detail": "deploy via deploy_site, live HTTP 200",
+    "timestamp": "2026-08-22T15:27:03.756954+00:00",
+    "actor": "agent"
+  }
+]

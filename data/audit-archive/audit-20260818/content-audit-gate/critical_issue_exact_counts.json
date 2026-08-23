@@ -1,0 +1,66 @@
+{
+ "note": "finding count(건수) vs unique URL count 분리, HIGH/CRITICAL 분리, 중첩 제거",
+ "mechanical_findings": {
+  "NO_INTERNAL_LINKS": {
+   "count": 18542,
+   "severity": "MEDIUM"
+  },
+  "TEMPLATE_LEAK": {
+   "count": 5097,
+   "severity": "HIGH"
+  },
+  "NO_H2": {
+   "count": 3667,
+   "severity": "MEDIUM"
+  },
+  "SHORT_BODY": {
+   "count": 1036,
+   "severity": "MEDIUM"
+  },
+  "TOO_SHORT_BODY": {
+   "count": 360,
+   "severity": "HIGH"
+  },
+  "LONG_TITLE": {
+   "count": 352,
+   "severity": "LOW"
+  }
+ },
+ "mechanical_issue_urls": {
+  "NO_INTERNAL_LINKS": {
+   "unique_urls": 18542
+  },
+  "TEMPLATE_LEAK": {
+   "unique_urls": 5097
+  },
+  "NO_H2": {
+   "unique_urls": 3667
+  },
+  "SHORT_BODY": {
+   "unique_urls": 1036
+  },
+  "TOO_SHORT_BODY": {
+   "unique_urls": 360
+  },
+  "LONG_TITLE": {
+   "unique_urls": 352
+  }
+ },
+ "any_mechanical_issue_unique_urls": 19720,
+ "high_mechanical_unique_urls": 5332,
+ "semantic_critical": {
+  "findings_total": 232,
+  "unique_urls": 230,
+  "human_review_required": {
+   "count": 230,
+   "unique_urls": 230
+  }
+ },
+ "overlap": {
+  "critical_in_hrr": 230,
+  "critical_in_high_mech": 230,
+  "hrr_in_high_mech": 230
+ },
+ "explanation": "HRR 230 = critical 230 전부(총 794 표본 중). critical_issues가 있으면 human_review_required=True로 부여됨. 기계적 HIGH 5,332 unique URL은 전수 24,986 기준, 의미 critical 230은 표본 794 기준 — 스케일이 다름.",
+ "provisional": true
+}

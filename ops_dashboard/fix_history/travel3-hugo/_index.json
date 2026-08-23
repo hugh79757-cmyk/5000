@@ -1,0 +1,11 @@
+[
+  {
+    "blog_id": "travel3-hugo",
+    "post_path": "/Users/twinssn/Projects/TAP/travel3-hugo/content/posts/_index.md",
+    "check_name": "content_quality",
+    "action": "ABSTAINED",
+    "detail": "dry_apply unsafe: ['file_size_delta_>50%']",
+    "timestamp": "2026-08-22T15:17:50.274204+00:00",
+    "actor": "agent"
+  }
+]

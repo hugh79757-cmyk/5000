@@ -1,0 +1,11 @@
+[
+  {
+    "blog_id": "hotissue-hugo",
+    "post_path": "content/posts/2025-04-06-hotissue/index.md",
+    "check_name": "content_quality",
+    "action": "VERIFIED_NO_CHANGE",
+    "detail": "source already compliant, stale check_results",
+    "timestamp": "2026-08-22T15:27:03.757518+00:00",
+    "actor": "agent"
+  }
+]

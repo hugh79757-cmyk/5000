@@ -1,0 +1,6 @@
+PROCESSED=100 FAILED=0 AVG=88.1 CRITICAL=31
+  LOW travel1-hugo/충북-청주-국가유산-야행-일정과-즐길-거리-총정리 score=60 crit=['TEMPLATE_LEAK', 'EMPTY_OR_TOO_SHORT_BODY']
+  LOW issue-techpawz-hugo/테라-토마토-맥주-20260817-s2 score=72 crit=['TEMPLATE_LEAK']
+  LOW luxury-hugo/stockholms-län-luxury-tours score=74 crit=['TEMPLATE_LEAK']
+  LOW transfers-hugo/tbilisi-transfers score=74 crit=['TEMPLATE_LEAK']
+  LOW pick-hugo/패밀리에게-모델-y가-맞는-이유-실비용으로-따져봤다 score=76 crit=['TEMPLATE_LEAK']

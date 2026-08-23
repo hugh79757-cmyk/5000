@@ -125,6 +125,14 @@ def _run_impl() -> dict | bool:
     article = _add_product_cards(article)
     cover = fetch_city_image(city + " restaurant dining", country, article["slug"]) if city else None
     body = fetch_body_images(city + " food cuisine", country, article["slug"], count=8) if city else []
+    # cross-sell: base pipeline.py:333-339 패턴 (F9 Golden Standard 픽스)
+    cross_html = build_cross_sell_html(
+        country=article.get("country", ""),
+        city=article.get("city", ""),
+        exclude_blog=BLOG_ID, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
+    article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")

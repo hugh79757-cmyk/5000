@@ -164,7 +164,11 @@ def fetch_camping():
 
 
 def fetch_korservice():
-    from core.korservice_data import get_korservice_data
+    try:
+        from core.korservice_data import get_korservice_data
+    except ImportError:
+        logger.warning("fetch_korservice: core.korservice_data 모듈 없음 → None")
+        return None
     ks = get_korservice_data()
     if not ks:
         return None

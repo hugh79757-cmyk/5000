@@ -1,0 +1,6 @@
+{
+ "batch_count": 32,
+ "sample_count": 794,
+ "seed": 5000,
+ "per_batch": 25
+}

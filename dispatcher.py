@@ -458,6 +458,9 @@ def _run_stap(stap_name, cfg):
 
 _ETAP_BLOG_EXCEPTIONS = {
     "flights-hugo": "pipelines.etap.flight_pipeline",
+    # tour-hugo: tour_pipeline.py 준비됨(중복 이슈로 승인 대기) — 승인 전까지 기존 fallback 유지.
+    # 승인 시 이 한 줄 삭제하면 dispatcher 관례(tour-hugo→tour_pipeline)가 자동 활성화됨.
+    "tour-hugo": "pipelines.etap.pipeline",
 }
 
 def _resolve_pipeline(blog_id: str, pipeline: str, cfg: dict):

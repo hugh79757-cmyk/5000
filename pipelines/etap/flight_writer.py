@@ -135,7 +135,7 @@ REAL PRICE DATA FROM OUR DATABASE:
 {price_summary}
 
 ARTICLE REQUIREMENTS:
-- 1,200-1,600 words, American English, friendly practical tone
+- Write MINIMUM 1,100 words, target 1,200-1,600 words in English. Articles under 1,000 words are rejected. American English, friendly practical tone
 - Use the EXACT prices from the data above when available
 - Include specific airline names, dates, and prices from the data
 
@@ -154,6 +154,8 @@ RULES:
 - If no price data, use phrases like "prices typically range from..."
 - No affiliate links or URLs, no markdown beyond H2, write in paragraphs not bullet lists
 - Include a brief intro before the first H2
+- Title must NOT contain the phrases "A Practical Guide" or "A Comprehensive Guide"
+- NEVER bold an entire paragraph or write label-style bold leads like '**Option:**' — bold is for short phrases only (max 10 words)
 """
     try:
         result = ai_generate(

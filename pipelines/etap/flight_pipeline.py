@@ -1,6 +1,7 @@
 from pipelines.etap.post_processor import insert_adsense
 from pipelines.etap.quality_guard import postprocess_content, send_alert
-from shared.entity_linker import inject_internal_links, mark_entity_published, register_entity
+from shared.entity_linker import build_cross_sell_html, inject_internal_links, mark_entity_published, register_entity
+from pipelines.etap.post_processor import insert_cross_sell_block
 from shared.publishers.hugo_writer import _write_hugo_post_etap as _write_hugo_post_shared
 from pipelines.etap._contract import _normalize_result
 
@@ -161,9 +162,16 @@ def _run_impl(cfg):
         send_alert(blog_id, article["slug"], _post_issues)
         return {"status": "draft", "slug": article["slug"]}
     article["content"] = inject_internal_links(article["content"], current_blog=blog_id, max_links=5)
+    # cross-sell (base pipeline.py:333-339 클론 — 항공 노선은 도시 컨텍스트=dest_city)
+    cross_html = build_cross_sell_html(country="", city=topic.get("dest_city", ""), exclude_blog=blog_id, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
     register_entity("destination", topic["dest_city"], blog_id, article["slug"],
                     topic["dest_city"], priority=70)
-    _write_hugo_post(cfg, article)
+    write_result = _write_hugo_post(cfg, article)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[ETAP-Flight] Hugo write failed — 발행 차단: {article['slug']}")
+        return {"status": "write_failed", "slug": article["slug"]}
     mark_published(topic["id"], cfg.get("id", "flights-hugo"), article["title"], article["slug"])
     mark_entity_published(blog_id, article["slug"])
     return {"status": "ok", "title": article["title"], "slug": article["slug"]}

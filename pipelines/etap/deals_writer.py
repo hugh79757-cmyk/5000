@@ -159,21 +159,21 @@ def generate_deals_guide(topic):
 
     summary = "\n".join(lines)
 
-    # 동적 섹션
-    sections = [f"## Best Deals from {origin_city} Right Now"]
+    # 동적 섹션 (제목은 hugo_writer H2 가드 허용 패턴만 사용 — 181패턴 실측 기반)
+    sections = ["## Quick Facts"]
     if budget:
-        sections.append(f"## Budget Flights Under $200 ({len(budget)} destinations)")
+        sections.append(f"## Current Flight Prices Under $200 ({len(budget)} destinations)")
     if mid:
-        sections.append(f"## Mid-Range Getaways $200-$500 ({len(mid)} destinations)")
+        sections.append(f"## Current Flight Prices $200-$500 ({len(mid)} destinations)")
     if premium:
-        sections.append(f"## Long-Haul Deals Over $500 ({len(premium)} destinations)")
+        sections.append(f"## Current Flight Prices Over $500 ({len(premium)} destinations)")
     if popular_dirs:
         direct_count = sum(1 for p in popular_dirs if p["stops"] == 0)
         if direct_count > 0:
-            sections.append(f"## Direct Flight Options from {origin_city} ({direct_count} non-stop routes)")
+            sections.append("## Direct vs. Connecting Flights")
     if calendar_data:
-        sections.append("## When to Fly: Price Calendar Insights")
-    sections.append(f"## How to Get the Best Price from {origin_city}")
+        sections.append(f"## Money-Saving Tips for {origin_city} Travelers")
+    sections.append("## Booking Tips")
     section_text = "\n".join(sections)
 
     prompt = f"""Write a flight deals guide for travelers from {origin_city}.
@@ -187,8 +187,9 @@ STRUCTURE (use these EXACT H2 headings in your article):
 - Each H2 section must have at least 2 paragraphs
 
 RULES:
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2). Open with the single best deal: "{origin_city} to {cheapest['dest_city']} for ${cheapest['min_price']:.0f}."
+- Write MINIMUM 1,100 words, target 1,200-1,600 words in English. Articles under 1,000 words are rejected. Expand each section into 2-3 full paragraphs.
 - Use ONLY destinations and prices from the data. Do NOT invent destinations.
-- START with the single best deal: "{origin_city} to {cheapest['dest_city']} for ${cheapest['min_price']:.0f}."
 - For EACH destination mention: price, whether direct, travel dates available, and one sentence about why the destination is worth visiting.
 - When price ranges are wide (e.g. $84-$150), explain why: different sellers, dates, or stops.
 - Group destinations geographically within each price tier when possible (e.g. "Florida destinations", "Caribbean", "Europe").

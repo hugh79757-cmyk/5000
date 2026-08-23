@@ -1,0 +1,34 @@
+{
+ "audit": "EXECUTE_ALL_BLOG_CONTENT_QUALITY_AUDIT",
+ "mode": "READ_ONLY",
+ "run_at": "2026-08-18",
+ "batches": {
+  "batch_size_max": 25,
+  "batch_count": 32,
+  "sample_total": 794,
+  "seed": 5000
+ },
+ "coverage": {
+  "blogs_total_registry": 85,
+  "blogs_with_site_path": 81,
+  "posts_inventory": 22685,
+  "posts_mechanical": 24986,
+  "posts_semantic_sample": 794,
+  "semantic_sample_pct": 3.18
+ },
+ "checksums": {
+  "mechanical_all.jsonl": "6cd85551484ed243f237e1ffce19f4a837854bee930781eeb646294a3e979e6a",
+  "post_inventory.jsonl": "4179c4e62eab375f1d8f6fb40763780390185e5f580f453ed57fa0a32c8359a2",
+  "post_audit_results.jsonl": "a532beca02d7069a2cd40c0038c8d2874271d2d84776121460b6280a9e9f67ba"
+ },
+ "line_counts": {
+  "mechanical_all.jsonl": 24986,
+  "post_inventory.jsonl": 22685,
+  "post_audit_results.jsonl": 794
+ },
+ "frozen_experiment": {
+  "count": 20,
+  "status": "FROZEN_UNTIL_SITEMAP_EXPERIMENT_COMPLETE",
+  "file": "frozen_match.json"
+ }
+}

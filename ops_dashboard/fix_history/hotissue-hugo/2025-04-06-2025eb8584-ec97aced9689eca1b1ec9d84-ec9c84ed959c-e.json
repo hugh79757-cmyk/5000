@@ -1,0 +1,38 @@
+[
+  {
+    "blog_id": "hotissue-hugo",
+    "post_path": "/Users/twinssn/Projects/cap/hotissue-hugo/content/posts/2025-04-06-2025eb8584-ec97aced9689eca1b1ec9d84-ec9c84ed959c-e.md",
+    "check_name": "content_quality",
+    "action": "APPLIED",
+    "detail": "CQ03 제휴공시 삽입/정리",
+    "timestamp": "2026-08-22T15:17:50.148287+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "hotissue-hugo",
+    "post_path": "/Users/twinssn/Projects/cap/hotissue-hugo/content/posts/2025-04-06-2025eb8584-ec97aced9689eca1b1ec9d84-ec9c84ed959c-e.md",
+    "check_name": "content_quality",
+    "action": "RECHECK_PASS",
+    "detail": "공시문구 확인",
+    "timestamp": "2026-08-22T15:17:50.148570+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "hotissue-hugo",
+    "post_path": "/Users/twinssn/Projects/cap/hotissue-hugo/content/posts/2025-04-06-2025eb8584-ec97aced9689eca1b1ec9d84-ec9c84ed959c-e.md",
+    "check_name": "content_quality",
+    "action": "APPLIED",
+    "detail": "CQ03 제휴공시 삽입/정리",
+    "timestamp": "2026-08-22T15:18:43.933324+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "hotissue-hugo",
+    "post_path": "/Users/twinssn/Projects/cap/hotissue-hugo/content/posts/2025-04-06-2025eb8584-ec97aced9689eca1b1ec9d84-ec9c84ed959c-e.md",
+    "check_name": "content_quality",
+    "action": "RECHECK_PASS",
+    "detail": "공시문구 확인",
+    "timestamp": "2026-08-22T15:18:43.933591+00:00",
+    "actor": "agent"
+  }
+]

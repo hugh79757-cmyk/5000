@@ -1,0 +1,38 @@
+[
+  {
+    "blog_id": "issue-techpawz-hugo",
+    "post_path": "/Users/twinssn/Projects/issue-techpawz-hugo/content/posts/애드센스로-월-100만-원-만들기.md",
+    "check_name": "FM-DRAFT",
+    "action": "ABSTAINED",
+    "detail": "safe_to_apply=False side_effects=['unexpected_field_removed:draft']",
+    "timestamp": "2026-08-22T09:34:52.529233+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "issue-techpawz-hugo",
+    "post_path": "/Users/twinssn/Projects/issue-techpawz-hugo/content/posts/애드센스로-월-100만-원-만들기.md",
+    "check_name": "FM-DRAFT",
+    "action": "APPLIED",
+    "detail": "draft:true 라인 제거",
+    "timestamp": "2026-08-22T14:48:23.997198+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "issue-techpawz-hugo",
+    "post_path": "/Users/twinssn/Projects/issue-techpawz-hugo/content/posts/애드센스로-월-100만-원-만들기.md",
+    "check_name": "FM-DRAFT",
+    "action": "RECHECK_PASS",
+    "detail": "재검사 통과",
+    "timestamp": "2026-08-22T14:48:24.002903+00:00",
+    "actor": "agent"
+  },
+  {
+    "blog_id": "issue-techpawz-hugo",
+    "post_path": "content/posts/애드센스로-월-100만-원-만들기.md",
+    "check_name": "FM-DRAFT",
+    "action": "DEPLOYED",
+    "detail": "deploy via deploy_site, live HTTP 200",
+    "timestamp": "2026-08-22T15:04:31.478819+00:00",
+    "actor": "agent"
+  }
+]

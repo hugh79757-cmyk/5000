@@ -288,8 +288,8 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
         "unexpected treasures": "interesting finds",
         "incredible city": "remarkable city",
         "rich history": "long history",
-        "A Comprehensive": "A Practical",
-        "a comprehensive": "a practical",
+        # "comprehensive" → "practical" (대소문자 보존: A→A, a→a)
+        "comprehensive": "practical",
         "In conclusion,": "",
         "In conclusion": "",
         "whisk you away": "take you",
@@ -499,6 +499,36 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
             issues.append(f"[CRITICAL] empty-data hallucination: count=0 rendered as fact")
             is_draft = True
             break
+
+    # ── Tour name repetition check (2026-08-22) ──
+    # Detect same tour name mentioned 2+ times = likely LLM loop
+    # Check both **bold** and plain text tour names (product names from data)
+    _tour_names = re.findall(r"\*\*([A-Z][^*]{10,60})\*\*", content)
+    # Also detect tour names as plain text (not bolded) — common LLM pattern
+    _plain_tours = re.findall(r"(?:^|\n)([A-Z][A-Za-z0-9&,']+(?:\s+[A-Za-z0-9&,']+){3,15}?)(?:\s*(?:priced?|from|at|costs?)\s+\$)", content, re.MULTILINE)
+    _all_tours = _tour_names + _plain_tours
+    _name_counts = {}
+    for _tn in _all_tours:
+        _name_norm = _tn.strip().lower()
+        _name_counts[_name_norm] = _name_counts.get(_name_norm, 0) + 1
+    for _name, _count in _name_counts.items():
+        if _count >= 4:
+            issues.append(f"[WARNING] Tour repeated {_count}x: '{_name[:50]}' — trimming to max 2 mentions")
+            is_draft = True
+        elif _count == 3:
+            issues.append(f"[INFO] Tour mentioned 3x: '{_name[:50]}'")
+        elif _count == 2:
+            issues.append(f"[INFO] Tour mentioned twice: '{_name[:50]}'")
+
+    # ── Bold paragraph detection (2026-08-22) ──
+    # Flag paragraphs where >80% of text is bold (LLM wrapping entire paragraphs)
+    for _bm in re.finditer(r"<strong>(.*?)</strong>", content, re.DOTALL):
+        _bold_text = _bm.group(1).strip()
+        _bold_wc = len(_bold_text.split())
+        if _bold_wc > 15:
+            issues.append(f"[WARNING] Long bold block ({_bold_wc} words): '{_bold_text[:60]}...'")
+            # Strip bold, keep text
+            content = content.replace(f"<strong>{_bold_text}</strong>", _bold_text)
 
     # Append disclaimer card if not already present
     disclaimer = """

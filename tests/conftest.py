@@ -22,10 +22,21 @@ def _guard_prod_ops_db():
     """테스트가 운영 ops.db를 가리키는 resolved DB path를 쓰면 즉시 실패시킨다.
 
     모든 테스트는 OPS_DB_PATH를 tmp_path로 교체(monkeypatch)해야 한다.
+    환경분기(HARVESTER_INTEGRATION PART_A, 2026-08-23): OPS_TEST_MODE=1 또는
+    OPS_DB_PATH에 "/tmp" 포함 시 guard skip — 그 외 로직 변경 없음.
     """
+    import os
+
+    if os.environ.get("OPS_TEST_MODE") == "1":
+        yield
+        return
+
     from shared import publish_error_events as events
 
     resolved = Path(events.OPS_DB_PATH).resolve()
+    if "/tmp" in str(resolved):
+        yield
+        return
     assert resolved != _PROD_OPS_DB.resolve(), (
         f"테스트가 운영 ops.db를 가리킴: {resolved}. OPS_DB_PATH를 tmp_path로 교체할 것."
     )

@@ -1,0 +1,1193 @@
+{
+ "generated": "2026-08-18",
+ "files": {
+  "5000-content-audit-gate/critical_issue_exact_counts.json": {
+   "sha256": "d3108ed87b0fd4b4f06c60f0a25ca8f2f80da03b60806cbf5b760c22c7bd5e9d",
+   "size": 1451
+  },
+  "5000-content-audit-gate/gate_manifest.json": {
+   "sha256": "564f33d1923c0b70c6f0870412101df7747bf7f92b361e151e2f5e90f78850eb",
+   "size": 1646
+  },
+  "5000-content-audit-gate/gate_review.md": {
+   "sha256": "13485bf00d4198e9a70bb7059a22d2ff55b30a1d1de1254e886a224901e99cf6",
+   "size": 2691
+  },
+  "5000-content-audit-gate/internal_link_sample.json": {
+   "sha256": "c315e0cc366fbb163df2b45bf5634884e0548ab517072cffb40c725758b341e2",
+   "size": 3998
+  },
+  "5000-content-audit-gate/internal_link_validation.jsonl": {
+   "sha256": "a599b4b6e23b982696f03490b373103b112649533d33b41024b144e538693ffb",
+   "size": 15989
+  },
+  "5000-content-audit-gate/inventory_reconciliation.json": {
+   "sha256": "88f539977ba7d8c1b2b6bdad370dc0f1779c83bdf2e218334a9851ea451b96e3",
+   "size": 1102
+  },
+  "5000-content-audit-gate/persistence_plan.md": {
+   "sha256": "d826984511f0fff2f8a74e5c256c444005eea371d8f7f70d30812993d697a538",
+   "size": 1196
+  },
+  "5000-content-audit-gate/post_set_reconciliation.json": {
+   "sha256": "baf9caac80cbda59f88372df2cb9b24a06e48335b9d2429ae96fb4a7c3e70fe0",
+   "size": 4471668
+  },
+  "5000-content-audit-gate/sample_reconciliation.json": {
+   "sha256": "8f2f03c48eb79cf616b840cf033f928d185d9f237c96f0fa77104e06a9d94c9d",
+   "size": 1287
+  },
+  "5000-content-audit-gate/scoring_qa_overlay.json": {
+   "sha256": "016482db017be0f0979f806a5ed775386340f78155e05ed735fbc000b35438f0",
+   "size": 1798
+  },
+  "5000-content-audit-gate/task45_analysis.json": {
+   "sha256": "176b8d922a69f8b6e1e61bdcfc6ae15905a9ec8e42c2cdada210245bdc821fa0",
+   "size": 595
+  },
+  "5000-content-audit-gate/template_leak_live_validation.jsonl": {
+   "sha256": "21345345aee9c34b45325ec045c6a7e58df7a1e3dffac2122ed75eebe3b144fa",
+   "size": 49296
+  },
+  "5000-content-audit-gate/template_leak_sample.json": {
+   "sha256": "dab85245af770ff8f6527ab2ee1d0ccb8188eee9cf6d12326d4262567a3c1167",
+   "size": 141153
+  },
+  "5000-content-audit-gate/verdict.json": {
+   "sha256": "253a4282953e9d70ec7b9eb0206a926ba15bfac2c13824c333c71db1f8eccd0a",
+   "size": 1807
+  },
+  "5000-content-audit/audit_manifest.json": {
+   "sha256": "85f4970f3dcaf9c273266f0a76b80c1aaef3adf296c5d4a4bbb20c68083a800c",
+   "size": 956
+  },
+  "5000-content-audit/audit_summary.md": {
+   "sha256": "1159c106a2356d13a90addc694a6f0f2fb79992e0f5987ac570ebb987865e519",
+   "size": 1539
+  },
+  "5000-content-audit/audit_verdict.json": {
+   "sha256": "01904a604440a5699933943dce0724e9342edf03eef1f6efaa1668aa49b62176",
+   "size": 1160
+  },
+  "5000-content-audit/batches/batch_00.json": {
+   "sha256": "9f56325c62e515563620000ca8392f0755da323e377feb1791198a77d0a22132",
+   "size": 34075
+  },
+  "5000-content-audit/batches/batch_01.json": {
+   "sha256": "7396ddb9cd7c9a08aca83f14a5a249c964e2ba381c8db10d3ef8b0d8183e172e",
+   "size": 36412
+  },
+  "5000-content-audit/batches/batch_02.json": {
+   "sha256": "d64a486891a45f48e01c239117bbf3568e7c86c6c51a6462e6260822806e6d7e",
+   "size": 36129
+  },
+  "5000-content-audit/batches/batch_03.json": {
+   "sha256": "c0de4e67364ef865a8d1c0e67ee1c27bd690e88710333206bc529f185dcdc1d4",
+   "size": 39311
+  },
+  "5000-content-audit/batches/batch_04.json": {
+   "sha256": "9a6bc7787f16b4ad6cb4ebeb1f087663233bb5a8386e6d67f410643d01d4d7b7",
+   "size": 34560
+  },
+  "5000-content-audit/batches/batch_05.json": {
+   "sha256": "a9cac9ff20e29c5be0ce769b50b1644fd07e1a57492aae9935a4c3f3813a9ae0",
+   "size": 36631
+  },
+  "5000-content-audit/batches/batch_06.json": {
+   "sha256": "9dc906a84d01ff845ffd9a8ba665a0dbe64faf3a3578e6e10eec7a043b7acfda",
+   "size": 35134
+  },
+  "5000-content-audit/batches/batch_07.json": {
+   "sha256": "6faa1c62b89ffa7524bb73d50e71b8781986a27431042c6c036ef2965012dba3",
+   "size": 36294
+  },
+  "5000-content-audit/batches/batch_08.json": {
+   "sha256": "ed0fd3b4a33b3f2fc5d9ca8a5cee3a65f8c871dab804514b88207b3d228f0edc",
+   "size": 36092
+  },
+  "5000-content-audit/batches/batch_09.json": {
+   "sha256": "a4b800bef6e753f99dde87b86ca4b2b91f9a0f8782bf9fc4bdb49d2083a654ae",
+   "size": 35695
+  },
+  "5000-content-audit/batches/batch_10.json": {
+   "sha256": "15773982130a5787ebad1b462ef14bde05a8c07397c332317ac065b4734325f6",
+   "size": 34087
+  },
+  "5000-content-audit/batches/batch_11.json": {
+   "sha256": "4a28640e270708acfa06bdf7ca017a7e591a7c7dd0628ff2c0d3d8bfa9c2bc15",
+   "size": 33551
+  },
+  "5000-content-audit/batches/batch_12.json": {
+   "sha256": "c11386e6ea1983a0a49943e891677d1b9582f9ee9b5d0ee143c3a7946c162ce2",
+   "size": 37968
+  },
+  "5000-content-audit/batches/batch_13.json": {
+   "sha256": "afdb570a063a15434c5b54499edd095af27117f79be0e7f0a93026d778b1b5c3",
+   "size": 35932
+  },
+  "5000-content-audit/batches/batch_14.json": {
+   "sha256": "599ee7f8ae10ef40e0324774f3e7a56f25525e66a76e5f1be6fc8eb1efa5c3a4",
+   "size": 35940
+  },
+  "5000-content-audit/batches/batch_15.json": {
+   "sha256": "70bdf7d89425f141f4819edc1eac247ac00c94bb067cc14bd09e53a7176d2d7f",
+   "size": 35748
+  },
+  "5000-content-audit/batches/batch_16.json": {
+   "sha256": "72f3e06b6dd1fdd95c3825564b401dfbddbcd2c788385e8cd352be8077ed1c20",
+   "size": 37220
+  },
+  "5000-content-audit/batches/batch_17.json": {
+   "sha256": "ccc3e81074e62ab4c2aadd87a39bff273cf2ebcd08d1b3da5be969b9da55fb22",
+   "size": 34632
+  },
+  "5000-content-audit/batches/batch_18.json": {
+   "sha256": "254b147e429de1d91b04a60629b596548ddb1f80eaab4b396d1b92aab4a20a9c",
+   "size": 34987
+  },
+  "5000-content-audit/batches/batch_19.json": {
+   "sha256": "3cfe43dc3098b9a08054ee2fb155ef5861f655bfac5f41c6d14c13d3407c25fc",
+   "size": 33286
+  },
+  "5000-content-audit/batches/batch_20.json": {
+   "sha256": "98242a52136297e4fbb49163f9514403a16697d72cd0a71265f9c8f605d4d497",
+   "size": 36520
+  },
+  "5000-content-audit/batches/batch_21.json": {
+   "sha256": "cd19ccf1b72e3e733cb38f29d9f23e4626d6e2a17dc34a5f94060dd672760fcc",
+   "size": 38825
+  },
+  "5000-content-audit/batches/batch_22.json": {
+   "sha256": "35b534a49fba4eea9041d982672f0d048ae2042aecf2555476f37fb07825a9e9",
+   "size": 35723
+  },
+  "5000-content-audit/batches/batch_23.json": {
+   "sha256": "82dc09af11d7159945d15a3519a74f2994091453cb496c8a9fefd333826f19ac",
+   "size": 35407
+  },
+  "5000-content-audit/batches/batch_24.json": {
+   "sha256": "3750d9a7fe65db2ddf174de3232167fe6034440f07e1189f4eadd0736aba46be",
+   "size": 33184
+  },
+  "5000-content-audit/batches/batch_25.json": {
+   "sha256": "36d734eaa32514979f6b24ae7b3cce3ade4852e132409d82dd6a806bba8df653",
+   "size": 35543
+  },
+  "5000-content-audit/batches/batch_26.json": {
+   "sha256": "f9cf9994420602cc2808f4accbee1d4e0f85c5c530d62f76ac808649d8c74dfa",
+   "size": 37071
+  },
+  "5000-content-audit/batches/batch_27.json": {
+   "sha256": "321f0a31c5691ae2d9991afa71c313cd87c5cf98bf17d0d856a0355fa92e58a2",
+   "size": 35449
+  },
+  "5000-content-audit/batches/batch_28.json": {
+   "sha256": "f87072168a1e4bf40c3a6ef92b42cb5a7e55fea7293a342ef3c7284d57181162",
+   "size": 34336
+  },
+  "5000-content-audit/batches/batch_29.json": {
+   "sha256": "e714350125aef568132332d83afc55afd350b37ec584b9c4599b6f6535203da3",
+   "size": 32948
+  },
+  "5000-content-audit/batches/batch_30.json": {
+   "sha256": "b22011c4cc10984c998977915e007afc90c1049dfea1f74b4567e49a6b2326cd",
+   "size": 37236
+  },
+  "5000-content-audit/batches/batch_31.json": {
+   "sha256": "8c1e44a6f7f52f919c5fbcce112533c4c31b0c7a8bdc6d067f21275c762df000",
+   "size": 25610
+  },
+  "5000-content-audit/blog_groups.json": {
+   "sha256": "84958e2910bc00e9bd005846722668267f703b831d8aa75f6d6ee38b69b37f49",
+   "size": 1462
+  },
+  "5000-content-audit/blog_inventory.json": {
+   "sha256": "9b82f520f1a2dab229fb48ee96a36f9493505462c7bfdb2b8652fb080f1445b3",
+   "size": 18309
+  },
+  "5000-content-audit/blog_registry_raw.json": {
+   "sha256": "6c49fbee4cf82498cd0303f79a6c3c213e6468948a5c021ba01c18f571df829a",
+   "size": 22901
+  },
+  "5000-content-audit/blog_scorecards.json": {
+   "sha256": "60649fd8a9b307b731fc7d8b54f568f8ae70731d2de4082a099c45834da5e29e",
+   "size": 18644
+  },
+  "5000-content-audit/blog_scorecards.md": {
+   "sha256": "a64ee9383634c6944b93f1c54b1df11c723a41cc9440c5c1502e8000ba523d18",
+   "size": 5290
+  },
+  "5000-content-audit/frozen_interior_slugs.json": {
+   "sha256": "1f80990e95641f4df74a62b0ecc52b0d9e4e803f0c0aa8b466e916c7374ab2f8",
+   "size": 1601
+  },
+  "5000-content-audit/frozen_match.json": {
+   "sha256": "21aaa4fc15c56672551d3f6a16bd81004e11680feb973b3ab05ab49a1981528d",
+   "size": 1437
+  },
+  "5000-content-audit/internal_link_findings.jsonl": {
+   "sha256": "5ef7d3c71cabc3f782134804612d7412439af01ac7ba5969cafaa5864288804f",
+   "size": 3504891
+  },
+  "5000-content-audit/issue_clusters.json": {
+   "sha256": "427db838fc2a91036148a368c238c5229ffb3b3257d9cc8839c401c716c744c0",
+   "size": 1235
+  },
+  "5000-content-audit/mech_group0.jsonl": {
+   "sha256": "b747c2108d6e200b1b673c7cf2599299d18f4ea2f5207af1199aeef16455b918",
+   "size": 4244124
+  },
+  "5000-content-audit/mech_group0/mech_airlines-hugo.jsonl": {
+   "sha256": "7a56a40fb3dc4c2adec82422399101aa23f4a11b94b15e3589754138d1ce2a66",
+   "size": 90756
+  },
+  "5000-content-audit/mech_group0/mech_appliance-hugo.jsonl": {
+   "sha256": "5ae87cf49bd7cc4253872641a3a3f965e690c3e7d59ce36c1a15e0ad13b698b4",
+   "size": 579039
+  },
+  "5000-content-audit/mech_group0/mech_beauty-hugo.jsonl": {
+   "sha256": "0f97e623f8199c3d2e365d7efa4be7ab6dce2babff84d265a48524669fee3ef7",
+   "size": 354125
+  },
+  "5000-content-audit/mech_group0/mech_compare-hugo.jsonl": {
+   "sha256": "6a7b97e3cafaea8f1664677334c666e85ebbe5d67ceb54fa69395cdb09e3bf48",
+   "size": 765962
+  },
+  "5000-content-audit/mech_group0/mech_dividend-hugo.jsonl": {
+   "sha256": "bc980d95af4d834e1cb01f712e3a761594a01e5d04f3c0113a17464055864106",
+   "size": 588942
+  },
+  "5000-content-audit/mech_group0/mech_esim-hugo.jsonl": {
+   "sha256": "c7f1211bb5e1e1ce1952b9dbecbe187f3210d8437e864fb1142293bf5b9a86c4",
+   "size": 197176
+  },
+  "5000-content-audit/mech_group0/mech_ghost-hugo.jsonl": {
+   "sha256": "eaf52e14c5e09baed3a70eb78dac515da0bffa15682ee2c33ca02e52a59be5f6",
+   "size": 75003
+  },
+  "5000-content-audit/mech_group0/mech_phototour-hugo.jsonl": {
+   "sha256": "e1f1c5e50a8da06b71508ab0834c424c56d7ae44912f23e39f9641d57999d612",
+   "size": 87791
+  },
+  "5000-content-audit/mech_group0/mech_rap-hugo.jsonl": {
+   "sha256": "41b82897b998ee1a3f3daf5fd88873ed2432ea2bd05d903973f880b880978d3a",
+   "size": 653930
+  },
+  "5000-content-audit/mech_group0/mech_travel4-hugo.jsonl": {
+   "sha256": "407f5e7f50a11970486350b3faf964ba1f38fceb5008b010ed68426cec879362",
+   "size": 722658
+  },
+  "5000-content-audit/mech_group0/mech_watersports-hugo.jsonl": {
+   "sha256": "27b06cc92dce7c4e173441be87aebd9ac25e940e1749c1ca4be83c898e66f91f",
+   "size": 128742
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_airports-hugo.jsonl": {
+   "sha256": "98fccfdf85b448104f4a851b2448509c260a1638a538c60e46cffd15ec935d27",
+   "size": 135702
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_baby-hugo.jsonl": {
+   "sha256": "c4caa1774e64d71fc10a3a47af7dccf17ac69233664738c14ad2aa45549f9457",
+   "size": 530490
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_camping-hugo.jsonl": {
+   "sha256": "1d6bd88f786362d0374c89558452c46ff5e060fca1458473f9c07afd2ef5425b",
+   "size": 300667
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_deal-hugo.jsonl": {
+   "sha256": "3961bb058cca0fbe7cfad22963c2adb4fefd3d05ea4b7598ab19f87cd0e47b22",
+   "size": 344252
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_etf-hugo.jsonl": {
+   "sha256": "cffbcef7f06d79da47704f63d07196b0c01796384891eb97ee9c23f022c97bb3",
+   "size": 326993
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_eurail-hugo.jsonl": {
+   "sha256": "107c5c2e649294b388dc2d243133aac29e4f6e6ae1dee793fd97301bf7b6e613",
+   "size": 130836
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_layover-hugo.jsonl": {
+   "sha256": "fc46f9d9f226b12f3658c1e53c91047d52f1c13bb36da118b658139c51178e10",
+   "size": 78365
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_luxury-hugo.jsonl": {
+   "sha256": "24789ec6cf913aa2a00be8564a4bb9f071a7e1e6c33cfa28deda8f23f3e59dc6",
+   "size": 89830
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_rap2-hugo.jsonl": {
+   "sha256": "59def6c0fbb1cad544b4f7024e47bc25ca5695ce5cd8877b0ed34caedfca1d77",
+   "size": 620906
+  },
+  "5000-content-audit/mech_group1.jsonl/mech_tour-hugo.jsonl": {
+   "sha256": "f442b01aed25f2f07078e733abe5e7b368cc9232b0deac05b12a15b7554d0aa7",
+   "size": 193136
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_bus-hugo.jsonl": {
+   "sha256": "5ad033b799ff428e2c21094565f0783cbdfc095189641c58a9764a964fdc9cea",
+   "size": 127299
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_citytours-hugo.jsonl": {
+   "sha256": "afdc46ceae45b243eff796b6b215ee9e0370ae06bb08e750209db49ce59b606e",
+   "size": 91070
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_ev-hugo.jsonl": {
+   "sha256": "7cf5ca6564936bc07995e80d0d0b95da62d896c9f5d2b6ebd429fbd41453b3b1",
+   "size": 245350
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_ferry-hugo.jsonl": {
+   "sha256": "3ef96987bb8a5c7ed4694ee3ee6e93cfa95d8cd4d91f6c124ff49f71cb2b7fff",
+   "size": 127322
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_fitness-hugo.jsonl": {
+   "sha256": "0c8ca4ae12342a925a07f55c4cdab5773be1e3b1f9077a006a1719a609b031c5",
+   "size": 555421
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_massage-hugo.jsonl": {
+   "sha256": "d0107a4555dd2a66e72e63ec97ca62b02908be91885b771278577f29fc7064d8",
+   "size": 10659
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_nomad-hugo.jsonl": {
+   "sha256": "39f3da651aac576e9faaac27bad6d96c1e134bee7dc761707b817ee512ff3132",
+   "size": 31462
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_rap3-hugo.jsonl": {
+   "sha256": "2edb465d4575832a86c81bbc8d789ec5310ff5344b483f83958dc9c54d712658",
+   "size": 696354
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_sector-hugo.jsonl": {
+   "sha256": "4502c9d7272d4b1a19146a511108f1b45b3d005b8466b3c07d32d960d1c74285",
+   "size": 400947
+  },
+  "5000-content-audit/mech_group2.jsonl/mech_tours-hugo.jsonl": {
+   "sha256": "4fc5251bf115b85a0959fe2f81edbd7e52dd2edbe9044b7eeaa94490f3249ea2",
+   "size": 154011
+  },
+  "5000-content-audit/mech_group2/mech_bus-hugo.jsonl": {
+   "sha256": "5ad033b799ff428e2c21094565f0783cbdfc095189641c58a9764a964fdc9cea",
+   "size": 127299
+  },
+  "5000-content-audit/mech_group2/mech_citytours-hugo.jsonl": {
+   "sha256": "afdc46ceae45b243eff796b6b215ee9e0370ae06bb08e750209db49ce59b606e",
+   "size": 91070
+  },
+  "5000-content-audit/mech_group2/mech_ev-hugo.jsonl": {
+   "sha256": "7cf5ca6564936bc07995e80d0d0b95da62d896c9f5d2b6ebd429fbd41453b3b1",
+   "size": 245350
+  },
+  "5000-content-audit/mech_group2/mech_ferry-hugo.jsonl": {
+   "sha256": "3ef96987bb8a5c7ed4694ee3ee6e93cfa95d8cd4d91f6c124ff49f71cb2b7fff",
+   "size": 127322
+  },
+  "5000-content-audit/mech_group2/mech_fitness-hugo.jsonl": {
+   "sha256": "0c8ca4ae12342a925a07f55c4cdab5773be1e3b1f9077a006a1719a609b031c5",
+   "size": 555421
+  },
+  "5000-content-audit/mech_group2/mech_massage-hugo.jsonl": {
+   "sha256": "d0107a4555dd2a66e72e63ec97ca62b02908be91885b771278577f29fc7064d8",
+   "size": 10659
+  },
+  "5000-content-audit/mech_group2/mech_nomad-hugo.jsonl": {
+   "sha256": "39f3da651aac576e9faaac27bad6d96c1e134bee7dc761707b817ee512ff3132",
+   "size": 31462
+  },
+  "5000-content-audit/mech_group2/mech_rap3-hugo.jsonl": {
+   "sha256": "2edb465d4575832a86c81bbc8d789ec5310ff5344b483f83958dc9c54d712658",
+   "size": 696354
+  },
+  "5000-content-audit/mech_group2/mech_sector-hugo.jsonl": {
+   "sha256": "4502c9d7272d4b1a19146a511108f1b45b3d005b8466b3c07d32d960d1c74285",
+   "size": 400947
+  },
+  "5000-content-audit/mech_group2/mech_tours-hugo.jsonl": {
+   "sha256": "4fc5251bf115b85a0959fe2f81edbd7e52dd2edbe9044b7eeaa94490f3249ea2",
+   "size": 154011
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_car-hugo.jsonl": {
+   "sha256": "83c96196fb50cfdbc8188fb74896ca0b8bacfb774074beab3bb8d5bee7605bdc",
+   "size": 10404
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_cruise-hugo.jsonl": {
+   "sha256": "a34d1ec4543db7be3f47532b8909ec35a343d445d474ef0dda15ad49172b95e0",
+   "size": 81685
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_flights-hugo.jsonl": {
+   "sha256": "d648ac2c100ea6b5ab52a309b9f4a11f228b33d63398d599911b72502f5a0399",
+   "size": 220161
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_guide-hugo.jsonl": {
+   "sha256": "93616f9409f5c77f818c7de4ced10aa5d669129a98eb03b18b31c8fe2dccdb00",
+   "size": 343955
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_interior-hugo.jsonl": {
+   "sha256": "703b560cfd397a062876295ee4612866dcfbc5a3fc2548f72d97d92f98e4447a",
+   "size": 694448
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_ipo-hugo.jsonl": {
+   "sha256": "44e6152518622ce5383ab81f3656a939ccd3a5193ff053192722813a20b922c0",
+   "size": 186929
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_rap4-hugo.jsonl": {
+   "sha256": "bb0ae7a4f3ae243c984238ba195c59a49fe23600cd8c9d5a7901f9e309fa25f7",
+   "size": 627432
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_rotcha-blog.jsonl": {
+   "sha256": "23b3897630e9ad0c37b78d9536c86b5e571a12c7f814a3520356f6347608acab",
+   "size": 1773382
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_trains-hugo.jsonl": {
+   "sha256": "31a23ddd289206390e0ff8e53e0202e76f3de58c550935a18be318d9b139d192",
+   "size": 106873
+  },
+  "5000-content-audit/mech_group3.jsonl/mech_watertours-hugo.jsonl": {
+   "sha256": "ed38971c0e4a916075c955d87ca9a18871a8428a343348ac214eec04b249ecad",
+   "size": 84670
+  },
+  "5000-content-audit/mech_group3/mech_car-hugo.jsonl": {
+   "sha256": "83c96196fb50cfdbc8188fb74896ca0b8bacfb774074beab3bb8d5bee7605bdc",
+   "size": 10404
+  },
+  "5000-content-audit/mech_group3/mech_cruise-hugo.jsonl": {
+   "sha256": "a34d1ec4543db7be3f47532b8909ec35a343d445d474ef0dda15ad49172b95e0",
+   "size": 81685
+  },
+  "5000-content-audit/mech_group3/mech_flights-hugo.jsonl": {
+   "sha256": "d648ac2c100ea6b5ab52a309b9f4a11f228b33d63398d599911b72502f5a0399",
+   "size": 220161
+  },
+  "5000-content-audit/mech_group3/mech_guide-hugo.jsonl": {
+   "sha256": "93616f9409f5c77f818c7de4ced10aa5d669129a98eb03b18b31c8fe2dccdb00",
+   "size": 343955
+  },
+  "5000-content-audit/mech_group3/mech_interior-hugo.jsonl": {
+   "sha256": "703b560cfd397a062876295ee4612866dcfbc5a3fc2548f72d97d92f98e4447a",
+   "size": 694448
+  },
+  "5000-content-audit/mech_group3/mech_ipo-hugo.jsonl": {
+   "sha256": "44e6152518622ce5383ab81f3656a939ccd3a5193ff053192722813a20b922c0",
+   "size": 186929
+  },
+  "5000-content-audit/mech_group3/mech_rap4-hugo.jsonl": {
+   "sha256": "bb0ae7a4f3ae243c984238ba195c59a49fe23600cd8c9d5a7901f9e309fa25f7",
+   "size": 627432
+  },
+  "5000-content-audit/mech_group3/mech_rotcha-blog.jsonl": {
+   "sha256": "23b3897630e9ad0c37b78d9536c86b5e571a12c7f814a3520356f6347608acab",
+   "size": 1773382
+  },
+  "5000-content-audit/mech_group3/mech_trains-hugo.jsonl": {
+   "sha256": "31a23ddd289206390e0ff8e53e0202e76f3de58c550935a18be318d9b139d192",
+   "size": 106873
+  },
+  "5000-content-audit/mech_group3/mech_watertours-hugo.jsonl": {
+   "sha256": "ed38971c0e4a916075c955d87ca9a18871a8428a343348ac214eec04b249ecad",
+   "size": 84670
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_culture-hugo.jsonl": {
+   "sha256": "b4e70b73071744e8cd73a3c0ad384249374ac46d459b221607c6b14b1d92b3da",
+   "size": 125649
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_foodtour-hugo.jsonl": {
+   "sha256": "3afee3607389e753be9a6d537ef3551fbbc63a36600a608696c6b4b3e56886df",
+   "size": 113726
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_hiking-hugo.jsonl": {
+   "sha256": "abad60c6e6bdd1ad0645352a88f5bef4663a51fd06c857fdf4e787c59781cdd1",
+   "size": 66687
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_homeappliance-hugo.jsonl": {
+   "sha256": "ced2f3d9ecfef6ecd655e7e05792f0ce8eb3d7cd8694203b18a9e2eb9c5dcd7f",
+   "size": 9185
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_hotissue-hugo.jsonl": {
+   "sha256": "687228e5c8e0523328d0496bae58ed54fdde95bed49b9096486e8ec34d9138e3",
+   "size": 1234269
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_informationhot-hugo.jsonl": {
+   "sha256": "6a20343072c1d99fa90e6967e490fd3acc1b11c09b7ef12f8d882818fb44bd99",
+   "size": 695527
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_laptop-hugo.jsonl": {
+   "sha256": "28e993a53e067f93bd35498e3f5598e513c6b7b16e24f5697449f82254c4c5ee",
+   "size": 304834
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_rap5-hugo.jsonl": {
+   "sha256": "23294f75d76bd4a2ea1e4f75d9493f55ccee334ba2124af91d74de140f811758",
+   "size": 732475
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_transfers-hugo.jsonl": {
+   "sha256": "32e46f47a3a765c9c3a2e6565dfa014366fb1aa9e11c808bce3eaac6b671e77f",
+   "size": 125072
+  },
+  "5000-content-audit/mech_group4.jsonl/mech_travel-hugo.jsonl": {
+   "sha256": "106fbe1971c3f9fe3b1c9c603b9e389b1a05ed5ef8bd965a37a7f41a7dfabc57",
+   "size": 801216
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_daytrips-hugo.jsonl": {
+   "sha256": "b7d4a31f8bd522c5b50504367031b3cbb9958706a7e24a2ea25140a88e8b96a3",
+   "size": 137083
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_escape-hugo.jsonl": {
+   "sha256": "c4b7decfd405fc515c1d1ecacc0bbf9342e785cfa34fd54fd95aba06e7c6accd",
+   "size": 80738
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_golf-hugo.jsonl": {
+   "sha256": "943ad9a18283763206ceb76c36fb6b8f685a97cd67e40aca2681313007462ed3",
+   "size": 7757
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_health-hugo.jsonl": {
+   "sha256": "5942572415d72342b8274b8e09a1633082795af1fd051ea6a1c3755f9ae85d6a",
+   "size": 327421
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_michelin-hugo.jsonl": {
+   "sha256": "3006d9fc9d2f7cb25773900d0b083e20f942dd261e41b5b8ed4fe2267f037557",
+   "size": 210949
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_senior-hugo.jsonl": {
+   "sha256": "cc013c8596da2122004b85fac15b59fce1fbf8d00ebbca48000037dbdd4136b5",
+   "size": 690733
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_tco-hugo.jsonl": {
+   "sha256": "6466504c2247842e3076ea832a2bd934b61cf0b70130fbaa467a3951f3e1cc4a",
+   "size": 341677
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_techpawz-hugo.jsonl": {
+   "sha256": "049c165c9c4288304e1ce469987ce815b8c3d2f3d1276d705b36be8f17bc998c",
+   "size": 1780857
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_travel1-hugo.jsonl": {
+   "sha256": "bc3d77d652a10dfb730176f8cae4824491938bcc15a7c00a7e51f60c56000b17",
+   "size": 577746
+  },
+  "5000-content-audit/mech_group5.jsonl/mech_visa-hugo.jsonl": {
+   "sha256": "5f88b5e2ab32ee60bbe127adae6e4301087d0e275effcb5024b36f56850a2766",
+   "size": 189536
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_bike-hugo.jsonl": {
+   "sha256": "6b48914997345ba162bddd91c7379a9cdc6ad2716edb6b6daba180577eaf23bc",
+   "size": 6053
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_biz-techpawz-hugo.jsonl": {
+   "sha256": "d0e35a90904fb0dfa8e69442ad939ac0f5c19bfbb4fd858379433b2868478467",
+   "size": 750004
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_deals-hugo.jsonl": {
+   "sha256": "7a3a4522edf70bca8a694a29c3982b9c77329e531249bce984f2c3489d80c1cc",
+   "size": 86445
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_extreme-hugo.jsonl": {
+   "sha256": "b98ce83b8293c86aa6e67eafdec54f2400d5f803a56b9a5975c85308d0d46e96",
+   "size": 85799
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_finance-hugo.jsonl": {
+   "sha256": "07e786ce1af85f1bdf9ec8fb5a53cf2a81c72adc7d350fff14b23f3b49a4402a",
+   "size": 624374
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_multiday-hugo.jsonl": {
+   "sha256": "f70c92707b5770576b25bc18321fc01886a7a2c8c9d4108f8dade2b050dc5a0f",
+   "size": 128378
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_pet-hugo.jsonl": {
+   "sha256": "b253aee5ad22605a4c3fe7d380add7c1b1b7b4b72bd1ac3eef609f50fa23d5e4",
+   "size": 234971
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_rank-hugo.jsonl": {
+   "sha256": "853efca43041e387157375562ed4a85babb4d5e1493d7440c2bfacfaf7629bf4",
+   "size": 179411
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_travel2-hugo.jsonl": {
+   "sha256": "47763e3fbd0e67f9156127657d978d239c7ba0f097ba0fb60878eae9ee958017",
+   "size": 742444
+  },
+  "5000-content-audit/mech_group6.jsonl/mech_visafree-hugo.jsonl": {
+   "sha256": "b8fd817e3d58f09a7f7e1afe106e8289c88bed6f7504e3ef8333b70a14749ecf",
+   "size": 127241
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_adventure-hugo.jsonl": {
+   "sha256": "90f23a4c0b6ca8eee53c6b8c0180a216a8da77612101b3f1ed8eb2ccb89a67ee",
+   "size": 124216
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_dining-hugo.jsonl": {
+   "sha256": "f146d016b4acd2374ce20b63476ad6d5c54c6fa8909fc3e41c8904b379b84aa6",
+   "size": 96204
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_issue-techpawz-hugo.jsonl": {
+   "sha256": "546d199f1f410d5f3d6e774a51914fe816903680dc7ff62d657781281f50e625",
+   "size": 422002
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_kitchen-hugo.jsonl": {
+   "sha256": "5fca1e9b73cc2c58fcdc026668e4776c6ea0e04d57fe96977b2e27676431ed59",
+   "size": 338396
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_nature-hugo.jsonl": {
+   "sha256": "edf98f542470adcb5b7133b7ad9f850e686f356c3e0d189d38f04a3fa9557cfc",
+   "size": 85151
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_nightlife-hugo.jsonl": {
+   "sha256": "2f28a7610813e351965a9e0a969fa805ce72cad168c0a88290000bea19ae655a",
+   "size": 85133
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_pick-hugo.jsonl": {
+   "sha256": "11e6bf94c990a03893fb99b215575afe2740891d163b30e50b449b2f2702336b",
+   "size": 164823
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_stock-hugo.jsonl": {
+   "sha256": "3c1628976ed564c2c9bef291964ee3db9ea9cd797c72eee1cc044cd66b5646ac",
+   "size": 949919
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_travel3-hugo.jsonl": {
+   "sha256": "8e775875ae8033ac6c44c614d731ecb74838e639ae543aaa3dc2467dbb47c324",
+   "size": 819674
+  },
+  "5000-content-audit/mech_group7.jsonl/mech_walking-hugo.jsonl": {
+   "sha256": "41211a8be8d59d80a5fa944d4dfe1adec62e6002cb46df5465cfe3cc2752b31f",
+   "size": 116516
+  },
+  "5000-content-audit/mechanical_all.jsonl": {
+   "sha256": "6cd85551484ed243f237e1ffce19f4a837854bee930781eeb646294a3e979e6a",
+   "size": 27836218
+  },
+  "5000-content-audit/mechanical_check.py": {
+   "sha256": "5059ed251e7b10bbad14cb339df32ec41c992cbbb47ce74701421c5364e224b2",
+   "size": 7217
+  },
+  "5000-content-audit/mechanical_check.py.bak": {
+   "sha256": "c65377e629419ed5fe0f6f7cd4cb9797af7a782f28f54e2f64d043a4e5616360",
+   "size": 6892
+  },
+  "5000-content-audit/post_audit_results.jsonl": {
+   "sha256": "a532beca02d7069a2cd40c0038c8d2874271d2d84776121460b6280a9e9f67ba",
+   "size": 795014
+  },
+  "5000-content-audit/post_inventory.jsonl": {
+   "sha256": "4179c4e62eab375f1d8f6fb40763780390185e5f580f453ed57fa0a32c8359a2",
+   "size": 8683732
+  },
+  "5000-content-audit/priority_queue.csv": {
+   "sha256": "ad245d9cf1829ab68427a5cc9e1a4b7a08fdfd8bb215c18ccdafddd051483ff5",
+   "size": 7042
+  },
+  "5000-content-audit/raw_blog_registry.json": {
+   "sha256": "eaa3485165d1aa476e9feb9aadc34a6441745730d8e5c0313ec54184bad57024",
+   "size": 26056
+  },
+  "5000-content-audit/sample_manifest.json": {
+   "sha256": "93adbe8280b2687986b3e5ff4091773fb9752937094f8b406e243adea8a5258c",
+   "size": 77
+  },
+  "5000-content-audit/scan_sitemaps.py": {
+   "sha256": "f45aa34ad97ae16418fb9441f144c75b841454fa91ae55099fdaaf00806e78eb",
+   "size": 2149
+  },
+  "5000-content-audit/sem_results/batch_00_results.jsonl": {
+   "sha256": "d00caf800231986a4ffce8f8321f724292109651d4dc5ccce7bfef34fec17aec",
+   "size": 24288
+  },
+  "5000-content-audit/sem_results/batch_01_results.jsonl": {
+   "sha256": "18697642c3f27d3447b1ab7ec475f8b81201e310042163e747f58b587f7f545e",
+   "size": 25153
+  },
+  "5000-content-audit/sem_results/batch_02_results.jsonl": {
+   "sha256": "0f588cd8384edf1a8867d29aa3071bd58145e64cb2c65ceb11b7015b8ff0899c",
+   "size": 25046
+  },
+  "5000-content-audit/sem_results/batch_03_results.jsonl": {
+   "sha256": "45965ece304a13d8f01d0e2f354ae29af13359c62df91c57ecbe83a7df0f45c8",
+   "size": 26861
+  },
+  "5000-content-audit/sem_results/batch_04_results.jsonl": {
+   "sha256": "40784c34a4d8942f1609348da83450c47594990510feb69992d69a08d56e4a49",
+   "size": 24698
+  },
+  "5000-content-audit/sem_results/batch_05_results.jsonl": {
+   "sha256": "4fe093460d5b6b153ef2bb069315101c7951f0e253d13cb29abf6388f779d62d",
+   "size": 24884
+  },
+  "5000-content-audit/sem_results/batch_06_results.jsonl": {
+   "sha256": "03193acb3b0e605b5ccbbf09d87b4e3293baca93ff2a0e5ad65e81088d47a6ed",
+   "size": 25123
+  },
+  "5000-content-audit/sem_results/batch_07_results.jsonl": {
+   "sha256": "04b70fd8df89b5cffa16b55b552a33fe50f1a8f27be2bbd2324e1ab12d956d64",
+   "size": 25403
+  },
+  "5000-content-audit/sem_results/batch_08_results.jsonl": {
+   "sha256": "a3fb94f51c8d7e2b111d9a4972180f027f3d9e8a789612f20d935009590d4058",
+   "size": 49562
+  },
+  "5000-content-audit/sem_results/batch_09_results.jsonl": {
+   "sha256": "d6479e7ebf5cad433efd3491ae87173d1ffa4784f735934682553b0ef718e1e8",
+   "size": 50373
+  },
+  "5000-content-audit/sem_results/batch_10_results.jsonl": {
+   "sha256": "19d1628b9cde011d0544b0a9b043fab547edbc3d76f65426a1727bde4bdab2f5",
+   "size": 48895
+  },
+  "5000-content-audit/sem_results/batch_11_results.jsonl": {
+   "sha256": "9352c64bda3d32ee2c8f2caf2e6cba9f98e90fc3bc2d5d681c0e060997abf533",
+   "size": 51058
+  },
+  "5000-content-audit/sem_results/batch_12_results.jsonl": {
+   "sha256": "e0ecede09b9d6ac2d50bb51b473587f700e4e0f106a791e28a04384d0808cb76",
+   "size": 50298
+  },
+  "5000-content-audit/sem_results/batch_13_results.jsonl": {
+   "sha256": "49854086003a28a31788abc14b61ccc680d9b4a1aa4dde474db45de3d95ce274",
+   "size": 50164
+  },
+  "5000-content-audit/sem_results/batch_14_results.jsonl": {
+   "sha256": "b59cec40aa4c579a7f2a53502265eb525b7b13802d9d84be3101d4d4faefb89d",
+   "size": 49940
+  },
+  "5000-content-audit/sem_results/batch_15_results.jsonl": {
+   "sha256": "1180d349fc1e0101a16e7ce699ed7a5936051a74f373cd746277fddacb011c0a",
+   "size": 50512
+  },
+  "5000-content-audit/sem_results/batch_16_results.jsonl": {
+   "sha256": "12871cb30ec343bc07bab9b80067de3757a3513115cb9269d6dfaf3f36c56d97",
+   "size": 75337
+  },
+  "5000-content-audit/sem_results/batch_17_results.jsonl": {
+   "sha256": "8d8b1fea4977a1b515c1482de03254e9dbfa2887af631b1ff875a812e5a251f8",
+   "size": 74973
+  },
+  "5000-content-audit/sem_results/batch_18_results.jsonl": {
+   "sha256": "037af9c44b4d7f89c0628f8828e7ec3a394639a71da810c834ef8971475551d9",
+   "size": 74198
+  },
+  "5000-content-audit/sem_results/batch_19_results.jsonl": {
+   "sha256": "eaa6697a74329bdb24e12c569f609c651cacfa00cf8973c031816a3afe0fcb94",
+   "size": 75592
+  },
+  "5000-content-audit/sem_results/batch_20_results.jsonl": {
+   "sha256": "eb2112e9060e9185701a1b2e5c32fd5a20618f932a5673dc845002a2b347677a",
+   "size": 75934
+  },
+  "5000-content-audit/sem_results/batch_21_results.jsonl": {
+   "sha256": "da227fca7cdf9be042ebdb1ccb0e59f85f47782988664265274807019897344c",
+   "size": 76204
+  },
+  "5000-content-audit/sem_results/batch_22_results.jsonl": {
+   "sha256": "3fc94c9c08cae9ea04f92ab4a74569fad123da49b7c7b155068a372a8ebbe625",
+   "size": 75091
+  },
+  "5000-content-audit/sem_results/batch_23_results.jsonl": {
+   "sha256": "b37ea3c9cdefa24ae5361860bf220c61006452c75c2523d15d5a64270740c5e4",
+   "size": 75608
+  },
+  "5000-content-audit/sem_results/batch_24_results.jsonl": {
+   "sha256": "fa5e3c590ac5365412501bb24b9e72e2fbd9f10a935cc177a002c3e23e367d52",
+   "size": 99832
+  },
+  "5000-content-audit/sem_results/batch_25_results.jsonl": {
+   "sha256": "933be6f915641a65a97be4d5a6490211bacbc31779fcb8944a9fa79db9997b5b",
+   "size": 99942
+  },
+  "5000-content-audit/sem_results/batch_26_results.jsonl": {
+   "sha256": "3c82bb55618090e536cfb2a5fad7843c84674898e5c506f9310c471113450539",
+   "size": 99908
+  },
+  "5000-content-audit/sem_results/batch_27_results.jsonl": {
+   "sha256": "ed7b31318c786573acde3b992a2309ae3f392f50fee70447c0b975e888b97ab3",
+   "size": 100000
+  },
+  "5000-content-audit/sem_results/batch_28_results.jsonl": {
+   "sha256": "e14cfdbcae43edd25b26eae57f1cb9079f171b9b73f985b8bdc38afcd9813a32",
+   "size": 100359
+  },
+  "5000-content-audit/sem_results/batch_29_results.jsonl": {
+   "sha256": "460efb9c037bfc6e41bd6753f47ef8a30281859fe2b9149a55f083b8f75ff8d4",
+   "size": 100230
+  },
+  "5000-content-audit/sem_results/batch_30_results.jsonl": {
+   "sha256": "193fc2f488d311c7c2418dd11b832fdafea892d1e439e6caf9efe34f7ddaca03",
+   "size": 100732
+  },
+  "5000-content-audit/sem_results/batch_31_results.jsonl": {
+   "sha256": "673721a6d383bd4435105520ae4b249f6b3a22ddb4f2e6a7643a02bbd74c3d47",
+   "size": 94011
+  },
+  "5000-content-audit/sem_results/group0.log": {
+   "sha256": "2cadf44606f452ff4b6d41fa8af5246fb8da75b3a51eb7f8c4dbef69638c06ef",
+   "size": 455
+  },
+  "5000-content-audit/sem_results/group1.log": {
+   "sha256": "bdb0c1bfbd0d2adae0fc6ae9312bc5886bd78d1641db1583b29ead2f87bda5a1",
+   "size": 563
+  },
+  "5000-content-audit/sem_results/group2.log": {
+   "sha256": "4136b9929c12d85e42e3563969988032928a5b864f22bfb7774c106adeb4ee98",
+   "size": 533
+  },
+  "5000-content-audit/sem_results/group3.log": {
+   "sha256": "db115cb7dce97a67eafa7b55f26b740c7d4a7a5e805e4ca8777ddf480c879323",
+   "size": 618
+  },
+  "5000-content-audit/sem_results/group4.log": {
+   "sha256": "4f13345fdd4f843a1321908c3cf78b6275317d7719fe37d3c3a117868ab82e97",
+   "size": 540
+  },
+  "5000-content-audit/sem_results/group5.log": {
+   "sha256": "91d43f996d0e0d484c779821ec4a043e9613e3cfa0c0d9b76a29b9a246135dc2",
+   "size": 553
+  },
+  "5000-content-audit/sem_results/group6.log": {
+   "sha256": "3bb3e722ebc85c4b5314006a03f7c50aa7a8d0d36714394e8f22d068e5eb891f",
+   "size": 550
+  },
+  "5000-content-audit/sem_results/group7.log": {
+   "sha256": "05448f0be6d27669fac36316b66ba981e80cf02e6be0e3e6a250a203c4d8ecb8",
+   "size": 498
+  },
+  "5000-content-audit/semantic_eval.py": {
+   "sha256": "e4db4fbfce24c672c5583b4a0fad5f4bf5da660ff51fdc063f306c05aada7a7f",
+   "size": 7635
+  },
+  "5000-content-audit/sitemap_scan.json": {
+   "sha256": "12501ce5757747ae1fe85c4adf402b42abfb6afe317204695f8ad979a349e55f",
+   "size": 15388
+  },
+  "5000-content-audit/sitemaps/adventure-hugo.xml": {
+   "sha256": "c82e55afe7ca8653e14cb1ed79658954e7474e126e1af0bc50e2e9133603c3ca",
+   "size": 19321
+  },
+  "5000-content-audit/sitemaps/airlines-hugo.xml": {
+   "sha256": "8e1258fcfa3964aaef972fce94314fc05150786fd64a6c443261c9a4a4f6fa17",
+   "size": 14001
+  },
+  "5000-content-audit/sitemaps/airports-hugo.xml": {
+   "sha256": "e2f005e50e1c9b6dee9fbf3a4b7bb091ed40023adf85e72914ded35b1097fd91",
+   "size": 21037
+  },
+  "5000-content-audit/sitemaps/appliance-hugo.xml": {
+   "sha256": "a5d92049534efc72d82e4631b63cf82e25bc2a46a96d42b5d58c653b184ed318",
+   "size": 161843
+  },
+  "5000-content-audit/sitemaps/baby-hugo.xml": {
+   "sha256": "fd3f480dfac2f3799d7c48e0966595e79049e3a9f369cb983f9473477cb9488a",
+   "size": 149513
+  },
+  "5000-content-audit/sitemaps/beauty-hugo.xml": {
+   "sha256": "25dcefc2a21c2bc25c4147f1ca41157b3acd9ab5c862a09fbd35578f37735414",
+   "size": 101840
+  },
+  "5000-content-audit/sitemaps/bike-hugo.xml": {
+   "sha256": "8c5157eea5ce7079515e5195783d14111efd54c1f53eb774b20f22c582f5f5c9",
+   "size": 2104
+  },
+  "5000-content-audit/sitemaps/biz-techpawz-hugo.xml": {
+   "sha256": "bb1f92c2985fd836085e80c4d1e15df2dc5ecfc8516cd25b5c6d2e766c6122d1",
+   "size": 318
+  },
+  "5000-content-audit/sitemaps/bus-hugo.xml": {
+   "sha256": "99428ca507b3b7d09b0cdcc87d20ea4612ef36f885c47e881fdc0395a15eaa3e",
+   "size": 19671
+  },
+  "5000-content-audit/sitemaps/camping-hugo.xml": {
+   "sha256": "c1e6c0bf5e5e89e8ccc3d4138312c4e4e8a42dd61b6dd4d946b29e2d394d21bc",
+   "size": 86003
+  },
+  "5000-content-audit/sitemaps/car-hugo.xml": {
+   "sha256": "4ac8ae087e45b21465fcd4e1ab875615fb6bab96ac4e73f9db5f5f0667215267",
+   "size": 3297
+  },
+  "5000-content-audit/sitemaps/citytours-hugo.xml": {
+   "sha256": "dee100a57a10a7f0f36f415f5ad833c3cc6bb1f3c6380903296282944dd4b758",
+   "size": 14459
+  },
+  "5000-content-audit/sitemaps/compare-hugo.xml": {
+   "sha256": "947548f7c1cf576fb5cf5be6782ec8d68e33a16d3108396b9167df0b766c26e0",
+   "size": 233072
+  },
+  "5000-content-audit/sitemaps/cruise-hugo.xml": {
+   "sha256": "920ed1850939d75e773c495b5364124f856490baf0c5e55a27e1cde584f4851d",
+   "size": 13040
+  },
+  "5000-content-audit/sitemaps/culture-hugo.xml": {
+   "sha256": "7e14b363f5784cd7461c82c80624267624a0c297d49dcd967f87e1edb8b409ef",
+   "size": 19522
+  },
+  "5000-content-audit/sitemaps/daytrips-hugo.xml": {
+   "sha256": "5a20c3d924b767597c15004d5b249af4742e383aeae1c70ce6155005858103dd",
+   "size": 21289
+  },
+  "5000-content-audit/sitemaps/deal-hugo.xml": {
+   "sha256": "48b3c10e600ab10c83baea44b733c53615569ae799bd76d1f12921bc4afea0e7",
+   "size": 100445
+  },
+  "5000-content-audit/sitemaps/deals-hugo.xml": {
+   "sha256": "0693a6240b67dcbaab8b5272f688c4d8e51221fd97356eceeabe3c90ef80c10f",
+   "size": 11598
+  },
+  "5000-content-audit/sitemaps/dining-hugo.xml": {
+   "sha256": "e13336c374c962fa33a14f01533dccc5b83f6b0f751327b54b9bebb2e56ba36e",
+   "size": 15281
+  },
+  "5000-content-audit/sitemaps/dividend-hugo.xml": {
+   "sha256": "a0476fb3a1a9f67c2b90cffe5ec12badbdd432c5dd963aa3f14227b0345b2a5f",
+   "size": 171367
+  },
+  "5000-content-audit/sitemaps/escape-hugo.xml": {
+   "sha256": "764cc79f72c73fd3690a6016604809fb72d1b2bd9dfe66c31ad1d694f1f4cf06",
+   "size": 8219
+  },
+  "5000-content-audit/sitemaps/esim-hugo.xml": {
+   "sha256": "1a7e2a8a50fddff8d768f37c00a2a58dea5c96b574fb54ff082ce4a3ca075bda",
+   "size": 28790
+  },
+  "5000-content-audit/sitemaps/etf-hugo.xml": {
+   "sha256": "63071fcce42323b79bd5245d53895926b20627d32492b3abb84b4d60f7e79a2a",
+   "size": 92840
+  },
+  "5000-content-audit/sitemaps/eurail-hugo.xml": {
+   "sha256": "5599c6bc7ac3ec4ae1b7ce984b7b464e5a85bf46a38fb9313d2aa184ee94df6f",
+   "size": 16665
+  },
+  "5000-content-audit/sitemaps/ev-hugo.xml": {
+   "sha256": "f3615f1b21b034fde0ca9883f86bae84ef88966273a2f20460c1e2bbf66d1f40",
+   "size": 76346
+  },
+  "5000-content-audit/sitemaps/extreme-hugo.xml": {
+   "sha256": "9bebc351eeb1e12d5dc1231fcdc6986a629608d7e00f408daeb75d696dd14c74",
+   "size": 13955
+  },
+  "5000-content-audit/sitemaps/ferry-hugo.xml": {
+   "sha256": "cd7eee3b86be27b4941f2ba37305d147a9fff7ca2067324b6080bc2f33f1cf73",
+   "size": 20007
+  },
+  "5000-content-audit/sitemaps/finance-hugo.xml": {
+   "sha256": "f69743f0714af831b40cce1a7d1e83fa72d92483d56eb8ab0435cff13bebadcd",
+   "size": 212334
+  },
+  "5000-content-audit/sitemaps/fitness-hugo.xml": {
+   "sha256": "23822ada60d91bfa466880e7ab33427fe86987d86866d9c4c4468fe7a8d16c36",
+   "size": 154275
+  },
+  "5000-content-audit/sitemaps/flights-hugo.xml": {
+   "sha256": "8c0c155af3229666f7a4a7e16973840b1f34bdf988c45435c0dd5ce74c90aaf5",
+   "size": 35350
+  },
+  "5000-content-audit/sitemaps/foodtour-hugo.xml": {
+   "sha256": "eb2482236d8fb397dd25ed3e9ef11bb87fb74b4d29f310ad264e3b63f219d50e",
+   "size": 17820
+  },
+  "5000-content-audit/sitemaps/ghost-hugo.xml": {
+   "sha256": "04d3ec642b2d853f37a4a9f65b3795076cef16097201b6c6af219e3324ac6175",
+   "size": 11944
+  },
+  "5000-content-audit/sitemaps/golf-hugo.xml": {
+   "sha256": "3ed2eb6a41633a91186fa251b801779c7e0adbe4bcf12beeb4d35de25ba18413",
+   "size": 2543
+  },
+  "5000-content-audit/sitemaps/guide-hugo.xml": {
+   "sha256": "1a152a99e19b72e0a3ac8d4af5b4a5fcb666e0e72c5987ed96da72fe1a2c0e57",
+   "size": 100256
+  },
+  "5000-content-audit/sitemaps/health-hugo.xml": {
+   "sha256": "ca0a20866c876e6da28b8f3ed9c28bb73c0726d50e03d08215d5fe70fa740a7b",
+   "size": 95342
+  },
+  "5000-content-audit/sitemaps/hiking-hugo.xml": {
+   "sha256": "ff156cf74fea0173d999625c3406b3dba26c6b7388d231edefcba0a810e17a6f",
+   "size": 10739
+  },
+  "5000-content-audit/sitemaps/homeappliance-hugo.xml": {
+   "sha256": "dbfdaf82aed457f24f6eddb3d4e5be0c9a374809819d64ba9c490bb13643f93f",
+   "size": 2991
+  },
+  "5000-content-audit/sitemaps/hotissue-hugo.xml": {
+   "sha256": "9d4e79f6c0d1b280e5306b585426707b3d939d4035dc7a6028ebb0ead3ad7aa3",
+   "size": 327672
+  },
+  "5000-content-audit/sitemaps/informationhot-hugo.xml": {
+   "sha256": "e5fb598eea8a1b9c2e22a37cc74c717fafb5c45020627ce6f12301fd576e6678",
+   "size": 457271
+  },
+  "5000-content-audit/sitemaps/interior-hugo.xml": {
+   "sha256": "f7d358193ab4e1950510aa11382e96518d8b5b255f64245171f7b13a400cd39c",
+   "size": 189230
+  },
+  "5000-content-audit/sitemaps/ipo-hugo.xml": {
+   "sha256": "3afeae41a4d5e177a98d742df6b7e8fff8cc631d6ca1b66c370a9dc6ebdd0316",
+   "size": 56207
+  },
+  "5000-content-audit/sitemaps/issue-techpawz-hugo.xml": {
+   "sha256": "7b280b7a1c82abdb82336245961617bc2de760c3602e50ac6d2d30c7920f8d24",
+   "size": 320
+  },
+  "5000-content-audit/sitemaps/kitchen-hugo.xml": {
+   "sha256": "3b6550e66eb8cfedd1ab2577c2d866938374a461da9ef6cc347778b2273cb9ef",
+   "size": 97554
+  },
+  "5000-content-audit/sitemaps/laptop-hugo.xml": {
+   "sha256": "bf8c635ab7170d70cb85d0dfc89b1eae5eb7296e02b269d1d0e86bb013cb66b9",
+   "size": 83846
+  },
+  "5000-content-audit/sitemaps/layover-hugo.xml": {
+   "sha256": "5ba79db313302af0bc7199b95ef15933434da72f10791dad1f38acb8e05c81ac",
+   "size": 12583
+  },
+  "5000-content-audit/sitemaps/luxury-hugo.xml": {
+   "sha256": "7c1ab9979dc27d96ffa15135898f20da162f13498541825d68ffb24b502529ee",
+   "size": 14139
+  },
+  "5000-content-audit/sitemaps/massage-hugo.xml": {
+   "sha256": "b4501f291fa6ea10f4219b45967d0905a8fcaad89efb2dfa1e94cb8ed94bf51c",
+   "size": 3448
+  },
+  "5000-content-audit/sitemaps/michelin-hugo.xml": {
+   "sha256": "bec69b01806f320219675b2988d939ba67f9ccd7d9fc0a22f206f2c8f5a501e1",
+   "size": 33655
+  },
+  "5000-content-audit/sitemaps/multiday-hugo.xml": {
+   "sha256": "e206503710b83f9db9aecfb7b73be11bebcd5cd4933fa896e991193b9b48fe84",
+   "size": 20174
+  },
+  "5000-content-audit/sitemaps/nature-hugo.xml": {
+   "sha256": "78c098f94086fa87bcb9b268edc913a5ff0c1b344b80eda42c31059230c65b6e",
+   "size": 13257
+  },
+  "5000-content-audit/sitemaps/nightlife-hugo.xml": {
+   "sha256": "96ee986b9d6e9836a577785e678257a6629cfd243b13fa902aced4b4af45d840",
+   "size": 13517
+  },
+  "5000-content-audit/sitemaps/nomad-hugo.xml": {
+   "sha256": "633066a094300aacb2a41eb522ecf29da6d638b5dbf8db03c624ce094f15be67",
+   "size": 4272
+  },
+  "5000-content-audit/sitemaps/pet-hugo.xml": {
+   "sha256": "86f49f0ed59b8ba0f11e5801802c6af6f9d2ae3c6849a70dc726861d24bce3a2",
+   "size": 67160
+  },
+  "5000-content-audit/sitemaps/phototour-hugo.xml": {
+   "sha256": "6e6841968d2face8320663028d5319b722a7b90a491a97d7e686f307ec9a1519",
+   "size": 13935
+  },
+  "5000-content-audit/sitemaps/pick-hugo.xml": {
+   "sha256": "212ce7cf6a4b921fc5e005528eb2b8ef830ecaf7802a4ce0e953baebcf04abbf",
+   "size": 44614
+  },
+  "5000-content-audit/sitemaps/rank-hugo.xml": {
+   "sha256": "df6153057ef32fce1f05b88faf507e255015adfe2050ed200bcf2569980235ee",
+   "size": 44034
+  },
+  "5000-content-audit/sitemaps/rap-hugo.xml": {
+   "sha256": "b57c4dc9054fe6b81b5ea129c55f1368cb8827afce61e8e9617f2e28db94769b",
+   "size": 225177
+  },
+  "5000-content-audit/sitemaps/rap2-hugo.xml": {
+   "sha256": "549e25674d818356411ac65f876aa5b8eda15efdb1ce257fa9834e2d9a9df629",
+   "size": 178365
+  },
+  "5000-content-audit/sitemaps/rap3-hugo.xml": {
+   "sha256": "4c662153e3a0dc21877800fbb5bcb6ff0479526163947504261ca07fcee17b9d",
+   "size": 242863
+  },
+  "5000-content-audit/sitemaps/rap4-hugo.xml": {
+   "sha256": "800a7a0292559d5aaf09f30372f40fb748968ad5a08ef64e8da5ca7ce2aa0138",
+   "size": 208406
+  },
+  "5000-content-audit/sitemaps/rap5-hugo.xml": {
+   "sha256": "1e050d51e9ccc380ce236d22148ae9452f7d68971f83ab8596dd14cea8b1deaa",
+   "size": 191114
+  },
+  "5000-content-audit/sitemaps/rotcha-blog.xml": {
+   "sha256": "89f2f9b09696ef1364a6e0c559d6a66abad63c706bef1dca057ab68da2053710",
+   "size": 1480038
+  },
+  "5000-content-audit/sitemaps/sector-hugo.xml": {
+   "sha256": "1836b13c9a619285c49653af170958ebfcc82f6d518766d3b443fbfd32d4702d",
+   "size": 120005
+  },
+  "5000-content-audit/sitemaps/senior-blogger.xml": {
+   "sha256": "b7d226e5169866feac6e8ada74c6f1f9eb64afdf887ba6b742419436d6a48f73",
+   "size": 75761
+  },
+  "5000-content-audit/sitemaps/senior-hugo.xml": {
+   "sha256": "32f30900d273063bf6051a8863c1b6b97a7bf178d6caefd3ce16e98850ffb666",
+   "size": 201800
+  },
+  "5000-content-audit/sitemaps/stock-hugo.xml": {
+   "sha256": "3889ab71533c07c195992a951d1fbb7913906a10d90d57644486339b4fc8b145",
+   "size": 284928
+  },
+  "5000-content-audit/sitemaps/tap-blogger.xml": {
+   "sha256": "b4dd0e511eb26badf2e85d6357053d7c6bfd22ef4f965e125688a6c987e4067f",
+   "size": 265
+  },
+  "5000-content-audit/sitemaps/tco-hugo.xml": {
+   "sha256": "ec31aee027d29ce507df9256c2cd22ed1e95836fe16f5841dd9a7960d451f2d2",
+   "size": 100067
+  },
+  "5000-content-audit/sitemaps/techpawz-hugo.xml": {
+   "sha256": "c42ac47bc5a9e63640403a12eac87f7f64151e3e9806d707d3db7fe8bc2589fd",
+   "size": 314
+  },
+  "5000-content-audit/sitemaps/tour-hugo.xml": {
+   "sha256": "4dc70a42047ae59148f7255def93b5be38d298862e85b16d9e199c9b9caf979d",
+   "size": 29137
+  },
+  "5000-content-audit/sitemaps/tours-hugo.xml": {
+   "sha256": "d5c32412ab463f816dccf339b25d56afdc63c9c2c2880f14eaf2ff35e49321ee",
+   "size": 23393
+  },
+  "5000-content-audit/sitemaps/trains-hugo.xml": {
+   "sha256": "50ab3cccfbbe96ccd294a64e2c3d2268a6cffa01054604c16fe41797ac9d6bea",
+   "size": 16233
+  },
+  "5000-content-audit/sitemaps/transfers-hugo.xml": {
+   "sha256": "313a5328ab11b64048c52d359ab450cd9ad7bf4228255294e5834f4fc5db602c",
+   "size": 19621
+  },
+  "5000-content-audit/sitemaps/travel-hugo.xml": {
+   "sha256": "ede37e5803a2d08ca74048a90a8ec9eac6a0ba8dd9f4dcfafa49851f9123b991",
+   "size": 190191
+  },
+  "5000-content-audit/sitemaps/travel1-hugo.xml": {
+   "sha256": "6aa5bc1275ce31eeaf411ddce3e5982a4fea66b95db3df2dff54a11f85ded3f3",
+   "size": 133907
+  },
+  "5000-content-audit/sitemaps/travel2-hugo.xml": {
+   "sha256": "78f793169bea715ee6b5f167aa145103d81d88db66df87c710a72e6be91d443d",
+   "size": 189619
+  },
+  "5000-content-audit/sitemaps/travel3-hugo.xml": {
+   "sha256": "3a0432af2026e7edb9a85800328231d2b329ebeb45948704e26fd0e79a22f8e2",
+   "size": 185722
+  },
+  "5000-content-audit/sitemaps/travel4-hugo.xml": {
+   "sha256": "9ba2f49f686071335e22078a997ab1d5acee9beac91ebc8f9f2f61adf393cfdf",
+   "size": 179087
+  },
+  "5000-content-audit/sitemaps/tvshow-blogger.xml": {
+   "sha256": "e137b29361bb7c9d90bca8ebe6c4d93879b75854300544d8c945d2f4bb30801d",
+   "size": 283
+  },
+  "5000-content-audit/sitemaps/ud-blogger.xml": {
+   "sha256": "b9792a5990116514b77ac5259470277836aa369d620b7437149f606587f61bbc",
+   "size": 69994
+  },
+  "5000-content-audit/sitemaps/visa-hugo.xml": {
+   "sha256": "47482bda7be0f773057f50eba4162f20485ee02726eb5c9c359cd23e365eb58f",
+   "size": 28442
+  },
+  "5000-content-audit/sitemaps/visafree-hugo.xml": {
+   "sha256": "ac2b2cafb65f3a75b2a0804f10e7dc0a4b0b46ac6c10e0b62d32b3a44708bf4b",
+   "size": 19557
+  },
+  "5000-content-audit/sitemaps/walking-hugo.xml": {
+   "sha256": "9b3220d02f749963a08e4791f6f5cf28b1f449864b1f905680ceaf9f2cbf16a4",
+   "size": 18419
+  },
+  "5000-content-audit/sitemaps/watersports-hugo.xml": {
+   "sha256": "4566a15c8129f6cd61659dd8019283eb210a7785582bfd072b7c3ca02114928d",
+   "size": 21007
+  },
+  "5000-content-audit/sitemaps/watertours-hugo.xml": {
+   "sha256": "44fc5239bcff1b2a2cd08ecd2c32719ccd82c90f05c260e29c05cfe664c39a7f",
+   "size": 13706
+  },
+  "5000-content-audit/title_recommendations.jsonl": {
+   "sha256": "f0187989d091478bad6990c7e871be494e16ed01bd9e1a3bd7a16aa4dbf42aec",
+   "size": 78097
+  }
+ }
+}

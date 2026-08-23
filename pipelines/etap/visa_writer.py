@@ -89,6 +89,7 @@ DATA (use ONLY this data, include ALL countries in each category):
 {summary}
 
 RULES:
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2)
 - Write 1,200-1,800 words in English
 - Title must include "{passport}" and "visa"
 - This is about who needs a visa to ENTER {passport}
@@ -118,6 +119,7 @@ DATA (use ONLY this data, include ALL countries in each category):
 {summary}
 
 RULES:
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2)
 - Write 1,200-1,800 words in English
 - Title must include "{passport}" and "passport" or "visa"
 - This is about where {passport} passport holders can travel

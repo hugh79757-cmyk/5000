@@ -131,6 +131,14 @@ def _run_impl() -> dict | bool:
     if _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
+    # cross-sell + 내부링크 (base pipeline.py:333-339 클론 — 전용 파이프라인 import-only 결함 보완)
+    cross_html = build_cross_sell_html(
+        country=article.get("country", ""),
+        city=article.get("city", ""),
+        exclude_blog=BLOG_ID, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
+    article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
     city = article.get("city", "")
     country = article.get("country", "")
     iata = article.get("iata", "")

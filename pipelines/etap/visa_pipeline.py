@@ -131,6 +131,14 @@ def _run_impl() -> bool:
     elif _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
+    # cross-sell (base pipeline.py:333-339 클론 — F5 Golden Standard 픽스)
+    cross_html = build_cross_sell_html(
+        country=article.get("country", ""),
+        city=topic.get("passport", ""),
+        exclude_blog=BLOG_ID, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
+    article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
     country = article.get("country", "")
     cover = fetch_city_image(country, "", article["slug"]) if country else None
     body = fetch_body_images(country, "", article["slug"], count=8) if country else []

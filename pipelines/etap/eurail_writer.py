@@ -85,28 +85,30 @@ DATA (use ONLY this data):
 {summary}
 
 RULES:
-- Write 1,000-1,500 words in English
+- Write MINIMUM 1,100 words, target 1,200-1,600 words in English. Articles under 1,000 words are rejected
+- Expand each H2 section into 2-3 full paragraphs. Do NOT submit a short draft
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (no heading first)
 - Title must include "{origin}" and "{destination}"
-- - If a section has 0 matching data items, OMIT that H2 section entirely. Do NOT write filler content.
+- Title must NOT contain the phrases "A Practical Guide" or "A Comprehensive Guide"
+- If a transport mode has no data, do NOT write a section about it
 - Do NOT include any URLs or links
 - Do NOT invent prices or durations not in the data
-- If a transport mode has no data, do NOT write a section about it
-- Required H2 sections (only for modes with data):
-  ## {origin} to {destination}: Your Options at a Glance
-  ## Traveling by Train (if train data exists)
-  ## Traveling by Bus (if bus data exists)
-  ## Should You Fly Instead? (if flight data exists)
-  ## By Ferry (if ferry data exists)
-  ## Price and Time Comparison
-  ## Best Time to Book for Cheapest Fares
-  ## Practical Tips for This Route
+- Required H2 sections (use these EXACT heading styles):
+  ## Route Options at a Glance
+  ## Train Guide: What to Expect        (omit if no train data)
+  ## Bus Guide: What to Expect          (omit if no bus data)
+  ## Flight Guide: Should You Fly?      (omit if no flight data)
+  ## Tips for Ferry Travel              (omit if no ferry data)
+  ## Tips for Booking Ahead
+  ## Money-Saving Tips for This Route
+  ## Practical Tips for Travelers
 - Use exact prices and durations from data
-- Write practically with real numbers
+- Write practically with real numbers, in flowing paragraphs
 
 Return ONLY the article in markdown starting with # title"""
 
     result = ai_generate(
-    "You are a European travel writer specializing in transportation. Use only provided data. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0.",
+    "You are a European travel writer specializing in transportation. Use only provided data. STRICT RULES: 1) NEVER use these words/phrases: plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. 3) Format prices as whole numbers when .0. 4) NEVER bold an entire paragraph or write label-style bold leads like '**Option:**' — bold is for short phrases only (max 10 words).",
     prompt,
     temperature=0.5,
     max_tokens=3500,

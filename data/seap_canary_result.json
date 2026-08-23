@@ -1,0 +1,36 @@
+{
+  "timestamp": "2026-08-19T23:39:02",
+  "blog_id": "senior-blogger",
+  "blogger_blog_id": "5484205249958557854",
+  "title": "SEAP 썸네일 복구 검증 — 시니어 복지 지원금 안내 (비공개 테스트)",
+  "thumbnail_url": "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/thumbnails/senior/canary-5d7555e412.webp",
+  "http_status": 200,
+  "content_type": "image/webp",
+  "content_length": 37760,
+  "sha256": "09372474973ec7ac61851670169cfcd1e42bf9a01c22522cc68d7612129a11d4",
+  "resolution": "600x600",
+  "is_unique": true,
+  "draft_post_id": "6247399775709535352",
+  "draft_url": "https://2.techpawz.com/",
+  "draft_status": "DRAFT",
+  "body_first_img_position": "first child of body",
+  "status": "CANARY_VERIFIED",
+  "verification": {
+    "thumbnail_http": "200",
+    "content_type": "image/webp",
+    "size_bytes": 37760,
+    "resolution": "600x600",
+    "sha256": "09372474973ec7ac61851670169cfcd1e42bf9a01c22522cc68d7612129a11d4",
+    "is_unique_vs_default": true,
+    "body_first_img": true,
+    "draft_confirmed": true
+  },
+  "senior_hugo_crosscheck": {
+    "id": 11562,
+    "thumbnail_url": "thumbnails/senior/20260819-a054965c96.webp",
+    "permalink_http": "200",
+    "thumbnail_http": "200",
+    "sha256": "778539cf3c2b3c53d47764a571bded6b069ff4f55d360a8af14b3f24038c58c9",
+    "is_unique_vs_default": true
+  }
+}

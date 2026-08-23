@@ -1,0 +1,17 @@
+{
+  "captured_at": "2026-08-20 09:01:14",
+  "adsense_daily": {
+    "max_date": "2026-08-19",
+    "rows": 2521
+  },
+  "gsc_keywords": {
+    "max_date": "2026-08-17",
+    "rows": 400
+  },
+  "ga4_daily": {
+    "max_date": "2026-08-19",
+    "rows": 251
+  },
+  "wal_present": false,
+  "shm_present": false
+}

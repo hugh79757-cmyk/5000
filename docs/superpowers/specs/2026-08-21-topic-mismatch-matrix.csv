@@ -1,0 +1,37 @@
+blog,total,s1_fail,s1_pass,tag,s2_fail,s2_pass,kw,s3_fail,approved,mismatch,corpus_tag_fail,corpus_kw_fail
+adventure-hugo,154,154,0,Adventure,0,0,adventure,0,0,154,100,1
+airlines-hugo,115,115,0,Airline Review,0,0,airline,0,0,115,103,99
+airports-hugo,163,90,73,Airport Guide,55,18,airport,1,17,146,145,91
+bus-hugo,162,162,0,Bus Travel,0,0,bus,0,0,162,104,7
+citytours-hugo,120,120,0,City Tours,0,0,city tour,0,0,120,57,19
+cruise-hugo,111,83,28,Shore Excursions,13,15,cruise,0,15,96,67,29
+culture-hugo,167,167,0,Culture Tours,0,0,culture,0,0,167,113,82
+daytrips-hugo,182,182,0,Day Trips,0,0,day trip,0,0,182,118,14
+deals-hugo,105,105,0,Flight Deals,0,0,deal,0,0,105,65,0
+dining-hugo,120,120,0,Dining Guide,0,0,dining,0,0,120,88,22
+escape-hugo,102,102,0,Escape Rooms,0,0,escape,0,0,102,44,7
+esim-hugo,265,265,0,eSIM Guide,0,0,esim,0,0,265,203,91
+eurail-hugo,171,171,0,European Rail,0,0,rail,0,0,171,106,170
+extreme-hugo,107,107,0,Extreme Sports,0,0,extreme,0,0,107,50,32
+ferry-hugo,159,159,0,Ferry Travel,0,0,ferry,0,0,159,102,5
+flights-hugo,272,272,0,Flight Deals,0,0,flight,0,0,272,253,179
+foodtour-hugo,143,143,0,Food Tours,0,0,food,0,0,143,82,30
+ghost-hugo,94,94,0,Ghost Tours,0,0,ghost,0,0,94,42,23
+hiking-hugo,82,82,0,Hiking Tours,0,0,hiking,0,0,82,47,8
+layover-hugo,99,99,0,Layover Tours,0,0,layover,0,0,99,43,10
+luxury-hugo,112,112,0,Luxury Tours,0,0,luxury,0,0,112,47,2
+michelin-hugo,272,272,0,Michelin Guide,0,0,michelin,0,0,272,199,91
+multiday-hugo,163,163,0,Multi-Day Tours,0,0,multi-day,0,0,163,106,6
+nature-hugo,110,110,0,Nature Tours,0,0,nature,0,0,110,59,0
+nightlife-hugo,107,107,0,Nightlife,0,0,nightlife,0,0,107,48,36
+nomad-hugo,39,0,39,Digital Nomad,9,30,nomad,29,1,38,9,34
+phototour-hugo,112,112,0,Photography Tours,0,0,photo,0,0,112,64,0
+tour-hugo,254,90,164,(none),164,0,tour,0,0,254,254,254
+tours-hugo,204,204,0,Tours & Activities,0,0,tour,0,0,204,129,133
+trains-hugo,145,145,0,Route Guide,0,0,train,0,0,145,76,145
+transfers-hugo,162,162,0,Airport Transfers,0,0,transfer,0,0,162,104,8
+visa-hugo,252,252,0,Visa Guide,0,0,visa,0,0,252,184,91
+visafree-hugo,169,169,0,Visa-Free Travel,0,0,visa,0,0,169,105,106
+walking-hugo,148,148,0,Walking Tours,0,0,walking,0,0,148,92,51
+watersports-hugo,159,159,0,Water Sports,0,0,water sports,0,0,159,95,33
+watertours-hugo,104,104,0,Water Tours,0,0,water tour,0,0,104,45,10

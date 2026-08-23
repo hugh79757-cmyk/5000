@@ -74,7 +74,7 @@ def _add_product_cards(article):
         seen.add(nm)
         selected.append({"name": nm, "price": t.get("price",""), "currency": t.get("currency","USD"),
             "discount": str(t.get("discount","")).replace("%",""),
-            "image_url": t.get("image_url",""), "link": _affiliate_link(t.get("deep_link","")), "category": t.get("category","")})
+            "image_url": t.get("image_url",""), "link": (t.get("deep_link","") if ".pxf.io/" in t.get("deep_link","") else _affiliate_link(t.get("deep_link",""))), "category": t.get("category","")})
     if selected:
         article["content"] = insert_product_cards(article["content"], selected, max_cards=5)
     comp_tours = [t for t in sorted(tours, key=lambda x: _safe_price(x.get("price",0))) if t.get("product_name","") not in seen][:5]
@@ -107,9 +107,20 @@ def _run_impl(cfg=None) -> bool:
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
+    # F13(2026-08-23): cross-sell 블록 삽입 — 기존 import-only 결함 해소(base :333-339 패턴)
+    cross_html = build_cross_sell_html(
+        country=country or "",
+        city=city or "",
+        exclude_blog=BLOG_ID, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
     cover = fetch_city_image(city + " coworking space digital nomad", country, article["slug"]) if city else None
     body = fetch_body_images(city + " coworking cafe laptop work", country, article["slug"], count=8) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    # F13(2026-08-23): write-fail 가드 — 쓰기 실패 시 mark_published 금지(canggu 팬텀 행 방지, multiday :136-140 패턴)
+    if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
+        logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
+        return False
     mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID, article["title"], article["slug"])
     mark_entity_published(BLOG_ID, article["slug"])
     if city:

@@ -1,0 +1,1456 @@
+[
+ {
+  "id": "compare-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/compare-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:16",
+    "10:16",
+    "13:16",
+    "16:16",
+    "20:16"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "deal-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/deal-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:14",
+    "10:14",
+    "13:14",
+    "16:14",
+    "20:14"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "ev-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/ev-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:20",
+    "10:20",
+    "13:20",
+    "16:20",
+    "20:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "guide-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/guide-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:18",
+    "10:18",
+    "13:18",
+    "16:18",
+    "20:18"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "hotissue-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/hotissue-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:10",
+    "10:10",
+    "13:10",
+    "16:10",
+    "20:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "tco-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/tco-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:12",
+    "10:12",
+    "13:12",
+    "16:12",
+    "20:12"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "rank-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/rank-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:22"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "pick-hugo",
+  "file": "config/blogs.d/cap.yaml",
+  "pipeline": "car",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cap/pick-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:24"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "appliance-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/appliance-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:50",
+    "10:50",
+    "13:50",
+    "16:50",
+    "20:50"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "baby-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/baby-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:10",
+    "11:10",
+    "14:10",
+    "17:10",
+    "21:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "fitness-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/fitness-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:20",
+    "11:20",
+    "14:20",
+    "17:20",
+    "21:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "interior-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/interior-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:00",
+    "11:00",
+    "14:00",
+    "17:00",
+    "21:00"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "laptop-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/laptop-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:40",
+    "10:40",
+    "13:40",
+    "16:40",
+    "20:40"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "health-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/health-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:30",
+    "10:30",
+    "13:30",
+    "16:30",
+    "20:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "pet-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/pet-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:00",
+    "10:00",
+    "13:00",
+    "16:00",
+    "20:00"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "kitchen-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/kitchen-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:30",
+    "11:30",
+    "14:30",
+    "17:30",
+    "21:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "beauty-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/beauty-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:40",
+    "11:40",
+    "14:40",
+    "17:40",
+    "21:40"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "camping-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/camping-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:10",
+    "10:10",
+    "13:10",
+    "16:10",
+    "20:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "massage-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/massage-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:20",
+    "13:20",
+    "19:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "car-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/car-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:30",
+    "13:30",
+    "19:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "homeappliance-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/homeappliance-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:20",
+    "14:20",
+    "20:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "golf-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/golf-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:30",
+    "14:30",
+    "20:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "bike-hugo",
+  "file": "config/blogs.d/cuap.yaml",
+  "pipeline": "curation",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/cuap/bike-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:20",
+    "15:20",
+    "21:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "adventure-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/adventure-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:35",
+    "11:35",
+    "14:35",
+    "17:35",
+    "21:35"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "airlines-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/airlines-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:31",
+    "10:31",
+    "13:31",
+    "16:31",
+    "20:31"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "airports-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/airports-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:33",
+    "10:33",
+    "13:33",
+    "16:33",
+    "20:33"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "bus-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/bus-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:45",
+    "11:45",
+    "14:45",
+    "17:45",
+    "21:45"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "cruise-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/cruise-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:35",
+    "12:35",
+    "15:35",
+    "18:35",
+    "22:35"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "culture-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/culture-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:00",
+    "12:00",
+    "15:00",
+    "18:00",
+    "22:00"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "daytrips-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/daytrips-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:20",
+    "11:20",
+    "14:20",
+    "17:20",
+    "21:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "deals-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/deals-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:25",
+    "12:25",
+    "15:25",
+    "18:25",
+    "22:25"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "dining-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/dining-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:55",
+    "11:55",
+    "14:55",
+    "17:55",
+    "21:55"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "esim-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/esim-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:35",
+    "10:35",
+    "13:35",
+    "16:35",
+    "20:35"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "eurail-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/eurail-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:30",
+    "12:30",
+    "15:30",
+    "18:30",
+    "22:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "ferry-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/ferry-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:50",
+    "11:50",
+    "14:50",
+    "17:50",
+    "21:50"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "flights-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/flights-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:37",
+    "10:37",
+    "13:37",
+    "16:37",
+    "20:37"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "foodtour-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/foodtour-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:30",
+    "11:30",
+    "14:30",
+    "17:30",
+    "21:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "michelin-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/michelin-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:39",
+    "10:39",
+    "13:39",
+    "16:39",
+    "20:39"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "multiday-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/multiday-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:10",
+    "12:10",
+    "15:10",
+    "18:10",
+    "22:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "nature-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/nature-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:15",
+    "12:15",
+    "15:15",
+    "18:15",
+    "22:15"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "phototour-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/phototour-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:40",
+    "12:40",
+    "15:40",
+    "18:40",
+    "22:40"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "tour-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/tour-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:30",
+    "10:30",
+    "13:30",
+    "16:30",
+    "20:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "tours-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/tours-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:41",
+    "10:41",
+    "13:41",
+    "16:41",
+    "20:41"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "trains-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/trains-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:43",
+    "10:43",
+    "13:43",
+    "16:43",
+    "20:43"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "transfers-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/transfers-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:05",
+    "12:05",
+    "15:05",
+    "18:05",
+    "22:05"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "visa-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/visa-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:45",
+    "10:45",
+    "13:45",
+    "16:45",
+    "20:45"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "visafree-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/visafree-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:20",
+    "12:20",
+    "15:20",
+    "18:20",
+    "22:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "walking-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/walking-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:25",
+    "11:25",
+    "14:25",
+    "17:25",
+    "21:25"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "watersports-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/watersports-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:40",
+    "11:40",
+    "14:40",
+    "17:40",
+    "21:40"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "luxury-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/luxury-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:00",
+    "10:00",
+    "13:00",
+    "16:00",
+    "20:00"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "citytours-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/citytours-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:05",
+    "10:05",
+    "13:05",
+    "16:05",
+    "20:05"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "watertours-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/watertours-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:10",
+    "10:10",
+    "13:10",
+    "16:10",
+    "20:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "hiking-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/hiking-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:15",
+    "10:15",
+    "13:15",
+    "16:15",
+    "20:15"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "escape-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/escape-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:20",
+    "10:20",
+    "13:20",
+    "16:20",
+    "20:20"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "extreme-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/extreme-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:25",
+    "10:25",
+    "13:25",
+    "16:25",
+    "20:25"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "nightlife-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/nightlife-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:30",
+    "10:30",
+    "13:30",
+    "16:30",
+    "20:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "ghost-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/ghost-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:35",
+    "10:35",
+    "13:35",
+    "16:35",
+    "20:35"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "layover-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/layover-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:40",
+    "10:40",
+    "13:40",
+    "16:40",
+    "20:40"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "nomad-hugo",
+  "file": "config/blogs.d/etap.yaml",
+  "pipeline": "etap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/ETAP/nomad-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:45",
+    "10:45",
+    "13:45",
+    "16:45",
+    "20:45"
+   ]
+  },
+  "status": "paused"
+ },
+ {
+  "id": "rotcha-blog",
+  "file": "config/blogs.d/manual_blog_for_backup.yaml",
+  "pipeline": null,
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/rotcha-blog",
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "informationhot-hugo",
+  "file": "config/blogs.d/manual_blog_for_backup.yaml",
+  "pipeline": null,
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/informationhot-hugo",
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "techpawz-hugo",
+  "file": "config/blogs.d/manual_blog_for_backup.yaml",
+  "pipeline": null,
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/techpawz-hugo",
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "biz-techpawz-hugo",
+  "file": "config/blogs.d/manual_blog_for_backup.yaml",
+  "pipeline": null,
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/biz.techpawz-hugo",
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "issue-techpawz-hugo",
+  "file": "config/blogs.d/manual_blog_for_backup.yaml",
+  "pipeline": null,
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/issue-techpawz-hugo",
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "tvshow-blogger",
+  "file": "config/blogs.d/manual_blogs.yaml",
+  "pipeline": "travel",
+  "platform": "blogger",
+  "site_path": null,
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "ud-blogger",
+  "file": "config/blogs.d/manual_blogs.yaml",
+  "pipeline": "travel",
+  "platform": "blogger",
+  "site_path": null,
+  "site_url": null,
+  "schedule": null,
+  "status": "paused"
+ },
+ {
+  "id": "rap-hugo",
+  "file": "config/blogs.d/rap.yaml",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/RAP/rap-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:50",
+    "10:50",
+    "13:50",
+    "16:50",
+    "20:50"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "rap2-hugo",
+  "file": "config/blogs.d/rap.yaml",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/RAP/rap2-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:10",
+    "11:10",
+    "14:10",
+    "17:10",
+    "21:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "rap3-hugo",
+  "file": "config/blogs.d/rap.yaml",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/RAP/rap3-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:30",
+    "11:30",
+    "14:30",
+    "17:30",
+    "21:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "rap4-hugo",
+  "file": "config/blogs.d/rap.yaml",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/RAP/rap4-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:50",
+    "11:50",
+    "14:50",
+    "17:50",
+    "21:50"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "rap5-hugo",
+  "file": "config/blogs.d/rap.yaml",
+  "pipeline": "rap",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/RAP/rap5-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "09:10",
+    "12:10",
+    "15:10",
+    "18:10",
+    "22:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "senior-blogger",
+  "file": "config/blogs.d/seap.yaml",
+  "pipeline": "senior",
+  "platform": "blogger",
+  "site_path": null,
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "08:10",
+    "11:10",
+    "14:10",
+    "17:10",
+    "21:10"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "senior-hugo",
+  "file": "config/blogs.d/seap.yaml",
+  "pipeline": "senior",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/SEAP/senior-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:34",
+    "10:34",
+    "13:34",
+    "16:34",
+    "20:34"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "finance-hugo",
+  "file": "config/blogs.d/stap.yaml",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/STAP/finance-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:32",
+    "10:32",
+    "13:32",
+    "16:32",
+    "20:32"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "stock-hugo",
+  "file": "config/blogs.d/stap.yaml",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/STAP/stock-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:22",
+    "10:22",
+    "13:22",
+    "16:22",
+    "20:22"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "dividend-hugo",
+  "file": "config/blogs.d/stap.yaml",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/STAP/dividend-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:24",
+    "10:24",
+    "13:24",
+    "16:24",
+    "20:24"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "etf-hugo",
+  "file": "config/blogs.d/stap.yaml",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/STAP/etf-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:26",
+    "10:26",
+    "13:26",
+    "16:26",
+    "20:26"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "sector-hugo",
+  "file": "config/blogs.d/stap.yaml",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/STAP/sector-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:28",
+    "10:28",
+    "13:28",
+    "16:28",
+    "20:28"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "ipo-hugo",
+  "file": "config/blogs.d/stap.yaml",
+  "pipeline": "stock",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/STAP/ipo-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:30",
+    "10:30",
+    "13:30",
+    "16:30",
+    "20:30"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "tap-blogger",
+  "file": "config/blogs.d/tap.yaml",
+  "pipeline": "travel",
+  "platform": "blogger",
+  "site_path": null,
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "06:00",
+    "10:00",
+    "14:00"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "travel-hugo",
+  "file": "config/blogs.d/tap.yaml",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/TAP/travel-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:00",
+    "10:00",
+    "13:00",
+    "16:00",
+    "20:00"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "travel1-hugo",
+  "file": "config/blogs.d/tap.yaml",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/TAP/travel1-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:02",
+    "10:02",
+    "13:02",
+    "16:02",
+    "20:02"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "travel2-hugo",
+  "file": "config/blogs.d/tap.yaml",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/TAP/travel2-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:04",
+    "10:04",
+    "13:04",
+    "16:04",
+    "20:04"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "travel3-hugo",
+  "file": "config/blogs.d/tap.yaml",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/TAP/travel3-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:06",
+    "10:06",
+    "13:06",
+    "16:06",
+    "20:06"
+   ]
+  },
+  "status": "active"
+ },
+ {
+  "id": "travel4-hugo",
+  "file": "config/blogs.d/tap.yaml",
+  "pipeline": "travel",
+  "platform": "hugo",
+  "site_path": "/Users/twinssn/Projects/TAP/travel4-hugo",
+  "site_url": null,
+  "schedule": {
+   "times": [
+    "07:08",
+    "10:08",
+    "13:08",
+    "16:08",
+    "20:08"
+   ]
+  },
+  "status": "active"
+ }
+]

@@ -216,7 +216,8 @@ DATA (use ONLY this data, do NOT invent restaurants or prices):
 {summary}
 
 RULES:
-- Write 1,200-1,800 words in English
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2)
+- Write MINIMUM 1,100 words, target 1,200-1,800 words in English. Articles under 1,000 words are rejected. Expand each section into 2-3 full paragraphs
 - Do NOT include any URLs or booking links in the text
 - Do NOT invent restaurant names, awards, cuisines, or prices not in the data
 - If price is "Price N/A", do not mention a price for that restaurant
@@ -232,7 +233,7 @@ RULES:
 Return ONLY the article in markdown starting with # title"""
 
     result = ai_generate(
-    "You are a food and travel blogger who dines at Michelin restaurants worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, culinary journey, gastronomic, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Never invent data. 3) Every section must include one practical tip (reservation lead time, dress code reality, lunch vs dinner value, which tasting menu to pick). 4) Open with a specific dish, restaurant detail, or dining scene.",
+    "You are a food and travel blogger who dines at Michelin restaurants worldwide. Write in first-person-informed tone. STRICT RULES: 1) Never use: plethora, vibrant, bustling, let\\'s dive in, without further ado, hidden gem, tapestry, myriad, embark, culinary journey, gastronomic, crystal-clear, soak in, immerse yourself, treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, look no further, haven for, left me in awe, adventure awaits, palpable, escapades, playground for, adrenaline-fueled. 2) Never invent data. 3) Every section must include one practical tip (reservation lead time, dress code reality, lunch vs dinner value, which tasting menu to pick). 4) Open with a specific dish, restaurant detail, or dining scene. 5) NEVER bold an entire paragraph or write label-style bold leads like '**Where to eat:**' — bold is for short phrases only (max 10 words).",
     prompt,
     temperature=0.5,
     max_tokens=4000,

@@ -285,7 +285,7 @@ def fetch_data(city, country=None):
     # eSIM: match country preferred
     esim_term = (country or city).lower()
     esim = conn.execute("""
-        SELECT title, description, link FROM airalo_esim
+        SELECT title, description, link, price, sale_price, image_link, currency FROM airalo_esim
         WHERE LOWER(description) LIKE ? OR LOWER(title) LIKE ?
         LIMIT 5
     """, (f"%{esim_term}%", f"%{esim_term}%")).fetchall()
@@ -580,6 +580,7 @@ FORMAT RULES:
 - Create a unique, specific title that highlights what makes {city} special for remote workers
 - Good examples: "Why {city} Is the Best-Kept Secret for Remote Workers", "{city} on a Laptop: Coworking, Costs, and the Best Cafes", "Working Remotely from {city}: An Honest Cost and Connectivity Breakdown"
 - Bad examples (NEVER use): "{city} Digital Nomad Guide", "A Digital Nomad\'s Guide to {city}", "{city}: Digital Nomad Guide to Coworking and Connectivity"
+- Title MUST be a COMPLETE phrase — NEVER truncated, NEVER end with an ellipsis ("…"/"...") or mid-sentence cut. If your title idea is long, shorten it to a complete statement instead of cutting it off.
 - Required H2 sections:
 {h2s}
 - If a section has fewer than 2 data points, OMIT that H2 entirely
@@ -614,6 +615,12 @@ Return ONLY the article in markdown starting with # title"""
     _validate_content(content, data, city)
     slug = topic.get("slug", re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-") + "-digital-nomad-guide")
     tags = [city, country, "Digital Nomad", "Coworking", "Remote Work"] if country else [city, "Digital Nomad", "Coworking"]
+    # F13(2026-08-23): eSIM 데이터를 product-card 소스로 연결 — 기존 "tours": [] 하드코딩(카드 구조적 불가) 해소
+    esim_plans = data.get("esim", [])
+    tours = [{"product_name": e.get("title",""), "price": e.get("sale_price") or e.get("price",""),
+              "currency": e.get("currency","USD"), "discount": "", "image_url": e.get("image_link",""),
+              "deep_link": e.get("link",""), "link": e.get("link",""), "category": "eSIM Plan"}
+             for e in esim_plans]
     return {"title": title, "slug": slug, "content": content,
              "description": f"Digital nomad guide to {city}: coworking spaces, internet, visa, cost of living and tips.",
-             "tags": [t for t in tags if t], "city": city, "country": country, "tours": []}
+             "tags": [t for t in tags if t], "city": city, "country": country, "tours": tours}

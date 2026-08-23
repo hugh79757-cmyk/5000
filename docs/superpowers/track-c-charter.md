@@ -25,9 +25,16 @@ Single source of truth for branch investigations, gates, and publish targets.
 
 ## Gates
 - S0: quality_guard 0허위/LaTeX (DONE for ETAP)
-- S1: michelin pilot 6 checks (build + GA + adsense single + disclosure conditional + rel sponsored noopener + wordCount)
-- S2: 34-blog batch rebuild publish (dispatcher per-blog deploy)
+- S1: michelin pilot 6 checks — **PASS (2026-08-22)**: build/GA single/AdSense single/wordCount 통과, disclosure·rel은 콘텐츠 기반 N/A (adventure-hugo에서 렌더 검증 완료). GA4 per-blog 전환(34/36 measurement_id 확보 + michelin 템플릿 전환) 완료.
+- S2: 34-blog batch rebuild publish (dispatcher per-blog deploy) — **michelin 파일럿 구조 재설계 완료(요약/비교/FAQ)**, 배포 대기 중(사람 승인).
 - S3: live verification (curl sitemap lastmod movement + head GA/AdSense single)
+
+## 진행 상태 갱신 (2026-08-22)
+- 스키마-as-code: 설계 → **구현 완료** (`schemas/` 8분기, `schema_loader.py`, `validate_schema_pr.py`, `c08_staging.py`). 상세: `specs/2026-08-22-schema-as-code-design.md` §9b.
+- GSC gsc_pages: 36도메인 전부 siteOwner 등록 확인 → `collect_gsc()` 확장 → **563행 수집** (ETAP 계열 17개 도메인 색인/노출 데이터 확인).
+- GA4: 공유 fallback G-N4Q99745QT → per-blog measurement_id 전환 (michelin 파일럿 PASS). 매핑: `config/ga4_measurement_map.yaml`.
+- airports 42건: **데이터 소진으로 재생성 불가 확정** — paused 유지, S3 데이터 확보 후 재개.
+- 병렬 실행 상세: `specs/2026-08-22-track-c-execution-report.md`.
 
 ## Publish Target
 - 34 active ETAP blogs normal publish + 통A batch (S2). deals-hugo 106-day stall flagged for draft_detected/content pipeline diagnosis after S1.

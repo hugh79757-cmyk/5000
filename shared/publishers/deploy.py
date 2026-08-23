@@ -112,24 +112,47 @@ def _pre_deploy_image_gate(site: Path) -> None:
     if not _recent:
         return
 
-    # 패리티 기준: 기존 경로에 featureimage/draft가 있었으면 신규도 보유 필수
-    _req_parity = {k for k in ("featureimage", "draft") if k in _reference_keys}
+    # 패리티 기준: 기존 경로에 featureimage가 있었으면 신규도 보유 필수.
+    # (draft는 제외: Hugo에서 draft 키 누락 == draft:false 와 동일 의미이므로
+    #  패리티 요구가 오탐을 유발 — 키 유무만으로 게이트 차단 금지)
+    _req_parity = {k for k in ("featureimage",) if k in _reference_keys}
 
     _failures = []
     for name, text, fm in _recent:
+        # noindex 포스트는 검색노출 제외 의도이므로 이미지 게이트 대상에서 제외.
+        # (전체 블로그 배포를 noindex 1건 때문에 막지 않기 위함)
+        _noindex = str(fm.get("noindex", "")).strip().lower()
+        if _noindex in ("true", "yes", "1"):
+            continue
         body = _strip_frontmatter(text)
-        if not (re.search(r"<img\s", body) or re.search(r"!\[[^\]]*\]\(", body)):
+        _has_img = (
+            re.search(r"<img\s", body)
+            or re.search(r"!\[[^\]]*\]\(", body)
+            or re.search(r"\{\{<\s*(?:figure|img|image|thumbnail)\b", body)
+        )
+        if not _has_img:
             _failures.append(f"{name}: R13 본문삽입이미지 0장")
         if not (re.search(r"featureimage:\s*\S", text)
                 or re.search(r"og_image:\s*\S", text)):
             _failures.append(f"{name}: R16 og:image(featureimage) 누락")
-        _tc = re.search(r"twitter[_:]?card:\s*[\"']?([^\s\"'\n]+)", text, re.IGNORECASE)
-        if _tc and _tc.group(1).strip('"\'') != "summary_large_image":
-            _failures.append(f"{name}: R17 twitter:card={_tc.group(1)}")
-        elif not _tc:
-            # M3(2026-08-21): R17 전사 승격 — airports 한정 해제, twitter:card 키
-            # 미보유 시 모든 블로그 차단 (템플릿이 summary_large_image 주입 권장)
-            _failures.append(f"{name}: R17 twitter_card 키 누락")
+        # R17: 실제 발행 페이지(렌더된 HTML)의 twitter:card 메타를 우선 검증.
+        # 소스 FM의 twitter_card 키도 레거시(airports) 호환으로 인정 → 회귀 방지.
+        _r17_ok = False
+        _rendered = _rendered_post_html(site, name)
+        if _rendered is not None:
+            # minified HTML drops attr quotes; blowfish emits summary first,
+            # injected extend-head emits summary_large_image after → find ALL.
+            _tcs = re.findall(
+                r'<meta\s+name=["\']?twitter:card["\']?\s+content=["\']?([^"\'>\s]*)["\']?',
+                _rendered, re.IGNORECASE)
+            if any(t.strip().lower() == "summary_large_image" for t in _tcs):
+                _r17_ok = True
+        if not _r17_ok:
+            _src_tc = re.search(r"twitter[_:]?card:\s*[\"']?([^\s\"'\n]+)", text, re.IGNORECASE)
+            if _src_tc and _src_tc.group(1).strip('"\'') == "summary_large_image":
+                _r17_ok = True
+        if not _r17_ok:
+            _failures.append(f"{name}: R17 twitter:card 누락/불일치")
         for k in _req_parity:
             if k not in fm:
                 _failures.append(f"{name}: 패리티누락 frontmatter 키 '{k}'")
@@ -167,6 +190,37 @@ def _strip_frontmatter(text: str) -> str:
     if end == -1:
         return text
     return text[end + 4:]
+
+
+def _rendered_post_html(site: Path, slug: str):
+    """실제 발행 페이지 HTML을 읽어 반환. 부재 시 None.
+
+    W5 R17은 소스 FM 키가 아니라 실제 발행 페이지의 메타 태그를 본다.
+    빌드본이 없으면(배포 대상 아님) None → 호출자가 차단하지 않도록 함.
+
+    permalinks 설정에 따라 페이지 위치가 다르다:
+      - 기본: public/posts/{slug}/index.html
+      - posts="/:slug/": public/{slug}/index.html
+    둘 다 시도하고, 그래도 없으면 public/**/{slug}/index.html 를 glob 한다.
+    """
+    candidates = [
+        site / "public" / "posts" / slug / "index.html",
+        site / "public" / slug / "index.html",
+    ]
+    for p in candidates:
+        if p.exists():
+            try:
+                return p.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                return None
+    # 마지막 수단: permalink 커스텀형 (ex. /blog/:slug/ 등)
+    try:
+        hits = list(site.glob(f"public/**/{slug}/index.html"))
+        if hits:
+            return hits[0].read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    return None
 
 
 def _run_hugo_build(site: Path, env: dict, log_path: Path) -> bool:

@@ -1,0 +1,28 @@
+{
+ "batch_count": 32,
+ "sample_count": 794,
+ "expected_max": 810,
+ "shortfall_16_explained": {
+  "car-hugo": 2,
+  "massage-hugo": 2,
+  "homeappliance-hugo": 3,
+  "golf-hugo": 4,
+  "bike-hugo": 5,
+  "sum": 16,
+  "reason": "로컬 포스트 수 자체가 10 미만인 블로그 (bike 5, golf 6, homeappliance 7, massage 8, car 8)"
+ },
+ "batch_structure": "batch_00~30=각 25개, batch_31=19개 → 794 = 31*25 + 19",
+ "duplicates_in_sample": 0,
+ "batch_result_mismatch": 0,
+ "recent5_mtime_reproducibility": {
+  "matched": 405,
+  "total": 405,
+  "pct": "100%"
+ },
+ "random5_seed_reproducibility": {
+  "verdict": "UNVERIFIED",
+  "detail": "표본 선정 스크립트 파일이 /tmp/5000-content-audit/에 미보존. 8가지 로직 변형(sorted/encounter 순회 × sample/shuffle_take/sample10 × raw/mtime_desc/mtime_asc/alpha population) 전부 diff 730~1083으로 원본 794와 불일치. 최신5(mtime)는 100% 일치하나 랜덤5 선택 로직(seed 소비 순서 등)을 재현 불가.",
+  "implication": "seed=5000 재현성은 검증 불가. 단, 표본 자체는 고정(batch_00~31.json 존재)되어 감사 결과 재현에는 영향 없음."
+ },
+ "per_blog_coverage": "81개 블로그 전부 ≥1 표본, 5개 블로그(저포스트)만 10 미만, 76개 블로그 정확히 10"
+}

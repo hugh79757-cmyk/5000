@@ -88,3 +88,14 @@ def temp_db_with_data(temp_db):
     conn.commit()
     conn.close()
     return temp_db
+
+
+@pytest.fixture(autouse=True)
+def _isolated_keyword_pool(tmp_path, monkeypatch):
+    """keyword_pool 조회가 운영 curation.db를 건드리지 않게 격리 (HARVESTER_FULL_INTEGRATION).
+
+    존재하지 않는 tmp db를 가리킴 → _get_from_pool이 OperationalError → None 반환
+    → get_keywords는 기존 KEYWORD_MAP fallback 그대로 동작.
+    """
+    from pipelines.curation import keywords as kw_mod
+    monkeypatch.setattr(kw_mod, "_POOL_DB_PATH", str(tmp_path / "curation.db"))

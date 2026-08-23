@@ -1,0 +1,33 @@
+{
+  "last_run_id": "20260823_164500_66203",
+  "overall_exit_code": 0,
+  "run_started": "2026-08-23 16:45:00",
+  "sources": {
+    "ga4": {
+      "status": "ok",
+      "exit_code": 0,
+      "started": "2026-08-23 16:45:02",
+      "finished": "2026-08-23 16:47:24"
+    },
+    "gsc": {
+      "status": "ok",
+      "exit_code": 0,
+      "started": "2026-08-23 16:47:25",
+      "finished": "2026-08-23 16:50:01"
+    },
+    "adsense": {
+      "status": "ok",
+      "exit_code": 0,
+      "started": "2026-08-23 16:50:02",
+      "finished": "2026-08-23 16:50:27"
+    },
+    "efficiency": {
+      "status": "ok",
+      "exit_code": 0,
+      "started": "2026-08-23 16:50:27",
+      "finished": "2026-08-23 16:50:30"
+    }
+  },
+  "updated_at": "2026-08-23 16:50:30",
+  "last_success_ts": "2026-08-23 16:45:00"
+}

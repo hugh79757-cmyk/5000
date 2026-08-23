@@ -25,6 +25,7 @@ VALID_ACTIONS = {
     "VERIFIED",
     "ABSTAINED",
     "DEPLOYED",
+    "VERIFIED_NO_CHANGE",
 }
 
 

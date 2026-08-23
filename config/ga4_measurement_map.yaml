@@ -1,0 +1,145 @@
+blogs:
+  adventure-hugo:
+    ga4_property: '531123457'
+    measurement_id: G-CSPDGZ1HZM
+    status: confirmed
+  airlines-hugo:
+    ga4_property: '531035921'
+    measurement_id: G-NYD0H1RZML
+    status: confirmed
+  airports-hugo:
+    ga4_property: '531044776'
+    measurement_id: G-DW3NCW5KNH
+    status: confirmed
+  bus-hugo:
+    ga4_property: '531065834'
+    measurement_id: G-X889K4XHNC
+    status: confirmed
+  cruise-hugo:
+    ga4_property: '531006370'
+    measurement_id: G-65W5YFCGYF
+    status: confirmed
+  culture-hugo:
+    ga4_property: '531065835'
+    measurement_id: G-3TQR78109F
+    status: confirmed
+  daytrips-hugo:
+    ga4_property: '531054102'
+    measurement_id: G-YHYXXLJ6KX
+    status: confirmed
+  deals-hugo:
+    ga4_property: '531065294'
+    measurement_id: G-4BRKY9KE2Z
+    status: confirmed
+  dining-hugo:
+    ga4_property: '531047182'
+    measurement_id: G-LGDLCT7EF6
+    status: confirmed
+  esim-hugo:
+    ga4_property: '531068317'
+    measurement_id: G-N5WJDZPCXV
+    status: confirmed
+  eurail-hugo:
+    ga4_property: '531024940'
+    measurement_id: null
+    status: planned
+  ferry-hugo:
+    ga4_property: '531123458'
+    measurement_id: G-MKJ5PYNCT5
+    status: confirmed
+  flights-hugo:
+    ga4_property: '531065272'
+    measurement_id: G-WX8RL7222K
+    status: confirmed
+  foodtour-hugo:
+    ga4_property: '531167909'
+    measurement_id: G-XY1EPFZ32T
+    status: confirmed
+  michelin-hugo:
+    ga4_property: '531066288'
+    measurement_id: G-73WF2WRN9H
+    status: confirmed
+  multiday-hugo:
+    ga4_property: '531139671'
+    measurement_id: G-BKLYM5WN6R
+    status: confirmed
+  nature-hugo:
+    ga4_property: '531055811'
+    measurement_id: G-040RFK9NFF
+    status: confirmed
+  phototour-hugo:
+    ga4_property: '531036743'
+    measurement_id: null
+    status: planned
+  tour-hugo:
+    ga4_property: '531055776'
+    measurement_id: G-2WBNSCT7DS
+    status: confirmed
+  tours-hugo:
+    ga4_property: '531081222'
+    measurement_id: G-0D4TTXPN60
+    status: confirmed
+  trains-hugo:
+    ga4_property: '531082945'
+    measurement_id: G-7HRHCS2VS3
+    status: confirmed
+  transfers-hugo:
+    ga4_property: '531012256'
+    measurement_id: G-1BT8DWNXVR
+    status: confirmed
+  visa-hugo:
+    ga4_property: '531039430'
+    measurement_id: G-G6FF1V2K3R
+    status: confirmed
+  visafree-hugo:
+    ga4_property: '531135786'
+    measurement_id: G-HK5BELRYVL
+    status: confirmed
+  walking-hugo:
+    ga4_property: '531135787'
+    measurement_id: G-ZKDVHDKPWL
+    status: confirmed
+  watersports-hugo:
+    ga4_property: '531139672'
+    measurement_id: G-PK52YHF7Q6
+    status: confirmed
+  luxury-hugo:
+    ga4_property: '533565769'
+    measurement_id: G-2S7TC1NJDD
+    status: confirmed
+  citytours-hugo:
+    ga4_property: '533547904'
+    measurement_id: G-4YF910V1E6
+    status: confirmed
+  watertours-hugo:
+    ga4_property: '533560944'
+    measurement_id: G-EKW4EFDYJQ
+    status: confirmed
+  hiking-hugo:
+    ga4_property: '533501468'
+    measurement_id: G-K5K96JNJT1
+    status: confirmed
+  escape-hugo:
+    ga4_property: '533557099'
+    measurement_id: G-W0FJB7JDJN
+    status: confirmed
+  extreme-hugo:
+    ga4_property: '533528727'
+    measurement_id: G-BKKYK9013Y
+    status: confirmed
+  nightlife-hugo:
+    ga4_property: '533501469'
+    measurement_id: G-P9J1150QY3
+    status: confirmed
+  ghost-hugo:
+    ga4_property: '533502285'
+    measurement_id: G-9F8X8VL37D
+    status: confirmed
+  layover-hugo:
+    ga4_property: '533564578'
+    measurement_id: G-YTQN7Z24R4
+    status: confirmed
+  nomad-hugo:
+    ga4_property: '533489259'
+    measurement_id: G-4ZEVWWPLEH
+    status: confirmed

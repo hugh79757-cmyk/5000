@@ -1,0 +1,409 @@
+{
+ "by_family": {
+  "techpawz": 44,
+  "informationhot.kr": 24,
+  "rotcha.kr": 12
+ },
+ "ratio_by_blog": {
+  "airlines-hugo": {
+   "no_link": 115,
+   "total": 115,
+   "pct": 100
+  },
+  "appliance-hugo": {
+   "no_link": 402,
+   "total": 499,
+   "pct": 81
+  },
+  "beauty-hugo": {
+   "no_link": 315,
+   "total": 315,
+   "pct": 100
+  },
+  "compare-hugo": {
+   "no_link": 533,
+   "total": 621,
+   "pct": 86
+  },
+  "dividend-hugo": {
+   "no_link": 102,
+   "total": 518,
+   "pct": 20
+  },
+  "esim-hugo": {
+   "no_link": 253,
+   "total": 253,
+   "pct": 100
+  },
+  "ghost-hugo": {
+   "no_link": 93,
+   "total": 93,
+   "pct": 100
+  },
+  "phototour-hugo": {
+   "no_link": 109,
+   "total": 109,
+   "pct": 100
+  },
+  "rap-hugo": {
+   "no_link": 1,
+   "total": 555,
+   "pct": 0
+  },
+  "travel4-hugo": {
+   "no_link": 542,
+   "total": 640,
+   "pct": 85
+  },
+  "watersports-hugo": {
+   "no_link": 158,
+   "total": 158,
+   "pct": 100
+  },
+  "tour-hugo": {
+   "no_link": 177,
+   "total": 243,
+   "pct": 73
+  },
+  "eurail-hugo": {
+   "no_link": 161,
+   "total": 161,
+   "pct": 100
+  },
+  "luxury-hugo": {
+   "no_link": 112,
+   "total": 112,
+   "pct": 100
+  },
+  "camping-hugo": {
+   "no_link": 272,
+   "total": 272,
+   "pct": 100
+  },
+  "airports-hugo": {
+   "no_link": 141,
+   "total": 164,
+   "pct": 86
+  },
+  "rap2-hugo": {
+   "no_link": 8,
+   "total": 522,
+   "pct": 2
+  },
+  "deal-hugo": {
+   "no_link": 193,
+   "total": 278,
+   "pct": 69
+  },
+  "etf-hugo": {
+   "no_link": 64,
+   "total": 297,
+   "pct": 22
+  },
+  "layover-hugo": {
+   "no_link": 98,
+   "total": 98,
+   "pct": 100
+  },
+  "baby-hugo": {
+   "no_link": 425,
+   "total": 459,
+   "pct": 93
+  },
+  "massage-hugo": {
+   "no_link": 8,
+   "total": 8,
+   "pct": 100
+  },
+  "bus-hugo": {
+   "no_link": 161,
+   "total": 161,
+   "pct": 100
+  },
+  "sector-hugo": {
+   "no_link": 53,
+   "total": 340,
+   "pct": 16
+  },
+  "ferry-hugo": {
+   "no_link": 159,
+   "total": 159,
+   "pct": 100
+  },
+  "fitness-hugo": {
+   "no_link": 439,
+   "total": 483,
+   "pct": 91
+  },
+  "citytours-hugo": {
+   "no_link": 113,
+   "total": 113,
+   "pct": 100
+  },
+  "nomad-hugo": {
+   "no_link": 39,
+   "total": 39,
+   "pct": 100
+  },
+  "tours-hugo": {
+   "no_link": 172,
+   "total": 194,
+   "pct": 89
+  },
+  "rap3-hugo": {
+   "no_link": 3,
+   "total": 573,
+   "pct": 1
+  },
+  "ev-hugo": {
+   "no_link": 109,
+   "total": 195,
+   "pct": 56
+  },
+  "watertours-hugo": {
+   "no_link": 104,
+   "total": 104,
+   "pct": 100
+  },
+  "ipo-hugo": {
+   "no_link": 28,
+   "total": 170,
+   "pct": 16
+  },
+  "cruise-hugo": {
+   "no_link": 101,
+   "total": 101,
+   "pct": 100
+  },
+  "flights-hugo": {
+   "no_link": 246,
+   "total": 270,
+   "pct": 91
+  },
+  "car-hugo": {
+   "no_link": 8,
+   "total": 8,
+   "pct": 100
+  },
+  "guide-hugo": {
+   "no_link": 188,
+   "total": 273,
+   "pct": 69
+  },
+  "trains-hugo": {
+   "no_link": 112,
+   "total": 135,
+   "pct": 83
+  },
+  "interior-hugo": {
+   "no_link": 490,
+   "total": 601,
+   "pct": 82
+  },
+  "rotcha-blog": {
+   "no_link": 1265,
+   "total": 1367,
+   "pct": 93
+  },
+  "laptop-hugo": {
+   "no_link": 265,
+   "total": 273,
+   "pct": 97
+  },
+  "homeappliance-hugo": {
+   "no_link": 7,
+   "total": 7,
+   "pct": 100
+  },
+  "hiking-hugo": {
+   "no_link": 82,
+   "total": 82,
+   "pct": 100
+  },
+  "hotissue-hugo": {
+   "no_link": 659,
+   "total": 681,
+   "pct": 97
+  },
+  "rap5-hugo": {
+   "no_link": 1,
+   "total": 584,
+   "pct": 0
+  },
+  "culture-hugo": {
+   "no_link": 157,
+   "total": 157,
+   "pct": 100
+  },
+  "informationhot-hugo": {
+   "no_link": 356,
+   "total": 503,
+   "pct": 71
+  },
+  "transfers-hugo": {
+   "no_link": 157,
+   "total": 157,
+   "pct": 100
+  },
+  "travel-hugo": {
+   "no_link": 571,
+   "total": 659,
+   "pct": 87
+  },
+  "foodtour-hugo": {
+   "no_link": 142,
+   "total": 142,
+   "pct": 100
+  },
+  "health-hugo": {
+   "no_link": 291,
+   "total": 291,
+   "pct": 100
+  },
+  "travel1-hugo": {
+   "no_link": 414,
+   "total": 483,
+   "pct": 86
+  },
+  "senior-hugo": {
+   "no_link": 486,
+   "total": 519,
+   "pct": 94
+  },
+  "visa-hugo": {
+   "no_link": 219,
+   "total": 242,
+   "pct": 90
+  },
+  "daytrips-hugo": {
+   "no_link": 171,
+   "total": 171,
+   "pct": 100
+  },
+  "tco-hugo": {
+   "no_link": 186,
+   "total": 273,
+   "pct": 68
+  },
+  "michelin-hugo": {
+   "no_link": 239,
+   "total": 262,
+   "pct": 91
+  },
+  "escape-hugo": {
+   "no_link": 101,
+   "total": 101,
+   "pct": 100
+  },
+  "golf-hugo": {
+   "no_link": 6,
+   "total": 6,
+   "pct": 100
+  },
+  "techpawz-hugo": {
+   "no_link": 1556,
+   "total": 1558,
+   "pct": 100
+  },
+  "extreme-hugo": {
+   "no_link": 105,
+   "total": 105,
+   "pct": 100
+  },
+  "bike-hugo": {
+   "no_link": 5,
+   "total": 5,
+   "pct": 100
+  },
+  "pet-hugo": {
+   "no_link": 215,
+   "total": 215,
+   "pct": 100
+  },
+  "travel2-hugo": {
+   "no_link": 531,
+   "total": 645,
+   "pct": 82
+  },
+  "rank-hugo": {
+   "no_link": 141,
+   "total": 141,
+   "pct": 100
+  },
+  "biz-techpawz-hugo": {
+   "no_link": 612,
+   "total": 612,
+   "pct": 100
+  },
+  "visafree-hugo": {
+   "no_link": 160,
+   "total": 160,
+   "pct": 100
+  },
+  "deals-hugo": {
+   "no_link": 106,
+   "total": 106,
+   "pct": 100
+  },
+  "multiday-hugo": {
+   "no_link": 160,
+   "total": 160,
+   "pct": 100
+  },
+  "finance-hugo": {
+   "no_link": 32,
+   "total": 512,
+   "pct": 6
+  },
+  "stock-hugo": {
+   "no_link": 330,
+   "total": 798,
+   "pct": 41
+  },
+  "pick-hugo": {
+   "no_link": 131,
+   "total": 131,
+   "pct": 100
+  },
+  "issue-techpawz-hugo": {
+   "no_link": 324,
+   "total": 324,
+   "pct": 100
+  },
+  "walking-hugo": {
+   "no_link": 145,
+   "total": 145,
+   "pct": 100
+  },
+  "dining-hugo": {
+   "no_link": 120,
+   "total": 120,
+   "pct": 100
+  },
+  "travel3-hugo": {
+   "no_link": 601,
+   "total": 701,
+   "pct": 86
+  },
+  "adventure-hugo": {
+   "no_link": 154,
+   "total": 154,
+   "pct": 100
+  },
+  "nightlife-hugo": {
+   "no_link": 106,
+   "total": 106,
+   "pct": 100
+  },
+  "kitchen-hugo": {
+   "no_link": 300,
+   "total": 300,
+   "pct": 100
+  },
+  "nature-hugo": {
+   "no_link": 106,
+   "total": 106,
+   "pct": 100
+  }
+ }
+}

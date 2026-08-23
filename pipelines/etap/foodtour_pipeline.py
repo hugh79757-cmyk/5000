@@ -138,7 +138,14 @@ def _run_impl() -> bool:
     country = article.get("country", "")
     cover = fetch_city_image(city + " food tour", country, article["slug"]) if city else None
     body = fetch_body_images(city + " food tour", country, article["slug"], count=8) if city else []
-    _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    post_path = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    if not post_path:
+        # 쓰기 실패 시 발행 기록 생략 — DB(publish_log)와 디스크 불일치 방지.
+        # (2026-08-22 invalid_frontmatter 차단 후에도 publish_log 기록되어
+        #  재발행이 영구 막히는 사례의 근본 수정)
+        logger.error(f"[{BLOG_ID}] Hugo write 실패 → 발행 기록 생략: {article['slug']}")
+        send_alert(BLOG_ID, article["slug"], ["hugo_write_failed"])
+        return False
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"],

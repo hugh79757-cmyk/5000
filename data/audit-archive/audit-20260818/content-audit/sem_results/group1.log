@@ -1,0 +1,6 @@
+PROCESSED=100 FAILED=0 AVG=87.9 CRITICAL=29
+  LOW travel3-hugo/경주에서-맛볼-수-있는-매운등갈비찜과-맛집-5곳-추천- score=69 crit=['TEMPLATE_LEAK', 'EMPTY_OR_TOO_SHORT_BODY']
+  LOW stock-hugo/현대자동차-영업이익-195-감소-자동차-산업의-위기는- score=71 crit=[]
+  LOW laptop-hugo/문서작업용-가벼운-노트북-추천-top5-2026년 score=72 crit=['TEMPLATE_LEAK']
+  LOW citytours-hugo/municipiul-bucurești-city-tour score=74 crit=['TEMPLATE_LEAK']
+  LOW tours-hugo/best-tours-los-angeles score=74 crit=['TEMPLATE_LEAK']

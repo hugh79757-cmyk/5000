@@ -1109,7 +1109,11 @@ def _check_r13(site: Path) -> tuple[bool, str]:
             continue
         content = _read_file_safe(idx)
         body = _strip_frontmatter(content)
-        has_img = bool(re.search(r"<img\s", body)) or bool(re.search(r"!\[[^\]]*\]\(", body))
+        has_img = (
+            bool(re.search(r"<img\s", body))
+            or bool(re.search(r"!\[[^\]]*\]\(", body))
+            or bool(re.search(r"\{\{<\s*(?:figure|img|image|thumbnail)\b", body))
+        )
         if not has_img:
             no_image_posts.append(post_dir.name)
 
@@ -1266,6 +1270,33 @@ def _check_r16(site: Path) -> tuple[bool, str]:
     return True, f"최근 {len(posts)}건 전부 og:image 존재"
 
 
+def _rendered_html_for_post(site: Path, slug: str):
+    """실제 발행 페이지 HTML을 읽어 반환. 부재 시 None.
+
+    permalinks 설정에 따라 위치가 다르다:
+      - 기본: public/posts/{slug}/index.html
+      - posts="/:slug/": public/{slug}/index.html
+    둘 다 시도하고, 없으면 public/**/{slug}/index.html 를 glob 한다.
+    """
+    candidates = [
+        site / "public" / "posts" / slug / "index.html",
+        site / "public" / slug / "index.html",
+    ]
+    for p in candidates:
+        if p.exists():
+            try:
+                return p.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                return None
+    try:
+        hits = list(site.glob(f"public/**/{slug}/index.html"))
+        if hits:
+            return hits[0].read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    return None
+
+
 def _check_r17(site: Path) -> tuple[bool, str]:
     """R17: twitter:card = summary_large_image."""
     posts = _recent_posts(site, 10, since=_today_start())
@@ -1284,15 +1315,23 @@ def _check_r17(site: Path) -> tuple[bool, str]:
             val = tc_match.group(1).strip('"\'')
             if val != "summary_large_image":
                 wrong.append(f"{post_dir.name}({val})")
-        else:
-            # twitter:card 없으면 params下面에서 확인
-            params_match = re.search(r"\[params\]\s*\ntwitter[_:]?card\s*=\s*[\"']?([^\s\"'\n]+)", content, re.IGNORECASE)
-            if params_match:
-                val = params_match.group(1).strip('"\'')
-                if val != "summary_large_image":
-                    wrong.append(f"{post_dir.name}({val})")
-            else:
-                wrong.append(f"{post_dir.name}(없음)")
+            continue
+        # twitter:card 없으면 params下面에서 확인
+        params_match = re.search(r"\[params\]\s*\ntwitter[_:]?card\s*=\s*[\"']?([^\s\"'\n]+)", content, re.IGNORECASE)
+        if params_match:
+            val = params_match.group(1).strip('"\'')
+            if val != "summary_large_image":
+                wrong.append(f"{post_dir.name}({val})")
+            continue
+        # 소스 FM/params에 없으면 렌더된 HTML의 메타 확인 (extend-head 주입 등)
+        rendered = _rendered_html_for_post(site, post_dir.name)
+        if rendered is not None:
+            _tcs = re.findall(
+                r'<meta\s+name=["\']?twitter:card["\']?\s+content=["\']?([^"\'>\s]*)["\']?',
+                rendered, re.IGNORECASE)
+            if any(t.strip().lower() == "summary_large_image" for t in _tcs):
+                continue
+        wrong.append(f"{post_dir.name}(없음)")
 
     if wrong:
         return False, (

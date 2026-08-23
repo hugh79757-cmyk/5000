@@ -135,6 +135,14 @@ def _run_impl() -> bool:
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
+    # cross-sell + 내부링크 (base pipeline.py:333-339 클론 — 전용 파이프라인은 호출부가 없었음)
+    cross_html = build_cross_sell_html(
+        country=topic.get("country", ""),
+        city=topic.get("city", ""),
+        exclude_blog=BLOG_ID, max_items=3)
+    if cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
+    article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
     city = article.get("city", "")
     country = article.get("country", "")
     cover = fetch_city_image(city + " day trip", country, article["slug"]) if city else None

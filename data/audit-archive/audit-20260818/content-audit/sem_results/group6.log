@@ -1,0 +1,6 @@
+PROCESSED=100 FAILED=0 AVG=86.6 CRITICAL=35
+  LOW travel3-hugo/충남-아산시-해어름과-카페-피어라-장춘닭개장-맛집-3곳 score=56 crit=['TEMPLATE_LEAK']
+  LOW bus-hugo/posts score=59 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW travel4-hugo/충북-방곡-도예촌과-덕주사-여행-체크리스트 score=70 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW travel1-hugo/충북-축제행사-주차장-위치와-요금-정리 score=70 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW baby-hugo/아기침대-추천-top5-2026년 score=70 crit=['TEMPLATE_LEAK']

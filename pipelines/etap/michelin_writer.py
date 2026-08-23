@@ -101,14 +101,21 @@ RULES:
 - Do NOT invent restaurant names, awards, or prices not in the data
 - If price is "Price N/A", do not mention a price for that restaurant
 - Title must include "{city}" and "Michelin"
-- Required H2 sections (OMIT that H2 section entirely if no data exists. Do NOT write filler content):
-  ## Michelin Dining in {city}: An Overview
-  ## Three-Star and Two-Star Excellence (only if 3-star or 2-star exist)
-  ## One-Star Gems
-  ## Bib Gourmand: Best Value Fine Dining (only if Bib Gourmand exist)
-  ## Cuisine Styles You Will Find in {city}
-  ## Price Ranges and What to Expect
-  ## How to Book and Tips for Dining
+- STRICT STRUCTURE — MANDATORY. Your article body MUST contain EXACTLY these four H2 headings, in this exact order, each as its own line starting with "## " (NOT numbered, NOT bulleted, NOT nested under anything):
+  ## At a Glance
+  ## Where to Eat
+  ## Compare
+  ## FAQ
+  Content required under each:
+  - "## At a Glance" — a compact summary TABLE with columns: Restaurant | Award | Cuisine | Price (3-7 rows from data, sorted by award). Answers "what's here" immediately.
+  - "## Where to Eat" — detailed per-restaurant H3 sections (each 120-180 words: award, signature dish, price tier, why choose it). 3-6 restaurants.
+  - "## Compare" — a comparison TABLE with columns: Restaurant | Award | Cuisine | Price | Best For (same restaurants as At a Glance, add "Best For" verdict column). Drives dwell time.
+  - "## FAQ" — 3 questions with answers (e.g. "How far in advance should I book?", "Are there vegetarian options?", "What is the dress code?"). Target long-tail keywords.
+- HARD CONSTRAINT: all four H2 headings above MUST appear verbatim as level-2 headings. If ANY is missing, the article is invalid — always emit all four.
+- OPENING PARAGRAPH — MANDATORY: before "## At a Glance", write a 3-4 sentence intro paragraph about {city}'s Michelin dining scene (NO heading above it, NO table). The article body must start with this paragraph, never with a heading.
+- description/meta: 1-2 sentence summary of {city}'s Michelin scene (20-30 words). NEVER a section name like "At a Glance".
+- Internal links: at most 3 links per 500 words, and only to other {city} guides
+  or same-site travel content. Do NOT exceed 6 total internal links.
 - Mention each restaurant by exact name and award from data
 - Write naturally as a guide, not a list dump
 

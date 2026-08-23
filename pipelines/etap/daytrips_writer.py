@@ -224,8 +224,9 @@ TITLE (REQUIRED — first line, H1 format):
   - Use a specific angle: e.g. "Day Trips From {city}: Beaches, Ruins & Safari in One Day" or "Escaping {city}: The Best Day Trips by Budget" or "{city} Day Trip Guide: Castles, Coasts & Mountain Roads"
   - Vary the structure each time — do NOT repeat the same subtitle pattern]
 
-STRUCTURE (use these H2 headings exactly):
-## [Hook: one specific, concrete sentence about {city}]
+STRUCTURE:
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading. Put the concrete hook here as plain text — do NOT put it in an H2.
+- Then use these H2 headings exactly:
 ## Best Budget Day Trips
 ## Mid-Range Excursions Worth the Upgrade
 ## Premium Full-Day Experiences

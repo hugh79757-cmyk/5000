@@ -281,6 +281,8 @@ FORMAT (informational style — short paragraphs, tables, clear structure):
 - Keep paragraphs short (2-4 sentences); let tables and ### sub-sections carry price details
 
 RULES:
+- Write MINIMUM 1,100 words, target 1,200-1,600 words in English. Articles under 1,000 words are rejected. Expand each section into 2-3 full paragraphs; let the data tables carry details while your prose explains and compares.
+- Start with a 2-3 sentence introduction paragraph BEFORE any heading (do NOT begin the article with an H2)
 - Use ONLY the data above. Do NOT invent prices, baggage policies, meal options, fleet details, or lounge info.
 - For routes: group by region/hub, mention specific city pairs with prices.
 - For prices: cite exact dollar amounts and flight numbers from the data.

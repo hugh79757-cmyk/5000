@@ -1,0 +1,11 @@
+[
+  {
+    "blog_id": "airlines-hugo",
+    "post_path": "/Users/twinssn/Projects/ETAP/airlines-hugo/content/posts/icelandair-airline-review/index.md",
+    "check_name": "FM-DRAFT",
+    "action": "VERIFIED",
+    "detail": "no-op: source compliant (draft absent), targeted_recheck passed, 0 file change",
+    "timestamp": "2026-08-22T09:24:29.782895+00:00",
+    "actor": "agent"
+  }
+]

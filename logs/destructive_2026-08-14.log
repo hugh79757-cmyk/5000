@@ -1,0 +1,3 @@
+[2026-08-14 11:04] backup | 대상=data/content.db | 백업=data/content.db.bak_20260814_1104 | 목적=Phase3 20건 재생성 전 백업 | 보존=실발행 행 source='' 확인 대기
+[2026-08-14 22:26:59] C02 techpawz 확산: 4개 포스트(frontmatter 미종료 변형 '---개행누락+본문병합') 교정 후 Hugo빌드+Pages 재배포 | 사전카운트=4 | 백업=git tag pre-c02-variant-20260814(techpawz) | 사후=대시보드 C02 pass(791건), 라이브 4개 200 | 보존확인=본문 첫줄 무손실
+[2026-08-14 22:55] C02 description 오염 격리: 4개 포스트의 이전세션 절단 description(135~141자)을 HEAD 원복 + newline만 유지, Hugo빌드+Pages 재배포 | 사전카운트=4(desc 제거) | 백업=git tag pre-c02-variant-20260814 | 사후=라이브 4개 200, description 사이트기본값 원복, 대시보드 C02 pass 유지(fail 3건=c01/standard/R2-01 기존) | 보존확인=HEAD 대비 newline 변경만(desc 0개)

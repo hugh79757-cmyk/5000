@@ -1,0 +1,27 @@
+{
+ "seed_reproducible": false,
+ "reselect_count": 794,
+ "task5": {
+  "mech_findings": {
+   "TEMPLATE_LEAK_HIGH": 5097,
+   "NO_H2_MEDIUM": 3667,
+   "NO_INTERNAL_LINKS_MEDIUM": 18542,
+   "TOO_SHORT_BODY_HIGH": 360,
+   "SHORT_BODY_MEDIUM": 1036,
+   "LONG_TITLE_LOW": 352
+  },
+  "mech_high_unique": 5332,
+  "mech_any_unique": 19720,
+  "sem_critical": 230,
+  "sem_critical_unique": 230,
+  "hrr": 230,
+  "hrr_unique": 230,
+  "sem_crit_and_hrr": 230,
+  "sem_crit_and_mech_high": 230
+ },
+ "task6": {
+  "unverified_dim_scored": false,
+  "verification_dist": {},
+  "template_leak_high_score_count": 6
+ }
+}

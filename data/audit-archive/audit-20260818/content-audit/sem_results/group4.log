@@ -1,0 +1,6 @@
+PROCESSED=100 FAILED=0 AVG=87.7 CRITICAL=23
+  LOW biz-techpawz-hugo/test2 score=42 crit=['EMPTY_OR_TOO_SHORT_BODY']
+  LOW rank-hugo/중형suv-잔존가치-top5-완전-분석-가격연비감가보험 score=70 crit=['TEMPLATE_LEAK']
+  LOW pet-hugo/파스텔펫민소매-나시-3종-비교-반려동물-시원한-여름옷- score=70 crit=['TEMPLATE_LEAK']
+  LOW senior-hugo/인천-부평구-만65세-이상-참전유공자-매월-2123만원 score=72 crit=['TEMPLATE_LEAK']
+  LOW foodtour-hugo/chiinu-food-tours score=74 crit=['TEMPLATE_LEAK']

@@ -1,0 +1,2 @@
+[2026-08-10 01:40:54] travel-hugo 가독성 CSS 개선 + 배포 | 사전=백업 tag pre-readability-20260810 | 백업=git tag | 실행=deploy_site(travel-hugo) 배포 ea40081d | 사후=라이브 CSS hash 62ff.., strong:only-child 1건 + map.naver.com 1건, HTTP 200 | 보존확인=콘텐츠 파일 미수정
+[2026-08-10 01:48:01] travel-hugo 히어로(썸네일 배경) 끄기 showHero=false + 배포 | 사전=백업 tag pre-herooff-20260810 | 백업=git tag | 실행=deploy_site(travel-hugo) | 사후=라이브 샘플포스트 hero-* div·background.svg·featureimage bg 모두 0, header 직행 | 보존확인=콘텐츠/템플릿 미수정

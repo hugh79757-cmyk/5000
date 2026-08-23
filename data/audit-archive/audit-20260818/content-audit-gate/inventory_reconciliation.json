@@ -1,0 +1,29 @@
+{
+ "registry_total": 85,
+ "pipeline_sum": 85,
+ "pipeline_breakdown": {
+  "car": 8,
+  "curation": 15,
+  "etap": 36,
+  "UNASSIGNED": 5,
+  "travel": 8,
+  "rap": 5,
+  "senior": 2,
+  "stock": 6
+ },
+ "pipeline_unassigned_5": [
+  "rotcha-blog",
+  "informationhot-hugo",
+  "techpawz-hugo",
+  "biz-techpawz-hugo",
+  "issue-techpawz-hugo"
+ ],
+ "domain_family_sum": 85,
+ "domain_family_breakdown": {
+  "rotcha.kr": 13,
+  "informationhot.kr": 27,
+  "techpawz": 45
+ },
+ "reported_84_cause": "이전 감사 보고(b8)에서 curation을 14로 오기재(실제 15: appliance,baby,fitness,interior,laptop,health,pet,kitchen,beauty,camping,massage,car,homeappliance,golf,bike) + pipeline 미지정 5개(rotcha-blog, informationhot-hugo, techpawz-hugo, biz-techpawz-hugo, issue-techpawz-hugo)를 'manual 3'으로 혼동 — 실제 85개 전부 유지, 삭제·재분류 없음",
+ "domain_84_cause": "이전 보고에서 techpawz.com 44(+1)=45를 44+1 분리 표기한 것 외 합계 자체는 85 — 재계산 결과 13+27+45=85로 불일치 없음 (84는 원본 보고의 표기 오류 가능성, 실제 데이터 85)"
+}

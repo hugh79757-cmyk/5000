@@ -125,6 +125,11 @@ def _run_impl() -> bool:
     elif _qg_issues:
         logger.info("[%s] Quality warnings: %s", BLOG_ID, _qg_issues)
     article = _add_product_cards(article)
+    # cross-sell + 내부링크 (base pipeline.py:333-339 클론 — 항공사 리뷰는 도시 컨텍스트 없음, 링크 주입만)
+    _cross_html = build_cross_sell_html(country="", city="", exclude_blog=BLOG_ID, max_items=3)
+    if _cross_html:
+        article["content"] = insert_cross_sell_block(article["content"], _cross_html, position="bottom")
+    article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
     airline_name = article.get("airline_name", "")
     cover = fetch_city_image(airline_name + " airline", "", article["slug"]) if airline_name else None
     body = fetch_body_images(airline_name + " airplane", "", article["slug"], count=8) if airline_name else []

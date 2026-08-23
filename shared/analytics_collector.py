@@ -100,6 +100,41 @@ GA4_PROPERTIES = {
     "deal-hugo": None,
     "guide-hugo": None,
     "tco-hugo": None,
+    # 5000 — Track C ETAP 34 (ga4_measurement_map.yaml 기준, 2026-08-22 등록)
+    "adventure-hugo": "531123457",
+    "airlines-hugo": "531035921",
+    "airports-hugo": "531044776",
+    "bus-hugo": "531065834",
+    "cruise-hugo": "531006370",
+    "culture-hugo": "531065835",
+    "daytrips-hugo": "531054102",
+    "deals-hugo": "531065294",
+    "dining-hugo": "531047182",
+    "esim-hugo": "531068317",
+    "ferry-hugo": "531123458",
+    "flights-hugo": "531065272",
+    "foodtour-hugo": "531167909",
+    "michelin-hugo": "531066288",
+    "multiday-hugo": "531139671",
+    "nature-hugo": "531055811",
+    "tour-hugo": "531055776",
+    "tours-hugo": "531081222",
+    "trains-hugo": "531082945",
+    "transfers-hugo": "531012256",
+    "visa-hugo": "531039430",
+    "visafree-hugo": "531135786",
+    "walking-hugo": "531135787",
+    "watersports-hugo": "531139672",
+    "luxury-hugo": "533565769",
+    "citytours-hugo": "533547904",
+    "watertours-hugo": "533560944",
+    "hiking-hugo": "533501468",
+    "escape-hugo": "533557099",
+    "extreme-hugo": "533528727",
+    "nightlife-hugo": "533501469",
+    "ghost-hugo": "533502285",
+    "layover-hugo": "533564578",
+    "nomad-hugo": "533489259",
     # 5000 — Info
     "hotissue-hugo": "520232186",
     "info-hugo": None,
@@ -178,6 +213,43 @@ GSC_SITES = [
     "https://ev.techpawz.com/",
     # Rotcha root
     "https://rotcha.kr/",
+    # ETAP 36 (Track C — 2026-08-22, GSC 도메인 전부 등록 확인됨)
+    "https://adventure.techpawz.com/",
+    "https://airlines.techpawz.com/",
+    "https://airports.techpawz.com/",
+    "https://bus.techpawz.com/",
+    "https://citytours.techpawz.com/",
+    "https://cruise.techpawz.com/",
+    "https://culture.techpawz.com/",
+    "https://daytrips.techpawz.com/",
+    "https://deals.techpawz.com/",
+    "https://dining.techpawz.com/",
+    "https://escape.techpawz.com/",
+    "https://esim.techpawz.com/",
+    "https://eurail.techpawz.com/",
+    "https://extreme.techpawz.com/",
+    "https://ferry.techpawz.com/",
+    "https://flights.techpawz.com/",
+    "https://foodtour.techpawz.com/",
+    "https://ghost.techpawz.com/",
+    "https://hiking.techpawz.com/",
+    "https://layover.techpawz.com/",
+    "https://luxury.techpawz.com/",
+    "https://michelin.techpawz.com/",
+    "https://multiday.techpawz.com/",
+    "https://nature.techpawz.com/",
+    "https://nightlife.techpawz.com/",
+    "https://nomad.techpawz.com/",
+    "https://phototour.techpawz.com/",
+    "https://tour.techpawz.com/",
+    "https://tours.techpawz.com/",
+    "https://trains.techpawz.com/",
+    "https://transfers.techpawz.com/",
+    "https://visa.techpawz.com/",
+    "https://visafree.techpawz.com/",
+    "https://walking.techpawz.com/",
+    "https://watersports.techpawz.com/",
+    "https://watertours.techpawz.com/",
 ]
 
 # ── URL → blog_id 매핑 (GSC 결과 blog_id 변환용) ──
@@ -225,6 +297,43 @@ URL_TO_BLOG_ID = {
     # AI Korea
     "aikorea24.kr": "aikorea24",
     "persona.aikorea24.kr": "persona-aikorea24",
+    # ETAP 36 (Track C — 2026-08-22, gsc_pages 수집용)
+    "adventure.techpawz.com": "adventure-hugo",
+    "airlines.techpawz.com": "airlines-hugo",
+    "airports.techpawz.com": "airports-hugo",
+    "bus.techpawz.com": "bus-hugo",
+    "citytours.techpawz.com": "citytours-hugo",
+    "cruise.techpawz.com": "cruise-hugo",
+    "culture.techpawz.com": "culture-hugo",
+    "daytrips.techpawz.com": "daytrips-hugo",
+    "deals.techpawz.com": "deals-hugo",
+    "dining.techpawz.com": "dining-hugo",
+    "escape.techpawz.com": "escape-hugo",
+    "esim.techpawz.com": "esim-hugo",
+    "eurail.techpawz.com": "eurail-hugo",
+    "extreme.techpawz.com": "extreme-hugo",
+    "ferry.techpawz.com": "ferry-hugo",
+    "flights.techpawz.com": "flights-hugo",
+    "foodtour.techpawz.com": "foodtour-hugo",
+    "ghost.techpawz.com": "ghost-hugo",
+    "hiking.techpawz.com": "hiking-hugo",
+    "layover.techpawz.com": "layover-hugo",
+    "luxury.techpawz.com": "luxury-hugo",
+    "michelin.techpawz.com": "michelin-hugo",
+    "multiday.techpawz.com": "multiday-hugo",
+    "nature.techpawz.com": "nature-hugo",
+    "nightlife.techpawz.com": "nightlife-hugo",
+    "nomad.techpawz.com": "nomad-hugo",
+    "phototour.techpawz.com": "phototour-hugo",
+    "tour.techpawz.com": "tour-hugo",
+    "tours.techpawz.com": "tours-hugo",
+    "trains.techpawz.com": "trains-hugo",
+    "transfers.techpawz.com": "transfers-hugo",
+    "visa.techpawz.com": "visa-hugo",
+    "visafree.techpawz.com": "visafree-hugo",
+    "walking.techpawz.com": "walking-hugo",
+    "watersports.techpawz.com": "watersports-hugo",
+    "watertours.techpawz.com": "watertours-hugo",
 }
 
 # ── Bing API 키 ──
@@ -613,6 +722,35 @@ def collect_gsc(days: int = 1) -> dict:
                     f"  [{blog_id}] 계정{account_num} 클릭 {clicks}, 노출 {impressions}, "
                     f"키워드 {len(sorted_rows)}개"
                 )
+
+                # ── gsc_pages INSERT (Track C — 2026-08-22) ──
+                # 페이지 단위 조회: 색인/노출 per page 확인용 (charter: GSC 노출/클릭 우선순위)
+                try:
+                    page_resp = service.searchanalytics().query(
+                        siteUrl=site_url,
+                        body={
+                            "startDate": target_date,
+                            "endDate": target_date,
+                            "dimensions": ["page"],
+                            "rowLimit": 1000,
+                        },
+                    ).execute()
+                    for prow in page_resp.get("rows", []):
+                        page_url = prow["keys"][0]
+                        conn.execute(
+                            """INSERT OR REPLACE INTO gsc_pages
+                               (blog_id, date, page, clicks, impressions, ctr, position, collected_at)
+                               VALUES (?,?,?,?,?,?,?, datetime('now','localtime'))""",
+                            (
+                                blog_id, target_date, page_url,
+                                int(prow["clicks"]), int(prow["impressions"]),
+                                round(prow["ctr"] * 100, 2), round(prow["position"], 1),
+                            ),
+                        )
+                except Exception as page_e:
+                    logger.warning(
+                        f"  gsc_pages 수집 실패 [{blog_id}]: {str(page_e)[:80]}"
+                    )
 
             except Exception as e:
                 if _is_auth_error(e):
