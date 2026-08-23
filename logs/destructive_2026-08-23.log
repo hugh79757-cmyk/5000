@@ -1,0 +1,5 @@
+[01:25:02] git commit 90fb025f6 (10 files) | 사전=테스트19/19 PASS | 백업=git 히스토리 자체 | 사후=커밋 755+/5- 확인 | 보존확인=KEYWORD_MAP fallback 유지
+[01:25:02] launchctl unload+load com.5000.scheduler | 사전=PID 99774 | 백업=plist 재로드로 즉시 복구 가능 | 사후=PID 15626 단일 프로세스, job 등록 검증 | 보존확인=기존 job 전부 재등록
+[2026-08-23 06:59:04] scheduler restart (harvest log fallback fix 8ef2ef083) | 사전=PID확인 | 백업=불필요(프로세스만) | 사후=신규 PID 기동 확인
+[2026-08-23 08:37] phase2 ETAP 36블로그 표준파일 확산 | 사전카운트=40복사+9airports+2hugo.toml파라미터 | 백업=*.bak_phase2(+git) | 상태=빌드36/36통과후 배포진행중
+[2026-08-23 08:52] phase2 배포 완료 | 사후=35/36배포성공(flights W5게이트차단-기존콘텐츠문제) | 라이브검증13/13 ads로더확인(airports 신규활성화) | 보존확인=michelin top.html·extend-head 미변경
