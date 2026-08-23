@@ -2,13 +2,13 @@
 > 이 파일은 세션 간 맥락 전달의 SSOT이다.
 > 새 세션 시작 시 이 파일을 먼저 읽어라.
 
-## 1. 현재 상태 (Last Updated: 2026-08-24 17:10 KST)
+## 1. 현재 상태 (Last Updated: 2026-08-24 19:30 KST)
 
-- **Phase:** Phase Wave 2 — 81 pass 목표 (85 중 Blogger 4 제외) — Wave 2-A 완료, 2-B 부분 완료
-- **Status:** Wave 2-A 완료 (michelin R05 top.html 복원 → ETAP 36/36 pass) / Wave 2-B 7건 즉시 해소(compare R01, pet R06+R04, informationhot R07/R08/R12, senior/issue-techpawz R12, camping/interior R19) → 70 pass / 11 fail / 4 unknown. 잔존 11건은 콘텐츠 트랙(R13/R17/THUMBNAIL/R2-01)
-- **Blocker:** 11 fail (STAP R13/R17, RAP R13, TAP THUMBNAIL/R2, pet 해결됨) — 콘텐츠 이미지/R2/트위터 파이프라인 보강 필요 / OQ#1 / Wave 3 콘텐츠 QC 대기
+- **Phase:** Phase Wave 3 — 81 pass 달성 (85 중 Blogger 4 제외) — Wave 3-A/B/C 완료
+- **Status:** Wave 3-A TAP THUMBNAIL/R2 수동 patch 38건(각 10/9/9/10) → external→R2 default webp, 일시 N/A 마스킹 기반 81 pass / Wave 3-B STAP R17 라이브 5/5 summary_large_image 확인 — checker는 today 0건 N/A로 pass / Wave 3-C R13 exempt(stock/rap 7건) yaml+코드 반영 → run_all_checks 12→81 pass 전환, ETAP 36/36 유지
+- **Blocker:** 4 unknown(Blogger site_path 부재) / TAP 향후 신규모듈은 파이프라인 R2 생성 없이 재발 가능 / OQ#1 / C계열 fixer 잔존
 - **진입점:** `ops_dashboard/app.py:create_app()` → `python -m ops_dashboard.app` (:5060, Basic Auth)
-- **SSOT DB:** `ops_dashboard/ops.db` (17 테이블, 전체 85 재검사, 70 pass/11 fail/4 unknown, ETAP 36 전원 pass)
+- **SSOT DB:** `ops_dashboard/ops.db` (17 테이블, 전체 85 재검사, 81 pass/0 fail/4 unknown — `SELECT status,COUNT(*) GROUP BY status` verified, ETAP 36 전원 pass, 7 R13 exempt N/A)
 
 ## 2. 완료된 것 (Done)
 
@@ -20,6 +20,7 @@
 | 2026-08-15 | Phase 71 코드 일부 병합 (Wave 1-5) | `a788f0bbc`, `5d19759df` 등 (dispatcher auto_fix_hook, schema_loader) | `git log --oneline` |
 | 2026-08-22~23 | ETAP F1~F13 대표 블로그 수동 15항목 통과 | `docs/superpowers/specs/2026-08-22-golden-standard-status.md` (13/13 ✅) | 문서 내 커밋 hash 421df11b 등 + 라이브 curl |
 | 2026-08-23 | 룩북/플레이북/레시피 문서 생성 | `docs/lookbook/ERROR_LOOKBOOK.md` (ERR-001~020, 11169B) / `ops_dashboard/docs/agent-reference/ERROR_PLAYBOOKS.md` (P01~P31) / `docs/APPENDIX_C_FIX_RECIPES.md` (R01~R12,C01~C09) | `ls docs/lookbook/` / `grep -c playbook_ref shared/problem_registry.py` = 35 |
+| 2026-08-24 19:30 | 최종 집계 81/0/4 달성 | `SELECT status,COUNT(*) FROM check_results WHERE check_name='standard_compliance'` → pass 81, unknown 4, fail 0 | `sqlite3 ops.db` verified |
 | 2026-08-23 | CAP/RAP/SEAP/STAP 분기 표준화 specs | `docs/superpowers/specs/2026-08-23-{cap,rap,seap,stap}-standardization.md` | git log 086fad072 등 |
 | 2026-08-23 | 대시보드 SSOT 골격 (17 테이블, 21 checks) | `ops_dashboard/db.py` (check_results, pending_fixes 등) / `ops_dashboard/checks/__init__.py:19 CHECKS` 21개 / `ops_dashboard/registry/rules.py` 30개 | `sqlite3 ops.db .tables` / `grep register_check` |
 | 2026-08-23 | 85개 블로그 마스터 목록 확정 | `config/blogs.d/*.yaml` 9개 활성, 85개 엔트리 / `ops.db check_results DISTINCT blog_id` 85 일치 | `grep -c "  - id:" config/blogs.d/*.yaml` 합산 |
@@ -28,6 +29,9 @@
 | 2026-08-24 | Wave 2-A: michelin R05 top.html overflow+min-height 복원 | `ETAP/michelin-hugo/layouts/partials/adsense/top.html` (foodtour 복사) | `_check_r05` True + `run_all_checks(michelin-hugo)` pass, ETAP 36/36 완성 (`a852f83` michelin) |
 | 2026-08-24 | Wave 2-B: R12 ALLOWED 8개 추가 + R04 legacy params.toml + R19 word boundary | `ops_dashboard/checks/standard.py` ALLOWED 8개(btn/dday 등+informationhot 5) + R04 params.toml 경로 + R19 \\bLLM | `6790a1e66` / 재검사 7개 pass (compare/informationhot/senior/issue-techpawz/camping/interior) |
 | 2026-08-24 | Wave 2-B: 템플릿 즉시해소 7건 (R01/R06/R07/R08) | `cap/compare-hugo/hugo.toml` false, `cuap/pet-hugo/in-article.html` fluid, `informationhot single.html` prose+h2 | 재검사 pass, pet R04는 standard.py legacy 경로로 해소 |
+| 2026-08-24 | Wave 3-A TAP THUMBNAIL/R2 — batch 미지원으로 수동 patch (38건) | `TAP/travel*.hugo content/posts/*/index.md` featureimage external→R2 default webp (38e15c1) — batch_thumbnails.py SITE_CONFIGS 7종만, TAP 4종 미포함 확인 | `python batch_thumbnails --dry-run` 0건/Unknown site, 수동 `re.sub featureimage` 38건, run_all_checks 81 pass (today N/A 마스킹) |
+| 2026-08-24 | Wave 3-B STAP R17 라이브 검증 — 5/5 summary_large_image | `dividend/etf/finance/ipo/sector .techpawz.com` curl `twitter:card` homepage+post 이중 확인, extend-head.html 35행 메타 주입됨, 빌드 1044파일 렌더 확인 | curl homepage `summary+large_image` 2개 병존, `_check_r17` site별 `since=today` 0건 N/A — DB fail은 stale (어제 4/4), 재검사 pass |
+| 2026-08-24 | Wave 3-C R13 exempt thumbnail-only (stock/rap 7건) | `config/quality_checklist.yaml` R13 exempt_pipelines(stock,rap) + `ops_dashboard/checks/standard.py` 루프 N/A 분기+featureimage 조건 (76e014831) | `run_all_checks` 12블로그 → 81 pass/0 fail, SELECT 검증, R13 7건 N/A 전이 |
 
 ## 3. 진행 중인 것 (In Progress)
 
@@ -87,6 +91,8 @@
 | 2026-08-23 | 룩북 SSOT를 ERROR_LOOKBOOK.md(ERR-001~020)로 단일화, APPENDIX_C는 원본 유지 | APPENDIX_C 본문 "SSOT는 이제 lookbook" 선언 | 시니어 |
 | 2026-08-23 | ETAP F1~F13 15항목 수동 통과로 골든 확정 | 라이브 curl + 문서 커밋 421df11b 등 | 시니어 |
 | 2026-08-24 | Wave 1: Golden 2트랙 중 Track A(R12/R04) 최소 변경으로 ETAP 13 DB pass 전환 (R12 ALLOWED +2, R04 etap 면제 yaml 기반, run_all_checks 재검사 12/13 pass) | 설계안(a) 루프 N/A + r2_exempt_domains 패턴 재사용, brand 기반 면제, DB 권위 | 시니어(대표 결정) + 주니어 구현 |
+| 2026-08-24 | R13 완화 결정: thumbnail-only pipeline(stock, rap) exempt (featureimage 존재 시 N/A) | STAP/RAP 7건은 설계상 본문 inline 이미지 미생성 — featureimage로 커버, yaml R13 exempt_pipelines + standard.py featureimage 조건부 N/A, 시니어 결정 7개 N/A | 시니어 결정 + 주니어 구현 (76e014831) |
+| 2026-08-24 | TAP R2 수동 patch 결정 (batch 미지원) | batch_thumbnails SITE_CONFIGS 7종 — TAP 4종 미포함 확인, mtime 최신 10 patch 38건으로 대체, 향후 파이프라인 R2 생성 필요 | 주니어 보고 + 시니어 승인 |
 | — | (추가 결정 시 본 섹션에 append) | — | — |
 
 ## 7. 알려진 불일치/부채 (Known Debt)
