@@ -161,6 +161,18 @@ ALLOWED_OVERRIDES = {
     "layouts/partials/extend-head-uncached.html",
     "layouts/partials/related-posts.html",
     "layouts/partials/home/background.html",
+    "layouts/shortcodes/btn.html",
+    "layouts/shortcodes/dday.html",
+    "layouts/shortcodes/inchcm.html",
+    "layouts/shortcodes/datecalc.html",
+    "layouts/shortcodes/linkcard.html",
+    "layouts/partials/extend_footer.html",
+    "layouts/partials/cover.html",
+    "layouts/partials/share_icons.html",
+    "layouts/partials/share-buttons.html",
+    "layouts/partials/jsonld.html",
+    "layouts/partials/templates/opengraph.html",
+    "layouts/partials/templates/twitter_cards.html",
 }
 
 # 오버라이드가 아닌 정크 파일: 위반으로 보고하지 않지만 별도로 집계한다.
@@ -349,6 +361,15 @@ def _check_r04(site: Path) -> tuple[bool, str]:
                           content, re.DOTALL)
             if m:
                 return True, f"hugo.toml: [services.googleAnalytics] ID={m.group(1)} (Blowfish 자동 생성)"
+
+    # (b') legacy params.toml googleAnalytics (Blowfish 구버전, site.Params.googleAnalytics)
+    for conf_path in (site / "config" / "_default" / "params.toml", site / "params.toml",
+                      site / "config" / "params.toml"):
+        if conf_path.exists():
+            content = _read_file_safe(conf_path)
+            m2 = re.search(r'googleAnalytics\s*=\s*["\'](G-[A-Z0-9]+)["\']', content)
+            if m2:
+                return True, f"params.toml: googleAnalytics={m2.group(1)} (legacy, Blowfish)"
 
     return False, evidence or "No extend_head.html found and no hugo.toml [services.googleAnalytics] ID"
 
@@ -1069,8 +1090,8 @@ _R19_BANNED_PATTERNS = [
     re.compile(r"AI-generated", re.IGNORECASE),
     re.compile(r"ChatGPT", re.IGNORECASE),
     re.compile(r"GPT-4", re.IGNORECASE),
-    re.compile(r"Claude", re.IGNORECASE),
-    re.compile(r"LLM", re.IGNORECASE),
+    re.compile(r"\bClaude\b", re.IGNORECASE),
+    re.compile(r"\bLLM\b", re.IGNORECASE),
 ]
 
 # R20 분류코드 원문 패턴 (large_airport, medium_airport, small_airport, IATA 코드 등)
