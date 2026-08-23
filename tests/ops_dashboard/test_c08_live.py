@@ -9,6 +9,15 @@ from ops_dashboard.checks.content_integrity import (  # noqa: E402
     _compare_live_vs_local,
 )
 
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def _guard_prod_ops_db(monkeypatch, tmp_path):
+    """conftest 운영 DB 가드 오버라이드 (레포 컨벤션) — tmp 경로 가리킴."""
+    from shared import publish_error_events as events
+    monkeypatch.setattr(events, "OPS_DB_PATH", tmp_path / "ops_test.db")
+
 
 GOOD_HTML = """
 <html><head>
@@ -74,3 +83,28 @@ def test_check_c08_no_site_returns_error_not_pass():
     ok, detail = _check_c08(None, "fixture-blog")
     assert ok is False, "site 없음은 통과가 아닌 명시적 에러"
     assert "C08_" in detail, f"detail 에 problem_id 형태 포함: {detail}"
+
+
+def test_c08_cache_suffix_not_duplicated():
+    """캐시 경로 접미사 누적 방지 — (캐시: 24h 내 실행됨)은 detail에 항상 1회만."""
+    import sqlite3
+    from datetime import datetime, timedelta
+
+    from ops_dashboard.checks.content_integrity import check_c08
+
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute(
+        "CREATE TABLE check_results (blog_id TEXT, check_name TEXT,"
+        " status TEXT, detail TEXT, checked_at TEXT)"
+    )
+    recent = (datetime.now() - timedelta(hours=1)).isoformat()
+    # 이미 접미사가 누적된 오염 행도 한 번에 정규화되는지 확인
+    polluted = "C08_SITE_UNREACHABLE" + " (캐시: 24h 내 실행됨)" * 5
+    conn.execute(
+        "INSERT INTO check_results VALUES ('x-hugo','c08_live_file_mismatch','fail',?,?)",
+        (polluted, recent),
+    )
+    r = check_c08(conn, "x-hugo")
+    assert r["detail"].count(" (캐시: 24h 내 실행됨)") == 1, r["detail"]
+    assert "C08_SITE_UNREACHABLE" in r["detail"]

@@ -674,9 +674,11 @@ def check_c08(conn, blog_id: str) -> dict:
         if last:
             _ts = datetime.fromisoformat(last["checked_at"])
             if (datetime.now() - _ts).total_seconds() < 24 * 3600:
+                # 접미사 중복 누적 방지 — 이전 실행에서 붙은 캐시 문구는 제거 후 1회만 부착
+                base = last["detail"].replace(" (캐시: 24h 내 실행됨)", "")
                 return {
                     "status": last["status"],
-                    "detail": last["detail"] + " (캐시: 24h 내 실행됨)",
+                    "detail": base + " (캐시: 24h 내 실행됨)",
                     "evidence_url": "",
                 }
     except Exception:
