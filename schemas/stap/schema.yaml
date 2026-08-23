@@ -1,0 +1,25 @@
+# stap/schema.yaml — STAP 분기 스키마
+# 상속: _base/default.yaml (deep-merge)
+# 근거: 표본 finance-hugo(40), sector-hugo(40) frontmatter (2026-08-22)
+#   - featureimage 존재율: 40/40, 36/40 — 필수 (finance) / 부분 (sector)
+#   - title: 잘림 35/40, 16/40 (높음) — 기존 발행물 다수가 '…' 잘림 형식
+#     → forbid_ellipsis=false + allow_suffix (수용). 단, 신규 잘림은 writer 개선으로 지향 (TODO)
+#   - ticker 키 존재 (finance 20/40, sector 23/40) — 주식 종목 코드
+#   - _base와의 차이: featureimage partial, ticker 허용, title 접미사 수용
+
+required_frontmatter: [title, description, date, slug, tags]
+allowed_og_patterns:
+  - "https://pub-[a-z0-9]+\\.r2\\.dev/.+"
+title_format_rule:
+  max_len: 80
+  forbid_ellipsis: false         # 기존 발행물 35/40 '…' 잘림 (표본 finance)
+  allow_suffix: ["…"]
+live_og_format_rule: contains
+og_rule:
+  og_image_required: false       # sector 36/40, finance 40/40 — 부분 필수
+  og_image_source: featureimage
+empty_value_policy:
+  featureimage: allow
+template_constraints:
+  ticker_allowed: true           # 주식 종목 코드 키 허용 (finance 20/40, sector 23/40)
+  # TODO: ticker를 required로 올릴지 — sector 23/40만 존재, 재검토 필요
