@@ -3,3 +3,4 @@
 [2026-08-23 06:59:04] scheduler restart (harvest log fallback fix 8ef2ef083) | 사전=PID확인 | 백업=불필요(프로세스만) | 사후=신규 PID 기동 확인
 [2026-08-23 08:37] phase2 ETAP 36블로그 표준파일 확산 | 사전카운트=40복사+9airports+2hugo.toml파라미터 | 백업=*.bak_phase2(+git) | 상태=빌드36/36통과후 배포진행중
 [2026-08-23 08:52] phase2 배포 완료 | 사후=35/36배포성공(flights W5게이트차단-기존콘텐츠문제) | 라이브검증13/13 ads로더확인(airports 신규활성화) | 보존확인=michelin top.html·extend-head 미변경
+[2026-08-23 09:22] flights 이미지보강+재배포 | 사전카운트=2건(R13 0장) | 백업=index.md.bak_img_fix x2 | 사후=R2 webp 200x2, 라이브 <img> 1개씩 확인, 배포 OK | 보존확인=michelin 무변경
