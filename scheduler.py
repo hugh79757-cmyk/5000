@@ -865,7 +865,7 @@ def _run_car_refresh() -> None:
     timed_out = False
     try:
         proc = subprocess.Popen(
-            [sys.executable, "pipelines/car/daily_refresh.py"],
+            [sys.executable, "-m", "pipelines.car.daily_refresh"],
             cwd=os.path.dirname(os.path.abspath(__file__)),
             stdout=stdout_tmp, stderr=stderr_tmp, text=True,
             start_new_session=True,
