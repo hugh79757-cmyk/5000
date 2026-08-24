@@ -134,3 +134,8 @@
 - CAP: ev pending 0→50 (0%→12.0%, total 415) — keyword_expander 없음 확인, 수동 INSERT (ev_clone_*)로 대체
 - STAP: stock_issue 라우팅 조사 — BLOG_SOURCE_MAP 정상, collect→publish_log 정상, 2799건 미사용은 ipo pipeline에서 get_unused_data로 정상 반환됨 (버그 아님, 활용 대기)
 - W5 R13: pick 2 + rap2 7 + rap4 10 = 19건 `![Travel image](default-thumbnail.webp)` 주입, hugo build 3개 pass, pages deploy 3개 성공 (6805c63e/5418c971/785f8c63)
+
+### 2026-08-24 마감
+- airports +200건 리셋 (251/9324, 2.7%) — 0.5%→2.7%
+- W5 19건 placeholder→R2 교체 시도했으나 r2.rotcha.kr DNS 미존재로 빌드 실패 → 롤백, default-thumbnail 유지 (빌드 pass)
+- 내일 확인: CUAP keyword_pool 03:00, STAP ipo stock_issue 소진 추이
