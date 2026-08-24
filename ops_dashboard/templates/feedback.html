@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<p>{{ items|length }} feedback entries{% if status_filter %} (status={{ status_filter }}){% endif %}{% if since_filter %} since {{ since_filter }}{% endif %}.</p>
+{% if since_filter or status_filter != 'open' %}
+<p style="font-size:0.85rem"><a href="/feedback">Show open (default)</a> · <a href="/feedback?status=all">Show all</a> · <a href="/api/feedback{% if since_filter %}?since={{ since_filter }}{% endif %}">API JSON</a></p>
+{% endif %}
+
+<div class="view-section">
+  <div class="table-view">
+    <div class="table-wrap">
+      <table>
+        <tr><th data-sort="asc">id</th><th data-sort>ts</th><th data-sort>type</th><th data-sort>rule_id</th><th data-sort>blog_id</th><th data-sort>slug</th><th data-sort>gate_decision</th><th>reason</th></tr>
+        {% for f in items %}
+        <tr>
+          <td><strong>{{ f.id }}</strong></td>
+          <td style="font-size:0.85rem;white-space:nowrap">{{ f.ts }}</td>
+          <td><span class="badge badge-{{ 'warn' if f.type == 'false_positive' else 'fail' if f.type == 'false_negative' else 'unknown' }}">{{ f.type }}</span></td>
+          <td>{{ f.rule_id }}</td>
+          <td>{{ f.blog_id }}</td>
+          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ f.slug }}">{{ f.slug }}</td>
+          <td>{{ f.gate_decision }}</td>
+          <td style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ f.reason }}">{{ f.reason }}</td>
+        </tr>
+        {% endfor %}
+        {% if not items %}
+        <tr><td colspan="8" class="empty">No feedback entries</td></tr>
+        {% endif %}
+      </table>
+    </div>
+  </div>
+  <div class="card-view">
+    {% for f in items %}
+    <div class="mobile-card">
+      <div class="mc-title">{{ f.id }} <span class="badge badge-{{ 'warn' if f.type == 'false_positive' else 'fail' if f.type == 'false_negative' else 'unknown' }}">{{ f.type }}</span> {{ f.rule_id }}</div>
+      <div class="mc-row"><span class="mc-label">ts</span><span>{{ f.ts }}</span></div>
+      <div class="mc-row"><span class="mc-label">blog</span><span>{{ f.blog_id }}</span></div>
+      <div class="mc-row"><span class="mc-label">slug</span><span>{{ f.slug }}</span></div>
+      <div class="mc-row"><span class="mc-label">gate</span><span>{{ f.gate_decision }}</span></div>
+      <div class="mc-row"><span class="mc-label">reason</span><span>{{ f.reason }}</span></div>
+    </div>
+    {% endfor %}
+    {% if not items %}
+    <p class="empty">No feedback entries</p>
+    {% endif %}
+  </div>
+</div>
+
+<p style="font-size:0.85rem;color:#6c757d;margin-top:0.5rem">Source: <code>logs/rule_feedback.jsonl</code> · <a href="/api/feedback{% if since_filter %}?since={{ since_filter }}{% endif %}">API</a> · <code>python scripts/rule_feedback_review.py --since 7d</code></p>
+
+{% endblock %}

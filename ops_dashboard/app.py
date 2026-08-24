@@ -457,6 +457,32 @@ def _register_human_routes(app: Flask) -> None:
             issues=issues,
         )
 
+    @app.route("/feedback")
+    @app.route("/rule-feedback")
+    @require_auth
+    def feedback():
+        """Rule feedback read-only view — reads logs/rule_feedback.jsonl."""
+        since = request.args.get("since", "")
+        status_param = request.args.get("status", "open")
+        # status=all -> no filter, else filter by value
+        status_filter = None if status_param == "all" else status_param
+        try:
+            from shared.rule_feedback import read_feedback
+            items = read_feedback(
+                since_days=since if since else None,
+                status=status_filter,
+            )
+        except Exception:
+            items = []
+        return render_template(
+            "feedback.html",
+            title="Rule Feedback",
+            active="feedback",
+            items=items,
+            status_filter=status_param,
+            since_filter=since,
+        )
+
     @app.route("/publish-errors")
     @require_auth
     def publish_errors():
@@ -792,6 +818,22 @@ def _register_api_routes(app: Flask) -> None:
         count = sync_blog_lifecycle(conn)
         _touch_sync_marker()
         return jsonify({"synced": count, "status": "ok"})
+
+    @app.route("/api/feedback")
+    @require_auth
+    def api_feedback():
+        """Rule feedback JSON — reads logs/rule_feedback.jsonl, missing file -> []."""
+        since = request.args.get("since", "")
+        status = request.args.get("status")
+        try:
+            from shared.rule_feedback import read_feedback
+            items = read_feedback(
+                since_days=since if since else None,
+                status=status,
+            )
+        except Exception:
+            items = []
+        return jsonify(items)
 
     @app.route("/api/pending-fixes")
     @require_auth
