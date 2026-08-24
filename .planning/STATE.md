@@ -69,7 +69,7 @@ progress:
 | 61 | Pipeline Standardization & Branch Renewal | ✅ | 9 plans/6 waves 실행 (2026-08-07) |
 | 62 | Content Leak Prevention — C01~C08 Rule System | ✅ | 5 plans/5 waves 실행 완료 (2026-08-07): standard_rules INSERT, leak_tracker 훅, preflight 게이트, 대시보드 체크 |
 | 63 | Content Integrity Refinement — C07/C09 검증 + 저혈압 글 판정 | ✅ | 1 plan/1 wave 실행 완료 (2026-08-07): C09 check_c09_frontmatter() 추가, 62-01 재검증 (C04 16/16, C07 95/95, C09 27/27, 오탐 0), health 저혈압 글 배포누락 판정 |
-| 64 | 규칙 체계 자기진화 + 운영헌장 | ✅ | 설계·문서 완료 (2026-08-07): C05→P 이동, 네임스페이스 분리(RULE-/ISSUE-), S01/S04 severity 확정, 관찰기간 7일+긴급예외, 오탐미탐 자동기록/승격 사람승인, Task 6 프리플라이트 체크리스트 5종 설계, OPERATIONS-CHARTER 갱신 |
+| 64 | 규칙 체계 자기진화 + 운영헌장 | 🔄 | Wave 3 진행 중: 64-06 실행 완료 (runbook + reverse-validate + promote helper) — 5단계 등록 파이프라인, 범용 역검증(--rule-id/--positive-dir/--negative-dir), 인간 승인 게이트(--approve), 긴급 예외 조항. 커밋 1ea5125ff. 64-07(차터 운영화) 병렬 실행 대기. |
 | 66 | P09 시나리오 A/B 판별 (조사 전용) | ✅ | 조사 완료 (2026-08-07). A 반증: health-hugo·pet-hugo 이미지 URL 4,776개 전수 스캔 결과 P09 패턴(세그먼트 50% 이상 중복) 0건. B 확정 불가: P09 알림 로그 0건이나, 로그 부재가 "알림 미발생"인지 "로그 유실"인지 구분 불가 → B 성립 여부는 확인 불가. 감지 slug 특정 불가(로그 0건). deploy.log range 오류(178건/70 slug, 전부 pet-hugo tags repr)와 P09는 별개 확정(교차 0건). 66-RESEARCH.md "B 성립" 결론은 지나치게 강함 — A만 반증되고 B는 미확정이 정확. 코드 수정·INSERT·배포 일체 없음. |
 | 67 | fix-g3-first — 오토트리아지 무인화 + 라이브 청소 | ✅ | 실행 완료 (2026-08-08). 커밋 `4d78d3f3f`. launchd 등록 2건(ops-dashboard + auto-triage), auto_triage fail-loud 전환, watchdog 3자 감시, dead_links 43건 제거(Wave 1), 8개 블로그 빌드·배포(Wave 2). STATE.md Phase 67 섹션에 상세. |
 | 68 | PPM-5 images:// URL 정규식 검증 추가 | ✅ | 실행 완료 (2026-08-09). 커밋 `ceb65a170`. shared/app_images/core.py 신규 생성: IMAGES_URL_PATTERN(^images://), _build_images_asset_path() 정규식 검증, _validate_images_url(), normalize_hugo_asset_url(). baby-hugo 등 HUGO_BASEURL 없는 환경에서 images:// 생성 시 FrontMatter 삭제 방지 안전 가드. |
@@ -91,6 +91,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-24 | Phase 64 Task 64-06 — Rule Registration Runbook + Reverse-Validate + Promote Helper (5-step pipeline, generalized validator, human-gated promote) | `1ea5125ff` |
 | 2026-08-10 | ETAP 발행 회귀 수정 — `_write_hugo_post_etap()`에서 tags list→str 정규화 (AttributeError: 'list' object has no attribute 'split' 해소, luxury/escape/extreme/nightlife/ghost/layover 등 6+블로그) | `본 커밋` |
 | 2026-08-06 | Phase 59-01 — Replace per-pipeline _write_hugo_post() in 34 ETAP pipelines with shared import | `b420e69cc`, `4ff78c0e5`, `d0fd9d2a8`, `a64544294`, `21f445b79` |
 | 2026-08-06 | Phase 59-07 — hotissue-hugo PaperMod to Blowfish migration (theme field, layouts, hugo.toml, SingleAuthor fix) | `d6ce85165`, `f8c186ed6`, `b3fcdb1`, `e55626b` |
@@ -508,4 +509,26 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 **next_action:** 2026-08-21 Interior sitemap experiment Day 3 checkpoint
 
-*Last updated: 2026-08-18 - M5 조건부 최종 로드맵 반영 (KA1 READY_WITH_GAPS, KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING, Day 3/7/14 체크포인트 + SCALE_CANDIDATE/ITERATE(1회)/NO_EFFECT_STOP/HARM_STOP 분기).*
+**Status:** 🔄 Wave 3 진행 중 — 64-06 완료 (runbook + reverse-validate + promote helper), 64-07 병렬 실행 대기
+**Context:** `.planning/phases/PHASE-64-rule-system-evolution/64-PLAN.md`
+**목표:** C01~C09 5-category 재편(C/S/L/P/V)을 코드로 operationalize하고 3종 자기개선 메커니즘(leak aggregate / feedback loop / registration)을 additive 코드로 구현하며, 운영헌장을 실행 게이트와 연결한다 — 기존 C01~C09 동작 불변, 신규 규칙은 WARNING observe부터
+
+### 64-06: Registration Runbook + Reverse-Validate + Promote Helper ✅
+
+**완료일:** 2026-08-24
+**커밋:** `1ea5125ff` feat(64-06): add rule registration runbook + reverse-validate + promote helper
+
+**생성 파일:**
+- `docs/RULE_REGISTRATION_RUNBOOK.md` — 5단계 등록 파이프라인 (Discover→Observe 7d→Reverse-Validate 100%+0FP→Promote --approve→Document), 단계별 체크리스트, 아티팩트 경로, 긴급 예외 조항
+- `scripts/rule_reverse_validate.py` — `c01_c08_reverse_validation.py` 일반화; `--rule-id --positive-dir --negative-dir` 인터페이스; 양성 전건탐지 + 음성 오탐0 게이트 (exit 0/1); C01 데모 데이터 검증 통과 (3/3 detected, 0/3 false positive)
+- `scripts/rule_promote.py` — `ops_dashboard/db.py:SEED_STANDARD_RULES` severity inplace 치환; `--approve` 플래그 필수(헌장 §6-2); regex replace + 백업 + 사후 체크리스트 출력; `--approve` 없으면 exit 1
+
+**검증 완료:**
+- Runbook: `grep -c "단계 3"` = 4, `grep -c "긴급 예외"` = 5 ✅
+- Reverse validator: `--help` contains `--rule-id` ✅
+- Promote: without `--approve` → exit 1 + "인간 승인 필요" ✅; with `--approve` on copy → severity updated ✅
+- Demo validation: C01 data → 100% detection + 0% false positive → exit 0 ✅
+
+**다음 단계:** 64-07 (차터 운영화: AGENTS.md 포인터 + dispatcher dry-run flag) 병렬 실행
+
+*Last updated: 2026-08-24 - Phase 64 Task 64-06 완료 (runbook + reverse-validate + promote helper, 커밋 1ea5125ff). Phase 64 Wave 3 진행 중 (64-07 차터 운영화 병렬 대기). M5 IN_PROGRESS/ACTIVE_WAITING.*

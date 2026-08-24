@@ -1,7 +1,7 @@
 # Roadmap: 5000
 
-**Last updated:** 2026-08-18
-**코드 기준 실제 상태:** Phase 1~17, 24, 28, 49, 50, 52(Wave 1~4), 56, 58, 59, 61, 62, 63, 64, 66, 67 실행 완료. Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55. 문서 갱신 필요(Phase 18~21, 44 상태 불명확).
+**Last updated:** 2026-08-24
+**코드 기준 실제 상태:** Phase 1~17, 24, 28, 49, 50, 52(Wave 1~4), 56, 58, 59, 61, 62, 63, 64(Wave 0~3), 66, 67 실행 완료. Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55. 문서 갱신 필요(Phase 18~21, 44 상태 불명확).
 **현재 대시보드:** http://localhost:5060 (ops_dashboard, Phase 59 산출물)
 **조건부 최종 로드맵:** Reliability Critical Path M1~M7 (본 문서 하단) — M1~M4 COMPLETED, M5 IN_PROGRESS/ACTIVE_WAITING, M6·M7 BLOCKED_BY_M5. next_action = 2026-08-21 Interior sitemap experiment Day 3 checkpoint.
 
@@ -715,6 +715,47 @@ Total in 898 ms +
 
 - `.planning/phases/61-pipeline-standardization-branch-renewal/CONTEXT.md` — 논의 확정 사항
 - `.planning/phases/61-pipeline-standardization-branch-renewal/PLAN.md` — 단계별 실행 계획
+
+---
+
+## Phase 64: 규칙 체계 자기진화 + 운영헌장
+
+**Status:** 🔄 IN_PROGRESS (Wave 3/4)  
+**Context:** `.planning/phases/PHASE-64-rule-system-evolution/`  
+**Depends on:** Phase 62 (C01~C08), Phase 63 (C09)  
+**M5 Critical Path:** Phase 62~64 Quality Blocking (M5)
+
+### Phase 64 Wave Structure
+
+| Wave | Plans | Status | Description |
+|------|-------|--------|-------------|
+| 0 | 64-01 | ✅ COMPLETED | Preflight C01 gap + ETAP locale + C09 seed idempotency |
+| 1 | 64-02, 64-03 | ✅ COMPLETED | Leak JSONL sidecar + blog_id threading + aggregate report |
+| 2 | 64-04, 64-05 | ✅ COMPLETED | Feedback JSONL store + review CLI + dashboard read hook |
+| 3 | 64-06, 64-07 | 🔄 64-06 ✅ / 64-07 대기 | Registration runbook + reverse-validate + promote helper + Charter operationalization |
+| 4 | 64-08 | 📋 PLANNED | Dashboard C/S/L/P/V matrix (computed, no migration) |
+
+### 64-06 완료 (2026-08-24)
+
+**커밋:** `1ea5125ff` feat(64-06): add rule registration runbook + reverse-validate + promote helper
+
+**산출물:**
+- `docs/RULE_REGISTRATION_RUNBOOK.md` — 5단계 등록 파이프라인 (Discover→Observe 7d→Reverse-Validate 100%+0FP→Promote --approve→Document), 단계별 체크리스트, 아티팩트 경로, 긴급 예외 조항
+- `scripts/rule_reverse_validate.py` — 범용 역검증 (`c01_c08_reverse_validation.py` 일반화); `--rule-id --positive-dir --negative-dir`; 양성 전건탐지 + 음성 오탐0 게이트 (exit 0/1); C01 데모 데이터 검증 통과 (3/3 detected, 0/3 false positive)
+- `scripts/rule_promote.py` — `ops_dashboard/db.py:SEED_STANDARD_RULES` severity inplace 치환; `--approve` 플래그 필수(헌장 §6-2); regex replace + 백업 + 사후 체크리스트 출력
+
+**검증:** Runbook 단계 3/긴급 예외 포함 ✅, reverse validator `--rule-id` ✅, promote `--approve` 게이트 작동 ✅, C01 데모 검증 통과 ✅
+
+### 64-07 대기 중
+- AGENTS.md 차터 포인터 1줄 추가
+- `shared/charter_checklist.py` thin helper (작업 유형별 체크리스트 출력)
+- dispatcher dry-run flag comment hook
+
+### 64-08 계획
+- `ops_dashboard/db.py`: `RULE_CATEGORY_MAP` dict + `get_rule_category(rule_id)` (C01~C09 + S/L/P/V 미래 규칙)
+- `ops_dashboard/app.py`: `/api/category-matrix?blog_id=` + index context injection
+- Template: blog list row에 `C:0 S:0 L:1 P:0 V:0` 텍스트 배지
+- Zero migration: `check_results` 스키마 변경 없음, 앱 레이어에서 computed mapping
 
 ---
 
