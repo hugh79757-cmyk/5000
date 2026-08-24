@@ -37,6 +37,7 @@
 
 | 작업 | 담당 | 시작일 | 다음 액션 | 블로커 |
 |------|------|--------|-----------|--------|
+| CUAP 종결 검증 | 주니어 | 2026-08-24 | 내일 06:00 VERIFY 재실행 (harvest 03:00/expander 02:00) — 내일 4항목 pass 시 PART D/E 종결 | harvester 윈도우 미스 (스케줄러 복구 08:41, 윈도우 02-06 놓침) — no_keyword=0 확인, 발행 5건 정상 (interior/laptop/health/pet/kitchen), 대기 중 |
 | Phase 71 계획 미커밋 정리 | 시니어 | 2026-08-14 | `.planning/phase-71-*` git add + STATE.md 생성 | git 미추적 상태, OQ#1/OQ#2 |
 | C계열 5개 fixer 구현 (C01/C03/C04/C05/C09) | — | — | `shared/autofix/fix_c0*.py` 생성 + FIXERS 등록 + dispatcher 매핑 | 선언-only 상태 (조사 2 확인) |
 | AD_INSERT 4패밀리 보완 (tap/rap/seap/etap) | — | — | yaml brand_standards에 AD_INSERT 블록 추가 또는 OQ#1 보류 명시 고도화 | OQ#1 |
