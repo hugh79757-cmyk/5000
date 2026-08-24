@@ -254,3 +254,236 @@ def clean_prompt_leaks(content: str) -> str:
     for p in patterns:
         content = _re.sub(p, "", content, flags=_re.IGNORECASE)
     return content.strip()
+
+
+# ============================================================
+# PHASE 70 WAVE 1: EDITORIAL SYNTHESIS STEP
+# ============================================================
+
+def editorial_synthesis_step(content: str, source_data: dict) -> tuple[str, int]:
+    """Phase 70 Wave 1: 템플릿 마커 치환 + 데이터 포인트 주입 (S03/S04 게이트 연동).
+    
+    GPT가 생성한 초안에서 {{...}} 형태의 템플릿 마커를 실제 데이터로 치환하고,
+    검증 가능한 데이터 포인트를 본문에 명시적으로 주입한다.
+    
+    Args:
+        content: GPT 생성 초안 (마크다운)
+        source_data: 원본 소스 데이터 (prices, dates, names, metrics 등)
+    
+    Returns:
+        (synthesized_content, injected_count): 치환된 본문과 주입된 데이터 포인트 수
+    """
+    if not content or not source_data:
+        return content, 0
+    
+    injected_count = 0
+    
+    # 1. 템플릿 마커 치환 ({{key}} -> value)
+    # 일반적인 마커 패턴들
+    marker_patterns = {
+        r"\{\{city\}\}": ["city", "origin_city", "destination_city", "dest_city"],
+        r"\{\{origin\}\}": ["origin", "origin_code", "origin_city"],
+        r"\{\{destination\}\}": ["destination", "dest_city", "destination_city"],
+        r"\{\{price\}\}": ["price", "min_price", "max_price", "cost", "fare"],
+        r"\{\{date\}\}": ["date", "departure_date", "return_date", "start_date"],
+        r"\{\{airline\}\}": ["airline", "operator", "carrier", "seller"],
+        r"\{\{tour_name\}\}": ["tour_name", "product_name", "name", "title"],
+        r"\{\{discount\}\}": ["discount", "discount_percent", "savings"],
+        r"\{\{rating\}\}": ["rating", "stars", "score"],
+        r"\{\{duration\}\}": ["duration", "min_duration", "max_duration"],
+        r"\{\{stops\}\}": ["stops", "min_stops", "layovers"],
+    }
+    
+    for pattern, keys in marker_patterns.items():
+        matches = list(re.finditer(pattern, content))
+        if not matches:
+            continue
+        
+        # source_data에서 첫 번째 매칭되는 값 찾기
+        replacement = None
+        for key in keys:
+            # source_data 직접 검색
+            if key in source_data and source_data[key]:
+                val = source_data[key]
+                if isinstance(val, (list, tuple)) and val:
+                    # 리스트인 경우 첫 번째 유효한 항목 사용
+                    for item in val:
+                        if isinstance(item, dict):
+                            for k in keys:
+                                if k in item and item[k]:
+                                    replacement = str(item[k])
+                                    break
+                        elif item:
+                            replacement = str(item)
+                            break
+                        if replacement:
+                            break
+                elif isinstance(val, dict):
+                    for k in keys:
+                        if k in val and val[k]:
+                            replacement = str(val[k])
+                            break
+                else:
+                    replacement = str(val)
+                break
+            
+            # 중첩 구조 검색 (예: flight_prices[0].price)
+            for data_key, data_val in source_data.items():
+                if isinstance(data_val, (list, tuple)):
+                    for item in data_val:
+                        if isinstance(item, dict) and key in item and item[key]:
+                            replacement = str(item[key])
+                            break
+                    if replacement:
+                        break
+        
+        if replacement:
+            # 모든 매치 치환
+            content = re.sub(pattern, replacement, content)
+            injected_count += len(matches)
+            logger.debug(f"[editorial] Replaced {len(matches)}x {{...}} with '{replacement}'")
+    
+    # 2. 데이터 포인트 명시적 주입 (S03 게이트 지원)
+    # 본문에 없는 중요 데이터 포인트를 H2 섹션 끝에 주입
+    
+    # 가격 데이터 주입
+    price_data = []
+    for data_key, data_val in source_data.items():
+        if isinstance(data_val, (list, tuple)):
+            for item in data_val:
+                if isinstance(item, dict):
+                    for price_key in ["price", "min_price", "max_price", "cost", "fare"]:
+                        if price_key in item and item[price_key] is not None:
+                            try:
+                                price_data.append(float(str(item[price_key]).replace("$", "").replace(",", "")))
+                            except (ValueError, TypeError):
+                                pass
+    
+    if price_data:
+        min_price = min(price_data)
+        max_price = max(price_data)
+        # "Price Range:" 또는 "From $" 패턴이 없으면 주입
+        if "price range" not in content.lower() and "from $" not in content.lower():
+            # 첫 번째 H2 뒤에 가격 범위 문단 추가
+            first_h2 = re.search(r"^## .+", content, re.MULTILINE)
+            if first_h2:
+                insert_pos = content.find("\n\n", first_h2.end())
+                if insert_pos == -1:
+                    insert_pos = first_h2.end()
+                price_text = f"\n\nPrice range for this route: ${int(min_price):,}–${int(max_price):,}.\n"
+                content = content[:insert_pos] + price_text + content[insert_pos:]
+                injected_count += 1
+    
+    # 날짜 데이터 주입
+    date_data = []
+    for data_key, data_val in source_data.items():
+        if isinstance(data_val, (list, tuple)):
+            for item in data_val:
+                if isinstance(item, dict):
+                    for date_key in ["date", "departure_date", "return_date", "start_date", "end_date"]:
+                        if date_key in item and item[date_key]:
+                            date_data.append(str(item[date_key]))
+    
+    if date_data:
+        # 첫 번째 유효한 날짜 사용
+        first_date = date_data[0]
+        if "depart" not in content.lower() and "travel date" not in content.lower():
+            first_h2 = re.search(r"^## .+", content, re.MULTILINE)
+            if first_h2:
+                insert_pos = content.find("\n\n", first_h2.end())
+                if insert_pos == -1:
+                    insert_pos = first_h2.end()
+                date_text = f"\n\nTravel dates available from {first_date}.\n"
+                content = content[:insert_pos] + date_text + content[insert_pos:]
+                injected_count += 1
+    
+    # 항공사/운영사 데이터 주입
+    airline_data = set()
+    for data_key, data_val in source_data.items():
+        if isinstance(data_val, (list, tuple)):
+            for item in data_val:
+                if isinstance(item, dict):
+                    for airline_key in ["airline", "operator", "carrier", "seller", "provider"]:
+                        if airline_key in item and item[airline_key]:
+                            airline_data.add(str(item[airline_key]))
+    
+    if airline_data:
+        airlines = ", ".join(sorted(airline_data)[:5])  # 최대 5개
+        if "airline" not in content.lower() and "operated by" not in content.lower():
+            first_h2 = re.search(r"^## .+", content, re.MULTILINE)
+            if first_h2:
+                insert_pos = content.find("\n\n", first_h2.end())
+                if insert_pos == -1:
+                    insert_pos = first_h2.end()
+                airline_text = f"\n\nOperated by: {airlines}.\n"
+                content = content[:insert_pos] + airline_text + content[insert_pos:]
+                injected_count += 1
+    
+    return content, injected_count
+
+
+def count_verifiable_data_points(content: str, source_data: dict) -> int:
+    """S03 게이트 지원: 본문 내 검증 가능한 데이터 포인트 수 계산.
+    
+    editorial_synthesis_step으로 주입된 포인트 포함하여 계산.
+    quality_guard.unique_data_points_gate와 로직 공유.
+    """
+    if not source_data:
+        return 0
+    
+    # quality_guard의 unique_data_points_gate 로직 재사용
+    try:
+        from pipelines.etap.quality_guard import unique_data_points_gate
+        _, count, _ = unique_data_points_gate(content, source_data, threshold=0)
+        return count
+    except ImportError:
+        pass
+    
+    # 폴백: 간단한 카운트
+    count = 0
+    content_lower = content.lower()
+
+    # 가격
+    for data_key, data_val in source_data.items():
+        if isinstance(data_val, (list, tuple)):
+            for item in data_val:
+                if isinstance(item, dict):
+                    for price_key in ["price", "min_price", "max_price"]:
+                        if price_key in item and item[price_key]:
+                            val = str(item[price_key]).replace("$", "").replace(",", "")
+                            if val in content:
+                                count += 1
+
+    return count
+
+
+# ============================================================
+# PHASE 70 WAVE 2: EDITORIAL SYNTHESIS LAYER (canonical)
+# ============================================================
+# Canonical synthesis lives in editorial_synthesis.py with the plan signature
+# (content, unique_data, topic) -> str. Imported here (aliased to avoid
+# shadowing the Wave 1 editorial_synthesis_step above, which tests depend on).
+from pipelines.etap.editorial_synthesis import editorial_synthesis_step as _editorial_synthesis_assemble
+from pipelines.etap.data_adapters import get_unique_data_points, ADAPTER_REGISTRY
+
+
+def apply_editorial_synthesis(content: str, topic: dict = None, topic_type: str = None, topic_id=None) -> str:
+    """Phase 70 Wave 2: resolve data points for a topic, synthesize an editorial
+    paragraph, and append it to the end of the content.
+
+    Wrapped in try/except: on any failure it logs a warning and returns the
+    untouched content (graceful degradation). Returns content unchanged when the
+    synthesized paragraph is empty.
+    """
+    try:
+        ttype = topic_type or (topic or {}).get("topic_type") or (topic or {}).get("type")
+        if not ttype or ttype not in ADAPTER_REGISTRY:
+            return content
+        unique_data = get_unique_data_points(ttype, topic_id)
+        paragraph = _editorial_synthesis_assemble(content, unique_data, topic or {})
+        if not paragraph:
+            return content
+        return content.rstrip() + "\n\n" + paragraph + "\n"
+    except Exception as exc:
+        logger.warning("[editorial] synthesis skipped: %s", exc)
+        return content
