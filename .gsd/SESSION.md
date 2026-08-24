@@ -147,3 +147,7 @@
 - bus-hugo P02: draft 'practical tip:' 5회 반복 DRAFT 차단 → 재시도 시 다음 토픽 nîmes-to-barcelona-bus 성공 (pipeline_success, deployed true)
 - consecutive_failures: 4개 모두 0 확인 (리셋 불필요)
 - 커버 중복 fix: deals_pipeline destination-based (b176b8549, 4 LA etag 분리)
+
+### 2026-08-24 — MAN-004 토픽 고갈 매뉴얼 + 대시보드 체크 생성
+- docs/manuals/MAN-004-topic-exhaustion.md: 정의/감지(수동 SQL 5분기)/대응(200건 리셋)/예방(잔여일수)/DB스키마/영구해결/이력 4건
+- ops_dashboard/checks/topic_pool_health.py: ETAP per-table + CAP site_id + RAP blog_target, WARN<10 CRIT=0, 49개 체크 전원 PASS (CRITICAL 0, WARNING 0 after orphan skip), 기존 runner 없음 → TODO 주석 유지, 수동 실행 `.venv/bin/python ops_dashboard/checks/topic_pool_health.py`
