@@ -351,6 +351,16 @@ RULES: list[UnifiedEntry] = [
         action="배포 시점 사람 승인 상태 기록 존재해야 함",
         bucket="actionable",
     ),
+    UnifiedEntry(
+        id="CF-01",
+        kind="rule",
+        target="content/posts/*/index.md (본문 날짜 + festival DB)",
+        severity="MAJOR",
+        threshold="always",
+        check_fn="check_content_freshness",
+        action="본문 날짜 만료(60일) 또는 festival DB 갱신 중단 시 재생성/refresh 필요 (ERR-021/022)",
+        bucket="actionable",
+    ),
 
 ]
 

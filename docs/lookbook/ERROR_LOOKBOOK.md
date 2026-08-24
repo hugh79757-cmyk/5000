@@ -28,6 +28,8 @@
 | 018 | LLM 폴백 전멸 | P22 | ✅ /publish-errors |
 | 019 | 설정 오류 | P21 | ✅ /publish-errors |
 | 020 | 미등록 오류 | unknown_failure, P33+ | ⚠️ events에 기록, problems.yaml 미등록 |
+| 021 | 콘텐츠 날짜 만료 | CF-01 (content_freshness=stale) | ✅ /standards (content_freshness) |
+| 022 | 데이터 소스 갱신 중단 | CF-01 (content_freshness=db_stale) | ✅ /standards (content_freshness) |
 
 ---
 
