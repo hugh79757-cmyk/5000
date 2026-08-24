@@ -139,3 +139,11 @@
 - airports +200건 리셋 (251/9324, 2.7%) — 0.5%→2.7%
 - W5 19건 placeholder→R2 교체 시도했으나 r2.rotcha.kr DNS 미존재로 빌드 실패 → 롤백, default-thumbnail 유지 (빌드 pass)
 - 내일 확인: CUAP keyword_pool 03:00, STAP ipo stock_issue 소진 추이
+
+### 2026-08-24 — 반복 오류 근본 수정 (Phase1-4)
+- watersports: 50→0 소진 확인 후 200건 추가 리셋 (총 250건, 잔여 209), publish 성공 확인 (dispatcher pipeline_success)
+- beauty-hugo P04: deploy 경로 정상 확인 — WORKERS_BLOGS 포함, wrangler.toml [assets] 존재, wrangler deploy 9-19s 성공 로그 확인 (오탐, 조치 불필요)
+- rap4-hugo P02: 원인은 W5 이미지 게이트가 rap exempt 미반영 → deploy.py _pre_deploy_image_gate에 R13 exempt_pipelines(rap/stock) 스킵 로직 추가 → 재배포 성공 (하남시 리버나인, deployed true)
+- bus-hugo P02: draft 'practical tip:' 5회 반복 DRAFT 차단 → 재시도 시 다음 토픽 nîmes-to-barcelona-bus 성공 (pipeline_success, deployed true)
+- consecutive_failures: 4개 모두 0 확인 (리셋 불필요)
+- 커버 중복 fix: deals_pipeline destination-based (b176b8549, 4 LA etag 분리)

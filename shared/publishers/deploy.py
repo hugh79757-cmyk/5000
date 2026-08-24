@@ -117,6 +117,26 @@ def _pre_deploy_image_gate(site: Path) -> None:
     #  패리티 요구가 오탐을 유발 — 키 유무만으로 게이트 차단 금지)
     _req_parity = {k for k in ("featureimage",) if k in _reference_keys}
 
+    # R13 exempt 파이프라인(rap/st stock)은 게� 미적용 — quality_checklist.yaml r13 exempt_pipelines 와 동기
+    _r13_exempt = False
+    try:
+        from pathlib import Path as _P
+        import yaml as _yaml
+        _qc = _P("/Users/twinssn/Projects/5000/config/quality_checklist.yaml")
+        if _qc.exists():
+            _data = _yaml.safe_load(_qc.read_text(encoding="utf-8"))
+            for r in (_data.get("global_standard") or []):
+                if r.get("id") == "R13":
+                    _ex = r.get("exempt_pipelines") or []
+                    # site 경로로 blog_id 추정 → etap/rap/stock 판별
+                    _bid = site.name  # e.g. rap4-hugo
+                    # rap/stock exempt: rap4-hugo, rap-hugo 등 prefix 매칭
+                    if any(_bid.startswith(p) or p in _bid for p in _ex):
+                        _r13_exempt = True
+                    break
+    except Exception:
+        pass
+
     _failures = []
     for name, text, fm in _recent:
         # noindex 포스트는 검색노출 제외 의도이므로 이미지 게이트 대상에서 제외.
@@ -130,7 +150,7 @@ def _pre_deploy_image_gate(site: Path) -> None:
             or re.search(r"!\[[^\]]*\]\(", body)
             or re.search(r"\{\{<\s*(?:figure|img|image|thumbnail)\b", body)
         )
-        if not _has_img:
+        if not _has_img and not _r13_exempt:
             _failures.append(f"{name}: R13 본문삽입이미지 0장")
         if not (re.search(r"featureimage:\s*\S", text)
                 or re.search(r"og_image:\s*\S", text)):
