@@ -11,6 +11,8 @@ schedule>=1.2.0
 python-dotenv>=1.0.1
 python-frontmatter>=1.1.0
 requests>=2.32.0
+scikit-learn>=1.5.0
+numpy>=1.26.0
 
 Pillow
 boto3

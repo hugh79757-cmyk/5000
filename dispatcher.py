@@ -645,6 +645,7 @@ def preflight_check(blog_id: str) -> dict:
     """배포 전 콘텐츠 무결성 프리플라이트 체크.
 
     C01(MAJOR warn-only)/C02(CRITICAL)/C04(CRITICAL)/C09(CRITICAL) 검사.
+    S01~S05(CRITICAL) Phase 70 Wave 1 품질 게이트 검사.
     C06/C08 placeholder (미구현, 주석 유지). blocked는 CRITICAL 위반만.
 
     Returns:
@@ -809,6 +810,174 @@ def preflight_check(blog_id: str) -> dict:
                             break  # 한 포스트당 1건만 기록
         except Exception:
             pass  # YAML 파싱 실패 시 C09 검사는 skip (C02에서 이미 걸렸을 가능성)
+
+        # --- PHASE 70 WAVE 1: S-CATEGORY RULES ---
+        # S01: Uniqueness Ratio ≥ 0.85
+        # S02: Structural Similarity ≤ 0.70
+        # S03: Unique Data Points ≥ 3
+        # S04: Editorial Synthesis (no template markers)
+        # S05: Freshness Gate (data age < 30 days)
+        
+        # Corpus 추출 (현재 포스트 제외)
+        corpus = []
+        for other_md in posts_dir.rglob("*.md"):
+            if other_md == md_file:
+                continue
+            try:
+                other_content = other_md.read_text(encoding="utf-8", errors="replace")
+                other_body_start = other_content.find("---\n", 4)
+                if other_body_start > 0:
+                    other_body = other_content[other_body_start + 4:]
+                    if len(other_body) > 200:
+                        corpus.append(other_body)
+            except Exception:
+                pass
+        
+        # Frontmatter 파싱 (S04, S05용)
+        fm_dict = {}
+        try:
+            import yaml as _yaml_s
+            fm_body = '\n'.join(lines[1:second_dash]) if second_dash else ''
+            fm_dict = _yaml_s.safe_load(fm_body) or {}
+        except Exception:
+            pass
+        
+        # S01: Uniqueness Ratio
+        if corpus:
+            try:
+                from pipelines.etap.quality_guard import uniqueness_ratio_gate
+                passed, ratio, details = uniqueness_ratio_gate(body, corpus, threshold=0.85)
+                if not passed:
+                    violations.append({
+                        "rule_id": "S01", "slug": slug, "severity": "CRITICAL",
+                        "detail": f"S01 위반: uniqueness={ratio:.4f} (threshold=0.85), max_sim={details.get('max_similarity', 0):.4f}",
+                        "file": str(md_file)})
+                    blocked = True
+            except ImportError:
+                pass  # quality_guard 미사용 블로그는 skip
+            except Exception as e:
+                logger.warning(f"[preflight] S01 check error for {slug}: {e}")
+        
+        # S02: Structural Similarity
+        if corpus:
+            try:
+                from pipelines.etap.quality_guard import structural_similarity_gate
+                passed, sim, details = structural_similarity_gate(body, corpus, threshold=0.70)
+                if not passed:
+                    violations.append({
+                        "rule_id": "S02", "slug": slug, "severity": "CRITICAL",
+                        "detail": f"S02 위반: structural_sim={sim:.4f} (threshold=0.70)",
+                        "file": str(md_file)})
+                    blocked = True
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.warning(f"[preflight] S02 check error for {slug}: {e}")
+        
+        # S03: Unique Data Points (source_data 재구성 필요 - ETAP 블로그만)
+        if blog_id in ETAP_PIPELINE_BLOGS:
+            try:
+                from pipelines.etap.quality_guard import unique_data_points_gate
+                # slug로 source_data 재구성 시도
+                source_data = {}
+                import sqlite3
+                db_path = Path(__file__).parent / "data" / "travel-en.db"
+                if db_path.exists():
+                    conn = sqlite3.connect(str(db_path))
+                    conn.row_factory = sqlite3.Row
+                    row = conn.execute(
+                        "SELECT topic_id FROM publish_log WHERE blog_id = ? AND slug = ? ORDER BY log_id DESC LIMIT 1",
+                        (blog_id, slug)
+                    ).fetchone()
+                    if row and row["topic_id"]:
+                        topic_id = row["topic_id"]
+                        source_data["topic_id"] = topic_id
+                        # 관련 테이블에서 데이터 조회
+                        for table in ["flight_prices", "popular_directions", "flight_calendar"]:
+                            try:
+                                rows = conn.execute(f"SELECT * FROM {table} WHERE origin = ? OR destination = ? LIMIT 20",
+                                                   (slug, slug)).fetchall()
+                                if rows:
+                                    source_data[table] = [dict(r) for r in rows]
+                            except Exception:
+                                pass
+                    conn.close()
+                
+                if source_data:
+                    passed, count, details = unique_data_points_gate(body, source_data, threshold=3)
+                    if not passed:
+                        violations.append({
+                            "rule_id": "S03", "slug": slug, "severity": "CRITICAL",
+                            "detail": f"S03 위반: data_points={count} (threshold=3)",
+                            "file": str(md_file)})
+                        blocked = True
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.warning(f"[preflight] S03 check error for {slug}: {e}")
+        
+        # S04: Editorial Synthesis (template markers)
+        template_markers = re.findall(r"\{\{[^}]+\}\}", body)
+        if template_markers:
+            unique_markers = set(template_markers)
+            violations.append({
+                "rule_id": "S04", "slug": slug, "severity": "CRITICAL",
+                "detail": f"S04 위반: 미치환 템플릿 마커 {len(unique_markers)}개 — {list(unique_markers)[:5]}",
+                "file": str(md_file)})
+            blocked = True
+        
+        # S05: Freshness Gate
+        freshness_keys = ["data_date", "price_date", "source_date", "last_updated", "data_freshness_days"]
+        for key in freshness_keys:
+            if key in fm_dict and fm_dict[key]:
+                val = str(fm_dict[key]).strip()
+                try:
+                    from datetime import datetime as _dt
+                    for fmt in ("%Y-%m-%d", "%Y%m%d", "%Y-%m-%d %H:%M:%S"):
+                        try:
+                            data_date = _dt.strptime(val[:10], "%Y-%m-%d")
+                            age_days = (_dt.now() - data_date).days
+                            if age_days > 30:
+                                violations.append({
+                                    "rule_id": "S05", "slug": slug, "severity": "CRITICAL",
+                                    "detail": f"S05 위반: 데이터 경과 {age_days}일 (threshold=30일), {key}={val}",
+                                    "file": str(md_file)})
+                                blocked = True
+                            break
+                        except ValueError:
+                            continue
+                    # 정수 일수로 파싱 시도
+                    try:
+                        age_days = int(val)
+                        if age_days > 30:
+                            violations.append({
+                                "rule_id": "S05", "slug": slug, "severity": "CRITICAL",
+                                "detail": f"S05 위반: 데이터 경과 {age_days}일 (threshold=30일), {key}={val}",
+                                "file": str(md_file)})
+                            blocked = True
+                    except ValueError:
+                        pass
+                except Exception:
+                    pass
+                break  # 첫 번째 freshness 키만 검사
+
+        # --- PHASE 70 WAVE 3: freshness gate (lastmod) ---
+        # lastmod 프론트매터가 30일 초과 시 MAJOR 경고 (warn-only, blocked=False)
+        _lm = fm_dict.get("lastmod") or fm_dict.get("date")
+        if _lm:
+            try:
+                from datetime import datetime as _dt
+                _lm_str = str(_lm)
+                _lm_dt = _dt.fromisoformat(_lm_str.replace("Z", "+00:00"))
+                _stale_days = (_dt.now().astimezone() - _lm_dt).days
+                if _stale_days > 30:
+                    violations.append({
+                        "rule_id": "FRESH", "slug": slug, "severity": "MAJOR",
+                        "detail": f"FRESH 경고: lastmod {_stale_days}일 경과 (threshold=30일)",
+                        "file": str(md_file)})
+                    # warn only — blocked remains False
+            except Exception:
+                pass
 
         # --- C2(2026-08-21): 이미지 배포 차단 게이트는 deploy._pre_deploy_image_gate
         #     (shared/publishers/deploy.py:41) 로 단일 초크포인트 통합.

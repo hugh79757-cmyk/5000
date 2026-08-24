@@ -16,6 +16,33 @@ from shared.ai_writer import generate as ai_generate
 from shared.validators import has_cjk
 from shared.title_templates import TitleTemplatePicker
 
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"
      crossorigin="anonymous"></script>
 <!-- CUAP -->
@@ -978,6 +1005,9 @@ def generate_curation_article(keyword, products, blog_id=None):
 
     # description: 본문에서 CoT/마커 줄 제외 첫 의미 문단 추출
     description = _extract_description(body, title or "", keyword)
+
+    # Phase 70 Wave 3: editorial synthesis (no-op unless topic carries topic_type)
+    body = _inject_editorial_synthesis(body, {})
 
     # 제목 최종 후처리: 괄호 → 하이픈 (LLM이 괄호를 뱉어도 발행물엔 괄호 없음)
     title = sanitize_title(title)

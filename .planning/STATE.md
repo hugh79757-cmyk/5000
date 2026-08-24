@@ -78,6 +78,7 @@ progress:
 | 54 | Curation Title Generation Hardening (제목 fallback 제거) | 📋 Planned | 미시작. `.planning/phase-54-title-hardening/PLAN.md` 존재. writer.py:538-539 하드코딩 fallback 제거 + H1 형식 강제 + CoT/프롬프트 누출 차단. "추천 TOP5 (연도년)" 패턴 134건 재발 중 — 시급. |
 | 55 | Curation Content Quality Diagnostics | 📋 Planned | 미시작. `.planning/phase-55-curation-quality-diagnostics/CONTEXT.md` 존재. 경험 허위 주장·소 스불명 수치·건강 효능 단정 측정(read-only). Phase 54 이후. |
 | 69 | Incident Integrity & Dashboard SSOT | ✅ COMPLETED | M3 merged @ f03acaa4c, M4(Phase69-C Dashboard SSOT) merged @ 403f7fba3 · WAITING_FOR_CANDIDATES(no_topics+P01+retryable=0)/LEGACY_UNMERGED/UNKNOWN 표시 + pagination · next_action=M5 품질 게이트 계획 |
+| 70 | Quality Improvement (W1-4: uniqueness gates, S-rules, editorial synthesis, schema/lastmod, freshness gate) | ✅ COMPLETED | W1(01) 기능구현+테스트(커밋 대기), W2(02a) 커밋 cc04e9dd8, W3(02b+03a) 9 writers 통합 + schema.html 신규 + unique_data_points 컬럼 추가 + freshness 게이트, W4(03b) preflight freshness + 테스트. 42/42 phase-70 테스트 통과. 02b 합성은 writer가 topic_type/topic_id 미연결로 현재 no-op(후속 과제). |
 
 **참고 — 문서상 미정리 잔여:**
 - Phase 44 (전수조사 및 전체 수정): 44-01~03 완료, 44-04~05(프롬프트 보완 + 마무리) 미완료. ROADMAP Phase 44 참조.

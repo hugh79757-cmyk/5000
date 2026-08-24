@@ -10,6 +10,35 @@ from openai import OpenAI
 
 from shared.ai_writer import generate as ai_generate
 
+logger = logging.getLogger(__name__)
+
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 
 # 상세 데이터 보강
 def _enrich_service(service):
@@ -594,6 +623,7 @@ def generate_senior_article(data, topic_type=None, enriched_service=None):
                     result["body_md"], main_service,
                     result.get("category", topic_type or "")
                 )
+                result["body_md"] = _inject_editorial_synthesis(result["body_md"], {})
             return result
 
         except Exception as e:

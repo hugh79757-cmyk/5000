@@ -3,10 +3,23 @@
 Pre-processing: validates and cleans tour/route data before sending to GPT.
 Post-processing: validates generated content for suspicious numbers, formatting issues.
 If quality check fails, marks post as draft and sends Telegram alert.
+
+Phase 70 Wave 1: Added S01 (Uniqueness Ratio), S02 (Structural Similarity),
+S03 (Unique Data Points) quality gates.
 """
 import logging
 import os
 import re
+from typing import List, Tuple
+
+# sklearn/numpy for quality gates
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.metrics.pairwise import cosine_similarity
+    import numpy as np
+    HAS_SKLEARN = True
+except ImportError:
+    HAS_SKLEARN = False
 
 logger = logging.getLogger(__name__)
 
@@ -221,6 +234,373 @@ def preprocess_restaurants(restaurants, blog_id="", city=""):
         all_issues.extend(issues)
     return clean, all_issues, excluded
 
+
+# ============================================================
+# PHASE 70 WAVE 1: NEW QUALITY GATES (S01, S02, S03)
+# ============================================================
+
+# S01: Uniqueness Ratio Gate
+# Threshold: >= 0.85 (85% unique n-grams vs existing corpus)
+# Returns (passed: bool, ratio: float, details: dict)
+def uniqueness_ratio_gate(content: str, corpus: List[str], threshold: float = 0.85) -> Tuple[bool, float, dict]:
+    """
+    Compute uniqueness ratio of generated content against existing corpus.
+    
+    Uses TF-IDF cosine similarity to measure how much of the content
+    overlaps with previously published articles. Higher ratio = more unique.
+    
+    Args:
+        content: Generated article content (markdown)
+        corpus: List of existing article bodies (markdown)
+        threshold: Minimum uniqueness ratio to pass (default 0.85)
+    
+    Returns:
+        (passed, ratio, details) where details contains:
+        - max_similarity: highest cosine similarity to any corpus item
+        - mean_similarity: average cosine similarity
+        - n_compared: number of corpus items compared
+    """
+    if not HAS_SKLEARN:
+        logger.warning("[S01] scikit-learn not available, skipping uniqueness gate")
+        return True, 1.0, {"skipped": "sklearn unavailable"}
+    
+    if not corpus:
+        return True, 1.0, {"n_compared": 0}
+    
+    try:
+        # Extract text content (remove markdown formatting for better comparison)
+        def clean_text(text: str) -> str:
+            # Remove markdown headers, links, emphasis
+            text = re.sub(r"^#{1,6}\s+", "", text, flags=re.MULTILINE)
+            text = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", text)
+            text = re.sub(r"[*_`]", "", text)
+            text = re.sub(r"<[^>]+>", "", text)
+            return text.strip()
+        
+        clean_content = clean_text(content)
+        clean_corpus = [clean_text(c) for c in corpus if c and len(c) > 100]
+        
+        if not clean_corpus:
+            return True, 1.0, {"n_compared": 0}
+        
+        # Build TF-IDF vectors
+        vectorizer = TfidfVectorizer(
+            ngram_range=(3, 5),  # 3-5 grams for phrase-level similarity
+            min_df=1,
+            max_df=0.9,
+            stop_words='english',
+            max_features=10000
+        )
+        
+        all_texts = [clean_content] + clean_corpus
+        tfidf_matrix = vectorizer.fit_transform(all_texts)
+        
+        # Compute cosine similarity between content and each corpus item
+        content_vec = tfidf_matrix[0:1]
+        corpus_vecs = tfidf_matrix[1:]
+        
+        similarities = cosine_similarity(content_vec, corpus_vecs).flatten()
+        
+        max_sim = float(similarities.max()) if len(similarities) > 0 else 0.0
+        mean_sim = float(similarities.mean()) if len(similarities) > 0 else 0.0
+        
+        # Uniqueness ratio = 1 - max_similarity
+        uniqueness = 1.0 - max_sim
+        
+        details = {
+            "max_similarity": round(max_sim, 4),
+            "mean_similarity": round(mean_sim, 4),
+            "n_compared": len(similarities),
+            "threshold": threshold
+        }
+        
+        passed = uniqueness >= threshold
+        
+        if not passed:
+            logger.warning(
+                f"[S01] Uniqueness gate FAILED: ratio={uniqueness:.4f} "
+                f"(threshold={threshold}), max_sim={max_sim:.4f}, n_compared={len(similarities)}"
+            )
+        else:
+            logger.info(
+                f"[S01] Uniqueness gate PASSED: ratio={uniqueness:.4f} "
+                f"(threshold={threshold}), max_sim={max_sim:.4f}"
+            )
+        
+        return passed, uniqueness, details
+    
+    except Exception as e:
+        logger.exception(f"[S01] Uniqueness gate error: {e}")
+        return True, 1.0, {"error": str(e), "skipped": True}
+
+
+# S02: Structural Similarity Gate
+# Threshold: <= 0.70 (max 70% H2 sequence overlap with any existing article)
+# Returns (passed: bool, similarity: float, details: dict)
+def structural_similarity_gate(content: str, corpus: List[str], threshold: float = 0.70) -> Tuple[bool, float, dict]:
+    """
+    Compare H2 heading structure similarity against existing articles.
+    
+    Detects template reuse where the same H2 sequence is used with different content.
+    Uses Jaccard similarity on H2 heading sequences (order-aware).
+    
+    Args:
+        content: Generated article content (markdown)
+        corpus: List of existing article bodies (markdown)
+        threshold: Maximum allowed structural similarity (default 0.70)
+    
+    Returns:
+        (passed, similarity, details) where details contains:
+        - max_structural_sim: highest structural similarity to any corpus item
+        - content_h2s: list of H2 headings in content
+        - matched_article_h2s: H2 headings of most similar corpus article
+    """
+    def extract_h2s(text: str) -> List[str]:
+        h2s = re.findall(r"^##\s+(.+)$", text, re.MULTILINE)
+        # Normalize: lowercase, remove punctuation, strip
+        normalized = []
+        for h in h2s:
+            h = h.lower().strip()
+            h = re.sub(r"[^\w\s]", "", h)
+            h = re.sub(r"\s+", " ", h)
+            normalized.append(h)
+        return normalized
+    
+    def jaccard_similarity(seq1: List[str], seq2: List[str]) -> float:
+        """Order-aware Jaccard on n-grams of headings."""
+        if not seq1 or not seq2:
+            return 0.0
+        
+        # Use bigrams of headings for order awareness
+        def get_bigrams(seq):
+            return set(tuple(seq[i:i+2]) for i in range(len(seq)-1)) or set(tuple(seq))
+        
+        bigrams1 = get_bigrams(seq1)
+        bigrams2 = get_bigrams(seq2)
+        
+        if not bigrams1 or not bigrams2:
+            # Fallback to unigram Jaccard
+            set1, set2 = set(seq1), set(seq2)
+            inter = len(set1 & set2)
+            union = len(set1 | set2)
+            return inter / union if union > 0 else 0.0
+        
+        inter = len(bigrams1 & bigrams2)
+        union = len(bigrams1 | bigrams2)
+        return inter / union if union > 0 else 0.0
+    
+    content_h2s = extract_h2s(content)
+    
+    if not content_h2s:
+        return True, 0.0, {"content_h2s": [], "n_compared": 0}
+    
+    max_sim = 0.0
+    matched_h2s = []
+    n_compared = 0
+    
+    for corpus_item in corpus:
+        if not corpus_item or len(corpus_item) < 100:
+            continue
+        corpus_h2s = extract_h2s(corpus_item)
+        if not corpus_h2s:
+            continue
+        
+        sim = jaccard_similarity(content_h2s, corpus_h2s)
+        if sim > max_sim:
+            max_sim = sim
+            matched_h2s = corpus_h2s
+        n_compared += 1
+    
+    passed = max_sim <= threshold
+    
+    details = {
+        "max_structural_sim": round(max_sim, 4),
+        "content_h2s": content_h2s,
+        "matched_article_h2s": matched_h2s,
+        "n_compared": n_compared,
+        "threshold": threshold
+    }
+    
+    if not passed:
+        logger.warning(
+            f"[S02] Structural similarity gate FAILED: sim={max_sim:.4f} "
+            f"(threshold={threshold}), content_h2s={content_h2s[:5]}"
+        )
+    else:
+        logger.info(
+            f"[S02] Structural similarity gate PASSED: sim={max_sim:.4f} "
+            f"(threshold={threshold})"
+        )
+    
+    return passed, max_sim, details
+
+
+# S03: Unique Data Points Gate
+# Threshold: >= 3 verifiable unique data points per article
+# Returns (passed: bool, count: int, details: dict)
+def unique_data_points_gate(content: str, source_data: dict = None, threshold: int = 3) -> Tuple[bool, int, dict]:
+    """
+    Verify article contains minimum number of verifiable unique data points.
+    
+    Counts specific, verifiable facts from source data that appear in the article:
+    - Specific prices (e.g., "$45", "$1,200")
+    - Specific dates (e.g., "March 15, 2024", "2024-03-15")
+    - Specific names/identifiers from source (airlines, tour operators, destinations)
+    - Specific metrics (duration, distance, capacity, ratings)
+    
+    Args:
+        content: Generated article content (markdown)
+        source_data: Dict of source data used for generation (prices, names, dates, etc.)
+        threshold: Minimum unique data points required (default 3)
+    
+    Returns:
+        (passed, count, details) where details contains:
+        - found_points: list of verified data points found in content
+        - source_coverage: which source data categories were covered
+    """
+    if source_data is None:
+        source_data = {}
+    
+    found_points = []
+    source_coverage = {}
+    
+    # 1. Price points - extract from content and verify against source
+    price_pattern = r"\$(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?|\d+(?:\.\d{1,2})?)"
+    content_prices = set(re.findall(price_pattern, content))
+    source_prices = set()
+    
+    # Extract prices from source_data (various possible structures)
+    for key, val in source_data.items():
+        if isinstance(val, (list, tuple)):
+            for item in val:
+                if isinstance(item, dict):
+                    for price_key in ["price", "min_price", "max_price", "cost", "fare"]:
+                        if price_key in item and item[price_key]:
+                            source_prices.add(str(item[price_key]))
+        elif isinstance(val, dict):
+            for price_key in ["price", "min_price", "max_price", "cost", "fare"]:
+                if price_key in val and val[price_key]:
+                    source_prices.add(str(val[price_key]))
+    
+    # Verify content prices against source
+    for cp in content_prices:
+        cp_clean = cp.replace(",", "")
+        for sp in source_prices:
+            sp_clean = str(sp).replace("$", "").replace(",", "")
+            try:
+                if abs(float(cp_clean) - float(sp_clean)) <= 2.0:  # Within $2 tolerance (inclusive)
+                    found_points.append(f"price:${cp}")
+                    source_coverage["prices"] = source_coverage.get("prices", 0) + 1
+                    break
+            except (ValueError, TypeError):
+                pass
+    
+    # 2. Date points
+    date_patterns = [
+        r"\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}\b",
+        r"\b\d{4}-\d{2}-\d{2}\b",
+        r"\b\d{1,2}/\d{1,2}/\d{4}\b",
+    ]
+    content_dates = set()
+    for pat in date_patterns:
+        content_dates.update(re.findall(pat, content, re.IGNORECASE))
+    
+    source_dates = set()
+    for key, val in source_data.items():
+        if isinstance(val, (list, tuple)):
+            for item in val:
+                if isinstance(item, dict):
+                    for date_key in ["date", "departure_date", "return_date", "start_date", "end_date", "available_date"]:
+                        if date_key in item and item[date_key]:
+                            source_dates.add(str(item[date_key]))
+    
+    for cd in content_dates:
+        for sd in source_dates:
+            if cd.lower() in sd.lower() or sd.lower() in cd.lower():
+                found_points.append(f"date:{cd}")
+                source_coverage["dates"] = source_coverage.get("dates", 0) + 1
+                break
+    
+    # 3. Named entities from source (airlines, tour operators, destinations, hotels)
+    entity_keys = ["airline", "operator", "provider", "seller", "destination", "origin",
+                   "dest_city", "dest_city_name", "city", "hotel", "name", "tour_name", "product_name"]
+    source_entities = set()
+    for key, val in source_data.items():
+        if isinstance(val, (list, tuple)):
+            for item in val:
+                if isinstance(item, dict):
+                    for ek in entity_keys:
+                        if ek in item and item[ek]:
+                            source_entities.add(str(item[ek]).lower())
+        elif isinstance(val, dict):
+            for ek in entity_keys:
+                if ek in val and val[ek]:
+                    source_entities.add(str(val[ek]).lower())
+    
+    # Check if source entities appear in content
+    content_lower = content.lower()
+    for entity in source_entities:
+        if len(entity) >= 3 and entity in content_lower:
+            found_points.append(f"entity:{entity}")
+            source_coverage["entities"] = source_coverage.get("entities", 0) + 1
+    
+    # 4. Specific numeric metrics (duration, distance, rating, capacity, stops)
+    metric_patterns = [
+        (r"\b(\d+(?:\.\d+)?)\s*(?:hours?|hrs?|minutes?|mins?)\b", "duration"),
+        (r"\b(\d+(?:\.\d+)?)\s*(?:km|kilometers?|miles?|mi\b)", "distance"),
+        (r"\b(\d+(?:\.\d+)?)\s*(?:stars?|rating|out of 5|/5)\b", "rating"),
+        (r"\b(\d+)\s*(?:stops?|layovers?)\b", "stops"),
+        (r"\b(\d+)\s*(?:people|guests|passengers|capacity|seats?)\b", "capacity"),
+    ]
+    
+    source_metrics = {}
+    for key, val in source_data.items():
+        if isinstance(val, (list, tuple)):
+            for item in val:
+                if isinstance(item, dict):
+                    for mk in ["duration", "distance", "rating", "stops", "capacity", "min_duration", "max_duration"]:
+                        if mk in item and item[mk] is not None:
+                            source_metrics[mk] = str(item[mk])
+    
+    for pattern, mtype in metric_patterns:
+        matches = re.findall(pattern, content, re.IGNORECASE)
+        for match in matches:
+            val = match if isinstance(match, str) else match[0]
+            for sm_key, sm_val in source_metrics.items():
+                try:
+                    if abs(float(val) - float(sm_val)) < (2.0 if mtype == "duration" else 0.5):
+                        found_points.append(f"{mtype}:{val}")
+                        source_coverage[mtype] = source_coverage.get(mtype, 0) + 1
+                        break
+                except (ValueError, TypeError):
+                    pass
+    
+    # Deduplicate
+    unique_points = list(set(found_points))
+    count = len(unique_points)
+    
+    passed = count >= threshold
+    
+    details = {
+        "found_points": unique_points,
+        "source_coverage": source_coverage,
+        "threshold": threshold
+    }
+    
+    if not passed:
+        logger.warning(
+            f"[S03] Unique data points gate FAILED: count={count} "
+            f"(threshold={threshold}), points={unique_points}"
+        )
+    else:
+        logger.info(
+            f"[S03] Unique data points gate PASSED: count={count} "
+            f"(threshold={threshold})"
+        )
+    
+    return passed, count, details
+
+
 # ============================================================
 # POST-PROCESSING: Content Validation
 # ============================================================
@@ -231,9 +611,20 @@ BANNED_PHRASES = [
     "unforgettable experience", "gastronomic journey",
 ]
 
-def postprocess_content(content, data_prices=None, blog_id="", slug=""):
+def postprocess_content(content, data_prices=None, blog_id="", slug="", corpus: list = None, source_data: dict = None, front_matter=None, content_type=None):
     """Validate generated content. Returns (content, issues, is_draft).
     is_draft=True means the post should be published as draft.
+    
+    Phase 70 Wave 1: Added S01 (Uniqueness Ratio), S02 (Structural Similarity),
+    S03 (Unique Data Points) quality gates.
+    
+    Args:
+        content: Generated article content (markdown)
+        data_prices: List of prices from source data for hallucination check
+        blog_id: Blog identifier for logging
+        slug: Article slug for logging
+        corpus: List of existing article bodies for S01/S02 gates
+        source_data: Dict of source data for S03 gate verification
     """
     issues = []
     is_draft = False
@@ -550,6 +941,63 @@ def postprocess_content(content, data_prices=None, blog_id="", slug=""):
 
     # ── affiliate rel — DISABLED (render-link.html 훅이 담당, sponsored noopener)
     # 본문에서 직접 <a rel> 박으면 훅과 중복. 훅이 렌더 시 일괄 부여하므로 본문 변환은 제거.
+
+    # ============================================================
+    # PHASE 70 WAVE 1: NEW QUALITY GATES INTEGRATION
+    # ============================================================
+    
+    # S01: Uniqueness Ratio Gate
+    if corpus and len(corpus) > 0:
+        passed, ratio, details = uniqueness_ratio_gate(content, corpus)
+        issues.append(f"S01 uniqueness: {ratio:.4f} ({'PASS' if passed else 'FAIL'})")
+        if not passed:
+            issues.append(f"[S01 FAIL] Uniqueness ratio {ratio:.4f} below threshold {details['threshold']}")
+            is_draft = True
+    
+    # S02: Structural Similarity Gate
+    if corpus and len(corpus) > 0:
+        passed, sim, details = structural_similarity_gate(content, corpus)
+        issues.append(f"S02 structural: {sim:.4f} ({'PASS' if passed else 'FAIL'})")
+        if not passed:
+            issues.append(f"[S02 FAIL] Structural similarity {sim:.4f} exceeds threshold {details['threshold']}")
+            is_draft = True
+    
+    # S03: Unique Data Points Gate
+    if source_data:
+        passed, count, details = unique_data_points_gate(content, source_data)
+        issues.append(f"S03 data_points: {count} ({'PASS' if passed else 'FAIL'})")
+        if not passed:
+            issues.append(f"[S03 FAIL] Only {count} unique data points (threshold={details['threshold']})")
+            is_draft = True
+
+    # ── PHASE 70 WAVE 3: freshness gate (lastmod-based) ──
+    # 동적 콘텐츠(deals/flights/nature/food/finance 등)의 lastmod가 30일 초과 시
+    # [MAJOR] stale 이슈 + draft 처리. lastmod 누락 시 skip (pass).
+    _DYNAMIC_TYPES = {"deals", "flights", "flight", "nature", "nature_tour",
+                      "tour", "tours", "food", "foodtour", "dining", "finance"}
+    _lm_raw = None
+    if front_matter:
+        if isinstance(front_matter, dict):
+            _lm_raw = front_matter.get("lastmod") or front_matter.get("date")
+        elif isinstance(front_matter, str):
+            import re as _re_fm
+            _m = _re_fm.search(r"lastmod:\s*([^\n]+)", front_matter)
+            if _m:
+                _lm_raw = _m.group(1).strip()
+            else:
+                _m = _re_fm.search(r"date:\s*([^\n]+)", front_matter)
+                if _m:
+                    _lm_raw = _m.group(1).strip()
+    if _lm_raw:
+        try:
+            from datetime import datetime as _dt
+            _lm_dt = _dt.fromisoformat(str(_lm_raw).replace("Z", "+00:00"))
+            _stale_days = (_dt.now().astimezone() - _lm_dt).days
+            if _stale_days > 30 and (content_type is None or content_type in _DYNAMIC_TYPES):
+                issues.append(f"[MAJOR] Content stale: lastmod {_stale_days} days ago")
+                is_draft = True
+        except Exception:
+            pass
 
     return content, issues, is_draft
 

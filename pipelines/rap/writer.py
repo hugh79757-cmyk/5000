@@ -5,6 +5,33 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 
 def _build_trade_reference(keyword, trades, region_info=None):
     """실거래가 데이터를 참고자료 블록으로 변환
@@ -668,7 +695,10 @@ def generate_trade_article(keyword, trades, region_info=None, blog_id=None):
     if not result or not result.get("content"):
         logger.error(f"RAP 실거래가 글 생성 실패: {keyword}")
         return None
-    return _parse_article(result["content"], keyword)
+    _article = _parse_article(result["content"], keyword)
+    if _article and _article.get("body_md"):
+        _article["body_md"] = _inject_editorial_synthesis(_article["body_md"], {})
+    return _article
 
 
 def _detect_subscription_type(subscriptions):
@@ -884,6 +914,8 @@ def generate_subscription_article(keyword, subscriptions):
     article = _parse_article(result["content"], keyword)
     if article is not None:
         article["model"] = result.get("model", "auto")
+        if article.get("body_md"):
+            article["body_md"] = _inject_editorial_synthesis(article["body_md"], {})
     return article
 
 

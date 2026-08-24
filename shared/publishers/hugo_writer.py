@@ -1418,6 +1418,14 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     for _c in ["\u201c", "\u201d"]:
         body_md = body_md.replace(_c, '"')
 
+    # ── PHASE 70 WAVE 3: lastmod in frontmatter (overrides date on re-publish) ──
+    # Freshness signals for Google (dateModified). ISO format matches date field.
+    _lastmod_iso = datetime.now().strftime("%Y-%m-%dT%H:%M:%S+09:00")
+    if fm.endswith("---\n"):
+        fm = fm[: -len("---\n")] + f"lastmod: {_lastmod_iso}\n---\n"
+    elif fm.endswith("---"):
+        fm = fm[:-3] + f"lastmod: {_lastmod_iso}\n---\n"
+
     content = fm + body_md
 
     # ── C01/C04 원인추적 훅 (c) 저장 직전 ──

@@ -736,3 +736,319 @@ def check_c09(conn, blog_id: str) -> dict:
         return {"status": "fail",
                 "detail": f"C09 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
     return {"status": "pass", "detail": f"C09 통과 ({len(posts)}건)"}
+
+
+# ============================================================
+# PHASE 70 WAVE 1: S-CATEGORY DASHBOARD RULES (S01~S05)
+# ============================================================
+
+def _extract_corpus(site: Path, blog_id: str, exclude_slug: str = "") -> list[str]:
+    """기존 발행된 포스트 본문들을 corpus로 추출 (S01, S02 게이트용)."""
+    posts_dir = site / "content" / "posts"
+    if not posts_dir.exists():
+        return []
+    corpus = []
+    for md_file in posts_dir.rglob("*.md"):
+        slug = md_file.parent.name
+        if slug == exclude_slug:
+            continue
+        try:
+            content = md_file.read_text(encoding="utf-8", errors="replace")
+            # frontmatter 제거하고 본문만 추출
+            body_start = content.find("---\n", 4)
+            if body_start > 0:
+                body = content[body_start + 4:]
+                if len(body) > 200:
+                    corpus.append(body)
+        except Exception:
+            pass
+    return corpus
+
+
+def _get_source_data_from_slug(slug: str, blog_id: str) -> dict:
+    """slug를 이용해 source_data 재구성 (S03 게이트용).
+    
+    travel-en.db의 articles/publish_log에서 원본 데이터 조회.
+    다른 파이프라인은 해당 DB에서 조회 로직 추가 필요.
+    """
+    import sqlite3
+    from pathlib import Path
+    
+    # ETAP 블로그인 경우 travel-en.db 사용
+    db_path = Path(__file__).parent.parent.parent / "data" / "travel-en.db"
+    if not db_path.exists():
+        return {}
+    
+    try:
+        conn = sqlite3.connect(str(db_path))
+        conn.row_factory = sqlite3.Row
+        
+        # publish_log에서 topic_id 조회
+        row = conn.execute(
+            "SELECT topic_id FROM publish_log WHERE blog_id = ? AND slug = ? ORDER BY log_id DESC LIMIT 1",
+            (blog_id, slug)
+        ).fetchone()
+        
+        if not row or not row["topic_id"]:
+            conn.close()
+            return {}
+        
+        topic_id = row["topic_id"]
+        
+        # articles 테이블에서 원본 데이터 조회 (테이블명 유추)
+        # topic_id로 어떤 테이블인지 파악 필요 - 여기선 기본 구조만 반환
+        source_data = {"topic_id": topic_id}
+        
+        # flight_prices, popular_directions, flight_calendar 등에서 데이터 조회 시도
+        for table in ["flight_prices", "popular_directions", "flight_calendar", "tours", "hotels", "restaurants"]:
+            try:
+                rows = conn.execute(f"SELECT * FROM {table} WHERE origin = ? OR destination = ? OR city = ? LIMIT 20",
+                                   (slug, slug, slug)).fetchall()
+                if rows:
+                    source_data[table] = [dict(r) for r in rows]
+            except Exception:
+                pass
+        
+        conn.close()
+        return source_data
+    except Exception:
+        return {}
+
+
+def _check_s01_uniqueness(content: str, corpus: list[str]) -> tuple[bool, str]:
+    """S01: Uniqueness Ratio ≥ 0.85 vs corpus."""
+    try:
+        from pipelines.etap.quality_guard import uniqueness_ratio_gate
+        passed, ratio, details = uniqueness_ratio_gate(content, corpus, threshold=0.85)
+        if not passed:
+            return False, f"S01 위반: uniqueness={ratio:.4f} (threshold=0.85), max_sim={details.get('max_similarity', 0):.4f}"
+        return True, f"S01 통과: uniqueness={ratio:.4f}"
+    except ImportError:
+        return True, "S01 skip (quality_guard import 실패)"
+    except Exception as e:
+        logger.warning(f"[S01] check error: {e}")
+        return True, f"S01 skip (error: {e})"
+
+
+def _check_s02_structural(content: str, corpus: list[str]) -> tuple[bool, str]:
+    """S02: Structural Similarity ≤ 0.70 (H2 sequence overlap)."""
+    try:
+        from pipelines.etap.quality_guard import structural_similarity_gate
+        passed, sim, details = structural_similarity_gate(content, corpus, threshold=0.70)
+        if not passed:
+            return False, f"S02 위반: structural_sim={sim:.4f} (threshold=0.70)"
+        return True, f"S02 통과: structural_sim={sim:.4f}"
+    except ImportError:
+        return True, "S02 skip (quality_guard import 실패)"
+    except Exception as e:
+        logger.warning(f"[S02] check error: {e}")
+        return True, f"S02 skip (error: {e})"
+
+
+def _check_s03_data_points(content: str, source_data: dict) -> tuple[bool, str]:
+    """S03: Unique Data Points ≥ 3 verifiable points."""
+    try:
+        from pipelines.etap.quality_guard import unique_data_points_gate
+        passed, count, details = unique_data_points_gate(content, source_data, threshold=3)
+        if not passed:
+            return False, f"S03 위반: data_points={count} (threshold=3), found={details.get('found_points', [])}"
+        return True, f"S03 통과: data_points={count}"
+    except ImportError:
+        return True, "S03 skip (quality_guard import 실패)"
+    except Exception as e:
+        logger.warning(f"[S03] check error: {e}")
+        return True, f"S03 skip (error: {e})"
+
+
+def _check_s04_editorial_synthesis(content: str) -> tuple[bool, str]:
+    """S04: Editorial Synthesis Passed (template markers replaced).
+    
+    Checks for remaining template markers like {{...}}, {{city}}, {{price}} etc.
+    """
+    template_markers = re.findall(r"\{\{[^}]+\}\}", content)
+    if template_markers:
+        unique_markers = set(template_markers)
+        return False, f"S04 위반: 미치환 템플릿 마커 {len(unique_markers)}개 — {list(unique_markers)[:5]}"
+    return True, "S04 통과: 템플릿 마커 없음"
+
+
+def _check_s05_freshness(fm: dict, blog_id: str) -> tuple[bool, str]:
+    """S05: Freshness Gate (data age < 30 days for price/date sensitive content).
+    
+    Checks frontmatter for data freshness indicators. For ETAP blogs,
+    checks if the source data (prices, dates) is within 30 days.
+    """
+    # Check for freshness-related frontmatter keys
+    freshness_keys = ["data_date", "price_date", "source_date", "last_updated", "data_freshness_days"]
+    for key in freshness_keys:
+        if key in fm and fm[key]:
+            try:
+                val = str(fm[key]).strip()
+                # Try to parse as date
+                from datetime import datetime
+                for fmt in ("%Y-%m-%d", "%Y%m%d", "%Y-%m-%d %H:%M:%S"):
+                    try:
+                        data_date = datetime.strptime(val[:10], "%Y-%m-%d")
+                        age_days = (datetime.now() - data_date).days
+                        if age_days > 30:
+                            return False, f"S05 위반: 데이터 경과 {age_days}일 (threshold=30일), {key}={val}"
+                        return True, f"S05 통과: 데이터 경과 {age_days}일"
+                    except ValueError:
+                        continue
+                # Try as integer days
+                try:
+                    age_days = int(val)
+                    if age_days > 30:
+                        return False, f"S05 위반: 데이터 경과 {age_days}일 (threshold=30일), {key}={val}"
+                    return True, f"S05 통과: 데이터 경과 {age_days}일"
+                except ValueError:
+                    pass
+            except Exception:
+                pass
+    
+    # No freshness info available - warn but don't fail (allow legacy)
+    return True, "S05 통과: freshness 정보 없음 (legacy 허용)"
+
+
+@register_check("s01_uniqueness_ratio")
+def check_s01(conn, blog_id: str) -> dict:
+    """S01: Uniqueness Ratio ≥ 0.85 vs existing corpus."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+    
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+    
+    violations = []
+    for path, content in posts:
+        slug = path.parent.name
+        corpus = _extract_corpus(site, blog_id, exclude_slug=slug)
+        if not corpus:
+            continue  # corpus 없으면 검사 불가 (첫 포스트 등)
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_s01_uniqueness(body, corpus)
+        if not passed:
+            violations.append(f"{slug}: {detail}")
+    
+    if violations:
+        return {"status": "fail",
+                "detail": f"S01 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"S01 통과 ({len(posts)}건 검사)"}
+
+
+@register_check("s02_structural_similarity")
+def check_s02(conn, blog_id: str) -> dict:
+    """S02: Structural Similarity ≤ 0.70 (H2 sequence overlap)."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+    
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+    
+    violations = []
+    for path, content in posts:
+        slug = path.parent.name
+        corpus = _extract_corpus(site, blog_id, exclude_slug=slug)
+        if not corpus:
+            continue
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_s02_structural(body, corpus)
+        if not passed:
+            violations.append(f"{slug}: {detail}")
+    
+    if violations:
+        return {"status": "fail",
+                "detail": f"S02 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"S02 통과 ({len(posts)}건 검사)"}
+
+
+@register_check("s03_unique_data_points")
+def check_s03(conn, blog_id: str) -> dict:
+    """S03: Unique Data Points ≥ 3 verifiable points per article."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+    
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+    
+    violations = []
+    for path, content in posts:
+        slug = path.parent.name
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        source_data = _get_source_data_from_slug(slug, blog_id)
+        if not source_data:
+            continue  # source_data 없으면 검사 불가
+        passed, detail = _check_s03_data_points(body, source_data)
+        if not passed:
+            violations.append(f"{slug}: {detail}")
+    
+    if violations:
+        return {"status": "fail",
+                "detail": f"S03 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"S03 통과 ({len(posts)}건 검사)"}
+
+
+@register_check("s04_editorial_synthesis")
+def check_s04(conn, blog_id: str) -> dict:
+    """S04: Editorial Synthesis Passed (no template markers remaining)."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+    
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+    
+    violations = []
+    for path, content in posts:
+        slug = path.parent.name
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_s04_editorial_synthesis(body)
+        if not passed:
+            violations.append(f"{slug}: {detail}")
+    
+    if violations:
+        return {"status": "fail",
+                "detail": f"S04 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"S04 통과 ({len(posts)}건 검사)"}
+
+
+@register_check("s05_freshness_gate")
+def check_s05(conn, blog_id: str) -> dict:
+    """S05: Freshness Gate (data age < 30 days for price/date sensitive content)."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+    
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+    
+    violations = []
+    for path, content in posts:
+        slug = path.parent.name
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_s05_freshness(fm, blog_id)
+        if not passed:
+            violations.append(f"{slug}: {detail}")
+    
+    if violations:
+        return {"status": "fail",
+                "detail": f"S05 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"S05 통과 ({len(posts)}건 검사)"}

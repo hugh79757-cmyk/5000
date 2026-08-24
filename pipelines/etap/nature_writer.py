@@ -31,6 +31,33 @@ except ImportError:
     HAS_ENRICHMENT = False
 # === END ETAP v2 ===
 
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -249,6 +276,8 @@ WRITING RULES:
 
     slug = topic.get("slug", re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-"))
     tags = [city, country, "Nature Tours", "Travel"] if country else [city, "Nature Tours", "Travel"]
+
+    content = _inject_editorial_synthesis(content, {"city": city, "country": country, "slug": slug})
 
     return {
         "title": title,

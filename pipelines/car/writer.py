@@ -10,6 +10,10 @@ car 분기는 독립적인 writer 모듈이 없었고, 글 생성이
 기존 `pipeline.run(blog_cfg)` 은 여전히 직접 호출하므로 동작은 그대로다.
 """
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def write_article(cfg, topic, data=None, prompt_text=None):
     """글 본문 생성 — `shared.ai_writer.generate_car` + `topic_manager.validate_body` 위임.
@@ -34,7 +38,28 @@ def write_article(cfg, topic, data=None, prompt_text=None):
     from shared.ai_writer import generate_car
     from pipelines.car.topic_manager import validate_body
 
+    try:
+        from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+    except ImportError:
+        editorial_synthesis_step = None
+
     body = generate_car(prompt_text, data)
     if not body:
         return None
-    return validate_body(body, data)
+    body = validate_body(body, data)
+    if not body:
+        return None
+
+    # Phase 70 Wave 3: editorial synthesis (no-op unless topic carries topic_type)
+    if editorial_synthesis_step is not None:
+        try:
+            from pipelines.etap.data_adapters import get_unique_data_points
+            _t = (topic or {})
+            _tt = _t.get("topic_type")
+            _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+            _s = editorial_synthesis_step(body, _ud, _t)
+            if _s:
+                body = body.rstrip() + "\n\n" + _s + "\n"
+        except Exception as _e:
+            logger.warning("[editorial] synthesis skipped: %s", _e)
+    return body

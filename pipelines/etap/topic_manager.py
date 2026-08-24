@@ -277,6 +277,66 @@ def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url="") ->
         conn.close()
 
 
+def record_publish_with_data(topic_id, topic_table, blog_id, title, slug, url, unique_data_points=0, source_data=None) -> bool | None:
+    """Phase 70 Wave 1: 발행 기록 + unique_data_points 저장.
+    
+    기존 mark_published_by_id를 확장하여 unique_data_points 컬럼 기록.
+    source_data는 JSON으로 별도 저장 가능 (향후 확장용).
+    
+    Args:
+        topic_id: 토픽 PK
+        topic_table: 토픽 테이블명
+        blog_id: 블로그 ID
+        title: 포스트 제목
+        slug: 포스트 슬러그
+        url: 발행 URL
+        unique_data_points: 검증된 고유 데이터 포인트 수 (S03 게이트 결과)
+        source_data: 원본 소스 데이터 dict (선택, 향후 JSON 저장용)
+    
+    Returns:
+        bool: 성공 시 True, 실패/중복 시 False
+    """
+    conn = _get_db()
+    try:
+        # 중복 체크
+        existing = conn.execute(
+            "SELECT log_id FROM publish_log WHERE topic_id = ? AND blog_id = ?",
+            (topic_id, blog_id)
+        ).fetchone()
+
+        if existing:
+            logger.warning(
+                f"[{blog_id}] DUPLICATE PREVENTED: topic_id={topic_id} "
+                f"already published (log_id={existing['log_id']})"
+            )
+            return False
+
+        # publish_log에 기록 (unique_data_points 포함)
+        conn.execute(
+            "INSERT INTO publish_log (topic_id, blog_id, title, slug, published_at, url, unique_data_points) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (topic_id, blog_id, title, slug, datetime.now().isoformat(), url, unique_data_points)
+        )
+
+        # topics 테이블 exhausted 마킹 (PK 기준)
+        pk2 = _get_pk_col(conn, topic_table)
+        conn.execute(
+            f"UPDATE {topic_table} SET exhausted = 1 WHERE {pk2} = ?",
+            (topic_id,)
+        )
+
+        conn.commit()
+        logger.info(f"[{blog_id}] Published: topic_id={topic_id}, slug={slug}, unique_data_points={unique_data_points}")
+        return True
+
+    except Exception as e:
+        logger.exception(f"record_publish_with_data error: {e}")
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
 # === 하위 호환: pipeline.py (tour-hugo)용 ===
 def pick_topic(blog_id, window_days=30):
     """tour-hugo 전용 pick_topic (topics 테이블 사용)"""

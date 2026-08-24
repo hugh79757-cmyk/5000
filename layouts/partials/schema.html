@@ -1,0 +1,13 @@
+{{- /* PHASE 70 WAVE 3: freshness signals — article:modified_time + JSON-LD dateModified */}}
+{{- if .IsPage }}
+<meta property="article:modified_time" content="{{ with .Lastmod }}{{ . }}{{ else }}{{ .Date }}{{ end }}">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ .Title | plainify }},
+  "datePublished": "{{ .Date }}",
+  "dateModified": "{{ with .Lastmod }}{{ . }}{{ else }}{{ .Date }}{{ end }}"
+}
+</script>
+{{- end }}

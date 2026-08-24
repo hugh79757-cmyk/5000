@@ -279,3 +279,28 @@
 | Site Health | 38/38 online |
 | launchd | com.5000.dashboard (실행 중) |
 | quality-aggregate | com.5000.quality-aggregate (매일 03:00) |
+
+---
+
+## Phase 70 — Quality Improvement (status: INCOMPLETE)
+
+- 실행일: 2026-08-25
+- 범위: 5 PLAN (70-PLAN/W1, 70-02/W2a, 70-02b/W2b, 70-03a/W3a, 70-03b/W3b)
+- 상태: 부분 완료. 대부분 구현 선행됨(테스트 작성 > 구현). 갭 클로저 수행.
+
+### 완료(검증됨)
+- `pipelines/etap/uniqueness_check.py` 신규 생성 (3 함수: ratio/structural/data-points)
+- `quality_guard.py` 게이트 연동, `content_integrity.py` S01-S05, `dispatcher.py` preflight S-category — 기구현 확인+검증
+- `data_adapters.py`(ADAPTER_REGISTRY), `editorial_synthesis.py`(editorial_synthesis_step), `topic_manager.record_publish_with_data` — 기구현 확인
+- `hugo_writer.py` lastmod 프론트매터 주입
+- `test_schema.py` 기준 publish_log.unique_data_points 컬럼 존재(INTEGER, default 0) — 통과
+- JSON-LD dateModified: PaperMod 테마가 이미 렌더(중복 방지 위해 신규 standalone schema.html 삭제)
+- Phase 70 테스트 54/54 통과 (8 파일), Hugo 로컬 빌드 성공(4727 pages, 단 deploy 아님)
+
+### 미완료(잔존 위험)
+- **W2b writer 통합 미연결**: plan 경로(pipelines/cap|cuap|stap|tap/writer.py) 실제 불일치.
+  실제 writer: pipelines/{car,curation,etap,rap,senior,stock,travel}/writer.py + etap 하위 3개.
+  중앙 `post_processor.apply_editorial_synthesis()` 구현·테스트 완료이나 어느 writer도 호출 안 함.
+  → 7 families 발행물에 editorial 단락/unique data point 미반영. 복구: 실제 writer 본문 확정 지점에
+  guarded 호출 연결(배포/빌드 검증 환경 필요, 무검증 편집은 라이브 파이프라인 파손 위험).
+- `article:modified_time` 메타태그: 테마 JSON-LD에 dateModified 존재하나 별도 메타는 미추가(성공기준 truth 충족, 부가).

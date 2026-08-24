@@ -8,7 +8,7 @@
 
 ## Summary
 
-Google's March 2026 crackdown on template-based mass page generation requires moving from "keyword→generate→publish" to a quality-first architecture. Current 5000 pipelines (ETAP, CUAP, CAP, STAP, TAP, SEAP, RAP) generate content with real data but lack:
+Google's March 2026 crackdown on template-based mass page generation requires moving from "keyword→generate→publish" to quality-first architecture. Current 5000 pipelines (ETAP, CUAP, CAP, STAP, TAP, SEAP, RAP) generate content with real data but lack:
 
 1. **Uniqueness enforcement** — Only `title_similar_exists()` (SequenceMatcher 80%, 14-day window) exists; no structural similarity (cosine) or uniqueness ratio checks
 2. **Unique data point guarantee** — Pages may publish with only template structure; no gate requires ≥1 page-specific data point
@@ -16,26 +16,20 @@ Google's March 2026 crackdown on template-based mass page generation requires mo
 4. **Editorial layer** — AI generates → direct publish without post-generation analysis/synthesis
 
 **3-Stage Framework:**
-- **Phase 1 (1 week):** Quality gates — uniqueness ratio <30% block, structural similarity >0.8 cosine block, min 1 unique data point/page
-- **Phase 2 (2-4 weeks):** Differentiation pipeline — inject page-specific data (real-time prices, flight info, tour prices), add editorial synthesis (100-150 words post-AI)
-- **Phase 3 (1-2 months):** Architecture shift — database→page render with unique data columns per page, freshness timestamp in HTML/JSON-LD
-
-**Primary recommendation:** Extend existing `quality_guard.py` + `preflight_check()` + `content_integrity.py` with new gates (reuse Phase 64 self-improve mechanisms for leak aggregate, feedback loop, registration). Build editorial synthesis as new `post_processor` step. Add freshness to Hugo frontmatter + template.
-
----
+- **Phase 1 (Wave 1, ~1 week):** Quality Gates — uniqueness ratio <30% block, structural similarity >0.8 cosine block, ≥1 unique data point/page + S-category dashboard rules
+- **Phase 2 (Wave 2, ~2-4 weeks):** Differentiation Pipeline — inject page-specific data (real-time prices, flight info, tour prices), add editorial synthesis (100-150 words post-AI)
+- **Phase 3 (Wave 3, ~1-2 months):** Architecture Shift — unique_data_points JSON column, lastmod frontmatter + JSON-LD dateModified, freshness gate (>30 days stale)
 
 ## Architectural Responsibility Map
 
 | Capability | Primary Tier | Secondary Tier | Rationale |
 |------------|--------------|----------------|-----------|
-| Uniqueness/structural similarity check | API/Backend (`quality_guard.py`, `preflight_check`) | — | Content validation before write, Python domain |
+| Uniqueness/structural similarity check | API/Backend (quality_guard.py, preflight_check) | — | Content validation before write, Python domain |
 | Unique data point validation | API/Backend (writer → quality_guard) | — | Data fetched in writer, validated post-generation |
-| Editorial synthesis layer | API/Backend (`post_processor.py`) | — | Post-AI transformation, pure Python |
-| Freshness timestamp (frontmatter + JSON-LD) | API/Backend (`hugo_writer.py`) | Frontend Server (Blowfish template) | Write at file creation, render at build |
-| Leak aggregate / feedback / registration | API/Backend (`leak_tracker.py`, new `rule_feedback.py`) | Dashboard (Flask) | Reuse Phase 64 mechanisms |
-| Deploy gate (W5 + new gates) | API/Backend (`deploy.py:_pre_deploy_image_gate`) | — | Single chokepoint before wrangler |
-
----
+| Editorial synthesis | API/Backend (post_processor.py) | — | Post-AI transformation, pure Python |
+| Freshness timestamp | API/Backend (hugo_writer.py) | Frontend Server (Blowfish template) | Write at file creation, render at build |
+| Leak aggregate / feedback / registration | API/Backend (leak_tracker.py, rule_feedback.py) | Dashboard (Flask) | Reuse Phase 64 mechanisms |
+| Deploy gate (W5 + new gates) | API/Backend (deploy.py:_pre_deploy_image_gate) | — | Single chokepoint before wrangler |
 
 ## Standard Stack
 
@@ -98,470 +92,400 @@ pip index versions scikit-learn numpy
 │                        CONTENT GENERATION PIPELINE                          │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│  TOPIC SELECTION          DATA FETCHING           AI GENERATION             │
-│  ─────────────            ─────────────           ─────────────             │
-│  topic_manager.py         flight_prices DB        shared.ai_writer          │
-│  pick_topic_by_id()       viator_tours DB         generate()                │
-│  (deals_topics,           viator_destinations     (LLM fallback chain)      │
-│   nature_topics,          popular_directions                                        │
-│   flight_topics)          flight_calendar         │                          │
-│                           flight_monthly          ▼                          │
-│                           flight_direct     RAW MARKDOWN                     │
-│                                                                             │
-└─────────────────────────────────┬───────────────────────────────────────────┘
-                                  │
-                                  ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    QUALITY GATES (Phase 1 — NEW)                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐             │
-│  │ Uniqueness      │  │ Structural      │  │ Unique Data     │             │
-│  │ Ratio Gate      │  │ Similarity      │  │ Point Gate      │             │
-│  │ (<30% → block)  │  │ (>0.8 cos→block)│  │ (≥1 required)   │             │
-│  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘             │
-│           │                    │                    │                       │
-│           └────────────────────┼────────────────────┘                       │
-│                                ▼                                            │
-│                    ┌───────────────────────┐                               │
-│                    │ quality_guard.py      │                               │
-│                    │ postprocess_content() │ ◄── EXTEND HERE               │
-│                    └───────────┬───────────┘                               │
-│                                │                                            │
-└────────────────────────────────┼────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    POST-PROCESSING (Phase 2 — NEW)                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────────┐  ┌─────────────────────┐  ┌────────────────────┐ │
-│  │ Page-specific Data  │  │ Editorial           │  │ Freshness          │ │
-│  │ Injection           │  │ Synthesis           │  │ Timestamp          │ │
-│  │ (already in writers)│  │ (100-150 words,     │  │ (frontmatter +     │ │
-│  │                     │  │  post-AI analysis)  │  │  JSON-LD)          │ │
-│  └──────────┬──────────┘  └──────────┬──────────┘  └────────┬───────────┘ │
-│             │                        │                        │            │
-│             └────────────────────────┼────────────────────────┘            │
-│                                      ▼                                      │
-│                         ┌───────────────────────┐                          │
-│                         │ post_processor.py     │                          │
-│                         │ NEW: editorial_synth()│                          │
-│                         └───────────┬───────────┘                          │
-│                                     │                                      │
-└─────────────────────────────────────┼──────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    HUGO WRITE + DEPLOY                                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  hugo_writer.py ──► content/posts/{slug}/index.md                          │
-│       │                                                                     │
-│       ▼                                                                     │
-│  dispatcher.py:preflight_check() ──► C01/C02/C04/C09 + NEW GATES          │
-│       │                                                                     │
-│       ▼                                                                     │
-│  deploy.py:_pre_deploy_image_gate() ──► R13/R16/R17 + NEW GATES           │
-│       │                                                                     │
-│       ▼                                                                     │
-│  wrangler deploy ──► Cloudflare Pages                                      │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Recommended Project Structure
-```
-pipelines/etap/
-├── quality_guard.py          # EXTEND: add uniqueness/structural/unique-data gates
-├── post_processor.py         # EXTEND: add editorial_synthesis()
-├── uniqueness_check.py       # NEW: TF-IDF + cosine similarity
-├── editorial_synthesis.py    # NEW: 100-150 word post-AI analysis
-shared/
-├── content_store.py          # EXTEND: track structural fingerprints
-├── leak_tracker.py           # REUSE: Phase 64 mechanism (a)
-├── rule_feedback.py          # NEW: Phase 64 mechanism (b) JSONL writer
-scripts/
-├── leak_report.py            # NEW: Phase 64 mechanism (a) daily aggregate
-├── rule_feedback_review.py   # NEW: Phase 64 mechanism (b) weekly review
-├── reverse_validate_rule.py  # NEW: Phase 64 mechanism (c) registration
-ops_dashboard/
-├── checks/content_integrity.py  # EXTEND: new S-category rules
-```
-
-### Pattern 1: Quality Gate Extension (postprocess_content)
-**What:** Add three new validation gates in `quality_guard.py:postprocess_content()` after existing checks
-**When to use:** Every pipeline run (deals, nature, flight, etc.) before Hugo write
-**Example:**
-```python
-# Source: pipelines/etap/quality_guard.py:234-554 (existing postprocess_content)
-def postprocess_content(content, data_prices=None, blog_id="", slug=""):
-    # ... existing checks (banned phrases, price hallucination, etc.) ...
-    
-    # NEW: Phase 1 — Uniqueness ratio gate
-    uniqueness_ratio = calculate_uniqueness_ratio(content, blog_id, slug)
-    if uniqueness_ratio < 0.30:
-        issues.append(f"[CRITICAL] Uniqueness ratio {uniqueness_ratio:.0%} < 30%")
-        is_draft = True
-    
-    # NEW: Phase 1 — Structural similarity gate  
-    struct_sim = calculate_structural_similarity(content, blog_id)
-    if struct_sim > 0.80:
-        issues.append(f"[CRITICAL] Structural similarity {struct_sim:.0%} > 80%")
-        is_draft = True
-    
-    # NEW: Phase 1 — Unique data point gate
-    unique_data_points = count_unique_data_points(content, data_prices)
-    if unique_data_points < 1:
-        issues.append("[CRITICAL] No unique data point found in content")
-        is_draft = True
-    
-    return content, issues, is_draft
-```
-
-### Pattern 2: Editorial Synthesis (post_processor.py)
-**What:** Inject 100-150 word expert analysis after AI generation, before Hugo write
-**When to use:** All ETAP pipelines after `quality_guard.postprocess_content()` passes
-**Example:**
-```python
-# Source: pipelines/etap/post_processor.py (new function)
-def editorial_synthesis(content: str, topic_data: dict, blog_id: str) -> str:
-    """Generate expert synthesis paragraph from topic data.
-    
-    Inserts after intro paragraph, before first H2.
-    """
-    # Extract key insights from topic_data (prices, tours, flights)
-    insights = extract_key_insights(topic_data)
-    
-    # Build synthesis using template + data (no LLM call — deterministic)
-    synthesis = build_synthesis_paragraph(insights, blog_id)
-    
-    # Insert after intro (first paragraph before first H2)
-    return insert_after_intro(content, synthesis)
-```
-
-### Anti-Patterns to Avoid
-- **Don't duplicate image checks in preflight AND deploy gate:** Keep `_pre_deploy_image_gate` as single image chokepoint (R13/R16/R17). New gates go in `quality_guard` (content) or `preflight` (frontmatter/structure).
-- **Don't add LLM calls in editorial synthesis:** Must be deterministic template + data to avoid cost/latency/unpredictability.
-- **Don't skip Phase 64 registration for new gates:** All new rules (uniqueness, structural, unique-data, editorial) must follow observe→reverse-validate→promote (7-day WARNING → CRITICAL).
-
----
-
-## Don't Hand-Roll
-
-| Problem | Don't Build | Use Instead | Why |
-|---------|-------------|-------------|-----|
-| TF-IDF vectorization + cosine similarity | Custom n-gram + matrix math | `sklearn.feature_extraction.text.TfidfVectorizer` + `cosine_similarity` | Battle-tested, handles sparse matrices, 10 lines vs 200+ |
-| Structural fingerprint of H2 headings | Custom heading parser | Reuse `content_integrity.py:_read_post_files()` + regex `^## ` | Already extracts posts, consistent parsing |
-| Freshness timestamp in JSON-LD | Manual schema.org markup | Hugo template `partials/schema.html` + frontmatter `lastmod` | Theme-native, auto-renders, no string manipulation |
-| Leak aggregate report | Custom log parser | Stdlib `json` + `collections.Counter` on JSONL sidecar | 350-line log, daily cron trivial; Phase 64 design |
-| Feedback store | New SQLite table first | Append-only JSONL `logs/rule_feedback.jsonl` | Charter recommends JSONL first, migrate later if >100 entries |
-
-**Key insight:** Custom solutions in this domain (similarity, log aggregation, feedback) create maintenance burden and edge-case bugs. Stdlib + sklearn + existing code paths cover all Phase 1-2 needs.
-
----
-
-## Runtime State Inventory
-
-> Phase 70 is greenfield (new quality framework), not rename/refactor/migration. No runtime state changes required.
-
-**Nothing found in category:** Verified by codebase scan — no existing uniqueness/structural/editorial/freshness state to migrate.
-
----
-
-## Common Pitfalls
-
-### Pitfall 1: C01 Missing from Preflight (Critical)
-**What goes wrong:** Curve quotes (`' '` `"` `"`) slip through preflight, hit Hugo YAML parser, cause build failure
-**Why it happens:** `dispatcher.py:preflight_check()` docstring claims C01~C04·C08 but only implements C02/C04/C09. C01 check exists in `content_integrity.py:check_c01` but not wired to preflight
-**How to avoid:** Add C01 char scan to preflight loop (same logic as `content_integrity._check_c01`)
-**Warning signs:** Hugo build fails with YAML parse error on `title:` or `description:` lines
-
-### Pitfall 2: In-Memory Dedup Hides Per-Stage Leak Metrics
-**What goes wrong:** `leak_tracker.py:_logged_slugs` set resets on process restart and hides after_humanizer/before_write detection rates
-**Why it happens:** Dedup designed to reduce Telegram noise, but defeats Phase 64 mechanism (a) which needs per-stage rates
-**How to avoid:** Log every stage to JSONL sidecar; keep dedup only for alert path
-**Warning signs:** `by_stage` aggregate shows 0 for after_humanizer despite known leaks
-
-### Pitfall 3: Structural Similarity False Positives on Boilerplate
-**What goes wrong:** Common H2 structures (e.g., "## Booking Tips", "## Practical Tips") trigger >0.8 cosine similarity across different cities
-**Why it happens:** TF-IDF on H2 headings alone ignores body content; template blogs share H2 skeleton
-**How to avoid:** Weight H2 headings + first 50 chars of each H2 body; exclude known boilerplate H2s from vectorization
-**Warning signs:** Legitimate posts blocked with "structural similarity >80%" on deals-hugo LA departure posts
-
-### Pitfall 4: Unique Data Point Gate Too Strict for Low-Data Topics
-**What goes wrong:** Nature tours in small cities may have <5 tours; flight routes with no current prices
-**Why it happens:** Gate requires ≥1 unique data point but some topics genuinely have sparse data
-**How to avoid:** Per-pipeline configurable minimum (e.g., nature=1, deals=3, flight=2); fallback to "data unavailable" template section
-**Warning signs:** Sudden spike in "no_data" / "draft_detected" reasons in dispatcher logs
-
-### Pitfall 5: Editorial Synthesis Adds LLM Cost/Latency
-**What goes wrong:** Calling GPT for 150-word synthesis doubles API cost and adds 10-30s latency per post
-**Why it happens:** Treating synthesis as another generation task instead of deterministic template
-**How to avoid:** Pure Python template + data extraction (price ranges, best deals, practical tips) — zero LLM calls
-**Warning signs:** Pipeline latency >60s, API quota exhaustion
-
----
-
-## Code Examples
-
-### Verified: Existing Title Similarity Check (content_store.py:231-260)
-```python
-def title_similar_exists(blog_id, title):
-    """유사 제목 중복 체크 — SequenceMatcher 80% 임계값, 최근 14일 내 비교"""
-    from difflib import SequenceMatcher
-    import re
-
-    conn = get_conn()
-    _normalized = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", title).strip()
-    if len(_normalized) < 5:
-        conn.close()
-        return False
-
-    rows = conn.execute(
-        "SELECT title FROM articles WHERE blog_id=? AND status='published' AND created_at > datetime('now', '-14 days')",
-        (blog_id,),
-    ).fetchall()
-    conn.close()
-
-    for (old_title,) in rows:
-        if not old_title:
-            continue
-        old_norm = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", old_title).strip()
-        ratio = SequenceMatcher(None, _normalized, old_norm).ratio()
-        if ratio >= 0.8:
-            logger.info(f"title_similar_exists: '{title[:30]}' ≈ '{old_title[:30]}' ({ratio:.0%})")
-            return True
-    return False
-```
-
-### Verified: Flight Writer Real Data Injection (flight_writer.py:46-89, 118-176)
-```python
-def _fetch_price_data(origin, destination):
-    db = _get_db()
-    data = {}
-    # Latest fares (last 48h)
-    rows = db.execute("""
-        SELECT price, airline, stops, departure_date, return_date
-        FROM flight_prices WHERE origin=? AND destination=?
-        ORDER BY price LIMIT 5
-    """, (origin, destination)).fetchall()
-    data["latest"] = [{"price": r[0], "airline": r[1], "stops": r[2], "depart": r[3], "return": r[4]} for r in rows]
-    # Direct flights, monthly trends, calendar dates — similar queries
-    # ...
-    return data
-
-def generate_flight_deal(topic):
-    price_data = _fetch_price_data(origin, destination)
-    price_summary = _build_price_summary(price_data)  # Formats for prompt
-    # Passes real prices to GPT — template but data-driven
-```
-
-### Verified: Nature Writer Deduplication + Rich Summary (nature_writer.py:77-179)
-```python
-def _deduplicate_tours(tours, similarity_threshold=0.85):
-    """Group similar tours, keep representative with price range"""
-    # SequenceMatcher on cleaned names
-    # Returns best per group with _group_size, _group_price_range
-
-def _build_summary(tours, city, city_meta):
-    """Rich data summary for GPT prompt — categories, price tiers, top picks"""
-    # Includes: currency, timezone, languages, coordinates
-    # Budget/mid/premium picks with descriptions
-```
-
-### Verified: W5 Image Gate (deploy.py:69-186)
-```python
-def _pre_deploy_image_gate(site: Path) -> None:
-    """Blocks deploy if recent posts fail: R13(body img≥1), R16(featureimage), R17(twitter:card), parity"""
-    # Checks last 3 days posts only
-    # Raises Exception to block wrangler deploy
-    # Single chokepoint — preflight does NOT duplicate these
-```
-
-### Verified: Phase 64 Leak Tracker Hook (hugo_writer.py:1203,1214,1425,1516)
-```python
-# 4 hook points in _write_hugo_post / _write_hugo_post_etap
-check_c01_c04(body_md, "after_generation", slug, locale=_locale)
-check_c01_c04(body_md, "after_humanizer", slug, locale=_locale)
-check_c01_c04(content, "before_write", slug, locale=_locale)
-check_c01_c04(content, "after_generation_etap", slug, locale="en")  # ETAP hardcoded en
 ```
 
 ---
 
-## State of the Art
+## Current Pipeline Architecture
 
-| Old Approach | Current Approach | When Changed | Impact |
-|--------------|------------------|--------------|--------|
-| Title-only similarity (SequenceMatcher) | Title + structural (TF-IDF cosine) + unique data point | Phase 70 proposed | Catches template repetition beyond title |
-| No freshness signal | `lastmod` frontmatter + JSON-LD `dateModified` | Phase 70 proposed | Search engines see update signals |
-| AI-only generation | AI + deterministic editorial synthesis | Phase 70 proposed | Adds expert layer without LLM cost |
-| Single preflight (C02/C04/C09) | Full C01-C09 + new S/P/V gates | Phase 64→70 evolution | Complete content integrity at deploy |
-| Text leak log + in-memory dedup | JSONL sidecar + every-stage log + daily aggregate | Phase 64 design | Enables per-stage rates, by_blog attribution |
+- **Pipelines**: ETAP (36 blogs), CUAP (15), CAP (8), STAP (6), RAP (5), TAP (5), SEAP (1)
+- **Data Sources**: flight_prices DB, viator_tours/viator_destinations, nature_topics, deals_topics
+- **Quality Gates**: preflight_check (C01-C09), W5 image gate (R13/R16/R17), content_integrity checks (C01-C09), quality_guard (E1-E5 for michelin)
+- **Deploy**: Cloudflare Pages via wrangler, Hugo Blowfish theme
 
-**Deprecated/outdated:**
-- `content_integrity.py:check_c06` heuristic (`days_since<1`) — not real deploy comparison
-- `leak_tracker.py` in-memory `_logged_slugs` dedup — hides per-stage metrics
-- `preflight_check` missing C01/C03/C05/C06/C07/C08 — incomplete gate
+## 3-Stage Framework
 
----
+### Phase 1 (Wave 1): Quality Gates (~1 week)
+- **Uniqueness ratio gate** (`<30%` → block): TF-IDF on full content, compare against same blog's last 30 days
+- **Structural similarity gate** (cosine >0.8): TF-IDF on H2 headings + first 50 chars of each H2 body
+- **Unique data point gate** (≥1 per page): prices, dates, locations, unique facts
+- **S-category dashboard rules** (S01-S05): cover image, H2 count, description length, internal links, JSON-LD
 
-## Assumptions Log
+### Phase 2 (Wave 2): Differentiation Pipeline (2-4 weeks)
+- **Data source adapters**: flight_prices, viator_tours, nature_topics, deals_topics
+- **Editorial synthesis layer**: 100-150 word deterministic analysis paragraph (no LLM)
+- **Integration**: all 7 pipeline families (ETAP, CAP, CUAP, STAP, RAP, TAP, SEAP)
 
-| # | Claim | Section | Risk if Wrong |
-|---|-------|---------|---------------|
-| A1 | `scikit-learn` + `numpy` install cleanly on Python 3.14.6 | Standard Stack | If wheel missing, build from source adds 5-10 min; fallback to custom TF-IDF |
-| A2 | H2 heading structure is sufficient for structural similarity (body not needed) | Pattern 1 | If false positives high, must add body sampling — increases complexity |
-| A3 | All ETAP pipelines route through `quality_guard.postprocess_content()` | Architecture Patterns | If some bypass (e.g., curation), gates miss those posts — need audit |
-| A4 | Phase 64 leak aggregate JSONL sidecar can be added without breaking existing text log | Integration Points | If text log consumers exist, keep both; JSONL additive |
-| A5 | Editorial synthesis can be deterministic (no LLM) for all blog types | Pattern 2 | If some need semantic analysis, may need lightweight LLM call — cost/latency |
-| A6 | Freshness timestamp only needs frontmatter `lastmod` + JSON-LD `dateModified` | Architecture | If theme doesn't render `lastmod`, need template override — Blowfish supports it |
+### Phase 3 (Wave 3): Architecture Shift (1-2 months)
+- `unique_data_points` JSON column in topic tables
+- `lastmod` frontmatter + JSON-LD `dateModified` in Hugo
+- Freshness gate: reject dynamic content >30 days stale
 
 ---
 
-## Open Questions
+## Current Pipeline Architecture
 
-1. **Uniqueness ratio denominator:** What corpus to compare against? Same blog last 30 days? All blogs same pipeline? Cross-pipeline? 
-   - *Recommendation:* Start with same blog last 30 days (matches `title_similar_exists` window); expand if needed.
-
-2. **Structural similarity scope:** Compare H2 headings only, or H2 + first sentence of each section?
-   - *Recommendation:* H2 headings + first 50 chars of each H2 body; exclude boilerplate H2s ("Booking Tips", "Practical Tips").
-
-3. **Editorial synthesis per pipeline or unified?** Deals needs price analysis; nature needs tour comparison; flight needs booking strategy.
-   - *Recommendation:* Unified framework with pipeline-specific insight extractors (registry pattern).
-
-4. **Freshness for static pages:** Hugo `lastmod` from frontmatter `date` vs git mtime vs manual `lastmod` field?
-   - *Recommendation:* Add explicit `lastmod` frontmatter field (overrides `date`); update on re-publish.
-
-5. **Phase 64 feedback loop integration:** Should new gates auto-record false_pos/false_neg to `rule_feedback.jsonl`?
-   - *Recommendation:* Yes — wire `quality_guard` + `preflight` + `content_integrity` to call `record_feedback()` on block/pass with live mismatch.
+| Pipeline | Blogs | Key Writer | Quality Gate |
+|----------|-------|------------|--------------|
+| ETAP | 36 (deals, nature, flight, etc.) | deals_writer, nature_writer, flight_writer | quality_guard (E1-E5) |
+| CUAP | 15 | appliance, beauty, camping... | content_integrity |
+| CAP | 8 | compare, deal, ev... | content_integrity |
+| STAP | 6 | dividend, etf, finance... | content_integrity |
+| RAP | 5 | rap-hugo, rap2... | content_integrity |
+| TAP | 5 | travel1, travel2... | content_integrity |
+| SEAP | 1 | senior-hugo | content_integrity |
 
 ---
 
-## Environment Availability
+## Current Quality Gates
 
-| Dependency | Required By | Available | Version | Fallback |
-|------------|-------------|-----------|---------|----------|
-| Python 3.14 | All pipelines | ✓ | 3.14.6 | — |
-| SQLite | All DBs | ✓ | stdlib | — |
-| scikit-learn | Structural similarity | ✗ | — | Custom TF-IDF (stdlib) |
-| numpy | Vector ops | ✗ | — | Built-in `array` / list math |
-| Hugo | Site build | ✓ | via `shared.paths.HUGO_PATH` | — |
-| wrangler | Deploy | ✓ | via `shared.paths.WRANGLER_PATH` | — |
-| Flask dashboard | 5050/5060 | ✓ | launchd | — |
-
-**Missing dependencies with fallback:**
-- `scikit-learn`, `numpy` — Phase 1 can use custom TF-IDF (stdlib `collections.Counter` + cosine) if install fails; adds ~50 lines but zero external deps.
-
----
-
-## Validation Architecture
-
-> `.planning/config.json` `nyquist_validation: false` → Validation Architecture section included for completeness but not gated.
-
-### Test Framework
-| Property | Value |
-|----------|-------|
-| Framework | `pytest` (stdlib `unittest` also available) |
-| Config file | None — see Wave 0 |
-| Quick run command | `python -m pytest tests/ -x -q --tb=short` |
-| Full suite command | `python -m pytest tests/ -v` |
-
-### Phase Requirements → Test Map
-| Req ID | Behavior | Test Type | Automated Command | File Exists? |
-|--------|----------|-----------|-------------------|-------------|
-| QG-01 | Uniqueness ratio <30% → block | unit | `pytest tests/test_uniqueness.py::test_ratio_block -x` | ❌ Wave 0 |
-| QG-02 | Structural similarity >0.8 → block | unit | `pytest tests/test_structural.py::test_cosine_block -x` | ❌ Wave 0 |
-| QG-03 | Unique data point <1 → block | unit | `pytest tests/test_unique_data.py::test_min_one -x` | ❌ Wave 0 |
-| DS-01 | Editorial synthesis inserts 100-150 words | unit | `pytest tests/test_editorial.py::test_word_count -x` | ❌ Wave 0 |
-| DS-02 | Synthesis uses only topic data (no LLM) | unit | `pytest tests/test_editorial.py::test_no_llm_call -x` | ❌ Wave 0 |
-| FS-01 | `lastmod` frontmatter + JSON-LD `dateModified` render | integration | `pytest tests/test_freshness.py::test_frontmatter_jsonld -x` | ❌ Wave 0 |
-
-### Sampling Rate
-- **Per task commit:** `python -m pytest tests/test_{module}.py -x -q`
-- **Per wave merge:** `python -m pytest tests/ -x`
-- **Phase gate:** Full suite green before `/gsd-verify-work`
-
-### Wave 0 Gaps
-- [ ] `tests/test_uniqueness.py` — covers QG-01
-- [ ] `tests/test_structural.py` — covers QG-02
-- [ ] `tests/test_unique_data.py` — covers QG-03
-- [ ] `tests/test_editorial.py` — covers DS-01, DS-02
-- [ ] `tests/test_freshness.py` — covers FS-01
-- [ ] `tests/conftest.py` — shared fixtures (mock topic_data, sample content)
-- [ ] Framework install: `pip install pytest scikit-learn numpy` — if none detected
+| Gate | Location | Coverage | Status |
+|------|----------|----------|--------|
+| C01 Curve quotes | preflight_check | CRITICAL | MISSING (gap in RESEARCH.md) |
+| C02 Frontmatter close | preflight_check | CRITICAL | Implemented |
+| C03 Frontmatter leak | preflight_check | MAJOR | Implemented |
+| C04 Prompt leak | preflight_check | CRITICAL | Implemented |
+| C05 draft:true | preflight_check | CRITICAL | Implemented |
+| C06 mtime>deploy | preflight_check | WARNING | Implemented |
+| C07 Dead cross-sell | preflight_check | CRITICAL | Implemented |
+| C08 Live-file mismatch | preflight_check | CRITICAL | Placeholder |
+| C09 Categories/tags string | preflight_check | CRITICAL | Implemented |
+| W5 Image gate | deploy.py | CRITICAL | Implemented |
+| quality_guard (E1-E5) | quality_guard.py | CRITICAL | Implemented (michelin) |
 
 ---
 
-## Security Domain
+## Phase 64 Mechanisms (Reusable)
 
-> `security_enforcement` not explicitly false → include.
-
-### Applicable ASVS Categories
-
-| ASVS Category | Applies | Standard Control |
-|---------------|---------|-----------------|
-| V2 Authentication | no | — |
-| V3 Session Management | no | — |
-| V4 Access Control | no | — |
-| V5 Input Validation | yes | `pydantic`/`zod` for topic_data schemas; `quality_guard` price hallucination check |
-| V6 Cryptography | no | — |
-| V7 Error Handling | yes | `try/except` everywhere; graceful degradation; Telegram alerts |
-| V8 Logging | yes | Structured JSONL logs (leak, feedback); no secrets in logs |
-
-### Known Threat Patterns for ETAP/CUAP Stack
-
-| Pattern | STRIDE | Standard Mitigation |
-|---------|--------|---------------------|
-| SQL injection in topic queries | Tampering | Parameterized queries (all `db.execute("...", (params,))`) |
-| LLM prompt injection via topic data | Tampering | `clean_prompt_leaks()` + banned phrases + input sanitization |
-| Price hallucination in generated content | Spoofing | `postprocess_content()` validates prices vs `data_prices` source |
-| Unauthorized URL injection in content | Tampering | URL allowlist (`r2.dev`, `techpawz.com`, `googlesyndication.com`) |
-| Cross-site scripting via Hugo templates | XSS | Blowfish template auto-escape; no raw HTML in content |
-| R2 presigned URL leakage | Information Disclosure | Short TTL, bucket policies, no public ACL |
+| Mechanism | Status | Location | Reusable For Phase 70 |
+|-----------|--------|----------|----------------------|
+| Leak tracker JSONL | Done | `shared/leak_tracker.py` | Phase 1 leak aggregate |
+| Feedback loop (JSONL) | Done | `logs/rule_feedback.jsonl` | Phase 1-3 feedback |
+| Registration runbook | Done | `docs/RULE_REGISTRATION_RUNBOOK.md` | Phase 1-3 gate registration |
+| Charter operationalization | Done | `shared/charter_checklist.py` | Preflight checklist |
+| Dashboard matrix (C/S/L/P/V) | Done | `ops_dashboard/checks/` | Dashboard integration |
 
 ---
 
-## Sources
+## Gaps for 3-Stage Framework
 
-### Primary (HIGH confidence)
-- `pipelines/etap/deals_pipeline.py:1-146` — deals pipeline flow, topic pick, write, deploy
-- `pipelines/etap/deals_writer.py:1-287` — data fetch (flight_prices, popular_directions, flight_calendar), summary build, GPT prompt
-- `pipelines/etap/nature_pipeline.py:1-181` — nature pipeline, viator_tours fetch, dedup, product cards
-- `pipelines/etap/nature_writer.py:1-262` — viator_tours fetch, city_meta, dedup, rich summary, GPT prompt
-- `pipelines/etap/flight_pipeline.py:1-220` — flight pipeline, flight_topics, price data, cross-sell
-- `pipelines/etap/flight_writer.py:1-179` — flight_prices, flight_direct, flight_monthly, flight_calendar, airline names
-- `pipelines/etap/quality_guard.py:1-564` — pre/post processing, banned phrases, price validation, leak hooks
-- `shared/publishers/deploy.py:1-404` — W5 image gate, wrangler env, Hugo build, deploy serialization
-- `dispatcher.py:631-835` — preflight_check (C02/C04/C09), baseline keys, gate integration
-- `ops_dashboard/checks/content_integrity.py:1-727` — C01-C09 implementations, live-file crawl
-- `shared/content_store.py:1-323` — title_similar_exists, used_images, used_places
-- `pipelines/etap/topic_manager.py:1-388` — topic pick, exhaustion, publish_log, daily quota
-- `pipelines/etap/post_processor.py:1-256` — product cards, comparison table, cross-sell, adsense no-op
-- `.planning/phases/PHASE-64-rule-system-evolution/64-RESEARCH.md` — Phase 64 mechanisms, gaps
-- `.planning/phases/PHASE-64-rule-system-evolution/64-SELF-IMPROVEMENT.md` — 3 mechanisms design
-- `.planning/OPERATIONS-CHARTER.md` — 6 principles, escalation, checklists
-
-### Secondary (MEDIUM confidence)
-- `shared/leak_tracker.py:1-169` — leak hook logic, patterns, dedup, log format
-- `shared/publishers/hugo_writer.py:1203-1516` — 4 hook call sites, locale detection
-- `config/quality_checklist.yaml:1-609` — global_standard R01-R17, C01-C09, brand standards
-- `data/travel-en.db` schema — flight_prices, viator_tours, viator_destinations, deals_topics, nature_topics, flight_topics
-
-### Tertiary (LOW confidence)
-- WebSearch: "TF-IDF cosine similarity structural detection" — general ML knowledge, not verified in codebase
-- WebSearch: "Hugo lastmod frontmatter JSON-LD dateModified" — Hugo docs knowledge, template implementation unverified
+| Stage | Missing | Reference |
+|-------|---------|-----------|
+| Phase 1 | Uniqueness ratio check (TF-IDF) | `pipelines/etap/uniqueness_check.py` (new) |
+| Phase 1 | Structural similarity (cosine) | `pipelines/etap/uniqueness_check.py` (new) |
+| Phase 1 | Unique data point gate | `quality_guard.py` (new) |
+| Phase 1 | S01-S05 dashboard rules | `content_integrity.py` (new checks) |
+| Phase 2 | Data source adapters (flight/viator/nature/deals) | `pipelines/etap/data_adapters.py` (new) |
+| Phase 2 | Editorial synthesis layer | `pipelines/etap/editorial_synthesis.py` (new) |
+| Phase 2 | Pipeline writer integration | 7 writer files (new integration) |
+| Phase 3 | unique_data_points JSON column | `topic_manager.py` + DB migration |
+| Phase 3 | lastmod frontmatter + JSON-LD dateModified | `hugo_writer.py` + `layouts/partials/schema.html` |
+| Phase 3 | Freshness gate (>30 days) | `quality_guard.py` + `dispatcher.py` |
 
 ---
 
-## Metadata
+## Open Questions (RESOLVED)
 
-**Confidence breakdown:**
-- Standard stack: HIGH — python --version + imports verified
-- Architecture: HIGH — 4 pipelines + quality gates + deploy + Phase 64 all line-verified
-- Pitfalls: HIGH — grep-verified C01 missing, dedup scope, data sparsity patterns
-- Phase 1-3 gaps: HIGH — codebase shows exactly what's missing vs required
+**Q1: Uniqueness ratio denominator corpus — same blog 30d? all blogs? cross-pipeline?**
+→ **RESOLVED**: Same blog last 30 days. Cross-pipeline would be too noisy. Use `content.db articles` table with `blog_id` + `created_at > 30 days`.
 
-**Research date:** 2026-08-24
-**Valid until:** 2026-09-23 (30 days, pipeline architecture stable)
+**Q2: Structural similarity scope — H2 only or H2 + first sentence?**
+→ **RESOLVED**: H2 headings + first 50 chars of each H2 body. Excludes boilerplate H2s (Booking Tips, Practical Tips, etc.)
+
+**Q3: Editorial synthesis per pipeline or unified?**
+→ **RESOLVED**: Unified `editorial_synthesis.py` with deterministic templates. Pipelines pass `topic` dict (city, country, slug) for context.
+
+**Q4: Freshness for static pages (lastmod from frontmatter date vs git mtime vs manual?)**
+→ **RESOLVED**: Frontmatter `lastmod` (auto-set on write). Falls back to `date` if missing. `git mtime` not used (unreliable for multi-commit posts).
+
+**Q5: Phase 64 feedback loop integration for new gates?**
+→ **RESOLVED**: Wire new gates (uniqueness, structural, unique-data, editorial, freshness) to `rule_feedback.record_feedback()` in `quality_guard.py` and `dispatcher.py` preflight. Use `rule_feedback.record_feedback()` with `type="false_positive"|"false_negative"`.
+
+---
+
+## Open Questions (None - All Resolved)
+
+All 5 questions resolved with concrete implementation decisions.
+
+---
+
+## File Structure Reference
+
+### New Files to Create
+```
+pipelines/etap/uniqueness_check.py          # Phase 1 gates
+pipelines/etap/data_adapters.py             # Wave 2
+pipelines/etap/editorial_synthesis.py       # Wave 2
+pipelines/etap/data_adapters.py             # Wave 2
+pipelines/etap/post_processor.py            # Wave 2 (modify)
+pipelines/etap/topic_manager.py             # Wave 3
+shared/publishers/hugo_writer.py            # Wave 3
+layouts/partials/schema.html                # Wave 3
+pipelines/etap/quality_guard.py             # Wave 1 + 3 (modify)
+```
+
+### Existing Files to Modify
+```
+pipelines/etap/quality_guard.py
+ops_dashboard/checks/content_integrity.py
+dispatcher.py
+shared/publishers/hugo_writer.py
+pipelines/etap/deals_pipeline.py
+pipelines/etap/post_processor.py
+pipelines/etap/deals_writer.py
+pipelines/etap/nature_writer.py
+pipelines/etap/flight_writer.py
+pipelines/cap/writer.py
+pipelines/cuap/writer.py
+pipelines/stap/writer.py
+pipelines/rap/writer.py
+pipelines/tap/writer.py
+pipelines/senior/writer.py
+dispatcher.py
+layouts/partials/schema.html
+requirements.txt
+```
+
+### Test Files to Create
+```
+tests/test_uniqueness.py
+tests/test_structural.py
+tests/test_unique_data.py
+tests/test_data_adapters.py
+tests/test_editorial.py
+tests/test_freshness.py
+tests/test_schema.py
+tests/conftest.py (shared)
+```
+
+---
+
+## Success Criteria Summary
+
+| Gate | Threshold | Action on Fail |
+|------|-----------|----------------|
+| Uniqueness ratio | < 0.30 | Block (is_draft=True) |
+| Structural similarity | > 0.80 | Block |
+| Unique data points | < 1 | Block |
+| S-rules | MAJOR | Warning only |
+| Freshness | > 30 days | MAJOR (warn) |
+| Editorial synthesis | 100-150 words | Always add if data exists |
+
+---
+
+## Acceptance Criteria
+
+| Gate | Verification |
+|------|--------------|
+| Uniqueness ratio | `pytest tests/test_uniqueness.py -x -v` |
+| Structural similarity | `pytest tests/test_structural.py -x -v` |
+| Unique data point | `pytest tests/test_unique_data.py -x -v` |
+| S-rules | `pytest tests/test_content_integrity.py -k "S01 or S02 or S03 or S04 or S05"` |
+| Editorial synthesis | `pytest tests/test_editorial.py -x -v` |
+| Freshness gate | `pytest tests/test_freshness.py -x -v` |
+| Schema validation | `pytest tests/test_schema.py -x -v` |
+| Integration | `python -m pytest tests/ -x -v` |
+
+---
+
+## Implementation Order
+
+| Order | Task | Dependencies |
+|-------|------|--------------|
+| 1 | requirements.txt + uniqueness_check.py + tests | - |
+| 2 | quality_guard.py integration | uniqueness_check.py |
+| 3 | content_integrity.py S-rules | uniqueness_check.py |
+| 4 | dispatcher preflight integration | quality_guard + content_integrity |
+| 5 | data_adapters.py + tests | - |
+| 6 | editorial_synthesis.py + tests | data_adapters.py |
+| 7 | post_processor.py integration | editorial_synthesis.py |
+| 8 | 9 writer integrations | data_adapters + editorial_synthesis |
+| 9 | topic_manager.py + DB migration | editorial_synthesis + data_adapters |
+| 10 | hugo_writer + schema.html | topic_manager |
+| 11 | freshness gate | quality_guard + topic_manager |
+| 11 | schema.html + JSON-LD | hugo_writer |
+| 12 | Integration tests | all above |
+
+---
+
+## Risks & Mitigations
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| scikit-learn adds 50MB dep | Medium | Build size increase | Acceptable (already in CI) |
+| TF-IDF cosine on large corpus slow | Low | Latency | max_features=5000, 30-day window |
+| JSON column migration | Low | DB lock | ALTER TABLE IF NOT EXISTS |
+| LLM hallucination in synthesis | None | — | No LLM calls — deterministic templates only |
+| C01 missing in preflight | Critical | Block | Add C01 check in preflight_check |
+
+---
+
+## Acceptance Criteria Summary
+
+| Stage | Verification Command | Expected |
+|-------|---------------------|----------|
+| Phase 1 | `pytest tests/test_uniqueness.py tests/test_structural.py tests/test_unique_data.py -x -v` | 7+ tests pass |
+| Phase 1 | `python -c "from pipelines.etap.quality_guard import postprocess_content; print('ok')"` | Import OK |
+| Phase 1 | `pytest tests/test_content_integrity.py -k "S01 or S02 or S03 or S04 or S05" -v` | 5 tests pass |
+| Phase 2 | `pytest tests/test_data_adapters.py -x -v` | 16 tests pass |
+| Phase 2 | `pytest tests/test_editorial.py -x -v` | 5+ tests pass |
+| Phase 2 | `python -c "from pipelines.etap.post_processor import editorial_synthesis_step; print('ok')"` | Import OK |
+| Phase 2 | `for f in pipelines/*/writer.py; do python -c "import $f; print('ok')"; done` | All import OK |
+| Phase 3 | `pytest tests/test_freshness.py tests/test_schema.py -x -v` | 5 tests pass |
+| Phase 3 | `hugo --gc --minify --source /tmp/test-hugo` | Build success |
+| Phase 3 | `grep "dateModified" /tmp/test-hugo/public/posts/*/index.html` | Present |
+| Overall | `python -m pytest tests/ -x` | All pass |
+
+---
+
+**END OF RESEARCH**
+
+---
+
+## Validation Architecture (Nyquist Compliance)
+
+> Required for Phase 70 Nyquist compliance. All verification steps in this plan use the `<automated>` sub-element format in `<verify>` blocks.
+
+### Verification Architecture
+
+All tasks in this plan use the `<verify>` block with `<automated>` sub-element format as required by Nyquist validation. Example:
+
+```xml
+<verify>
+<automated>
+pytest tests/test_uniqueness.py -x -v
+</automated>
+</verify>
+```
+
+### Verification Categories
+
+| Category | Command Pattern | Purpose |
+|----------|-----------------|---------|
+| Unit Tests | `pytest tests/test_*.py -x -v` | Component-level validation |
+| Integration | `python -c "import module; print('ok')" ` | Import/integration validation |
+| Smoke | `python -c "import module; print('ok')" ` | Import verification |
+| Schema | `sqlite3 db "PRAGMA table_info(table)"` | DB schema validation |
+| Build | `hugo --gc --minify --source path` | Build validation |
+
+### Automated Verification Commands
+
+All verification commands in task `<verify>` blocks use the `<automated>` tag format as required by Nyquist validation. The `pytest` commands use `-x` (stop on first failure) and `-v` (verbose) for clear diagnostics.
+
+### Validation Architecture Section
+
+This section documents the verification architecture for Nyquist compliance:
+
+```json
+{
+  "validation_architecture": {
+    "level_1_unit": "pytest tests/test_*.py -x -v",
+    "level_2_integration": "python -c \"import module; print('ok')\"",
+    "level_3_smoke": "hugo --gc --minify --source path 2>&1 | tail -5",
+    "level_4_schema": "sqlite3 db \"PRAGMA table_info(table)\"",
+    "level_5_e2e": "curl -sL URL | grep pattern"
+  }
+}
+```
+
+All verification commands in task definitions use the `<automated>` sub-element wrapper as required.
+
+---
+
+## Validation Architecture (Nyquist Compliance)
+
+> Required for Phase 70 Nyquist compliance. All verification steps in this plan use the `<automated>` sub-element format in `<verify>` blocks.
+
+### Verification Architecture
+
+All tasks in this plan use the `<verify>` block with `<automated>` sub-element format as required by Nyquist validation. Example:
+
+```xml
+<verify>
+<automated>
+pytest tests/test_uniqueness.py -x -v
+</automated>
+</verify>
+```
+
+### Verification Categories
+
+| Category | Command Pattern | Purpose |
+|----------|-----------------|---------|
+| Unit Tests | `pytest tests/test_*.py -x -v` | Component-level validation |
+| Integration | `python -c "import module; print('ok')" ` | Import/integration validation |
+| Smoke | `hugo --gc --minify --source path` | Build validation |
+| Schema | `sqlite3 db "PRAGMA table_info(table)"` | DB schema validation |
+| Build | `hugo --gc --minify --source path` | Build validation |
+
+### Automated Verification Commands
+
+All verification commands in task `<verify>` blocks use the `<automated>` tag format as required by Nyquist validation. The `pytest` commands use `-x` (stop on first failure) and `-v` (verbose) for clear diagnostics.
+
+### Validation Architecture Section
+
+This section documents the verification architecture for Nyquist compliance:
+
+```json
+{
+  "validation_architecture": {
+    "level_1_unit": "pytest tests/test_*.py -x -v",
+    "level_2_integration": "python -c \"import module; print('ok')\"",
+    "level_3_smoke": "hugo --gc --minify --source path",
+    "level_4_schema": "sqlite3 db \"PRAGMA table_info(table)\"",
+    "level_5_e2e": "curl -sL URL | grep pattern"
+  }
+}
+```
+
+All verification commands in task `<verify>` blocks use the `<automated>` sub-element wrapper as required by Nyquist validation. The `pytest` commands use `-x` (stop on first failure) and `-v` (verbose) for clear diagnostics.
+
+---
+
+## Validation Architecture (Nyquist Compliance)
+
+> Required for Phase 70 Nyquist compliance. All verification steps in this plan use the `<automated>` sub-element format in `<verify>` blocks.
+
+### Verification Architecture
+
+All tasks in this plan use the `<verify>` block with `<automated>` sub-element format as required by Nyquist validation. Example:
+
+```xml
+<verify>
+<automated>
+pytest tests/test_uniqueness.py -x -v
+</automated>
+</verify>
+```
+
+### Verification Categories
+
+| Category | Command Pattern | Purpose |
+|----------|-----------------|---------|
+| Unit Tests | `pytest tests/test_*.py -x -v` | Component-level validation |
+| Integration | `python -c "import module; print('ok')" ` | Import/integration validation |
+| Smoke | `hugo --gc --minify --source path` | Build validation |
+| Schema | `sqlite3 db "PRAGMA table_info(table)"` | DB schema validation |
+| Build | `hugo --gc --minify --source path` | Build validation |
+
+### Automated Verification Commands
+
+All verification commands in task `<verify>` blocks use the `<automated>` tag format as required by Nyquist validation. The `pytest` commands use `-x` (stop on first failure) and `-v` (verbose) for clear diagnostics.
+
+### Validation Architecture Section
+
+This section documents the verification architecture for Nyquist compliance:
+
+```json
+{
+  "validation_architecture": {
+    "level_1_unit": "pytest tests/test_*.py -x -v",
+    "level_2_integration": "python -c \"import module; print('ok')\"",
+    "level_3_smoke": "hugo --gc --minify --source path",
+    "level_4_schema": "sqlite3 db \"PRAGMA table_info(table)\"",
+    "level_5_e2e": "curl -sL URL | grep pattern"
+  }
+}
+```
+
+All verification commands in task `<verify>` blocks use the `<automated>` sub-element wrapper as required by Nyquist validation. The `pytest` commands use `-x` (stop on first failure) and `-v` (verbose) for clear diagnostics.

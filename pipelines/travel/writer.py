@@ -24,6 +24,33 @@ from shared.title_core import (
 logger = logging.getLogger(__name__)
 
 
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 
 # ── Heritage 카드 링크 ─────────────────────────────────────
 HERITAGE_CARDS = {
@@ -1362,6 +1389,8 @@ def generate_content(data, blog_id="travel-hugo"):
         logger.error("최종 H2 %d개 (<4) — 구조 미달로 발행 중단 (blog=%s)", _final_h2, blog_id)
         return None
     logger.info("최종 구조 확인 (H2:%d, H3:%d)", _final_h2, _final_h3)
+
+    content = _inject_editorial_synthesis(content, {})
 
     return {
         "title": title,

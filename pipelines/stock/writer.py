@@ -6,6 +6,33 @@ from shared.ai_writer import generate as ai_generate
 
 logger = logging.getLogger(__name__)
 
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 
 def generate_disclosure_article(disclosure, company_info=None, financials=None, financials_prev=None, dividend=None):
     corp_name = disclosure.get("corp_name", "")
@@ -171,7 +198,10 @@ BODY:
     if not result or not result.get("content"):
         logger.error("AI generation failed for disclosure article")
         return None
-    return _parse_response(result["content"])
+    _parsed = _parse_response(result["content"])
+    if _parsed and _parsed.get("body_md"):
+        _parsed["body_md"] = _inject_editorial_synthesis(_parsed["body_md"], {})
+    return _parsed
 
 
 def generate_evergreen_article(topic_type, corp_data=None, extra_data=None):
@@ -380,6 +410,9 @@ BODY:
                     continue
                 _j += 1
             parsed["body_md"] = "\n".join(_out)
+
+    if parsed and parsed.get("body_md"):
+        parsed["body_md"] = _inject_editorial_synthesis(parsed["body_md"], {})
 
     return parsed
 

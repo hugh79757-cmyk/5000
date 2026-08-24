@@ -16,6 +16,33 @@ try:
 except ImportError:
     HAS_PP = False
 
+try:
+    from pipelines.etap.editorial_synthesis import editorial_synthesis_step
+except ImportError:
+    editorial_synthesis_step = None
+
+
+def _inject_editorial_synthesis(body, topic=None):
+    """Phase 70 Wave 3: append deterministic editorial synthesis paragraph.
+
+    No-op unless the topic carries a recognized ``topic_type`` (graceful
+    degradation — returns body unchanged when no unique data resolves).
+    """
+    if not body or editorial_synthesis_step is None:
+        return body
+    try:
+        from pipelines.etap.data_adapters import get_unique_data_points
+        _t = topic or {}
+        _tt = _t.get("topic_type")
+        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        _s = editorial_synthesis_step(body, _ud, _t)
+    except Exception as _e:
+        logger.warning("[editorial] synthesis skipped: %s", _e)
+        return body
+    if not _s:
+        return body
+    return body.rstrip() + "\n\n" + _s + "\n"
+
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -278,6 +305,8 @@ Return ONLY the article in markdown starting with # title"""
     tags = [origin_city, "Flight Deals", "Cheap Flights", "Travel Deals"]
     if HAS_PP:
         tags = clean_tags(tags)
+
+    content = _inject_editorial_synthesis(content, {"city": origin_city, "country": "", "slug": topic.get("slug", "")})
 
     return {
         "title": title, "slug": topic["slug"], "content": content,
