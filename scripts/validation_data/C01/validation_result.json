@@ -1,0 +1,56 @@
+{
+  "rule_id": "C01",
+  "summary": {
+    "positive_detection_rate": "3/3",
+    "negative_false_positive_rate": "0/3",
+    "gate_passed": true
+  },
+  "details": {
+    "positive": [
+      {
+        "source": "/Users/twinssn/Projects/5000/scripts/c01_c08_validation_data/c01_demo_positive/c01_pos_1.md",
+        "expected": "fail (탐지)",
+        "actual": "fail (탐지됨)",
+        "check": "C01 위반: 곡선따옴표(' ')"
+      },
+      {
+        "source": "/Users/twinssn/Projects/5000/scripts/c01_c08_validation_data/c01_demo_positive/c01_pos_3.md",
+        "expected": "fail (탐지)",
+        "actual": "fail (탐지됨)",
+        "check": "C01 위반: 곡선따옴표(' '), 곡선따옴표(\" \")"
+      },
+      {
+        "source": "/Users/twinssn/Projects/5000/scripts/c01_c08_validation_data/c01_demo_positive/c01_pos_2.md",
+        "expected": "fail (탐지)",
+        "actual": "fail (탐지됨)",
+        "check": "C01 위반: 곡선따옴표(\" \")"
+      }
+    ],
+    "negative": [
+      {
+        "source": "/Users/twinssn/Projects/5000/scripts/c01_c08_validation_data/c01_demo_negative/c01_neg_2.md",
+        "expected": "pass (정상)",
+        "actual": "pass (정상)",
+        "check": "C01 통과"
+      },
+      {
+        "source": "/Users/twinssn/Projects/5000/scripts/c01_c08_validation_data/c01_demo_negative/c01_neg_3.md",
+        "expected": "pass (정상)",
+        "actual": "pass (정상)",
+        "check": "C01 통과"
+      },
+      {
+        "source": "/Users/twinssn/Projects/5000/scripts/c01_c08_validation_data/c01_demo_negative/c01_neg_1.md",
+        "expected": "pass (정상)",
+        "actual": "pass (정상)",
+        "check": "C01 통과"
+      }
+    ]
+  },
+  "counts": {
+    "positive_total": 3,
+    "positive_detected": 3,
+    "negative_total": 3,
+    "negative_false_positives": 0
+  }
+}

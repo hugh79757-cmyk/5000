@@ -180,8 +180,21 @@ def _sync_yaml_if_needed(conn: sqlite3.Connection) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Unpause checklist builder
+# Category Matrix helper (Phase 64-08)
 # ---------------------------------------------------------------------------
+
+def _category_counts(blog_id: str) -> dict:
+    """Return C/S/L/P/V counts for a blog from latest failed checks.
+    
+    Uses db._category_counts which queries check_results, maps check_name/rule_id
+    to category via get_rule_category(), and checks staleness (>48h).
+    """
+    from ops_dashboard.db import get_conn, _category_counts as _db_category_counts
+    conn = get_conn()
+    try:
+        return _db_category_counts(conn, blog_id)
+    finally:
+        conn.close()
 
 
 def _build_unpause_checklist(
@@ -332,6 +345,14 @@ def _register_human_routes(app: Flask) -> None:
         conn = _get_db()
         _ensure_db(conn)
         blogs = get_all_blogs(conn)
+        
+        # Phase 64-08: Category Matrix (C/S/L/P/V) per blog for summary view
+        category_matrix = {}
+        for blog in blogs:
+            bid = blog["blog_id"]
+            matrix = _category_counts(bid)
+            category_matrix[bid] = matrix
+        
         attention = get_attention_items(conn)
         brands = {b["brand"] for b in blogs}
         maintenance_summary = get_maintenance_summary(conn)
@@ -417,6 +438,7 @@ def _register_human_routes(app: Flask) -> None:
             all_brands=attention_agg.get("all_brands", {}),
             all_check_names=attention_agg.get("all_check_names", {}),
             all_severities=attention_agg.get("all_severities", {}),
+            category_matrix=category_matrix,
         )
 
     @app.route("/blog/<blog_id>")
@@ -804,6 +826,33 @@ def _register_api_routes(app: Flask) -> None:
         _ensure_db(conn)
         from ops_dashboard.db import get_registry_view
         return jsonify(get_registry_view(conn, blog_id=blog_id))
+
+    @app.route("/api/category-matrix")
+    @require_auth
+    def api_category_matrix():
+        """C/S/L/P/V 카테고리별 위반 카운트 매트릭스 (Phase 64-08).
+
+        쿼리 파라미터:
+            blog_id — 필수, 대상 블로그 ID (예: health-hugo)
+
+        응답:
+            {
+                "blog_id": "health-hugo",
+                "by_category": {"C": 0, "S": 0, "L": 1, "P": 0, "V": 0},
+                "total": 1,
+                "stale": false
+            }
+        """
+        blog_id = request.args.get("blog_id")
+        if not blog_id:
+            return jsonify({"error": "blog_id required"}), 400
+        
+        conn = _get_db()
+        _ensure_db(conn)
+        from ops_dashboard.db import _category_counts as _db_category_counts
+        result = _db_category_counts(conn, blog_id)
+        result["blog_id"] = blog_id
+        return jsonify(result)
 
     @app.route("/api/sync-yaml", methods=["POST"])
     @require_auth

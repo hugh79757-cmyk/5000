@@ -546,6 +546,179 @@ def seed_known_issues(conn: sqlite3.Connection) -> int:
 
 
 # ---------------------------------------------------------------------------
+# Rule Category Map (Phase 64-08: C/S/L/P/V matrix from seed map)
+# ---------------------------------------------------------------------------
+
+# Mapping from rule_id to category (C=Content, S=Structure/SEO, L=Link, P=Publish, V=Live-File)
+# Legacy alias: P05 -> C05 (draft:true is C in seed but P in new categorization)
+RULE_CATEGORY_MAP: dict[str, str] = {
+    # C — 콘텐츠 무결성 (current C01~C04, C09)
+    "C01": "C", "C02": "C", "C03": "C", "C04": "C", "C09": "C",
+    # S — 구조/SEO (future observe rules, currently none implemented)
+    # "S01": "S", "S02": "S", "S03": "S", "S04": "S", "S05": "S",
+    # L — 링크 건전성 (current C07)
+    "C07": "L",
+    # P — 발행 정합 (C05 draft:true, C06 mtime>deploy)
+    "C05": "P", "C06": "P",
+    # V — 라이브-파일 일치 (current C08 placeholder)
+    "C08": "V",
+    # R01~R12: standard rules (not mapped to C/S/L/P/V — separate bucket)
+    # Legacy alias for Phase 64 categorization
+    "P05": "C",  # draft:true is C in seed but P in new categorization
+}
+
+# TODO: RULE_METADATA table deferred — when implemented, store category, severity, auto_action, description per rule_id
+# CREATE TABLE IF NOT EXISTS rule_metadata (
+#     rule_id TEXT PRIMARY KEY,
+#     category TEXT NOT NULL,  -- C/S/L/P/V
+#     severity TEXT NOT NULL,  -- CRITICAL/MAJOR/WARNING
+#     auto_action TEXT NOT NULL,  -- block_deploy/warn/log
+#     description TEXT NOT NULL DEFAULT '',
+#     created_at TEXT DEFAULT (datetime('now'))
+# );
+
+
+def get_rule_category(rule_id: str) -> str:
+    """Return C/S/L/P/V category for a rule_id.
+    
+    Fallback logic:
+    - If rule_id in RULE_CATEGORY_MAP, return mapped category
+    - Else if rule_id starts with 'C' -> 'C' (content integrity)
+    - Else if rule_id starts with 'S' -> 'S' (structure/SEO)
+    - Else if rule_id starts with 'L' -> 'L' (link health)
+    - Else if rule_id starts with 'P' -> 'P' (publish consistency)
+    - Else if rule_id starts with 'V' -> 'V' (live-file verify)
+    - Else -> '?'
+    """
+    if rule_id in RULE_CATEGORY_MAP:
+        return RULE_CATEGORY_MAP[rule_id]
+    prefix = rule_id[0] if rule_id else ""
+    if prefix == "C":
+        return "C"
+    if prefix == "S":
+        return "S"
+    if prefix == "L":
+        return "L"
+    if prefix == "P":
+        return "P"
+    if prefix == "V":
+        return "V"
+    return "?"
+
+
+def _category_counts(conn: sqlite3.Connection, blog_id: str) -> dict:
+    """Count failed checks per C/S/L/P/V category for a blog.
+    
+    Queries latest check_results per (blog_id, check_name) where status='fail',
+    maps check_name to rule_id (if check_name == rule_id for individual rule rows,
+    or extracts rule_id from standard_compliance detail), then aggregates by category.
+    
+    Returns: dict with keys C, S, L, P, V, total, and 'stale' bool if latest check > 48h ago.
+    """
+    from datetime import datetime, timedelta
+    import re
+    
+    # Regex to extract C## or R## prefix from check names like c01_curve_quote, c06_mtime_deploy
+    _C_PREFIX_RE = re.compile(r"^(c0\d+)")
+    _R_PREFIX_RE = re.compile(r"^(r0\d+)")
+    _RULE_ID_RE = re.compile(r"\b[A-Za-z0-9][A-Za-z0-9-]*\d[A-Za-z0-9-]*\b(?=\()")
+    _RULES_FAILED_RE = re.compile(r"(\d+)/\d+\s+rules failed:\s*(.+)$", re.DOTALL)
+    
+    # Get latest check results per check_name for this blog
+    rows = conn.execute("""
+        SELECT cr.check_name, cr.rule_id, cr.detail, cr.status, cr.checked_at
+        FROM check_results cr
+        INNER JOIN (
+            SELECT blog_id, check_name, MAX(checked_at) as latest
+            FROM check_results WHERE blog_id = ?
+            GROUP BY blog_id, check_name
+        ) latest ON cr.blog_id = latest.blog_id
+            AND cr.check_name = latest.check_name
+            AND cr.checked_at = latest.latest
+        WHERE cr.status = 'fail'
+    """, (blog_id,)).fetchall()
+    
+    counts = {"C": 0, "S": 0, "L": 0, "P": 0, "V": 0}
+    latest_check_time = None
+    
+    for row in rows:
+        check_name = row["check_name"]
+        rule_id = row["rule_id"]
+        detail = row["detail"] or ""
+        checked_at = row["checked_at"]
+        
+        # Track latest check time for staleness
+        if checked_at:
+            try:
+                dt = datetime.fromisoformat(checked_at)
+                if latest_check_time is None or dt > latest_check_time:
+                    latest_check_time = dt
+            except ValueError:
+                pass
+        
+        # Determine rule_id for categorization
+        cat_rule_id = None
+        if rule_id:
+            cat_rule_id = rule_id
+        elif check_name == "standard_compliance":
+            # Extract rule_ids from aggregate detail
+            m = _RULES_FAILED_RE.search(detail)
+            if m and m.group(2):
+                failed_ids = _RULE_ID_RE.findall(m.group(2))
+                # Count each failed rule_id
+                for fid in failed_ids:
+                    cat = get_rule_category(fid)
+                    if cat in counts:
+                        counts[cat] += 1
+                continue  # Already counted individual rules
+        else:
+            # Extract C## or R## prefix from check_name (e.g., c01_curve_quote -> C01)
+            m_c = _C_PREFIX_RE.match(check_name)
+            m_r = _R_PREFIX_RE.match(check_name)
+            if m_c:
+                cat_rule_id = m_c.group(1).upper()
+            elif m_r:
+                cat_rule_id = m_r.group(1).upper()
+        
+        if cat_rule_id:
+            cat = get_rule_category(cat_rule_id)
+            if cat in counts:
+                counts[cat] += 1
+    
+    total = sum(counts.values())
+    
+    # Check staleness (>48h since last check)
+    stale = False
+    if latest_check_time:
+        if datetime.now() - latest_check_time > timedelta(hours=48):
+            stale = True
+    elif total == 0:
+        # No fail checks at all - could mean no checks run recently
+        # Check if any checks exist for this blog
+        any_check = conn.execute("""
+            SELECT MAX(checked_at) FROM check_results WHERE blog_id = ?
+        """, (blog_id,)).fetchone()
+        if any_check and any_check[0]:
+            try:
+                dt = datetime.fromisoformat(any_check[0])
+                if datetime.now() - dt > timedelta(hours=48):
+                    stale = True
+            except ValueError:
+                pass
+    
+    return {
+        "by_category": counts,
+        "total": total,
+        "stale": stale,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Standard rules seed
+# ---------------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------------
 # Standard rules seed
 # ---------------------------------------------------------------------------
 

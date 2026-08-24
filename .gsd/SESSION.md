@@ -151,3 +151,11 @@
 ### 2026-08-24 — MAN-004 토픽 고갈 매뉴얼 + 대시보드 체크 생성
 - docs/manuals/MAN-004-topic-exhaustion.md: 정의/감지(수동 SQL 5분기)/대응(200건 리셋)/예방(잔여일수)/DB스키마/영구해결/이력 4건
 - ops_dashboard/checks/topic_pool_health.py: ETAP per-table + CAP site_id + RAP blog_target, WARN<10 CRIT=0, 49개 체크 전원 PASS (CRITICAL 0, WARNING 0 after orphan skip), 기존 runner 없음 → TODO 주석 유지, 수동 실행 `.venv/bin/python ops_dashboard/checks/topic_pool_health.py`
+
+### 2026-08-24 Phase 64 완료
+- Wave 0: preflight C01/C09/locale fix (3f3b660f9 → 7c94d4bbf → 4ed8aa4b2 → 7c94d4bbf → 7c94d4bbf)
+- Wave 1: leak JSONL sidecar + blog_id (64-02) + leak aggregate report (64-03)
+- Wave 2: feedback store (64-04) + dashboard read hook (64-05)
+- Wave 3: registration runbook + reverse-validate + promote helper (64-06) + charter operationalization (64-07)
+- Wave 4: dashboard C/S/L/P/V matrix (64-08) — computed from seed, no migration
+- 커밋: 7c94d4bbf → d739d9561 → cc652d517 → b176b8549 → 15db174e7 → 78d9dfac8 → a20735725 → 9b09c9f28 → f4040a234 → 086fad072

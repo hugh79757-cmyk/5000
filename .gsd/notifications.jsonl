@@ -1,0 +1,2 @@
+{"id":"9bf8c5ad-ea97-4e1e-8c4b-aadc8c27eedd","ts":"2026-08-24T09:03:22.308Z","severity":"info","message":"→ /gsd quick plan check PHASE-64","source":"notify","read":false}
+{"id":"23a61783-5010-4a06-8891-9880b69fcdb3","ts":"2026-08-24T09:03:22.341Z","severity":"info","message":"Quick task 1: plan check PHASE-64\nDirectory: .gsd/quick/1-plan-check-phase-64\nBranch: main","source":"notify","read":false}

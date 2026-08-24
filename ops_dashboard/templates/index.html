@@ -199,16 +199,23 @@
   <div class="table-view">
     <div class="table-wrap">
       <table>
-        <tr><th data-sort="asc">Blog ID</th><th data-sort>Brand</th><th data-sort>Config</th><th data-sort>정비</th><th data-sort>Quality</th></tr>
+        <tr><th data-sort="asc">Blog ID</th><th data-sort>Brand</th><th data-sort>Config</th><th data-sort>정비</th><th data-sort>Quality</th><th data-sort>C/S/L/P/V</th></tr>
         {% for b in blogs %}
+        {% set cm = category_matrix.get(b.blog_id, {}) %}
+        {% set by_cat = cm.get('by_category', {}) %}
+        {% set total = cm.get('total', 0) %}
+        {% set stale = cm.get('stale', false) %}
         <tr>
           <td><a href="/blog/{{ b.blog_id }}">{{ b.blog_id }}</a></td>
           <td><span class="dot dot-{{ b.config_status }}"></span>{{ b.brand }}</td>
           <td><span class="badge badge-{{ 'pass' if b.config_status == 'active' else 'fail' if b.config_status == 'inactive' else 'unknown' }}">{{ b.config_status }}</span></td>
           <td>
-            {% if b.maintenance_status == 'ready' %}<span class="badge badge-pass">재개준비</span>
-            {% elif b.maintenance_status == 'in_progress' %}<span class="badge badge-warn">정비중</span>
-            {% elif b.maintenance_status == 'awaiting' %}<span class="badge badge-unknown">정비대기</span>
+            {% if b.maintenance_status == 'ready' %}
+              <span class="badge badge-pass">재개준비</span>
+            {% elif b.maintenance_status == 'in_progress' %}
+              <span class="badge badge-warn">정비중</span>
+            {% elif b.maintenance_status == 'awaiting' %}
+              <span class="badge badge-unknown">정비대기</span>
             {% else %}—{% endif %}
           </td>
             <td style="white-space:nowrap">
@@ -233,24 +240,44 @@
                 </span>
               {% endif %}
             </td>
+            <td style="white-space:nowrap;font-family:monospace;font-size:0.85rem">
+              {% if stale %}
+                <span class="badge badge-unknown" style="background:#6c757d;color:#fff">⏰</span>
+              {% elif total == 0 %}
+                <span style="color:#6c757d">—</span>
+              {% else %}
+                <span style="color:{{ 'var(--fail)' if by_cat.C > 0 else '#6c757d' }}">C:{{ by_cat.C }}</span>
+                <span style="color:{{ 'var(--warn)' if by_cat.S > 0 else '#6c757d' }}"> S:{{ by_cat.S }}</span>
+                <span style="color:{{ 'var(--fail)' if by_cat.L > 0 else '#6c757d' }}"> L:{{ by_cat.L }}</span>
+                <span style="color:{{ 'var(--warn)' if by_cat.P > 0 else '#6c757d' }}"> P:{{ by_cat.P }}</span>
+                <span style="color:{{ 'var(--fail)' if by_cat.V > 0 else '#6c757d' }}"> V:{{ by_cat.V }}</span>
+              {% endif %}
+            </td>
         </tr>
         {% endfor %}
         {% if not blogs %}
-        <tr><td colspan="5" class="empty">No blogs synced</td></tr>
+        <tr><td colspan="6" class="empty">No blogs synced</td></tr>
         {% endif %}
       </table>
     </div>
   </div>
   <div class="card-view">
     {% for b in blogs %}
+    {% set cm = category_matrix.get(b.blog_id, {}) %}
+    {% set by_cat = cm.get('by_category', {}) %}
+    {% set total = cm.get('total', 0) %}
+    {% set stale = cm.get('stale', false) %}
     <div class="mobile-card">
       <div class="mc-title"><a href="/blog/{{ b.blog_id }}">{{ b.blog_id }}</a></div>
       <div class="mc-row"><span class="mc-label">Brand</span><span>{{ b.brand }}</span></div>
       <div class="mc-row"><span class="mc-label">Config</span><span class="badge badge-{{ 'pass' if b.config_status == 'active' else 'fail' if b.config_status == 'inactive' else 'unknown' }}">{{ b.config_status }}</span></div>
-      <div class="mc-row"><span class="mc-label">정비</span><span>
-        {% if b.maintenance_status == 'ready' %}<span class="badge badge-pass">재개준비</span>
-        {% elif b.maintenance_status == 'in_progress' %}<span class="badge badge-warn">정비중</span>
-        {% elif b.maintenance_status == 'awaiting' %}<span class="badge badge-unknown">정비대기</span>
+<div class="mc-row"><span class="mc-label">정비</span><span>
+        {% if b.maintenance_status == 'ready' %}
+          <span class="badge badge-pass">재개준비</span>
+        {% elif b.maintenance_status == 'in_progress' %}
+          <span class="badge badge-warn">정비중</span>
+        {% elif b.maintenance_status == 'awaiting' %}
+          <span class="badge badge-unknown">정비대기</span>
         {% else %}—{% endif %}
       </span></div>
       <div class="mc-row"><span class="mc-label">Quality</span><span>
@@ -273,6 +300,19 @@
             <span class="badge badge-warn" style="margin-left:3px">{{ rid }}</span>
             {% endfor %}
           </span>
+        {% endif %}
+      </span></div>
+      <div class="mc-row"><span class="mc-label">C/S/L/P/V</span><span style="font-family:monospace;font-size:0.8rem">
+        {% if stale %}
+          <span class="badge badge-unknown" style="background:#6c757d;color:#fff">⏰</span>
+        {% elif total == 0 %}
+          <span style="color:#6c757d">—</span>
+        {% else %}
+          <span style="color:{{ 'var(--fail)' if by_cat.C > 0 else '#6c757d' }}">C:{{ by_cat.C }}</span>
+          <span style="color:{{ 'var(--warn)' if by_cat.S > 0 else '#6c757d' }}"> S:{{ by_cat.S }}</span>
+          <span style="color:{{ 'var(--fail)' if by_cat.L > 0 else '#6c757d' }}"> L:{{ by_cat.L }}</span>
+          <span style="color:{{ 'var(--warn)' if by_cat.P > 0 else '#6c757d' }}"> P:{{ by_cat.P }}</span>
+          <span style="color:{{ 'var(--fail)' if by_cat.V > 0 else '#6c757d' }}"> V:{{ by_cat.V }}</span>
         {% endif %}
       </span></div>
     </div>
