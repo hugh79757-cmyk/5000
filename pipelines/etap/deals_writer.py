@@ -216,6 +216,56 @@ Return ONLY the article in markdown starting with # title"""
         content = fix_encoding(content)
         content = clean_prompt_leaks(content)
 
+    # ── Per-paragraph price table (4 cols, price approx + button) ──
+    def _deals_table(rows: list) -> str:
+        header = "\n\n| Destination | From Price | Stops | Details |\n|---|---|---|---|\n"
+        body = []
+        marker = os.getenv("TRAVELPAYOUTS_MARKER", "") or os.getenv("AVIASALES_MARKER", "")
+        for r in rows[:10]:
+            city = r.get("dest_city", r.get("destination", ""))
+            iata = r.get("destination", "")
+            dest_label = f"{city} ({iata})" if city != iata else city
+            price = f"From ${int(r['min_price']):,}" if r.get("min_price") else "—"
+            stops_raw = r.get("min_stops", 0)
+            try:
+                stops_raw = int(stops_raw)
+            except Exception:
+                stops_raw = 0
+            stops = "Nonstop" if stops_raw == 0 else f"{stops_raw} stop(s)"
+            # Aviasales/JetRadar search link — date required, else search fails (SHV->VTE bug)
+            dep_date = (r.get("earliest_date") or r.get("departure_date") or "")[:10]
+            if marker and dep_date:
+                link = f"https://www.jetradar.com/searches/new?origin_iata={origin_code}&destination_iata={iata}&depart_date={dep_date}&adults=1&marker={marker}"
+            elif marker:
+                link = f"https://www.aviasales.com/search/{origin_code}{iata}?marker={marker}"
+            elif dep_date:
+                link = f"https://www.jetradar.com/searches/new?origin_iata={origin_code}&destination_iata={iata}&depart_date={dep_date}&adults=1"
+            else:
+                link = f"https://www.aviasales.com/search/{origin_code}{iata}"
+            body.append(f"| {dest_label} | {price}* | {stops} | [Check Details]({link}) |")
+        note = "\n* Prices are approximate and may change. Please click **Check Details** to verify current fare.\n"
+        return header + "\n".join(body) + note
+
+    # Insert table right after each price-tier H2
+    if budget:
+        content = re.sub(
+            r"(## Current Flight Prices Under \$200[^\n]*\n)",
+            r"\1" + _deals_table(budget),
+            content, count=1
+        )
+    if mid:
+        content = re.sub(
+            r"(## Current Flight Prices \$200-\$500[^\n]*\n)",
+            r"\1" + _deals_table(mid),
+            content, count=1
+        )
+    if premium:
+        content = re.sub(
+            r"(## Current Flight Prices Over \$500[^\n]*\n)",
+            r"\1" + _deals_table(premium),
+            content, count=1
+        )
+
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else f"Flight Deals From {origin_city}"
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
