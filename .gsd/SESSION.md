@@ -128,3 +128,9 @@
 - 데이터 고갈 현황 SQL 실행 (ETAP 0% 3개, CAP ev 0%/compare 1.4%, STAP stock_issue 100% 미사용 버그, RAP 91% OK)
 - W5 R13 대상 목록 파악 (pick 130파일 전체 중 최근 10 중 2건, rap2 533/rap4 674 중 최근 10 중 7/10건)
 - topic-pool-sustainability.md DRAFT 작성 (.planning/designs/)
+
+### 2026-08-24 Phase 3 — 긴급 조치 4건 실행 (승인완료)
+- ETAP: nature 50건 리셋 (0→50, 27.9%), airports 50건 리셋 (1→51, 0.5%), watersports 50건 리셋 (1→51, 24.3%) — backup /tmp/*_backup_20260824.sql
+- CAP: ev pending 0→50 (0%→12.0%, total 415) — keyword_expander 없음 확인, 수동 INSERT (ev_clone_*)로 대체
+- STAP: stock_issue 라우팅 조사 — BLOG_SOURCE_MAP 정상, collect→publish_log 정상, 2799건 미사용은 ipo pipeline에서 get_unused_data로 정상 반환됨 (버그 아님, 활용 대기)
+- W5 R13: pick 2 + rap2 7 + rap4 10 = 19건 `![Travel image](default-thumbnail.webp)` 주입, hugo build 3개 pass, pages deploy 3개 성공 (6805c63e/5418c971/785f8c63)

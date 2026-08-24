@@ -109,6 +109,8 @@ Return ONLY the article in markdown starting with # title"""
         max_tokens=4000,
         )
     content = result["content"].strip()
+    # H2 guard: LLM이 ## 대신 <strong>으로 출력한 경우 보정 (da-nang 2026-08-24 사례)
+    content = re.sub(r"^<strong>\s*(Why Choose.*?|Top Private Tours.*?|Luxury Day Trips.*?|Prices and What.*?|Tips for Booking.*?)\s*</strong>\s*$", r"## \1", content, flags=re.MULTILINE)
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"Luxury And Private Tours in {city}")
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
