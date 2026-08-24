@@ -98,9 +98,12 @@ def _run_impl() -> dict | bool:
         send_alert(BLOG_ID, article["slug"], post_issues)
         return {"success": False, "reason": "draft_detected"}
     origin = article.get("origin", "")
-    # country 자리에 origin 도시명을 넣어 관련성 필터 통과율 향상
-    cover = fetch_city_image(origin + " airport travel", origin, article["slug"]) if origin else None
-    body = fetch_body_images(origin + " city travel", origin, article["slug"], count=8) if origin else []
+    # 커버: 목적지(destination) 기준으로 고유화 — 동일 origin 출발 글끼리 썸네일 중복 방지
+    # body: 동일하게 목적지 기반 분산 (origin만 쓰면 LA 출발 4건 모두 동일 Pexels 결과 → 동일 R2 etag)
+    _deals_for_img = article.get("deals", [])
+    _dest_for_cover = _deals_for_img[0].get("dest_city") if _deals_for_img and _deals_for_img[0].get("dest_city") else origin
+    cover = fetch_city_image(_dest_for_cover + " travel", _dest_for_cover, article["slug"]) if _dest_for_cover else None
+    body = fetch_body_images(_dest_for_cover + " city travel", _dest_for_cover, article["slug"], count=8) if _dest_for_cover else []
     # cross-sell: base pipeline 표준 블록 (deals는 도시 기반 — origin을 city로 사용)
     cross_html = build_cross_sell_html(
         country=article.get("country", ""),
