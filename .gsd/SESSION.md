@@ -159,3 +159,11 @@
 - Wave 3: registration runbook + reverse-validate + promote helper (64-06) + charter operationalization (64-07)
 - Wave 4: dashboard C/S/L/P/V matrix (64-08) — computed from seed, no migration
 - 커밋: 7c94d4bbf → d739d9561 → cc652d517 → b176b8549 → 15db174e7 → 78d9dfac8 → a20735725 → 9b09c9f28 → f4040a234 → 086fad072
+
+### 2026-08-25 — 파이프라인 실패 대시보드 체크 추가
+- ops_dashboard/checks/pipeline_failure_health.py: P02/P03/P14 가시화
+  * 소스: publish_error_events (canonical). scheduler.log는 'Blog:' 프리픽스 부재 + fitness/kitchen 누락으로 silent gap → 폐기
+  * gate: state='open' OR 24h 이내 발생, blog_id LIKE '%-hugo'
+  * 임계값: 문제별 건수 합 ≥3 CRITICAL, ≥1 WARNING
+- ops_dashboard/checks/run_all_checks.py: topic_pool_health + pipeline_failure_health 통합, check_results_custom 저장
+  * 매 실행 전 clear_managed()로 스냅샷 누적 방지
