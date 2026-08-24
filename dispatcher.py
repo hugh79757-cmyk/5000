@@ -12,6 +12,8 @@ blog_id를 받아 해당 pipeline의 run(cfg)를 호출하고,
 #                 slug=slug, severity="CRITICAL", gate_decision="passed",
 #                 reason="live check found issue but gate passed",
 #                 detected_by="agent", status="open")
+
+# Charter: run python -m shared.charter_checklist --job deploy before mass-mod
 """
 import importlib
 import json

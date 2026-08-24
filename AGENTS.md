@@ -798,3 +798,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## Dashboard Operations Agent Reference
 
 For any dashboard, publishing, deployment, validation, source, duplicate, freshness, or notification signal, read `ops_dashboard/docs/agent-reference/README.md` before proposing or applying a change. It links the required safety protocol, machine-readable signal policy, and error playbooks. Treat Telegram as a notification channel only; use structured events, raw logs, configuration, data stores, and live evidence to determine root cause.
+
+## Operations Charter — read before any job
+
+운영헌장: `.planning/OPERATIONS-CHARTER.md` (배경/원칙) | 작업 유형별 체크리스트: `.planning/phases/PHASE-64-rule-system-evolution/64-PREFLIGHT-CHECKLISTS.md` (강제 실행 게이트)
