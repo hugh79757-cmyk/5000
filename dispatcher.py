@@ -1,6 +1,17 @@
 """5000 dispatcher — 중앙 라우터
 blog_id를 받아 해당 pipeline의 run(cfg)를 호출하고,
 결과를 publish_ledger에 기록한다.
+
+# feedback hook (stub, Phase 64-04 — no wiring yet):
+# from shared.rule_feedback import record_feedback
+# record_feedback(type="false_positive", rule_id="C01", blog_id=blog_id,
+#                 slug=slug, severity="MAJOR", gate_decision="blocked",
+#                 reason="manual review: gate blocked but content ok",
+#                 detected_by="human", status="open")
+# record_feedback(type="false_negative", rule_id="C09", blog_id=blog_id,
+#                 slug=slug, severity="CRITICAL", gate_decision="passed",
+#                 reason="live check found issue but gate passed",
+#                 detected_by="agent", status="open")
 """
 import importlib
 import json
@@ -631,11 +642,12 @@ def _compute_baseline_keys(posts_dir: "Path") -> set:
 def preflight_check(blog_id: str) -> dict:
     """배포 전 콘텐츠 무결성 프리플라이트 체크.
 
-    C01~C04·C08 중 critical이 1건이라도 있으면 배포 중단.
+    C01(MAJOR warn-only)/C02(CRITICAL)/C04(CRITICAL)/C09(CRITICAL) 검사.
+    C06/C08 placeholder (미구현, 주석 유지). blocked는 CRITICAL 위반만.
 
     Returns:
         {"blocked": bool, "violations": list[dict], "reason": str}
-        - blocked=True: 배포 중단 필요
+        - blocked=True: CRITICAL 위반 시 배포 중단
         - violations: [{rule_id, slug, severity, detail}, ...]
     """
     import json
@@ -680,6 +692,34 @@ def preflight_check(blog_id: str) -> dict:
     for md_file in recent_posts:
         content = md_file.read_text(encoding="utf-8", errors="replace")
         slug = md_file.parent.name
+
+        # --- C01: 곡선따옴표 (MAJOR, warn-only) ---
+        # reuse ops_dashboard/checks/content_integrity.py _check_c01 char set
+        # \u2018\u2019\u201c\u201d inclusion — severity lookup SEED_STANDARD_RULES
+        _C01_CURVED_SINGLE = ["\u2018", "\u2019"]
+        _C01_CURVED_DOUBLE = ["\u201c", "\u201d"]
+        _c01_found = []
+        if any(c in content for c in _C01_CURVED_SINGLE):
+            _c01_found.append("곡선따옴표(' ')")
+        if any(c in content for c in _C01_CURVED_DOUBLE):
+            _c01_found.append('곡선따옴표(" ")')
+        if _c01_found:
+            # severity-aware: lookup SEED_STANDARD_RULES — C01 is MAJOR, blocked only if CRITICAL
+            _c01_severity = "MAJOR"
+            try:
+                from ops_dashboard.db import SEED_STANDARD_RULES as _SEED
+                for _r in _SEED:
+                    if _r.get("rule_id") == "C01":
+                        _c01_severity = _r.get("severity", "MAJOR")
+                        break
+            except Exception:
+                pass
+            violations.append({
+                "rule_id": "C01", "slug": slug, "severity": _c01_severity,
+                "detail": f"C01 위반: {', '.join(_c01_found)}",
+                "file": str(md_file)})
+            if _c01_severity == "CRITICAL":
+                blocked = True
 
         # --- C02: 프론트매터 미종료 (CRITICAL) ---
         lines = content.split('\n')
@@ -736,6 +776,10 @@ def preflight_check(blog_id: str) -> dict:
                     "file": str(md_file)})
                 blocked = True
                 break  # 한 포스트당 1건만 기록
+
+        # --- C06: mtime > deploy_time (MAJOR) ---
+        # placeholder: deploy timestamp 소스 미확보 — heuristic 유지, LATER 후보
+        # 기존 _check_c06 days_since<1 heuristic 유지, preflight에서는 미구현
 
         # --- C08: 라이브-파일 불일치 (CRITICAL) ---
         # 현재 구현에서는 제목/og_image 비교 로직 생략 (별도 구현 필요)

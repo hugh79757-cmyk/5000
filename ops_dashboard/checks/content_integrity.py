@@ -1,6 +1,17 @@
 """ops_dashboard.checks.content_integrity — C01~C08 콘텐츠 무결성 검사
 
 블로그별 콘텐츠 무결성 규칙(C01~C08)을 검사하고 결과를 check_results에 기록.
+
+# feedback hook (stub, Phase 64-04 — no wiring yet):
+# from shared.rule_feedback import record_feedback
+# # false_positive example: gate flagged C01 but human judges pass
+# record_feedback(type="false_positive", rule_id="C01", blog_id=blog_id,
+#                 slug=path.parent.name, severity="MAJOR", gate_decision="blocked",
+#                 reason="curved quote in code block is intentional", detected_by="human")
+# # false_negative example: check passed but live issue found later
+# record_feedback(type="false_negative", rule_id="C09", blog_id=blog_id,
+#                 slug=slug, severity="CRITICAL", gate_decision="passed",
+#                 reason="categories str-literal not detected", detected_by="agent")
 """
 from __future__ import annotations
 

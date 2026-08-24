@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 # 로그 파일 경로
 LEAK_LOG_PATH = Path(__file__).parent.parent / "logs" / "leak-origin.log"
+LEAK_JSONL_PATH = Path(__file__).parent.parent / "logs" / "leak-origin.jsonl"
 
 # C01: 곡선따옴표 (U+2018, U+2019, U+201C, U+201D)
 # 직선따옴표(' "...')는 정상, 곡선따옴표(' ' " ")만 위반으로 탐지
@@ -62,6 +63,29 @@ def _log_leak_origin(stage: str, slug: str, rule_id: str, pattern_type: str, sni
     logger.warning(f"[LEAK-ORIGIN] {log_line.strip()}")
 
 
+def _log_leak_jsonl(stage: str, slug: str, rule_id: str, pattern_type: str, snippet: str, blog_id=None) -> None:
+    """leak-origin.jsonl sidecar에 JSON 한 줄 기록 (per detection).
+
+    Fields: ts(iso), stage, slug, rule_id, pattern_type, snippet[:100], blog_id.
+    blog_id는 "" 으로 폴백하여 기존 text 로그와의 호환 유지.
+    """
+    import json
+
+    _ensure_log_dir()
+    ts = datetime.now().isoformat()
+    payload = {
+        "ts": ts,
+        "stage": stage,
+        "slug": slug,
+        "rule_id": rule_id,
+        "pattern_type": pattern_type,
+        "snippet": snippet[:100],
+        "blog_id": blog_id or "",
+    }
+    with open(LEAK_JSONL_PATH, "a", encoding="utf-8") as f:
+        f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+
+
 # 이미 기록된 slug 추적 (중복 방지 — 메모리 내)
 _logged_slugs: set[str] = set()
 
@@ -82,6 +106,8 @@ def check_c01_c04(
     slug: str,
     locale: str = "ko",
     log_originally: bool = True,
+    blog_id: str | None = None,
+    log_every_stage: bool = False,
 ) -> dict:
     """C01(곡선따옴표) + C04(프롬프트 누수) 검사.
 
@@ -91,6 +117,10 @@ def check_c01_c04(
         slug: 포스트 slug
         locale: "ko" 또는 "en" (C04 패턴 선택)
         log_originally: True면 최초 탐지 지점만 기록, False면 기록 안 함 (재검증용)
+        blog_id: blog 식별자 (JSONL sidecar에 기록, 없으면 "" )
+        log_every_stage: True면 dedup과 무관하게 JSONL은 매 탐지마다 기록 (aggregate 관측용).
+                         False면 JSONL도 text 로그와 동일하게 dedup.
+                         Text 로그는 항상 dedup 유지.
 
     Returns:
         {"c01_detected": bool, "c04_detected": bool,
@@ -126,19 +156,31 @@ def check_c01_c04(
         result["c04_detected"] = True
         result["c04_patterns"] = c04_found
 
-    # 로그 기록 (최초 탐지 지점만)
+    # 로그 기록
+    # Text 로그는 항상 dedup (기존 동작 유지, Telegram 노이즈 방지)
+    # JSONL은 log_every_stage=True이면 dedup 무시하고 매 탐지마다 기록 (aggregate 관측용)
     if log_originally and (result["c01_detected"] or result["c04_detected"]):
-        if not _is_logged(slug):
+        is_first = not _is_logged(slug)
+        if is_first:
             _mark_logged(slug)
             if result["c01_detected"]:
                 _log_leak_origin(stage, slug, "C01", "curve_quote", c01_found[0])
+                _log_leak_jsonl(stage, slug, "C01", "curve_quote", c01_found[0], blog_id=blog_id)
                 result["first_stage"] = stage if result["first_stage"] is None else result["first_stage"]
             if result["c04_detected"]:
                 _log_leak_origin(stage, slug, "C04", "prompt_leak", c04_found[0])
+                _log_leak_jsonl(stage, slug, "C04", "prompt_leak", c04_found[0], blog_id=blog_id)
                 result["first_stage"] = stage if result["first_stage"] is None else result["first_stage"]
         else:
-            # 이미 기록된 slug — 추가 기록 안 함 (중복 방지)
-            pass
+            if log_every_stage:
+                # text는 dedup 유지, JSONL만 추가 기록
+                if result["c01_detected"]:
+                    _log_leak_jsonl(stage, slug, "C01", "curve_quote", c01_found[0], blog_id=blog_id)
+                if result["c04_detected"]:
+                    _log_leak_jsonl(stage, slug, "C04", "prompt_leak", c04_found[0], blog_id=blog_id)
+            else:
+                # 둘 다 dedup — 추가 기록 없음
+                pass
 
     return result
 

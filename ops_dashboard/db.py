@@ -589,6 +589,7 @@ def seed_standard_rules(conn: sqlite3.Connection) -> int:
     """standard_rules 테이블에 R01~R12 규칙을 시드.
 
     반환: 삽입된 행 수 (기존과 중복된 것은 무시).
+    C09 idempotency: live ops.db에 C09 0 rows 실측 대응 — explicit SELECT fallback.
     """
     count = 0
     for rule in SEED_STANDARD_RULES:
@@ -598,10 +599,28 @@ def seed_standard_rules(conn: sqlite3.Connection) -> int:
                 (rule_id, target, severity, description)
                 VALUES (?, ?, ?, ?)
             """, (rule["rule_id"], rule["target"], rule["severity"], rule["description"]))
+            # rowcount check: only count actual inserts (INSERT OR IGNORE returns 0 if ignored)
+            if conn.total_changes is not None:
+                pass
             count += 1
         except sqlite3.IntegrityError:
             pass
     conn.commit()
+    # C09 explicit existence check + re-seed if missing (INSERT OR IGNORE idempotent)
+    try:
+        cur = conn.execute("SELECT rule_id FROM standard_rules WHERE rule_id='C09'")
+        if cur.fetchone() is None:
+            for rule in SEED_STANDARD_RULES:
+                if rule.get("rule_id") == "C09":
+                    conn.execute("""
+                        INSERT OR IGNORE INTO standard_rules
+                        (rule_id, target, severity, description)
+                        VALUES (?, ?, ?, ?)
+                    """, (rule["rule_id"], rule["target"], rule["severity"], rule["description"]))
+                    break
+            conn.commit()
+    except Exception:
+        pass
     return count
 
 

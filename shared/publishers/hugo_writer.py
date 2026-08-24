@@ -1201,7 +1201,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ── C01/C04 원인추적 훅 (a) 생성 직후 ──
     try:
         from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(body_md, "after_generation", slug, locale=_locale)
+        _leak_result = check_c01_c04(body_md, "after_generation", slug, locale=_locale, blog_id=blog_cfg.get("id", ""), log_every_stage=True)
         if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
             logger.info(f"[LEAK-TRACKER] (a)생성직후 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} {slug}")
     except ImportError:
@@ -1212,7 +1212,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ── C01/C04 원인추적 훅 (b) humanizer 통과 직후 ──
     try:
         from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(body_md, "after_humanizer", slug, locale=_locale)
+        _leak_result = check_c01_c04(body_md, "after_humanizer", slug, locale=_locale, blog_id=blog_cfg.get("id", ""), log_every_stage=True)
         if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
             logger.info(f"[LEAK-TRACKER] (b)humanizer후 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} {slug}")
     except ImportError:
@@ -1423,7 +1423,7 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
     # ── C01/C04 원인추적 훅 (c) 저장 직전 ──
     try:
         from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(content, "before_write", slug, locale=_locale)
+        _leak_result = check_c01_c04(content, "before_write", slug, locale=_locale, blog_id=blog_cfg.get("id", ""), log_every_stage=True)
         if _leak_result["c01_detected"] or _leak_result["c04_detected"]:
             logger.warning(f"[LEAK-TRACKER] (c)저장직전 C01:{_leak_result['c01_detected']} C04:{_leak_result['c04_detected']} — 배포중단 대상 {slug}")
             return {"success": False, "error": f"leak_detected: C01={_leak_result['c01_detected']}, C04={_leak_result['c04_detected']}"}
@@ -1513,8 +1513,8 @@ def _write_hugo_post_etap(article, cover_image=None, body_images=None, blog_id=N
 
     # ── C01/C04 원인추적 훅 (a) ETAP 생성 직후 ──
     try:
-        from shared.leak_tracker import check_c01_c04
-        _leak_result = check_c01_c04(content, "after_generation_etap", slug, locale="en")
+        from shared.leak_tracker import check_c01_c04  # _detect_locale(content) for etap locale fix
+        _leak_result = check_c01_c04(content, "after_generation_etap", slug, locale=_detect_locale(content), blog_id=blog_id or "", log_every_stage=True)
         if _leak_result["c04_detected"]:
             logger.info(f"[LEAK-TRACKER] (a)ETAP생성직후 C04:{_leak_result['c04_detected']} {slug}")
     except ImportError:
