@@ -92,7 +92,6 @@ data/llm_trace/
 # Do not commit these files to the repository.
 ga4_admin_*.json
 rollback_bouches_log5593.sql
-.gsd/
 .commandcode/
 .bg-shell/
 .planning/*
