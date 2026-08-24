@@ -3,7 +3,7 @@ import logging
 import os
 import re
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from shared.ai_writer import generate as ai_generate
 
@@ -232,8 +232,13 @@ Return ONLY the article in markdown starting with # title"""
             except Exception:
                 stops_raw = 0
             stops = "Nonstop" if stops_raw == 0 else f"{stops_raw} stop(s)"
-            # Aviasales/JetRadar search link — date required, else search fails (SHV->VTE bug)
+            # Aviasales/JetRadar search link — dynamic future date (DB dates are stale Apr/May)
+            today_str = datetime.now().strftime("%Y-%m-%d")
+            future_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
             dep_date = (r.get("earliest_date") or r.get("departure_date") or "")[:10]
+            # if DB date is past or empty, use future date (30 days out)
+            if not dep_date or dep_date < today_str:
+                dep_date = future_date
             if marker and dep_date:
                 link = f"https://www.jetradar.com/searches/new?origin_iata={origin_code}&destination_iata={iata}&depart_date={dep_date}&adults=1&marker={marker}"
             elif marker:

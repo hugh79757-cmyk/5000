@@ -120,3 +120,11 @@
 
 ---
 *이 파일은 git 추적 대상이다. 수정 시 커밋하라. 새 세션은 이 파일을 먼저 읽고, 작업 완료 시 해당 섹션을 업데이트하라.*
+
+### 2026-08-24 Phase 2 — 규격통일 잔여 + 데이터고갈 설계
+- CUAP beauty/bike/camping Workers 배포 완료 (hugo build + wrangler deploy, 79/111/45 assets)
+- travel3/4 CDN 자연해소 확인 (tour2/tour3.rotcha.kr 각각 datetime 6/10, homepage 캐시 정상)
+- deals_writer 동적 날짜 패치 (future_date +30일, DB 과거 날짜 대체) + LAX/BOS v2 2026-09-23 재배포
+- 데이터 고갈 현황 SQL 실행 (ETAP 0% 3개, CAP ev 0%/compare 1.4%, STAP stock_issue 100% 미사용 버그, RAP 91% OK)
+- W5 R13 대상 목록 파악 (pick 130파일 전체 중 최근 10 중 2건, rap2 533/rap4 674 중 최근 10 중 7/10건)
+- topic-pool-sustainability.md DRAFT 작성 (.planning/designs/)
