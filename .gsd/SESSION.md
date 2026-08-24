@@ -32,6 +32,7 @@
 | 2026-08-24 | Wave 3-A TAP THUMBNAIL/R2 — batch 미지원으로 수동 patch (38건) | `TAP/travel*.hugo content/posts/*/index.md` featureimage external→R2 default webp (38e15c1) — batch_thumbnails.py SITE_CONFIGS 7종만, TAP 4종 미포함 확인 | `python batch_thumbnails --dry-run` 0건/Unknown site, 수동 `re.sub featureimage` 38건, run_all_checks 81 pass (today N/A 마스킹) |
 | 2026-08-24 | Wave 3-B STAP R17 라이브 검증 — 5/5 summary_large_image | `dividend/etf/finance/ipo/sector .techpawz.com` curl `twitter:card` homepage+post 이중 확인, extend-head.html 35행 메타 주입됨, 빌드 1044파일 렌더 확인 | curl homepage `summary+large_image` 2개 병존, `_check_r17` site별 `since=today` 0건 N/A — DB fail은 stale (어제 4/4), 재검사 pass |
 | 2026-08-24 | Wave 3-C R13 exempt thumbnail-only (stock/rap 7건) | `config/quality_checklist.yaml` R13 exempt_pipelines(stock,rap) + `ops_dashboard/checks/standard.py` 루프 N/A 분기+featureimage 조건 (76e014831) | `run_all_checks` 12블로그 → 81 pass/0 fail, SELECT 검증, R13 7건 N/A 전이 |
+| 2026-08-24 | 전 분기 Golden 통일 라이브 배포 (TAP 4 + CUAP 14 + CAP 6/7 + STAP 4/5 + RAP 2/4 + ETAP 8 = 38, stock/pick/rap2/rap4 W5 게이트 4건 제외) | `/tmp/deploy_all_v2*.log`, `/tmp/live_verification_all.md` — deploy_site Worker/Pages 자동, assets/css 통일, GA4 보존 | deploy PASS 38/42, W5 3 + stock 1 제외, TAP travel1 live date 3 확인, CUAP 403 bot block |
 
 ## 3. 진행 중인 것 (In Progress)
 
@@ -115,6 +116,7 @@
 | 13 | fix_remaining.py 중복定義 (fix_r04/r06/r08 중복) | 유지보수 혼선 | Backlog #12 |
 | 14 | .gsd/SESSION.md AGENTS/CLAUDE 미연동 | 세션 연속성 수동 | Backlog #10 |
 | 15 | OPS DB 코드-문서 상충: 코드는 08-15 병합, 문서는 Planned | Phase 상태 불일치 | Backlog #1에서 STATE 정정 |
+| 16 | 로컬 통일 ≠ 라이브 통일 — build+deploy+live curl이 원자 작업 | 배포 누락으로 TAP travel2-4 라이브 미반영 (local pass만으로 완료 오판) | 프롬프트에 deploy+curl 필수, deploy_site로 Worker/Pages 자동 |
 
 ---
 *이 파일은 git 추적 대상이다. 수정 시 커밋하라. 새 세션은 이 파일을 먼저 읽고, 작업 완료 시 해당 섹션을 업데이트하라.*
