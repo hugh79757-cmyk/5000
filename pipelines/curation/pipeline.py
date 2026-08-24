@@ -409,7 +409,8 @@ CATEGORY_FILTERS = {
                      "텀블러", "도시락", "밀폐", "보관", "조리도구",
                      "가위", "저울", "타이머", "주걱", "냄비받침",
                      "에어프라이어", "전기냄비", "밥솥", "믹서기", "전기포트",
-                     "커피머신", "식기세척기", "찜기", "와플", "토스터",
+                     "커피머신", "에스프레소", "캡슐커피", "원두", "원두커피", "드립",
+                     "식기세척기", "찜기", "와플", "토스터",
                      "블렌더", "착즙기", "그릴", "인덕션", "세제",
                      "주방용품", "조리",
                      "베이킹", "제빵", "케이크",
@@ -708,7 +709,7 @@ def _record_products(blog_id, keyword, products) -> None:
 
 
 
-def _title_is_duplicate(blog_id, title):
+def _title_is_duplicate(blog_id, title, keyword=None):
     """publish_log에서 유사 제목 체크 (3일 이내, SequenceMatcher + 단어 겹침)"""
     import re as _re
     from difflib import SequenceMatcher
@@ -722,11 +723,13 @@ def _title_is_duplicate(blog_id, title):
 
     found = False
     if len(normalized) >= 5:
-        recent = conn.execute(
-            """SELECT title FROM publish_log
-               WHERE blog_id=? AND published_at > datetime('now', '-3 days')""",
-            (blog_id,),
-        ).fetchall()
+        _sql = """SELECT title FROM publish_log
+                  WHERE blog_id=? AND published_at > datetime('now', '-3 days')"""
+        _params = [blog_id]
+        if keyword:
+            _sql += " AND keyword=?"
+            _params.append(keyword)
+        recent = conn.execute(_sql, tuple(_params)).fetchall()
         for (prev_title,) in recent:
             if not prev_title:
                 continue
@@ -766,11 +769,13 @@ def _title_is_duplicate(blog_id, title):
         }
         title_words -= stop_words
         if len(title_words) >= 3:
-            recent = conn.execute(
-                """SELECT title FROM publish_log
-                   WHERE blog_id=? AND published_at > datetime('now', '-3 days')""",
-                (blog_id,),
-            ).fetchall()
+            _sql2 = """SELECT title FROM publish_log
+                       WHERE blog_id=? AND published_at > datetime('now', '-3 days')"""
+            _params2 = [blog_id]
+            if keyword:
+                _sql2 += " AND keyword=?"
+                _params2.append(keyword)
+            recent = conn.execute(_sql2, tuple(_params2)).fetchall()
             for (prev_title,) in recent:
                 prev_words = set(_re.findall(r"[가-힣a-zA-Z0-9]{2,}", prev_title))
                 prev_words -= stop_words
@@ -782,6 +787,14 @@ def _title_is_duplicate(blog_id, title):
 
     conn.close()
     return found
+
+
+def _strip_stray_parenthetical(title: str) -> str:
+    """LLM이 제목 말미에 다른 키워드를 '(XXX 추천)' 형태로 덧붙인 경우 제거.
+    연도·지역 등 정상 괄호는 건드리지 않도록 '추천' 포함 시에만 대상."""
+    if not title:
+        return title
+    return re.sub(r"\s*\(\s*[^()]*추천[^()]*\)\s*$", "", title).strip()
 
 
 def _make_slug(keyword) -> str:
@@ -1211,6 +1224,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         return {"success": False, "reason": "language_error"}
 
     title = sanitize_title(article["title"])
+    title = _strip_stray_parenthetical(title)
     body_md = article["body_md"]
     description = article.get("description", "")
     if description:
@@ -1239,7 +1253,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     # 유사 제목 체크 — 실패 시 최대 3회 fallback 키워드 재시도
     _st_attempt = 0
     _st_max = 3
-    while _title_is_duplicate(blog_id, title):
+    while _title_is_duplicate(blog_id, title, keyword):
         _st_attempt += 1
         if _st_attempt > _st_max:
             logger.warning(f"[{blog_id}] {_st_max}회 fallback 후에도 유사 제목 — 포기")
@@ -1306,6 +1320,7 @@ def _run_inner(cfg, blog_id, daily_quota):
             logger.warning(f"[{blog_id}] fallback 언어 오류 — 다음 시도")
             continue
         title = sanitize_title(article["title"])
+        title = _strip_stray_parenthetical(title)
         body_md = article["body_md"]
         description = article.get("description", "")
         if description:

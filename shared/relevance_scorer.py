@@ -15,6 +15,7 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "pet-hugo": {"threshold": 0.55},
     "appliance-hugo": {"threshold": 0.65},    # Phase 10: NEW — was using default 0.75
     "golf-hugo": {"threshold": 0.50},         # golf products use brand names, default 0.75 blocks all
+    "bike-hugo": {"threshold": 0.50},         # bike compound-keyword products carry 1 allowed token -> default 0.75 blocks all (same as golf)
 }
 
 OFFTOPIC_THRESHOLD = 0.20
@@ -33,6 +34,9 @@ def score_product(product_name: str, category_name: str, allowed_keywords: list[
         "그램", "gram", "갤럭시북", "galaxy book",
         "씽크패드", "thinkpad", "비보북", "vivobook", "젠북", "zenbook",
         "오멘", "omen", "빅터스", "victus", "프레데터", "predator",
+        # 커피 브랜드 보너스 (kitchen 커피머신 관련성 보정)
+        "드롱기", "delonghi", "필립스", "philips", "네스프레소", "nespresso",
+        "리큅", "locknlock", "쿠첸", "cuchen", "위즈웰", "wizwell",
     }
     name_lower = product_name.lower()
     if any(b in name_lower for b in BRAND_KEYWORDS):
