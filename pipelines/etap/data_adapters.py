@@ -48,16 +48,43 @@ def _point(label, value, unit, source_table):
 
 
 def flight_adapter(topic_id=None):
-    """flight_prices → min_price, min_stops, departure_date, airline."""
+    """flight_prices → min_price, min_stops, departure_date, airline.
+
+    Phase 72 W2 T2.1 (threat T-72-01): when the topic row resolves, prices are
+    scoped to that topic's own route (origin AND destination) so other routes'
+    fares cannot leak into this article's synthesis. Falls back to the legacy
+    global query only when the topic row is missing (behavior preserved).
+    """
     conn = _connect()
-    rows = _query(
-        conn,
-        """
-        SELECT price, stops, departure_date, airline, origin, destination
-        FROM flight_prices
-        ORDER BY price ASC LIMIT 20
-        """,
-    )
+    rows = []
+    if topic_id is not None and conn is not None:
+        trows = _query(
+            conn,
+            "SELECT origin, destination FROM flight_topics WHERE id = ?",
+            (topic_id,),
+        )
+        t = trows[0] if trows else {}
+        if t.get("origin") and t.get("destination"):
+            rows = _query(
+                conn,
+                """
+                SELECT price, stops, departure_date, airline, origin, destination
+                FROM flight_prices
+                WHERE origin = ? AND destination = ?
+                ORDER BY price ASC LIMIT 20
+                """,
+                (t["origin"], t["destination"]),
+            )
+    if not rows:
+        # Legacy global fallback (unchanged behavior when topic row missing).
+        rows = _query(
+            conn,
+            """
+            SELECT price, stops, departure_date, airline, origin, destination
+            FROM flight_prices
+            ORDER BY price ASC LIMIT 20
+            """,
+        )
     if conn:
         conn.close()
     if not rows:
