@@ -1441,7 +1441,7 @@ def _wait_for_network(timeout=300) -> bool:
 
 # ── Consecutive Failure Detection ──────────────────────────────
 _CONSECUTIVE_FAILURES: dict[str, int] = {}
-_FAILURE_THRESHOLD = 3
+_FAILURE_THRESHOLD = 5  # 2026-08-25: 상향 3→5 (일시적 장애 1~4회로 블로그 중단 방지)
 
 
 def _track_publish_result(blog_id: str, success: bool) -> None:
