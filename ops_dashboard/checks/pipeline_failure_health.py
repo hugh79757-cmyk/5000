@@ -31,7 +31,6 @@ def parse_recent_failures(hours=24):
         """SELECT blog_id, problem_id, COUNT(*)
            FROM publish_error_events
            WHERE problem_id IN (?,?,?)
-             AND resolved_at IS NULL
              AND (state = 'open' OR created_at >= ?)
              AND blog_id LIKE '%-hugo'
            GROUP BY blog_id, problem_id""",
