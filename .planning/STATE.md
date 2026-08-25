@@ -3,20 +3,20 @@ gsd_state_version: 2.0
 milestone: v1.1
 milestone_name: milestone
 status: active
-last_updated: "2026-08-18T00:00:00Z"
+last_updated: "2026-08-25T13:30:00Z"
 progress:
   # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
   # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
-  total_phases: 33
-  completed_phases: 29
-  in_progress_phases: 1
+  total_phases: 35
+  completed_phases: 31
+  in_progress_phases: 3
   planned_phases: 4
-  percent: 88
+  percent: 89
 ---
 
 # Project State: 5000
 
-**Status:** v1.1 — **M5 조건부 최종 로드맵 적용 중 (IN_PROGRESS/ACTIVE_WAITING).** M5-KA1 READY_WITH_GAPS, M5-KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING (Day 3 = 2026-08-21 체크포인트). Phase 73 실행 완료 (SC-1/2/3/4/5/7/8 적용; SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 71 완료 (자동수정 폐루프 검증 + 안전항목만 무인재배포 옵션 a 적용). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
+**Status:** v1.1 — **M5 조건부 최종 로드맵 적용 중 (IN_PROGRESS/ACTIVE_WAITING).** Phase 71 COMPLETED (폐루프 검증), Phase 72 W1-4 진행 중 (S03/S04 보정 완료, 72-W4 회귀 테스트 통과), ETAP topic_expander 5블로그 auto-refill 연동(01:00 daily, 커밋 27130ee/62691e6). M5-KA1 READY_WITH_GAPS, M5-KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING (Day 3 = 2026-08-21 체크포인트). Phase 73 실행 완료 (SC-1/2/3/4/5/7/8 적용; SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 71 완료 (자동수정 폐루프 검증 + 안전항목만 무인재배포 옵션 a 적용). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -79,6 +79,8 @@ progress:
 | 55 | Curation Content Quality Diagnostics | 📋 Planned | 미시작. `.planning/phase-55-curation-quality-diagnostics/CONTEXT.md` 존재. 경험 허위 주장·소 스불명 수치·건강 효능 단정 측정(read-only). Phase 54 이후. |
 | 69 | Incident Integrity & Dashboard SSOT | ✅ COMPLETED | M3 merged @ f03acaa4c, M4(Phase69-C Dashboard SSOT) merged @ 403f7fba3 · WAITING_FOR_CANDIDATES(no_topics+P01+retryable=0)/LEGACY_UNMERGED/UNKNOWN 표시 + pagination · next_action=M5 품질 게이트 계획 |
 | 70 | Quality Improvement (W1-4: uniqueness gates, S-rules, editorial synthesis, schema/lastmod, freshness gate) | ✅ COMPLETED | W1(01) 기능구현+테스트(커밋 대기), W2(02a) 커밋 cc04e9dd8, W3(02b+03a) 9 writers 통합 + schema.html 신규 + unique_data_points 컬럼 추가 + freshness 게이트, W4(03b) preflight freshness + 테스트. 42/42 phase-70 테스트 통과. 02b 합성은 writer가 topic_type/topic_id 미연결로 현재 no-op(후속 과제). |
+| 71 | 폐루프 잔여분 — fixing 어휘·브랜드 fallback·verify_brand_resolution | ✅ COMPLETED | `3fa500665` — fixing 상태 어휘, 브랜드 fallback 경고, verify_brand_resolution, autofix 테스트 확장, STATE 기록 |
+| 72 | Editorial Synthesis 활성화 + uniqueness/S-규칙 + freshness 게이트 (W1-4) | 🔄 IN_PROGRESS (W4) | W1 `c16713f19` 10 writers topic 주입, W2 `4731d79`~`c16713` 7 adapters + TAP items-derived + flight scope, W3 `eb752d0e` synthesis 게이트+cosine+S06 + `112fe8ff` unique_data_points 저장, W4 `7f9fe85`/`1299594`/`13a79e5` S03 24h 게이트·S04 shortcode 제외·회귀 테스트. 13a79e5가 최신 W4 보정. |
 
 **참고 — 문서상 미정리 잔여:**
 - Phase 44 (전수조사 및 전체 수정): 44-01~03 완료, 44-04~05(프롬프트 보완 + 마무리) 미완료. ROADMAP Phase 44 참조.
@@ -92,6 +94,8 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-25 | ETAP topic_expander — 5블로그(airlines/airports/nature/watersports/deals) auto-refill + scheduler 01:00 연동 | `27130ee` + `62691e6` |
+| 2026-08-25 | fix(72-W4): S03 24h 연령 게이트 + S04 Hugo shortcode 제외 + 회귀 테스트 (외부 미발행글 소급 차단 방지) | `13a79e5` |
 | 2026-08-24 | Phase 64 Task 64-06 — Rule Registration Runbook + Reverse-Validate + Promote Helper (5-step pipeline, generalized validator, human-gated promote) | `1ea5125ff` |
 | 2026-08-10 | ETAP 발행 회귀 수정 — `_write_hugo_post_etap()`에서 tags list→str 정규화 (AttributeError: 'list' object has no attribute 'split' 해소, luxury/escape/extreme/nightlife/ghost/layover 등 6+블로그) | `본 커밋` |
 | 2026-08-06 | Phase 59-01 — Replace per-pipeline _write_hugo_post() in 34 ETAP pipelines with shared import | `b420e69cc`, `4ff78c0e5`, `d0fd9d2a8`, `a64544294`, `21f445b79` |
