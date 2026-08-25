@@ -1,3 +1,4 @@
+- 2026-08-25 | fix | p14-history-cuap-expander-0200 | P14 fitness3/golf1/kitchen1 5 rows resolved + scheduler CUAP 14 blogs x20 daily 02:00
 - 2026-08-25 | fix | p14-fitness-kitchen-dashboard-fix | P14 fitness irrelevant_products 콤마버그+오염키워드 + kitchen low_relevance 대시보드 숨김( resolved_at 버그 619건 정리, health state=open 복구) CRITICAL9 회복
 # Triage Index
 
