@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 RELEVANCE_CONFIG: dict[str, dict] = {
     "default": {"threshold": 0.75, "min_keyword_matches": 2},
     "laptop-hugo": {"threshold": 0.65},
-    "health-hugo": {"threshold": 0.65},
+    "health-hugo": {"threshold": 0.55},  # Phase72: 0.65->0.55
     "baby-hugo": {"threshold": 0.70},
     "beauty-hugo": {"threshold": 0.55},
     "interior-hugo": {"threshold": 0.55},
@@ -16,14 +16,21 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "appliance-hugo": {"threshold": 0.65},    # Phase 10: NEW — was using default 0.75
     "golf-hugo": {"threshold": 0.50},         # golf products use brand names, default 0.75 blocks all
     "bike-hugo": {"threshold": 0.50},         # bike compound-keyword products carry 1 allowed token -> default 0.75 blocks all (same as golf)
+    "car-hugo": {"threshold": 0.50},          # Phase 72: car 12 keywords strict 0.75 blocks remaining 타이어/냉장고 (avg 0.67/0.33)
 }
 
 OFFTOPIC_THRESHOLD = 0.20
 
 
 def score_product(product_name: str, category_name: str, allowed_keywords: list[str]) -> float:
+    import re as _re
     combined = (product_name + " " + category_name).lower()
-    count = sum(1 for kw in allowed_keywords if kw.lower() in combined)
+    combined_nospace = _re.sub(r'\s+', '', combined)
+    def _kw_match(kw: str) -> bool:
+        kl = kw.lower()
+        kl_ns = _re.sub(r'\s+', '', kl)
+        return kl in combined or kl_ns in combined_nospace
+    count = sum(1 for kw in allowed_keywords if _kw_match(kw))
     min_matches = RELEVANCE_CONFIG["default"]["min_keyword_matches"]
     score = min(count / min_matches, 1.0)
     # brand 키워드 보너스 — 브랜드명이 product_name에 있으면 +0.15

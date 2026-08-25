@@ -69,6 +69,7 @@ def _get_dynamic_seeds(blog_id: str, limit: int = 20) -> list[str]:
 DEFAULT_SEEDS = {
     "baby-hugo": ["아기", "신생아", "유아", "육아", "출산"],
     "fitness-hugo": ["운동", "헬스", "요가", "홈트", "다이어트"],
+    "car-hugo": ["블랙박스", "차량용", "자동차 용품", "카시트", "차량 관리"],
     "laptop-hugo": ["노트북", "맥북", "게이밍", "사무용", "학생"],
     "appliance-hugo": ["에어프라이어", "청소기", "공기청정기", "세탁기", "냉장고"],
     "interior-hugo": ["소파", "침대", "책상", "의자", "조명"],
