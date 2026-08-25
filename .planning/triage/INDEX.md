@@ -1,3 +1,4 @@
+- 2026-08-25 | fix | p14-fitness-kitchen-dashboard-fix | P14 fitness irrelevant_products 콤마버그+오염키워드 + kitchen low_relevance 대시보드 숨김( resolved_at 버그 619건 정리, health state=open 복구) CRITICAL9 회복
 # Triage Index
 
 - 2026-08-25 | fix | cuap-table-5col-and-pipeline-p02-fix | CUAP 테이블 5열 제한 + PIPELINE resolved 필터 + airports P02 해소 (WARNING 14→12, CRITICAL 9→0)
