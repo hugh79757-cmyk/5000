@@ -20,7 +20,7 @@ def ensure_table(conn):
 def clear_managed(conn):
     """이 스크립트가 관리하는 체크만 매 실행 전 삭제 → 스냅샷 누적 방지"""
     conn.execute(
-        "DELETE FROM check_results_custom WHERE check_name IN ('TOPIC_POOL_HEALTH','PIPELINE_FAILURE_HEALTH')"
+        "DELETE FROM check_results_custom WHERE check_name IN ('TOPIC_POOL_HEALTH','PIPELINE_FAILURE_HEALTH','TABLE_QUALITY')"
     )
     conn.commit()
 
@@ -41,8 +41,9 @@ if __name__ == "__main__":
 
     from topic_pool_health import run_check as pool_check
     from pipeline_failure_health import run_check as pipeline_check
+    from table_quality import run_check as table_check
 
-    all_results = pool_check() + pipeline_check()
+    all_results = pool_check() + pipeline_check() + table_check()
     save_results(conn, all_results)
 
     critical = [r for r in all_results if r["result"] == "critical"]

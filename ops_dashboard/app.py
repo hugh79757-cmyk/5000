@@ -937,6 +937,23 @@ def _register_api_routes(app: Flask) -> None:
             return jsonify({"ok": False, "msg": f"승인 실행 실패: {e}"}), 500
         return jsonify({"ok": result["ok"], **result})
 
+    @app.route("/api/table-quality")
+    @require_auth
+    def api_table_quality():
+        """CUAP 비교표 품질 — column_count + empty_ratio 모니터링 (TABLE_QUALITY).
+
+        쿼리: blog(선택) — 지정 시 해당 블로그만 반환.
+        응답: {count, warning, pass, items: run_check() 결과}
+        """
+        from ops_dashboard.checks.table_quality import run_check
+        blog = request.args.get("blog") or request.args.get("blog_id")
+        items = run_check()
+        if blog:
+            items = [r for r in items if r.get("blog_id") == blog]
+        warned = [r for r in items if r.get("result") == "warning"]
+        passed = [r for r in items if r.get("result") == "pass"]
+        return jsonify({"count": len(items), "warning": len(warned), "pass": len(passed), "items": items})
+
     @app.route("/api/pending-fixes/<int:fix_id>/reject", methods=["POST"])
     @require_auth
     def api_pending_fix_reject(fix_id: int):
