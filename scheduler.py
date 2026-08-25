@@ -1377,6 +1377,23 @@ def register_schedules():
     schedule.every().day.at("02:00").do(_run_keyword_expander)
     logger.info("CUAP keyword_expander scheduled daily at 02:00")
 
+    # CUAP per-blog expander (spec 14 blogs, --count 20) — 02:00과 동일 분에 추가 스케줄
+    def _run_cuap_expander() -> None:
+        try:
+            for blog in ['golf-hugo','fitness-hugo','kitchen-hugo','car-hugo','health-hugo',
+                         'beauty-hugo','camping-hugo','interior-hugo','pet-hugo',
+                         'baby-hugo','appliance-hugo','garden-hugo','hotissue-hugo','deal-hugo']:
+                try:
+                    subprocess.run([sys.executable, 'pipelines/curation/keyword_expander.py', blog, '--count', '20'], timeout=600)
+                    logger.info(f"[CUAP expander] {blog} --count 20 done")
+                except Exception as e:
+                    logger.warning(f"[CUAP expander] {blog} error: {e}")
+        except Exception as e:
+            logger.exception(f"CUAP cuap_expander error: {e}")
+
+    schedule.every().day.at("02:00").do(_run_cuap_expander)
+    logger.info("CUAP cuap_expander scheduled daily at 02:00 (14 blogs x20)")
+
     # CUAP keyword_harvester: 매일 03:00 (윈도우 게이트는 run_harvest 내부 이중 확인)
     def _run_cuap_harvest() -> None:
         try:
