@@ -721,6 +721,8 @@ def preflight_check(blog_id: str) -> dict:
     for md_file in recent_posts:
         content = md_file.read_text(encoding="utf-8", errors="replace")
         slug = md_file.parent.name
+        # 포스트 경과 시간(시간 단위) — S03 등 소급 차단 방지용 연령 판단에 사용
+        _age_h = (datetime.now().timestamp() - md_file.stat().st_mtime) / 3600
 
         # --- C01: 곡선따옴표 (MAJOR, warn-only) ---
         # reuse ops_dashboard/checks/content_integrity.py _check_c01 char set
@@ -950,11 +952,16 @@ def preflight_check(blog_id: str) -> dict:
                 if any(k != "topic_id" for k in source_data):
                     passed, count, details = unique_data_points_gate(body, source_data, threshold=3)
                     if not passed:
+                        # Phase 72-fix: warn-only 시절 합법 발행분 소급 차단 방지 —
+                        # 24h 이내 신규 글만 blocking, 구형 글은 MAJOR 경고만.
+                        _s03_critical = _enforce_s03_s04 and _age_h < 24
                         violations.append({
-                            "rule_id": "S03", "slug": slug, "severity": "CRITICAL",
-                            "detail": f"S03 위반: data_points={count} (threshold=3)",
+                            "rule_id": "S03", "slug": slug,
+                            "severity": "CRITICAL" if _s03_critical else "MAJOR",
+                            "detail": f"S03 위반: data_points={count} (threshold=3)"
+                                      + ("" if _s03_critical else " — 신규 발행 아님, warn-only"),
                             "file": str(md_file)})
-                        if _enforce_s03_s04:
+                        if _s03_critical:
                             blocked = True
             except ImportError:
                 pass
@@ -962,7 +969,8 @@ def preflight_check(blog_id: str) -> dict:
                 logger.warning(f"[preflight] S03 check error for {slug}: {e}")
         
         # S04: Editorial Synthesis (template markers)
-        template_markers = re.findall(r"\{\{[^}]+\}\}", body)
+        # (?![<{%]) — Hugo 쇼트코드({{< lead >}}, {{% foo %}})는 정상 문법이므로 제외.
+        template_markers = re.findall(r"\{\{(?![<{%])[^}]+\}\}", body)
         if template_markers:
             unique_markers = set(template_markers)
             violations.append({
