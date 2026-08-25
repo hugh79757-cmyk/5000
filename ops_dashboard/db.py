@@ -340,24 +340,37 @@ def sync_blog_lifecycle(conn: sqlite3.Connection) -> int:
 
             now = datetime.now(timezone.utc).isoformat()
 
+            # pipeline / lifecycle derived — ponytail: minimal fix, per-pipeline status if needed later
+            pipeline = b.get("pipeline", "")
+            pipeline_path = f"pipelines.{pipeline}.pipeline" if pipeline else ""
+            cfg_status = b.get("config_status", b.get("status", "unknown"))
+            # lifecycle_status: config_status가 active/paused/disabled이면 그대로, 그 외 unknown 유지
+            if cfg_status in ("active", "paused", "disabled"):
+                lifecycle = cfg_status
+            else:
+                lifecycle = "unknown"
             if existing:
                 conn.execute("""
                     UPDATE blog_lifecycle SET
                         brand = ?,
                         config_status = ?,
+                        lifecycle_status = ?,
                         theme = ?,
                         domain = ?,
                         cf_project = ?,
                         site_path = ?,
+                        pipeline_path = ?,
                         updated_at = ?
                     WHERE blog_id = ?
                 """, (
                     brand,
-                    b.get("config_status", b.get("status", "unknown")),
+                    cfg_status,
+                    lifecycle,
                     b.get("theme", ""),
                     b.get("domain", ""),
                     b.get("cf_project", ""),
                     b.get("site_path", ""),
+                    pipeline_path,
                     now,
                     blog_id,
                 ))
@@ -365,17 +378,18 @@ def sync_blog_lifecycle(conn: sqlite3.Connection) -> int:
                 conn.execute("""
                     INSERT INTO blog_lifecycle
                     (blog_id, brand, config_status, lifecycle_status,
-                     theme, domain, cf_project, site_path, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                     theme, domain, cf_project, site_path, pipeline_path, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     blog_id,
                     brand,
-                    b.get("config_status", b.get("status", "unknown")),
-                    "unknown",
+                    cfg_status,
+                    lifecycle,
                     b.get("theme", ""),
                     b.get("domain", ""),
                     b.get("cf_project", ""),
                     b.get("site_path", ""),
+                    pipeline_path,
                     now,
                 ))
             count += 1
