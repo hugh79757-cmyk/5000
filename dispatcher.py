@@ -642,12 +642,33 @@ def _compute_baseline_keys(posts_dir: "Path") -> set:
     return {k for k, c in cnt.items() if c / total >= 0.8}
 
 
+def _stored_points_to_gate_data(raw_json):
+    """Phase 72 W4 T4.2: topics.unique_data_points 저장 JSON → S03 gate 입력 변환.
+
+    저장 스키마는 data_adapters 포인트({label,value,unit,source_table}) 배열의 JSON.
+    각 포인트를 {label: value} dict로 변환해 unique_data_points_gate가 price/date/
+    entity 키로 인식할 수 있게 한다. 파싱 실패·빈 값은 {} 반환(폴백 경로 보존).
+    """
+    try:
+        pts = json.loads(raw_json) if raw_json else []
+    except (TypeError, ValueError):
+        return {}
+    items = []
+    for p in pts if isinstance(pts, list) else []:
+        if isinstance(p, dict) and p.get("label") and p.get("value") not in (None, ""):
+            items.append({str(p["label"]): p["value"]})
+    return {"stored_unique_data_points": items} if items else {}
+
+
 def preflight_check(blog_id: str) -> dict:
     """배포 전 콘텐츠 무결성 프리플라이트 체크.
 
     C01(MAJOR warn-only)/C02(CRITICAL)/C04(CRITICAL)/C09(CRITICAL) 검사.
     S01~S05(CRITICAL) Phase 70 Wave 1 품질 게이트 검사.
     C06/C08 placeholder (미구현, 주석 유지). blocked는 CRITICAL 위반만.
+
+    Phase 72 W4: S03/S04 위반 시 blocked=True (기존 warn-only에서 전환).
+    kill-switch: 환경변수 QUALITY_ENFORCE_S03_S04=0 → warn-only 복귀.
 
     Returns:
         {"blocked": bool, "violations": list[dict], "reason": str}
@@ -663,6 +684,10 @@ def preflight_check(blog_id: str) -> dict:
 
     violations = []
     blocked = False
+
+    # Phase 72 W4 T4.2: S03/S04 blocking kill-switch.
+    # "0"이면 기존 warn-only 동작(위반 기록만, blocked 미설정) — 재배포 없이 즉시 복귀.
+    _enforce_s03_s04 = os.getenv("QUALITY_ENFORCE_S03_S04", "1") == "1"
 
     # 대상 블로그 site_path 확인
     _all_blogs = _load_all_blogs().get("blogs", [])
@@ -897,21 +922,40 @@ def preflight_check(blog_id: str) -> dict:
                         for table in ["flight_prices", "popular_directions", "flight_calendar"]:
                             try:
                                 rows = conn.execute(f"SELECT * FROM {table} WHERE origin = ? OR destination = ? LIMIT 20",
-                                                   (slug, slug)).fetchall()
+                                                    (slug, slug)).fetchall()
                                 if rows:
                                     source_data[table] = [dict(r) for r in rows]
                             except Exception:
                                 pass
+                        # Phase 72 W4 T4.1 연동: 역추적된 topic_id의 <topic_table>.unique_data_points
+                        # 저장값을 gate 입력에 병합 (저장 위치=topics 테이블, 읽는 위치 일치).
+                        # 기존 테이블 재구성 로직은 폴백으로 보존.
+                        try:
+                            _stem = blog_id[:-5] if blog_id.endswith("-hugo") else blog_id
+                            _ttable = ("flight" if _stem == "flights" else _stem) + "_topics"
+                            _pkrows = conn.execute(f"PRAGMA table_info({_ttable})").fetchall()
+                            _pk = next((r["name"] for r in _pkrows if r["pk"] == 1), "id")
+                            _trow = conn.execute(
+                                f"SELECT unique_data_points FROM {_ttable} WHERE {_pk} = ?", (topic_id,)
+                            ).fetchone()
+                            for _k, _v in _stored_points_to_gate_data(
+                                    _trow["unique_data_points"] if _trow else None).items():
+                                source_data[_k] = _v
+                        except Exception:
+                            pass  # 테이블/컬럼 부재 시 기존 재구성값만 사용
                     conn.close()
-                
-                if source_data:
+
+                # gate는 검증 가능한 소스 값이 있을 때만 실행 — bare topic_id만 있으면
+                # count=0이 보장되어 전량 오탐(발행 대량 차단, T-72-03)이 되므로 skip.
+                if any(k != "topic_id" for k in source_data):
                     passed, count, details = unique_data_points_gate(body, source_data, threshold=3)
                     if not passed:
                         violations.append({
                             "rule_id": "S03", "slug": slug, "severity": "CRITICAL",
                             "detail": f"S03 위반: data_points={count} (threshold=3)",
                             "file": str(md_file)})
-                        # WARN-ONLY (Phase 71 editorial synthesis 완료 전): blocked 미설정
+                        if _enforce_s03_s04:
+                            blocked = True
             except ImportError:
                 pass
             except Exception as e:
@@ -925,7 +969,9 @@ def preflight_check(blog_id: str) -> dict:
                 "rule_id": "S04", "slug": slug, "severity": "CRITICAL",
                 "detail": f"S04 위반: 미치환 템플릿 마커 {len(unique_markers)}개 — {list(unique_markers)[:5]}",
                 "file": str(md_file)})
-            # WARN-ONLY (Phase 71 editorial synthesis 완료 전): blocked 미설정
+            # Phase 72 W4: blocking 전환 (kill-switch QUALITY_ENFORCE_S03_S04=0 → warn-only 복귀)
+            if _enforce_s03_s04:
+                blocked = True
 
         # S06: Editorial Synthesis cosine (WARN-ONLY, Phase 72 W3 T3.2)
         # 본문 말미 synthesis 단락의 동일 블로그 최근 발행 대비 TF-IDF cosine < 0.70 검사.
