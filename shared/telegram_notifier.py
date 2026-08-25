@@ -81,7 +81,7 @@ def _blog_metadata(blog_id):
     return "", ""
 
 
-def send_error(blog_id, stage, error_msg):
+def send_error(blog_id, stage="", error_msg=""):
     """Send one publish error and persist a structured operational event."""
     silent_reasons = (
         "quota_met",

@@ -414,6 +414,8 @@ def run_publish(blog_id) -> bool | None:
             _tg_error(blog_id, "scheduler", error_text[-300:])
             return False
         if parsed_success is not True:
+            if result.stderr:
+                logger.error("  ERR: " + result.stderr.strip().splitlines()[-1][-500:])
             logger.error(f"[PUBLISH] {blog_id} dispatcher reported failure or missing JSON")
             return False
         if blog_cfg is not None:

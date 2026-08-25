@@ -22,6 +22,7 @@ import os
 import sqlite3
 import subprocess
 import sys
+import traceback
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -1263,7 +1264,7 @@ def _auto_fix_on_fail(
     게이트 (AGENTS.md 파괴적 작업 + OQ#2 승인게이트):
       - actionable bucket 규칙만 대상 (deferred R06 / out_of_scope R03,R04 제외)
       - 구현된 fixer 가 있는 규칙만 대상
-      - SAFE_ACTIONS 만 기본 무인 실행. 그 외는 approve_non_safe=True 필요
+      - SAFE_ACTIONS 만 무인 실행+재배포. 그 외(파괴등급)는 항상 사람 승인 경로(requires_approval), approve_non_safe 와 무관 (OQ#2 옵션 a)
       - redeploy(실발행 재배포 = 파괴적)는 기본 False — 명시적 승인 필요
 
     Phase 71 (SC-4) 영속화: conn 을 넘기면 파괴등급(사람 승인 필요) fix 를
@@ -1284,6 +1285,15 @@ def _auto_fix_on_fail(
     }
     if not failed_rule_ids:
         return summary
+
+    # WAVE3-3.1 게이트: redeploy(파괴적 재배포)는 기본 False 유지.
+    # 명시적 redeploy=True + env AUTOFIX_REDEPLOY_APPROVED=1 + approve_non_safe=True
+    # 세 조건 동시 충족 시에만 활성화. 그 외 모든 경로는 False 로 고정(자동 활성화 없음).
+    effective_redeploy = (
+        redeploy
+        and os.environ.get("AUTOFIX_REDEPLOY_APPROVED") == "1"
+        and approve_non_safe
+    )
 
     cfg = get_blog_config(blog_id)
     site_path = cfg.get("site_path", "") if cfg else ""
@@ -1308,7 +1318,7 @@ def _auto_fix_on_fail(
             return _dispatch_auto_fix(
                 summary, blog_id, failed_rule_ids, site_path,
                 bucket_by_id, pend_conn, ops_db_path,
-                approve_non_safe, redeploy,
+                approve_non_safe, effective_redeploy,
             )
         finally:
             if need_close:
@@ -1354,8 +1364,10 @@ def _dispatch_auto_fix(
             continue
         entry = get_entry(rule_id)
         severity = entry.severity if entry else ""
-        # 사람 승인 필요(파괴등급) — 기본 승인 전까지는 pending_fixes 에 proposed 로 적재
-        if action_key not in _AUTOFIX_SAFE_ACTIONS and not approve_non_safe:
+        # 사람 승인 필요(파괴등급) — 안전항목(SAFE_ACTIONS)만 무인 실행.
+        # 그 외는 항상 pending_fixes 에 proposed 로 적재(사람 승인 경로),
+        # approve_non_safe 와 무관 (OQ#2 옵션 a: 비안전은 무인 재배포 대상 아님)
+        if action_key not in _AUTOFIX_SAFE_ACTIONS:
             summary["requires_approval"].append(f"{rule_id}->{action_key}")
             try:
                 enqueue_pending_fix(
@@ -1368,6 +1380,13 @@ def _dispatch_auto_fix(
                 logger.warning("[auto-fix] %s %s pending 적재 실패: %s", blog_id, rule_id, e)
             continue
         try:
+            # R1 상태 어휘: fixer 실행 직전 proposed→fixing 전이 기록 (폐루프 감사)
+            try:
+                set_pending_fix_status(
+                    pend_conn, _latest_pending_id(pend_conn, blog_id, rule_id), "fixing",
+                )
+            except Exception as e:
+                logger.warning("[auto-fix] %s %s fixing 기록 실패: %s", blog_id, rule_id, e)
             ok, msg = fixer(site, blog_id, ga4_id)
             if ok:
                 summary["applied"].append(f"{rule_id}:{msg}")
@@ -1394,21 +1413,69 @@ def _dispatch_auto_fix(
             logger.warning("[auto-fix] %s %s fixer 실패: %s", blog_id, rule_id, e)
             summary["skipped"].append(f"{rule_id}(예외:{e})")
 
-    # 파괴적 작업 4단계 (3) 재배포 — 기본 게이팅
+    # 파괴적 작업 4단계 (3) 재배포 — 안전항목만, env 승인 게이트 필요 (OQ#2 옵션 a)
     if applied_any and redeploy:
+        # (1) 사전카운트: 재배포 대상 적용 건수 기록
+        _applied_count = len(summary["applied"])
+        logger.info("[auto-fix] %s 재배포 사전카운트: 적용 %d건", blog_id, _applied_count)
+        from datetime import datetime
+        import subprocess
+        _ts = datetime.now().strftime("%Y-%m-%d")
+        # (2) 백업 보강: site_path git 태그 (롤백 지점)
+        try:
+            subprocess.run(
+                ["git", "tag", f"pre-autofix-{blog_id}-{_ts.replace('-', '')}"],
+                cwd=str(site_path), check=False, capture_output=True,
+            )
+        except Exception:
+            pass
         try:
             _build_and_deploy_central(blog_id)
             summary["redeployed"] = True
         except Exception as e:
             logger.warning("[auto-fix] %s 재배포 실패: %s", blog_id, e)
-        # 파괴적 작업 4단계 (4) 사후대조 — 재검사는 _run_autofix=False 로 재귀 차단
+        # (4) 사후대조 — 재검사는 _run_autofix=False 로 재귀 차단
         try:
             _trigger_post_publish_checks(blog_id, ops_db_path, _run_autofix=False)
             summary["recheck_triggered"] = True
         except Exception as e:
             logger.warning("[auto-fix] %s 재검사 트리거 실패: %s", blog_id, e)
-            pass
+        # 파괴적 작업 기록 (민감정보 미포함: blog/건수/시각만)
+        try:
+            _record_destructive_redeploy(blog_id, _applied_count, _ts)
+        except Exception as e:
+            logger.warning("[auto-fix] %s 파괴적 기록 실패: %s", blog_id, e)
     return summary
+
+
+def _record_destructive_redeploy(blog_id: str, applied_count: int, ts: str) -> None:
+    """파괴적 재배포 4단계 로그 + worklog 기록 (민감정보 미포함: blog/건수/시각만).
+
+    redeploy 게이트(AUTOFIX_REDEPLOY_APPROVED=1 + approve_non_safe) 통과 후에만 호출.
+    """
+    try:
+        _log_dir = Path("logs")
+        _log_dir.mkdir(exist_ok=True)
+        _line = f"{ts} autofix-redeploy blog={blog_id} applied={applied_count}\n"
+        with open(_log_dir / f"destructive_{ts}.log", "a", encoding="utf-8") as _lf:
+            _lf.write(_line)
+    except Exception as e:
+        logger.warning("[auto-fix] %s 파괴적 로그 기록 실패: %s", blog_id, e)
+    try:
+        _wl_dir = Path(".planning/worklog")
+        _wl_dir.mkdir(parents=True, exist_ok=True)
+        _wp = _wl_dir / f"WL-{ts}-autofix-redeploy.md"
+        if not _wp.exists():
+            _wp.write_text(
+                f"# WL-{ts} autofix-redeploy — {blog_id}\n\n"
+                f"- 시각: {ts}\n"
+                f"- blog: {blog_id}\n"
+                f"- 적용 건수: {applied_count}\n"
+                f"- 게이트: AUTOFIX_REDEPLOY_APPROVED=1 + approve_non_safe (안전항목만)\n"
+                f"- 롤백: git tag pre-autofix-{blog_id}-{ts.replace('-', '')}\n"
+            )
+    except Exception as e:
+        logger.warning("[auto-fix] %s worklog 생성 실패: %s", blog_id, e)
 
 
 def _latest_pending_id(conn, blog_id: str, rule_id: str) -> int:
@@ -1568,8 +1635,12 @@ def dispatch(blog_id):
     try:
         result = _run_pipeline(cfg)
     except Exception as e:
-        logger.warning(f"[dispatch] pipeline exception for {blog_id}: {type(e).__name__}: {str(e)[:150]}")
-        result = {"success": False, "reason": f"exception:{type(e).__name__}"}
+        logger.warning(f"[dispatch] pipeline exception for {blog_id}: {type(e).__name__}: {str(e)[:200]}")
+        result = {
+            "success": False,
+            "reason": f"exception:{type(e).__name__}:{str(e)[:200]}",
+            "traceback": traceback.format_exc()[-500:],
+        }
 
     # 결과 정규화: 모든 pipeline이 dict를 반환하도록
     if result is None:
