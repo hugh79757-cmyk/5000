@@ -23,6 +23,25 @@ _FILLER = (
 
 _FALLBACK = "All figures are sourced from the cited tables."
 
+# Every template sentence starts "From {table}, verified records indicate ..."
+# — unique marker lets callers find the synthesis block inside a full body.
+_SYNTHESIS_MARKER = "verified records indicate"
+
+
+def extract_trailing_synthesis(body: str) -> str:
+    """Return the synthesis paragraph embedded in a full article body, or "".
+
+    Phase 72 W3 (dispatcher S06): scans from the end so the appended synthesis
+    is found even when later blocks (e.g. disclaimer cards) follow it.
+    """
+    if not body:
+        return ""
+    for block in reversed(body.split("\n\n")):
+        b = block.strip()
+        if _SYNTHESIS_MARKER in b:
+            return b
+    return ""
+
 
 def _sentence_for(table, points):
     """Build one deterministic sentence from a table's data points."""

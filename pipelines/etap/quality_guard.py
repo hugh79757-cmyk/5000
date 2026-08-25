@@ -601,6 +601,64 @@ def unique_data_points_gate(content: str, source_data: dict = None, threshold: i
     return passed, count, details
 
 
+# Phase 72 W3 T3.1: Editorial Synthesis Quality Gate
+# Validates the deterministic synthesis paragraph appended by writers:
+#   (a) length >= 80 chars
+#   (b) every numeric token traces back to a unique_data value string
+#   (c) at least one source_table name is cited in the paragraph
+_NUM_TOKEN_RE = re.compile(r"\d[\d,._]*")
+
+def editorial_synthesis_quality_gate(paragraph: str, unique_data: list) -> Tuple[bool, dict]:
+    """Validate a synthesis paragraph against its source unique_data points.
+
+    Args:
+        paragraph: The synthesis paragraph text (may be empty).
+        unique_data: List of {label, value, unit, source_table} dicts.
+
+    Returns:
+        (passed, details). details always contains length / missing_numbers /
+        source_found; on failure also a human-readable reason.
+    """
+    details = {
+        "length": len(paragraph or ""),
+        "missing_numbers": [],
+        "source_found": None,
+        "threshold_length": 80,
+    }
+    if not isinstance(paragraph, str) or len(paragraph.strip()) < 80:
+        details["reason"] = f"too short: {len((paragraph or '').strip())} chars (<80)"
+        return False, details
+
+    values = []
+    tables = []
+    for d in (unique_data or []):
+        if isinstance(d, dict):
+            v = d.get("value")
+            if v is not None and str(v).strip():
+                values.append(str(v))
+            t = d.get("source_table")
+            if t:
+                tables.append(str(t))
+    value_set = set(values)
+
+    # (b) hallucination guard: every numeric token must appear inside some value.
+    missing = sorted({tok for tok in _NUM_TOKEN_RE.findall(paragraph)
+                      if not any(tok in v for v in value_set)})
+    if missing:
+        details["missing_numbers"] = missing[:10]
+        details["reason"] = f"unverifiable numbers: {missing[:5]}"
+        return False, details
+
+    # (c) provenance guard: at least one source_table cited.
+    found = next((t for t in tables if t in paragraph), None)
+    details["source_found"] = found
+    if not found:
+        details["reason"] = "no source_table cited"
+        return False, details
+
+    return True, details
+
+
 # ============================================================
 # POST-PROCESSING: Content Validation
 # ============================================================

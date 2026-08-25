@@ -157,6 +157,27 @@ def calculate_structural_similarity(content: str, blog_id: str) -> float:
         return 0.0
 
 
+def editorial_cosine_check(paragraph: str, blog_id: str, threshold: float = 0.70):
+    """Phase 72 W3 T3.2: synthesis paragraph cosine vs same blog's recent articles.
+
+    Reuses calculate_uniqueness_ratio's TF-IDF machinery (no new similarity
+    implementation): ratio = 1 - max_cosine, so cosine = 1 - ratio.
+    Passes (True, low cosine) when the paragraph is sufficiently distinct.
+
+    Returns:
+        (ok, cosine). Fail-open on any error / empty corpus / empty input.
+    """
+    if not paragraph or not paragraph.strip():
+        return True, 0.0
+    try:
+        ratio = calculate_uniqueness_ratio(paragraph, blog_id)
+        cos = round(max(0.0, min(1.0, 1.0 - ratio)), 4)
+        return cos < threshold, cos
+    except Exception as exc:  # graceful: warn-only gate must never block
+        logger.warning("[uniqueness_check] editorial_cosine_check error: %s", exc)
+        return True, 0.0
+
+
 _AIRLINES = {
     "air france", "delta", "united", "american airlines", "lufthansa", "emirates",
     "qatar airways", "singapore airlines", "british airways", "korean air", "asiana",

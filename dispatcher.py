@@ -926,7 +926,28 @@ def preflight_check(blog_id: str) -> dict:
                 "detail": f"S04 위반: 미치환 템플릿 마커 {len(unique_markers)}개 — {list(unique_markers)[:5]}",
                 "file": str(md_file)})
             # WARN-ONLY (Phase 71 editorial synthesis 완료 전): blocked 미설정
-        
+
+        # S06: Editorial Synthesis cosine (WARN-ONLY, Phase 72 W3 T3.2)
+        # 본문 말미 synthesis 단락의 동일 블로그 최근 발행 대비 TF-IDF cosine < 0.70 검사.
+        # corpus는 S02에서 만든 것 재사용(블로그에 다른 포스트가 있을 때만 검사).
+        if corpus:
+            try:
+                from pipelines.etap.editorial_synthesis import extract_trailing_synthesis
+                from pipelines.etap.uniqueness_check import editorial_cosine_check
+                _syn = extract_trailing_synthesis(body)
+                if _syn:
+                    _s06_ok, _s06_cos = editorial_cosine_check(_syn, blog_id, threshold=0.70)
+                    if not _s06_ok:
+                        violations.append({
+                            "rule_id": "S06", "slug": slug, "severity": "MAJOR",
+                            "detail": f"S06 경고: synthesis cosine={_s06_cos:.4f} (threshold=0.70)",
+                            "file": str(md_file)})
+                        # WARN-ONLY: blocked 미설정 (Wave 4 이후 재검토)
+            except ImportError:
+                pass
+            except Exception as e:
+                logger.warning(f"[preflight] S06 check error for {slug}: {e}")
+
         # S05: Freshness Gate
         freshness_keys = ["data_date", "price_date", "source_date", "last_updated", "data_freshness_days"]
         for key in freshness_keys:
