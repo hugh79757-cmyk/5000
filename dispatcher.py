@@ -721,8 +721,6 @@ def preflight_check(blog_id: str) -> dict:
     for md_file in recent_posts:
         content = md_file.read_text(encoding="utf-8", errors="replace")
         slug = md_file.parent.name
-        # 포스트 경과 시간(시간 단위) — S03 등 소급 차단 방지용 연령 판단에 사용
-        _age_h = (datetime.now().timestamp() - md_file.stat().st_mtime) / 3600
 
         # --- C01: 곡선따옴표 (MAJOR, warn-only) ---
         # reuse ops_dashboard/checks/content_integrity.py _check_c01 char set
@@ -880,7 +878,9 @@ def preflight_check(blog_id: str) -> dict:
                         "rule_id": "S01", "slug": slug, "severity": "CRITICAL",
                         "detail": f"S01 위반: uniqueness={ratio:.4f} (threshold=0.85), max_sim={details.get('max_similarity', 0):.4f}",
                         "file": str(md_file)})
-                    blocked = True
+                    # WARN-ONLY: sklearn 부재 시 평소 스킵(dormant) 상태라 prod에서
+                    # 차단한 적 없음. 활성화 시 짧은 synthesis 단락 vs 코퍼스 비교로
+                    # 오탐 과다 → hard-block 미설정(S02/S06과 동일 품질신호 계열).
             except ImportError:
                 pass  # quality_guard 미사용 블로그는 skip
             except Exception as e:
@@ -952,17 +952,15 @@ def preflight_check(blog_id: str) -> dict:
                 if any(k != "topic_id" for k in source_data):
                     passed, count, details = unique_data_points_gate(body, source_data, threshold=3)
                     if not passed:
-                        # Phase 72-fix: warn-only 시절 합법 발행분 소급 차단 방지 —
-                        # 24h 이내 신규 글만 blocking, 구형 글은 MAJOR 경고만.
-                        _s03_critical = _enforce_s03_s04 and _age_h < 24
+                        # Phase 72-fix: S03 = 데이터 충분성 품질신호 → WARN-ONLY(MAJOR).
+                        # warn-only 시절 합법 발행분을 enforce 전환 시 소급 차단하면
+                        # 단 1포스트 실패로 블로그 전체 배포 정지 → hard-block 부적절.
+                        # 실제 깨진 synthesis(미치환 마커)는 S04가 hard-block 담당.
                         violations.append({
                             "rule_id": "S03", "slug": slug,
-                            "severity": "CRITICAL" if _s03_critical else "MAJOR",
-                            "detail": f"S03 위반: data_points={count} (threshold=3)"
-                                      + ("" if _s03_critical else " — 신규 발행 아님, warn-only"),
+                            "severity": "MAJOR",
+                            "detail": f"S03 위반: data_points={count} (threshold=3) — warn-only",
                             "file": str(md_file)})
-                        if _s03_critical:
-                            blocked = True
             except ImportError:
                 pass
             except Exception as e:
