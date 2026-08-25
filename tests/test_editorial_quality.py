@@ -211,5 +211,149 @@ class TestEndToEndNoLLM:
         assert ok is False
 
 
+class TestUniqueDataPointsStorage:
+    """W4 T4.1: mark_published_by_id optional unique_data_points 저장 (tmp DB — prod 미접촉).
+    W4 T4.2: dispatcher._stored_points_to_gate_data 저장 JSON → S03 gate 입력 변환.
+    """
+
+    @staticmethod
+    def _tmp_travelen(tmp_path):
+        import sqlite3
+        db_path = str(tmp_path / "travel-en.db")
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            "CREATE TABLE flight_topics (id INTEGER PRIMARY KEY, exhausted INTEGER DEFAULT 0,"
+            " unique_data_points TEXT)"
+        )
+        conn.execute(
+            "CREATE TABLE publish_log (log_id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            " topic_id INTEGER, blog_id TEXT, title TEXT, slug TEXT,"
+            " published_at TEXT, url TEXT)"
+        )
+        conn.execute("INSERT INTO flight_topics (id) VALUES (42)")
+        conn.execute("INSERT INTO flight_topics (id) VALUES (7)")
+        conn.commit()
+        conn.close()
+        return db_path
+
+    def test_mark_published_stores_points_json(self, tmp_path, monkeypatch):
+        import json as _json
+        import sqlite3
+        from pipelines.etap import topic_manager as tm
+        db_path = self._tmp_travelen(tmp_path)
+        monkeypatch.setattr(tm, "DB_PATH", db_path)
+        pts = [{"label": "min_price", "value": 320, "unit": "USD",
+                "source_table": "flight_prices"},
+               {"label": "departure_date", "value": "2026-09-01", "unit": "date",
+                "source_table": "flight_prices"}]
+        ok = tm.mark_published_by_id(42, "flight_topics", "flights-hugo", "t", "s-42",
+                                     unique_data_points=pts)
+        assert ok is True
+        conn = sqlite3.connect(db_path)
+        try:
+            exhausted, stored = conn.execute(
+                "SELECT exhausted, unique_data_points FROM flight_topics WHERE id = 42"
+            ).fetchone()
+            # publish_log INSERT는 무변경 — 컬럼 추가 없음 (T4.1 체커 사양)
+            cols = {r[1] for r in conn.execute("PRAGMA table_info(publish_log)").fetchall()}
+        finally:
+            conn.close()
+        assert exhausted == 1
+        assert _json.loads(stored) == pts
+        assert "unique_data_points" not in cols
+
+    def test_mark_published_without_points_backward_compat(self, tmp_path, monkeypatch):
+        """unique_data_points 미전달(None) → 기존 경로 그대로, 컬럼 NULL."""
+        import sqlite3
+        from pipelines.etap import topic_manager as tm
+        db_path = self._tmp_travelen(tmp_path)
+        monkeypatch.setattr(tm, "DB_PATH", db_path)
+        ok = tm.mark_published_by_id(7, "flight_topics", "flights-hugo", "t2", "s-07")
+        assert ok is True
+        conn = sqlite3.connect(db_path)
+        try:
+            exhausted, stored = conn.execute(
+                "SELECT exhausted, unique_data_points FROM flight_topics WHERE id = 7"
+            ).fetchone()
+        finally:
+            conn.close()
+        assert exhausted == 1
+        assert stored is None
+
+    def test_stored_points_to_gate_data_conversion(self):
+        import json as _json
+        from dispatcher import _stored_points_to_gate_data
+        raw = _json.dumps([
+            {"label": "min_price", "value": "320", "unit": "USD",
+             "source_table": "flight_prices"},
+            {"label": "airline", "value": "Korean Air", "unit": "",
+             "source_table": "flight_prices"},
+            {"label": "empty_val", "value": None},
+            "garbage-row",
+        ])
+        out = _stored_points_to_gate_data(raw)
+        assert out == {"stored_unique_data_points": [
+            {"min_price": "320"}, {"airline": "Korean Air"}]}
+        # 폴백 보존: 깨진 입력은 {} (gate 입력 없음 → 기존 재구성값만 사용)
+        assert _stored_points_to_gate_data(None) == {}
+        assert _stored_points_to_gate_data("") == {}
+        assert _stored_points_to_gate_data("not-json") == {}
+        assert _stored_points_to_gate_data(_json.dumps([])) == {}
+
+
+class TestS03S04Blocking:
+    """W4 T4.2: S03/S04 blocking 전환 + kill-switch (tmp site 픽스처, LLM 0회).
+
+    S04는 완전 기능 검증(tmp site + 미치환 마커). S03은 prod travel-en.db를
+    read-only로만 건드리는 구조라 slug 미일치로 gate skip 경로만 검증하고,
+    저장값 병합 로직은 TestUniqueDataPointsStorage의 변환 단위테스트로 커버.
+    """
+
+    @staticmethod
+    def _make_site(tmp_path):
+        import os
+        site = tmp_path / "site"
+        post = site / "content" / "posts" / "w4test-post-a7x9"
+        post.mkdir(parents=True)
+        body = "Paragraph text about travel deals and prices. " * 40
+        (post / "index.md").write_text(
+            "---\ntitle: W4 Test\ndate: 2026-08-25\n"
+            "categories: [travel]\ntags: [test]\n---\n\n"
+            + body + "\n\n{{unreplaced_marker}}\n",
+            encoding="utf-8",
+        )
+        # mtime이 cutoff(7일) 안쪽임을 보장
+        os.utime(post / "index.md")
+        return str(site)
+
+    def _run(self, tmp_path, monkeypatch):
+        import dispatcher
+        site = self._make_site(tmp_path)
+        monkeypatch.setattr(dispatcher, "_load_all_blogs",
+                            lambda: {"blogs": [{"id": "deals-hugo", "site_path": site}]})
+        return dispatcher.preflight_check("deals-hugo")
+
+    def test_s04_blocks_by_default(self, tmp_path, monkeypatch):
+        monkeypatch.delenv("QUALITY_ENFORCE_S03_S04", raising=False)
+        res = self._run(tmp_path, monkeypatch)
+        rules = {v["rule_id"] for v in res["violations"]}
+        assert "S04" in rules
+        assert res["blocked"] is True
+
+    def test_kill_switch_restores_warn_only(self, tmp_path, monkeypatch):
+        """QUALITY_ENFORCE_S03_S04=0 → 위반 기록 유지, blocked 미설정(warn-only)."""
+        monkeypatch.setenv("QUALITY_ENFORCE_S03_S04", "0")
+        res = self._run(tmp_path, monkeypatch)
+        rules = {v["rule_id"] for v in res["violations"]}
+        assert "S04" in rules
+        assert res["blocked"] is False
+
+    def test_s03_gate_skipped_without_verifiable_values(self, tmp_path, monkeypatch):
+        """저장값·재구성값 없는 slug → gate skip → S03 오탐(전량 차단) 없음."""
+        monkeypatch.setenv("QUALITY_ENFORCE_S03_S04", "1")
+        res = self._run(tmp_path, monkeypatch)
+        assert "S03" not in {v["rule_id"] for v in res["violations"]}
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
