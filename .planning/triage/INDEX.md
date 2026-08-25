@@ -1,5 +1,6 @@
 # Triage Index
 
+- 2026-08-25 | fix | cuap-table-5col-and-pipeline-p02-fix | CUAP 테이블 5열 제한 + PIPELINE resolved 필터 + airports P02 해소 (WARNING 14→12, CRITICAL 9→0)
 - 2026-08-25 | chore | save-changes-and-update-gsd-docs | 변경사항 저장 + 코드 기준 GSD 문서 업데이트 (dispatcher S03/S04, scheduler ETAP 01:00, STATE/ROADMAP 동기화)
 - 2026-08-07 | debug | diagnosis-reports-pinpoint-rework | 진단 보고서 2건 작성 + 핀포인트 재작업 3항목(라이브 대조/내부링크 0 원인/텍스트 품질 패턴 재설계). 수정·발행·스케줄러 재개 없이 읽기 전용 확정
 - 2026-08-05 | fix | fix-stap-finance-hugo-db-diversity-and-publish | STAP finance-hugo DB 기반 상품 다양화(last_used_at) + 프로덕션 실발행 검증 + depth_next 제거 + push
