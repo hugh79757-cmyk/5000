@@ -1418,12 +1418,12 @@ def register_schedules():
     logger.info("CUAP weekly off-topic report scheduled Monday at 10:00")
     job_count += 1
 
-    # ETAP topic_expander: daily 01:00 auto-refill (airlines/airports/nature/watersports/deals)
+    # ETAP topic_expander: daily 01:00 auto-refill (deals/airlines/airports/nature/watersports)
     def _run_etap_expander() -> None:
         try:
-            for blog in ['airlines','airports','nature','watersports','deals']:
+            for blog in ['deals','airlines','airports','nature','watersports']:
                 try:
-                    subprocess.run([sys.executable, '-m', 'pipelines.etap.topic_expander', blog, '--count', '50', '--execute'], timeout=300)
+                    subprocess.run([sys.executable, 'pipelines/etap/topic_expander.py', blog, '--count', '50', '--execute'], timeout=300)
                     logger.info(f"[ETAP expander] {blog} --count 50 --execute done")
                 except Exception as e:
                     logger.warning(f"[ETAP expander] {blog} error: {e}")
