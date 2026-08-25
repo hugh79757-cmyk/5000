@@ -56,6 +56,33 @@ def _inject_editorial_synthesis(body, topic=None):
     return body.rstrip() + "\n\n" + _s + "\n"
 
 
+def _derive_points_from_items(items):
+    """Phase 72 W2 T2.4: derive deterministic unique_data points from TAP items.
+
+    Plan §2 TAP exception — no topic-id-addressable local store exists for TAP,
+    so points come from the in-scope ``data["items"]`` (LLM-free, DB-free).
+    Capped at 12 points; returns [] for empty input.
+    """
+    if not items:
+        return []
+    pts = [{"label": "items_count", "value": len(items), "unit": "곳", "source_table": "items"}]
+    for i, item in enumerate(items[:6], 1):
+        title = item.get("title") or item.get("facltNm") or ""
+        if title:
+            pts.append({"label": f"place_{i}", "value": str(title)[:40], "unit": "", "source_table": "items"})
+        for key, label, unit in (
+            ("price", f"price_{i}", "KRW"),
+            ("eventstartdate", f"event_start_{i}", "date"),
+            ("tel", f"tel_{i}", ""),
+        ):
+            v = item.get(key)
+            if v:
+                pts.append({"label": label, "value": str(v)[:40], "unit": unit, "source_table": "items"})
+        if len(pts) >= 12:
+            break
+    return pts[:12]
+
+
 # ── Heritage 카드 링크 ─────────────────────────────────────
 HERITAGE_CARDS = {
     "서울": {
@@ -1394,7 +1421,12 @@ def generate_content(data, blog_id="travel-hugo"):
         return None
     logger.info("최종 구조 확인 (H2:%d, H3:%d)", _final_h2, _final_h3)
 
-    content = _inject_editorial_synthesis(content, {"topic_type": "tap"})
+    # Phase 72 W2 T2.4: items에서 결정론 파생 points를 passthrough로 주입
+    # (TAP은 topic-id 주소 가능 로컬 스토어 없음 — PLAN §2 설계결정)
+    content = _inject_editorial_synthesis(
+        content,
+        {"topic_type": "tap", "unique_data": _derive_points_from_items(data.get("items", []))},
+    )
 
     return {
         "title": title,
