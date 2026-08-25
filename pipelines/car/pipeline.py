@@ -268,6 +268,14 @@ def run(blog_cfg):
                 body = body2
                 logger.info(f"재생성 완료: {len(body)}자")
 
+    # Phase 72 W1: editorial synthesis 주입 — 최종 body 확정 직후 1회.
+    # car 어댑터 미등록 시 apply_editorial_synthesis가 원본 그대로 반환(no-op, additive).
+    try:
+        from pipelines.etap.post_processor import apply_editorial_synthesis
+        body = apply_editorial_synthesis(body, topic=topic, topic_type="car", topic_id=topic.get("id"))
+    except Exception as _syn_err:
+        logger.warning(f"[car] editorial synthesis skipped: {_syn_err}")
+
     title = None
     for _title_attempt in range(5):
         candidate = generate_title(data, site_id=car_site_id)

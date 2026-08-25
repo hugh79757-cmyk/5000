@@ -277,7 +277,7 @@ WRITING RULES:
     slug = topic.get("slug", re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-"))
     tags = [city, country, "Nature Tours", "Travel"] if country else [city, "Nature Tours", "Travel"]
 
-    content = _inject_editorial_synthesis(content, {"city": city, "country": country, "slug": slug})
+    content = _inject_editorial_synthesis(content, {"topic_type": "nature", "topic_id": topic.get("id"), "city": city, "country": country, "slug": slug})
 
     return {
         "title": title,

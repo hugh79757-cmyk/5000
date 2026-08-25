@@ -1007,7 +1007,7 @@ def generate_curation_article(keyword, products, blog_id=None):
     description = _extract_description(body, title or "", keyword)
 
     # Phase 70 Wave 3: editorial synthesis (no-op unless topic carries topic_type)
-    body = _inject_editorial_synthesis(body, {})
+    body = _inject_editorial_synthesis(body, {"topic_type": "curation", "topic_id": keyword})
 
     # 제목 최종 후처리: 괄호 → 하이픈 (LLM이 괄호를 뱉어도 발행물엔 괄호 없음)
     title = sanitize_title(title)

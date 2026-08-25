@@ -200,7 +200,7 @@ BODY:
         return None
     _parsed = _parse_response(result["content"])
     if _parsed and _parsed.get("body_md"):
-        _parsed["body_md"] = _inject_editorial_synthesis(_parsed["body_md"], {})
+        _parsed["body_md"] = _inject_editorial_synthesis(_parsed["body_md"], {"topic_type": "stock_disclosure", "topic_id": disclosure.get("corp_code") or disclosure.get("corp_name", "")})
     return _parsed
 
 
@@ -412,7 +412,7 @@ BODY:
             parsed["body_md"] = "\n".join(_out)
 
     if parsed and parsed.get("body_md"):
-        parsed["body_md"] = _inject_editorial_synthesis(parsed["body_md"], {})
+        parsed["body_md"] = _inject_editorial_synthesis(parsed["body_md"], {"topic_type": "stock_evergreen", "topic_id": str(topic_type)})
 
     return parsed
 

@@ -623,7 +623,7 @@ def generate_senior_article(data, topic_type=None, enriched_service=None):
                     result["body_md"], main_service,
                     result.get("category", topic_type or "")
                 )
-                result["body_md"] = _inject_editorial_synthesis(result["body_md"], {})
+                result["body_md"] = _inject_editorial_synthesis(result["body_md"], {"topic_type": "senior", "topic_id": main_service.get("service_id", "")})
             return result
 
         except Exception as e:

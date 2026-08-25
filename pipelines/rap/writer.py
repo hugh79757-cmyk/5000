@@ -697,7 +697,7 @@ def generate_trade_article(keyword, trades, region_info=None, blog_id=None):
         return None
     _article = _parse_article(result["content"], keyword)
     if _article and _article.get("body_md"):
-        _article["body_md"] = _inject_editorial_synthesis(_article["body_md"], {})
+        _article["body_md"] = _inject_editorial_synthesis(_article["body_md"], {"topic_type": "rap_trade", "topic_id": keyword})
     return _article
 
 
@@ -915,7 +915,7 @@ def generate_subscription_article(keyword, subscriptions):
     if article is not None:
         article["model"] = result.get("model", "auto")
         if article.get("body_md"):
-            article["body_md"] = _inject_editorial_synthesis(article["body_md"], {})
+            article["body_md"] = _inject_editorial_synthesis(article["body_md"], {"topic_type": "rap_sub", "topic_id": keyword})
     return article
 
 

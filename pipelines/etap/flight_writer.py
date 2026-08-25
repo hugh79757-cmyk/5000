@@ -196,7 +196,7 @@ RULES:
             content = content.split("\n", 1)[1].strip()
         description = f"Find the cheapest flights from {o_city} to {d_city}. Real-time prices, best booking times, airline comparisons, and money-saving tips."
         tags = [o_city, d_city, "flights", "travel deals", "cheap flights"]
-        content = _inject_editorial_synthesis(content, {"city": d_city, "country": "", "slug": topic.get("slug", "")})
+        content = _inject_editorial_synthesis(content, {"topic_type": "flight", "topic_id": topic.get("id"), "city": d_city, "country": "", "slug": topic.get("slug", "")})
         return {
             "title": title, "slug": topic["slug"], "content": content,
             "description": description, "tags": tags,

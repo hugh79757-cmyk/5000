@@ -42,7 +42,11 @@ def _inject_editorial_synthesis(body, topic=None):
         from pipelines.etap.data_adapters import get_unique_data_points
         _t = topic or {}
         _tt = _t.get("topic_type")
-        _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        # Phase 72 W1: TAP passthrough — unique_data가 topic dict에 실려오면
+        # DB 조회 없이 그대로 사용 (W2 T2.4에서 items 파생 points 연결).
+        _ud = _t.get("unique_data")
+        if _ud is None:
+            _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
         _s = editorial_synthesis_step(body, _ud, _t)
     except Exception as _e:
         logger.warning("[editorial] synthesis skipped: %s", _e)
@@ -1390,7 +1394,7 @@ def generate_content(data, blog_id="travel-hugo"):
         return None
     logger.info("최종 구조 확인 (H2:%d, H3:%d)", _final_h2, _final_h3)
 
-    content = _inject_editorial_synthesis(content, {})
+    content = _inject_editorial_synthesis(content, {"topic_type": "tap"})
 
     return {
         "title": title,

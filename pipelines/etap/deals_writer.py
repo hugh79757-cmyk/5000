@@ -306,7 +306,7 @@ Return ONLY the article in markdown starting with # title"""
     if HAS_PP:
         tags = clean_tags(tags)
 
-    content = _inject_editorial_synthesis(content, {"city": origin_city, "country": "", "slug": topic.get("slug", "")})
+    content = _inject_editorial_synthesis(content, {"topic_type": "deals", "topic_id": topic.get("id"), "city": origin_city, "country": "", "slug": topic.get("slug", "")})
 
     return {
         "title": title, "slug": topic["slug"], "content": content,
