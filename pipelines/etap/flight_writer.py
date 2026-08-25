@@ -58,6 +58,8 @@ def _inject_editorial_synthesis(body, topic=None):
         _t = topic or {}
         _tt = _t.get("topic_type")
         _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        if _ud:
+            _t["unique_data"] = _ud  # Phase 72 W4: pipeline이 저장할 수 있게 points 노출
         _s = editorial_synthesis_step(body, _ud, _t)
     except Exception as _e:
         logger.warning("[editorial] synthesis skipped: %s", _e)
@@ -196,11 +198,13 @@ RULES:
             content = content.split("\n", 1)[1].strip()
         description = f"Find the cheapest flights from {o_city} to {d_city}. Real-time prices, best booking times, airline comparisons, and money-saving tips."
         tags = [o_city, d_city, "flights", "travel deals", "cheap flights"]
-        content = _inject_editorial_synthesis(content, {"topic_type": "flight", "topic_id": topic.get("id"), "city": d_city, "country": "", "slug": topic.get("slug", "")})
+        topic_ctx = {"topic_type": "flight", "topic_id": topic.get("id"), "city": d_city, "country": "", "slug": topic.get("slug", "")}
+        content = _inject_editorial_synthesis(content, topic_ctx)
         return {
             "title": title, "slug": topic["slug"], "content": content,
             "description": description, "tags": tags,
             "origin": o_city, "destination": d_city, "has_price_data": has_data,
+            "unique_data_points": topic_ctx.get("unique_data") or [],
         }
     except Exception as e:
         logger.exception(f"[FlightWriter] GPT error: {e}")

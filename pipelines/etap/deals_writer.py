@@ -35,6 +35,8 @@ def _inject_editorial_synthesis(body, topic=None):
         _t = topic or {}
         _tt = _t.get("topic_type")
         _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        if _ud:
+            _t["unique_data"] = _ud  # Phase 72 W4: pipeline이 저장할 수 있게 points 노출
         _s = editorial_synthesis_step(body, _ud, _t)
     except Exception as _e:
         logger.warning("[editorial] synthesis skipped: %s", _e)
@@ -306,11 +308,13 @@ Return ONLY the article in markdown starting with # title"""
     if HAS_PP:
         tags = clean_tags(tags)
 
-    content = _inject_editorial_synthesis(content, {"topic_type": "deals", "topic_id": topic.get("id"), "city": origin_city, "country": "", "slug": topic.get("slug", "")})
+    topic_ctx = {"topic_type": "deals", "topic_id": topic.get("id"), "city": origin_city, "country": "", "slug": topic.get("slug", "")}
+    content = _inject_editorial_synthesis(content, topic_ctx)
 
     return {
         "title": title, "slug": topic["slug"], "content": content,
         "description": f"Best flight deals from {origin_city}: {len(deals)} destinations, fares from ${cheapest['min_price']:.0f}. Updated {today}.",
         "tags": [t for t in tags if t],
         "origin": origin_city, "deals": deals,
+        "unique_data_points": topic_ctx.get("unique_data") or [],
     }

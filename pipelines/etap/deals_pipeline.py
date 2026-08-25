@@ -59,7 +59,8 @@ def _get_db():
 
 def _mark_published(article, blog_id, topic_table, topic_id) -> None:
     mark_published_by_id(topic_id=topic_id, topic_table=topic_table, blog_id=blog_id,
-                         title=article["title"], slug=article["slug"], url="")
+                         title=article["title"], slug=article["slug"], url="",
+                         unique_data_points=article.get("unique_data_points"))
     mark_entity_published(blog_id, article["slug"])
 
 def pick_topic():

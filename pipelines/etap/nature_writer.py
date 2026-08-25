@@ -50,6 +50,8 @@ def _inject_editorial_synthesis(body, topic=None):
         _t = topic or {}
         _tt = _t.get("topic_type")
         _ud = get_unique_data_points(_tt, _t.get("topic_id")) if _tt else []
+        if _ud:
+            _t["unique_data"] = _ud  # Phase 72 W4: pipeline이 저장할 수 있게 points 노출
         _s = editorial_synthesis_step(body, _ud, _t)
     except Exception as _e:
         logger.warning("[editorial] synthesis skipped: %s", _e)
@@ -277,7 +279,8 @@ WRITING RULES:
     slug = topic.get("slug", re.sub(r"[^a-z0-9]+", "-", city.lower()).strip("-"))
     tags = [city, country, "Nature Tours", "Travel"] if country else [city, "Nature Tours", "Travel"]
 
-    content = _inject_editorial_synthesis(content, {"topic_type": "nature", "topic_id": topic.get("id"), "city": city, "country": country, "slug": slug})
+    topic_ctx = {"topic_type": "nature", "topic_id": topic.get("id"), "city": city, "country": country, "slug": slug}
+    content = _inject_editorial_synthesis(content, topic_ctx)
 
     return {
         "title": title,
@@ -286,6 +289,7 @@ WRITING RULES:
         "description": f"Best nature and wildlife tours in {city}: hiking, safari, and outdoor adventures with real prices and practical tips.",
         "tags": clean_tags([t for t in tags if t]) if HAS_ENRICHMENT else [t for t in tags if t],
         "city": city,
+        "unique_data_points": topic_ctx.get("unique_data") or [],
         "country": country,
         "tours": tours,
     }

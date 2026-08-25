@@ -3,6 +3,7 @@
 모든 ETAP 파이프라인은 이 모듈의 함수를 사용해야 합니다.
 중복 체크는 topics 테이블의 PK(id)를 기준으로 합니다.
 """
+import json
 import logging
 import os
 import sqlite3
@@ -229,12 +230,16 @@ def get_topic_by_id(topic_table: str, topic_id: int) -> dict | None:
         conn.close()
 
 
-def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url="") -> bool | None:
+def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url="", unique_data_points=None) -> bool | None:
     """PK 기준으로 발행 완료 기록.
 
     1. publish_log에 topic_id 포함하여 INSERT
     2. topics 테이블의 exhausted = 1로 UPDATE (id 기준)
     3. 중복 INSERT 방지 (같은 topic_id + blog_id 조합)
+
+    Phase 72 W4 T4.1: ``unique_data_points`` 전달 시(리스트 of
+    {label,value,unit,source_table}) 같은 UPDATE에서 topics 테이블
+    unique_data_points 컬럼에 JSON으로 함께 저장한다 (publish_log INSERT 무변경).
     """
     conn = _get_db()
     try:
@@ -260,10 +265,16 @@ def mark_published_by_id(topic_id, topic_table, blog_id, title, slug, url="") ->
 
         # topics 테이블 exhausted 마킹 (PK 기준)
         pk2 = _get_pk_col(conn, topic_table)
-        conn.execute(
-            f"UPDATE {topic_table} SET exhausted = 1 WHERE {pk2} = ?",
-            (topic_id,)
-        )
+        if unique_data_points is not None:
+            conn.execute(
+                f"UPDATE {topic_table} SET exhausted = 1, unique_data_points = ? WHERE {pk2} = ?",
+                (json.dumps(unique_data_points, ensure_ascii=False), topic_id)
+            )
+        else:
+            conn.execute(
+                f"UPDATE {topic_table} SET exhausted = 1 WHERE {pk2} = ?",
+                (topic_id,)
+            )
 
         conn.commit()
         logger.info(f"[{blog_id}] Published: topic_id={topic_id}, slug={slug}")

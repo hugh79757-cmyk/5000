@@ -66,7 +66,8 @@ def _mark_published(article, blog_id, topic_table, topic_id) -> None:
         blog_id=blog_id,
         title=article["title"],
         slug=article["slug"],
-        url=""
+        url="",
+        unique_data_points=article.get("unique_data_points")
     )
     mark_entity_published(blog_id, article["slug"])
 

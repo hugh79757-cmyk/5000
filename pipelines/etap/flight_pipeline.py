@@ -8,6 +8,7 @@ from pipelines.etap._contract import _normalize_result
 """
 항공권 딜 글 발행 파이프라인
 """
+import json
 import logging
 import os
 import sqlite3
@@ -118,13 +119,19 @@ def _write_hugo_post(cfg, article):
     return result
 
 
-def mark_published(topic_id, blog_id, title, slug) -> None:
+def mark_published(topic_id, blog_id, title, slug, unique_data_points=None) -> None:
     db = _get_db()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     db.execute("""
         INSERT INTO publish_log (topic_id, blog_id, title, slug, published_at, url)
         VALUES (?, ?, ?, ?, ?, ?)
     """, (topic_id, blog_id, title, slug, now, slug))
+    # Phase 72 W4 T4.1: synthesis에 쓰인 points를 flight_topics에 JSON 저장 (optional)
+    if unique_data_points is not None:
+        db.execute(
+            "UPDATE flight_topics SET unique_data_points = ? WHERE id = ?",
+            (json.dumps(unique_data_points, ensure_ascii=False), topic_id)
+        )
     db.commit()
     db.close()
 
@@ -172,7 +179,8 @@ def _run_impl(cfg):
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[ETAP-Flight] Hugo write failed — 발행 차단: {article['slug']}")
         return {"status": "write_failed", "slug": article["slug"]}
-    mark_published(topic["id"], cfg.get("id", "flights-hugo"), article["title"], article["slug"])
+    mark_published(topic["id"], cfg.get("id", "flights-hugo"), article["title"], article["slug"],
+                   unique_data_points=article.get("unique_data_points"))
     mark_entity_published(blog_id, article["slug"])
     return {"status": "ok", "title": article["title"], "slug": article["slug"]}
 
