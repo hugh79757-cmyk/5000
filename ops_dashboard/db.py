@@ -2503,7 +2503,7 @@ def sync_yaml_to_lifecycle(conn: sqlite3.Connection) -> dict:
 # pending_fixes — 자동수정 파괴등급 영속 승인 큐 (Phase 71, SC-4)
 # ---------------------------------------------------------------------------
 
-PENDING_STATUSES = ("proposed", "approved", "executing", "resolved", "failed", "rejected")
+PENDING_STATUSES = ("proposed", "approved", "executing", "fixing", "resolved", "failed", "rejected")
 
 # 재검사가 반복돼도 동일 rule이 중복 적재되지 않도록 '활성(미완결)'으로 취급하는 상태
 _ACTIVE_PENDING = ("proposed", "approved", "executing")

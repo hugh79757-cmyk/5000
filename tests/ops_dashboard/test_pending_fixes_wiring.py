@@ -23,6 +23,7 @@ import shared.autofix as autofix_mod
 import dispatcher
 from ops_dashboard.db import (
     init_db,
+    enqueue_pending_fix,
     get_pending_fix,
     list_pending_fixes,
     record_check_rule,
@@ -89,14 +90,19 @@ class PendingFixesWiringTest(unittest.TestCase):
         self.assertEqual(rows[0]["rule_id"], "R08")
         self.assertEqual(rows[0]["status"], "proposed")
 
-    def test_destructive_r08_real_fixer_runs_only_with_approval(self):
-        """실제 fixer 경유 검증: approve_non_safe=True 시 실 fixer 가 site 파일을 고친다."""
+    def test_destructive_r08_real_fixer_never_runs_unattended(self):
+        """옵션 a: R08(비안전)은 approve_non_safe=True 여도 무인 실행 금지.
+
+        실제 fixer 경유 검증: approve_non_safe=True 라도 적용되지 않고
+        site 파일(.Lead)은 변경되지 않아야 한다.
+        """
         self.assertIn('.Lead', (Path(self.site) / "layouts/_default/single.html").read_text())
         res = dispatcher._auto_fix_on_fail(
             "cap-hugo", ["R08"], conn=self.conn, approve_non_safe=True, redeploy=False
         )
-        self.assertTrue(any(a.startswith("R08:") for a in res["applied"]), res)
-        self.assertNotIn('.Lead', (Path(self.site) / "layouts/_default/single.html").read_text())
+        self.assertEqual(res["applied"], [], res)
+        self.assertIn("R08->fix_r08", res["requires_approval"])
+        self.assertIn('.Lead', (Path(self.site) / "layouts/_default/single.html").read_text())
 
     def test_destructive_gate_persists_proposed_and_does_not_apply(self):
         """승인 없이(R08, approve_non_safe=False) → 실행 금지 + proposed 영속 적재."""
@@ -131,6 +137,33 @@ class PendingFixesWiringTest(unittest.TestCase):
         row = get_pending_fix(self.conn, fix_id)
         self.assertEqual(row["status"], "resolved")
         self.assertIsNotNone(row["resolved_at"])
+
+    def test_r1_fixing_status_enum_and_proposed_fixing_resolved_transition(self):
+        """R1 상태 어휘: 'fixing' 이 PENDING_STATUSES 에 있고
+        proposed→fixing→resolved 전이가 기록되는지 검증."""
+        from ops_dashboard.db import PENDING_STATUSES
+        self.assertIn("fixing", PENDING_STATUSES)
+        fix_id = enqueue_pending_fix(
+            self.conn, "cap-hugo", "R08", "fix_r08", severity="MAJOR",
+        )
+        row = get_pending_fix(self.conn, fix_id)
+        self.assertEqual(row["status"], "proposed")
+        ok = set_pending_fix_status(self.conn, fix_id, "fixing")
+        self.assertTrue(ok)
+        self.assertEqual(get_pending_fix(self.conn, fix_id)["status"], "fixing")
+        set_pending_fix_status(self.conn, fix_id, "resolved", resolved_at="2026-08-25 00:00:00")
+        self.assertEqual(get_pending_fix(self.conn, fix_id)["status"], "resolved")
+        self.assertEqual(get_pending_fix(self.conn, fix_id)["resolved_at"], "2026-08-25 00:00:00")
+
+    def test_auto_fix_redeploy_default_false_guarded(self):
+        """WAVE3-3.1: redeploy 는 기본 False, env+approve 없이는 절대 활성화되지 않는다."""
+        import os as _os
+        _os.environ.pop("AUTOFIX_REDEPLOY_APPROVED", None)
+        res = dispatcher._auto_fix_on_fail(
+            "cap-hugo", ["R08"], conn=self.conn, approve_non_safe=True, redeploy=True
+        )
+        # env 게이트가 없으므로 재배포는 발생하지 않아야 함
+        self.assertFalse(res["redeployed"])
 
     def test_execute_pending_fix_guards_duplicate_and_bad_status(self):
         """이미 resolved/failed 인 행은 재실행 불가, 없는 행은 404성 처리."""

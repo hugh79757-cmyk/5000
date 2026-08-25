@@ -17,12 +17,38 @@ blogs.d/*.yaml 의 brand 메타를 합쳐, blog_id → 적용 표준 집합 + �
 
 from __future__ import annotations
 
+import logging
 import yaml
 from pathlib import Path
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "config"
 QC_PATH = CONFIG_DIR / "quality_checklist.yaml"
 BLOGS_D = CONFIG_DIR / "blogs.d"
+
+logger = logging.getLogger(__name__)
+
+_REAL_BLOG_IDS_CACHE: set[str] | None = None
+
+
+def _load_real_blog_ids() -> set[str]:
+    """config/blogs.d/*.yaml (non-bak) 에 선언된 실제 블로그 id 집합 (캐시)."""
+    global _REAL_BLOG_IDS_CACHE
+    if _REAL_BLOG_IDS_CACHE is not None:
+        return _REAL_BLOG_IDS_CACHE
+    ids: set[str] = set()
+    if BLOGS_D.exists():
+        for p in sorted(BLOGS_D.glob("*.yaml")):
+            if p.name.endswith(".bak") or p.name.endswith(".bak2"):
+                continue
+            try:
+                data = yaml.safe_load(p.read_text(encoding="utf-8")) or {}
+            except Exception:
+                continue
+            for entry in data.get("blogs", []) or []:
+                if isinstance(entry, dict) and entry.get("id"):
+                    ids.add(entry["id"])
+    _REAL_BLOG_IDS_CACHE = ids
+    return ids
 
 
 def _load_qc() -> dict:
@@ -49,6 +75,9 @@ def _detect_brand(blog_id: str) -> str | None:
         for entry in data.get("blogs", []) or []:
             if isinstance(entry, dict) and entry.get("id") == blog_id:
                 return p.stem
+    if blog_id in _load_real_blog_ids():
+        # real configured blog but unmatched to any brand file -> falls back to default
+        logger.warning("brand resolution fell back to default for real blog: %s", blog_id)
     return None
 
 

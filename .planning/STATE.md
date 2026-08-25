@@ -16,7 +16,7 @@ progress:
 
 # Project State: 5000
 
-**Status:** v1.1 — **M5 조건부 최종 로드맵 적용 중 (IN_PROGRESS/ACTIVE_WAITING).** M5-KA1 READY_WITH_GAPS, M5-KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING (Day 3 = 2026-08-21 체크포인트). Phase 73 실행 완료 (SC-1/2/3/4/5/7/8 적용; SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
+**Status:** v1.1 — **M5 조건부 최종 로드맵 적용 중 (IN_PROGRESS/ACTIVE_WAITING).** M5-KA1 READY_WITH_GAPS, M5-KA2-T1 INSUFFICIENT_BASELINE, Interior sitemap experiment ACTIVE_WAITING (Day 3 = 2026-08-21 체크포인트). Phase 73 실행 완료 (SC-1/2/3/4/5/7/8 적용; SC-7 investigate-only 이월). Phase 68 완료 (TAP 블로거 본문 레이아웃 보완 + images:// URL 검증). Phase 67 완료 (G3 해소 + Wave 1·2 라이브 청소). Phase 71 완료 (자동수정 폐루프 검증 + 안전항목만 무인재배포 옵션 a 적용). Phase 52 Wave 5 진행 중. 미시작: Phase 45·53·54·55.
 **Initialized:** 2026-06-30
 
 ## 배포 방식 (CI 없음)
@@ -481,6 +481,46 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 ---
 
+## Phase 71: 자동수정 폐루프 + 안전항목 무인재배포 (2026-08-25)
+
+**Status:** ✅ Executed (Waves 0·1·2·3.1·3.2·3.3 완료) — 전부 additive/non-destructive, autofix 테스트 14passed, push 안 함, DB 파일 변경 0건, wrangler deploy 안 함.
+
+**목표:** 자동 탐지→수정→재검사→JSON(record) 폐루프를 ≥1 분기에서 종단간 완성 + 85개 블로그 표준(global 20 + brand 7) 적용. SC-1~SC-5는 RESEARCH(08-25) 기준 이미 landing → 본 phase는 검증 + 소규모 additive gap-closure.
+
+**실행 결과:**
+
+| Wave | 내용 | 상태 |
+|------|------|------|
+| 0 | SC-1~SC-5 검증 (grep/pytest 증거) | ✅ [검증됨] |
+| 1 | R1 `fixing` 상태 어휘: PENDING_STATUSES+'fixing' + fixer 직전 기록 | ✅ [검증됨] |
+| 2 | R3 브랜드 해석: 85블로그 검증 스크립트 + default 경고 | ✅ [검증됨] |
+| 3.1 | 게이트된 redeploy 플래그 (AUTOFIX_REDEPLOY_APPROVED=1 + approve_non_safe) | ✅ [검증됨] |
+| 3.2 | 시니어 결정: (a) 안전항목만 무인+재배포 | ✅ BLOCKING 해제 |
+| 3.3 | 4단계 파괴적 훅: safe-only 강제 + 사전카운트 + git tag + destructive 로그/worklog | ✅ [검증됨] |
+
+**구현된 구성 요소:**
+- `dispatcher.py`: `_auto_fix_on_fail` 게이트 강화 — 비안전 항목은 `approve_non_safe`와 무관하게 항상 `requires_approval`(수동). 안전항목(`_AUTOFIX_SAFE_ACTIONS`)만 무인 실행+재배포.
+- redeploy 분기 4단계: (1)사전카운트 로그 → (2)`git tag pre-autofix-{blog_id}-{YYYYMMDD}`(cwd=site_path) → (3)`_build_and_deploy_central` → (4)사후대조 재검사(`_run_autofix=False`) + `_record_destructive_redeploy`(logs/destructive_*.log + .planning/worklog/WL-*.md).
+- `db.py:2506` `PENDING_STATUSES`+`'fixing'` + fixer 직전 `set_pending_fix_status(...,'fixing')`.
+- `scripts/verify_brand_resolution.py` 신규 (85블로그, CAP assert, 0 default).
+- `shared/standards_loader.py` real-blog default fallback 경고.
+
+**검증 (측정):**
+- autofix 테스트 14passed (`test_auto_fix_hook.py` + `test_pending_fixes_wiring.py`, OPS_TEST_MODE=1).
+- Wave0: SC-1 dispatcher:1139/1659 + scheduler:751/1398(6pytest); SC-2 content_integrity:423 _check_c08 + rules.py:182 C08; SC-3 7브랜드 cap rules=20; SC-4 redeploy 기본 False + R1 gap(기대됨); SC-5 publish_error_events 테이블 존재.
+- Wave2: `python scripts/verify_brand_resolution.py --assert-cap` → 85블로그, CAP PASS, default 0.
+
+**잔존 위험 / 이월:**
+- `tests/` 전체 35실패 + 1수집에러(C06_GRACE_HOURS import)는 사전 존재(Phase 71 무관, git stash 재현 확인).
+- SC-4 라이브 종단간은 단위검증만(실운영 폐루프 미증명) [부분검증].
+- `maintenance.py:394` 또 다른 `except...:pass` 묵음 경로 잔존(부분).
+- R2 라이브 페이지 갱신은 시니어 승인 env 게이트 통해서만 발동 — 설계상 의도.
+- 재배포는 **자동 활성화 없음** (env AUTOFIX_REDEPLOY_APPROVED=1 + 호출자 approve_non_safe 동시 필요). STAP/TAP 외부는 변경 안 함.
+
+**한 줄 결론:** "Phase 71 완료 — 자동수정 폐루프 단위 검증 + 안전항목만 무인재배포(옵션 a) 적용, redeploy 기본 False·env 게이트·4단계 로그, 14 autofix 테스트 통과."
+
+---
+
 ## Reliability Critical Path (M1–M7) 상태표
 
 **의존성:** M1 → M2 → M3 → M4 → M5 → M6 → M7 (동시 진행 금지)
@@ -492,7 +532,7 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 | M3 | Phase69 incident/taxonomy wiring | COMPLETED |
 | M4 | Phase69-C Dashboard SSOT | COMPLETED |
 | M5 | Phase 62~64 Quality Blocking | IN_PROGRESS / ACTIVE_WAITING |
-| M6 | Phase 67/71 Limited Remediation | BLOCKED_BY_M5 |
+| M6 | Phase 67/71 Limited Remediation | PHASE71_IMPL_DONE / 67_DONE (라이브 관찰 대기) |
 | M7 | Phase 61/43 Family Rollout | BLOCKED_BY_M5 |
 
 ### M5 내부 상태 (2026-08-18)
