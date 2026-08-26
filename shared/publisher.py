@@ -818,9 +818,9 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
     from shared.content_store import source_exists, get_conn as _get_conn
 
     if source_id:
-        # car 파이프라인: (car_id, post_type) 영구 콤보 가드 + 30일 source_id 윈도우 완화
+        # car 파이프라인: (car_id, post_type) 콤보 가드 90일 기간화 + 30일 source_id 윈도우 완화
         if data_source == "car_db" and prompt_id:
-            if source_exists(blog_id, data_source, source_id, prompt_id=prompt_id):
+            if source_exists(blog_id, data_source, source_id, prompt_id=prompt_id, days=90):
                 return {
                     "success": False,
                     "reason": "duplicate_source_id",
