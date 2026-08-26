@@ -54,12 +54,12 @@
 | 날짜 | Quick Task | 디렉토리 | 상태 | 커밋/증거 |
 |------|-----------|---------|------|----------|
 | 2026-08-26 | publish-errors-triage (senior/pick/rap3/rap4/rap5/watersports/phototour 수정+배포) | .planning/quick/20260826-publish-errors-triage | ✅ Complete | dc1bd048c, ae518f06e, f6f1cf4af, 4a7bc6805 |
-| 2026-08-26 | MAX_CONCURRENT config화 (env override, 기본 3→5) | .planning/quick/20260826-max-concurrent-config | ✅ Complete (code) / live 적용은 restart 필요 | 미커밋(대기) |
-| 2026-08-26 | 스케줄러 로깅 이중화 (FileHandler 누락 버그 수정) | .planning/quick/20260826-scheduler-logging-dual | ✅ Complete (code) / live 적용은 restart 필요(승인 대기) | 미커밋(대기) |
-| 2026-08-26 | leak C04 '단계별로' 패턴 완화 | .planning/quick/20260826-leak-c04-pattern-approval | 🔴 Planned (인간 승인 대기) | PLAN.md |
+| 2026-08-26 | MAX_CONCURRENT config화 (env override, 기본 3→5) | .planning/quick/20260826-max-concurrent-config | ✅ Complete + live 적용(재시작 PID 93221) | ca32d10c8 |
+| 2026-08-26 | 스케줄러 로깅 이중화 (FileHandler 누락 버그 수정) | .planning/quick/20260826-scheduler-logging-dual | ✅ Complete + live 적용(scheduler.log fd 복구) | ca32d10c8 |
+| 2026-08-26 | leak C04 '단계별로' 패턴 완화 | .planning/quick/20260826-leak-c04-pattern-approval | ✅ Complete (맥락제약 패턴, 5/5 검증) | ca32d10c8 |
 | 2026-08-26 | car daily_refresh 신규 소스 확보 | .planning/quick/20260826-car-daily-refresh-sources | 🔴 Planned (설계 변경 필요) | PLAN.md |
 | 2026-08-26 | adventure/kitchen W5 게이트 튜닝 | .planning/quick/20260826-w5-gate-adventure-kitchen | 🔴 Planned (별도 분석 필요) | PLAN.md |
-| 2026-08-26 | interior-hugo P14 진단 | .planning/quick/20260826-interior-p14-diagnosis | 🔴 Planned (진단 필요) | PLAN.md |
+| 2026-08-26 | interior-hugo P14 진단 | .planning/quick/20260826-interior-p14-diagnosis | ✅ Complete (21:02 발행 성공, 이벤트 resolved) | PLAN.md+DB |
 
 ---
 
