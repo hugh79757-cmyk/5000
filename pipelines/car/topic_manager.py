@@ -35,13 +35,34 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
     # 토픽 선택 단계에서 사전 배제해 불필요한 BLOCK 감소 + 게이트 정합.
     _market = "AND car_id IN (SELECT car_id FROM trims WHERE status = '시판')"
     # 미사용 콤보 우선: 발행 이력 없는 (car_id, post_type) 후보를 먼저 시도, 소진 후 재사용 후보로 폴백
+    # 콤보 가드 정합: publisher.py:820-826와 동일 기준 — content.db articles에서 90일 이내 발행된
+    # (blog_id, car_id, post_type) 조합은 선택 단계에서 사전 제외 (발행 가드에서 duplicate_source_id로
+    # 차단되기 전에 걸러내기 위함). car.db publish_log 기반 미사용 판정은 아래 최종 fallback SELECT로 보존.
+    _blog_id = site_id + "-hugo"
+    from shared.content_store import get_conn as _cc
+    _cconn = _cc()
+    _pt_sql = " AND prompt_id = ?" if post_type else ""
+    _blocked = _cconn.execute(
+        "SELECT DISTINCT source_id FROM articles WHERE blog_id = ? AND data_source = 'car_db'"
+        " AND published_at > datetime('now', '-90 days')" + _pt_sql,
+        (_blog_id,) + ((post_type,) if post_type else ()),
+    ).fetchall()
+    _cconn.close()
+    _combo_blocked = {r[0] for r in _blocked}
+    _combo_filter = ""
+    _combo_params = []
+    if _combo_blocked:
+        _ph = ",".join("?" * len(_combo_blocked))
+        _combo_filter = f" AND car_id NOT IN ({_ph})"
+        _combo_params = list(_combo_blocked)
     _post_filter = " AND post_type = ?" if post_type else ""
     _unused = c.execute("""
         SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ?
-        AND id NOT IN (SELECT topic_id FROM publish_log){_post_filter}
+        {_combo_filter}{_post_filter}
         ORDER BY priority DESC, RANDOM()
-    """.replace("{_reuse}", _reuse).replace("{_market}", _market).replace("{_post_filter}", _post_filter),
-        (cutoff, site_id) + ((post_type,) if post_type else ())).fetchall()
+    """.replace("{_reuse}", _reuse).replace("{_market}", _market)
+        .replace("{_combo_filter}", _combo_filter).replace("{_post_filter}", _post_filter),
+        (cutoff, site_id) + tuple(_combo_params) + ((post_type,) if post_type else ())).fetchall()
     skip_set = set(skip_ids) if skip_ids else set()
     for t in _unused:
         if t["id"] not in skip_set:
