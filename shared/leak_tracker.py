@@ -46,6 +46,8 @@ _C04_EN_PATTERNS = [
     r"editorial synthesis is constructed exclusively",
     r"contains no externally modeled or estimated values",
     r"every figure can be traced back to its named source table",
+    # Part A: 원시 데이터 덤프 (from products, verified records indicate ...)
+    r"from products, verified records indicate",
 ]
 
 
