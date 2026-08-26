@@ -34,6 +34,18 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
     # ponytail: 단종 모델(car_id)은 시판 trims 0건 → 발행 게이트(data_builder:342)에서 차단됨.
     # 토픽 선택 단계에서 사전 배제해 불필요한 BLOCK 감소 + 게이트 정합.
     _market = "AND car_id IN (SELECT car_id FROM trims WHERE status = '시판')"
+    # 미사용 콤보 우선: 발행 이력 없는 (car_id, post_type) 후보를 먼저 시도, 소진 후 재사용 후보로 폴백
+    _post_filter = " AND post_type = ?" if post_type else ""
+    _unused = c.execute("""
+        SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ?
+        AND id NOT IN (SELECT topic_id FROM publish_log){_post_filter}
+        ORDER BY priority DESC, RANDOM()
+    """.replace("{_reuse}", _reuse).replace("{_market}", _market).replace("{_post_filter}", _post_filter),
+        (cutoff, site_id) + ((post_type,) if post_type else ())).fetchall()
+    skip_set = set(skip_ids) if skip_ids else set()
+    for t in _unused:
+        if t["id"] not in skip_set:
+            return t
     if post_type:
         topics = c.execute("""
             SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? AND post_type = ? ORDER BY priority DESC, RANDOM()
