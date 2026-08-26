@@ -41,6 +41,10 @@ def _inject_editorial_synthesis(body, topic=None):
         return body
     if not _s:
         return body
+    # P35 재발방지: 라벨덤프 라인 발행 전 제거 (hugo_writer와 동일 범위)
+    import re as _re
+    _lb = _re.compile(r'(?im)^\s*(?:가격|배송|쿠팡순위|장점|아쉬운점|단점|적당한대상|적합대상|추천대상|추천\s*대상|페르소나)\s*[:：].*$')
+    _s = "\n".join(ln for ln in _s.split("\n") if not _lb.match(ln))
     return body.rstrip() + "\n\n" + _s + "\n"
 
 ADSENSE_AD = """<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6677996696534146"

@@ -717,7 +717,7 @@ def _run_p32_scan() -> None:
         logger.exception(f"[P32] 스캔 실패: {e}")
         try:
             from shared.telegram_notifier import send_error
-            send_error("P32 스캔 오류", str(e))
+            send_error("P32 스캔 오류", error_msg=str(e))
         except Exception:
             pass
 
@@ -813,7 +813,7 @@ def _run_recheck_all() -> None:
         try:
             from shared.telegram_notifier import send_error
 
-            send_error("RecheckAll 오류", str(e))
+            send_error("RecheckAll 오류", error_msg=str(e))
         except Exception:
             pass
 
@@ -1512,7 +1512,7 @@ def _track_publish_result(blog_id: str, success: bool) -> None:
     if count >= _FAILURE_THRESHOLD:
         try:
             from shared.telegram_notifier import send_error as _tg
-            _tg(f"{blog_id} 연속 {count}회 실패", f"scheduler — {count} consecutive failures")
+            _tg(blog_id, f"연속 {count}회 실패 (scheduler — {count} consecutive failures)")
         except Exception as _e:
             logger.warning(f"Telegram alert failed: {_e}")
         # alert_thresholds 배선 — reason별 임계값/쿨다운 알림

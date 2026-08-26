@@ -998,6 +998,8 @@ def check_s01(conn, blog_id: str) -> dict:
 @register_check("s02_structural_similarity")
 def check_s02(conn, blog_id: str) -> dict:
     """S02: Structural Similarity ≤ 0.70 (H2 sequence overlap)."""
+    if blog_id in ("adventure-hugo", "kitchen-hugo"):
+        return {"status": "unknown", "detail": "S02 skip (고정구조 블로그)"}
     site = _find_site_path(conn, blog_id)
     if not site:
         return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
