@@ -19,7 +19,9 @@ import time
 
 # ── 설정 ──────────────────────────────────────────────────────
 PUBLISH_SLOT_DIR = "/tmp/publish_slots"
-MAX_CONCURRENT_PUBLISH = 3       # 전역 동시 발행 한도 (관측 기반 조정 가능)
+# 전역 동시 발행 한도 — 관측 기반 상향(기본 5, env MAX_CONCURRENT_PUBLISH로 재정의 가능).
+# 3 → 5: 2026-08-26 큐 폭발 시 concurrency skip 연쇄(연속실패 카운트 상승) 관측에 따른 조정.
+MAX_CONCURRENT_PUBLISH = int(os.environ.get("MAX_CONCURRENT_PUBLISH", "5"))
 PUB_SLOT_TTL_SEC = 1200          # 20분 — 정상 발행 소요(마진 포함)보다 넉넉히
 
 

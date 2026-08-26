@@ -197,13 +197,21 @@ from shared.telegram_notifier import send_error as _tg_error
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
-# FileHandler: scheduler.log 직접 기록
+# FileHandler: scheduler.log 직접 기록 (stderr와 병행 — 이중화)
+# 2026-08-26: 라이브 프로세스에서 FileHandler fd 누락로 scheduler.log 10:22 이후 silent.
+# 재시작 필요. 여기서는 (1) 전용 logger에 직접 attach, (2) root에도 attach, (3) propagate 강제로
+# 어느 경로든 scheduler.log 기록 보장. FileHandler 생성 실패 시 stderr로만 동작(크래시 방지).
 from shared.paths import LOGS_DIR
 _log_file = os.path.join(LOGS_DIR, "scheduler.log")
-_fh = logging.FileHandler(_log_file, encoding="utf-8")
-_fh.setLevel(logging.INFO)
-_fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
-logging.getLogger().addHandler(_fh)
+try:
+    _fh = logging.FileHandler(_log_file, encoding="utf-8", delay=False)
+    _fh.setLevel(logging.INFO)
+    _fh.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
+    logging.getLogger().addHandler(_fh)
+    logger.addHandler(_fh)          # 전용 logger에도 직접 부착
+    logger.propagate = True
+except OSError as _e:
+    logger.error(f"scheduler.log FileHandler 생성 실패 — stderr만 기록: {_e}")
 
 PROJECT_DIR = FIVEK_ROOT
 CONFIG_DIR = os.path.join(PROJECT_DIR, "config")
