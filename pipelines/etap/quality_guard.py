@@ -956,6 +956,8 @@ def postprocess_content(content, data_prices=None, blog_id="", slug="", corpus: 
     # Also detect tour names as plain text (not bolded) — common LLM pattern
     _plain_tours = re.findall(r"(?:^|\n)([A-Z][A-Za-z0-9&,']+(?:\s+[A-Za-z0-9&,']+){3,15}?)(?:\s*(?:priced?|from|at|costs?)\s+\$)", content, re.MULTILINE)
     _all_tours = _tour_names + _plain_tours
+    # 섹션 라벨(예: **Description:**)은 투어명 반복 오탐지 원인 → 콜론 종결 라벨 제외
+    _all_tours = [t for t in _all_tours if not t.strip().endswith(":")]
     _name_counts = {}
     for _tn in _all_tours:
         _name_norm = _tn.strip().lower()
