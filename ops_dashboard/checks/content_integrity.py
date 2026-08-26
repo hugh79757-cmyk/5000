@@ -863,9 +863,12 @@ def _check_s03_data_points(content: str, source_data: dict) -> tuple[bool, str]:
 def _check_s04_editorial_synthesis(content: str) -> tuple[bool, str]:
     """S04: Editorial Synthesis Passed (template markers replaced).
     
-    Checks for remaining template markers like {{...}}, {{city}}, {{price}} etc.
+    Checks for remaining template markers like {{city}}, {{price}} etc.
+    Hugo shortcodes `{{< ... >}}` / `{{% ... %}}` are valid rendered output,
+    NOT unrendered markers — excluded via negative lookahead to match the actual
+    deploy gate in dispatcher.py:preflight_check.
     """
-    template_markers = re.findall(r"\{\{[^}]+\}\}", content)
+    template_markers = re.findall(r"\{\{(?![<{%])[^}]+\}\}", content)
     if template_markers:
         unique_markers = set(template_markers)
         return False, f"S04 위반: 미치환 템플릿 마커 {len(unique_markers)}개 — {list(unique_markers)[:5]}"
