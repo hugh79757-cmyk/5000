@@ -261,21 +261,25 @@ R 규칙은 대체로 구조·템플릿·SEO·운영 표준의 준수 여부를 
 
 ---
 
-## P35 — CUAP 형식/어투 위반 (label-dump + 반말체) (MAJOR)
+## P35 — 형식/어투 위반 (label-dump + 반말체) (MAJOR)
 
-**발생 위치**: `ops_dashboard/checks/content_integrity.py:check_c10` (`c10_cuap_format_tone`). CUAP 블로그만 대상 (`blog_id.startswith("cuap")` 아니면 N/A).
+**발생 위치**: `ops_dashboard/checks/content_integrity.py:check_c10` (`c10_cuap_format_tone`).
+
+**적용 범위 (중요)**:
+- **라벨덤프**: **전 브랜치 적용** (CUAP/STAP/TAP 불문). 전수 스캔 결과 STAP 9포스트/50건, TAP 2포스트/6건도 동일 위반 발견 → 검출 범위 확장됨.
+- **반말체(~다) 비율**: **CUAP 전용**. 타 분기는 정당한 `~다` 사용 가능 → 오탐 방지.
 
 **원인**:
-- **라벨덤프**: `가격:`, `배송:`, `쿠팡순위:`, `장점:`, `아쉬운점:`, `적당한대상:` 등 `라벨:` 형태로 본문 작성 — `pipelines/curation/writer.py:467`이 "라벨 표기 절대 금지"로 명시했으나 생성물이 위반.
+- **라벨덤프**: `가격:`, `배송:`, `쿠팡순위:`, `장점:`, `아쉬운점:`, `적당한대상:` 등 `라벨:` 형태로 본문 작성 — `pipelines/curation/writer.py:467`이 "라벨 표기 절대 금지"로 명시했으나 생성물이 위반. STAP는 `장점:<strong>`/단점:`</strong>` HTML 주입형, TAP는 `가격: 8,000원` 형태.
 - **반말체**: `~다.` / `~이다.` 비율 > 50% (문장 5개 이상) — `writer.py:486`은 `~입니다/~습니다` 통일 요구, `shared/ai_writer.py:617`은 반말체 혼용 금지.
 
 **판별 로직**:
-- `C10_LABEL_RE = ^\s*(가격|배송|쿠팡순위|장점|아쉬운점|단점|적당한대상|적합대상|추천대상|페르소나)\s*[:：]`
-- 문장 단위 `~다|이다$` 카운트 → 비율 계산.
+- `C10_LABEL_RE = ^\s*(가격|배송|쿠팡순위|장점|아쉬운점|단점|적당한대상|적합대상|추천대상|페르소나)\s*[:：]` (전 브랜치)
+- 문장 단위 `~다|이다$` 카운트 → 비율 계산 (CUAP만).
 
 **해결 방법 (매뉴얼)**:
 1. 위반 포스트 본문을 `~입니다/~습니다` 존댓말로 전면 재작성 (라벨 제거, 자연문 단락화).
 2. 생성단 계선: `writer.py:467/486` 규정 강화(라벨 미사용 + 존댓말 강제) — 프롬프트에 "라벨 표기 금지, 존댓말 통일" 명시.
-3. `check_c10` 탐지 후 `/api/run-checks?blog_id={cuap}` 재검사로 close 확인.
+3. `check_c10` 탐지 후 `/api/run-checks?blog_id={blog}` 재검사로 close 확인.
 
 **대시보드 확인**: `/api/attention` 또는 check_results `c10_cuap_format_tone` status=fail 필터.

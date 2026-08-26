@@ -243,17 +243,20 @@ C10_LABEL_RE = re.compile(r"^\s*(?:" + "|".join(re.escape(l) for l in C10_LABELS
 
 
 def _check_c10(body_md: str, blog_id: str) -> tuple[bool, str]:
-    """C10: CUAP 형식/톤 위반 (라벨 덤프 + 반말체 비율). CUAP 전용."""
-    if not blog_id.startswith("cuap"):
-        return True, "C10 N/A (CUAP 아님)"
+    """C10: 형식/톤 위반. 라벨덤프는 전 브랜치 적용(명백한 데이터 덤프),
+    반말체 비율(~다)은 CUAP 전용(타 분기는 정당한 ~다 사용 가능)."""
     lines = body_md.split("\n")
     label_hits = [l.strip()[:40] for l in lines if C10_LABEL_RE.match(l)]
+    # 라벨덤프: STAP/TAP/CUAP 등 어느 분기나 동일 항목 → 전체 적용
+    if label_hits:
+        return False, f"C10 위반: 라벨덤프 {len(label_hits)}건 — {label_hits[0]}"
+    # 반말체 비율: CUAP 전용 (타 분기 정당한 ~다 사용 가능 → 오탐 방지)
+    if not blog_id.startswith("cuap"):
+        return True, "C10 통과 (비-CUAP 톤 검사 생략)"
     sentences = [s.strip() for s in re.split(r"[.!?。！？]\s*", body_md) if len(s.strip()) > 2]
     banmal = sum(1 for s in sentences if re.search(r"(?:다|이다)$", s))
     total = len(sentences)
     ratio = (banmal / total) if total else 0
-    if label_hits:
-        return False, f"C10 위반: 라벨덤프 {len(label_hits)}건 — {label_hits[0]}"
     if ratio > 0.5 and total >= 5:
         return False, f"C10 위반: 반말체 비율 {ratio:.0%} (기대 ~입니다/~습니다)"
     return True, "C10 통과"
