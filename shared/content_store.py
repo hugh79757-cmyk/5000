@@ -216,12 +216,15 @@ def get_used_image_count(blog_id=None):
     return row["cnt"] if row else 0
 
 
-def source_exists(blog_id, data_source, source_id, days=None):
+def source_exists(blog_id, data_source, source_id, days=None, prompt_id=None):
     if not source_id:
         return False
     conn = get_conn()
     _sql = "SELECT 1 FROM articles WHERE blog_id=? AND data_source=? AND source_id=?"
     _params = [blog_id, data_source, source_id]
+    if prompt_id:
+        _sql += " AND prompt_id=?"
+        _params.append(prompt_id)
     if days:
         _sql += " AND published_at > datetime('now', ?)"
         _params.append(f"-{days} days")
