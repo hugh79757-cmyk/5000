@@ -1209,12 +1209,14 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     body_md = _clean_body(body_md, site_path=site_path)
 
-    # ── recurrence prevention: CUAP 프롬프트 릭 자동 제거 (A=데이터 문장, B=메타 블록) ──
-    # 패턴은 CUAP 전용이므로 타 블로그 오탐 없음. 생성 직후 본문에서 제거해 live 누수 차단.
-    _leak_re = re.compile(r"(?im)^\s*From products, verified records indicate[^\n]*\n?")
+    # ── recurrence prevention: editorial_synthesis 프롬프트 릭 자동 제거 (A=데이터 문장, B=메타 블록) ──
+    # CUAP/SEAP/CAP/TAP 공통: _sentence_for(table,...)가 "From {table}, verified records indicate..." 생성.
+    # table은 products/cars/trims/hotels 등 가변 → 테이블명 무관하게 제거. 단 "
+    # {{" shortcode는 아님(오탐 방지). 생성 직후 본문에서 제거해 live 누수 차단.
+    _leak_re = re.compile(r"(?im)^\s*From [a-z]+, verified records indicate[^\n]*\n?")
     if _leak_re.search(body_md):
         body_md = _leak_re.sub("", body_md)
-        logger.info(f"[LEAK-STRIP] CUAP 프롬프트 릭 문장(Part A) 제거: {slug}")
+        logger.info(f"[LEAK-STRIP] editorial_synthesis 데이터 문장(Part A) 제거: {slug}")
     # Part B: editorial_synthesis 메타 코멘트 블록 ("This editorial synthesis is constructed exclusively...preserving the integrity of the reported facts")
     _leak_re_b = re.compile(r"(?is)This editorial synthesis is constructed exclusively.*?preserving the integrity of the reported facts\.?")
     if _leak_re_b.search(body_md):
