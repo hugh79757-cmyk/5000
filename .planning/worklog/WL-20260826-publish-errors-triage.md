@@ -31,3 +31,7 @@
 - health/car-hugo: 오전 발행 성공 확인, P14 이벤트 미갱신 잔여
 - ev/compare/deal/stock/travel4: 다음 슬롯(16:08~16:22) 자가복귀 예상 (playwright 수정 반영)
 - 스케줄러: 정상 동작 확인 — 로깅이 logs/scheduler_stderr.log로 출력 중 (scheduler.log 아님)
+- topic_expander 크래시 픽스 커밋 f6f1cf4af (city 칼럼 가드) — 수동 실행 +507 토픽 정상화
+- 16시대 슬롯 검증: travel4 no_result / deal·compare·ev duplicate_source_id / stock duplicate_slug 재확인 — 데이터 소진 계열로 미해결(수집기 의존)
+- aviasales 수집기 05:10 600초 타임아웃 (deals 데이터 공급 끊김, 익일 05:00 자동 재시도 예정)
+- CAR daily_refresh 오늘 rows_inserted=0 신규 소스 없음
