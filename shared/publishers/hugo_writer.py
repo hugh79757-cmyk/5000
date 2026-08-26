@@ -151,6 +151,8 @@ def _build_frontmatter_congo(title, slug, category, tags, thumbnail_url, descrip
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
         fm += 'image: ' + _sanitize_yaml_value(_url) + '\n'
         fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
+    # W5 R17: featureimage(R2 URL) 존재 시 twitter_card 필수 (없으면 deploy 게이트 차단)
+    fm += 'twitter_card: summary_large_image\n'
     fm += "---\n"
     return fm, date_str
 
@@ -184,6 +186,7 @@ def _build_frontmatter_papermod(title, slug, category, tags, thumbnail_url, desc
         fm += "categories:\n  - " + category + "\n"
     if thumbnail_url:
         fm += 'featureimage: ' + _sanitize_yaml_value(thumbnail_url) + '\n'
+    fm += 'twitter_card: summary_large_image\n'
     fm += "---\n\n"
     return fm, date_str
 
@@ -223,6 +226,7 @@ def _build_frontmatter_blowfish(title, slug, category, tags, thumbnail_url, desc
     else:
         _url = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"
         fm += 'featureimage: ' + _sanitize_yaml_value(_url) + '\n'
+    fm += 'twitter_card: summary_large_image\n'
     fm += "---\n"
     return fm, date_str
 
