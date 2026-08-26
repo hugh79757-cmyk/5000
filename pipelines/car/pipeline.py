@@ -32,7 +32,7 @@ def _select_car_image(conn, car_id, slug):
     try:
         c = conn.cursor()
         used = c.execute(
-            "SELECT r2_url FROM publish_log WHERE published_at > datetime('now', '-7 days') AND r2_url IS NOT NULL AND r2_url != ''"
+            "SELECT r2_url FROM publish_log WHERE published_at > datetime('now', '-14 days') AND r2_url IS NOT NULL AND r2_url != ''"
         ).fetchall()
         used_urls = {r["r2_url"] for r in used} if used else set()
         images = c.execute(
@@ -120,12 +120,12 @@ def run(blog_cfg):
             _rnd.shuffle(pt_cfg)
             topic = None
             for _pt in pt_cfg:
-                topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=_pt)
+                topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=_pt, days_window=14)
                 if topic:
                     resolved_post_type = _pt
                     break
         else:
-            topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=pt_cfg)
+            topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=pt_cfg, days_window=14)
             resolved_post_type = pt_cfg
 
         if not topic:
@@ -140,17 +140,23 @@ def run(blog_cfg):
             skip_ids.append(topic["id"])
             continue
 
-        # 사전 중복 발행 방지: 이미 발행된 car_id는 skip → 다음 토픽 회전
+        # 사전 중복 발행 방지: N일 내 발행된 car_id는 skip → 다음 토픽 회전
+        # ponytail: 영구 소진은 풀 고갈 원인 → 30일 윈도우로 완화(중복가드)
         try:
-            from shared.content_store import source_exists as _src_exists
-            if _src_exists(blog_id, "car_db", topic["car_id"]):
-                logger.info("car_id already published, rotating: " + str(topic["car_id"]))
+            _site = blog_id.replace("-hugo", "")
+            _recent = conn.execute(
+                "SELECT 1 FROM publish_log p JOIN topics t ON t.id=p.topic_id "
+                "WHERE p.site=? AND t.car_id=? AND p.published_at > datetime('now','-14 days') LIMIT 1",
+                (_site, topic["car_id"]),
+            ).fetchone()
+            if _recent:
+                logger.info("car_id published within 30d, rotating: " + str(topic["car_id"]))
                 skip_ids.append(topic["id"])
                 conn.execute("UPDATE topics SET status='skip_duplicate' WHERE id=?", (topic["id"],))
                 conn.commit()
                 continue
         except Exception as _de:
-            logger.warning(f"[dup-precheck] source_exists error: {_de}")
+            logger.warning(f"[dup-precheck] recent-publish error: {_de}")
 
         post_type = topic.get("post_type", resolved_post_type)
 

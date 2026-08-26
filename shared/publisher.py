@@ -817,13 +817,23 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
     # ── 중복 발행 방지 (source_id + slug 기반) ──
     from shared.content_store import source_exists, get_conn as _get_conn
 
-    if source_id and source_exists(blog_id, data_source, source_id):
-        return {
-            "success": False,
-            "reason": "duplicate_source_id",
-            "blog_id": blog_id,
-            "source_id": source_id,
-        }
+    if source_id:
+        # car 파이프라인: (car_id, post_type) 영구 콤보 가드 + 30일 source_id 윈도우 완화
+        if data_source == "car_db" and prompt_id:
+            if source_exists(blog_id, data_source, source_id, prompt_id=prompt_id):
+                return {
+                    "success": False,
+                    "reason": "duplicate_source_id",
+                    "blog_id": blog_id,
+                    "source_id": source_id,
+                }
+        if source_exists(blog_id, data_source, source_id, days=30 if data_source == "car_db" else None):
+            return {
+                "success": False,
+                "reason": "duplicate_source_id",
+                "blog_id": blog_id,
+                "source_id": source_id,
+            }
     _conn = _get_conn()
     _dup = _conn.execute(
         "SELECT id, published_url FROM articles WHERE blog_id=? AND slug=? AND status='published' LIMIT 1",

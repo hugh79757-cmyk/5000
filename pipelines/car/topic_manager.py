@@ -21,6 +21,7 @@ def josa_i(text) -> str:
     return "이" if has_batchim(text) else ""
 
 def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_type=None):
+    # ponytail: days_window 내 발행 토픽은 recent_keys로 배제. 그 외(pending + 30일+ 경과 published)는 재선택 허용 → 풀 고갈 방지
     c = conn.cursor()
     cutoff = (datetime.now() - timedelta(days=days_window)).isoformat()
     recent = c.execute("""
@@ -29,14 +30,18 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
         WHERE p.published_at > ? AND p.site = ?
     """, (cutoff, site_id)).fetchall()
     recent_keys = {r[0] for r in recent}
+    _reuse = "AND id NOT IN (SELECT topic_id FROM publish_log WHERE published_at > ?)"
+    # ponytail: 단종 모델(car_id)은 시판 trims 0건 → 발행 게이트(data_builder:342)에서 차단됨.
+    # 토픽 선택 단계에서 사전 배제해 불필요한 BLOCK 감소 + 게이트 정합.
+    _market = "AND car_id IN (SELECT car_id FROM trims WHERE status = '시판')"
     if post_type:
         topics = c.execute("""
-            SELECT * FROM topics WHERE status = 'pending' AND site_id = ? AND post_type = ? ORDER BY priority DESC, RANDOM()
-        """, (site_id, post_type)).fetchall()
+            SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? AND post_type = ? ORDER BY priority DESC, RANDOM()
+        """.replace("{_reuse}", _reuse).replace("{_market}", _market), (cutoff, site_id, post_type)).fetchall()
     else:
         topics = c.execute("""
-            SELECT * FROM topics WHERE status = 'pending' AND site_id = ? ORDER BY priority DESC, RANDOM()
-        """, (site_id,)).fetchall()
+            SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? ORDER BY priority DESC, RANDOM()
+        """.replace("{_reuse}", _reuse).replace("{_market}", _market), (cutoff, site_id)).fetchall()
     skip_set = set(skip_ids) if skip_ids else set()
     for t in topics:
         if t["id"] in skip_set:
@@ -48,11 +53,12 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
     return c.execute("""
         SELECT t.* FROM topics t
         LEFT JOIN publish_log p ON t.id = p.topic_id
-        WHERE t.status = 'pending' AND t.site_id = ?
+        WHERE (t.status = 'pending' OR t.status = 'published') {_reuse} {_market} AND t.site_id = ?
         AND t.id NOT IN ({}){}
         ORDER BY p.published_at ASC NULLS FIRST
         LIMIT 1
-    """.format(placeholder, " AND t.post_type = ?" if post_type else ""), [site_id] + (list(skip_set) if skip_set else []) + ([post_type] if post_type else [])).fetchone()
+        """.format(placeholder, " AND t.post_type = ?" if post_type else "").replace("{_reuse}", _reuse).replace("{_market}", _market),
+             [cutoff, site_id] + (list(skip_set) if skip_set else []) + ([post_type] if post_type else [])).fetchone()
 
 def generate_title(data, site_id="hotissue"):
     """title_engine의 사이트별 고CTR 템플릿 엔진으로 위임"""
