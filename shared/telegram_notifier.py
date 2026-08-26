@@ -167,3 +167,13 @@ def send_standard_violation(blog_id, rule_id, severity, detail):
         "Dashboard: " + url
     )
     return send(message)
+
+
+def send_warning(title, detail=""):
+    """Generic WARNING-level alert (2026-08-26 추가 — pipelines/etap/quality_guard 호환)."""
+    return send("⚠️ " + title + ("\n" + detail if detail else ""))
+
+
+def send_critical(title, detail=""):
+    """Generic CRITICAL-level alert (2026-08-26 추가 — pipelines/etap/quality_guard 호환)."""
+    return send("🚨 " + title + ("\n" + detail if detail else ""))

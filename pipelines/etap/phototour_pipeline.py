@@ -139,6 +139,12 @@ def _run_impl() -> bool:
     if is_draft:
         logger.warning(f"[{BLOG_ID}] DRAFT 감지 → 발행 중단: {article['slug']} - {post_issues}")
         send_alert(BLOG_ID, article["slug"], post_issues)
+        # draft 판정 토픽을 exhausted 처리하지 않으면 다음 시도에 같은 토픽이
+        # 재선택되어 무한 실패 루프에 빠진다 (2026-08-26 phototour 5회 연속 실패 원인).
+        # 위의 "데이터 부족 토픽 exhausted 처리" 경로와 동일한 패턴을 적용한다.
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
         return False
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")

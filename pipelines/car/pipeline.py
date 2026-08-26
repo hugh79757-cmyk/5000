@@ -316,6 +316,19 @@ def run(blog_cfg):
         )
     body = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + body
 
+    # ── W5 R13 본문삽입이미지 보장 (2026-08-26, senior와 동일 패턴) ──
+    # Hugo 경로는 본문에 썬네일을 넣지 않아 deploy.py W5 이미지 게이트(R13)에 걸림.
+    # 첫 H2 직후에 이미지가 없을 때만 thumbnail_url을 삽입한다.
+    if (blog_cfg.get("platform", "hugo") == "hugo" and r2_url
+            and not re.search(r"!\[[^\]]*\]\(|<img\s", body or "")):
+        _alt = (title or "image").strip()
+        _img_block = f"\n\n![{_alt}]({r2_url})\n"
+        _m = re.search(r"^##[^\n]*\n", body or "", re.MULTILINE)
+        if _m:
+            body = body[: _m.end()] + _img_block + body[_m.end():]
+        elif body:
+            body += _img_block
+
     _is_draft = False
     try:
         from shared.validators import validate_post_extended as _validate
