@@ -584,6 +584,25 @@ codes:
   - 로컬 Hugo 빌드: HUGO_THEMESDIR=/Users/twinssn/Projects/shared-themes hugo --gc --minify --source {site_path}
   - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
   needs_human: false
+- code: P35
+  playbook_ref: ERROR_PLAYBOOKS.md#p35
+  name_ko: CUAP 형식/어투 위반 (label-dump + 반말체)
+  severity: MAJOR
+  family: content_quality
+  hook: content_check
+  automation_level: human_approval
+  one_line_action: CUAP 포스트 라벨덤프(가격:/장점: 등) 또는 반말체(~다) 비율>50% 탐지 → ~입니다/~습니다 체 통일 + 라벨 제거 재작성. writer.py:467/486 이미 금지 규정 존재.
+  target_files:
+  - path: ops_dashboard/checks/content_integrity.py
+    hint: check_c10 (c10_cuap_format_tone) — 라벨덤프 정규식 + 어투 비율 검사, CUAP 블로그만 적용
+  - path: pipelines/curation/writer.py
+    hint: "절대 금지 라벨 표기(:467) + ~입니다/~습니다 체 통일(:486) 규정 위반 시 재작성"
+  - path: shared/ai_writer.py
+    hint: 반말체(~다/이다) 혼용 금지(:617)
+  verify:
+  - "CUAP 라벨덤프 포스트 샘플로 check_c10 단위 테스트 (False 기대)"
+  - "POST /api/run-checks?blog_id={cuap_blog} 재검사 트리거"
+  needs_human: false
 - code: unknown_failure
   playbook_ref: ''
   name_ko: 미등록 실패 사유

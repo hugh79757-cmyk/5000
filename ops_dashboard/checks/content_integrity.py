@@ -236,6 +236,29 @@ def _check_c04(body_md: str, blog_id: str) -> tuple[bool, str]:
     return True, "C04 통과"
 
 
+# CUAP 형식/톤 위반 (P35) — 라벨 덤프 + 반말체 비율
+C10_LABELS = ["가격", "배송", "쿠팡순위", "장점", "아쉬운점", "단점",
+              "적당한대상", "적합대상", "추천대상", "추천 대상", "페르소나"]
+C10_LABEL_RE = re.compile(r"^\s*(?:" + "|".join(re.escape(l) for l in C10_LABELS) + r")\s*[:：]")
+
+
+def _check_c10(body_md: str, blog_id: str) -> tuple[bool, str]:
+    """C10: CUAP 형식/톤 위반 (라벨 덤프 + 반말체 비율). CUAP 전용."""
+    if not blog_id.startswith("cuap"):
+        return True, "C10 N/A (CUAP 아님)"
+    lines = body_md.split("\n")
+    label_hits = [l.strip()[:40] for l in lines if C10_LABEL_RE.match(l)]
+    sentences = [s.strip() for s in re.split(r"[.!?。！？]\s*", body_md) if len(s.strip()) > 2]
+    banmal = sum(1 for s in sentences if re.search(r"(?:다|이다)$", s))
+    total = len(sentences)
+    ratio = (banmal / total) if total else 0
+    if label_hits:
+        return False, f"C10 위반: 라벨덤프 {len(label_hits)}건 — {label_hits[0]}"
+    if ratio > 0.5 and total >= 5:
+        return False, f"C10 위반: 반말체 비율 {ratio:.0%} (기대 ~입니다/~습니다)"
+    return True, "C10 통과"
+
+
 def _check_c05(fm: dict) -> tuple[bool, str]:
     """C05: draft:true 발행 대상."""
     if fm.get("draft", "").lower() == "true":
@@ -591,6 +614,32 @@ def check_c04(conn, blog_id: str) -> dict:
         return {"status": "fail",
                 "detail": f"C04 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
     return {"status": "pass", "detail": f"C04 통과 ({len(posts)}건)"}
+
+
+@register_check("c10_cuap_format_tone")
+def check_c10(conn, blog_id: str) -> dict:
+    """C10: CUAP 형식/톤 위반 (라벨덤프 + 반말체). CUAP 전용."""
+    site = _find_site_path(conn, blog_id)
+    if not site:
+        return {"status": "unknown", "detail": f"site_path 없음: {blog_id}"}
+
+    posts = _read_post_files(site)
+    if not posts:
+        return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
+
+    violations = []
+    for path, content in posts:
+        _, fm = _parse_frontmatter(content)
+        body_start = content.find("---\n", 4)
+        body = content[body_start + 4:] if body_start > 0 else content
+        passed, detail = _check_c10(body, blog_id)
+        if not passed:
+            violations.append(f"{path.parent.name}: {detail}")
+
+    if violations:
+        return {"status": "fail",
+                "detail": f"C10 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
+    return {"status": "pass", "detail": f"C10 통과 ({len(posts)}건)"}
 
 
 @register_check("c05_draft_publish")
