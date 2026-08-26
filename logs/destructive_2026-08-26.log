@@ -4,3 +4,5 @@
 15:50:45 travel-en.db topic_expander 수동실행(크래시 픽스 후 정상화) | 사전카운트=crash(no such column: city) | 백업=N/A(추가만, 삭제/갱신 없음) | 사후=exit0 + watertours +507행 | 보존확인=기존 행 미변경
 21:36:25 scheduler restart 시작 | 사전: PID=752 자식=0 DB=미변경 | 백업=plist 동일(재로드 롤백) | 영향: 발행 스케줄링 ~수초 정지
 21:36:58 scheduler restart 완료 | 사후: 신규PID=93221, scheduler.log fd 복구(3w), 로그 77행 활성화, MAX_CONCURRENT=5 적용확인, 자식=0 | 보존확인=DB 미변경
+21:37:30 interior-hugo P14 이벤트 close | 사전: open P14 2건 | 백업=ops.db.bak_20260826_interior_close | 사후: resolved 2건, P03(08-22) 유지 | 보존확인=실발행행 미변경
+22:44:32 CUAP 프롬프트 릭 일괄 수정: 69개 포스트 EN 블록 제거(CUAP 15개 사이트 별도 repo, git 미추적이면 미커밋) + leak_tracker.py 패턴 3종 추가(C04 EN) | 사전: 78건(스캔) | 백업=각 사이트 git(해당시) | 사후: 잔여 0건, 15사이트 배포 ok=15 | 보존확인=실데이터 문장 유지

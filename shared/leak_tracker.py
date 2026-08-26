@@ -42,6 +42,10 @@ _C04_EN_PATTERNS = [
     r"in\s+order\s+to\s+achieve",
     r"as\s+an\s+AI\s+language\s+model",
     r"I\s+cannot\s+",
+    # CUAP 프롬프트 릭: LLM이 instruction 텍스트를 본문에 그대로 에코
+    r"editorial synthesis is constructed exclusively",
+    r"contains no externally modeled or estimated values",
+    r"every figure can be traced back to its named source table",
 ]
 
 
