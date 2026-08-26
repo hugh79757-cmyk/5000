@@ -87,13 +87,8 @@ def editorial_synthesis_step(content: str, unique_data: list, topic: dict) -> st
     para = " ".join(sentences)
     words = para.split()
 
-    if len(words) < 100:
-        para = (para + " " + _FILLER).strip()
-        words = para.split()
-    while len(words) < 100:
-        para = (para + " " + _FALLBACK).strip()
-        words = para.split()
-
+    # ponytail: _FILLER/_FALLBACK은 공개 본문에 들어가선 안 될 메타/패딩 블록
+    # (CUAP 프롬프트 릭으로 오인됨). 제거 — 발행시점(hugo_writer)에서도 재차 제거.
     if len(words) > 150:
         para = " ".join(words[:150])
 

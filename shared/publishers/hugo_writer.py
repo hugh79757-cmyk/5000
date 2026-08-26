@@ -1209,12 +1209,17 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
 
     body_md = _clean_body(body_md, site_path=site_path)
 
-    # ── recurrence prevention: CUAP 프롬프트 릭("From products, verified records indicate...") 자동 제거 ──
+    # ── recurrence prevention: CUAP 프롬프트 릭 자동 제거 (A=데이터 문장, B=메타 블록) ──
     # 패턴은 CUAP 전용이므로 타 블로그 오탐 없음. 생성 직후 본문에서 제거해 live 누수 차단.
     _leak_re = re.compile(r"(?im)^\s*From products, verified records indicate[^\n]*\n?")
     if _leak_re.search(body_md):
         body_md = _leak_re.sub("", body_md)
-        logger.info(f"[LEAK-STRIP] CUAP 프롬프트 릭 문장 제거: {slug}")
+        logger.info(f"[LEAK-STRIP] CUAP 프롬프트 릭 문장(Part A) 제거: {slug}")
+    # Part B: editorial_synthesis 메타 코멘트 블록 ("This editorial synthesis is constructed exclusively...preserving the integrity of the reported facts")
+    _leak_re_b = re.compile(r"(?is)This editorial synthesis is constructed exclusively.*?preserving the integrity of the reported facts\.?")
+    if _leak_re_b.search(body_md):
+        body_md = _leak_re_b.sub("", body_md)
+        logger.info(f"[LEAK-STRIP] CUAP 프롬프트 릭 블록(Part B) 제거: {slug}")
 
     # ── C01/C04 원인추적 훅 (b) humanizer 통과 직후 ──
     try:
