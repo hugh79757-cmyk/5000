@@ -210,6 +210,11 @@ def expand_topics():
             continue
 
         cols = [c[1] for c in conn.execute(f"PRAGMA table_info({tbl})").fetchall()]
+
+        # city 기반 스키마가 아닌 토픽 테이블(deals=origin 등)은 Viator 도시 확장 대상 아님
+        if "city" not in cols:
+            continue
+
         remaining = _get_remaining(conn, tbl, cols)
 
         if remaining >= MIN_THRESHOLD:
