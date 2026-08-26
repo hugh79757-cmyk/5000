@@ -9,20 +9,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-_FILLER = (
-    "This editorial synthesis is constructed exclusively from the verified "
-    "source tables cited above and contains no externally modeled or estimated "
-    "values. Each data point listed represents an observed record drawn directly "
-    "from the underlying dataset, and every figure can be traced back to its "
-    "named source table for independent verification. The intent of this section "
-    "is to give readers concrete, checkable anchors rather than generalized "
-    "commentary, so planning decisions rest on reproducible evidence. Where a "
-    "field is absent in the source it is omitted rather than inferred, preserving "
-    "the integrity of the reported facts."
-)
-
-_FALLBACK = "All figures are sourced from the cited tables."
-
 # Every template sentence starts "From {table}, verified records indicate ..."
 # — unique marker lets callers find the synthesis block inside a full body.
 _SYNTHESIS_MARKER = "verified records indicate"

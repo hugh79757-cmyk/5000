@@ -1221,6 +1221,16 @@ def _write_hugo_post(blog_cfg, title, body_md, slug, category, tags, thumbnail_u
         body_md = _leak_re_b.sub("", body_md)
         logger.info(f"[LEAK-STRIP] CUAP 프롬프트 릭 블록(Part B) 제거: {slug}")
 
+    # ── recurrence prevention: P35 라벨덤프 자동 제거 (C10_LABEL_RE 미러) ──
+    # 가격:/장점:/단점: 등 라벨 표기는 위키/블로그 본문에 부적합. STAP/TAP/CUAP 공통.
+    # 라인 전체(HTML 태그 포함) 제거해 잔여 라벨덤프 차단.
+    _label_re = re.compile(
+        r"(?im)^\s*(?:가격|배송|쿠팡순위|장점|아쉬운점|단점|적당한대상|적합대상|"
+        r"추천대상|추천\s*대상|페르소나)\s*[:：].*$"
+    )
+    if _label_re.search(body_md):
+        body_md = _label_re.sub("", body_md)
+        logger.info(f"[LABEL-STRIP] P35 라벨덤프 라인 제거: {slug}")
     # ── C01/C04 원인추적 훅 (b) humanizer 통과 직후 ──
     try:
         from shared.leak_tracker import check_c01_c04

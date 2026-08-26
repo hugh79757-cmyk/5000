@@ -6,3 +6,5 @@
 21:36:58 scheduler restart 완료 | 사후: 신규PID=93221, scheduler.log fd 복구(3w), 로그 77행 활성화, MAX_CONCURRENT=5 적용확인, 자식=0 | 보존확인=DB 미변경
 21:37:30 interior-hugo P14 이벤트 close | 사전: open P14 2건 | 백업=ops.db.bak_20260826_interior_close | 사후: resolved 2건, P03(08-22) 유지 | 보존확인=실발행행 미변경
 22:44:32 CUAP 프롬프트 릭 일괄 수정: 69개 포스트 EN 블록 제거(CUAP 15개 사이트 별도 repo, git 미추적이면 미커밋) + leak_tracker.py 패턴 3종 추가(C04 EN) | 사전: 78건(스캔) | 백업=각 사이트 git(해당시) | 사후: 잔여 0건, 15사이트 배포 ok=15 | 보존확인=실데이터 문장 유지
+22:48:29 CUAP 프롬프트 릭 스트립: 70건 본문에서 editorial-synthesis 블록 제거(워킹트리), 0 잔여 확인 | 백업=N/A(삭제 아님, 누락 텍스트만 제거) | 사후=CUAP 16개 사이트 배포 완료, 작업트리 0잔여
+00:01:24 STAP/TAP 라벨덤프 포스트 정화 | 사전: STAP 9건/TAP 2건(라벨덤프 라인 56) | 백업=git(STAP/TAP repo) | 사후: 잔여 0, content/ 수정→자체 scheduler 빌드반영 | 보존확인=DB 미변경
