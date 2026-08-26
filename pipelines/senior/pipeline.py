@@ -326,8 +326,34 @@ def run(cfg):
     return {"success": False, "reason": "publish_error"}
 
 
+def _ensure_body_image(article, thumb_url):
+    """W5 R13 본문삽입이미지 보장 (2026-08-26).
+
+    Hugo 경로는 Blogger 경로(_do_publish_blogger의 thumb_html prepend)와 달리
+    썬네일을 본문에 넣지 않아 W5 이미지 게이트(R13 본문삽입이미지 0장)에 걸렸다.
+    첫 H2 직후(사이트 관례 위치, hugo_writer body_images 삽입 방식과 동일)에
+    이미지가 없을 때만 삽입한다.
+    """
+    if not thumb_url:
+        return
+    import re as _re
+
+    body = article.get("body_md", "")
+    if not body or _re.search(r"!\[[^\]]*\]\(|<img\s", body):
+        return
+    alt = (article.get("title") or "image").strip()
+    img_block = f"\n\n![{alt}]({thumb_url})\n"
+    m = _re.search(r"^##[^\n]*\n", body, _re.MULTILINE)
+    if m:
+        article["body_md"] = body[: m.end()] + img_block + body[m.end():]
+    else:
+        article["body_md"] = f"![{alt}]({thumb_url})\n\n" + body
+
+
 def _do_publish_hugo(cfg, blog_id, article, tags, thumb_url, candidate=None):
     from shared.publisher import publish
+
+    _ensure_body_image(article, thumb_url)
 
     _is_draft = False
     try:

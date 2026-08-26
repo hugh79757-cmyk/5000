@@ -94,6 +94,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-08-26 | 발행 오류 트리아지 — senior W5 R13 Hugo 본문이미지 삽입(_ensure_body_image) + 백필 12건+twitter_card 19건 배포, playwright chromium 재설치(rap3/5 회복), foodtour/adventure 스테일 확인 | `본 커밋` |
 | 2026-08-25 | ETAP topic_expander — 5블로그(airlines/airports/nature/watersports/deals) auto-refill + scheduler 01:00 연동 | `27130ee` + `62691e6` |
 | 2026-08-25 | fix(72-W4): S03 24h 연령 게이트 + S04 Hugo shortcode 제외 + 회귀 테스트 (외부 미발행글 소급 차단 방지) | `13a79e5` |
 | 2026-08-24 | Phase 64 Task 64-06 — Rule Registration Runbook + Reverse-Validate + Promote Helper (5-step pipeline, generalized validator, human-gated promote) | `1ea5125ff` |
