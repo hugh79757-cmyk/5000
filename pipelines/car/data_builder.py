@@ -344,8 +344,7 @@ def build_input(conn, topic, db_path):
     ).fetchall()
     trims = [dict(t) for t in trims_raw]
     # === 데이터 품질 필터 ===
-    # 가격 임계값 0: NULL/빈값만 차단 (기존 >=500 완화, car-rotation-relief)
-    trims = [t for t in trims if t["price"]]
+    trims = [t for t in trims if t["price"] and t["price"] >= 500]
     if not trims:
         logger.warning(f"[BLOCK] 유효 트림 없음 (가격 비정상) - 발행 차단: {car['model']}")
         return None
