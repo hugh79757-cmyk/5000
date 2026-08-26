@@ -120,12 +120,12 @@ def run(blog_cfg):
             _rnd.shuffle(pt_cfg)
             topic = None
             for _pt in pt_cfg:
-                topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=_pt)
+                topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=_pt, days_window=14)
                 if topic:
                     resolved_post_type = _pt
                     break
         else:
-            topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=pt_cfg)
+            topic = select_topic(conn, site_id=car_site_id, skip_ids=skip_ids, post_type=pt_cfg, days_window=14)
             resolved_post_type = pt_cfg
 
         if not topic:
@@ -146,7 +146,7 @@ def run(blog_cfg):
             _site = blog_id.replace("-hugo", "")
             _recent = conn.execute(
                 "SELECT 1 FROM publish_log p JOIN topics t ON t.id=p.topic_id "
-                "WHERE p.site=? AND t.car_id=? AND p.published_at > datetime('now','-30 days') LIMIT 1",
+                "WHERE p.site=? AND t.car_id=? AND p.published_at > datetime('now','-14 days') LIMIT 1",
                 (_site, topic["car_id"]),
             ).fetchone()
             if _recent:
