@@ -140,6 +140,18 @@ def run(blog_cfg):
             skip_ids.append(topic["id"])
             continue
 
+        # 사전 중복 발행 방지: 이미 발행된 car_id는 skip → 다음 토픽 회전
+        try:
+            from shared.content_store import source_exists as _src_exists
+            if _src_exists(blog_id, "car_db", topic["car_id"]):
+                logger.info("car_id already published, rotating: " + str(topic["car_id"]))
+                skip_ids.append(topic["id"])
+                conn.execute("UPDATE topics SET status='skip_duplicate' WHERE id=?", (topic["id"],))
+                conn.commit()
+                continue
+        except Exception as _de:
+            logger.warning(f"[dup-precheck] source_exists error: {_de}")
+
         post_type = topic.get("post_type", resolved_post_type)
 
         # ── 신규 타입: build_input() 우회, 전용 빌더 직접 호출 ──

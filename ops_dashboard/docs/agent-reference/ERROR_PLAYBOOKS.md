@@ -213,3 +213,48 @@ R 규칙은 대체로 구조·템플릿·SEO·운영 표준의 준수 여부를 
 | P15 | 검증 통과 콘텐츠 재배포 성공 | 배포 성공 시 |
 
 > **"해결됨"과 "close"는 별도 상태다.** 코드 수정이 완료되었더라도 이벤트가 close되지 않으면 대시보드에 계속 표시된다. 코드 수정 + 이벤트 close + 재검사를 함께 수행해야 완전한 해결이다.
+
+---
+
+## P12 — 콘텐츠 품질 게이트 차단 (MAJOR)
+
+**발생 위치**: `dispatcher.py:preflight_check()` → `_build_and_deploy_central()` blocked 경로. 현재는 `record_publish_error(problem_id="P12", reason="preflight_blocked", stage="preflight", retryable=False)`로 대시보드에 기록됨.
+
+**원인**: W5 preflight 게이트 항목 중 하나라도 위반 시 배포 차단.
+- **S02 구조 유사도** (warn-only, 차단 아님)
+- **S03 유니크 데이터** (warn-only)
+- **S04 템플릿 마커** (`{{...}}` 미렌더링 shortcode 잔여) — **HARD-BLOCK**
+- **S05 신선도** (hard-block)
+- `_enforce_s03_s04=1`(기본)일 때 S04 차단 활성.
+
+**adventure-hugo / kitchen-hugo 특이사항**: 구조 고정 블로그(H2 템플릿 동일)라 S02 sim=1.0 빈번하나 S02는 warn-only라 차단 안 함. 실제 W5 차단은 **S04 템플릿 마커**임. 해당 두 블로그는 `dispatcher.py`의 `_s04_warn_only_blogs = ("adventure-hugo","kitchen-hugo")` 설정으로 S04도 warn-only 처리됨(차단 해제).
+
+**해결 방법 (매뉴얼)**:
+1. 차단 메시지의 `violations` 필드 확인 → 어떤 규칙(S04/S05)인지 특정.
+2. S04(템플릿 마커)인 경우:
+   - 포스트 본문에 `{{< ... >}}` 또는 `{{% ... %}}` 형태 미렌더링 shortcode가 있는지 검사.
+   - 파이프라인 writer가 Hugo shortcode를 이스케이프 없이 그대로 삽입하지 않도록 수정.
+   - `dispatcher.py:preflight_check`의 정규식 `\{\{(?![<{%])[^}]+\}\}` 이 `{{< ... >}}`(정상 shortcode)은 제외하는지 확인.
+   - adventure/kitchen은 이미 S04 warn-only라 배포는 진행되나 경고 누적 → S02/S04 경고 근본 해소는 콘텐츠 구조 다양화 또는 블로그별 예외 등록.
+3. S05(신선도)인 경우: 최근 N일 내 동일/유사 포스트 존재 → 키워드 회전 또는 cooldown 확인.
+4. 게이트 강제 해제(긴급): `QUALITY_ENFORCE_S03_S04=0` env 설정 → S04만 warn-only로 전환(영구 완화 아님).
+
+**대시보드 확인**: `/api/publish-errors?problem_id=P12` 로 open 이벤트 조회.
+
+---
+
+## P16 — 중복 slug / source_id (MINOR)
+
+**발생 위치**: `shared/publisher.py:820-826` `source_exists()` True 시 `duplicate_source_id` 반환 → `classify_error`가 P16 매핑.
+
+**원인**:
+- **car 파이프라인**: `car_id`가 이미 발행 이력(`car_db` source)에 존재 → 중복. 근본 원인은 **CAR daily_refresh가 신규 소스를 0건 삽입**(신차 출시 없음/스캐너 풀 한정)하여 소스 풀 고갈.
+- **stock(STAP)**: 동일 상품 slug 이미 발행됨.
+
+**해결 방법 (매뉴얼)**:
+1. **car source 회전 (이미 적용)**: `pipelines/car/pipeline.py` 토픽 선택 루프에서 `source_exists(blog_id,"car_db",car_id)` 사전 확인 → 이미 발행된 car_id는 `skip_duplicate` 처리 후 다음 토픽으로 회전. 덕분에 중복 실패 대신 미발행 토픽 자동 시도.
+2. **신규 소스 확보**: `pipelines/car/daily_refresh.py` `scan_new_cars()` 실행 → `rows_inserted` 확인. 0이면 신차 출시 대기 또는 스캐너 소스 풀 확장 필요(설계 변경).
+3. **stock**: STAP 콘텐츠 풀 고갈 → STAP 데이터 수집기(06:10) 실행 결과 확인, 중복 slug 제외 로직 점검.
+4. **이벤트 close**: 중복은 MINOR(retryable=False) — 소스 회전으로 자연 해소되면 이벤트 close.
+
+**대시보드 확인**: `/api/publish-errors?problem_id=P16`.

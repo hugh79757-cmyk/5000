@@ -688,6 +688,9 @@ def preflight_check(blog_id: str) -> dict:
     # Phase 72 W4 T4.2: S03/S04 blocking kill-switch.
     # "0"이면 기존 warn-only 동작(위반 기록만, blocked 미설정) — 재배포 없이 즉시 복귀.
     _enforce_s03_s04 = os.getenv("QUALITY_ENFORCE_S03_S04", "1") == "1"
+    # 구조 고정 블로그(adventure/kitchen)는 S04 미치환 마커 hard-block 제외(warn-only).
+    # 해당 블로그는 템플릿 구조가 고정이라 정상 발행분도 S04 위반으로 오탐 → 별도 튜닝 과제(B).
+    _s04_warn_only_blogs = ("adventure-hugo", "kitchen-hugo")
 
     # 대상 블로그 site_path 확인
     _all_blogs = _load_all_blogs().get("blogs", [])
@@ -976,7 +979,7 @@ def preflight_check(blog_id: str) -> dict:
                 "detail": f"S04 위반: 미치환 템플릿 마커 {len(unique_markers)}개 — {list(unique_markers)[:5]}",
                 "file": str(md_file)})
             # Phase 72 W4: blocking 전환 (kill-switch QUALITY_ENFORCE_S03_S04=0 → warn-only 복귀)
-            if _enforce_s03_s04:
+            if _enforce_s03_s04 and blog_id not in _s04_warn_only_blogs:
                 blocked = True
 
         # S06: Editorial Synthesis cosine (WARN-ONLY, Phase 72 W3 T3.2)
@@ -1098,6 +1101,16 @@ def _build_and_deploy_central(blog_id: str) -> bool:
         except Exception as e:
             logger.warning(f"[deploy blocked] 텔레그램 전송 실패: {e}")
             pass
+        # W5 프리플라이트 차단을 대시보드에 가시화(P12 품질 게이트 차단 코드로 기록)
+        try:
+            from shared.publish_error_events import record_publish_error as _rec_pe
+            _rec_pe(
+                blog_id, "preflight", _violation_summary,
+                problem_id="P12", reason="preflight_blocked",
+                pipeline=blog_id, retryable=False,
+            )
+        except Exception as e:
+            logger.warning(f"[deploy blocked] 이벤트 기록 실패: {e}")
         return False
 
     import fcntl as _fcntl

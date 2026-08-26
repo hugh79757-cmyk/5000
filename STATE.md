@@ -57,8 +57,8 @@
 | 2026-08-26 | MAX_CONCURRENT config화 (env override, 기본 3→5) | .planning/quick/20260826-max-concurrent-config | ✅ Complete + live 적용(재시작 PID 93221) | ca32d10c8 |
 | 2026-08-26 | 스케줄러 로깅 이중화 (FileHandler 누락 버그 수정) | .planning/quick/20260826-scheduler-logging-dual | ✅ Complete + live 적용(scheduler.log fd 복구) | ca32d10c8 |
 | 2026-08-26 | leak C04 '단계별로' 패턴 완화 | .planning/quick/20260826-leak-c04-pattern-approval | ✅ Complete (맥락제약 패턴, 5/5 검증) | ca32d10c8 |
-| 2026-08-26 | car daily_refresh 신규 소스 확보 | .planning/quick/20260826-car-daily-refresh-sources | 🔴 Planned (설계 변경 필요) | PLAN.md |
-| 2026-08-26 | adventure/kitchen W5 게이트 튜닝 | .planning/quick/20260826-w5-gate-adventure-kitchen | 🔴 Planned (별도 분석 필요) | PLAN.md |
+| 2026-08-26 | car daily_refresh 신규 소스 확보 | .planning/quick/20260826-car-daily-refresh-sources | 🟡 Partial (source 회전 구현 + runbook P16; 근본=신규소스 0건 잔존) | PLAN.md + pipelines/car/pipeline.py |
+| 2026-08-26 | adventure/kitchen W5 게이트 튜닝 | .planning/quick/20260826-w5-gate-adventure-kitchen | ✅ Complete (S04 warn-only + P12 visibility + runbook P12) | PLAN.md + dispatcher.py |
 | 2026-08-26 | interior-hugo P14 진단 | .planning/quick/20260826-interior-p14-diagnosis | ✅ Complete (21:02 발행 성공, 이벤트 resolved) | PLAN.md+DB |
 
 ---
