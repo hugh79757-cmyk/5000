@@ -246,7 +246,7 @@ CATEGORY_FILTERS = {
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구"],
     },
     "car-hugo": {
-        "allowed": ["블랙박스", "타이어", "공기주입기", "냉장고", "차량용청소기", "하이패스", "차량용공기청정기", "타이어공기주입기", "트렁크정리함", "차량용거치대", "차량용방향제", "차량용냉장고", "핸들커버", "차량용무선충전기", "자동차매트", "차량용", "자동차", "카", "블박"],
+        "allowed": ["블랙박스", "타이어", "공기주입기", "냉장고", "차량용청소기", "하이패스", "차량용공기청정기", "타이어공기주입기", "트렁크정리함", "차량용거치대", "차량용방향제", "차량용냉장고", "핸들커버", "차량용무선충전기", "자동차매트", "차량용", "자동차", "블박"],
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구", "의류"],
     },
     "homeappliance-hugo": {
@@ -851,6 +851,23 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
         except Exception as e:
             logger.warning(f"[keyword_health] 기록 오류: {e}")
     
+    # 오프토픽 차단은 즉시 대시보드(P36) + 텔레그램 노출 (발행은 이미 차단된 상태)
+    if stage in ("low_relevance", "irrelevant_products"):
+        try:
+            from shared.publish_error_events import record_publish_error
+            record_publish_error(
+                blog_id, stage="relevance", reason="offtopic_blocked",
+                detail=error_msg, problem_id="P36", pipeline="curation",
+            )
+        except Exception as _e:
+            logger.warning(f"[offtopic] event 기록 실패: {_e}")
+        try:
+            from shared.telegram_notifier import send_error as _tg_off
+            _tg_off(blog_id, "offtopic_blocked", f"오프토픽 차단: {error_msg} (keyword={keyword})")
+        except Exception as _e:
+            logger.warning(f"[telegram] 오프토픽 알림 실패: {_e}")
+        return
+
     # 연속 3회 이상 실패 시 Telegram 알림 (Phase 10-1)
     if consecutive >= 3:
         try:

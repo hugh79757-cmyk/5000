@@ -180,9 +180,10 @@ def weekly_offtopic_report(db_path: str, blog_id: str) -> str | None:
 
 def run_all_weekly_reports(db_path: str) -> str | None:
     blogs = [
-        "laptop-hugo", "appliance-hugo", "interior-hugo",
-        "baby-hugo", "fitness-hugo", "health-hugo",
-        "pet-hugo", "kitchen-hugo", "beauty-hugo", "camping-hugo",
+        "appliance-hugo", "baby-hugo", "fitness-hugo", "interior-hugo",
+        "laptop-hugo", "health-hugo", "pet-hugo", "kitchen-hugo",
+        "beauty-hugo", "camping-hugo", "massage-hugo", "car-hugo",
+        "homeappliance-hugo", "golf-hugo", "bike-hugo",
     ]
     messages = []
     for blog_id in blogs:

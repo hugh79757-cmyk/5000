@@ -738,6 +738,26 @@ _register(ProblemSpec(
     playbook_ref="ERROR_PLAYBOOKS.md#p34",
 ))
 
+# P36 (Phase 76): 오프토픽 차단 즉시 노출 — curation 파이프라인이 비주제 상품을
+# 관련성 게이트에서 차단할 때 대시보드(PublishMonitor) + 텔레그램 즉시 알람.
+_register(ProblemSpec(
+    problem_id="P36",
+    name_ko="오프토픽 차단 (off-topic blocked)",
+    severity="CRITICAL",
+    reason_keys=("offtopic_blocked",),
+    hook="result_parse",
+    threshold="always",
+    alert_template=(
+        "🚨 [CRITICAL] 오프토픽 차단 감지\n"
+        "blog: {blog_id}\n"
+        "problem: {problem_id} — {name_ko}\n"
+        "stage: {phase}\n"
+        "action: {action}"
+    ),
+    action="curation allowed 토큰/키워드 재점검 — 비주제 상품이 게이트에 걸림 (발행은 차단됨)",
+    playbook_ref="ERROR_PLAYBOOKS.md#p36",
+))
+
 
 # --- Wave 2d (Phase 72): 단일 소스 YAML 오버레이 ---
 # config/problems.yaml 이 PROBLEM_REGISTRY 를 YAML 우선 오버라이드한다. YAML 누락/오류 시
