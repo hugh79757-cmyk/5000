@@ -110,6 +110,11 @@ except ImportError:
     pass
 
 try:
+    from ops_dashboard.checks import concurrency_skip  # noqa: F401
+except ImportError:
+    pass
+
+try:
     from ops_dashboard.checks import data_stock  # noqa: F401
     from ops_dashboard.checks import content_quality  # noqa: F401
 except ImportError:
