@@ -402,12 +402,18 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
         except Exception:
             pass
         logger.error("[deploy] %s wrangler failed rc=%s dur=%.1fs tail=%s", site.name, result.returncode, dur, tail)
-    # Wrangler deploy 재시도 (지수 백오프) — Phase 10-1
+    # Wrangler deploy 재시도 (지수 백오프) — Phase 10-1 / P25 guard: total 480s 예산
     if result.returncode != 0:
-        for deploy_attempt in range(2):
+        # P25 guard: scheduler 600s 킬 전에 자르기 위해 재시도 1회로 축소 + total 480s 예산
+        for deploy_attempt in range(1):
+            # total wall guard 480s — 이미 많이 썼으면 재시도 포기하고 P04로 전환
+            elapsed = time.time() - _t0
+            if elapsed > 180:  # 첫 시도+빌드 이미 180s 이상이면 재시도 시 300s 추가 시 600 초과 위험
+                _log_header(f"재시도 스킵 — total {elapsed:.1f}s 예산 초과, 바로 실패 처리")
+                logger.error("[deploy] %s skip retry elapsed=%.1fs >180s budget", site.name, elapsed)
+                break
             sleep_secs = 10 * (deploy_attempt + 1)
-            _log_header(f"재시도 {deploy_attempt + 1}/2 ({sleep_secs}s 대기) prev_rc={result.returncode}")
-            time.sleep(sleep_secs)
+            _log_header(f"재시도 {deploy_attempt + 1}/1 ({sleep_secs}s 대기) prev_rc={result.returncode}")
             _t0r = time.time()
             _log_header(f"wrangler retry {deploy_attempt + 1}/2 start timeout={_deploy_timeout}s")
             with open(log_path, "a") as log_f:
@@ -431,11 +437,11 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
                         )
                 except subprocess.TimeoutExpired:
                     dur_r = time.time() - _t0r
-                    _log_header(f"재시도 {deploy_attempt + 1}/2 TIMEOUT after {dur_r:.1f}s")
+                    _log_header(f"재시도 {deploy_attempt + 1}/1 TIMEOUT after {dur_r:.1f}s")
                     logger.error("[deploy] %s retry %s TIMEOUT dur=%.1fs", site.name, deploy_attempt + 1, dur_r)
                     continue
             dur_r = time.time() - _t0r
-            _log_header(f"재시도 {deploy_attempt + 1}/2 done rc={result.returncode} dur={dur_r:.1f}s")
+            _log_header(f"재시도 {deploy_attempt + 1}/1 done rc={result.returncode} dur={dur_r:.1f}s")
             if result.returncode == 0:
                 logger.info("[deploy] %s 재시도 성공 dur=%.1fs", site.name, dur_r)
                 _log_header("재시도 성공")
