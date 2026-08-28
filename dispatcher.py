@@ -489,6 +489,7 @@ def _run_stap(stap_name, cfg):
         cfg=cfg,
         timeout=600,
         prefix="stap",
+        blog_id=cfg["id"],
     )
 
 
@@ -572,6 +573,7 @@ def _run_tap_subprocess(cfg):
         cfg=None,
         timeout=600,
         prefix="tap",
+        blog_id=cfg["id"],
     )
     # TAP run_publish()는 (bool, result, error) 튜플을 반환할 수 있음 — dict 정규화.
     # 원래 subprocess runner가 했던 것과 동일하게 비-dict는 {'success': bool(...)}로 변환.
@@ -1754,6 +1756,11 @@ def dispatch(blog_id):
 
     # 결과 정규화: 모든 pipeline이 dict를 반환하도록
     if result is None:
+        logger.warning(
+            f"[dispatch] {blog_id} pipeline returned None → no_result "
+            f"(서브사인: subprocess는 logs/<prefix>_<blog>.pipeline.log, "
+            f"in-process는 파이프라인 내부 로그 확인)"
+        )
         _set_cooldown(blog_id)
         result = {"success": False, "reason": "no_result"}
     elif isinstance(result, str):

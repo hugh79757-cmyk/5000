@@ -34,6 +34,11 @@ import re
 import subprocess
 import sys
 import tempfile
+from pathlib import Path
+
+# 로그 디렉토리: 5000/logs (shared/ 기준 상위)
+_LOGS_DIR = Path(__file__).resolve().parent.parent / "logs"
+
 
 # T-61-02-01: module_spec은 내부 dotted 경로(dispatcher의 제어 레지스트리)지만 방어적으로 검증.
 _MODULE_SPEC_RE = re.compile(r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$")
@@ -61,6 +66,7 @@ def run_subprocess(
     cfg: dict | None = None,
     timeout: int = 600,
     prefix: str = "subproc",
+    blog_id: str = "",
 ) -> dict:
     """외부 프로젝트 모듈을 격리 subprocess에서 실행하고 dict 결과를 반환한다.
 
@@ -119,6 +125,7 @@ def run_subprocess(
     ])
 
     runner_path = ""
+    _tag = blog_id or module_spec
     try:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False, encoding="utf-8") as f:
             f.write(runner)
@@ -132,6 +139,8 @@ def run_subprocess(
                 cwd=project_root,
             )
         except subprocess.TimeoutExpired:
+            # 타임아웃도 로그에 기록 (서브사인 확보)
+            _proc_log(_tag, prefix, "TIMEOUT", "", f"timeout after {timeout}s")
             return {"success": False, "reason": f"{prefix}_timeout"}
     except Exception:
         return {"success": False, "reason": f"{prefix}_error"}
@@ -141,6 +150,11 @@ def run_subprocess(
                 os.unlink(runner_path)
             except OSError:
                 pass
+
+    # 서브프로세스 stdout/stderr 전체를 로그 파일에 보존 (dispatcher가 OUT JSON만 봐서
+    # 서브사인 누락되는 문제 해결 — travel2 no_result 등). 진행 로그 + 크래시 stderr 포함.
+    if proc.stdout or proc.stderr:
+        _proc_log(_tag, prefix, f"rc={proc.returncode}", proc.stdout or "", proc.stderr or "")
 
     if proc.returncode != 0:
         # 크래시 원인 캡처: stderr를 보존해 다음 실패 시 실제 예외가 잡히게 한다.
@@ -158,3 +172,15 @@ def run_subprocess(
             except Exception:
                 continue
     return {"success": False, "reason": f"{prefix}_no_output"}
+
+
+def _proc_log(tag: str, prefix: str, header: str, stdout_text: str, stderr_text: str) -> None:
+    """subprocess stdout/stderr를 logs/<prefix>_<tag>.pipeline.log 에 보존."""
+    try:
+        _LOGS_DIR.mkdir(parents=True, exist_ok=True)
+        path = _LOGS_DIR / f"{prefix}_{tag}.pipeline.log"
+        ts = __import__("time").strftime("%Y-%m-%d %H:%M:%S")
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(f"\n[{ts}] [{prefix}] {header}\n--- STDOUT ---\n{stdout_text}\n--- STDERR ---\n{stderr_text}\n")
+    except Exception:
+        pass
