@@ -161,13 +161,30 @@ def generate_airline_review(topic):
         logger.warning(f"[airlines] {name} ({iata}): 데이터 부족 ({total_data_points}건) - 스킵")
         return None
 
+    # 통합 연결성 (airline_routes 비어있을 수 있음 → flight_direct/popular_directions 합산, 0을 팩트로 렌더 방지)
+    _pairs = set()
+    for r in routes:
+        _pairs.add((r["origin"], r["destination"]))
+    for d in directs:
+        _pairs.add((d["origin"], d["destination"]))
+    for p in popular:
+        _pairs.add((p["origin"], p["destination"]))
+    _airports = set()
+    for _o, _d in _pairs:
+        _airports.add(_o)
+        _airports.add(_d)
+    route_count = len(_pairs)
+    airport_count_real = len(_airports)
+
     # 요약 구성
     lines = []
     lines.append(f"AIRLINE: {name} (IATA: {iata})")
     lines.append(f"Type: {lcc_str}")
     lines.append(f"Country: {country}")
-    lines.append(f"Route count: {len(routes)}")
-    lines.append(f"Airports served: {airport_count}")
+    if route_count > 0:
+        lines.append(f"Route count: {route_count}")
+    if airport_count_real > 0:
+        lines.append(f"Airports served: {airport_count_real}")
 
     if routes:
         lines.append(f"\nROUTE NETWORK ({len(routes)} routes):")

@@ -205,7 +205,8 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: active
+  status: 소진  # 토픽소진 212/212 (2026-08-28, 7 신규 잔여→소진 임박) — city 컬럼 없어 expander 리필 불가, 하드 고갈. entity-link 허브 아님 → 발행 중지
+  enabled: false  # scheduler skip — 토픽소진
   daily_quota: 5
   domain: esim.techpawz.com
   cf_project: esim-hugo
