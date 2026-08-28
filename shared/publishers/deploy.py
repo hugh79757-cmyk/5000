@@ -345,8 +345,27 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
     elif deploy_type == "pages":
         use_workers = False
 
+    # P25 diagnose: timestamped wrangler logging + duration —DryRun 가능
+    def _log_header(msg: str):
+        ts = time.strftime("%Y-%m-%d %H:%M:%S")
+        line = f"[{ts}] [deploy] {site.name} {msg}"
+        try:
+            with open(log_path, "a") as _lf:
+                _lf.write("\n" + line + "\n")
+        except Exception:
+            pass
+        print(line)
+        logger.info(line)
+
+    _deploy_timeout = 300  # large travel/ETAP sites need >120s; 120s caused fail+3xretry >600s scheduler kill (tour-hugo P25)
+    # DRY_RUN: Hugo 빌드까지만 수행, wrangler 업로드 스킵 (원인 분리용)
+    if os.getenv("DEPLOY_DRY_RUN") == "1":
+        _log_header(f"DRY_RUN skip wrangler type={'workers' if use_workers else 'pages'} project={cf_project}")
+        return True
+
+    _t0 = time.time()
+    _log_header(f"wrangler start timeout={_deploy_timeout}s type={'workers' if use_workers else 'pages'} project={cf_project}")
     with open(log_path, "a") as log_f:
-        _deploy_timeout = 300  # large travel/ETAP sites need >120s; 120s caused fail+3xretry >600s scheduler kill (tour-hugo P25)
         try:
             if use_workers:
                 result = subprocess.run(
@@ -366,14 +385,31 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
                     env=_wrangler_env, timeout=_deploy_timeout
                 )
         except subprocess.TimeoutExpired:
-            msg = f"Wrangler deploy timed out ({_deploy_timeout}s)"
-            raise Exception(msg)
+            dur = time.time() - _t0
+            _log_header(f"wrangler TIMEOUT after {dur:.1f}s (limit {_deploy_timeout}s)")
+            logger.error("[deploy] %s wrangler TIMEOUT dur=%.1fs limit=%ss", site.name, dur, _deploy_timeout)
+            raise Exception(f"Wrangler deploy timed out ({_deploy_timeout}s) after {dur:.1f}s")
+    dur = time.time() - _t0
+    _log_header(f"wrangler done rc={result.returncode} dur={dur:.1f}s")
+    if result.returncode == 0:
+        logger.info("[deploy] %s wrangler success dur=%.1fs rc=0", site.name, dur)
+    else:
+        # 실패 tail 로깅 (프론트메터/빌드 산출물 원인 파악)
+        tail = ""
+        try:
+            tail_lines = Path(log_path).read_text(encoding="utf-8", errors="replace").splitlines()[-40:]
+            tail = " | ".join(tail_lines[-6:])
+        except Exception:
+            pass
+        logger.error("[deploy] %s wrangler failed rc=%s dur=%.1fs tail=%s", site.name, result.returncode, dur, tail)
     # Wrangler deploy 재시도 (지수 백오프) — Phase 10-1
     if result.returncode != 0:
         for deploy_attempt in range(2):
             sleep_secs = 10 * (deploy_attempt + 1)
-            print(f"[deploy] {site.name} 재시도 {deploy_attempt + 1}/2 ({sleep_secs}s 대기)")
+            _log_header(f"재시도 {deploy_attempt + 1}/2 ({sleep_secs}s 대기) prev_rc={result.returncode}")
             time.sleep(sleep_secs)
+            _t0r = time.time()
+            _log_header(f"wrangler retry {deploy_attempt + 1}/2 start timeout={_deploy_timeout}s")
             with open(log_path, "a") as log_f:
                 try:
                     if use_workers:
@@ -394,11 +430,23 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
                             env=_wrangler_env, timeout=_deploy_timeout
                         )
                 except subprocess.TimeoutExpired:
-                    print(f"[deploy] {site.name} 재시도 {deploy_attempt + 1}/2 timeout ({_deploy_timeout}s)")
+                    dur_r = time.time() - _t0r
+                    _log_header(f"재시도 {deploy_attempt + 1}/2 TIMEOUT after {dur_r:.1f}s")
+                    logger.error("[deploy] %s retry %s TIMEOUT dur=%.1fs", site.name, deploy_attempt + 1, dur_r)
                     continue
+            dur_r = time.time() - _t0r
+            _log_header(f"재시도 {deploy_attempt + 1}/2 done rc={result.returncode} dur={dur_r:.1f}s")
             if result.returncode == 0:
-                print(f"[deploy] {site.name} 재시도 성공")
+                logger.info("[deploy] %s 재시도 성공 dur=%.1fs", site.name, dur_r)
+                _log_header("재시도 성공")
                 break
+            else:
+                try:
+                    tail_lines = Path(log_path).read_text(encoding="utf-8", errors="replace").splitlines()[-40:]
+                    tail = " | ".join(tail_lines[-6:])
+                except Exception:
+                    tail = ""
+                logger.error("[deploy] %s retry %s failed rc=%s dur=%.1fs tail=%s", site.name, deploy_attempt + 1, result.returncode, dur_r, tail)
         if result.returncode != 0:
             raise Exception("Wrangler deploy failed: see deploy.log")
     return True

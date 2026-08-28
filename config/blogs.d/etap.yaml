@@ -522,7 +522,8 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: active
+  status: 소진  # 토픽소진 199/199 (2026-08-28) — entity-link 참조용 유지, 재발행 시 visa_requirements 기반 별도 seeder 필요
+  enabled: false  # scheduler skip — 토픽소진으로 발행 중지
   daily_quota: 5
   domain: visafree.techpawz.com
   cf_project: visafree-hugo
@@ -785,7 +786,7 @@ blogs:
   name: Digital Nomad Guide
   pipeline: etap
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 5
   domain: nomad.techpawz.com
   cf_project: nomad-hugo
