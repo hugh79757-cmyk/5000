@@ -346,7 +346,7 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
         use_workers = False
 
     with open(log_path, "a") as log_f:
-        _deploy_timeout = 120
+        _deploy_timeout = 300  # large travel/ETAP sites need >120s; 120s caused fail+3xretry >600s scheduler kill (tour-hugo P25)
         try:
             if use_workers:
                 result = subprocess.run(

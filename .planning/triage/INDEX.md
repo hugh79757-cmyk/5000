@@ -1,3 +1,4 @@
+- 2026-08-28 | fix | tour-hugo-p25-deploy-timeout | tour-hugo P25 600s: deploy.py _deploy_timeout 120→300 ( large site wrangler fail+retry>600s kill)
 - 2026-08-28 | fix | fitness-hugo-p02-concurrency-skip-miscount | fitness-hugo P02: CONCURRENCY 스킵을 실패로 오집계 → run_publish None 반환으로 정정
 - 2026-08-28 | fix | stock-hugo-disclosure-duplicate-slug-rotation | stock-hugo 공시 duplicate_slug 5연속실패 → STAP _run_disclosure 후보순회로 수정
 - 2026-08-28 | fix | golf-hugo-keyword-pool-prune | golf-hugo 키워드 풀 오염 195→22 골프전용 (게이트는 이미 strict, 생성낭비만 제거)
