@@ -86,6 +86,25 @@ def _add_product_cards(article):
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
+def _disambiguate_slug(slug: str, city: str) -> str:
+    """기존 발행 slug(corpus)와 충돌 시 접미 disambiguator 부여 (P12 lookbook)."""
+    import os as _os
+    from pathlib import Path as _P
+    base = slug or re.sub(r"[^a-z0-9]+", "-", (city or "escape").lower()).strip("-") + "-escape-rooms"
+    posts_dir = _P(SITE_PATH) / "content" / "posts"
+    seen = set()
+    if posts_dir.is_dir():
+        seen = {p.name for p in posts_dir.iterdir() if p.is_dir()}
+    if base not in seen:
+        return base
+    for n in range(2, 50):
+        cand = f"{base}-{n}"
+        if cand not in seen:
+            logger.info(f"[{BLOG_ID}] slug 충돌 회전: {base} → {cand}")
+            return cand
+    return base
+
+
 def _run_impl(cfg=None) -> bool:
     topic = pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
     if not topic:
@@ -107,6 +126,8 @@ def _run_impl(cfg=None) -> bool:
         return False
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
+    # B-step: 슬러그 중복 회전 (P12 lookbook) — 기존 발행 slug와 충돌 시 disambiguator 부여
+    article["slug"] = _disambiguate_slug(article.get("slug", ""), article.get("city", ""))
     article = _add_product_cards(article)
     cover = fetch_city_image(city + " escape room puzzle game", country, article["slug"]) if city else None
     body = fetch_body_images(city + " escape room adventure", country, article["slug"], count=8) if city else []

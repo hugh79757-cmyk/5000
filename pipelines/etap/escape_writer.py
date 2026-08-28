@@ -64,6 +64,21 @@ def _build_summary(tours, city):
             summary += "\n"
     return summary, picks
 
+def _sanitize_cot_leak(text: str) -> str:
+    """C04 게이트 패턴(프롬프트/추론 누수) 1차 제거. preflight blocked 방지."""
+    import re as _re
+    _patterns = [
+        r"\bNeed\s+to\s+think\b", r"\bWe\s+need\s+to\s+write\b",
+        r"Let['\"]?s\s+think\s+step\s+by\s+step", r"think\s+step\s+by\s+step",
+        r"let['\"]?s\s+break\s+this\s+down", r"here['\"]?s\s+the\s+plan",
+        r"in\s+order\s+to\s+achieve", r"as\s+an\s+AI\s+language\s+model",
+        r"as\s+a\s+language\s+model", r"I['\"]?m\s+an\s+AI",
+    ]
+    for _p in _patterns:
+        text = _re.sub(_p, "", text, flags=_re.IGNORECASE)
+    return text
+
+
 def generate_escape_guide(topic):
     city = topic["city"]
     country = topic.get("country", "")
@@ -109,6 +124,8 @@ Return ONLY the article in markdown starting with # title"""
         max_tokens=4000,
         )
     content = result["content"].strip()
+    # C04 프롬프트/CoT 누수 1차 살균 — preflight C04 hard-block 방지 (escape-hugo P12)
+    content = _sanitize_cot_leak(content)
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"Escape Rooms And Puzzle Experiences in {city}")
     content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
