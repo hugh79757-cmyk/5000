@@ -356,11 +356,9 @@ def run_batch(cfg: dict, count: int = 3, force_topic_id: int | None = None) -> l
             time.sleep(5)
 
     if results:
-        deployed = _build_and_deploy(cfg)
-        if deployed:
-            print(f"[ETAP] {blog_id}: {len(results)}건 발행 + 배포 완료")
-        else:
-            print(f"[ETAP] {blog_id}: {len(results)}건 발행, 배포 실패")
+        # 배포는 dispatcher 중앙 경유(_build_and_deploy_central)가 담당 — 중복 배포 방지.
+        # tour-hugo를 포함한 모든 ETAP 블로그는 ETAP_PIPELINE_BLOGS 경유로 단일 배포(fallback 0 블로그).
+        print(f"[ETAP] {blog_id}: {len(results)}건 발행 완료 (중앙 배포 경유)")
 
     return results
 
