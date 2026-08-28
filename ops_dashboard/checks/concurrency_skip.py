@@ -55,7 +55,7 @@ def check_concurrency_skip(conn, blog_id) -> dict:
     since_s = since.strftime("%Y-%m-%d %H:%M:%S")
     try:
         rows = conn.execute(
-            "SELECT id, occurred_at FROM publish_error_events "
+            "SELECT occurred_at FROM publish_error_events "
             "WHERE blog_id=? AND problem_id='P02' AND state='open' "
             "AND occurred_at > ?",
             (blog_id, since_s),
@@ -75,7 +75,7 @@ def check_concurrency_skip(conn, blog_id) -> dict:
 
     correlated = 0
     for r in rows:
-        occurred = r[1] if isinstance(r, (tuple, list)) else r["occurred_at"]
+        occurred = r[0] if isinstance(r, (tuple, list)) else r["occurred_at"]
         et = _parse_ts(occurred) if isinstance(occurred, str) else None
         if et is None:
             correlated += 1
