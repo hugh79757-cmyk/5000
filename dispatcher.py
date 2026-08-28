@@ -616,7 +616,7 @@ ETAP_PIPELINE_BLOGS = {
     "luxury-hugo", "michelin-hugo", "multiday-hugo", "nature-hugo",
     "nightlife-hugo", "nomad-hugo", "phototour-hugo", "tours-hugo",
     "trains-hugo", "transfers-hugo", "visa-hugo", "visafree-hugo",
-    "walking-hugo", "watersports-hugo", "watertours-hugo",
+    "walking-hugo", "watersports-hugo", "watertours-hugo", "tour-hugo",
 }
 
 # Workers 배포 대상 블로그 (Pages 대신 Workers 사용)
