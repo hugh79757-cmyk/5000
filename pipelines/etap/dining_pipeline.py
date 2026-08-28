@@ -87,33 +87,42 @@ def _add_product_cards(article):
     return article
 
 def _run_impl() -> dict | bool:
-    topic = pick_topic()
-    if not topic:
-        logger.info(f"[{BLOG_ID}] No topics")
-        return {"success": False, "reason": "no_topic"}
-    city = topic.get("city", "")
-    country = topic.get("country", "")
-    logger.info(f"[{BLOG_ID}] {city} generating")
-    try:
-        article = generate_dining_guide(topic)
-    except RuntimeError as e:
-        error_msg = str(e)
-        if "chain_timeout" in error_msg:
-            reason = "chain_timeout"
-        elif "quota" in error_msg.lower() or "429" in error_msg:
-            reason = "ai_quota"
-        else:
-            reason = "ai_generate_error"
+    # 토픽↔데이터 불일치(도시별 레스토랑 데이터 미수집)로 no_data가 나와도
+    # 다음 사용가능 토픽으로 로테이션해 유효 토픽에 도달하면 발행 성공 → P01 스로틀 방지
+    MAX_TRIES = 20
+    article = None
+    topic = None
+    for _ in range(MAX_TRIES):
+        topic = pick_topic()
+        if not topic:
+            logger.info(f"[{BLOG_ID}] No topics")
+            return {"success": False, "reason": "no_topic"}
+        city = topic.get("city", "")
+        country = topic.get("country", "")
+        logger.info(f"[{BLOG_ID}] {city} generating")
+        try:
+            article = generate_dining_guide(topic)
+        except RuntimeError as e:
+            error_msg = str(e)
+            if "chain_timeout" in error_msg:
+                reason = "chain_timeout"
+            elif "quota" in error_msg.lower() or "429" in error_msg:
+                reason = "ai_quota"
+            else:
+                reason = "ai_generate_error"
+            from pipelines.etap.topic_manager import mark_published_by_id
+            mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                                 topic.get("title",""), topic.get("slug",""))
+            logger.warning(f"[{BLOG_ID}] AI 생성 오류({reason}): {error_msg[:120]}")
+            return {"success": False, "reason": reason}
+        if article:
+            break
         from pipelines.etap.topic_manager import mark_published_by_id
         mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
                              topic.get("title",""), topic.get("slug",""))
-        logger.warning(f"[{BLOG_ID}] AI 생성 오류({reason}): {error_msg[:120]}")
-        return {"success": False, "reason": reason}
+        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리(로테이션): {topic.get('city','')}")
     if not article:
-        from pipelines.etap.topic_manager import mark_published_by_id
-        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
-                             topic.get("title",""), topic.get("slug",""))
-        logger.warning(f"[{BLOG_ID}] 데이터 부족 토픽 exhausted 처리: {topic.get('city','')}")
+        logger.warning(f"[{BLOG_ID}] {MAX_TRIES}회 시도 모두 데이터 부족")
         return {"success": False, "reason": "no_data"}
     article["content"], post_issues, is_draft = postprocess_content(article["content"], blog_id=BLOG_ID, slug=article["slug"])
     if is_draft:
