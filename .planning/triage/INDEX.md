@@ -1,3 +1,17 @@
+- 2026-08-28 | fix | fitness-hugo-p02-concurrency-skip-miscount | fitness-hugo P02: CONCURRENCY 스킵을 실패로 오집계 → run_publish None 반환으로 정정
+- 2026-08-28 | fix | stock-hugo-disclosure-duplicate-slug-rotation | stock-hugo 공시 duplicate_slug 5연속실패 → STAP _run_disclosure 후보순회로 수정
+- 2026-08-28 | fix | golf-hugo-keyword-pool-prune | golf-hugo 키워드 풀 오염 195→22 골프전용 (게이트는 이미 strict, 생성낭비만 제거)
+- 2026-08-28 | fix | dispatcher-p04-deploy-error-liveness-guard | P04 deploy_error 사이트 200이면 CRITICAL 페이징 생략(이벤트만 기록) — 오탐 방지
+- 2026-08-28 | fix | car-hugo-keyword-pool-offtopic-purge | car-hugo 키워드 풀 130+→29 자동차전용, 오프토픽(매트/맥북슬리브) 차단
+- 2026-08-28 | fix | etap-fleet-title-thumbnail-yaml-deploy | ETAP 36blogs: 192 titles de-templated + 38 covers regenerated + YAML repair + full deploy
+- 2026-08-28 | fix | etap-yaml-frontmatter-repair | ETAP 36 blogs YAML frontmatter repair via PyYAML parser
+- 2026-08-27 | fix | dashboard-checker-false-positive-fixes | Dashboard 체커 거짓양성 2건 수정 (c08 permalink + _index.md FM 스캔) — resolved
+- 2026-08-27 | fix | travel4-section-index-yaml-parser | travel4-hugo YAML 파싱 거짓양성 check_section_index.sh find('---')→find('\n---')
+- 2026-08-27 | fix | kitchen-keyword-pool-prune | kitchen-hugo 키워드 풀 오염 정화 20 토큰 (가방/노트북/남성 등)
+- 2026-08-27 | config | llm-crawl-pilot-manual-blogs | fire-your-seo-agency 파일럿: 4/10 라이브, techpawz/rotcha 메뉴얼 미배포, travel1/3/2 스테이징
+- 2026-08-27 | chore | cannibalization-tracking | AI-크롤러 잠식 측정 인프라 구축 — 주간 트래커 + launchd, 다음 관측 2026-09-24
+- 2026-08-26 | fix | p35-label-strip-editorial-deadcode | P35 라벨덤프 발행시점 자동제거 + editorial_synthesis dead-code 삭제 + STAP/TAP 11포스트 정화
+- 2026-08-26 | fix | cuap-leak-editorial-synthesis-root-fix | CUAP 프롬프트 릭 근본 수정: editorial_synthesis 메타 블록 제거(결정론적 코드) + hugo_writer 발행시점 2중 제거. 70포스트 정화+15사이트 재배포
 - 2026-08-25 | fix | p14-history-cuap-expander-0200 | P14 fitness3/golf1/kitchen1 5 rows resolved + scheduler CUAP 14 blogs x20 daily 02:00
 - 2026-08-25 | fix | p14-fitness-kitchen-dashboard-fix | P14 fitness irrelevant_products 콤마버그+오염키워드 + kitchen low_relevance 대시보드 숨김( resolved_at 버그 619건 정리, health state=open 복구) CRITICAL9 회복
 # Triage Index

@@ -384,9 +384,11 @@ def run_publish(blog_id) -> bool | None:
     if slot_id is None:
         logger.warning(
             f"[CONCURRENCY] publish 슬롯 풀 소진 "
-            f"(MAX_CONCURRENT={MAX_CONCURRENT_PUBLISH}) — {blog_id} 스킵"
+            f"(MAX_CONCURRENT={MAX_CONCURRENT_PUBLISH}) — {blog_id} 스킵 (실패로 미집계)"
         )
-        return False
+        # 슬롯 소진은 일시적 fleet 부하일 뿐 콘텐츠 실패 아님. None 반환→호출자에서
+        # consecutive_failures 미증가(실패 집계 제외). bool|None 계약 준수.
+        return None
 
     try:
         # env var로 슬롯 ID 상속 (자식 dispatcher가 이중 acquire 방지)

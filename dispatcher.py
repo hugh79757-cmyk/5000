@@ -448,6 +448,30 @@ def _deploy_log_hint(blog_id: str) -> str:
     return "logs/deploy.log (5000 중앙)"
 
 
+def _is_site_live(blog_id: str, timeout: int = 5) -> bool:
+    """배포 알람 오탐 방지용 사이트 생존 확인.
+
+    사이트가 정상 서빙(HTTP 200) 중이면 배포 실패는 transient일 가능성이 높아
+    즉각 CRITICAL 페이징을 건너뛴다. 조회 자체가 실패하면 False를 반환해
+    기존 페이징 경로로 폴백(fail-safe).
+    """
+    try:
+        cfg = get_blog_config(blog_id)
+    except Exception:
+        return False
+    domain = (cfg or {}).get("domain", "")
+    if not domain:
+        return False
+    url = domain if domain.startswith("http") else f"https://{domain}"
+    try:
+        import urllib.request
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return 200 <= resp.status < 400
+    except Exception:
+        return False
+
+
 def _run_stap(stap_name, cfg):
     """STAP 파이프라인을 subprocess로 완전 격리 실행 (shared runner 위임)"""
     from shared.paths import STAP_ROOT as _STAP_ROOT
@@ -1689,16 +1713,16 @@ def dispatch(blog_id):
         _record_failure(blog_id, "duplicate_title", "daily_quota 도달")
         return {"success": False, "reason": "duplicate_title"}
 
-    # no_result backoff 체크
+    # no_result backoff 체크 (cooldown은 정상 백오프 — 실패 아님)
     if _is_on_cooldown(blog_id):
         logger.info(f"[SKIP] {blog_id} cooldown ({_COOLDOWN_MINUTES}분) — 발행 건너뜀")
-        _record_failure(blog_id, "no_result", f"cooldown {_COOLDOWN_MINUTES}분")
-        return {"success": False, "reason": "no_result"}
-    # 일일 cooldown 체크 (IPO no_content 등)
+        return {"success": True, "reason": "cooldown",
+                "detail": f"cooldown {_COOLDOWN_MINUTES}분 (정상 백오프, 실패 카운트 제외)"}
+    # 일일 cooldown 체크 (IPO no_content 등 — 실패 아님)
     if _is_on_daily_cooldown(blog_id):
         logger.info(f"[SKIP] {blog_id} daily cooldown — 내일까지 발행 중단")
-        _record_failure(blog_id, "no_result", "daily cooldown (다음 날 재시작)")
-        return {"success": False, "reason": "no_result"}
+        return {"success": True, "reason": "cooldown",
+                "detail": "daily cooldown (다음 날 재시작, 실패 카운트 제외)"}
 
     # ── 전역 publish 동시성 제한: 슬롯 확보 ──────────────────────
     inherited = get_inherited_slot_info()
@@ -1778,24 +1802,28 @@ def dispatch(blog_id):
         deploy_err = result.get("deploy_error")
         if deploy_err:
             _record_failure(blog_id, "deploy", deploy_err[:300])
+            # 오탐 방지: 사이트가 여전히 정상 서빙(200) 중이면 transient 배포 실패로
+            # 간주하고 즉각 CRITICAL 페이징을 건너뛴다(이벤트는 기록해 감사 추적 유지).
+            _site_live = _is_site_live(blog_id)
             # 실시간 푸시: 디바운스 적용 (하루 1회)
             try:
                 _ops_conn = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
                 init_debounce_tables(_ops_conn)
-                if _debounce_push(_ops_conn, blog_id, "deploy_error"):
+                _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
+                    "deploy_error", blog_id)
+                if not _site_live and _debounce_push(_ops_conn, blog_id, "deploy_error"):
                     _tg_error(blog_id, "deploy",
                         f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
                         f"원인: {deploy_err[:200]}\n"
-f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
-                _record_summary_event(_ops_conn, datetime.now().strftime("%Y-%m-%d"),
-                    "deploy_error", blog_id)
+                        f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
                 _ops_conn.close()
             except Exception:
-                # 디바운스 실패 시 기존대로 발송
-                _tg_error(blog_id, "deploy",
-                    f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
-                    f"원인: {deploy_err[:200]}\n"
-                    f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
+                # 디바운스/사이트체크 실패 시 기존대로 발송
+                if not _site_live:
+                    _tg_error(blog_id, "deploy",
+                        f"[{blog_id}] Hugo빌드/Wrangler배포 실패\n"
+                        f"원인: {deploy_err[:200]}\n"
+                        f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
         else:
             # 성공 + 배포 오류 없음 → stale P04 이벤트 close
             # (성공했으나 이전에 생성된 P04 open 이벤트가 남아있을 수 있음)
@@ -1828,7 +1856,7 @@ f"조치: {_deploy_log_hint(blog_id)} 확인 후 Hugo 테마/themesDir 점검")
             get_monitor().report(
                 blog_id, {"reason": "deploy_error"}, phase="post_deploy", extra={})
             _record_failure(blog_id, "deploy", _deploy_err[:300])
-        if reason not in ("quota_met", "already_running", "duplicate_title"):
+        if reason not in ("quota_met", "already_running", "duplicate_title", "cooldown"):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
             # no_result/no_content — 실제 파이프라인 실패 → 실시간 푸시 + 요약 기록
             if reason in ("no_result", "no_data", "fetch_error", "no_content"):
