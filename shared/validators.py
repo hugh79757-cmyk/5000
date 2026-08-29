@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # ── 상수 ──
 _AI_RESIDUES = ["다듬은 제목", "추천 제목", "title:", "제목 후보",
                 "1단계에서", "2단계에서", "3단계에서", "4단계에서",
-                "정리하면 다음과 같습니다", "핵심 요약을", "다음과 같습니다"]
+                "핵심 요약을"]
 
 # ===== CJK 단일소스 (2026) : collector/writer/publisher 공통 import 대상 =====
 CJK_CHARS = re.compile(r'[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF]')
