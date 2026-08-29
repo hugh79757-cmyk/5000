@@ -637,7 +637,7 @@ WORKERS_BLOGS = {
 }
 
 DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
-DEPLOY_LOCK_TIMEOUT = 600
+DEPLOY_LOCK_TIMEOUT = 300  # 스케줄러 600s 킬 이전 포기 → P04로 빠지고 재시도. 경합 시 wait(≤300)+wrangler(≤120)=≤420s<600s
 
 
 def _compute_baseline_keys(posts_dir: "Path") -> set:
@@ -1195,7 +1195,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                      "--config", str(site_path / "wrangler.toml")],
                     cwd=str(site_path),
                     capture_output=True, text=True,
-                    timeout=300,
+                    timeout=120,
                     env=deploy_env
                 )
             else:
@@ -1206,7 +1206,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                      "--commit-message=publish"],
                     cwd=str(site_path),
                     capture_output=True, text=True,
-                    timeout=300,
+                    timeout=120,
                     env=deploy_env
                 )
         finally:
