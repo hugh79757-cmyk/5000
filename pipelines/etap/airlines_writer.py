@@ -75,7 +75,7 @@ def fetch_airline_data(iata_code):
         ORDER BY price ASC
     """, (iata_code,)).fetchall()
 
-    # flight_prices: 해당 항공사 운항 공항 출발 시장가격
+    # flight_prices: 해당 항공사 운항 공항 출발 시장가격 (airline_routes 의존 제거 — 직접 조회)
     route_prices = []
     try:
         route_prices = conn.execute("""
@@ -83,31 +83,23 @@ def fetch_airline_data(iata_code):
                    MAX(fp.price) as max_price, COUNT(*) as offer_count,
                    GROUP_CONCAT(DISTINCT fp.airline) as sellers
             FROM flight_prices fp
-            WHERE fp.origin IN (
-                SELECT DISTINCT origin FROM airline_routes WHERE airline = ?
-                UNION
-                SELECT DISTINCT destination FROM airline_routes WHERE airline = ?
-            )
+            WHERE fp.airline = ?
             GROUP BY fp.origin, fp.destination
             ORDER BY min_price ASC
-        """, (iata_code, iata_code)).fetchall()
+        """, (iata_code,)).fetchall()
         route_prices = [dict(r) for r in route_prices]
     except Exception:
         pass
 
-    # flight_calendar: 날짜별 가격 (AA 운항 공항 기반)
+    # flight_calendar: 날짜별 가격 (해당 항공사 직접 조회 — airline_routes 의존 제거)
     calendar = []
     try:
         calendar = conn.execute("""
             SELECT DISTINCT origin, destination, date, price, airline
             FROM flight_calendar
-            WHERE origin IN (
-                SELECT DISTINCT origin FROM airline_routes WHERE airline = ?
-                UNION
-                SELECT DISTINCT destination FROM airline_routes WHERE airline = ?
-            )
+            WHERE airline = ?
             ORDER BY price ASC
-        """, (iata_code, iata_code)).fetchall()
+        """, (iata_code,)).fetchall()
         calendar = [dict(r) for r in calendar]
     except Exception:
         pass
@@ -183,8 +175,12 @@ def generate_airline_review(topic):
     lines.append(f"Country: {country}")
     if route_count > 0:
         lines.append(f"Route count: {route_count}")
+    else:
+        lines.append("Route count: not recorded in our dataset")
     if airport_count_real > 0:
         lines.append(f"Airports served: {airport_count_real}")
+    else:
+        lines.append("Airports served: not recorded in our dataset")
 
     if routes:
         lines.append(f"\nROUTE NETWORK ({len(routes)} routes):")
