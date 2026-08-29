@@ -443,6 +443,19 @@ def _parse_response(content):
             body_lines.append(line)
 
     body = "\n".join(body_lines).strip()
+    # BODY: 마커가 없는 경우(자유 tier가 본문만 평문으로 출력) 헤더 제외 전체를 본문으로 폴백
+    # — 마커 누락 시 body_md='' → no_content 오탐 방지
+    if not body:
+        _fallback = []
+        for line in lines:
+            if line.startswith(("TITLE:", "CATEGORY:", "TAGS:", "DESC:")):
+                continue
+            _fallback.append(line)
+        body = "\n".join(_fallback).strip()
+        # 코드펜스(```markdown ... ```) 제거
+        if body.startswith("```"):
+            body = re.sub(r"^```[a-zA-Z]*\n?", "", body)
+            body = re.sub(r"\n?```$", "", body).strip()
     # 거래량 급증 섹션에 H2 없으면 추가
     if "거래량" in body and not re.search(r"^## .*거래량", body, re.MULTILINE):
         body = body.replace("\n거래량 급증 ETF는", "\n## 거래량 급증 ETF\n\n거래량 급증 ETF는")
