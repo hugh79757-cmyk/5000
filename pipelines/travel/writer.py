@@ -944,9 +944,11 @@ def _validate_and_retry(content, system_prompt, user_prompt, max_retries=3):
     """
     # 재시도 tier 후보 — 전체 17개 모델 폴백 체인 중 "시작점" 후보.
     # ai_writer.generate(tier=X)는 X부터 전체 체인을 순차 시도하므로,
-    # 한 프로바이더(쿼터 소진/타임아웃)가 막혀도 다음 프로바이더로 자동 폴백된다.
+    # 한 프로바이더(쿼타 소진/타임아웃)가 막혀도 다음 프로바이더로 자동 폴백된다.
+    # FAST 모델을 앞에 둬야 chain_timeout(120s) 안에 재시도 완료됨.
+    # (느린 대형 모델 cerebras-gemma/nvidia-nemotron을 앞에 두면 120s 초과 → P02 chain_timeout)
     # zen-deepseek-free는 응답이 느려(타임아웃 빈번) 우선순위에서 제외.
-    _RETRY_TIERS = ["cerebras-gemma", "nvidia-nemotron", "gemini-3.5-flash-lite", "groq-qwen"]
+    _RETRY_TIERS = ["gemini-3.5-flash-lite", "groq-qwen", "cerebras-gemma", "nvidia-nemotron"]
     for attempt in range(max_retries + 1):
         _all_h3_titles = re.findall(r"^### (.+)", content, re.MULTILINE)
         h3_count = len(_all_h3_titles)
