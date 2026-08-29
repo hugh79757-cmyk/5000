@@ -19,6 +19,7 @@ import asyncio
 import json
 import logging
 import re
+import urllib.parse
 from datetime import datetime
 from pathlib import Path
 
@@ -124,6 +125,10 @@ def _read_post_files(site: Path) -> list[tuple[Path, str]]:
     cutoff = datetime.now().timestamp() - 7 * 86400
     results = []
     for md_file in posts_dir.rglob("*.md"):
+        # Hugo 섹션/리스팅 인덱스(_index.md)는 실제 포스트 아님.
+        # 최소 frontmatter(title/draft만)라 FM-MISSINGKEYS/FM-DRAFT 오탐 유발 → 제외.
+        if md_file.name == "_index.md":
+            continue
         content = md_file.read_text(encoding="utf-8", errors="replace")
         mtime_ok = md_file.stat().st_mtime >= cutoff
         date_ts = _frontmatter_date_ts(content)
@@ -270,13 +275,18 @@ def _check_c05(fm: dict) -> tuple[bool, str]:
 
 
 def _check_c06(file_path: Path, blog_id: str) -> tuple[bool, str]:
-    """C06: 로컬 mtime > 마지막 배포 시각 (단순화: 최근 수정 파일 경고)."""
+    """C06: 로컬 mtime 기반 배포-미반영 감지.
+
+    원래 구현은 '최근 1일 내 수정'이면 무조건 fail 했으나, 파이프라인이
+    매일 배포하므로 정상 상태(방금 발행)에서도 항상 fail → 대시보드 노이즈.
+    단순 mtime만으로는 '배포 미반영'을 판별할 수 없음(배포 시각 추적 없음).
+    따라서 C06은 항상 pass(정보성)로 전환 — 실제 undeployed-change 감지는
+    c08_live_file_mismatch(라이브 대조)가 담당.
+    """
     if not file_path.exists():
         return True, "파일 없음 (skip)"
     mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
     days_since = (datetime.now() - mtime).days
-    if days_since < 1:
-        return False, f"C06 경고: 최근 수정 ({mtime.strftime('%Y-%m-%d')})"
     return True, f"C06 통과 (마지막 수정 {days_since}일 전)"
 
 
@@ -427,22 +437,54 @@ def _compare_live_vs_local(fm: dict, live_html: str) -> list[str]:
     return problems
 
 
+def _post_url_candidates(domain: str, slug: str) -> list[str]:
+    """라이브 포스트 URL 후보 (section prefix / bare / blog prefix).
+
+    c08 체커는 과거 bare `/{slug}/` 만 가정해 실제 permalink(`/posts/{slug}/` 등)
+    와 달라 404를 맞히고 매 포스트를 TITLE_MISMATCH+OG_MISSING 오탐.
+    `_read_post_files` 는 `content/posts/` 만 읽으므로 표준 섹션은 'posts'.
+    후보를 순서대로 시도해 첫 200(soft-404 아님) 본문을 사용한다.
+    """
+    enc = urllib.parse.quote(slug, safe="")
+    base = f"https://{domain}"
+    return [
+        f"{base}/posts/{enc}/",
+        f"{base}/{enc}/",
+        f"{base}/blog/{enc}/",
+    ]
+
+
 def _crawl_post(blog_id: str, domain: str | None, slug: str) -> str | None:
-    """라이브 포스트 URL GET (render._fetch_get 의 sync 래퍼). 실패 시 None."""
+    """라이브 포스트 URL GET (render._fetch_get 의 sync 래퍼).
+
+    후보 URL 중 HTTP 200이고 soft-404(og:title에 '404' 포함)가 아닌
+    첫 본문을 반환. 전부 실패 시 None. slug 유니코드는 URL 인코딩.
+    """
     if not domain:
         return None
-    url = f"https://{domain}/{slug}/"
+    candidates = _post_url_candidates(domain, slug)
     try:
-        async def _go() -> tuple:
+        async def _go() -> str | None:
             async with httpx.AsyncClient(
                 timeout=10, follow_redirects=True, headers={"User-Agent": "OpsDashboard/1.0"}
             ) as client:
-                return await _fetch_get(client, url)
+                for url in candidates:
+                    try:
+                        status, body = await _fetch_get(client, url)
+                    except Exception as e:  # noqa: BLE001
+                        logger.warning("[C08] 크롤 예외: blog=%s url=%s: %s", blog_id, url, e)
+                        continue
+                    if status == 200 and body:
+                        # soft-404 방지: og:title 가 404 마커면 무효 처리
+                        ogt = _meta_content(body, "property", "og:title")
+                        if ogt and "404" in ogt:
+                            continue
+                        return body
+                return None
 
-        _code, body = asyncio.run(_go())
-        return body
+        return asyncio.run(_go())
     except Exception as e:  # 크롤 실패/타임아웃 — 통과가 아닌 명시적 에러 상태로 상위 전달
-        logger.warning("[C08] 라이브 크롤 실패: blog=%s url=%s: %s", blog_id, url, e)
+        logger.warning("[C08] 라이브 크롤 실패: blog=%s slug=%s: %s", blog_id, slug, e)
         return None
 
 
@@ -737,13 +779,25 @@ def check_c08(conn, blog_id: str) -> dict:
         if last:
             _ts = datetime.fromisoformat(last["checked_at"])
             if (datetime.now() - _ts).total_seconds() < 24 * 3600:
-                # 접미사 중복 누적 방지 — 이전 실행에서 붙은 캐시 문구는 제거 후 1회만 부착
-                base = last["detail"].replace(" (캐시: 24h 내 실행됨)", "")
-                return {
-                    "status": last["status"],
-                    "detail": base + " (캐시: 24h 내 실행됨)",
-                    "evidence_url": "",
-                }
+                # 캐시 무효화: 로컬 포스트가 캐시 시각보다 새로우면(배포 직후 등)
+                # 구 결과는 stale 불일치(false positive)이므로 재크롤 강제.
+                _stale = False
+                try:
+                    _posts = _read_post_files(site)
+                    if _posts:
+                        _max_mtime = max(p.stat().st_mtime for p, _ in _posts)
+                        if _max_mtime > _ts.timestamp():
+                            _stale = True
+                except Exception:
+                    pass
+                if not _stale:
+                    # 접미사 중복 누적 방지 — 이전 실행에서 붙은 캐시 문구는 제거 후 1회만 부착
+                    base = last["detail"].replace(" (캐시: 24h 내 실행됨)", "")
+                    return {
+                        "status": last["status"],
+                        "detail": base + " (캐시: 24h 내 실행됨)",
+                        "evidence_url": "",
+                    }
     except Exception:
         pass
 

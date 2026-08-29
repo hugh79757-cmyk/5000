@@ -1115,7 +1115,9 @@ _R19_BANNED_PATTERNS = [
     re.compile(r"AI-generated", re.IGNORECASE),
     re.compile(r"ChatGPT", re.IGNORECASE),
     re.compile(r"GPT-4", re.IGNORECASE),
-    re.compile(r"\bClaude\b", re.IGNORECASE),
+    # 네거티브 lookbehind: 하이픈/구두점/단어 문자 뒤의 'Claude'는
+    # 성씨(Marie-Claude 등)로 판단하여 제외. 단독 'Claude'(AI 모델명)만 잡음.
+    re.compile(r"(?<![-.\w])Claude\b", re.IGNORECASE),
     re.compile(r"\bLLM\b", re.IGNORECASE),
 ]
 
