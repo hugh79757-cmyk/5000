@@ -637,7 +637,10 @@ WORKERS_BLOGS = {
 }
 
 DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"
-DEPLOY_LOCK_TIMEOUT = 300  # 스케줄러 600s 킬 이전 포기 → P04로 빠지고 재시도. 경합 시 wait(≤300)+wrangler(≤120)=≤420s<600s
+DEPLOY_LOCK_TIMEOUT = 180  # 스케줄러 600s 킬 이전 포기 → P04로 빠지고 재시도.
+# updated 2026-08-29: Hugo build timeout 180s 추가.
+# 추정 예산: Hugo(180s) + lock wait(≤180s) + wrangler(≤120s) = 480s < 600s,
+# content gen + preflight 에 120s 여백 확보.
 
 
 def _compute_baseline_keys(posts_dir: "Path") -> set:
@@ -1158,7 +1161,8 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             [HUGO, "--gc", "--minify"],
             cwd=str(site_path),
             capture_output=True, text=True,
-            env=deploy_env
+            env=deploy_env,
+            timeout=180,
         )
         if r1.returncode != 0:
             logger.error(f"[deploy] Hugo 빌드 실패 {blog_id}\nSTDERR: {r1.stderr[-400:]}")
