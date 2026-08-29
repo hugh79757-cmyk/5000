@@ -1749,7 +1749,22 @@ def dispatch(blog_id):
         self_acquired = True
 
     try:
+        import threading
+
+        class PipelineTimeout(Exception):
+            pass
+
+        def _timeout_func():
+            raise PipelineTimeout("150s elapsed")
+
+        timer = threading.Timer(150.0, _timeout_func)
+        timer.daemon = True
+        timer.start()
         result = _run_pipeline(cfg)
+        timer.cancel()
+    except PipelineTimeout:
+        logger.warning(f"[dispatch] pipeline timeout 150s for {blog_id}")
+        result = {"success": False, "reason": "pipeline_timeout_150s"}
     except Exception as e:
         logger.warning(f"[dispatch] pipeline exception for {blog_id}: {type(e).__name__}: {str(e)[:200]}")
         result = {
