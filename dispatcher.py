@@ -1701,6 +1701,60 @@ def execute_pending_fix(
 
 # ─── 메인 디스패치 ───
 
+
+def _terminate_pipeline_children(blog_id: str) -> None:
+    """150s 타임아웃 시 워커 스레드가 남긴 hugo/wrangler 자식 프로세스를 종료.
+
+    스레드는 kill 불가하므로, 현재 dispatcher 프로세스의 자식 트리를 순회하며
+    SIGTERM → SIGKILL 로 정리. 이들이 잡고 있던 /tmp/wrangler_deploy.lock 이
+    해제되어 후속 배포가 블록되지 않는다. (psutil 미설치 환경 → pgrep fallback)
+    """
+    import os
+    import signal
+    import subprocess
+
+    pid = os.getpid()
+    to_kill: list[int] = []
+    seen: set[int] = set()
+    frontier = [pid]
+    while frontier:
+        p = frontier.pop()
+        if p in seen:
+            continue
+        seen.add(p)
+        try:
+            out = subprocess.run(
+                ["pgrep", "-P", str(p)], capture_output=True, text=True, timeout=5
+            )
+            for line in out.stdout.split():
+                try:
+                    c = int(line)
+                    if c != pid:
+                        to_kill.append(c)
+                    frontier.append(c)
+                except ValueError:
+                    pass
+        except Exception:
+            pass
+    for c in to_kill:
+        try:
+            os.kill(c, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+    # grace 2s 후 강제 SIGKILL
+    if to_kill:
+        import time
+        time.sleep(2)
+        for c in to_kill:
+            try:
+                os.kill(c, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        logger.warning(
+            f"[dispatch] terminated {len(to_kill)} child process(es) on timeout for {blog_id}"
+        )
+
+
 def dispatch(blog_id):
     """blog_id → config 조회 → pipeline 실행 → ledger 기록"""
     cfg = get_blog_config(blog_id)
@@ -1760,6 +1814,9 @@ def dispatch(blog_id):
             result = _fut.result(timeout=150)
         except FuturesTimeoutError:
             logger.warning(f"[dispatch] pipeline timeout 150s for {blog_id}")
+            # ponytail: terminate spawned children (hugo/wrangler) so they release
+            # /tmp/wrangler_deploy.lock instead of holding it for the full run.
+            _terminate_pipeline_children(blog_id)
             result = {"success": False, "reason": "pipeline_timeout_150s"}
         finally:
             _exec.shutdown(wait=False)  # abandon worker thread, let process exit
