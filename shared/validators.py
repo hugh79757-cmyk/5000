@@ -12,9 +12,9 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 # ── 상수 ──
-_AI_RESIDUES = ["다듬은 제목", "추천 제목", "title:", "제목 후보",
+_AI_RESIDUES = ["다듬은 제목", "추천 제목", "title:", "제목 후보", "가능한 제목",
                 "1단계에서", "2단계에서", "3단계에서", "4단계에서",
-                "핵심 요약을"]
+                "핵심 요약을", "우선 사용자 요청", "매우 세심한 지침"]
 
 # ===== CJK 단일소스 (2026) : collector/writer/publisher 공통 import 대상 =====
 CJK_CHARS = re.compile(r'[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\u3040-\u309F\u30A0-\u30FF]')

@@ -32,21 +32,11 @@ def _init_used_images_table() -> None:
 
 
 def _is_image_used(image_url, slug=None):
-    """같은 URL이라도 다른 slug(포스트)에서는 재사용 허용.
-    단, 같은 slug 내에서는 중복 방지.
-    """
+    """글로벌 중복 방지 — 같은 URL은 다른 slug에서도 재사용 금지 (대시보드 미탐 중복 이미지 fix)."""
     db = _get_db()
-    if slug:
-        # 동일 slug 내 중복만 차단
-        row = db.execute(
-            "SELECT 1 FROM used_images WHERE image_url = ? AND slug = ?",
-            (image_url, slug)
-        ).fetchone()
-    else:
-        # slug 없으면 전체 중복 체크 (기존 동작 유지)
-        row = db.execute(
-            "SELECT 1 FROM used_images WHERE image_url = ?", (image_url,)
-        ).fetchone()
+    row = db.execute(
+        "SELECT 1 FROM used_images WHERE image_url = ?", (image_url,)
+    ).fetchone()
     db.close()
     return row is not None
 
@@ -95,14 +85,17 @@ def _is_relevant(photo, city, country) -> bool:
     return any(kw in text for kw in keywords)
 
 
-def _search_pexels(query, per_page=15, city="", country=""):
+def _search_pexels(query, per_page=15, city="", country="", page=None):
     """Pexels 검색 + 관련성 필터링. per_page를 넉넉히 요청해서 필터 후에도 결과 확보."""
+    import random
     key = os.getenv("PEXELS_API_KEY", "")
     if not key:
         return []
+    if page is None:
+        page = random.randint(1, 3)  # cross-post 중복 방지: 매 호출 다른 페이지
     try:
         r = requests.get("https://api.pexels.com/v1/search", params={
-            "query": query, "per_page": per_page, "orientation": "landscape", "size": "large"
+            "query": query, "per_page": per_page, "page": page, "orientation": "landscape", "size": "large"
         }, headers={"Authorization": key}, timeout=10)
         if r.status_code != 200:
             logger.warning("[Pexels] %s: %s", r.status_code, query)
@@ -132,13 +125,16 @@ def _search_pexels(query, per_page=15, city="", country=""):
         return []
 
 
-def _search_unsplash(query, per_page=15, city="", country=""):
+def _search_unsplash(query, per_page=15, city="", country="", page=None):
+    import random
     key = os.getenv("UNSPLASH_ACCESS_KEY", "")
     if not key:
         return []
+    if page is None:
+        page = random.randint(1, 3)
     try:
         r = requests.get("https://api.unsplash.com/search/photos", params={
-            "query": query, "per_page": per_page, "orientation": "landscape"
+            "query": query, "per_page": per_page, "page": page, "orientation": "landscape"
         }, headers={"Authorization": f"Client-ID {key}"}, timeout=10)
         if r.status_code != 200:
             logger.warning("[Unsplash] %s: %s", r.status_code, query)

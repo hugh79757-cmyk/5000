@@ -96,9 +96,15 @@ def detect_validation_issue(check_result, blog_id: str) -> Detection | None:
     check_result: shared.post_validator.validate_post_html 반환 dict.
     dict가 아니면 예외가 자연 발생 (caller가 P24 처리).
     """
+    # fix P15 false positive: WARNING soft signals (intentional CTA omission etc) pass validation but were flagged
+    if check_result.get("passed") is True:
+        return None
     issues = check_result.get("issues", [])
     for issue in issues:
         if isinstance(issue, dict):
+            # WARNING은 통과로 간주 — P15 오탐 방지
+            if issue.get("severity") == "WARNING":
+                continue
             key = issue.get("check")
             value = issue.get("msg", "")
         else:
