@@ -1751,13 +1751,18 @@ def dispatch(blog_id):
     try:
         from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 
-        with ThreadPoolExecutor(max_workers=1) as _exec:
-            _fut = _exec.submit(_run_pipeline, cfg)
-            try:
-                result = _fut.result(timeout=150)
-            except FuturesTimeoutError:
-                logger.warning(f"[dispatch] pipeline timeout 150s for {blog_id}")
-                result = {"success": False, "reason": "pipeline_timeout_150s"}
+        # NOTE: do NOT use `with` — its implicit shutdown(wait=True) would join the
+        # still-running worker thread and block until the pipeline finishes (600s),
+        # defeating the 150s timeout. Abandon the thread on timeout instead.
+        _exec = ThreadPoolExecutor(max_workers=1)
+        _fut = _exec.submit(_run_pipeline, cfg)
+        try:
+            result = _fut.result(timeout=150)
+        except FuturesTimeoutError:
+            logger.warning(f"[dispatch] pipeline timeout 150s for {blog_id}")
+            result = {"success": False, "reason": "pipeline_timeout_150s"}
+        finally:
+            _exec.shutdown(wait=False)  # abandon worker thread, let process exit
     except Exception as e:
         logger.warning(f"[dispatch] pipeline exception for {blog_id}: {type(e).__name__}: {str(e)[:200]}")
         result = {
