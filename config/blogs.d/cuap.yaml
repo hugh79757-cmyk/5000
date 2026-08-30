@@ -331,7 +331,7 @@ blogs:
   name: 주방용품 베스트 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 2
   source: bestcategories
   category_id: '1020'
@@ -353,7 +353,7 @@ blogs:
   name: 뷰티 베스트 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 2
   source: bestcategories
   category_id: '1010'
@@ -375,7 +375,7 @@ blogs:
   name: 유아용품 베스트 추천 가이드
   pipeline: curation
   platform: hugo
-  status: paused
+  status: active
   daily_quota: 2
   source: bestcategories
   category_id: '1011'
