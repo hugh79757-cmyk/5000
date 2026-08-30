@@ -33,6 +33,8 @@ class ProblemSpec:
     action: str = ""
     detect_fn: str = ""
     playbook_ref: str = ""  # 예: "ERROR_PLAYBOOKS.md#p01"
+    display_family: str = ""
+    ops_tier: str = ""
     # Wave 2d (Phase 72): friendly 단일 소스 YAML 오버레이용 선택 필드. 기본값 "" 으로
     # 기존 코드 dict 호환 유지 — config/problems.yaml 이 채우지 않으면 공란.
     summary_human: str = ""
@@ -618,6 +620,36 @@ def lookup_problem(problem_id: str) -> ProblemSpec | None:
     """problem_id → ProblemSpec. 미등록이면 None."""
     return PROBLEM_REGISTRY.get(problem_id)
 
+
+FAMILY_MAP: dict[str, str] = {
+    # pipeline_failure
+    "P01": "pipeline_failure", "P02": "pipeline_failure", "P03": "pipeline_failure",
+    "P10": "pipeline_failure", "P11": "pipeline_failure", "P12": "pipeline_failure",
+    "P13": "pipeline_failure", "P20": "pipeline_failure", "P21": "pipeline_failure",
+    "P22": "pipeline_failure", "P26": "pipeline_failure", "P27": "pipeline_failure",
+    "P28": "pipeline_failure", "P30": "pipeline_failure",
+    # content_mismatch (P14+P36 merged)
+    "P14": "content_mismatch", "P36": "content_mismatch",
+    # content_pollution
+    "P07": "content_pollution", "P08": "content_pollution", "P09": "content_pollution",
+    "P23": "content_pollution", "P29": "content_pollution", "P32": "content_pollution",
+    # deploy_failure
+    "P04": "deploy_failure", "P05": "deploy_failure", "P06": "deploy_failure",
+    # validation
+    "P15": "validation", "P19": "validation",
+    # notification
+    "P31": "notification",
+    # scheduler
+    "P25": "scheduler", "P33": "scheduler", "P34": "scheduler",
+    # dedup_config (quiet)
+    "P16": "dedup_config", "P17": "dedup_config", "P18": "dedup_config", "P24": "dedup_config",
+    "unknown_failure": "unknown",
+}
+
+EXCLUDED_BLOGS = {"test-blog", "blog-trunc-1", "blog-maj-1", "blog-ctr-1", "blog-crit-1", "int-deployerr-hugo", "int-cot-hugo"}
+
+def get_family(problem_id: str) -> str:
+    return FAMILY_MAP.get(problem_id, "unknown")
 
 def lookup_hook(problem_id: str) -> str | None:
     """problem_id의 감지 hook 반환. 미등록이면 None."""

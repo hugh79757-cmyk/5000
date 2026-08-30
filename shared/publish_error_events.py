@@ -501,23 +501,45 @@ def record_telegram_delivery(
         pass
 
 
-def get_publish_error_summary(conn: sqlite3.Connection) -> dict[str, Any]:
+EXCLUDED_BLOGS = {"test-blog", "blog-trunc-1", "blog-maj-1", "blog-ctr-1", "blog-crit-1", "int-deployerr-hugo", "int-cot-hugo"}
+
+def get_publish_error_summary(conn: sqlite3.Connection, exclude_noise: bool = True) -> dict[str, Any]:
     ensure_schema(conn)
-    total = conn.execute("SELECT COUNT(*) FROM publish_error_events").fetchone()[0]
+    conn.row_factory = sqlite3.Row
+    exc_filter = f"WHERE blog_id NOT IN ({','.join('?' for _ in EXCLUDED_BLOGS)})" if exclude_noise else ""
+    exc_params = list(EXCLUDED_BLOGS) if exclude_noise else []
+    total = conn.execute(f"SELECT COUNT(*) FROM publish_error_events {exc_filter}", exc_params).fetchone()[0]
     open_count = conn.execute(
-        "SELECT COUNT(*) FROM publish_error_events WHERE state='open'"
+        f"SELECT COUNT(*) FROM publish_error_events WHERE state='open' {' AND ' + exc_filter.replace('WHERE','') if exclude_noise else ''}", exc_params
     ).fetchone()[0]
     by_problem = [dict(row) for row in conn.execute(
-        """
+        f"""
         SELECT problem_id, severity, COUNT(*) AS events, COUNT(DISTINCT blog_id) AS blogs,
                MAX(occurred_at) AS last_seen
         FROM publish_error_events
+        {exc_filter}
         GROUP BY problem_id, severity
         ORDER BY CASE severity WHEN 'CRITICAL' THEN 1 WHEN 'MAJOR' THEN 2 ELSE 3 END,
                  events DESC
-        """
+        """, exc_params
     ).fetchall()]
-    return {"total": total, "open": open_count, "by_problem": by_problem}
+    # 9-family aggregation (display layer)
+    try:
+        from shared.problem_registry import get_family
+        by_family: dict[str, dict] = {}
+        for r in by_problem:
+            fam = get_family(r["problem_id"])
+            if fam not in by_family:
+                by_family[fam] = {"family": fam, "events": 0, "blogs": set(), "last_seen": r["last_seen"]}
+            by_family[fam]["events"] += r["events"]
+            by_family[fam]["blogs"].add(r["blogs"])
+            if r["last_seen"] and r["last_seen"] > by_family[fam]["last_seen"]:
+                by_family[fam]["last_seen"] = r["last_seen"]
+        family_list = [{"family": k, "events": v["events"], "blogs": len(v["blogs"]), "last_seen": v["last_seen"]} for k, v in by_family.items()]
+        family_list.sort(key=lambda x: x["events"], reverse=True)
+    except Exception:
+        family_list = []
+    return {"total": total, "open": open_count, "by_problem": by_problem, "by_family": family_list, "excluded": len(EXCLUDED_BLOGS)}
 
 
 def get_publish_error_events_count(
@@ -526,11 +548,15 @@ def get_publish_error_events_count(
     blog_id: str = "",
     severity: str = "",
     state: str = "",
+    exclude_noise: bool = True,
 ) -> int:
     """동일 필터의 전체 건수 (pagination total 산출용, 읽기 전용)."""
     ensure_schema(conn)
     where: list[str] = []
     params: list[Any] = []
+    if exclude_noise:
+        where.append(f"blog_id NOT IN ({','.join('?' for _ in EXCLUDED_BLOGS)})")
+        params.extend(list(EXCLUDED_BLOGS))
     for column, value in (("blog_id", blog_id), ("severity", severity), ("state", state)):
         if value:
             where.append(f"{column} = ?")
@@ -549,10 +575,14 @@ def get_publish_error_events(
     blog_id: str = "",
     severity: str = "",
     state: str = "",
+    exclude_noise: bool = True,
 ) -> list[dict[str, Any]]:
     ensure_schema(conn)
     where: list[str] = []
     params: list[Any] = []
+    if exclude_noise:
+        where.append(f"blog_id NOT IN ({','.join('?' for _ in EXCLUDED_BLOGS)})")
+        params.extend(list(EXCLUDED_BLOGS))
     for column, value in (("blog_id", blog_id), ("severity", severity), ("state", state)):
         if value:
             where.append(f"{column} = ?")
