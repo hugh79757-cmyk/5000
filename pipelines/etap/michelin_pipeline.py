@@ -126,7 +126,7 @@ def _run_impl() -> bool:
     city = article.get("city", "")
     country = article.get("country", "")
     cover = fetch_city_image(city, country, article["slug"]) if city else None
-    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
+    body = fetch_body_images(city, country, article["slug"], count=3) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:

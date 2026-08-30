@@ -233,13 +233,26 @@ def source_exists(blog_id, data_source, source_id, days=None, prompt_id=None):
     return row is not None
 
 
+_DATE_RE = re.compile(r"\d{4}년\s*\d{1,2}월\s*\d{1,2}일|\d{1,2}월\s*\d{1,2}일")
+
+
+def _normalize_title(t):
+    # strip date tokens + keywords for content comparison
+    return _DATE_RE.sub("", re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", t)).strip()
+
+
+def _extract_date(t):
+    m = _DATE_RE.search(t)
+    return m.group(0) if m else None
+
+
 def title_similar_exists(blog_id, title):
     """유사 제목 중복 체크 — SequenceMatcher 80% 임계값, 최근 14일 내 비교"""
     import re
     from difflib import SequenceMatcher
 
     conn = get_conn()
-    _normalized = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", title).strip()
+    _normalized = _normalize_title(title)
 
     # 최소 5자 미만이면 비교 불가 → 통과 허용
     if len(_normalized) < 5:
@@ -256,9 +269,13 @@ def title_similar_exists(blog_id, title):
     for (old_title,) in rows:
         if not old_title:
             continue
-        old_norm = re.sub(r"[0-9]곳|[0-9]선|총정리|정리|한눈에 보기|추천 리스트|비교|체크리스트|소개", "", old_title).strip()
+        old_norm = _normalize_title(old_title)
         ratio = SequenceMatcher(None, _normalized, old_norm).ratio()
         if ratio >= 0.8:
+            # ponytail: differing date tokens => distinct article, not a duplicate
+            d_new, d_old = _extract_date(title), _extract_date(old_title)
+            if d_new and d_old and d_new != d_old:
+                continue
             logger.info(f"title_similar_exists: '{title[:30]}' ≈ '{old_title[:30]}' ({ratio:.0%})")
             return True
 

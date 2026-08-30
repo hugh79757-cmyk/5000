@@ -256,7 +256,9 @@ def _run_single(target_blog_id, blog_cfg=None):
         # 다른 시군구가 나올 때까지 최대 _MAX_SIGUNGU_RETRIES회 재시도
         _source_type = data.get("source_type", "")
         _sigungu = data.get("sigungu", "")
-        if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=3):
+        # food source: 맛집 체인명 충돌 잦아 시군구 가드 3일→1일 완화
+        _sigungu_days = 1 if _source_type == "food" else 3
+        if _sigungu and _source_type != "festival" and _travel_sigungu_recently_published(target_blog_id, _sigungu, days=_sigungu_days):
             if _attempt < _MAX_SIGUNGU_RETRIES:
                 logger.info(f"{target_blog_id} 시군구 중복: {_sigungu}, 재시도 {_attempt}/{_MAX_SIGUNGU_RETRIES}")
                 continue
@@ -265,12 +267,15 @@ def _run_single(target_blog_id, blog_cfg=None):
                 return None
 
         # ── 가게명 기반 중복 발행 방지 (used_places ALL-TIME 체크) ──
+        # food source: contentid로 이미 중복 발행 방지됨. 맛집 체인명 충돌로
+        # 가게명 가드가 no_result 유발하므로 food는 가게명 가드 스킵.
+        _skip_place_guard = _source_type == "food"
         _place_names = [
             it.get("title", it.get("facltNm", "")).strip()
             for it in data.get("items", [])
             if it.get("title") or it.get("facltNm")
         ]
-        if _place_names:
+        if _place_names and not _skip_place_guard:
             _used_places = [n for n in _place_names if is_place_used(n, target_blog_id)]
             _dup_threshold = 2 if _source_type == "festival" else 1
             if len(_used_places) >= _dup_threshold:  # QUOTA_OVERRIDE
