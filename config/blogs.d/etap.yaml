@@ -162,7 +162,8 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: active
+  status: 소진  # 토픽소진 134/134 valid exhausted (330 total, 196 invalid origin filtered) — flight_prices 10 origins 외 신규 origin 시딩 필요, valid pool 0 → 발행 중지
+  enabled: false  # scheduler skip — 데이터없음 발행 비활성화 (2026-08-30)
   daily_quota: 5
   domain: deals.techpawz.com
   cf_project: deals-hugo
