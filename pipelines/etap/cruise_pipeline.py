@@ -151,10 +151,6 @@ def _run_impl(force_topic_id: int | None = None) -> bool:
     # Post-process quality check
     data_prices = [float(str(t.get("price",0)).replace("$","").replace(",","")) for t in article.get("tours", article.get("routes", article.get("restaurants", []))) if t.get("price")]
     article["content"], post_issues, is_draft = postprocess_content(article["content"], data_prices=data_prices, blog_id=BLOG_ID, slug=article["slug"])
-    if is_draft:
-        logger.warning(f"[{BLOG_ID}] DRAFT 감지 → 발행 중단: {article['slug']} - {post_issues}")
-        send_alert(BLOG_ID, article["slug"], post_issues)
-        return False
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
@@ -162,10 +158,18 @@ def _run_impl(force_topic_id: int | None = None) -> bool:
     country = article.get("country", "")
     cover = fetch_city_image(city + " shore excursion", country, article["slug"]) if city else None
     body = fetch_body_images(city + " shore excursion", country, article["slug"], count=8) if city else []
-    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
+    # 환각 가격 과다(is_draft) 감지 시 draft로 격리 작성 — 라이브 노출 방지.
+    # return False로 건너뛰면 동일 토픽이 재시도되어 무한루프 →
+    # draft 작성 + 소비 처리(_mark_published)로 격리 (airports_pipeline 패턴).
+    write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY, is_draft=is_draft)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
         return False
+    if is_draft:
+        logger.warning(f"[{BLOG_ID}] DRAFT 감지 → draft 격리: {article['slug']} - {post_issues}")
+        send_alert(BLOG_ID, article["slug"], post_issues)
+        _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
+        return True
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:
         register_entity("city", city, BLOG_ID, article["slug"],

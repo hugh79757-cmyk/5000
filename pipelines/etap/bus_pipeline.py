@@ -121,7 +121,10 @@ def _run_impl() -> bool:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
     search_term = origin or dest
-    cover = fetch_city_image(search_term + " bus station", "", article["slug"]) if search_term else None
+    # ponytail: cover query = city names (not " bus station") to get route-relevant
+    # photos; " bus station" + empty country rejected route photos -> identical fallback.
+    cover_search = f"{origin} {dest}".strip() or search_term
+    cover = fetch_city_image(cover_search, "", article["slug"]) if cover_search else None
     body = fetch_body_images(search_term + " bus travel", "", article["slug"], count=8) if search_term else []
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):

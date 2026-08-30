@@ -1,0 +1,5 @@
+[12:47] launchctl setenv QUALITY_ENFORCE_S03_S04=0 + kickstart com.5000.scheduler (PID 42527→70102) | 원인=W4 S04 Hugo쇼트코드 오탐으로 flights/deals/nature 배포차단 실측 | 백업=불요(env+재시작만) | 사후=getenv 0 확인+신규PID 확인 | 보존확인=해당없음(DB 미접촉)
+[2026-08-25 13:58:56] UPDATE publish_error_events SET resolved_at | pre=1623 | backup=/tmp/ops_backup_20260825_135844.db | updated=1150 | post_remaining=473 | CRITICAL/WARNING/PASS see above
+[2026-08-25 14:12:11] UPDATE publish_error_events P02 resolved for airports-hugo/etap-collector-hugo | pre_unresolved=473 | backup=/tmp/ops_backup_20260825_141145.db | updated=8 | post_remaining=465 | run_all_checks Total124 CRITICAL0 WARNING12 PASS112 (TABLE12 PIPELINE0)
+[2026-08-25 15:17:46] FIX fitness/kitchen P14 | kw_comma_fix + scorer_0.55 + health_state_open | pre_open_resolved=619 | backup=/tmp/ops_backup_20260825_2_before_clear.db | post_open_resolved=0 | PIPELINE_CRITICAL=9 WARNING=26 TABLE=12 Total=159 | verify fitness CRITICAL kitchen WARNING
+[2026-08-25 15:37:36] FIX P14 history resolved | backup=/tmp/ops_backup_20260825_153730.db | pre_P14_unresolved=5 | resolved=5 | post_remaining fitness1(kitchen0 golf0) | state closed

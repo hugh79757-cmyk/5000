@@ -138,3 +138,184 @@ Return ONLY the article in markdown starting with # title"""
         "tags": [city, country, "Michelin Restaurants", "Fine Dining", "Food Guide"],
         "city": city, "country": country, "restaurants": restaurants,
     }
+
+
+# === TRACKC_SELF_IMPROVE deliverable: generate_michelin_post + validate_structure ===
+# E5 HARD CONSTRAINT — must be embedded verbatim in the LLM prompt.
+_FILLER_HARD_CONSTRAINT = "Do NOT write filler. Every sentence must carry specific Michelin data (restaurant name, award, cuisine, price, or verdict). No generic travel-brochure padding."
+_MICHELIN_SYSTEM = (
+    "You are a food and travel writer. Use only the provided Michelin data. "
+    "Never fabricate information. STRICT RULES: 1) NEVER use these words/phrases: "
+    "plethora, vibrant, bustling, tapestry, myriad, embark, unforgettable, hidden gem, "
+    "hidden gems, crystal-clear, culinary delights, gastronomic, soak in, immerse yourself, "
+    "treasure trove, of a lifetime, must-visit, paradise for, world-class, bucket list, "
+    "look no further, haven for, left me in awe, adventure awaits, palpable, escapades, "
+    "playground for, adrenaline-fueled. 2) Write in flowing paragraphs, not numbered lists. "
+    "3) Format prices as whole numbers when .0. 4) " + _FILLER_HARD_CONSTRAINT
+)
+
+# Module constants for the quarantine write path (mirror michelin_pipeline.py).
+_BLOG_ID = "michelin-hugo"
+_SITE_PATH = "/Users/twinssn/Projects/ETAP/michelin-hugo"
+_CATEGORY = "Michelin Guide"
+
+_REQUIRED_H2 = ["At a Glance", "Where to Eat", "Compare", "FAQ"]
+
+
+def generate_michelin_post(topic) -> dict | None:
+    """TRACKC_SELF_IMPROVE generator.
+
+    Produces a Michelin destination/food guide satisfying E1~E5 (STRICT).
+    Returns the article dict (same shape as generate_michelin_guide) or None
+    on data/LLM failure.
+    """
+    city = topic["city"]
+    country = topic.get("country", "")
+    restaurants = fetch_restaurants(city)
+    if not restaurants:
+        logger.warning(f"[TRACKC] No restaurants for {city}")
+        return None
+    summary = _build_summary(restaurants, city)
+    if not summary:
+        return None
+    prompt = f"""Write a Michelin destination food guide for {city}, {country}.
+
+DATA (use ONLY this data, do NOT invent restaurants):
+{summary}
+
+RULES:
+- Write 1,200-1,800 words in English (word count MUST be >= 706).
+- Do NOT include any URLs or booking links.
+- Do NOT invent restaurant names, awards, or prices not in the data.
+- If price is "Price N/A", do not mention a price for that restaurant.
+- Title must include "{city}" and "Michelin".
+- {_FILLER_HARD_CONSTRAINT}
+- STRICT STRUCTURE — MANDATORY. Your article body MUST contain EXACTLY these four
+  H2 headings, in this exact order, each as its own line starting with "## "
+  (NOT numbered, NOT bulleted, NOT nested). A numbered heading like
+  "## 1. At a Glance" is INVALID:
+  ## At a Glance
+  ## Where to Eat
+  ## Compare
+  ## FAQ
+  Content required under each:
+  - "## At a Glance" — a compact summary TABLE.
+  - "## Where to Eat" — detailed per-restaurant H3 sections (each 120-180 words).
+  - "## Compare" — a COMPARISON TABLE emitted as HTML: <table>...</table> with
+    column headers Restaurant | Award | Cuisine | Price | Best For and AT LEAST 14
+    <tr> rows (header + >=13 data rows). This is a HARD minimum.
+  - "## FAQ" — AT LEAST 3 question/answer pairs (use "### Q: ... / ### A: ..." blocks).
+- OPENING PARAGRAPH — MANDATORY: before "## At a Glance", write a 3-4 sentence intro
+  paragraph. The article body must start with this paragraph, never with a heading.
+- description/meta: 1-2 sentence summary (20-30 words). NEVER a section name.
+- Mention each restaurant by exact name and award from data.
+
+Return ONLY the article in markdown starting with # title"""
+
+    try:
+        result = ai_generate(_MICHELIN_SYSTEM, prompt, temperature=0.5, max_tokens=4000)
+    except Exception as e:
+        logger.error(f"[TRACKC] generate_michelin_post LLM failed for {city}: {e}")
+        return None
+    content = (result.get("content") or "").strip()
+    if not content:
+        return None
+    title_match = re.match(r"^#\s+(.+)", content)
+    title = title_match.group(1).strip() if title_match else topic.get("title", f"Michelin Restaurants in {city}")
+    content = re.sub(r"^#\s+.+\n*", "", content, count=1).strip()
+    slug = topic.get("slug", f"michelin-restaurants-{re.sub(r'[^a-z0-9]+', '-', city.lower()).strip('-')}")
+    return {
+        "title": title, "slug": slug, "content": content,
+        "description": f"Complete guide to Michelin-starred restaurants in {city}: awards, cuisines, prices, and booking tips.",
+        "tags": [city, country, "Michelin Restaurants", "Fine Dining", "Food Guide"],
+        "city": city, "country": country, "restaurants": restaurants,
+    }
+
+
+def validate_structure(content: str) -> tuple[bool, list]:
+    """TRACKC_SELF_IMPROVE E1~E5 STRICT validator.
+
+    Returns (passed, issues). E5 is a prompt-embedded HARD CONSTRAINT (no code
+    check) — it is recorded in the log rather than flagged as a failure.
+    """
+    issues = []
+    if not content:
+        return (False, ["E0: empty content"])
+
+    # E1: literal H2 headings present, no numbering inside headings.
+    h2s = re.findall(r"^##\s+(.+?)\s*$", content, re.M)
+    for h in _REQUIRED_H2:
+        hlabel = "## " + h
+        found = False
+        for x in h2s:
+            xs = x.strip()
+            if xs == h:
+                found = True
+                break
+            if re.match(r"^\d+[\.\)]\s*" + re.escape(h) + r"$", xs):
+                issues.append(f"E1: numbered heading '{xs}' (numbering inside heading forbidden)")
+                found = True
+                break
+        if not found:
+            issues.append(f"E1: missing H2 '{hlabel}'")
+
+    # E2: a <table> in body with >= 14 <tr> rows.
+    tables = re.findall(r"<table.*?</table>", content, re.S | re.I)
+    max_rows = 0
+    for tb in tables:
+        rows = len(re.findall(r"<tr", tb, re.I))
+        max_rows = max(max_rows, rows)
+    if max_rows < 14:
+        issues.append(f"E2: no <table> with >=14 rows (max={max_rows})")
+
+    # E3: >= 3 FAQ Q/A pairs under "## FAQ".
+    m = re.search(r"##\s+FAQ\s*(.*?)(?=^##\s+|\Z)", content, re.S | re.M)
+    faq_block = m.group(1) if m else ""
+    qa = len(re.findall(r"^\s*(#{3,4}\s+.+\?|\*\*[^*]+\?\*\*)", faq_block, re.M))
+    if qa < 3:
+        issues.append(f"E3: FAQ Q/A pairs <3 (found={qa})")
+
+    # E4: word count >= 706.
+    wc = len(content.split())
+    if wc < 706:
+        issues.append(f"E4: word count {wc} < 706")
+
+    # E5: HARD CONSTRAINT embedded in prompt (no code check) — log only.
+    logger.info("[TRACKC] E5: filler prohibition is a HARD CONSTRAINT embedded in the LLM "
+                f"prompt (contains 'Do NOT write filler': {_FILLER_HARD_CONSTRAINT in _MICHELIN_SYSTEM})")
+
+    blocking = [i for i in issues if i.startswith(("E1", "E2", "E3", "E4"))]
+    return (len(blocking) == 0, issues)
+
+
+def postprocess_and_write(article, blog_id=_BLOG_ID, site_path=_SITE_PATH,
+                          category=_CATEGORY, is_draft=False):
+    """Mirror cruise/airports postprocess + _write_hugo_post_etap(..., is_draft=...).
+
+    On quality-draft detection the post is quarantined as a draft (NOT skipped),
+    so the topic is still consumed and the post never goes live in a broken state.
+    Returns (result, issues, is_draft).
+    """
+    from pipelines.etap.quality_guard import postprocess_content, send_alert
+    from shared.publishers.hugo_writer import _write_hugo_post_etap as _write
+
+    prices = []
+    for r in article.get("restaurants", []):
+        try:
+            p = float(str(r.get("price", 0)).replace("$", "").replace(",", ""))
+            if p > 0:
+                prices.append(p)
+        except Exception:
+            pass
+    content, issues, draft = postprocess_content(
+        article["content"], data_prices=prices or None,
+        blog_id=blog_id, slug=article["slug"])
+    if draft:
+        is_draft = True
+        logger.warning("[%s] Quality DRAFT -> quarantine as draft: %s - %s",
+                       blog_id, article["slug"], issues)
+        send_alert(blog_id, article["slug"], issues)
+    article = dict(article)
+    article["content"] = content
+    res = _write(article, None, None, blog_id, site_path, category, is_draft=is_draft)
+    return res, issues, is_draft
