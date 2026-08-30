@@ -242,13 +242,37 @@ WRITING RULES:
 7. CLOSING: End with a single "If you only have one day" recommendation with specific tour name and price.
 8. NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, culinary delights, gastronomic, rich cultural heritage, seamlessly, breathtaking, brimming with, a must-visit, treasure trove, staggering"""
 
-    result = ai_generate(
-    "You are a travel writer who has visited these destinations. Write in second-person informed tone. STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. 4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific concrete scene or fact. 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, treasure trove, a must-visit.",
-    prompt,
-    temperature=0.6,
-    max_tokens=3500,
-    )
-    content = result["content"].strip()
+    SYSTEM_PROMPT = ("You are a travel writer who has visited these destinations. Write in second-person informed tone. "
+    "STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, "
+    "NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. "
+    "4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific "
+    "concrete scene or fact. 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, "
+    "unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, "
+    "seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, "
+    "treasure trove, a must-visit.")
+
+    # ponytail: self-correct loop — gate hard-min is 3 H2 / 400 words; enforce a 600-word floor
+    # so published posts clear the gate on first try instead of burning tokens on repeated full regenerations.
+    last_issues: list[str] = []
+    content = ""
+    for _attempt in range(3):  # 1 initial + up to 2 self-corrections
+        if last_issues:
+            gen_prompt = (prompt + "\n\nPREVIOUS DRAFT REJECTED — fix these and rewrite the FULL article: "
+                          + "; ".join(last_issues) + ".")
+        else:
+            gen_prompt = prompt
+        result = ai_generate(SYSTEM_PROMPT, gen_prompt, temperature=0.6, max_tokens=3500)
+        content = result["content"].strip()
+        h2 = len(re.findall(r"^##\s+", content, re.MULTILINE))
+        wc = len(content.split())
+        if h2 >= 3 and wc >= 600:
+            break
+        last_issues = []
+        if h2 < 3:
+            last_issues.append(f"only {h2} H2 sections, MUST have at least 3 '##' headings")
+        if wc < 600:
+            last_issues.append(f"only {wc} words, MUST be at least 600 (target 1000-1500)")
+        logger.warning(f"[daytrips] quality self-correct attempt {_attempt+1}/3: {last_issues}")
 
     title_match = re.match(r"^#\s+(.+)", content)
     title = title_match.group(1).strip() if title_match else topic.get("title", f"Best Day Trips from {city}")

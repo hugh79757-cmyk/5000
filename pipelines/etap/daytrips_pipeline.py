@@ -131,6 +131,11 @@ def _run_impl() -> bool:
     if is_draft:
         logger.warning(f"[{BLOG_ID}] DRAFT 감지 → 발행 중단: {article['slug']} - {post_issues}")
         send_alert(BLOG_ID, article["slug"], post_issues)
+        # ponytail: 게이트 미달 토픽은 자가교정 3회后仍 실패 → 재시도 무한루프(토큰 낭비) 방지용 exhausted 처리
+        from pipelines.etap.topic_manager import mark_published_by_id
+        mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
+                             topic.get("title",""), topic.get("slug",""))
+        logger.warning(f"[{BLOG_ID}] 품질 미달 토픽 exhausted 처리 (재시도 방지): {topic.get('city','')}")
         return False
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
