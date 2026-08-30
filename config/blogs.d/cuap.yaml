@@ -326,3 +326,69 @@ blogs:
     - '21:20'
   gsc_site: https://bike.informationhot.kr/
   ga4_property: ''
+- id: best-kitchen-hugo
+  deploy_type: workers
+  name: 주방용품 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1020'
+  domain: best-kitchen.informationhot.kr
+  cf_project: best-kitchen-hugo
+  repo: best-kitchen-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-kitchen-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '09:15'
+    - '14:15'
+    - '20:15'
+  gsc_site: https://best-kitchen.informationhot.kr/
+  ga4_property: ''
+- id: best-beauty-hugo
+  deploy_type: workers
+  name: 뷰티 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1010'
+  domain: best-beauty.informationhot.kr
+  cf_project: best-beauty-hugo
+  repo: best-beauty-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-beauty-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '09:25'
+    - '14:25'
+    - '20:25'
+  gsc_site: https://best-beauty.informationhot.kr/
+  ga4_property: ''
+- id: best-baby-hugo
+  deploy_type: workers
+  name: 유아용품 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: paused
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1011'
+  domain: best-baby.informationhot.kr
+  cf_project: best-baby-hugo
+  repo: best-baby-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-baby-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '09:35'
+    - '14:35'
+    - '20:35'
+  gsc_site: https://best-baby.informationhot.kr/
+  ga4_property: ''
