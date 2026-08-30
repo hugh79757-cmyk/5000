@@ -1873,12 +1873,27 @@ def dispatch(blog_id):
                 # Phase 58 Task 5: ETAP/Workers 배포 실패 캡처 — P04 (hook=post_deploy).
                 # _build_and_deploy_central은 bool만 반환하므로 Hugo/P05 vs Wrangler/P04
                 # 구분 정보는 없어 기본 P04 deploy_error로 보고 (구분 배선은 후속 작업).
+                # 오탐 방지: 사이트가 여전히 200으로 서빙 중이면 transient 배포 실패로
+                # 간주하고 CRITICAL 페이징을 건너뛴다(이벤트는 감사 추적용으로 기록).
+                _site_live = _is_site_live(blog_id)
                 logger.warning(
                     "[problem_monitor] 배포 실패 캡처: blog=%s reason=deploy_error "
-                    "problem_id=P04 phase=post_deploy",
-                    blog_id)
-                get_monitor().report(
-                    blog_id, {"reason": "deploy_error"}, phase="post_deploy", extra={})
+                    "problem_id=P04 phase=post_deploy live=%s",
+                    blog_id, _site_live)
+                if not _site_live:
+                    get_monitor().report(
+                        blog_id, {"reason": "deploy_error"}, phase="post_deploy", extra={})
+                else:
+                    # 라이브면 즉시 close (flicker 방지 — 1886 부근 STAP 경로와 동일 정책)
+                    try:
+                        from shared.publish_error_events import close_publish_error_event
+                        _ops_c = sqlite3.connect(str(PROJECT_DIR / "ops_dashboard" / "ops.db"))
+                        try:
+                            close_publish_error_event(_ops_c, blog_id=blog_id, problem_id="P04")
+                        finally:
+                            _ops_c.close()
+                    except Exception:
+                        pass
         # STAP/Hugo 배포 실패 — success=True지만 배포는 실패한 경우
         deploy_err = result.get("deploy_error")
         if deploy_err:
