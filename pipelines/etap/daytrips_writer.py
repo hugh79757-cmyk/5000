@@ -256,8 +256,9 @@ WRITING RULES:
     "seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, "
     "treasure trove, a must-visit.")
 
-    # ponytail: self-correct loop — gate hard-min is 3 H2 / 400 words; enforce a 600-word floor
-    # so published posts clear the gate on first try instead of burning tokens on repeated full regenerations.
+    # ponytail: self-correct loop — gate hard-min is 3 H2 / 400 words, but the prompt
+    # REQUIRES 7 H2 (Budget/Mid-Range/Premium/When/Getting/Planning/FAQ) and 1,200-1,800 words.
+    # Enforce a 5-H2 / 1,000-word floor so thin drafts (the old 3-H2/600 "too short" failure) never publish.
     last_issues: list[str] = []
     content = ""
     for _attempt in range(3):  # 1 initial + up to 2 self-corrections
@@ -266,17 +267,18 @@ WRITING RULES:
                           + "; ".join(last_issues) + ".")
         else:
             gen_prompt = prompt
-        result = ai_generate(SYSTEM_PROMPT, gen_prompt, temperature=0.6, max_tokens=3500)
+        result = ai_generate(SYSTEM_PROMPT, gen_prompt, temperature=0.6, max_tokens=4000)
         content = result["content"].strip()
         h2 = len(re.findall(r"^##\s+", content, re.MULTILINE))
         wc = len(content.split())
-        if h2 >= 3 and wc >= 600:
+        if h2 >= 5 and wc >= 1000:
             break
         last_issues = []
-        if h2 < 3:
-            last_issues.append(f"only {h2} H2 sections, MUST have at least 3 '##' headings")
-        if wc < 600:
-            last_issues.append(f"only {wc} words, MUST be at least 600 (target 1000-1500)")
+        if h2 < 5:
+            last_issues.append(f"only {h2} H2 sections, MUST have at least 5 '##' headings "
+                               f"(required: Best Budget / Mid-Range / Premium / When to Go / Getting There / Planning / FAQ)")
+        if wc < 1000:
+            last_issues.append(f"only {wc} words, MUST be at least 1,000 (target 1,200-1,800)")
         logger.warning(f"[daytrips] quality self-correct attempt {_attempt+1}/3: {last_issues}")
 
     title_match = re.match(r"^#\s+(.+)", content)
