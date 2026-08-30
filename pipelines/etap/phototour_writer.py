@@ -212,6 +212,7 @@ ARTICLE REQUIREMENTS:
 - If a price section has 0 tours in the data, OMIT that H2 section entirely. Do NOT write filler content.
 - Use ONLY the tour names and prices from the data above
 - Do NOT invent any tour names, prices, or statistics
+- Every $ amount must exactly match a price from the provided TOUR DATA. Do NOT invent taxi/transport/entry/food prices.
 
 STRUCTURE (use these H2 headings exactly):
 ## [Hook: one specific sentence about photographing {city}]
@@ -221,7 +222,7 @@ STRUCTURE (use these H2 headings exactly):
 ## Camera Gear and Photography Tips for {city}
 
 WRITING RULES:
-1. OPENING: Start with a concrete hook. Example style: "A 20-minute taxi from downtown drops you at the foot of 4,500-year-old pyramids and it costs less than $15 round trip." Do NOT start with generic overview sentences.
+1. OPENING: Start with a concrete visual hook. Example style: "The call to prayer echoes off the Golden Horn as you line up your tripod on the Galata Bridge at sunrise." Do NOT start with generic overview sentences. Do NOT include any $ price in the opening hook unless it is from TOUR DATA.
 2. CURATION: For each price section, feature 2-3 tours maximum. For each tour write 2-3 sentences explaining WHAT makes it worth choosing, WHO it suits best, and one PRACTICAL TIP.
 3. COMPARISON: When multiple tours cover the same attraction, tell the reader which one to pick and why.
 4. PRACTICAL SECTION: Include local currency tips, typical transport costs, best day of week, what to wear, water and food advice.
@@ -231,7 +232,7 @@ WRITING RULES:
 8. NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, culinary delights, gastronomic, rich cultural heritage, seamlessly, breathtaking, brimming with, a must-visit, treasure trove, staggering"""
 
     result = ai_generate(
-    "You are a travel writer who has visited these destinations. Write in second-person informed tone. STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. 4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific concrete scene or fact. 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, treasure trove, a must-visit.",
+    "You are a travel writer who has visited these destinations. Write in second-person informed tone. STRICT RULES: 1) Use ONLY tour names and prices from the provided data. Every $ price must exactly match a TOUR DATA price — do NOT invent taxi/transport/entry prices. 2) Write in flowing paragraphs, NEVER use numbered lists or bullet points. 3) Each section must include at least one practical tip. 4) Compare tours against each other. 5) Format prices as whole numbers when .0. 6) Open with a specific concrete visual scene (no $ price). 7) NEVER use: plethora, vibrant, bustling, tapestry, myriad, embark, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, seamlessly, breathtaking, brimming, culinary delights, gastronomic, staggering, rich cultural heritage, treasure trove, a must-visit.",
     prompt,
     temperature=0.6,
     max_tokens=3500,
