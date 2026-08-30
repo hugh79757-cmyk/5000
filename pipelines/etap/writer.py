@@ -83,7 +83,7 @@ The guide is about {city}, {country} and targets American travelers.
 (5~7 practical tips written as prose paragraphs, NOT a numbered list. Bold the topic of each tip)
 {link_instruction}
 ## Important Rules:
-- Do NOT invent specific prices or statistics. Use ranges like "budget hotels typically start around $30-50/night"
+- Do NOT invent specific prices or statistics. Use qualitative ranges (budget / mid-range / luxury) rather than inventing specific dollar amounts.
 - Do NOT mention specific hotel or airline brand names
 - Do NOT include any external links (only internal links listed above are allowed)
 - Do NOT invent any internal links. Use ONLY the exact links provided in the "Internal Links" section above. If no internal links are provided, do not add any.

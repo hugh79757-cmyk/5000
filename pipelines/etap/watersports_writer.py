@@ -121,7 +121,7 @@ RULES:
 - Remove "Save XX%!" prefixes from tour names when mentioning them
 - Add ONE natural CTA near the end of the article (not in every section). Example: "Peak season fills up fast — check availability before prices change."
 - Do NOT use numbered lists for tours. Weave them into flowing paragraphs
-- Include a "Quick Comparison" sentence at the end of each price section (e.g., "At $15, the catamaran tour offers the best value per hour compared to the $50 private option.")
+- Include a "Quick Comparison" sentence at the end of each price section (e.g., compare a budget tour's price-per-hour against a premium private option using only prices from the data).
 - Make the summary actionable: mention the best overall value pick and the best splurge pick by name and price
 
 Return ONLY the article in markdown starting with # title"""

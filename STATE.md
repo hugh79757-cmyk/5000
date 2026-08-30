@@ -60,6 +60,7 @@
 | 2026-08-26 | car daily_refresh 신규 소스 확보 | .planning/quick/20260826-car-daily-refresh-sources | 🟡 Partial (source 회전 구현 + runbook P16; 근본=신규소스 0건 잔존) | PLAN.md + pipelines/car/pipeline.py |
 | 2026-08-26 | adventure/kitchen W5 게이트 튜닝 | .planning/quick/20260826-w5-gate-adventure-kitchen | ✅ Complete (S04 warn-only + P12 visibility + runbook P12) | PLAN.md + dispatcher.py |
 | 2026-08-26 | interior-hugo P14 진단 | .planning/quick/20260826-interior-p14-diagnosis | ✅ Complete (21:02 발행 성공, 이벤트 resolved) | PLAN.md+DB |
+| 2026-08-30 | keyword-prompt-dashboard (키워드 전수 900제거/프롬프트 가격제거 12건/대시보드 단순화 제안) | .planning/quick/20260830-keyword-prompt-dashboard | ✅ Complete | 6194c3b, docs/ops/dashboard-simplification-20260830.md |
 
 ---
 

@@ -220,7 +220,7 @@ RULES:
 - Write MINIMUM 1,100 words, target 1,200-1,600 words in English. Articles under 1,000 words are rejected. Expand each section into 2-3 full paragraphs.
 - Use ONLY destinations and prices from the data. Do NOT invent destinations.
 - For EACH destination mention: price, whether direct, travel dates available, and one sentence about why the destination is worth visiting.
-- When price ranges are wide (e.g. $84-$150), explain why: different sellers, dates, or stops.
+- When price ranges are wide (e.g. a large gap between the lowest and highest fare), explain why: different sellers, dates, or stops.
 - Group destinations geographically within each price tier when possible (e.g. "Florida destinations", "Caribbean", "Europe").
 - In the booking tips section, name the specific sellers from the data (e.g. Farera, Kiwi.com) and compare them.
 - Flowing paragraphs only. NO bullet points or numbered lists.

@@ -250,7 +250,7 @@ STRUCTURE (use these H2 headings exactly):
 ## Planning Your Nature Trip
 
 WRITING RULES:
-1. OPENING: Start with a concrete hook. Example style: "A 20-minute taxi from downtown drops you at the foot of 4,500-year-old pyramids and it costs less than $15 round trip." Do NOT start with generic overview sentences.
+1. OPENING: Start with a concrete hook. Example style: "A 20-minute taxi from downtown drops you at the foot of 4,500-year-old pyramids, the driver waving you toward the trailhead." Do NOT start with generic overview sentences. Do NOT attach any invented transport or entry price to the scene.
 2. CURATION: For each price section, feature 2-3 tours maximum. For each tour write 2-3 sentences explaining WHAT makes it worth choosing, WHO it suits best, and one PRACTICAL TIP.
 3. COMPARISON: When multiple tours cover the same attraction, tell the reader which one to pick and why.
 4. PRACTICAL SECTION: Include local currency tips, typical transport costs, best day of week, what to wear, water and food advice.
