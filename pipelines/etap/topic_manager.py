@@ -138,13 +138,17 @@ def pick_topic_by_id(topic_table, blog_id):
     conn = _get_db()
     try:
         pk = _get_pk_col(conn, topic_table)
+        # deals-hugo: invalid origin filter (flight_prices 없는 origin은 no_data 확정 → skip)
+        extra = ""
+        if topic_table == "deals_topics":
+            extra = " AND origin IN (SELECT DISTINCT origin FROM flight_prices WHERE price > 0)"
         row = conn.execute(f"""
             SELECT * FROM {topic_table}
             WHERE exhausted = 0
               AND {pk} NOT IN (
                   SELECT topic_id FROM publish_log
                   WHERE blog_id = ? AND topic_id IS NOT NULL
-              )
+              ){extra}
             ORDER BY priority DESC, {pk} ASC
             LIMIT 1
         """, (blog_id,)).fetchone()
@@ -176,7 +180,7 @@ def pick_topic_by_id(topic_table, blog_id):
                   AND {pk} NOT IN (
                       SELECT topic_id FROM publish_log
                       WHERE blog_id = ? AND topic_id IS NOT NULL
-                  )
+                  ){extra}
                 ORDER BY priority DESC, {pk} ASC
                 LIMIT 1
             """, (blog_id,)).fetchone()

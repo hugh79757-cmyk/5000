@@ -632,6 +632,13 @@ def _validate_title(title):
         return False
     if "우선" in title or "사용자 요청" in title:
         return False
+    # vague keyword-eco title guard (2026-08-30): "다기능 추천: ..." 처럼 제품유형 없이 속성키워드만으로 시작하면 재생성 유도
+    generic_seeds = {"다기능", "다용도", "실속", "가성비", "추천"}
+    first_token = title.split()[0].replace(":","").replace("·","")
+    if first_token in generic_seeds:
+        return False
+    if title.startswith("다기능 ") or title.startswith("다기능:") or title.startswith("다기능 추천"):
+        return False
     # 괄호 절대 금지
     if re.search(r"[()（）]", title):
         return False
