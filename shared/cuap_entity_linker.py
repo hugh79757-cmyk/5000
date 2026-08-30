@@ -58,7 +58,7 @@ def _url_is_alive(url: str, timeout: float = 2.5) -> bool:
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "data", "travel-en.db")
 
-# 10개 CUAP 블로그 도메인 (config/blogs.d/cuap.yaml 기준)
+# 15(+3 best) CUAP 블로그 도메인 (config/blogs.d/cuap.yaml 기준) [RESEARCH L328-392, Phase 75]
 BLOG_DOMAINS = {
     "appliance-hugo": "https://appliance.informationhot.kr",
     "baby-hugo":      "https://baby.informationhot.kr",
@@ -75,9 +75,12 @@ BLOG_DOMAINS = {
     "homeappliance-hugo":"https://homeappliance.informationhot.kr",
     "golf-hugo":         "https://golf.informationhot.kr",
     "bike-hugo":         "https://bike.informationhot.kr",
+    "best-kitchen-hugo": "https://best-kitchen.informationhot.kr",
+    "best-beauty-hugo":  "https://best-beauty.informationhot.kr",
+    "best-baby-hugo":    "https://best-baby.informationhot.kr",
 }
 
-# 블로그별 아이콘
+# 블로그별 아이콘 [RESEARCH L389, Phase 75 best fleet 🏆 distinct from kitchen 🍳]
 ICONS = {
     "appliance-hugo": "🔌",
     "baby-hugo":      "👶",
@@ -89,9 +92,12 @@ ICONS = {
     "kitchen-hugo":   "🍳",
     "beauty-hugo":    "💄",
     "camping-hugo":   "⛺",
+    "best-kitchen-hugo": "🏆",
+    "best-beauty-hugo":  "💄",
+    "best-baby-hugo":    "👶",
 }
 
-# 블로그별 테마 컬러 (퍼널 헤더)
+# 블로그별 테마 컬러 (퍼널 헤더) [RESEARCH L388, Phase 75]
 THEME_COLORS = {
     "appliance-hugo": "#2563eb",
     "baby-hugo":      "#ec4899",
@@ -103,6 +109,9 @@ THEME_COLORS = {
     "kitchen-hugo":   "#ea580c",
     "beauty-hugo":    "#db2777",
     "camping-hugo":   "#0891b2",
+    "best-kitchen-hugo": "#ea580c",
+    "best-beauty-hugo":  "#db2777",
+    "best-baby-hugo":    "#ec4899",
 }
 
 # 10개 블로그 연결 그래프 (고정 퍼널 경로)
@@ -158,7 +167,19 @@ CROSS_GRAPH = {
         "secondary": ["interior-hugo", "pet-hugo"],
         "use_cases": ["kitchen-hugo", "laptop-hugo"],
     },
+    # Phase 75 best fleet — bidirectional with search siblings [RESEARCH L375-384]
+    # best primary → search sibling + adjacent; search siblings secondary[0] inserts best via _apply_best_graph_patches()
+    "best-kitchen-hugo": {"primary": ["kitchen-hugo","appliance-hugo"], "secondary": ["health-hugo","interior-hugo"], "use_cases": ["camping-hugo","baby-hugo"]},
+    "best-beauty-hugo":  {"primary": ["beauty-hugo","health-hugo"], "secondary": ["appliance-hugo","interior-hugo"], "use_cases": ["kitchen-hugo","baby-hugo"]},
+    "best-baby-hugo":    {"primary": ["baby-hugo","kitchen-hugo"], "secondary": ["interior-hugo","pet-hugo"], "use_cases": ["beauty-hugo","appliance-hugo"]},
 }
+
+# Search → best bidirectional edges (insert best at secondary[0]) [RESEARCH L384, PLAN T02-3]
+# Idempotent — guard double-insert on reload
+for _sid, _bid in (("kitchen-hugo","best-kitchen-hugo"), ("beauty-hugo","best-beauty-hugo"), ("baby-hugo","best-baby-hugo")):
+    _sec = CROSS_GRAPH.get(_sid, {}).get("secondary")
+    if _sec is not None and _bid not in _sec:
+        _sec.insert(0, _bid)
 
 
 def _get_db():
