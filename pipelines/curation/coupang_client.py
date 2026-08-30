@@ -64,8 +64,14 @@ def search_products(keyword: str, limit: int = 10, limiter=None) -> dict:
 def get_best_categories(category_id: str = "", limiter=None) -> dict:
     from pipelines.curation.rate_limiter import RateLimiter
     limiter = limiter or RateLimiter(limit=80, window_seconds=60)
-    url_path = "/v2/providers/affiliate_open_api/apis/openapi/categories/bestcategories"
-    return _request(limiter, "GET", url_path, {"categoryId": category_id} if category_id else None)
+    # Live probe 2026-08-30: query param ?categoryId= returns 404.
+    # Correct is path-param /v1/products/bestcategories/{categoryId} (flat list data).
+    # Keep both forms handled: non-empty → path-param, empty → base path (no query).
+    if category_id:
+        url_path = f"/v2/providers/affiliate_open_api/apis/openapi/v1/products/bestcategories/{category_id}"
+        return _request(limiter, "GET", url_path, None)
+    url_path = "/v2/providers/affiliate_open_api/apis/openapi/v1/products/bestcategories"
+    return _request(limiter, "GET", url_path, None)
 
 
 def get_goldbox(limiter=None) -> dict:

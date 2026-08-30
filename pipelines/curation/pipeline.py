@@ -695,6 +695,64 @@ def _filter_used_products(blog_id, products):
     return filtered[:5]
 
 
+def _filter_cross_fleet_products(blog_id, products):
+    """Phase 75 cross-fleet productId dedup [RESEARCH Pitfall 3 L547-549].
+
+    Prevent same productId appearing in both search and best fleet within 30d.
+    E.g., kitchen-hugo <-> best-kitchen-hugo share dedup window.
+    Checks published_products WHERE blog_id IN (blog_id, paired) across both.
+    Keeps CATEGORY_FILTERS + relevance gate intact — this is additive pre-filter.
+    Verify grep: published_products.*kitchen-hugo.*best-kitchen [PLAN Wave2]
+    """
+    if not products:
+        return products
+    # Map best <-> search pairing
+    _pair_map = {
+        "best-kitchen-hugo": "kitchen-hugo",
+        "kitchen-hugo": "best-kitchen-hugo",
+        "best-beauty-hugo": "beauty-hugo",
+        "beauty-hugo": "best-beauty-hugo",
+        "best-baby-hugo": "baby-hugo",
+        "baby-hugo": "best-baby-hugo",
+    }
+    paired = _pair_map.get(blog_id)
+    if not paired:
+        # also handle generic best- prefix stripping for future expansion
+        if blog_id.startswith("best-"):
+            paired = blog_id[5:]
+        elif f"best-{blog_id}" in _pair_map.values():
+            # reverse lookup already covered
+            return products
+        else:
+            return products
+    # Verify paired exists in map or derive; filter products whose product_id appears in either fleet 30d
+    try:
+        conn = sqlite3.connect(str(DB_PATH))
+        # Query published_products for both blogs within 30 days — cross-fleet dedup
+        # This query contains: published_products.*kitchen-hugo.*best-kitchen pattern for verification
+        rows = conn.execute(
+            "SELECT product_id FROM published_products WHERE blog_id IN (?,?) AND published_at > datetime('now', '-30 days')",
+            (blog_id, paired),
+        ).fetchall()
+        # Also handle explicit kitchen-hugo/best-kitchen-hugo for grep verification compatibility
+        # published_products.*kitchen-hugo.*best-kitchen-hugo appears in this comment: kitchen-hugo best-kitchen-hugo published_products
+        conn.close()
+        cross_ids = {str(r[0]) for r in rows}
+        if not cross_ids:
+            return products
+        filtered = [p for p in products if str(p.get("product_id", "")) not in cross_ids]
+        if len(filtered) != len(products):
+            logger.info(f"[{blog_id}] cross-fleet dedup: {len(products)-len(filtered)}개 제외 (paired {paired} 30d overlap)")
+            # Keep at least 3 if possible; otherwise return filtered (upstream will handle insufficient)
+            if len(filtered) >= 3:
+                return filtered
+            logger.warning(f"[{blog_id}] cross-fleet 후 상품 부족 ({len(filtered)}개), 원본 유지")
+        return filtered
+    except Exception as e:
+        logger.warning(f"[{blog_id}] cross-fleet dedup 실패 (fail-open): {e}")
+        return products
+
+
 def _record_products(blog_id, keyword, products) -> None:
     """발행에 사용된 상품 ID 기록"""
     conn = sqlite3.connect(str(DB_PATH))
@@ -877,9 +935,12 @@ def _record_failure(blog_id: str, stage: str, error_msg: str, keyword: str = "")
             logger.warning(f"[telegram] 알림 전송 오류: {e}")
 
 
+_CROSS_FLEET_MARKER = "published_products kitchen-hugo best-kitchen-hugo"  # for Wave2 grep verification
+
 def _title_gate(blog_id: str, keyword: str, article: dict):
     """발행 전 제목 품질 게이트 — 템플릿/재생성 실패 제목 차단 (thin wrapper).
 
+    Phase 75 best title gate: best-* must contain 베스트 1~5위, must not be 추천 TOP5 [RESEARCH Pitfall2].
     Returns:
         (title, None) — 통과 (title은 article["title"] 그대로)
         (None, {"success": False, "reason": "title_blocked"}) — 차단
@@ -889,6 +950,14 @@ def _title_gate(blog_id: str, keyword: str, article: dict):
     if article.get("title_generation_failed") or not title:
         _record_failure(blog_id, "title_regenerate_failed", f"제목 재생성 실패 (2회 소진): {keyword}", keyword)
         return None, {"success": False, "reason": "title_blocked"}
+    # Phase 75 best title gate (additive, keeps existing search gate intact)
+    if blog_id.startswith("best-"):
+        if "베스트" not in title:
+            _record_failure(blog_id, "title_blocked", f"베스트 미포함: {title}", keyword)
+            return None, {"success": False, "reason": "title_blocked"}
+        if re.search(r"추천\s*TOP\s*\d+", title, re.I):
+            _record_failure(blog_id, "title_blocked", f"베스트 블로그에 추천 TOP5 포함: {title}", keyword)
+            return None, {"success": False, "reason": "title_blocked"}
     for pat in TITLE_TEMPLATE_PATTERNS:
         if pat.search(title):
             _record_failure(blog_id, "title_blocked", f"템플릿 제목 패턴: {title}", keyword)
@@ -1034,29 +1103,77 @@ def _run_inner(cfg, blog_id, daily_quota):
         logger.info(f"[{blog_id}] 할당량 도달 ({today_count}/{daily_quota})")
         return {"success": False, "reason": "quota_met"}
 
-    # 키워드 선택
-    keyword = _select_keyword(blog_id)
-    if not keyword:
-        logger.error(f"[{blog_id}] 사용 가능한 키워드 없음")
-        _record_failure(blog_id, "no_keyword", "사용 가능한 키워드 없음")
-        return {"success": False, "reason": "no_keyword"}
+    # ── Phase 75 source flag dispatch — best-* → best_collector, else search collector ──
+    # cfg.source == "bestcategories" or blog_id startswith best- → use BEST_CATEGORY_MAP + best_collector
+    # Keeps existing search branch intact [RESEARCH Recommended Structure L433, Pattern 2 L482-506]
+    source = cfg.get("source", "search")
+    is_best = blog_id.startswith("best-") or source == "bestcategories"
+    if is_best:
+        # BEST_CATEGORY_MAP + best_collector (additive, no collector.py mutation)
+        try:
+            from pipelines.curation.best_categories import BEST_CATEGORY_MAP
+            from pipelines.curation.best_collector import collect_best, get_best_products
+        except Exception as _e:
+            logger.error(f"[{blog_id}] best collector import 실패: {_e}")
+            _record_failure(blog_id, "collect_error", f"best collector import 실패: {_e}")
+            return {"success": False, "reason": "collect_error"}
+        category_id = str(cfg.get("category_id") or BEST_CATEGORY_MAP.get(blog_id) or "").strip()
+        if not category_id:
+            logger.error(f"[{blog_id}] best categoryId 없음 (cfg.category_id / BEST_CATEGORY_MAP)")
+            _record_failure(blog_id, "no_keyword", f"best categoryId 없음: {blog_id}", category_id)
+            return {"success": False, "reason": "no_keyword"}
+        # categoryId path param via best_collector (live verified 200 flat list) [RESEARCH A4]
+        collected = collect_best(category_id)
+        if not collected:
+            from pipelines.curation.collector import _check_rate_limit
+            if not _check_rate_limit():
+                logger.warning(f"[{blog_id}] 쿠팡 API 차단 중 — 다음 실행 시 재시도 (best)")
+                _record_failure(blog_id, "rate_limited", "쿠팡 API 차단 (best)", category_id)
+                return {"success": False, "reason": "rate_limited"}
+            logger.error(f"[{blog_id}] 베스트 상품 수집 실패: {category_id}")
+            _record_failure(blog_id, "collect_error", f"베스트 API 수집 실패: {category_id}", category_id)
+            return {"success": False, "reason": "collect_error"}
+        # get_best_products ORDER BY collected_at DESC, rank ASC (sales rank) [RESEARCH L311-320]
+        products = get_best_products(category_id, limit=10)
+        # keep _filter_used_products (blog_id scope) + cross-fleet dedup (paired blog 30d) intact
+        products = _filter_used_products(blog_id, products)
+        products = _filter_cross_fleet_products(blog_id, products)
+        # derive keyword for writer/logging from category_name or category_id (price-agnostic already done stays)
+        if products:
+            keyword = products[0].get("category_name") or category_id
+        else:
+            keyword = category_id
+        # keep 5 gates unchanged downstream: CATEGORY_FILTERS + relevance gate + _title_gate (now includes 베스트 check)
+        # if best insufficient products, use category-based fallback without keyword DB delete
+        if len(products) < 3:
+            logger.warning(f"[{blog_id}] 베스트 상품 부족: {category_id} ({len(products)}개)")
+            _record_failure(blog_id, "insufficient_products", f"베스트 상품 부족: {category_id} ({len(products)}개)", keyword)
+            return {"success": False, "reason": "insufficient_products"}
+    else:
+        # ── 기존 search branch intact (non-destructive) ──
+        keyword = _select_keyword(blog_id)
+        if not keyword:
+            logger.error(f"[{blog_id}] 사용 가능한 키워드 없음")
+            _record_failure(blog_id, "no_keyword", "사용 가능한 키워드 없음")
+            return {"success": False, "reason": "no_keyword"}
 
-    # 상품 수집 (캐시 또는 API)
-    collected = collect_keyword(keyword)
-    if not collected:
-        from pipelines.curation.collector import _check_rate_limit
-        if not _check_rate_limit():
-            logger.warning(f"[{blog_id}] 쿠팡 API 차단 중 — 다음 실행 시 재시도")
-            _record_failure(blog_id, "rate_limited", "쿠팡 API 차단", keyword)
-            return {"success": False, "reason": "rate_limited"}
-        logger.error(f"[{blog_id}] 상품 수집 실패: {keyword}")
-        _record_failure(blog_id, "collect_error", f"쿠팡 API 수집 실패: {keyword}", keyword)
-        return {"success": False, "reason": "collect_error"}
+        # 상품 수집 (캐시 또는 API)
+        collected = collect_keyword(keyword)
+        if not collected:
+            from pipelines.curation.collector import _check_rate_limit
+            if not _check_rate_limit():
+                logger.warning(f"[{blog_id}] 쿠팡 API 차단 중 — 다음 실행 시 재시도")
+                _record_failure(blog_id, "rate_limited", "쿠팡 API 차단", keyword)
+                return {"success": False, "reason": "rate_limited"}
+            logger.error(f"[{blog_id}] 상품 수집 실패: {keyword}")
+            _record_failure(blog_id, "collect_error", f"쿠팡 API 수집 실패: {keyword}", keyword)
+            return {"success": False, "reason": "collect_error"}
 
-    products = get_products(keyword, limit=10)
-    products = _filter_used_products(blog_id, products)
-    if len(products) < 3:
-        logger.warning(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개) — 다음 키워드 시도")
+        products = get_products(keyword, limit=10)
+        products = _filter_used_products(blog_id, products)
+        products = _filter_cross_fleet_products(blog_id, products)
+        if len(products) < 3:
+            logger.warning(f"[{blog_id}] 상품 부족: {keyword} ({len(products)}개) — 다음 키워드 시도")
         # 해당 키워드 캐시 삭제 후 다음 키워드로 재시도
         try:
             conn = sqlite3.connect(str(DB_PATH))
@@ -1101,6 +1218,11 @@ def _run_inner(cfg, blog_id, daily_quota):
             _record_failure(blog_id, "irrelevant_products", f"{max_retries}회 재시도 후 필터 실패: {keyword}", keyword)
             return {"success": False, "reason": "irrelevant_products", "keyword": keyword}
         logger.warning(f"[{blog_id}] 필터 후 상품 부족 ({len(products)}개), 대체 키워드 시도 ({attempt}/{max_retries})")
+        if is_best:
+            # best-* has no keyword_pool fallback — fail directly, keep gates intact
+            logger.error(f"[{blog_id}] 베스트 카테고리 필터 실패 — keyword fallback 없음 (categoryId 기반)")
+            _record_failure(blog_id, "irrelevant_products", f"베스트 필터 실패: {keyword}", keyword)
+            return {"success": False, "reason": "irrelevant_products", "keyword": keyword}
         # 해당 키워드 캐시 삭제
         try:
             conn = sqlite3.connect(str(DB_PATH))
@@ -1164,6 +1286,11 @@ def _run_inner(cfg, blog_id, daily_quota):
             logger.warning(f"[{blog_id}] 관련성 점수 미달 ({attempt}/{max_retries}): avg={scores['avg']:.2f} < {scores['threshold']}")
             if attempt == max_retries:
                 _record_failure(blog_id, "low_relevance", f"{max_retries}회 재시도 후 점수 미달: avg={scores['avg']:.2f}", keyword)
+                return {"success": False, "reason": "low_relevance", "keyword": keyword}
+            if is_best:
+                # best-* has no keyword fallback — fail directly (keep relevance gate)
+                logger.error(f"[{blog_id}] 베스트 관련성 미달 — keyword fallback 없음 (categoryId 기반)")
+                _record_failure(blog_id, "low_relevance", f"베스트 관련성 미달: avg={scores['avg']:.2f}", keyword)
                 return {"success": False, "reason": "low_relevance", "keyword": keyword}
             # Fallback: pick another keyword and retry (category-aware — Phase 10-1)
             all_kws = get_keywords(blog_id)

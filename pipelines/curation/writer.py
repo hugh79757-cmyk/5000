@@ -171,6 +171,25 @@ BLOG_EXTRA_RULES = {
 - "추천 대상:", "페르소나:" 같은 라벨 표기 절대 금지.
 - 리뷰 점수, 판매량 수치는 상품 데이터에 있는 경우에만 사용. 없으면 절대 지어내지 말 것.
 """,
+    "best-kitchen-hugo": """
+[best-kitchen-hugo 전용 — 판매 베스트]
+- 제목에 반드시 '베스트 1~5위' 포함, '추천 TOP5' 절대 금지.
+- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~5위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
+- rank는 판매 순위임을 본문에 1회 언급. 가격 기준 정렬이 아님을 명확히 할 것.
+- 각 상품 소개는 판매량/인기 근거가 아니라 카테고리 내 판매 순위 기반임을 서술.
+""",
+    "best-beauty-hugo": """
+[best-beauty-hugo 전용 — 판매 베스트]
+- 제목에 반드시 '베스트 1~5위' 포함, '추천 TOP5' 절대 금지.
+- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~5위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
+- rank는 판매 순위임을 본문에 1회 언급. 가격 기준 정렬이 아님을 명확히 할 것.
+""",
+    "best-baby-hugo": """
+[best-baby-hugo 전용 — 판매 베스트]
+- 제목에 반드시 '베스트 1~5위' 포함, '추천 TOP5' 절대 금지.
+- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~5위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
+- rank는 판매 순위임을 본문에 1회 언급. 가격 기준 정렬이 아님을 명확히 할 것.
+""",
 }
 
 BANNED_PHRASES = [
@@ -334,8 +353,10 @@ def _count_h2(body):
 
 
 
-def _build_product_block(products):
+def _build_product_block(products, blog_id=None):
     """상품 데이터를 프롬프트용 텍스트로 변환 (enriched 데이터 포함)"""
+    # Phase 75: sales-rank wording for best-* (flat list rank is sales rank, not search exposure) [RESEARCH L168-169]
+    _is_best = bool(blog_id and blog_id.startswith("best-"))
     lines = []
     for i, p in enumerate(products, 1):
         rocket = "로켓배송" if p.get("is_rocket") else ""
@@ -354,6 +375,7 @@ def _build_product_block(products):
             spec_lines.append(f"  {k}: {v}")
         spec_str = "\n".join(spec_lines) if spec_lines else "  (상품명에서 스펙을 확인하세요)"
 
+        rank_label = "판매 베스트" if _is_best else "쿠팡순위"
         lines.append(
             f"[상품{i}]\n"
             f"- 상품명: {p['product_name']}\n"
@@ -361,7 +383,7 @@ def _build_product_block(products):
             f"- 가격: {p.get('product_price', 0):,}원\n"
             f"- 카테고리: {p.get('category_name', '')}\n"
             f"- 배송: {badges or '일반배송'}\n"
-            f"- 쿠팡순위: {p.get('rank', '-')}위\n"
+            f"- {rank_label}: {p.get('rank', '-')}위\n"
             f"- 확인된 스펙:\n{spec_str}\n"
             f"- 링크: {p.get('product_url', '')}\n"
             f"- 이미지: {p.get('product_image', '')}\n"
@@ -394,6 +416,103 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 최근 3일 내 발행된 글과 중복되는 제목 구조는 피해주세요. 특히 '1위 X vs Y — ... 비교' 구조는 반복 사용하지 마세요.
 제목에 "가성비"라는 단어를 사용하지 마세요. 대신 "합격점", "실속", "가격 대비" 등의 표현을 사용하세요.
 """
+
+    # Phase 75 Wave 2: best-* sales-rank framing [RESEARCH Pitfall 2 L537-542]
+    _is_best = bool(blog_id and blog_id.startswith("best-"))
+    if _is_best:
+        return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
+{year}년 {month}월 기준 "{keyword}" 카테고리 베스트셀러 판매량 기준 1~5위를 소개합니다. 아래 rank(판매 베스트 N위)는 판매 순위이며 가격·가성비 기준 정렬이 아닙니다. 본문에 판매 순위임을 1회 명시하세요.
+
+[제목 규칙 — 베스트 전용 — 가장 중요]
+제목에 반드시 '베스트 1~5위'를 포함하세요. '추천 TOP5'는 절대 금지입니다.
+예: "주방용품 베스트 1~5위 — 스테인리스 냄비부터 유리 밀폐용기까지"
+예: "뷰티 베스트 1~5위 — 판매량 상위 크림·세럼 비교"
+- 제목에 '베스트' 미포함 또는 '추천 TOP5' 포함 시 재생성 대상입니다.
+- 제품명 또는 브랜드명 1~2개 포함 가능하나 '베스트 1~5위' 문구는 필수.
+- "가성비" 사용 금지 → "합격점", "실속", "가격 대비" 사용 (단, "가성비/스펙 기준으로 골랐습니다" 서술은 베스트 글에서 금지 — 판매량 기준임을 명시).
+- 핵심 키워드가 제목 앞 15자 이내에 위치해야 합니다.
+- 제목 길이는 35자 이내로 작성하세요 (공백 포함).
+- "{keyword} 추천 TOP5 (연도년)" 같은 통짜 포맷은 사용하지 마세요.
+- **괄호 () 절대 금지**: 괄호 대신 하이픈(-)을 사용하세요.
+{extra_title_rules}{recent_block}
+
+[출력 형식 규칙 — 가장 중요, 반드시 준수]
+응답의 구조는 아래 4단계를 정확히 따르세요:
+
+1. 첫 번째 줄은 반드시 '# ' 로 시작하는 H1 제목이어야 합니다.
+   - 예: "# 2026년 8월 주방용품 베스트 1~5위 — 판매량 상위 냄비·프라이팬 비교"
+   - H1 제목 앞에 아무 텍스트도 쓰지 마세요. 첫 글자가 반드시 '#' 여야 합니다.
+2. H1 제목 다음에 빈 줄을 한 칸 넣습니다.
+3. 빈 줄 다음에 본문 첫 문단이 시작됩니다.
+4. H1 제목 없이 본문을 시작하지 마세요. '# ' 없는 상태로 글을 시작하면 응답 전체가 무효 처리됩니다.
+
+- 나열형 템플릿 제목 금지: "{{keyword}} 추천 TOP N (연도년)" 형태의 단순 나열형 제목은 작성하지 마세요.
+- 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~" 등 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
+
+[글 구조 — 베스트 정보 전달형]
+이 글은 카테고리 베스트셀러 판매량 기준 1~5위를 또렷하게 전달하는 "베스트 정보 전달형" 글입니다. 아래 5단계 구조를 따르되, 문장은 자연스럽게 쓰세요.
+
+1. **도입부 — 판매량 기준 명시 (2~4문장)**:
+   - "카테고리 베스트셀러 판매량 기준 1~5위"임을 첫 문단에서 명시
+   - "가성비/스펙 기준으로 골랐습니다" 서술 금지 — 판매 순위 기반임을 밝히기
+   - 이 글에 어떤 정보가 담겨 있는지(비교표, 상품별 특징, 구매 전 체크리스트) 한두 문장으로 안내
+   - "{year}년 {month}월 기준"을 넣어 시의성을 살리고, 공감 가는 문장으로 자연스럽게 시작
+
+2. **핵심 비교 표 (H2) — 필수**:
+    - H2 소제목: "한눈에 보는 비교표"
+    - 표 헤더는 `| # | 상품명 | 가격 | 핵심 특징 |` 4열을 기본으로 하되, 데이터가 3개 이상 있는 항목만 최대 1열 추가 가능 (총 5열 상한, 6열 이상 금지)
+    - 가격과 특징은 상품 데이터에 있는 값만 사용하고, 정보 없으면 열 자체를 생략 — "-"로 채우지 말 것
+    - rank는 판매 순위(판매 베스트 N위) 기준 정렬임을 표 아래 한두 문장으로 설명
+
+3. **상품별 상세 소개 (H2 + 상품마다 H3) — 필수**:
+   - H2 소제목: "상품별 상세 비교"
+   - 각 상품을 H3 (###)로 세분화. H3 제목: "상품명 — 한 줄 특징"
+   - 각 상품마다: 상품 이미지 → 핵심 스펙(수치) → 장점 1~2가지 + 아쉬운 점 1가지 → 어떤 상황의 사람에게 적합한지
+   - "추천 대상:", "페르소나:" 같은 라벨 표기 절대 금지.
+   - 마지막에 실질 구매 정보 1~2줄 추가. 로켓배송 여부, 구매자 반응 등을 자연스러운 문장으로 녹여낼 것. 근거 없는 수치 지어내기 금지.
+   - 소개 끝에 링크: [쿠팡에서 최저가 확인하기](상품링크)
+
+4. **구매 전 체크리스트 (H2) — 필수**:
+   - H2 소제목: "구매 전 체크리스트"
+   - 구매 전 확인할 실용 항목을 체크리스트(대시 목록)로 정리
+
+5. **마무리 — 추천과 재확인 (H2)**:
+   - H2 소제목은 "마무리", "결론"이 아니라 자연스러운 문장형으로 작성
+   - 소개한 상품 중 어떤 상황의 누구에게 어떤 상품이 어울리는지 1~2문장으로 다시 짚기
+   - 가격·배송·할인 정보는 변경될 수 있으니 최신 정보를 재확인하라는 안내 1문장
+   - 행동 유도(CTA): "아래 링크에서 가격을 확인해 보세요" 같은 문구 포함
+
+[문체 규칙]
+- "~입니다/~습니다" 체로 통일
+- 글 마지막에 반드시 포함: "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다."
+
+[스펙 서술 규칙 — 매우 중요]
+- "확인된 스펙"에 있는 수치만 본문에 사용하세요.
+- 스펙 정보가 없는 항목은 추측하거나 지어내지 마세요.
+- "뛰어난 성능", "강력한 흡입력" 같은 추상적 표현 대신, 스펙 수치가 있으면 수치를 쓰고 없으면 해당 항목을 언급하지 마세요.
+- 브랜드 정보가 있으면 제목과 본문에 적극 활용하세요.
+
+[절대 금지]
+- "알아보겠습니다", "소개합니다", "소개해 드리겠습니다", "드립니다", "놓치지 마세요"
+- "마무리", "결론" 소제목
+- 취소선(~~), 이모지, 【】, ★, ♥ 등 특수 장식 문자
+- "이번 포스팅에서는", "이번 글에서는" 표현
+- "스펙 정보가 부족", "스펙 정보가 없", "무게 범위가 불확실" 등 메타 문구
+[1인칭 경험 주장 금지 — 매우 중요]
+- "저도", "저는", "내가", "직접 사용", "실제 사용", "실사용", "써보니", "사용해보니" 등 1인칭 경험/체험 주장 표현 절대 금지.
+- 대신 상품 데이터(스펙, 가격, 배송, 리뷰 수치)와 구체적 생활 장면으로 서술하세요.
+
+[상품 필터 규칙 — 반드시 준수]
+- 키워드와 명백히 무관한 상품은 소개하지 마세요.
+- 제외 후 남은 상품이 3개 미만이면 남은 상품만으로 작성하세요.
+- 같은 브랜드의 색상만 다른 동일 제품은 하나만 소개하세요.
+
+[글자수]
+- 총 2500~3500자 (한글 기준). 비교표/체크리스트 포함해 기존 대비 확대.
+- 각 상품 소개는 최소 150자 이상.
+- 핵심 비교 표 섹션은 최소 200자 이상.
+- 구매 전 체크리스트는 최소 200자 이상.
+- 전체 글이 2500자 미만이면 절대 안 됩니다.{extra_block}"""
 
     return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
 {year}년 {month}월 기준 "{keyword}" 관련 추천 상품 글을 작성합니다.
@@ -814,7 +933,7 @@ def generate_curation_article(keyword, products, blog_id=None):
         logger.warning(f"상품 부족: {keyword} ({len(products) if products else 0}개)")
         return None
 
-    product_block = _build_product_block(products[:5])
+    product_block = _build_product_block(products[:5], blog_id=blog_id)
 
     # 제목 스타일 다양화 — 템플릿 기반 선택
     template_type = None
@@ -971,10 +1090,24 @@ def generate_curation_article(keyword, products, blog_id=None):
     # 제목 추출: 첫 번째 # 헤딩 또는 첫 줄
     title_generation_failed = False
     title = ""
+    # Phase 75 best title gate: must contain 베스트, must not contain 추천 TOP5 [RESEARCH Pitfall 2]
+    _is_best_title_gate = bool(blog_id and blog_id.startswith("best-"))
     for line in body.split("\n"):
         line = line.strip()
         if line.startswith("# "):
             title = line.lstrip("# ").strip()
+            # 베스트 전용 제목 검증: 베스트 미포함 또는 추천 TOP5 포함 시 재생성 대상
+            if _is_best_title_gate:
+                if "베스트" not in title or re.search(r"추천\s*TOP\s*\d+", title, re.I):
+                    logger.warning(f"[best_title_gate] 베스트 누락/추천 TOP5 포함 → 재생성: {title[:60]}")
+                    title = _regenerate_title(keyword, blog_id)
+                    # 재생성 후에도 베스트 검증 — 실패 시 차단 마커
+                    if not title or "베스트" not in title:
+                        title_generation_failed = True
+                        logger.warning(f"[best_title_gate] 베스트 제목 재생성 실패: {keyword} — 발행 차단")
+                        title = ""
+                    body = body.replace(line, "", 1).strip()
+                    break
             # 백스톱: H1이 있어도 템플릿/CoT 패턴이면 재생성 (fail-closed 유지)
             if not _validate_title(title):
                 title = _regenerate_title(keyword, blog_id)
@@ -1002,8 +1135,19 @@ def generate_curation_article(keyword, products, blog_id=None):
         if not title:
             # 최후 폴백: "{keyword} 추천 · YYYY년 M월" — 옛 TOP5 포맷 금지
             _now = datetime.now()
-            title = f"{keyword} 추천 · {_now.year}년 {_now.month}월"
+            if _is_best_title_gate:
+                title = f"{keyword} 베스트 1~5위 · {_now.year}년 {_now.month}월"
+            else:
+                title = f"{keyword} 추천 · {_now.year}년 {_now.month}월"
             logger.warning(f"[title-fallback] blog_id={blog_id} keyword={keyword} pick 실패 → 최후 폴백 사용: {title}")
+    # Phase 75 fallback best guarantee: fallback이 베스트 미포함이면 베스트로 강제 치환 (additive, non-destructive)
+    if _is_best_title_gate and title and "베스트" not in title:
+        # 기존 제목에 베스트 주입 — 예: "주방용품 추천 · 2026년 8월" → "주방용품 베스트 1~5위 · 2026년 8월"
+        if "추천" in title:
+            title = title.replace("추천", "베스트 1~5위", 1)
+        else:
+            title = f"{keyword} 베스트 1~5위 — {title[:20]}"
+        logger.info(f"[best_title_fallback_fix] 베스트 주입: {title[:50]}")
     if template_type:
         logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, (title or "")[:50])
 
