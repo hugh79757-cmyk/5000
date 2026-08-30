@@ -15,6 +15,7 @@ import hashlib
 import hmac
 import logging
 import os
+import re
 import sys
 import time
 from typing import Optional
@@ -173,6 +174,13 @@ class ETAPAffiliate:
         base_url = "https://www.booking.com/hotel"
         return f"{base_url}/{hotel_id}.html?aid={self.booking_api_key}&checkin={checkin}&checkout={checkout}&locale={locale}"
     
+    def generate_trip_city_link(self, city: str) -> str:
+        """Trip.com 도시 호텔 검색 제휴 링크 (partnerid 포함). 미설정 시 빈 문자열."""
+        if not self.is_trip_configured():
+            return ""
+        slug = re.sub(r"[^a-z0-9]+", "-", (city or "").lower()).strip("-")
+        return f"https://www.trip.com/hotels/{slug}/?partnerid={self.trip_partner_id}"
+
     def get_viator_deep_link(self, tour_name: str, city: str) -> Optional[str]:
         """
         Viator 투어 딥링크 조회.

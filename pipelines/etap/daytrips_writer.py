@@ -211,7 +211,7 @@ def generate_daytrips_guide(topic):
 {summary}
 
 ARTICLE REQUIREMENTS:
-- 1,000-1,500 words in English
+- 1,200-1,800 words in English
 - All prices in {currency} (the local currency shown in data)
 - If a price section has 0 tours in the data, OMIT that H2 section entirely. Do NOT write filler content.
 - Use ONLY the tour names and prices from the data above
@@ -224,23 +224,28 @@ TITLE (REQUIRED — first line, H1 format):
   - Use a specific angle: e.g. "Day Trips From {city}: Beaches, Ruins & Safari in One Day" or "Escaping {city}: The Best Day Trips by Budget" or "{city} Day Trip Guide: Castles, Coasts & Mountain Roads"
   - Vary the structure each time — do NOT repeat the same subtitle pattern]
 
-STRUCTURE:
+STRUCTURE (use these H2 headings — in this order, all required):
 - Start with a 2-3 sentence introduction paragraph BEFORE any heading. Put the concrete hook here as plain text — do NOT put it in an H2.
-- Then use these H2 headings exactly:
 ## Best Budget Day Trips
 ## Mid-Range Excursions Worth the Upgrade
 ## Premium Full-Day Experiences
+## When to Go (Best Season & Month)
+## Getting There & Local Transport
 ## Planning Your Day Trip
+## FAQ
 
 WRITING RULES:
 1. OPENING: Start with a concrete hook. Example style: "A 20-minute taxi from downtown drops you at the foot of 4,500-year-old pyramids, the driver waving you toward the trailhead." Do NOT start with generic overview sentences. Do NOT attach any invented transport or entry price to the scene.
 2. CURATION: For each price section, feature 2-3 tours maximum. For each tour write 2-3 sentences explaining WHAT makes it worth choosing, WHO it suits best, and one PRACTICAL TIP.
 3. COMPARISON: When multiple tours cover the same attraction, tell the reader which one to pick and why.
-4. PRACTICAL SECTION: Include local currency tips, typical transport costs, best day of week, what to wear, water and food advice.
-5. TONE: Write as a knowledgeable friend who has been there. Use "you" directly. Include subjective opinions.
-6. FORMAT: Flowing paragraphs only. NO numbered lists, NO bullet points. Bold tour names on first mention.
-7. CLOSING: End with a single "If you only have one day" recommendation with specific tour name and price.
-8. NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, culinary delights, gastronomic, rich cultural heritage, seamlessly, breathtaking, brimming with, a must-visit, treasure trove, staggering"""
+4. WHEN TO GO: Give a month-by-month or seasonal take — which months have best weather, lowest crowds, or shoulder-season deals. Be specific to {city}.
+5. GETTING THERE: Cover how to reach the day-trip bases from {city} (train/bus/ferry/car), typical fares in {currency}, and one booking tip.
+6. PLANNING: Include local currency tips, best day of week, what to wear, water and food advice.
+7. FAQ: Answer 3 real reader questions (e.g. "Can I do this without a car?", "Is it safe for solo travelers?", "What if it rains?"). Keep each answer 2-3 sentences.
+8. TONE: Write as a knowledgeable friend who has been there. Use "you" directly. Include subjective opinions.
+9. FORMAT: Flowing paragraphs only. NO numbered lists, NO bullet points. Bold tour names on first mention.
+10. CLOSING: End with a single "If you only have one day" recommendation with specific tour name and price.
+11. NEVER use: plethora, vibrant, bustling, embark, tapestry, myriad, hidden gem, unforgettable, crystal-clear, soak in, immerse yourself, lets dive in, without further ado, a testament to, culinary delights, gastronomic, rich cultural heritage, seamlessly, breathtaking, brimming with, a must-visit, treasure trove, staggering"""
 
     SYSTEM_PROMPT = ("You are a travel writer who has visited these destinations. Write in second-person informed tone. "
     "STRICT RULES: 1) Use ONLY tour names and prices from the provided data. 2) Write in flowing paragraphs, "

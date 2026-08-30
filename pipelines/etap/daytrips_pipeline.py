@@ -112,6 +112,42 @@ def _add_product_cards(article):
         article["content"] = insert_comparison_table(article["content"], comp, max_rows=5)
     return article
 
+def _inject_tour_affiliate_links(content, tours):
+    """본문에 언급된 투어명을 Viator 딥링크로 인라인 치환 (제휴 CTR↑)."""
+    if not tours:
+        return content
+    import re as _re
+    for t in tours:
+        nm = _re.sub(r"^Save [\d.]+%!\s*", "", t.get("product_name", "")).strip()
+        link = t.get("deep_link", "")
+        if not nm or not link:
+            continue
+        pattern = _re.compile(r"(?<!\[)" + _re.escape(nm) + r"(?!\]\()")
+        content = pattern.sub(rf"[\g<0>]({link})", content, count=1)
+    return content
+
+
+def _maybe_add_trip_cta(article):
+    """Trip.com 도시 호텔 CTA 블록 주입 (설정된 경우만)."""
+    try:
+        from shared.etap_affiliate import get_affiliate
+        af = get_affiliate()
+        if not af.is_trip_configured():
+            return article
+        city = article.get("city", "")
+        if not city:
+            return article
+        link = af.generate_trip_city_link(city)
+        if not link:
+            return article
+        cta = (f"\n\n---\n\n## Where to Stay\nPlanning to overnight? "
+               f"Compare hotels in {city} on [Trip.com]({link}) (partner link).\n")
+        article["content"] = article["content"] + cta
+    except Exception as e:
+        logger.warning(f"[{BLOG_ID}] Trip CTA inject skip: {e}")
+    return article
+
+
 def _run_impl() -> bool:
     topic = pick_topic()
     if not topic:
@@ -148,6 +184,9 @@ def _run_impl() -> bool:
     if cross_html:
         article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
     article["content"] = inject_internal_links(article["content"], current_blog=BLOG_ID, max_links=5)
+    # 제휴: 본문 투어명 → Viator 딥링크 인라인 + Trip.com 호텔 CTA (수익↑)
+    article["content"] = _inject_tour_affiliate_links(article["content"], article.get("tours", []))
+    article = _maybe_add_trip_cta(article)
     city = article.get("city", "")
     country = article.get("country", "")
     cover = fetch_city_image(city + " day trip", country, article["slug"]) if city else None
