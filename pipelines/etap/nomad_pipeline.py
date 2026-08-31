@@ -98,7 +98,22 @@ def _run_impl(cfg=None) -> bool:
         mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID, topic.get("title",""), topic.get("slug",""))
         logger.warning(f"[{BLOG_ID}] 데이터 부족: {city}")
         return False
+    # eSIM/tour 가격 + cost-of-living 가격을 합쳐서 검증에 사용
     data_prices = [float(str(t.get("price",0)).replace("$","").replace(",","")) for t in article.get("tours",[]) if t.get("price")]
+    cost = article.get("cost_data", {})
+    if cost:
+        from pipelines.etap.nomad_writer import _to_usd
+        for k in ["meal_inexpensive","meal_mid_range","cappuccino","beer_domestic",
+                   "monthly_pass","internet_monthly","fitness_monthly",
+                   "rent_1br_center","rent_1br_outside","utilities_monthly"]:
+            v = cost.get(k)
+            if v is not None:
+                try:
+                    usd = _to_usd(float(v), cost.get("currency",""))
+                    if usd and usd >= 5:
+                        data_prices.append(round(usd, 2))
+                except (ValueError, TypeError):
+                    pass
     article["content"], post_issues, is_draft = postprocess_content(article["content"], data_prices=data_prices, blog_id=BLOG_ID, slug=article["slug"])
     if is_draft:
         logger.warning(f"[{BLOG_ID}] DRAFT 감지 → 발행 중단: {article['slug']} - {post_issues}")

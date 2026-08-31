@@ -8,6 +8,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: adventure.techpawz.com
   cf_project: adventure-hugo
   repo: adventure-hugo
@@ -29,6 +30,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: airlines.techpawz.com
   cf_project: airlines-hugo
   repo: airlines-hugo
@@ -76,6 +78,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: bus.techpawz.com
   cf_project: bus-hugo
   repo: bus-hugo
@@ -98,6 +101,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: cruise.techpawz.com
   cf_project: cruise-hugo
   repo: cruise-hugo
@@ -120,6 +124,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: culture.techpawz.com
   cf_project: culture-hugo
   repo: culture-hugo
@@ -142,6 +147,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: daytrips.techpawz.com
   cf_project: daytrips-hugo
   repo: daytrips-hugo
@@ -165,6 +171,7 @@ blogs:
   status: 소진  # 토픽소진 134/134 valid exhausted (330 total, 196 invalid origin filtered) — flight_prices 10 origins 외 신규 origin 시딩 필요, valid pool 0 → 발행 중지
   enabled: false  # scheduler skip — 데이터없음 발행 비활성화 (2026-08-30)
   daily_quota: 5
+  pipeline_timeout: 900
   domain: deals.techpawz.com
   cf_project: deals-hugo
   repo: deals-hugo
@@ -187,6 +194,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: dining.techpawz.com
   cf_project: dining-hugo
   repo: dining-hugo
@@ -209,6 +217,7 @@ blogs:
   status: 소진  # 토픽소진 212/212 (2026-08-28, 7 신규 잔여→소진 임박) — city 컬럼 없어 expander 리필 불가, 하드 고갈. entity-link 허브 아님 → 발행 중지
   enabled: false  # scheduler skip — 토픽소진
   daily_quota: 5
+  pipeline_timeout: 900
   domain: esim.techpawz.com
   cf_project: esim-hugo
   repo: esim-hugo
@@ -233,6 +242,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: eurail.techpawz.com
   cf_project: eurail-hugo
   repo: eurail-hugo
@@ -255,6 +265,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: ferry.techpawz.com
   cf_project: ferry-hugo
   repo: ferry-hugo
@@ -276,6 +287,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: flights.techpawz.com
   cf_project: flights-hugo
   repo: flights-hugo
@@ -300,6 +312,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: foodtour.techpawz.com
   cf_project: foodtour-hugo
   repo: foodtour-hugo
@@ -321,6 +334,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: michelin.techpawz.com
   cf_project: michelin-hugo
   repo: michelin-hugo
@@ -345,6 +359,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: multiday.techpawz.com
   cf_project: multiday-hugo
   repo: multiday-hugo
@@ -367,6 +382,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: nature.techpawz.com
   cf_project: nature-hugo
   repo: nature-hugo
@@ -389,6 +405,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: phototour.techpawz.com
   cf_project: phototour-hugo
   repo: phototour-hugo
@@ -404,6 +421,7 @@ blogs:
     - '22:40'
 - cf_project: tour-hugo
   daily_quota: 5
+  pipeline_timeout: 900
   domain: tour.techpawz.com
   id: tour-hugo
   deploy_type: pages
@@ -434,6 +452,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: tours.techpawz.com
   cf_project: tours-hugo
   repo: tours-hugo
@@ -457,6 +476,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: trains.techpawz.com
   cf_project: trains-hugo
   repo: trains-hugo
@@ -481,6 +501,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: transfers.techpawz.com
   cf_project: transfers-hugo
   repo: transfers-hugo
@@ -502,6 +523,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: visa.techpawz.com
   cf_project: visa-hugo
   repo: visa-hugo
@@ -527,6 +549,7 @@ blogs:
   status: 소진  # 토픽소진 199/199 (2026-08-28) — entity-link 참조용 유지, 재발행 시 visa_requirements 기반 별도 seeder 필요
   enabled: false  # scheduler skip — 토픽소진으로 발행 중지
   daily_quota: 5
+  pipeline_timeout: 900
   domain: visafree.techpawz.com
   cf_project: visafree-hugo
   repo: visafree-hugo
@@ -549,6 +572,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: walking.techpawz.com
   cf_project: walking-hugo
   repo: walking-hugo
@@ -571,6 +595,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: watersports.techpawz.com
   cf_project: watersports-hugo
   repo: watersports-hugo
@@ -593,6 +618,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: luxury.techpawz.com
   cf_project: luxury-hugo
   repo: luxury-hugo
@@ -615,6 +641,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: citytours.techpawz.com
   cf_project: citytours-hugo
   repo: citytours-hugo
@@ -637,6 +664,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: watertours.techpawz.com
   cf_project: watertours-hugo
   repo: watertours-hugo
@@ -659,6 +687,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: hiking.techpawz.com
   cf_project: hiking-hugo
   repo: hiking-hugo
@@ -681,6 +710,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: escape.techpawz.com
   cf_project: escape-hugo
   repo: escape-hugo
@@ -703,6 +733,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: extreme.techpawz.com
   cf_project: extreme-hugo
   repo: extreme-hugo
@@ -725,6 +756,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: nightlife.techpawz.com
   cf_project: nightlife-hugo
   repo: nightlife-hugo
@@ -747,6 +779,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: ghost.techpawz.com
   cf_project: ghost-hugo
   repo: ghost-hugo
@@ -769,6 +802,7 @@ blogs:
   managed_by: pipeline
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: layover.techpawz.com
   cf_project: layover-hugo
   repo: layover-hugo
@@ -790,6 +824,7 @@ blogs:
   platform: hugo
   status: active
   daily_quota: 5
+  pipeline_timeout: 900
   domain: nomad.techpawz.com
   cf_project: nomad-hugo
   repo: nomad-hugo

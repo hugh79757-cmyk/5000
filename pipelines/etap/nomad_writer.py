@@ -623,4 +623,5 @@ Return ONLY the article in markdown starting with # title"""
              for e in esim_plans]
     return {"title": title, "slug": slug, "content": content,
              "description": f"Digital nomad guide to {city}: coworking spaces, internet, visa, cost of living and tips.",
-             "tags": [t for t in tags if t], "city": city, "country": country, "tours": tours}
+             "tags": [t for t in tags if t], "city": city, "country": country, "tours": tours,
+             "cost_data": data.get("cost", {})}

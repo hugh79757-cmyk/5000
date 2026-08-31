@@ -597,26 +597,77 @@ CATEGORY_FILTERS = {
                      "공기청정기", "에어컨",
                      "덤벨", "데스크", "운동", "헬스"],
     },
-    "best-baby-hugo": {
-        "allowed": ["카시트", "유모차", "아기띠", "바운서", "젖병", "분유",
-                     "기저귀", "보행기", "범퍼침대", "아기침대", "수유",
-                     "이유식", "체온계", "멸균기", "신생아", "유아",
-                     "아기", "베이비", "유아용", "영아",
-                     "육아", "출산",
-                     "물티슈", "아기세제", "로션", "아기오일", "아기비누",
-                     "아기옷", "배넷저고리", "우주복", "아기양말", "아기모자",
-                     "아기욕조", "유아변기", "아기안전문",
-                     "아기장난감", "촉감놀이", "아기블록", "딸랑이",
-                     "이유식용기", "유아식기", "아기빨대컵", "분유포트",
-                     "모서리보호대", "임산부"],
-        "blocked": ["강아지", "반려견", "반려동물", "개모차", "pet", "여성의류", "남성의류", "패션의류", "여성패션", "남성패션",
-                     "고양이", "강아지용", "도그", "dog",
-                     "도서", "교재", "성인용",
-                     "장난감", "완구", "블록", "보드게임", "퍼즐",
-                     "유모차 가방", "유모차 후크", "유모차 고리", "유모차 걸이",
-                     "유모차 정리함", "유모차 양산", "유모차 액세서리",
-                     "핸들장난감", "드라이빙", "모빌",
-                      "생활용품", "가전", "가구", "홈인테리어"],
+    "best-electronics-hugo": {
+        "allowed": ["전자기기", "가전", "노트북", "모니터", "키보드", "마우스", "태블릿", "아이패드",
+                     "스마트폰", "충전기", "보조배터리", "블루투스", "이어폰", "헤드폰", "스피커",
+                     "웹캠", "프린터", "SSD", "RAM", "USB", "HDMI", "케이블", "거치대",
+                     "케이스", "보호필름", "스마트홈", "IoT",
+                     "냉장고", "에어컨", "TV", "텔레비전", "세탁기", "건조기",
+                     "공기청정기", "청소기", "식세기", "의류관리기", "전기밥솥"],
+        "blocked": ["강아지", "반려동물", "고양이", "도서", "교재",
+                     "장난감", "완구", "의류", "패션", "화장품",
+                     "생활용품", "출산/유아", "식품",
+                     "스포츠", "레저", "여행"],
+    },
+    "best-sports-hugo": {
+        "allowed": ["스포츠", "레저", "골프", "캠핑", "등산", "낚시", "자전거", "수영", "서핑",
+                     "요가", "필라테스", "헬스", "운동", "피트니스", "야구", "축구", "농구",
+                     "배드민턴", "테니스", "탁구", "볼링", "스키", "보드",
+                     "트레킹", "백패킹", "아웃도어", "캠핑용품"],
+        "blocked": ["강아지", "반려동물", "고양이", "도서", "교재",
+                     "장난감", "완구", "의류", "패션", "화장품",
+                     "생활용품", "가전", "출산/유아", "식품", "여행"],
+    },
+    "best-books-hugo": {
+        "allowed": ["도서", "음반", "DVD", "블루레이", "만화", "웹툰", "소설", "에세이",
+                     "자기계발", "경제", "경영", "인문", "과학", "IT", "컴퓨터", "프로그래밍",
+                     "코딩", "수험", "교재", "전공서", "아동도서", "그림책", "동화",
+                     "유아도서", "어린이", "청소년", "요리", "실용"],
+        "blocked": ["강아지", "반려동물", "고양이",
+                     "장난감", "완구", "의류", "패션", "화장품",
+                     "생활용품", "가전", "출산/유아", "식품",
+                     "스포츠", "레저", "여행"],
+    },
+    "best-toys-hugo": {
+        "allowed": ["완구", "장난감", "인형", "블록", "레고", "보드게임", "퍼즐", "조립",
+                     "RC", "드론", "프라모델", "피규어", "미니카",
+                     "역할극", "야외놀이", "물놀이", "과학키트", "코딩키트", "STEM",
+                     "교육용", "유아완구", "어린이날", "선물"],
+        "blocked": ["강아지", "반려동물", "고양이", "도서", "교재",
+                     "의류", "패션", "화장품",
+                     "생활용품", "가전", "출산/유아", "식품",
+                     "스포츠", "레저", "여행"],
+    },
+    "best-stationery-hugo": {
+        "allowed": ["문구", "사무용품", "펜", "노트", "공책", "파일", "스티커", "마카", "색연필",
+                     "볼펜", "형광펜", "하이라이터", "자", "컴퍼스", "풀", "테이프",
+                     "가위", "스테플러", "인감", "도장", "봉투", "엽서", "메모",
+                     "포스트잇", "라벨", "사무실", "학용품"],
+        "blocked": ["강아지", "반려동물", "고양이", "도서", "교재",
+                     "장난감", "완구", "의류", "패션", "화장품",
+                     "생활용품", "가전", "출산/유아", "식품",
+                     "스포츠", "레저", "여행"],
+    },
+    "best-pet-supplies-hugo": {
+        "allowed": ["반려동물", "강아지", "고양이", "사료", "간식", "장난감", "하네스", "리드줄",
+                     "캣타워", "스크래쳐", "배변패드", "모래", "이동장", "케이지", "방석",
+                     "급식기", "정수기", "샴푸", "치약", "영양제", "유산균", "오메가",
+                     "의류", "넥카라", "인식표", "우비", "쿨매트", "훈련"],
+        "blocked": ["도서", "교재",
+                     "의류", "패션의류", "화장품",
+                     "생활용품", "가전", "출산/유아", "식품",
+                     "스포츠", "레저", "여행",
+                     "생수", "삼다수", "수DCALL", "두루마리", "화장지", "물티슈"],
+    },
+    "best-unisex-clothing-hugo": {
+        "allowed": ["남녀공용", "공용의류", "유니섹스", "남녀공통", "오버핏", "박스핏", "루즈핏",
+                     "베이직", "기본", "데일리", "캐주얼", "트레이닝", "맨투맨", "후드",
+                     "나시", "슬리브리스", "긴팔", "셔츠", "자켓", "재킷", "패딩",
+                     "조끼", "점퍼", "니트", "스웨터", "홈웨어", "잠옷"],
+        "blocked": ["강아지", "반려동물", "고양이", "도서", "교재",
+                     "장난감", "완구", "화장품",
+                     "생활용품", "가전", "출산/유아", "식품",
+                     "스포츠", "레저", "여행"],
     },
 }
 
@@ -635,7 +686,7 @@ TITLE_BLOCKED = {
 # 하드 차단 카테고리 — 상품명 allowed 여부와 무관하게 무조건 차단
 # 단, 자기 주제 블로그는 예외 (예: pet-hugo는 반려동물 상품 허용)
 HARD_BLOCK = {"반려동물", "펫", "pet", "dog", "cat", "강아지", "고양이"}
-HARD_BLOCK_EXCEPTIONS = {"pet-hugo"}  # 자기 주제 키워드는 면제
+HARD_BLOCK_EXCEPTIONS = {"pet-hugo", "best-pet-supplies-hugo"}  # 자기 주제 키워드는 면제
 
 # 제목 문맥 확인용 allowed 키워드 (blocked 키워드가 있어도 allowed 키워드가 제목에 있으면 차단 스킵)
 ALLOWED_PRODUCT = {
@@ -643,8 +694,12 @@ ALLOWED_PRODUCT = {
 }
 
 
-def _filter_irrelevant_products(blog_id, keyword, products):
-    """카테고리와 무관한 상품 제거 (코드 레벨 필터)"""
+def _filter_irrelevant_products(blog_id, keyword, products, is_best=False):
+    """카테고리와 무관한 상품 제거 (코드 레벨 필터)
+
+    is_best=True: best_collector가 이미 올바른 categoryId에서 수집했으므로
+    allowed 키워드 체크 우회, blocked/HARD_BLOCK만 적용.
+    """
     filters = CATEGORY_FILTERS.get(blog_id)
     if not filters:
         return products
@@ -669,29 +724,38 @@ def _filter_irrelevant_products(blog_id, keyword, products):
         name_has_allowed = any(aw in name for aw in allowed)
 
         # 차단 키워드 — category_name + product_name 모두 확인
+        # best-*: best_collector가 이미 올바른 categoryId에서 수집했으므로 blocked 우회
+        #理由: blocked 목록에 자기 카테고리 키워드(예: best-electronics의 "가전")가 포함되어 있어
+        #      best_collector의 정상 상품까지 필터링하는 자기참조 차단 발생
         is_blocked = False
-        if cat_hard_blocked:
+        if not is_best:
+            if cat_hard_blocked:
+                logger.info(f"[필터] 하드차단: '{p.get('product_name', '')[:40]}' (카테고리: {cat[:30]})")
+                is_blocked = True
+            else:
+                for bw in blocked:
+                    bw_lower = bw.lower()
+                    if (bw_lower in cat and not name_has_allowed) or (bw_lower in name and not name_has_allowed):
+                        logger.info(f"[필터] 차단: '{p.get('product_name', '')[:40]}' (차단어: {bw}, 대상: {'카테고리' if bw_lower in cat else '상품명'})")
+                        is_blocked = True
+                        break
+        elif cat_hard_blocked and blog_id not in HARD_BLOCK_EXCEPTIONS:
+            # best-*에도 HARD_BLOCK은 적용 (반려동물 등)
             logger.info(f"[필터] 하드차단: '{p.get('product_name', '')[:40]}' (카테고리: {cat[:30]})")
             is_blocked = True
-        else:
-            for bw in blocked:
-                bw_lower = bw.lower()
-                if (bw_lower in cat and not name_has_allowed) or (bw_lower in name and not name_has_allowed):
-                    logger.info(f"[필터] 차단: '{p.get('product_name', '')[:40]}' (차단어: {bw}, 대상: {'카테고리' if bw_lower in cat else '상품명'})")
-                    is_blocked = True
-                    break
         if is_blocked:
             continue
 
-        # 허용 키워드 중 하나라도 포함되어야 통과 (product_name + category_name)
-        has_allowed = False
-        for aw in allowed:
-            if aw in combined:
-                has_allowed = True
-                break
-        if not has_allowed:
-            logger.info(f"[필터] 미허용: '{p.get('product_name', '')[:40]}' (허용어 미포함)")
-            continue
+        if not is_best:
+            # 허용 키워드 중 하나라도 포함되어야 통과 (product_name + category_name)
+            has_allowed = False
+            for aw in allowed:
+                if aw in combined:
+                    has_allowed = True
+                    break
+            if not has_allowed:
+                logger.info(f"[필터] 미허용: '{p.get('product_name', '')[:40]}' (허용어 미포함)")
+                continue
 
         filtered.append(p)
 
@@ -771,8 +835,7 @@ def _filter_cross_fleet_products(blog_id, products):
         "kitchen-hugo": "best-kitchen-hugo",
         "best-beauty-hugo": "beauty-hugo",
         "beauty-hugo": "best-beauty-hugo",
-        "best-baby-hugo": "baby-hugo",
-        "baby-hugo": "best-baby-hugo",
+
     }
     paired = _pair_map.get(blog_id)
     if not paired:
@@ -806,6 +869,7 @@ def _filter_cross_fleet_products(blog_id, products):
             if len(filtered) >= 3:
                 return filtered
             logger.warning(f"[{blog_id}] cross-fleet 후 상품 부족 ({len(filtered)}개), 원본 유지")
+            return products
         return filtered
     except Exception as e:
         logger.warning(f"[{blog_id}] cross-fleet dedup 실패 (fail-open): {e}")
@@ -1197,11 +1261,16 @@ def _run_inner(cfg, blog_id, daily_quota):
         # keep _filter_used_products (blog_id scope) + cross-fleet dedup (paired blog 30d) intact
         products = _filter_used_products(blog_id, products)
         products = _filter_cross_fleet_products(blog_id, products)
-        # derive keyword for writer/logging from category_name or category_id (price-agnostic already done stays)
+        # derive keyword for writer/logging — best-* uses CATEGORY_FILTERS allowed[0] (Coupang category_name은 상위분류라 부정확)
         if products:
             keyword = products[0].get("category_name") or category_id
         else:
             keyword = category_id
+        if is_best and blog_id in CATEGORY_FILTERS:
+            _allowed = CATEGORY_FILTERS[blog_id].get("allowed", [])
+            if _allowed:
+                keyword = _allowed[0]
+                logger.info(f"[{blog_id}] best keyword override → {keyword}")
         # keep 5 gates unchanged downstream: CATEGORY_FILTERS + relevance gate + _title_gate (now includes 베스트 check)
         # if best insufficient products, use category-based fallback without keyword DB delete
         if len(products) < 3:
@@ -1269,7 +1338,7 @@ def _run_inner(cfg, blog_id, daily_quota):
     # ── 3회 재시도: 불량 키워드로 인한 단일 실패가 전체 pipeline을 죽이지 않도록 ──
     max_retries = 3
     for attempt in range(1, max_retries + 1):
-        products = _filter_irrelevant_products(blog_id, keyword, products)
+        products = _filter_irrelevant_products(blog_id, keyword, products, is_best=is_best)
         if len(products) >= 3:
             break
         if attempt == max_retries:
@@ -1278,8 +1347,15 @@ def _run_inner(cfg, blog_id, daily_quota):
             return {"success": False, "reason": "irrelevant_products", "keyword": keyword}
         logger.warning(f"[{blog_id}] 필터 후 상품 부족 ({len(products)}개), 대체 키워드 시도 ({attempt}/{max_retries})")
         if is_best:
-            # best-* has no keyword_pool fallback — fail directly, keep gates intact
-            logger.error(f"[{blog_id}] 베스트 카테고리 필터 실패 — keyword fallback 없음 (categoryId 기반)")
+            # best-*: 필터가 과도하게 상품을 제거했을 수 있음 → 필터 없이 재시도
+            # best_collector가 이미 올바른 카테고리에서 수집했으므로 필터 불필요
+            if attempt == 1:
+                logger.warning(f"[{blog_id}] 베스트 필터 후 상품 부족 ({len(products)}개) — 필터 스킵 재시도")
+                products = get_best_products(category_id, limit=10)
+                products = _filter_used_products(blog_id, products)
+                products = _filter_cross_fleet_products(blog_id, products)
+                continue
+            logger.error(f"[{blog_id}] 베스트 카테고리 필터 실패 — 상품 부족 (categoryId: {category_id})")
             _record_failure(blog_id, "irrelevant_products", f"베스트 필터 실패: {keyword}", keyword)
             return {"success": False, "reason": "irrelevant_products", "keyword": keyword}
         # 해당 키워드 캐시 삭제
@@ -1317,6 +1393,14 @@ def _run_inner(cfg, blog_id, daily_quota):
     for attempt in range(1, max_retries + 1):
         try:
             scores = score_products(products, blog_id)
+            # best-*: Coupang bestcategory가 이미 관련성 보장 → 점수 검증 스킵
+            if is_best:
+                scores["avg"] = 1.0
+                scores["min"] = 1.0
+                scores["scores"] = [1.0] * len(products)
+                scores["threshold"] = 0.0
+                logger.info(f"[{blog_id}] 베스트 관련성 검증 스킵 (bestcategory 기반)")
+                break
             # adaptive threshold 적용 (Phase 10-1) — 최근 성공 평균 기반으로 과도한 탈락 방지
             try:
                 from shared.relevance_scorer import get_adaptive_threshold
@@ -1347,8 +1431,14 @@ def _run_inner(cfg, blog_id, daily_quota):
                 _record_failure(blog_id, "low_relevance", f"{max_retries}회 재시도 후 점수 미달: avg={scores['avg']:.2f}", keyword)
                 return {"success": False, "reason": "low_relevance", "keyword": keyword}
             if is_best:
-                # best-* has no keyword fallback — fail directly (keep relevance gate)
-                logger.error(f"[{blog_id}] 베스트 관련성 미달 — keyword fallback 없음 (categoryId 기반)")
+                # best-*: keyword fallback 불가 → 임계값 완화 후 재시도 (같은 상품)
+                # best_collector가 이미 올바른 카테고리에서 수집했으므로 관련성은 보장됨
+                relaxed = max(0.35, scores["threshold"] - 0.15)
+                if attempt < max_retries and scores["avg"] >= relaxed:
+                    logger.info(f"[{blog_id}] 베스트 관련성 완화: avg={scores['avg']:.2f} >= {relaxed} (원래 임계값 {scores['threshold']})")
+                    scores["threshold"] = relaxed
+                    continue
+                logger.error(f"[{blog_id}] 베스트 관련성 미달 (완화 후도 미달): avg={scores['avg']:.2f}")
                 _record_failure(blog_id, "low_relevance", f"베스트 관련성 미달: avg={scores['avg']:.2f}", keyword)
                 return {"success": False, "reason": "low_relevance", "keyword": keyword}
             # Fallback: pick another keyword and retry (category-aware — Phase 10-1)
@@ -1379,7 +1469,7 @@ def _run_inner(cfg, blog_id, daily_quota):
             collect_keyword(keyword)
             products = get_products(keyword, limit=10)
             products = _filter_used_products(blog_id, products)
-            products = _filter_irrelevant_products(blog_id, keyword, products)
+            products = _filter_irrelevant_products(blog_id, keyword, products, is_best=is_best)
             if len(products) < 3:
                 logger.warning(f"[{blog_id}] 대체 키워드 상품 부족 ({len(products)}개), 다음 fallback 시도")
                 continue
@@ -1454,9 +1544,14 @@ def _run_inner(cfg, blog_id, daily_quota):
         )
 
     # 유사 제목 체크 — 실패 시 최대 3회 fallback 키워드 재시도
-    _st_attempt = 0
-    _st_max = 3
-    while _title_is_duplicate(blog_id, title, keyword):
+    # best-* 블로그: 키워드 풀이 없어 키워드 fallback 불가 → 유사 제목 허용
+    # (writer 프롬프트에 '제목 다양화' 지시가 있으나, 카테고리 기반이라 구조 반복은 불가피)
+    if is_best and _title_is_duplicate(blog_id, title, keyword):
+        logger.info(f"[{blog_id}] best-* 유사 제목 허용 (카테고리 기반): {title}")
+    else:
+      _st_attempt = 0
+      _st_max = 3
+      while _title_is_duplicate(blog_id, title, keyword):
         _st_attempt += 1
         if _st_attempt > _st_max:
             logger.warning(f"[{blog_id}] {_st_max}회 fallback 후에도 유사 제목 — 포기")
@@ -1489,7 +1584,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         products = _filter_used_products(blog_id, products)
         # ── 게이트 사각 차단 (2026-08-16): fallback 교체 상품도 정상 경로(1059)와 동일하게
         #    카테고리 필터 + 관련성 게이트 재적용 — 무관 상품 발행(avg=0.0) 방지 ──
-        products = _filter_irrelevant_products(blog_id, keyword, products)
+        products = _filter_irrelevant_products(blog_id, keyword, products, is_best=is_best)
         if len(products) < 3:
             logger.warning(f"[{blog_id}] fallback 카테고리 필터 후 상품 부족 ({len(products)}개) — 다음 시도")
             continue

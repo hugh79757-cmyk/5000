@@ -33,7 +33,6 @@ logger = logging.getLogger(__name__)
 # 프로세스 재시작 시 캐시 초기화 → 매 실행마다 fresh 체크.
 _URL_HEALTH_CACHE: dict = {}
 
-
 def _url_is_alive(url: str, timeout: float = 2.5) -> bool:
     """HEAD 요청으로 URL이 200인지 확인. 실패·타임아웃 시 False 반환(안전 스킵).
 
@@ -77,7 +76,14 @@ BLOG_DOMAINS = {
     "bike-hugo":         "https://bike.informationhot.kr",
     "best-kitchen-hugo": "https://best-kitchen.informationhot.kr",
     "best-beauty-hugo":  "https://best-beauty.informationhot.kr",
-    "best-baby-hugo":    "https://best-baby.informationhot.kr",
+
+    "best-electronics-hugo":      "https://best-electronics.rotcha.kr",
+    "best-sports-hugo":           "https://best-sports.rotcha.kr",
+    "best-books-hugo":            "https://best-books.rotcha.kr",
+    "best-toys-hugo":             "https://best-toys.rotcha.kr",
+    "best-stationery-hugo":       "https://best-stationery.rotcha.kr",
+    "best-pet-supplies-hugo":     "https://best-pet-supplies.rotcha.kr",
+    "best-unisex-clothing-hugo":  "https://best-unisex-clothing.rotcha.kr",
 }
 
 # 블로그별 아이콘 [RESEARCH L389, Phase 75 best fleet 🏆 distinct from kitchen 🍳]
@@ -94,7 +100,14 @@ ICONS = {
     "camping-hugo":   "⛺",
     "best-kitchen-hugo": "🏆",
     "best-beauty-hugo":  "💄",
-    "best-baby-hugo":    "👶",
+
+    "best-electronics-hugo":      "📱",
+    "best-sports-hugo":           "⚽",
+    "best-books-hugo":            "📚",
+    "best-toys-hugo":             "🧸",
+    "best-stationery-hugo":       "✏️",
+    "best-pet-supplies-hugo":     "🐾",
+    "best-unisex-clothing-hugo":  "👕",
 }
 
 # 블로그별 테마 컬러 (퍼널 헤더) [RESEARCH L388, Phase 75]
@@ -111,7 +124,14 @@ THEME_COLORS = {
     "camping-hugo":   "#0891b2",
     "best-kitchen-hugo": "#ea580c",
     "best-beauty-hugo":  "#db2777",
-    "best-baby-hugo":    "#ec4899",
+
+    "best-electronics-hugo":      "#0ea5e9",
+    "best-sports-hugo":           "#16a34a",
+    "best-books-hugo":            "#dc2626",
+    "best-toys-hugo":             "#f97316",
+    "best-stationery-hugo":       "#84cc16",
+    "best-pet-supplies-hugo":     "#d97706",
+    "best-unisex-clothing-hugo":  "#64748b",
 }
 
 # 10개 블로그 연결 그래프 (고정 퍼널 경로)
@@ -171,22 +191,20 @@ CROSS_GRAPH = {
     # best primary → search sibling + adjacent; search siblings secondary[0] inserts best via _apply_best_graph_patches()
     "best-kitchen-hugo": {"primary": ["kitchen-hugo","appliance-hugo"], "secondary": ["health-hugo","interior-hugo"], "use_cases": ["camping-hugo","baby-hugo"]},
     "best-beauty-hugo":  {"primary": ["beauty-hugo","health-hugo"], "secondary": ["appliance-hugo","interior-hugo"], "use_cases": ["kitchen-hugo","baby-hugo"]},
-    "best-baby-hugo":    {"primary": ["baby-hugo","kitchen-hugo"], "secondary": ["interior-hugo","pet-hugo"], "use_cases": ["beauty-hugo","appliance-hugo"]},
+
 }
 
 # Search → best bidirectional edges (insert best at secondary[0]) [RESEARCH L384, PLAN T02-3]
 # Idempotent — guard double-insert on reload
-for _sid, _bid in (("kitchen-hugo","best-kitchen-hugo"), ("beauty-hugo","best-beauty-hugo"), ("baby-hugo","best-baby-hugo")):
+for _sid, _bid in (("kitchen-hugo","best-kitchen-hugo"), ("beauty-hugo","best-beauty-hugo")):
     _sec = CROSS_GRAPH.get(_sid, {}).get("secondary")
     if _sec is not None and _bid not in _sec:
         _sec.insert(0, _bid)
-
 
 def _get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
-
 
 def init_cuap_tables():
     """travel-en.db에 CUAP 전용 테이블 생성 (ETAP entity_links는 수정하지 않음)."""
@@ -229,7 +247,6 @@ def init_cuap_tables():
     finally:
         conn.close()
 
-
 def register_cuap_entity(entity_type, entity_name, blog_id, post_slug,
                          link_label, priority=50, published=0,
                          is_draft=False) -> bool:
@@ -267,7 +284,6 @@ def register_cuap_entity(entity_type, entity_name, blog_id, post_slug,
         return False
     finally:
         conn.close()
-
 
 def inject_cross_blog_links(content, blog_id, max_links=3):
     """본문(markdown)에서 entity_name이 등장하면 타 블로그 링크로 교체.
@@ -359,7 +375,6 @@ def inject_cross_blog_links(content, blog_id, max_links=3):
         logger.info(f"CUAP 크로스링크 {total_links_added}개 삽입 (대상: {list(linked_names)})")
     return result
 
-
 # ── cross-sell 차단 블로그 (CoT 미해결 또는 오염 블로그) ──
 BLOCKED_CROSS_SELL_BLOGS = {"fitness-hugo", "laptop-hugo"}
 
@@ -372,11 +387,9 @@ _SAFE_FALLBACK_BLOGS = [
     "camping-hugo", "appliance-hugo", "interior-hugo",
 ]
 
-
 def _is_review_frame_slug(slug: str) -> bool:
     """slug에 후기·실사용 프레임 문자열이 포함되어 있는지 판정."""
     return any(p in slug for p in _REVIEW_FRAME_PATTERNS)
-
 
 def _target_blogs(blog_id, max_targets=4):
     """CROSS_GRAPH에서 대상 블로그 목록 반환 (primary → secondary 순).
@@ -389,7 +402,6 @@ def _target_blogs(blog_id, max_targets=4):
         if t not in targets:
             targets.append(t)
     return [t for t in targets if t not in BLOCKED_CROSS_SELL_BLOGS][:max_targets]
-
 
 def _pick_safe_entity(conn, blog_id, max_candidates=5):
     """안전한 엔티티(후기 프레임 미포함 + URL alive)를 선택. 없으면 None 반환.
@@ -412,7 +424,6 @@ def _pick_safe_entity(conn, blog_id, max_candidates=5):
             continue
         return r
     return None
-
 
 def _fallback_blog(blog_id, used_blogs, max_candidates=5):
     """blocked/필터된 블로그 대체: 안전 블로그에서 첫 번째 엔티티 반환.
@@ -440,7 +451,6 @@ def _fallback_blog(blog_id, used_blogs, max_candidates=5):
         finally:
             conn.close()
     return None, None
-
 
 def build_cross_sell_card(blog_id, max_items=4):
     """크로스셀 카드 HTML 생성. 본문 하단에 삽입.
@@ -511,7 +521,6 @@ def build_cross_sell_card(blog_id, max_items=4):
         + "\n".join(items_html) +
         "\n</div>\n</div>\n"
     )
-
 
 def build_funnel_header(blog_id):
     """퍼널 헤더 HTML 생성. 본문 상단에 삽입.

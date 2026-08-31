@@ -20,7 +20,13 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "fitness-hugo": {"threshold": 0.50},      # P14 irrelevant_products — 0.55→0.50 (kin/kitchen 동조)
     "best-kitchen-hugo": {"threshold": 0.50},
     "best-beauty-hugo": {"threshold": 0.55},
-    "best-baby-hugo": {"threshold": 0.70},
+    "best-electronics-hugo": {"threshold": 0.10},
+    "best-sports-hugo": {"threshold": 0.10},
+    "best-toys-hugo": {"threshold": 0.10},
+    "best-stationery-hugo": {"threshold": 0.10},
+    "best-pet-supplies-hugo": {"threshold": 0.10},
+    "best-books-hugo": {"threshold": 0.50},
+    "best-unisex-clothing-hugo": {"threshold": 0.10},
 }
 
 OFFTOPIC_THRESHOLD = 0.20

@@ -634,6 +634,14 @@ WORKERS_BLOGS = {
     "homeappliance-hugo",
     "golf-hugo",
     "bike-hugo",
+    "fitness-hugo",
+    "best-electronics-hugo",
+    "best-sports-hugo",
+    "best-books-hugo",
+    "best-toys-hugo",
+    "best-stationery-hugo",
+    "best-pet-supplies-hugo",
+    "best-unisex-clothing-hugo",
 }
 
 DEPLOY_LOCK = "/tmp/wrangler_deploy.lock"

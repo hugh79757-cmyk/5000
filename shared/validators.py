@@ -42,8 +42,10 @@ def sanitize_title(title: str) -> str:
     t = t.replace("**", "").replace("__", "")
     # 1b) (Phase 7) 날짜 prefix 제거: "2026년 7월" → 제거
     t = re.sub(r"^\d{4}년\s*\d{1,2}월\s*", "", t)
-    # 1c) (Phase 7) 특수문자 정규화: em dash, en dash, middle dot, bullet, full-width colon
-    t = re.sub(r"[—–·•：]", "", t)
+    # 1c) (Phase 7) 특수문자 정규화: em dash, en dash, middle dot, bullet, full-width colon, slash
+    t = re.sub(r"[—–·•：/]", "", t)
+    # 1d) tilde 제거 (숫자 사이 범위 표현 "1~5위" 는 보존: "X ~ Y" → "XY", "~" 단독/양쪽 공백)
+    t = re.sub(r"(?<!\d)~(?!\d)", "", t)
     # 2) 연속 동일 단어 제거: "청주시 청주시" → "청주시"
     words = t.split()
     deduped = []

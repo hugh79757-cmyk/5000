@@ -519,6 +519,12 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - 제외 후 남은 상품이 3개 미만이면 남은 상품만으로 작성하세요.
 - 같은 브랜드의 색상만 다른 동일 제품은 하나만 소개하세요.
 
+[상품 추가 금지 — 매우 중요]
+- 위 [상품 데이터]에 없는 상품을 절대 추가하지 마세요. 프롬프트에 제공된 상품 목록에 없는 제품을 만들어내지 마세요 (환각 금지).
+- 예: 반려동물 블로그에 생수·삼다수를 추가하지 마세요. 프롬프트에 없는 제품입니다.
+- 예: 주방용품 블로그에 냉장고·세탁기를 추가하지 마세요. bestcategories에 없는 대형 가전입니다.
+- 상품 목록 그대로만 사용하세요. 임의로 상품을 추가하면 안 됩니다.
+
 [글자수]
 - 총 2500~3500자 (한글 기준). 비교표/체크리스트 포함해 기존 대비 확대.
 - 각 상품 소개는 최소 150자 이상.
@@ -647,6 +653,10 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - 키워드와 명백히 무관한 상품은 소개하지 마세요.
 - 제외 후 남은 상품이 3개 미만이면 남은 상품만으로 작성하세요.
 - 같은 브랜드의 색상만 다른 동일 제품은 하나만 소개하세요.
+
+[상품 추가 금지 — 매우 중요]
+- 위 [상품 데이터]에 없는 상품을 절대 추가하지 마세요. 프롬프트에 제공된 상품 목록에 없는 제품을 만들어내지 마세요 (환각 금지).
+- 상품 목록 그대로만 사용하세요. 임의로 상품을 추가하면 안 됩니다.
 
 [글자수]
 - 총 2500~3500자 (한글 기준). 비교표/체크리스트 포함해 기존 대비 확대.
@@ -1115,7 +1125,7 @@ def generate_curation_article(keyword, products, blog_id=None):
             if _is_best_title_gate:
                 if "베스트" not in title or re.search(r"추천\s*TOP\s*\d+", title, re.I):
                     logger.warning(f"[best_title_gate] 베스트 누락/추천 TOP5 포함 → 재생성: {title[:60]}")
-                    title = _regenerate_title(keyword, blog_id)
+                    title = _regenerate_title(keyword, blog_id, max_attempts=3)
                     # 재생성 후에도 베스트 검증 — 실패 시 차단 마커
                     if not title or "베스트" not in title:
                         title_generation_failed = True
@@ -1182,6 +1192,26 @@ def generate_curation_article(keyword, products, blog_id=None):
 
     # 제목 최종 후처리: 괄호 → 하이픈 (LLM이 괄호를 뱉어도 발행물엔 괄호 없음)
     title = sanitize_title(title)
+
+    # 제목-본문 아이템 수 불일치 수정: 제목 "1~5위"인데 본문 H3가 3개면 "1~3위"로 교정
+    if _is_best_title_gate and title:
+        _actual_h3 = len(re.findall(r'^### ', body, re.MULTILINE))
+        if _actual_h3 >= 3:
+            # 범위형 "1~5위" 또는 "1-5위"
+            _m = re.search(r'(\d+)\s*[~\-]\s*(\d+)\s*위', title)
+            if _m:
+                _claimed = int(_m.group(2))
+                if _claimed != _actual_h3:
+                    title = title[:_m.start(2)] + str(_actual_h3) + title[_m.end(2):]
+                    logger.info(f"[title_count_fix] 제목-본문 불일치 수정: {_claimed}→{_actual_h3}위 (H3={_actual_h3})")
+            else:
+                # 단일형 "5위"
+                _m2 = re.search(r'(?<!\d)(\d+)\s*위', title)
+                if _m2:
+                    _claimed = int(_m2.group(1))
+                    if _claimed != _actual_h3:
+                        title = title[:_m2.start(1)] + str(_actual_h3) + title[_m2.end(1):]
+                        logger.info(f"[title_count_fix] 제목-본문 불일치 수정: {_claimed}→{_actual_h3}위 (H3={_actual_h3})")
 
     result = {
         "title": title or "",

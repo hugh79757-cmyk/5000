@@ -1,10 +1,3 @@
-# ═══════════════════════════════════════════════════════════════════════════════
-# CUAP (Curation Auto Publisher) — 상품 큐레이션 블로그
-# ⚠️ 쿠팡 파트너스 API RATE LIMIT (2026-07-16 제재)
-# - 검색/링크생성 각 분당 50회, 전체 분당 100회 / 3회 경고 → 이용제한
-# - 블로그 간 10분 간격 유지, collector._check_rate_limit() 분당 40회 컷오프
-# - 신규 5개(massage/car/homeappliance/golf/bike)는 status:paused, quota:1로 시작
-# ═══════════════════════════════════════════════════════════════════════════════
 blogs:
 - id: appliance-hugo
   deploy_type: pages
@@ -51,7 +44,7 @@ blogs:
   gsc_site: https://baby.informationhot.kr/
   ga4_property: '532411814'
 - id: fitness-hugo
-  deploy_type: pages
+  deploy_type: workers
   name: 운동용품 추천 가이드
   pipeline: curation
   platform: hugo
@@ -343,7 +336,7 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '09:15'
+    - 09:15
     - '14:15'
     - '20:15'
   gsc_site: https://best-kitchen.informationhot.kr/
@@ -365,30 +358,162 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '09:25'
+    - 09:25
     - '14:25'
     - '20:25'
   gsc_site: https://best-beauty.informationhot.kr/
   ga4_property: ''
-- id: best-baby-hugo
+- id: best-electronics-hugo
   deploy_type: workers
-  name: 유아용품 베스트 추천 가이드
+  name: 가전디지털 베스트 추천 가이드
   pipeline: curation
   platform: hugo
   status: active
   daily_quota: 2
   source: bestcategories
-  category_id: '1011'
-  domain: best-baby.informationhot.kr
-  cf_project: best-baby-hugo
-  repo: best-baby-hugo
-  site_path: /Users/twinssn/Projects/cuap/best-baby-hugo
+  category_id: '1016'
+  domain: best-electronics.rotcha.kr
+  cf_project: best-electronics-hugo
+  repo: best-electronics-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-electronics-hugo
   theme: blowfish
   managed_by: mde2
   schedule:
     times:
-    - '09:35'
-    - '14:35'
-    - '20:35'
-  gsc_site: https://best-baby.informationhot.kr/
+    - '10:10'
+    - '15:10'
+    - '21:10'
+  gsc_site: https://best-electronics.rotcha.kr/
+  ga4_property: ''
+- id: best-sports-hugo
+  deploy_type: workers
+  name: 스포츠/레저 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1017'
+  domain: best-sports.rotcha.kr
+  cf_project: best-sports-hugo
+  repo: best-sports-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-sports-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '10:15'
+    - '15:15'
+    - '21:15'
+  gsc_site: https://best-sports.rotcha.kr/
+  ga4_property: ''
+- id: best-books-hugo
+  deploy_type: workers
+  name: 도서/음반 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1019'
+  domain: best-books.rotcha.kr
+  cf_project: best-books-hugo
+  repo: best-books-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-books-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '10:20'
+    - '15:20'
+    - '21:20'
+  gsc_site: https://best-books.rotcha.kr/
+  ga4_property: ''
+- id: best-toys-hugo
+  deploy_type: workers
+  name: 완구/취미 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1020'
+  domain: best-toys.rotcha.kr
+  cf_project: best-toys-hugo
+  repo: best-toys-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-toys-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '10:25'
+    - '15:25'
+    - '21:25'
+  gsc_site: https://best-toys.rotcha.kr/
+  ga4_property: ''
+- id: best-stationery-hugo
+  deploy_type: workers
+  name: 문구/사무용품 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1021'
+  domain: best-stationery.rotcha.kr
+  cf_project: best-stationery-hugo
+  repo: best-stationery-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-stationery-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '10:30'
+    - '15:30'
+    - '21:30'
+  gsc_site: https://best-stationery.rotcha.kr/
+  ga4_property: ''
+- id: best-pet-supplies-hugo
+  deploy_type: workers
+  name: 반려동물용품 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1022'
+  domain: best-pet-supplies.rotcha.kr
+  cf_project: best-pet-supplies-hugo
+  repo: best-pet-supplies-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-pet-supplies-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '10:35'
+    - '15:35'
+    - '21:35'
+  gsc_site: https://best-pet-supplies.rotcha.kr/
+  ga4_property: ''
+- id: best-unisex-clothing-hugo
+  deploy_type: workers
+  name: 남녀공용의류 베스트 추천 가이드
+  pipeline: curation
+  platform: hugo
+  status: active
+  daily_quota: 2
+  source: bestcategories
+  category_id: '1031'
+  domain: best-unisex-clothing.rotcha.kr
+  cf_project: best-unisex-clothing-hugo
+  repo: best-unisex-clothing-hugo
+  site_path: /Users/twinssn/Projects/cuap/best-unisex-clothing-hugo
+  theme: blowfish
+  managed_by: mde2
+  schedule:
+    times:
+    - '11:00'
+    - '16:00'
+    - '22:00'
+  gsc_site: https://best-unisex-clothing.rotcha.kr/
   ga4_property: ''

@@ -755,7 +755,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug="", corpus: 
         "bucket list": "travel wishlist",
         "playground for": "popular with",
         "soaking up": "enjoying",
-        "unmatched": "impressive",
+
         "of a lifetime": "",
         "second to none": "excellent",
         "a must-visit": "worth visiting",
@@ -858,7 +858,7 @@ def postprocess_content(content, data_prices=None, blog_id="", slug="", corpus: 
 
     # Check for fabricated URLs (GPT sometimes adds them despite instructions)
     url_pattern = re.findall(r"https?://[^\s\)]+", content)
-    allowed_domains = ["r2.dev", "techpawz.com", "googlesyndication.com"]
+    allowed_domains = ["r2.dev", "techpawz.com", "googlesyndication.com", "google.com"]
     for url in url_pattern:
         if not any(d in url for d in allowed_domains):
             issues.append(f"Unauthorized URL found: {url[:60]}")

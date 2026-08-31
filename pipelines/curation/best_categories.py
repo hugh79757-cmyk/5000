@@ -32,7 +32,13 @@ Envelope branching decision (T00-3):
 BEST_CATEGORY_MAP = {
     "best-kitchen-hugo": "1013",  # 주방용품 — live verified 20 items, flat list [RESEARCH L190]
     "best-beauty-hugo": "1010",   # 뷰티 — live verified 20 items
-    "best-baby-hugo": "1011",     # 출산/유아 — live verified 20 items
+    "best-electronics-hugo": "1016",  # 가전디지털 — live verified
+    "best-sports-hugo": "1017",   # 스포츠/레저용품 — live verified
+    "best-books-hugo": "1019",    # 도서/음반 — live verified
+    "best-toys-hugo": "1020",     # 완구/취미 — live verified
+    "best-stationery-hugo": "1021",  # 문구/사무용품 — live verified
+    "best-pet-supplies-hugo": "1022",  # 반려/애완용품 — live verified
+    "best-unisex-clothing-hugo": "1031",  # 패션의류 — live verified
 }
 
 BEST_CACHE_DAYS = 1  # [RESEARCH Open Q 2 L684, Pattern 1 L460] best lists change daily
