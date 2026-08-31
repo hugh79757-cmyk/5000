@@ -6,7 +6,7 @@ Wave0 probe (2026-08-30) lock:
 - Envelope: flat list data=[...] (not data.productData). Search uses data.productData;
   bestcategories uses data flat list — see live probe.
 - Verified IDs (live 200, rCode 0, len 20):
-  - 1020 → 주방용품 (best-kitchen-hugo) [RESEARCH L190-194 kitchen hint, corrected from assumed 1006]
+  - 1013 → 주방용품 (corrected 2026-08-31 live probe top=주방용품) (best-kitchen-hugo) [RESEARCH L190-194 kitchen hint, corrected from assumed 1006]
   - 1010 → 뷰티 (best-beauty-hugo)
   - 1011 → 출산/유아 (best-baby-hugo)
   1006 returns rCode 0 but data None (empty best) — not usable.
@@ -30,7 +30,7 @@ Envelope branching decision (T00-3):
 """
 
 BEST_CATEGORY_MAP = {
-    "best-kitchen-hugo": "1020",  # 주방용품 — live verified 20 items, flat list [RESEARCH L190]
+    "best-kitchen-hugo": "1013",  # 주방용품 — live verified 20 items, flat list [RESEARCH L190]
     "best-beauty-hugo": "1010",   # 뷰티 — live verified 20 items
     "best-baby-hugo": "1011",     # 출산/유아 — live verified 20 items
 }

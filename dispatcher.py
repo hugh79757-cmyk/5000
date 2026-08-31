@@ -1803,12 +1803,42 @@ def dispatch(blog_id):
         self_acquired = True
 
     try:
+        import threading
         from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
+        from concurrent.futures.thread import _worker
+
+        class _DaemonThreadPoolExecutor(ThreadPoolExecutor):
+            """Worker threads are daemons so a 150s pipeline timeout actually ends
+            the process. A non-daemon worker would keep the interpreter alive until
+            the scheduler's 600s kill (observed: rap4-hugo 09:23 run survived 600s)."""
+            def _adjust_thread_count(self):
+                if self._idle_semaphore.acquire(timeout=0):
+                    return
+                import weakref
+                from concurrent.futures.thread import _threads_queues
+
+                def weakref_cb(_, q=self._work_queue):
+                    q.put(None)
+
+                num_threads = len(self._threads)
+                if num_threads < self._max_workers:
+                    thread_name = '%s_%d' % (
+                        self._thread_name_prefix or self,
+                        num_threads)
+                    t = threading.Thread(
+                        name=thread_name, target=_worker,
+                        args=(weakref.ref(self, weakref_cb),
+                              self._create_worker_context(),
+                              self._work_queue),
+                        daemon=True)
+                    t.start()
+                    self._threads.add(t)
+                    _threads_queues[t] = self._work_queue
 
         # NOTE: do NOT use `with` — its implicit shutdown(wait=True) would join the
         # still-running worker thread and block until the pipeline finishes (600s),
         # defeating the 150s timeout. Abandon the thread on timeout instead.
-        _exec = ThreadPoolExecutor(max_workers=1)
+        _exec = _DaemonThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
         _fut = _exec.submit(_run_pipeline, cfg)
         try:
             result = _fut.result(timeout=150)

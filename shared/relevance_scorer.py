@@ -18,6 +18,9 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "bike-hugo": {"threshold": 0.50},         # bike compound-keyword products carry 1 allowed token -> default 0.75 blocks all (same as golf)
     "car-hugo": {"threshold": 0.50},          # Phase 72: car 12 keywords strict 0.75 blocks remaining 타이어/냉장고 (avg 0.67/0.33)
     "fitness-hugo": {"threshold": 0.50},      # P14 irrelevant_products — 0.55→0.50 (kin/kitchen 동조)
+    "best-kitchen-hugo": {"threshold": 0.50},
+    "best-beauty-hugo": {"threshold": 0.55},
+    "best-baby-hugo": {"threshold": 0.70},
 }
 
 OFFTOPIC_THRESHOLD = 0.20

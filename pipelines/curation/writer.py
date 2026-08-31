@@ -173,21 +173,24 @@ BLOG_EXTRA_RULES = {
 """,
     "best-kitchen-hugo": """
 [best-kitchen-hugo 전용 — 판매 베스트]
-- 제목에 반드시 '베스트 1~5위' 포함, '추천 TOP5' 절대 금지.
-- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~5위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
+- 제목에 '베스트' 포함, '추천 TOP5' 절대 금지.
+- **타이틀과 본문 아이템 수 일치 필수**: 제목 "베스트 1~N위"의 N과 본문 비교표·상세의 상품 수가 반드시 일치해야 합니다.
+- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~N위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
 - rank는 판매 순위임을 본문에 1회 언급. 가격 기준 정렬이 아님을 명확히 할 것.
 - 각 상품 소개는 판매량/인기 근거가 아니라 카테고리 내 판매 순위 기반임을 서술.
 """,
     "best-beauty-hugo": """
 [best-beauty-hugo 전용 — 판매 베스트]
-- 제목에 반드시 '베스트 1~5위' 포함, '추천 TOP5' 절대 금지.
-- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~5위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
+- 제목에 '베스트' 포함, '추천 TOP5' 절대 금지.
+- **타이틀과 본문 아이템 수 일치 필수**: 제목 "베스트 1~N위"의 N과 본문 비교표·상세의 상품 수가 반드시 일치해야 합니다.
+- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~N위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
 - rank는 판매 순위임을 본문에 1회 언급. 가격 기준 정렬이 아님을 명확히 할 것.
 """,
     "best-baby-hugo": """
 [best-baby-hugo 전용 — 판매 베스트]
-- 제목에 반드시 '베스트 1~5위' 포함, '추천 TOP5' 절대 금지.
-- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~5위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
+- 제목에 '베스트' 포함, '추천 TOP5' 절대 금지.
+- **타이틀과 본문 아이템 수 일치 필수**: 제목 "베스트 1~N위"의 N과 본문 비교표·상세의 상품 수가 반드시 일치해야 합니다. 3개면 "1~3위", 5개면 "1~5위".
+- 본문 framing: "카테고리 베스트셀러 판매량 기준 1~N위"로 명시, "가성비/스펙 기준으로 골랐습니다" 서술 금지.
 - rank는 판매 순위임을 본문에 1회 언급. 가격 기준 정렬이 아님을 명확히 할 것.
 """,
 }
@@ -392,13 +395,13 @@ def _build_product_block(products, blog_id=None):
     return "\n".join(lines)
 
 
-def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=None) -> str:
+def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=None, product_count=5) -> str:
     year = datetime.now().year
     month = datetime.now().month
     extra = BLOG_EXTRA_RULES.get(blog_id or "", "")
     extra_block = f"\n\n{extra}" if extra else ""
 
-    # 최근 발행 제목 목록을 프롬프트에 주입 (유사 제목 방지)
+    # 최근 발행 제목 수집 (유사 제목 방지용 프롬프트 주입)
     recent_block = ""
     if recent_titles:
         recent_block = "\n[피해야 할 제목 — 최근 발행된 글]"
@@ -421,19 +424,28 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
     _is_best = bool(blog_id and blog_id.startswith("best-"))
     if _is_best:
         return f"""당신은 10년 경력의 상품 큐레이션 전문 블로거입니다. 반드시 한국어로 작성하세요. 중국어나 다른 언어로 작성하지 마세요.
-{year}년 {month}월 기준 "{keyword}" 카테고리 베스트셀러 판매량 기준 1~5위를 소개합니다. 아래 rank(판매 베스트 N위)는 판매 순위이며 가격·가성비 기준 정렬이 아닙니다. 본문에 판매 순위임을 1회 명시하세요.
+{year}년 {month}월 기준 "{keyword}" 카테고리 베스트셀러 판매량 기준 1~{product_count}위를 소개합니다. 아래 rank(판매 베스트 N위)는 판매 순위이며 가격·가성비 기준 정렬이 아닙니다. 본문에 판매 순위임을 1회 명시하세요.
 
 [제목 규칙 — 베스트 전용 — 가장 중요]
-제목에 반드시 '베스트 1~5위'를 포함하세요. '추천 TOP5'는 절대 금지입니다.
-예: "주방용품 베스트 1~5위 — 스테인리스 냄비부터 유리 밀폐용기까지"
-예: "뷰티 베스트 1~5위 — 판매량 상위 크림·세럼 비교"
+- 제목에 '베스트'를 포함하세요. '추천 TOP5'는 절대 금지입니다.
+- **타이틀과 본문 아이템 수 일치 필수**: 제목에 포함된 순위 범위(예: "베스트 1~3위")와 본문 비교표·상세 소개의 상품 수는 반드시 일치해야 합니다. "1~5위"라고 쓰고 본문에 3개만 쓰면 안 됩니다. 제공된 상품 수에 맞춰 "1~{product_count}위"로 작성하세요.
+- 예: "주방용품 베스트 1~5위 — 스테인리스 냄비부터 유리 밀폐용기까지"
+- 예: "뷰티 베스트 1~3위 — 판매량 상위 크림·세럼 비교"
 - 제목에 '베스트' 미포함 또는 '추천 TOP5' 포함 시 재생성 대상입니다.
-- 제품명 또는 브랜드명 1~2개 포함 가능하나 '베스트 1~5위' 문구는 필수.
+- 제품명 또는 브랜드명 1~2개 포함 가능하나 '베스트 1~{product_count}위' 문구는 필수.
 - "가성비" 사용 금지 → "합격점", "실속", "가격 대비" 사용 (단, "가성비/스펙 기준으로 골랐습니다" 서술은 베스트 글에서 금지 — 판매량 기준임을 명시).
 - 핵심 키워드가 제목 앞 15자 이내에 위치해야 합니다.
 - 제목 길이는 35자 이내로 작성하세요 (공백 포함).
 - "{keyword} 추천 TOP5 (연도년)" 같은 통짜 포맷은 사용하지 마세요.
 - **괄호 () 절대 금지**: 괄호 대신 하이픈(-)을 사용하세요.
+
+[제목 다양화 — 베스트 전용 필수]
+동일 카테고리로 재발행 시에도 이전 제목과 앞 2단어가 겹치지 않게 하세요. 아래 중 다른 각도를 골라 매번 구조를 바꾸세요:
+- 판매량/판매 순위 각도 (예: 판매량 상위 정리, 판매량으로 본 인기)
+- 브랜드 비교 각도 (예: A vs B — 베스트 1~5위 비교)
+- 가격대/상황 각도 (예: 1만원대, 선물용, 상황에 따라 고르기)
+- 스펙/특징 각도 (예: 스펙과 가격 비교)
+최근 제목 목록이 주어지면 그들과 구조·어미·브랜드 조합이 겹치지 않게 작성하세요.
 {extra_title_rules}{recent_block}
 
 [출력 형식 규칙 — 가장 중요, 반드시 준수]
@@ -450,10 +462,10 @@ def _build_system_prompt(keyword, blog_id=None, style_hint="", recent_titles=Non
 - 사고 과정/검토 텍스트 금지: "우선 사용자 요청은~", "제목 규칙을 확인해야 한다~" 등 작성 과정을 설명하는 문구는 일절 포함하지 마세요.
 
 [글 구조 — 베스트 정보 전달형]
-이 글은 카테고리 베스트셀러 판매량 기준 1~5위를 또렷하게 전달하는 "베스트 정보 전달형" 글입니다. 아래 5단계 구조를 따르되, 문장은 자연스럽게 쓰세요.
+이 글은 카테고리 베스트셀러 판매량 기준 1~{product_count}위를 또렷하게 전달하는 "베스트 정보 전달형" 글입니다. 아래 5단계 구조를 따르되, 문장은 자연스럽게 쓰세요.
 
 1. **도입부 — 판매량 기준 명시 (2~4문장)**:
-   - "카테고리 베스트셀러 판매량 기준 1~5위"임을 첫 문단에서 명시
+   - "카테고리 베스트셀러 판매량 기준 1~{product_count}위"임을 첫 문단에서 명시
    - "가성비/스펙 기준으로 골랐습니다" 서술 금지 — 판매 순위 기반임을 밝히기
    - 이 글에 어떤 정보가 담겨 있는지(비교표, 상품별 특징, 구매 전 체크리스트) 한두 문장으로 안내
    - "{year}년 {month}월 기준"을 넣어 시의성을 살리고, 공감 가는 문장으로 자연스럽게 시작
@@ -934,6 +946,7 @@ def generate_curation_article(keyword, products, blog_id=None):
         return None
 
     product_block = _build_product_block(products[:5], blog_id=blog_id)
+    _product_count = len(products[:5])
 
     # 제목 스타일 다양화 — 템플릿 기반 선택
     template_type = None
@@ -962,6 +975,8 @@ def generate_curation_article(keyword, products, blog_id=None):
                 price_range_str = f"{min_p:,}원 ~ {max_p:,}원"
                 brand_data["price_range"] = f"{min_p // 10000}~{max_p // 10000}"
 
+            brand_data["best_count"] = str(_product_count)
+
         style_hint = _tt_picker.render(template_type, brand_data, keyword)
         logger.info("[title_template] 선택: %s → %s…", template_type, style_hint[:60])
     except Exception as e:
@@ -982,7 +997,7 @@ def generate_curation_article(keyword, products, blog_id=None):
         except Exception as _e:
             logger.warning(f"[recent_titles] 수집 실패: {_e}")
 
-    system_prompt = _build_system_prompt(keyword, blog_id=blog_id, style_hint=style_hint, recent_titles=recent_titles)
+    system_prompt = _build_system_prompt(keyword, blog_id=blog_id, style_hint=style_hint, recent_titles=recent_titles, product_count=_product_count)
     user_prompt = _build_user_prompt(keyword, product_block, price_range=price_range_str)
 
     # 글자수 미달 시 최대 3회 시도 (2→3 확대, 시도별 temperature 변화)
@@ -1136,17 +1151,17 @@ def generate_curation_article(keyword, products, blog_id=None):
             # 최후 폴백: "{keyword} 추천 · YYYY년 M월" — 옛 TOP5 포맷 금지
             _now = datetime.now()
             if _is_best_title_gate:
-                title = f"{keyword} 베스트 1~5위 · {_now.year}년 {_now.month}월"
+                title = f"{keyword} 베스트 1~{_product_count}위 · {_now.year}년 {_now.month}월"
             else:
                 title = f"{keyword} 추천 · {_now.year}년 {_now.month}월"
             logger.warning(f"[title-fallback] blog_id={blog_id} keyword={keyword} pick 실패 → 최후 폴백 사용: {title}")
     # Phase 75 fallback best guarantee: fallback이 베스트 미포함이면 베스트로 강제 치환 (additive, non-destructive)
     if _is_best_title_gate and title and "베스트" not in title:
-        # 기존 제목에 베스트 주입 — 예: "주방용품 추천 · 2026년 8월" → "주방용품 베스트 1~5위 · 2026년 8월"
+        # 기존 제목에 베스트 주입 — 예: "주방용품 추천 · 2026년 8월" → "주방용품 베스트 1~3위 · 2026년 8월"
         if "추천" in title:
-            title = title.replace("추천", "베스트 1~5위", 1)
+            title = title.replace("추천", f"베스트 1~{_product_count}위", 1)
         else:
-            title = f"{keyword} 베스트 1~5위 — {title[:20]}"
+            title = f"{keyword} 베스트 1~{_product_count}위 — {title[:20]}"
         logger.info(f"[best_title_fallback_fix] 베스트 주입: {title[:50]}")
     if template_type:
         logger.info("[title_template] 사용됨: %s (제목: %s…)", template_type, (title or "")[:50])

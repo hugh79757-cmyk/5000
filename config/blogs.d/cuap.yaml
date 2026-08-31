@@ -334,7 +334,7 @@ blogs:
   status: active
   daily_quota: 2
   source: bestcategories
-  category_id: '1020'
+  category_id: '1013'
   domain: best-kitchen.informationhot.kr
   cf_project: best-kitchen-hugo
   repo: best-kitchen-hugo

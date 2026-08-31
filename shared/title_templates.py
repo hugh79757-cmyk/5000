@@ -26,6 +26,12 @@ TITLE_TEMPLATES: dict[str, str] = {
     "myth_busting": "{keyword} 흔한 오해 3가지 — {year}년 기준 바로잡기",
     "new_release": "최근 출시 {keyword} {brand1} — 첫인상과 주요 특징",
     "situation_based": "{keyword} 어떤 걸 골라야 할까? 상황별 추천",
+    # best-* 전용 — 베스트 1~N위 (N=상품 수에 따라 유동적), 구조 다양화
+    "best_ranking": "{keyword} 베스트 1~{best_count}위 — {year}년 {month}월 판매량 상위 정리",
+    "best_comparison": "{brand1} vs {brand2} — {keyword} 베스트 1~{best_count}위 비교",
+    "best_budget": "{keyword} 베스트 1~{best_count}위 — {price_range}만원대 인기 제품은?",
+    "best_situation": "{keyword} 베스트 1~{best_count}위, 상황에 따라 고르기",
+    "best_spec": "{brand1}·{brand2} {keyword} 베스트 1~{best_count}위 스펙과 가격 비교",
 }
 
 # ── 블로그별 오버라이드 (추후 확장용) ─────────────────────────────────
@@ -71,6 +77,19 @@ BLOG_TEMPLATE_OVERRIDES: dict[str, dict] = {
         "preferred_templates": ["comparison", "spec_style", "buying_guide", "question_style", "myth_busting"],
         "avoid_templates": [],
     },
+    # best-* 전용 — 베스트 1~5위 포함 템플릿만 선호
+    "best-kitchen-hugo": {
+        "preferred_templates": ["best_ranking", "best_comparison", "best_budget", "best_situation", "best_spec"],
+        "avoid_templates": ["ranking", "toplist", "budget", "comparison", "review_style"],
+    },
+    "best-beauty-hugo": {
+        "preferred_templates": ["best_ranking", "best_comparison", "best_budget", "best_situation", "best_spec"],
+        "avoid_templates": ["ranking", "toplist", "budget", "comparison", "review_style"],
+    },
+    "best-baby-hugo": {
+        "preferred_templates": ["best_ranking", "best_comparison", "best_budget", "best_situation", "best_spec"],
+        "avoid_templates": ["ranking", "toplist", "budget", "comparison", "review_style"],
+    },
 }
 
 TEMPLATE_ROTATION_WINDOW = 15  # 같은 타입 N회 내 재사용 방지
@@ -89,6 +108,17 @@ def _classify_title(title: str) -> str:
     """
     if not title:
         return ""
+    # best-* 전용 — 베스트 1~N위 포함 제목은 best_* 로 분류 (회전 감지용)
+    if re.search(r"베스트\s*1\s*[~-]\s*\d+위", title):
+        if re.search(r"\bvs\b", title):
+            return "best_comparison"
+        if re.search(r"\d+만원", title):
+            return "best_budget"
+        if re.search(r"스펙", title):
+            return "best_spec"
+        if re.search(r"상황", title):
+            return "best_situation"
+        return "best_ranking"
     # myth_busting: 오해
     if re.search(r"오해|흔한.*오해|바로잡기", title):
         return "myth_busting"
@@ -215,6 +245,7 @@ class TitleTemplatePicker:
             "month": str(now.month),
             "keyword": keyword or "상품",
             "price_range": brand_data.get("price_range", "50"),
+            "best_count": brand_data.get("best_count", "5"),
         }
         try:
             return template.format(**context)
