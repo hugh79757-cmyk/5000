@@ -139,15 +139,21 @@ def _pick_keyword(blog_id):
         # Q-D: 최근 발행 단지 제외 (중복 방지) — 발견② 연동
         try:
             if blog_id in ("rap-hugo", "rap3-hugo", "rap4-hugo", "rap5-hugo"):
+                from pipelines.rap.fetcher import find_lawd_cd
                 recent_complexes = {r[0] for r in rap_conn.execute(
                     "SELECT DISTINCT data_key FROM publish_log "
                     "WHERE blog_id=? AND published_at >= datetime('now', '-30 days') "
-                    "AND data_key LIKE '%실거래가%' OR data_key LIKE '%전세%' OR data_key LIKE '%월세%'",
+                    "AND (data_key LIKE '%실거래가%' OR data_key LIKE '%전세%' OR data_key LIKE '%월세%')",
                     (blog_id,)
                 ).fetchall()}
-                # 키워드에서 단지명 추출하여 최근 발행 단지 제외
-                rows = [(kw, cat) for kw, cat in rows 
-                        if not any(complex_name in kw for complex_name in recent_complexes)]
+                # 같은 district의 keyword는 최근 발행되어도 제외 (data_key substring이 아니라 district 기준)
+                recent_districts = set()
+                for dk in recent_complexes:
+                    _, _, district = find_lawd_cd(dk)
+                    if district:
+                        recent_districts.add(district)
+                rows = [(kw, cat) for kw, cat in rows
+                        if not any(district in kw for district in recent_districts)]
         except Exception:
             pass  # 에러 시 건너뜀
 

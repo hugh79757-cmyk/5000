@@ -965,7 +965,13 @@ def postprocess_content(content, data_prices=None, blog_id="", slug="", corpus: 
     for _name, _count in _name_counts.items():
         if _count >= 4:
             issues.append(f"[WARNING] Tour repeated {_count}x: '{_name[:50]}' — trimming to max 2 mentions")
-            is_draft = True
+            # 실제 트림: 모든 occurrence 위치 수집 → 3회째부터 모두 제거
+            _positions = [m.start() for m in re.finditer(re.escape(_name), content, re.IGNORECASE)]
+            if len(_positions) > 2:
+                # 뒤에서부터 제거 (인덱스 shift 방지)
+                for _pos in reversed(_positions[2:]):
+                    content = content[:_pos] + content[_pos + len(_name):]
+                issues.append(f"[FIXED] Tour '{_name[:50]}' trimmed from {len(_positions)} to 2 mentions")
         elif _count == 3:
             issues.append(f"[INFO] Tour mentioned 3x: '{_name[:50]}'")
         elif _count == 2:
