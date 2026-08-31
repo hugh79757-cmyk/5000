@@ -1,33 +1,33 @@
 {
-  "last_run_id": "20260830_034249_63107",
+  "last_run_id": "20260831_071409_90916",
   "overall_exit_code": 0,
-  "run_started": "2026-08-30 03:42:49",
+  "run_started": "2026-08-31 07:14:09",
   "sources": {
     "ga4": {
       "status": "ok",
       "exit_code": 0,
-      "started": "2026-08-30 03:42:49",
-      "finished": "2026-08-30 03:44:57"
+      "started": "2026-08-31 07:14:09",
+      "finished": "2026-08-31 07:16:12"
     },
     "gsc": {
       "status": "ok",
       "exit_code": 0,
-      "started": "2026-08-30 03:44:57",
-      "finished": "2026-08-30 03:46:50"
+      "started": "2026-08-31 07:16:12",
+      "finished": "2026-08-31 07:17:26"
     },
     "adsense": {
       "status": "ok",
       "exit_code": 0,
-      "started": "2026-08-30 03:46:50",
-      "finished": "2026-08-30 03:46:57"
+      "started": "2026-08-31 07:17:26",
+      "finished": "2026-08-31 07:17:32"
     },
     "efficiency": {
       "status": "ok",
       "exit_code": 0,
-      "started": "2026-08-30 03:46:57",
-      "finished": "2026-08-30 03:46:58"
+      "started": "2026-08-31 07:17:32",
+      "finished": "2026-08-31 07:17:33"
     }
   },
-  "updated_at": "2026-08-30 03:46:58",
-  "last_success_ts": "2026-08-30 03:42:49"
+  "updated_at": "2026-08-31 07:17:33",
+  "last_success_ts": "2026-08-31 07:14:09"
 }

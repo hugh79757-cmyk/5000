@@ -1,0 +1,2 @@
+[2026-08-30 10:06:51] deploy | sites=pet-hugo,adventure-hugo | type=workers+pages | pre-count=2 | result=ok 40.1s,22.4s | reason=prompt leak + TOC fix | backup=N/A
+[2026-08-30 16:20:45] deploy | sites=36 ETAP pages (adsense fix: TOC=false + header in-article removed) | pre-count=36 | backup=N/A (template revert, idempotent) | result=36/36 ok rc0 | post-verify=live 200 | reason=ADSENSE-GUIDE §2/§8 compliance
