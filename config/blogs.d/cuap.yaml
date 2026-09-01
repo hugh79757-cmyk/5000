@@ -325,7 +325,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1013'
   domain: best-kitchen.informationhot.kr
@@ -347,7 +347,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1010'
   domain: best-beauty.informationhot.kr
@@ -369,7 +369,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1016'
   domain: best-electronics.rotcha.kr
@@ -391,7 +391,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1017'
   domain: best-sports.rotcha.kr
@@ -413,7 +413,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1019'
   domain: best-books.rotcha.kr
@@ -435,7 +435,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1020'
   domain: best-toys.rotcha.kr
@@ -457,7 +457,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1021'
   domain: best-stationery.rotcha.kr
@@ -479,7 +479,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1022'
   domain: best-pet-supplies.rotcha.kr
@@ -501,7 +501,7 @@ blogs:
   pipeline: curation
   platform: hugo
   status: active
-  daily_quota: 2
+  daily_quota: 5
   source: bestcategories
   category_id: '1031'
   domain: best-unisex-clothing.rotcha.kr
