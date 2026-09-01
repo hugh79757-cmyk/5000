@@ -348,6 +348,10 @@ def generate(
         rotation_quota_break = False     # 429/quota로 break했는지 플래그
         structural_cooldown_break = False  # 구조적 오류로 cooldown 진입했는지 플래그
         for attempt in range(MAX_RETRIES):
+            # ponytail: per-attempt chain budget — prevents 600s scheduler kill when single tier hangs
+            if time.time() - chain_start > CHAIN_TIME_BUDGET:
+                logger.warning(f"[ai_writer] 체인 시간 예산 {CHAIN_TIME_BUDGET}초 초과 (경과 {time.time()-chain_start:.1f}초) — retry loop 조기 종료")
+                raise RuntimeError(f"chain_timeout: LLM 체인 시간 예산 {CHAIN_TIME_BUDGET}초 초과")
             try:
                 client = get_client(tier_config["provider"], providers)
                 if client is None:
@@ -479,6 +483,9 @@ def generate(
                     # 5xx/timeout/truncation: 기존 재시도 유지 (시간 조이기)
                     wait = (2 ** attempt) * 0.5  # 0.5s, 1s, 2s
                     logger.warning(f"[ai_writer] Retry {attempt+1}/{MAX_RETRIES} after {wait}s: {e}")
+                    # chain budget check before sleep — avoid sleeping past budget
+                    if time.time() - chain_start + wait > CHAIN_TIME_BUDGET:
+                        raise RuntimeError(f"chain_timeout: LLM 체인 시간 예산 {CHAIN_TIME_BUDGET}초 초과")
                     time.sleep(wait)
                     continue  # 같은 tier 재시도 계속
 
