@@ -1711,7 +1711,7 @@ def execute_pending_fix(
 
 
 def _terminate_pipeline_children(blog_id: str) -> None:
-    """150s 타임아웃 시 워커 스레드가 남긴 hugo/wrangler 자식 프로세스를 종료.
+    """300s 타임아웃 시 워커 스레드가 남긴 hugo/wrangler 자식 프로세스를 종료.
 
     스레드는 kill 불가하므로, 현재 dispatcher 프로세스의 자식 트리를 순회하며
     SIGTERM → SIGKILL 로 정리. 이들이 잡고 있던 /tmp/wrangler_deploy.lock 이
@@ -1845,17 +1845,17 @@ def dispatch(blog_id):
 
         # NOTE: do NOT use `with` — its implicit shutdown(wait=True) would join the
         # still-running worker thread and block until the pipeline finishes (600s),
-        # defeating the 150s timeout. Abandon the thread on timeout instead.
+        # defeating the 300s timeout. Abandon the thread on timeout instead.
         _exec = _DaemonThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
         _fut = _exec.submit(_run_pipeline, cfg)
         try:
-            result = _fut.result(timeout=150)
+            result = _fut.result(timeout=300)
         except FuturesTimeoutError:
-            logger.warning(f"[dispatch] pipeline timeout 150s for {blog_id}")
+            logger.warning(f"[dispatch] pipeline timeout 300s for {blog_id}")
             # ponytail: terminate spawned children (hugo/wrangler) so they release
             # /tmp/wrangler_deploy.lock instead of holding it for the full run.
             _terminate_pipeline_children(blog_id)
-            result = {"success": False, "reason": "pipeline_timeout_150s"}
+            result = {"success": False, "reason": "pipeline_timeout_300s"}
         finally:
             _exec.shutdown(wait=False)  # abandon worker thread, let process exit
     except Exception as e:

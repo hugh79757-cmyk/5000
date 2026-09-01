@@ -396,10 +396,13 @@ def run_publish(blog_id) -> bool | None:
         run_env["PUBLISH_SLOT_ID"] = str(slot_id)
         run_env["PUBLISH_SLOT_BLOG_ID"] = blog_id
 
+        # 블로그별 타임아웃: ETAP 등 대형 사이트는 LLM 폴백 체인 경쟁으로 느림
+        _pipeline_timeout = int(blog_cfg.get("pipeline_timeout", 600)) if blog_cfg else 600
+
         result = subprocess.run(
             [PYTHON, "dispatcher.py", blog_id],
             cwd=PROJECT_DIR,
-            capture_output=True, text=True, timeout=600,
+            capture_output=True, text=True, timeout=_pipeline_timeout,
             env=run_env,
         )
         parsed_success = None
@@ -432,8 +435,8 @@ def run_publish(blog_id) -> bool | None:
             _upsert_availability_healthy(blog_cfg)
         return True
     except subprocess.TimeoutExpired:
-        logger.exception(blog_id + " timeout (600s)")
-        _tg_error(blog_id, "scheduler", "timeout 600s")
+        logger.exception(blog_id + f" timeout ({_pipeline_timeout}s)")
+        _tg_error(blog_id, "scheduler", f"timeout {_pipeline_timeout}s")
         return False
     except Exception as e:
         logger.exception(blog_id + " failed: " + str(e))

@@ -7,13 +7,14 @@ RELEVANCE_CONFIG: dict[str, dict] = {
     "default": {"threshold": 0.75, "min_keyword_matches": 2},
     "laptop-hugo": {"threshold": 0.65},
     "health-hugo": {"threshold": 0.55},  # Phase72: 0.65->0.55
-    "baby-hugo": {"threshold": 0.70},
+    "baby-hugo": {"threshold": 0.50},  # P14 borderline 0.65 avg fails 0.70 -> relax to 0.50
     "beauty-hugo": {"threshold": 0.55},
     "interior-hugo": {"threshold": 0.55},
     "camping-hugo": {"threshold": 0.55},      # Phase 10: lowered from 0.65
     "kitchen-hugo": {"threshold": 0.50},
     "pet-hugo": {"threshold": 0.55},
     "appliance-hugo": {"threshold": 0.65},    # Phase 10: NEW — was using default 0.75
+    "homeappliance-hugo": {"threshold": 0.50},  # alias of appliance-hugo, default 0.75 blocks
     "golf-hugo": {"threshold": 0.50},         # golf products use brand names, default 0.75 blocks all
     "bike-hugo": {"threshold": 0.50},         # bike compound-keyword products carry 1 allowed token -> default 0.75 blocks all (same as golf)
     "car-hugo": {"threshold": 0.50},          # Phase 72: car 12 keywords strict 0.75 blocks remaining 타이어/냉장고 (avg 0.67/0.33)
