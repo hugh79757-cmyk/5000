@@ -1183,7 +1183,7 @@ def run(cfg):
         else:
             reason = result.get("reason", "unknown")
             # 조용한 실패(할당량/중복)는 알림 제외, 나머지는 텔레그램 전송
-            if reason not in ("quota_met", "already_running", "similar_title"):
+            if reason not in ("quota_met", "already_running", "similar_title", "interval_skip"):
                 _tg_error(blog_id, reason, f"[curation] 발행 실패: {reason}")
 
             # ── Phase 58 모니터 통합 (additive — reason → spec.hook 매핑, 기존 알림과 병렬) ──
@@ -1206,7 +1206,7 @@ def run(cfg):
                 logger.error(f"[problem_monitor] curation run() 보고 실패: {_me}")
 
             # 임계값 기반 추가 알림 (쿨다운, dry_run 지원)
-            if reason not in ("quota_met", "already_running"):
+            if reason not in ("quota_met", "already_running", "interval_skip"):
                 _consecutive_failures[blog_id] = _consecutive_failures.get(blog_id, 0) + 1
                 _alert_checker.maybe_alert(blog_id, reason, {
                     "keyword": result.get("keyword", ""),
@@ -1225,6 +1225,64 @@ def _run_inner(cfg, blog_id, daily_quota):
     if today_count >= daily_quota:
         logger.info(f"[{blog_id}] 할당량 도달 ({today_count}/{daily_quota})")
         return {"success": False, "reason": "quota_met"}
+
+    # best-* 3일 간격 게이트 — 랭크 변동 반영 + 중복 방지 (2026-09-02)
+    if blog_id.startswith("best-"):
+        try:
+            import sqlite3 as _sq
+            from datetime import datetime as _dt, timedelta as _td, timezone as _tz
+            _raw = None
+            # 1) curation publish_log (가장 정확)
+            try:
+                _conn = _sq.connect(str(DB_PATH))
+                _row = _conn.execute("SELECT published_at FROM publish_log WHERE blog_id=? ORDER BY published_at DESC LIMIT 1", (blog_id,)).fetchone()
+                if _row and _row[0]:
+                    _raw = str(_row[0]).strip()
+                if not _raw:
+                    _row = _conn.execute("SELECT published_at FROM published_products WHERE blog_id=? ORDER BY published_at DESC LIMIT 1", (blog_id,)).fetchone()
+                    if _row and _row[0]:
+                        _raw = str(_row[0]).strip()
+                _conn.close()
+            except Exception as _ie:
+                try:
+                    _conn.close()
+                except Exception:
+                    pass
+                logger.warning(f"[{blog_id}] interval publish_log 조회 실패: {_ie}")
+            except Exception:
+                pass
+            # 2) fallback content.db publish_ledger
+            if not _raw:
+                try:
+                    _c2 = _sq.connect("data/content.db")
+                    _r2 = _c2.execute("SELECT created_at FROM publish_ledger WHERE blog_id=? AND status='published' ORDER BY created_at DESC LIMIT 1", (blog_id,)).fetchone()
+                    _c2.close()
+                    if _r2 and _r2[0]:
+                        _raw = str(_r2[0]).strip()
+                except Exception:
+                    pass
+            if _raw:
+                _last = None
+                try:
+                    _last = _dt.fromisoformat(_raw.replace("Z","+00:00"))
+                except Exception:
+                    try:
+                        _last = _dt.strptime(_raw[:19], "%Y-%m-%dT%H:%M:%S")
+                    except Exception:
+                        try:
+                            _last = _dt.strptime(_raw[:19], "%Y-%m-%d %H:%M:%S")
+                        except Exception:
+                            _last = None
+                if _last is not None:
+                    if _last.tzinfo is None:
+                        _last = _last.replace(tzinfo=_tz.utc)
+                    _now = _dt.now(_last.tzinfo)
+                    if _now - _last < _td(days=3):
+                        _left = _td(days=3) - (_now - _last)
+                        logger.info(f"[{blog_id}] 3일 간격 스킵 — { _left.total_seconds()/3600:.1f}h 남음 (last={_raw})")
+                        return {"success": False, "reason": "interval_skip"}
+        except Exception as _e:
+            logger.warning(f"[{blog_id}] interval gate check fail: {_e}")
 
     # ── Phase 75 source flag dispatch — best-* → best_collector, else search collector ──
     # cfg.source == "bestcategories" or blog_id startswith best- → use BEST_CATEGORY_MAP + best_collector
@@ -1257,10 +1315,22 @@ def _run_inner(cfg, blog_id, daily_quota):
             _record_failure(blog_id, "collect_error", f"베스트 API 수집 실패: {category_id}", category_id)
             return {"success": False, "reason": "collect_error"}
         # get_best_products ORDER BY collected_at DESC, rank ASC (sales rank) [RESEARCH L311-320]
-        products = get_best_products(category_id, limit=10)
+        # 3일 주기: 풀 전체(20)로 가져와서 used 필터 후 로테이션 — 랭크 고정 반복 방지
+        products = get_best_products(category_id, limit=20)
         # keep _filter_used_products (blog_id scope) + cross-fleet dedup (paired blog 30d) intact
         products = _filter_used_products(blog_id, products)
         products = _filter_cross_fleet_products(blog_id, products)
+        # used 필터 후에도 랭크 1~5 고정 방지 — 3일 주기 로테이션 셔플 (결정적, 일자 기반)
+        if len(products) >= 5:
+            try:
+                from datetime import date as _d
+                import hashlib as _hl
+                _seed = int(_hl.md5(f"{blog_id}:{_d.today().isoformat()}".encode()).hexdigest()[:8], 16)
+                import random as _rnd
+                _rnd.seed(_seed)
+                _rnd.shuffle(products)
+            except Exception:
+                pass
         # derive keyword for writer/logging — best-* uses CATEGORY_FILTERS allowed[0] (Coupang category_name은 상위분류라 부정확)
         if products:
             keyword = products[0].get("category_name") or category_id
@@ -1351,7 +1421,7 @@ def _run_inner(cfg, blog_id, daily_quota):
             # best_collector가 이미 올바른 카테고리에서 수집했으므로 필터 불필요
             if attempt == 1:
                 logger.warning(f"[{blog_id}] 베스트 필터 후 상품 부족 ({len(products)}개) — 필터 스킵 재시도")
-                products = get_best_products(category_id, limit=10)
+                products = get_best_products(category_id, limit=20)
                 products = _filter_used_products(blog_id, products)
                 products = _filter_cross_fleet_products(blog_id, products)
                 continue
