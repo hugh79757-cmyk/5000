@@ -226,6 +226,29 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], top_n: int = 50):
         logger.info(f"[{blog_id}] 추가할 신규 키워드 없음")
         return 0
 
+    # CATEGORY_FILTERS 기반 검증 (write-time guard)
+    # validate_keyword 실패 시 무필터 추가 금지 — keywords.py 재오염 방지
+    try:
+        from pipelines.curation.keywords import validate_keyword
+    except ImportError as exc:
+        logger.warning(f"[{blog_id}] 추가 중단 — validate_keyword import 실패: {exc}")
+        return 0
+    valid_added = []
+    for kw in added:
+        try:
+            ok, reason = validate_keyword(kw, blog_id)
+        except Exception as exc:
+            logger.warning(f"[{blog_id}] 제외됨 '{kw}' — validate_keyword 오류: {exc}")
+            continue
+        if ok:
+            valid_added.append(kw)
+        else:
+            logger.info(f"[{blog_id}] 제외됨 '{kw}' — {reason}")
+    added = valid_added
+    if not added:
+        logger.info(f"[{blog_id}] 검증 통과 키워드 없음")
+        return 0
+
     new_entries = ",\n        ".join([f'"{k}"' for k in added])
     new_content = (
         content[:end]

@@ -271,18 +271,24 @@ def update_keywords_py(blog_id: str, new_keywords: list[str], max_add: int = 100
     added = [kw for kw in new_keywords if kw not in existing][:max_add]
 
     # CATEGORY_FILTERS 기반 검증
+    # validate_keyword import/호출 실패 시 무필터 추가 금지 (write-time guard)
     try:
         from pipelines.curation.keywords import validate_keyword
-        valid_added = []
-        for kw in added:
+    except ImportError as exc:
+        print(f"[keywords.py] {blog_id}: 추가 중단 — validate_keyword import 실패: {exc}")
+        return 0
+    valid_added = []
+    for kw in added:
+        try:
             ok, reason = validate_keyword(kw, blog_id)
-            if ok:
-                valid_added.append(kw)
-            else:
-                print(f"[keywords.py] {blog_id}: 제외됨 '{kw}' — {reason}")
-        added = valid_added
-    except ImportError:
-        pass
+        except Exception as exc:
+            print(f"[keywords.py] {blog_id}: 제외됨 '{kw}' — validate_keyword 오류: {exc}")
+            continue
+        if ok:
+            valid_added.append(kw)
+        else:
+            print(f"[keywords.py] {blog_id}: 제외됨 '{kw}' — {reason}")
+    added = valid_added
 
     if not added:
         print(f"[keywords.py] {blog_id}: 추가할 신규 키워드 없음")
