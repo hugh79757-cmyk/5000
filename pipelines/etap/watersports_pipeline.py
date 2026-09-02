@@ -150,8 +150,14 @@ def _run_impl() -> bool:
 
 
 def run():
-    """표준 계약 정규화 adapter (Phase 61, D-08). 기존 _run_impl 로직 위임. 반환만 표준 dict로."""
-    return _normalize_result(_run_impl())
+    """표준 계약 정규화 adapter (Phase 61, D-08). 기존 _run_impl 로직 위임. 반환만 표준 dict로.
+    데이터 없는 토픽은 exhausted 처리 후 False 반환 — 실패 아님. 다음 토픽 회전 재시도(최대 5회)."""
+    ok = False
+    for _attempt in range(5):
+        ok = _run_impl()
+        if ok:
+            break
+    return _normalize_result(ok)
 
 
 
