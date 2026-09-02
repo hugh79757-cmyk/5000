@@ -165,8 +165,12 @@ def run_batch(count=1):
     count = min(count, 5 - today_count)
     ok = 0
     for _ in range(count):
-        if _run_impl():
-            ok += 1
+        # 데이터 없는 토픽은 _run_impl이 exhausted 처리 후 False 반환 —
+        # 실패 아님. 다음 토픽으로 회전 재시도 (최대 5회 선별).
+        for _attempt in range(5):
+            if _run_impl():
+                ok += 1
+                break
         time.sleep(5)
     logger.info(f"[{BLOG_ID}] Batch {ok}/{count}")
     return ok

@@ -758,9 +758,31 @@ def preflight_check(blog_id: str) -> dict:
                 "reason": "최근 7일 내 발행 포스트 없음 (skip)"}
 
     # 각 포스트 검사
+    # ponytail: corpus를 포스트 루프 밖에서 1회만 구축(기존: 포스트마다 전체 재스캔 →
+    # 301포스트×300파일 I/O로 900s scheduler kill, tour-hugo P25). 상한 캡=200 샘플.
+    _S_CORPUS_CAP = 200
+    corpus_by_file = {}
+    for other_md in posts_dir.rglob("*.md"):
+        try:
+            other_content = other_md.read_text(encoding="utf-8", errors="replace")
+            other_body_start = other_content.find("---\n", 4)
+            if other_body_start > 0:
+                other_body = other_content[other_body_start + 4:]
+                if len(other_body) > 200:
+                    corpus_by_file[other_md] = other_body
+        except Exception:
+            pass
+
     for md_file in recent_posts:
         content = md_file.read_text(encoding="utf-8", errors="replace")
         slug = md_file.parent.name
+        # 자기 자신 제외한 corpus — 루프 밖 1회 구축 재사용.
+        # ponytail: 상한 200 초과 시 stride 샘플링(전 기간 골고루) — 301코퍼스
+        # 전량 TF-IDF는 포스트당 ~0.8s×301로 900s kill 유발(tour-hugo P25).
+        corpus = [b for f, b in corpus_by_file.items() if f != md_file]
+        if len(corpus) > _S_CORPUS_CAP:
+            _step = len(corpus) // _S_CORPUS_CAP or 1
+            corpus = corpus[::_step][:_S_CORPUS_CAP]
 
         # --- C01: 곡선따옴표 (MAJOR, warn-only) ---
         # reuse ops_dashboard/checks/content_integrity.py _check_c01 char set
@@ -883,22 +905,8 @@ def preflight_check(blog_id: str) -> dict:
         # S03: Unique Data Points ≥ 3
         # S04: Editorial Synthesis (no template markers)
         # S05: Freshness Gate (data age < 30 days)
-        
-        # Corpus 추출 (현재 포스트 제외)
-        corpus = []
-        for other_md in posts_dir.rglob("*.md"):
-            if other_md == md_file:
-                continue
-            try:
-                other_content = other_md.read_text(encoding="utf-8", errors="replace")
-                other_body_start = other_content.find("---\n", 4)
-                if other_body_start > 0:
-                    other_body = other_content[other_body_start + 4:]
-                    if len(other_body) > 200:
-                        corpus.append(other_body)
-            except Exception:
-                pass
-        
+        # corpus: 루프 밖 1회 구축(위) — 포스트마다 재스캔하지 않음
+
         # Frontmatter 파싱 (S04, S05용)
         fm_dict = {}
         try:
@@ -909,7 +917,12 @@ def preflight_check(blog_id: str) -> dict:
             pass
         
         # S01: Uniqueness Ratio
-        if corpus:
+        # ponytail: 킬스위치 QUALITY_ENFORCE_S01_S02=1일 때만 계산(기본 OFF).
+        # WARN-ONLY라 blocked에 영향 없으면서 301포스트×TF-IDF(1.2s/포스트)
+        # 로 900s scheduler kill 유발(tour-hugo P25). 발행 시점 quality_guard가
+        # 동일 게이트를 이미 수행 — preflight 중복. corpus 재구축은 위에서
+        # 1회로 축소했으므로 재활성화 시에도 포스트당 1.2s 유지됨.
+        if corpus and os.getenv("QUALITY_ENFORCE_S01_S02", "0") == "1":
             try:
                 from pipelines.etap.quality_guard import uniqueness_ratio_gate
                 passed, ratio, details = uniqueness_ratio_gate(body, corpus, threshold=0.85)
@@ -925,9 +938,9 @@ def preflight_check(blog_id: str) -> dict:
                 pass  # quality_guard 미사용 블로그는 skip
             except Exception as e:
                 logger.warning(f"[preflight] S01 check error for {slug}: {e}")
-        
-        # S02: Structural Similarity
-        if corpus:
+
+        # S02: Structural Similarity (S01과 동일 킬스위치 — 계산 비용 대비 sim=0.0000만 관측)
+        if corpus and os.getenv("QUALITY_ENFORCE_S01_S02", "0") == "1":
             try:
                 from pipelines.etap.quality_guard import structural_similarity_gate
                 passed, sim, details = structural_similarity_gate(body, corpus, threshold=0.70)

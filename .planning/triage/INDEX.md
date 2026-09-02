@@ -1,3 +1,6 @@
+- 2026-09-02 | fix | five-alert-keyword-purge-preflight-cost | kitchen/fitness P36+P14 정크키워드 purge + tour-hugo P25 preflight S01 900s→3.1s + rap P16 자연해소
+- 2026-09-02 | fix | fleet-keyword-purge-watersports-rotation | curation 9블로그 정크 734 purge(car/golf/interior/beauty/baby/health/pet/appliance/camping) + watersports P02 토픽 회전 재시도 + travel P01 실발행 확인 + rap3 P16 가드 정상 판정
+- 2026-09-02 | fix | best-fleet-3day-interval-and-rank-shuffle | best fleet 3일 주기 + 랭크 셔플 — interval gate + 썸네일 반복 수정
 - 2026-08-28 | fix | tour-hugo-p25-deploy-timeout | tour-hugo P25 600s: deploy.py _deploy_timeout 120→300 ( large site wrangler fail+retry>600s kill)
 - 2026-08-28 | fix | fitness-hugo-p02-concurrency-skip-miscount | fitness-hugo P02: CONCURRENCY 스킵을 실패로 오집계 → run_publish None 반환으로 정정
 - 2026-08-28 | fix | deals-dining-no-data-orphan-topic-rotation | deals/dining P01 no_data → 고아 토픽 회전(192건너뛰고 134 유효 도달), P01 연속 알람 소멸
