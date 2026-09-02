@@ -773,6 +773,10 @@ def preflight_check(blog_id: str) -> dict:
         except Exception:
             pass
 
+    _total_corpus = len(corpus_by_file)
+    if _total_corpus > _S_CORPUS_CAP:
+        logger.info("[preflight] corpus %d건 → cap %d건 샘플링 (blog=%s)" % (_total_corpus, _S_CORPUS_CAP, blog_id))
+
     for md_file in recent_posts:
         content = md_file.read_text(encoding="utf-8", errors="replace")
         slug = md_file.parent.name

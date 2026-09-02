@@ -5,6 +5,8 @@
 - 쿠팡 Search API에서 적절한 결과가 나올 수 있는 자연어 키워드
 """
 
+import os
+
 KEYWORD_MAP = {
     "massage-hugo": [
         '안마의자',
@@ -2380,11 +2382,27 @@ def _get_from_pool(blog_id):
 
 
 def get_keywords(blog_id):
-    """블로그 ID에 해당하는 키워드 목록 반환 (pool-first, KEYWORD_MAP fallback 유지)"""
+    """블로그 ID에 해당하는 키워드 목록 반환 (pool-first, KEYWORD_MAP fallback 유지)
+
+    KEYWORD_MAP fallback 시 validate_keyword 미통과 정크 키워드를 필터링한다
+    (02:00 keyword_expander 등 파일 재오염 방지 — read-time 방어선).
+    필터 후 빈 리스트면 원본 반환(기존 동작 보존). 킬스위치: KEYWORD_READ_FILTER=0.
+    """
     pool_kw = _get_from_pool(blog_id)
     if pool_kw:
         return [pool_kw]
-    return KEYWORD_MAP.get(blog_id, [])
+    kws = KEYWORD_MAP.get(blog_id, [])
+    if os.environ.get("KEYWORD_READ_FILTER", "1") != "1":
+        return kws
+    filtered = []
+    for kw in kws:
+        try:
+            ok, _reason = validate_keyword(kw, blog_id)
+            if ok:
+                filtered.append(kw)
+        except Exception:
+            filtered.append(kw)  # validate 실패 시 기존 동작 보존
+    return filtered if filtered else kws
 
 
 def validate_keyword(keyword: str, blog_id: str) -> tuple[bool, str]:

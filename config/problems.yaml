@@ -80,7 +80,7 @@ problems:
     연속 실패: {consecutive}회
 
     조치: {action}'
-  action: 프롬프트/모델 설정 점검 후 콘텐츠 재생성
+  action: 프롬프트/모델 설정 점검 후 콘텐츠 재생성 — 최초 1회는 `python3 dispatcher.py {blog_id}` 수동 재시도 (transient 여부 확인), 재발 시 logs/scheduler.log에서 {blog_id} 실패 stage 확인
   playbook_ref: ERROR_PLAYBOOKS.md#p02
   summary_human: '콘텐츠 생성 실패 (no_content): 원문 수집 실패, LLM 응답 공백, 콘텐츠 후처리 실패 중 실패 지점별로 오류 전파·fallback·입력 검증 보완.'
   summary_llm: '{"problem_id": "P02", "name_ko": "콘텐츠 생성 실패 (no_content)", "severity": "MAJOR", "family": "pipeline", "one_line_action": "원문 수집 실패, LLM 응답 공백, 콘텐츠 후처리 실패 중 실패 지점별로 오류 전파·fallback·입력 검증 보완", "needs_human": false, "target_files": [{"path": "dispatcher.py", "hint": "result_parse 단계, no_content reason 처리"}, {"path": "shared/ai_writer.py", "hint": "GPT 호출·응답 검증 로직"}, {"path": "pipelines/*/pipeline.py", "hint": "각 파이프라인 generate/run 함수, 제목/본문 생성 부분"}], "how_to_add": "config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
@@ -518,7 +518,7 @@ problems:
     연속 실패: {consecutive}회
 
     조치: {action}'
-  action: 수집 소스/필터 기준 점검
+  action: '수집 소스/필터 기준 점검 — irrelevant_products 반복 시 키워드 오염 의심: `python3 -c "import sys; sys.path.insert(0, ''.''); from pipelines.curation.keywords import get_keywords; [print(k) for k in get_keywords(''{blog_id}'')]"` 로 정크 여부 확인 (read-time 필터가 KEYWORD_MAP 오염은 자동 차단)'
   playbook_ref: ERROR_PLAYBOOKS.md#p14
   summary_human: '수집/품질 게이트 실패: 소스·필터를 정확히 보정; 실패 reason을 구체화; 기준 완화는 승인 필요.'
   summary_llm: '{"problem_id": "P14", "name_ko": "수집/품질 게이트 실패", "severity": "MAJOR", "family": "pipeline", "one_line_action": "소스·필터를 정확히 보정; 실패 reason을 구체화; 기준 완화는 승인 필요", "needs_human": false, "target_files": [{"path": "pipelines/*/pipeline.py", "hint": "데이터 수집·필터 단계, 후보 유효성 체크, 차단 사유 구체화"}, {"path": "config/blogs.d/*.yaml", "hint": "해당 블로그의 fetch_sources, 필터 설정"}], "how_to_add": "config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'
@@ -913,7 +913,7 @@ problems:
     stage: {phase}
 
     action: {action}'
-  action: Review the blocked subprocess and its external request timeouts.
+  action: 'Review the blocked subprocess and its external request timeouts — preflight 확인: `python3 -c "import sys; sys.path.insert(0, ''.''); from dispatcher import preflight_check; preflight_check(''{blog_id}'')"` (60s 초과 시 corpus cap/샘플링 로그 확인)'
   playbook_ref: ERROR_PLAYBOOKS.md#p25
   summary_human: 'Scheduler timeout: 병목 단계를 분리하고 단계별 제한·정리·결과 전파를 보완; timeout 상향만으로 해결하지 않음.'
   summary_llm: '{"problem_id": "P25", "name_ko": "Scheduler timeout", "severity": "CRITICAL", "family": "scheduler", "one_line_action": "병목 단계를 분리하고 단계별 제한·정리·결과 전파를 보완; timeout 상향만으로 해결하지 않음", "needs_human": false, "target_files": [{"path": "scheduler.py", "hint": "스케줄러 루프, 600초 타임아웃 제한, subprocess 실행 관리"}, {"path": "dispatcher.py", "hint": "파이프라인 실행 진입점, subprocess 호출·시간 측정"}], "how_to_add": "config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영"}'

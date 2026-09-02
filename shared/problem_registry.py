@@ -250,7 +250,7 @@ _register(ProblemSpec(
         "연속 실패: {consecutive}회\n"
         "조치: {action}"
     ),
-    action="프롬프트/모델 설정 점검 후 콘텐츠 재생성",
+    action="프롬프트/모델 설정 점검 후 콘텐츠 재생성 — 최초 1회는 `python3 dispatcher.py {blog_id}` 수동 재시도 (transient 여부 확인), 재발 시 logs/scheduler.log에서 {blog_id} 실패 stage 확인",
     playbook_ref="ERROR_PLAYBOOKS.md#p02",
 ))
 
@@ -374,7 +374,7 @@ _register(ProblemSpec(
         "연속 실패: {consecutive}회\n"
         "조치: {action}"
     ),
-    action="수집 소스/필터 기준 점검",
+    action="수집 소스/필터 기준 점검 — irrelevant_products 반복 시 키워드 오염: `python3 -c \"import sys; sys.path.insert(0,'.'); from pipelines.curation.keywords import get_keywords; [print(k) for k in get_keywords('{blog_id}')]\"` 로 정크 여부 확인 (read-time 필터가 KEYWORD_MAP 오염은 자동 차단함)",
     playbook_ref="ERROR_PLAYBOOKS.md#p14",
 ))
 
@@ -662,7 +662,7 @@ _register(ProblemSpec(
     reason_keys=("scheduler_timeout", "timeout_600s"), hook="scheduler",
     threshold="always",
     alert_template="[CRITICAL] Scheduler timeout\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
-    action="Review the blocked subprocess and its external request timeouts.",
+    action="Review the blocked subprocess and its external request timeouts — preflight 확인: `python3 -c \"import sys; sys.path.insert(0,'.'); from dispatcher import preflight_check; preflight_check('{blog_id}')\"` (60s 초과 시 corpus cap/샘플링 로그 확인)",
     playbook_ref="ERROR_PLAYBOOKS.md#p25",
 ))
 _register(ProblemSpec(
@@ -786,7 +786,7 @@ _register(ProblemSpec(
         "stage: {phase}\n"
         "action: {action}"
     ),
-    action="curation allowed 토큰/키워드 재점검 — 비주제 상품이 게이트에 걸림 (발행은 차단됨)",
+    action="curation allowed 토큰/키워드 재점검 — 비주제 상품이 게이트에 걸림 (발행은 차단됨) — 키워드 확인: `python3 -c \"import sys; sys.path.insert(0,'.'); from pipelines.curation.keywords import get_keywords; [print(k) for k in get_keywords('{blog_id}')]\"` (read-time 필터 작동 중이면 정크는 이미 차단됨)",
     playbook_ref="ERROR_PLAYBOOKS.md#p36",
 ))
 
