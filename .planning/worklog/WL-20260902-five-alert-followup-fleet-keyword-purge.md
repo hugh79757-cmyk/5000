@@ -102,3 +102,45 @@
 - escape topics 8개 (기존)
 - S02 Structural similarity WARN (ETAP corpus 대형화 — 기존 이슈)
 - best-* insufficient_products (Coupang 데이터 부족) — 별개 이슈
+
+---
+
+# 추가 수정 — tour-hugo P25 최종 해결 + golf P36 (커밋 01f3c860e)
+
+## 추가 조사 결과
+
+tour-hugo P25의 **진짜 hang 지점**이 preflight가 아닌 **배포 후 `_run_post_publish_checks()`**였음:
+
+1. preflight_check는 3.1s로 정상 통과 (커밋 0a3d3c005의 corpus cap 도입 이후)
+2. `_build_and_deploy_central()` 도 정상 완료 (deploy OK, wrangler rc=0)
+3. **배포 후** `_run_post_publish_checks()`(dispatcher.py:1285) → `run_all_checks()` → `content_integrity.py check_s01()`이 최근 7일 포스트 303건 각각に 대해 `_extract_corpus()` + TF-IDF 계산 → **303 × 302 = ~91,000회** → 900s scheduler kill
+
+- `content_integrity.py`의 `_extract_corpus()`는 cap 없이 전체 포스트를 매번 읽기
+- `check_s01()` 루프 안에서 매 포스트마다 `_extract_corpus()` 재호출 → 최악의 경우 O(N²) I/O + TF-IDF
+- `_run_post_publish_checks()`는 try/except로 감싸져 있어 에러 로그만 남기고 hang → 900s 도달
+
+## [PRODUCTION] 추가 수정
+
+### 10. ops_dashboard/checks/content_integrity.py — S01/S02 최적화
+
+- `_extract_corpus()`: `_S_CORPUS_CAP=200` 추가 (stride 샘플링). 기존 코드에 cap 없었음.
+- `check_s01()`, `check_s02()`: corpus를 **루프 밖에서 1회만 구축** (기존: 매 포스트마다 `_extract_corpus()` 재호출 = 최악 303×303 I/O). self-exclusion 제거(포스트 본문 유사성에 미세 영향이나 O(N²) 제거가 최우선).
+- `check_s01()`, `check_s02()`: `_S_POST_SAMPLE=50` 포스트 상한 추가 (초과 시 최신 N건만 검사).
+- 결과: tour-hugo 기준 304포스트 → corpus 152건(캡), 포스트 검사 최대 50건. 기존 ~91,000회 TF-IDF → 최대 50회.
+
+### 11. pipelines/curation/pipeline.py — golf-hugo bare allowed 제거
+
+- `"골프"`, `"스윙"` bare 토큰 제거 → 구체 토큰만保留 (`"골프클럽"`, `"골프용품"`, `"골프연습"`, `"골프장"`, `"골프공"`, `"골프용품"`, `"골프티"`, `"골프GPS"`, `"골프모자"`)
+- substring 매칭 맹점 제거: bare `'골프'` 포함 → `'식기골프신생아골프'` 같은 임의 정크 통과했으나 이제 구체 토큰만 허용
+
+### 12. pipelines/curation/keywords.py — golf KEYWORD_MAP purge
+
+- `'식기골프신생아골프'` 제거 (1건). golf-hugo 18개.
+
+## 추가 검증
+
+- py_compile: content_integrity.py, pipeline.py, keywords.py OK
+- `validate_keyword('식기골프신생아골프', 'golf-hugo')` → **False** (이전: True). `'골프클럽'` → True, bare `'골프'` → False.
+- `preflight_check('tour-hugo')` → 2.9s, blocked=False
+- `_extract_corpus(tour-hugo)` → 152건 (304포스트, cap=200 적용)
+- pytest: 19 failed, 129 passed (baseline 동일, 회귀 0건)

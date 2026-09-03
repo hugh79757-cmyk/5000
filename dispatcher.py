@@ -1224,7 +1224,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                      "--config", str(site_path / "wrangler.toml")],
                     cwd=str(site_path),
                     capture_output=True, text=True,
-                    timeout=120,
+                    timeout=300,  # ponytail: 120→300 large ETAP Pages/Workers need >120s (tour-hugo P25)
                     env=deploy_env
                 )
             else:
@@ -1235,7 +1235,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
                      "--commit-message=publish"],
                     cwd=str(site_path),
                     capture_output=True, text=True,
-                    timeout=120,
+                    timeout=300,  # ponytail: 120→300 ETAP large sites
                     env=deploy_env
                 )
         finally:

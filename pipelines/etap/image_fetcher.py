@@ -211,6 +211,9 @@ def _trigger_unsplash_download(photo) -> None:
 
 def fetch_city_image(city, country, slug, force=False):
     """커버 이미지 검색. 도시+국가명 관련성 필터 적용."""
+    # ponytail: overall deadline 40s — P25 guard
+    import time as _t2
+    _deadline2 = _t2.monotonic() + 40
     # 여러 쿼리 패턴 시도 (구체적 → 일반적)
     queries = [
         f"{city} {country} city" if country else f"{city} city",
@@ -219,10 +222,15 @@ def fetch_city_image(city, country, slug, force=False):
     ]
 
     for query in queries:
+        if _t2.monotonic() > _deadline2:
+            logger.warning("[Image] cover deadline 40s exceeded for %s", slug)
+            break
         results = _search_with_fallback(query, per_page=15, city=city, country=country)
         if not results:
             continue
         for photo in results:
+            if _t2.monotonic() > _deadline2:
+                break
             if not force and _is_image_used(photo["url"], slug):
                 continue
             r2_key = f"etap/{slug}/cover.jpg"
@@ -258,6 +266,9 @@ def fetch_city_image(city, country, slug, force=False):
 
 def fetch_body_images(city, country, slug, count=3, force=False):
     """본문 이미지. 관련성 필터 적용, 다양한 쿼리."""
+    # ponytail: overall deadline 60s — P25 guard, per-query 10s timeouts ×5 queries could exceed pipeline_timeout
+    import time as _t
+    _deadline = _t.monotonic() + 60
     queries = [
         f"{city} {country} skyline cityscape" if country else f"{city} skyline",
         f"{city} {country} street food market" if country else f"{city} food",
@@ -268,10 +279,15 @@ def fetch_body_images(city, country, slug, count=3, force=False):
     collected = []
 
     for q in queries:
+        if _t.monotonic() > _deadline:
+            logger.warning("[Image] body deadline 60s exceeded for %s — collected %d", slug, len(collected))
+            break
         if len(collected) >= count:
             break
         results = _search_with_fallback(q, per_page=15, city=city, country=country)
         for photo in results:
+            if _t.monotonic() > _deadline:
+                break
             if len(collected) >= count:
                 break
             if not force and _is_image_used(photo["url"], slug):
