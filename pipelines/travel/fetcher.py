@@ -27,6 +27,91 @@ def _fix_image_https(url):
     return url
 
 
+def _perf_boosted_sigungu(exclude_sigungus: set | None = None) -> tuple:
+    """성과 신호(Phase 77) 기반 시군구 선택 — 유입 실적 있는 지역 우선.
+
+    keyword_performance.json의 blog 신호 쿼리에서 지역명(광역시도/시군구)을
+    추출해 해당 시군구 가중치를 PERF_REGION_BOOST배 증폭. 게이트:
+    env PERF_SIGNALS 미설정/0, 파일 부재, blog_id 신호 없음, 지역명 미추출,
+    boost 대상이 exclude_sigungus에 있음 → 전부 기존 get_weighted_random_sigungu
+    로 passthrough. 예외 시에도 passthrough (기존 동작 보존).
+    """
+    from pipelines.travel.area_codes import (
+        FOOD_AREA_SIGUNGU_WEIGHTED,
+        find_by_sigungu_name,
+    )
+
+    pool = FOOD_AREA_SIGUNGU_WEIGHTED
+    if exclude_sigungus:
+        pool = [x for x in pool if x[2] not in exclude_sigungus]
+    if not pool:
+        pool = FOOD_AREA_SIGUNGU_WEIGHTED
+
+    if os.environ.get("PERF_SIGNALS", "") in ("", "0"):
+        # 게이트 OFF → 기존 함수와 동일한 선택
+        import random as _r
+        weights = [x[3] for x in pool]
+        chosen = _r.choices(pool, weights=weights, k=1)[0]
+        return chosen[0], chosen[1], chosen[2]
+
+    try:
+        import json as _json
+        from pathlib import Path as _P
+
+        blog_id = os.environ.get("PERF_BLOG_ID", "")
+        _root = _P(os.getenv("FIVEK_ROOT", _P(__file__).resolve().parents[2]))
+        sig_path = _P(
+            os.getenv(
+                "PERF_SIGNALS_PATH",
+                str(_root / "data" / "keyword_performance.json"),
+            )
+        )
+        if not blog_id or not sig_path.exists():
+            raise FileNotFoundError(blog_id or "no blog_id")
+        signals = _json.loads(sig_path.read_text(encoding="utf-8")).get(blog_id, [])
+        if not signals:
+            raise KeyError(blog_id)
+
+        # 신호 쿼리에 포함된 지역명 → 시군구 엔트리 매칭
+        # 광역시도명(예: '대전')은 get_do_name 역매핑으로 area_code를 찾아
+        # 해당 area의 시군구 전부로 확장 (대전 → 동구/중구/서구/유성구/대덕구)
+        from pipelines.travel.area_codes import FOOD_AREA_SIGUNGU
+
+        _DO_NAME_TO_AREA = {
+            "서울": "1", "인천": "2", "대전": "3", "대구": "4", "광주": "5",
+            "부산": "6", "울산": "7", "세종": "8",
+        }
+        pool_names = {x[2] for x in pool}
+        boosted_names = set()
+        for query in signals:
+            for token in str(query).split():
+                entry = find_by_sigungu_name(token)
+                if entry and entry[2] in pool_names:
+                    boosted_names.add(entry[2])
+                area = _DO_NAME_TO_AREA.get(token)
+                if area:
+                    for ac, _sc, nm in FOOD_AREA_SIGUNGU:
+                        if ac == area and nm in pool_names:
+                            boosted_names.add(nm)
+        if not boosted_names:
+            raise LookupError("no region in signals")
+
+        boost = float(os.environ.get("PERF_REGION_BOOST", "3"))
+        entries = [
+            (ac, sc, nm, w * (boost if nm in boosted_names else 1.0))
+            for ac, sc, nm, w in pool
+        ]
+        import random as _r
+        chosen = _r.choices(entries, weights=[e[3] for e in entries], k=1)[0]
+        return chosen[0], chosen[1], chosen[2]
+    except Exception as _e:
+        logger.info(f"perf-boost passthrough: {_e}")
+        import random as _r
+        weights = [x[3] for x in pool]
+        chosen = _r.choices(pool, weights=weights, k=1)[0]
+        return chosen[0], chosen[1], chosen[2]
+
+
 
 def _safe_region(addr_str):
     if not addr_str or not addr_str.strip():
@@ -500,7 +585,7 @@ def fetch_food():
     """
     import requests as req
 
-    from pipelines.travel.area_codes import get_do_name, get_weighted_random_sigungu
+    from pipelines.travel.area_codes import get_do_name
 
     key = os.getenv("TOUR_API_KEY", "") or os.getenv("DATA_GO_KR_API_KEY", "")
 
@@ -527,8 +612,9 @@ def fetch_food():
 
     # 가중치 기반 시군구 선택 (최근 발행 시군구 제외)
     # 최대 50회 시도 — exclude_sigungus로 전부 소진 시 제한 해제됨
+    # Phase 77: 성과 신호 있으면 유입 지역 가중치 증폭 (기본 OFF)
     for _attempt in range(50):
-        area_code, sigungu_code, sigungu_name = get_weighted_random_sigungu(
+        area_code, sigungu_code, sigungu_name = _perf_boosted_sigungu(
             exclude_sigungus=_recent_sigungus
         )
         do_name = get_do_name(area_code)
