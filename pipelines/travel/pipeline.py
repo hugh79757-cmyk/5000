@@ -204,6 +204,9 @@ def _fetch_for_blog(blog_id):
 
 def _run_single(target_blog_id, blog_cfg=None):
     init_db()
+    # Phase 77: 성과 신호 boost용 blog_id 전달 (fetcher._perf_boosted_sigungu가 읽음.
+    # 게이트 자체는 PERF_SIGNALS env가 열어주므로 미설정 시 이 값은 미사용)
+    os.environ["PERF_BLOG_ID"] = target_blog_id
     if blog_cfg is None:
         blog_cfg = get_blog_config(target_blog_id)
     quota = blog_cfg.get("daily_quota", 50)
