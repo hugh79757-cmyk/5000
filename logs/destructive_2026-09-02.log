@@ -3,3 +3,4 @@
 [2026-09-02 23:43] test publish frederiksted-us-virgin-islands-guide | 사전카운트=publish_log 8193 | 백업=N/A (dry_run file) | 사후=DELETE log_id 8193 + rm -rf frederiksted + exhausted=0 restored | 보존확인=4/5 quota preserved
 [2026-09-02 23:47] patch image_fetcher deadline 40/60s + dispatcher wrangler 120->300s | 사전카운트=tour-hugo P25 3회 900s | 백업=git diff | 사후=compile ok | 보존확인=publish_log 4/4 preserved
 [2026-09-03 07:46:33] launchctl kickstart -k gui/501/com.5000.scheduler + com.5000.dashboard (push 6e8937b wrangler 300 + image deadline) | 사전카운트=scheduler PID 30798 dashboard 58637 | 백업=git push 6e8937b87 | 사후=scheduler PID 16324 dashboard 16332 신규 기동 | 보존확인=queue 유지
+[2026-09-03 09:12:15] fix W7-a standard.py wrappers _check_data_stock/_check_frontmatter/check_content_freshness N/A | 사전=warning 5회/주기 | 백업=git diff | 사후=compile ok _resolve 5/5, push 35d2e8e04, dashboard 29940 scheduler 29953 재시작, W7-a 0건 확인 | 보존=check_results 무변경
