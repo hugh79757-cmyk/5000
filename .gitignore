@@ -98,3 +98,4 @@ rollback_bouches_log5593.sql
 !.planning/worklog/
 !.planning/worklog/WL-*.md
 scripts/master_backup.py.pre-r2-fix-*
+data/keyword_performance.json

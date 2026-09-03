@@ -95,4 +95,9 @@ else
   echo "[$TS] === Analytics 수집 종료 (rc=$OVERALL_RC) ===" >> "$LOG_FILE"
 fi
 
+# Phase 77 W1: 성과 신호 추출 (관찰 모드) — 수집 본체와 무관하게 비치명
+"$PY" shared/performance_signals.py >> "$LOG_FILE" 2>&1 \
+  && echo "[$TS] perf-signals → ok" >> "$LOG_FILE" \
+  || echo "[$TS] ⚠️ perf-signals extraction failed (non-fatal)" >> "$LOG_FILE"
+
 exit "$OVERALL_RC"
