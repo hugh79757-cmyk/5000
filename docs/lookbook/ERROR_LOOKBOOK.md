@@ -41,11 +41,11 @@
 - **수정**: harvest 실행 — `pipelines/curation/run_harvest.py`. 윈도우 게이트 02:00–06:00 KST 외엔 `[SKIP]` exit 0. CLI 플래그(--dry-run) 미지원. 수동 실행은 윈도우 내에서만 의미 있음
 - **검증**: keyword_pool 행수 > 0 + `_select_keyword()`가 후보 반환
 
-### ERR-002 콘텐츠 수급 실패 (P01/P02/P26/P27/P30)
-- **감지**: publish_error_events problem_id IN (P01,P02,P26,P27,P30); no_result/no_content/no_topics
-- **진단**: `GET /api/publish-errors?problem_id=P01` — 소스별 원인 확인. P26/P27=소스 unavailable/exhausted
-- **수정**: 소스 갱신(collector 수동 실행), 데이터 재수집, 가드 완화는 별도 승인
-- **검증**: 동일 blog_id 재실행 성공
+### ERR-002 콘텐츠 수급 실패 (P01/P02/P14/P26/P27/P30)
+- **감지**: publish_error_events problem_id IN (P01,P02,P14,P26,P27,P30); no_result/no_content/no_topics/insufficient_products/irrelevant_products/low_relevance
+- **진단**: `GET /api/publish-errors?problem_id=P01` — 소스별 원인 확인. P26/P27=소스 unavailable/exhausted. P14 세분화: `reason`이 `insufficient_products`면 pool <3, `irrelevant_products`면 CATEGORY_FILTERS 허용어 미포함 필터링, `low_relevance`면 relevance gate avg<0.5
+- **수정**: 소스 갱신(collector 수동 실행), 데이터 재수집, 가드 완화는 별도 승인. **P14 poison fallback**은 `pipelines/curation/pipeline.py` fallback 경로가 `health_store.is_quarantined`를 스킵했는지 확인 — 2026-09-03 fix(3ca9f463d)로 2곳에 quarantine 필터 추가. **golf bare term**은 allowed에 bare 단어(드라이버/아이언) 누락 시 filter가 9/10 제거 → allowed 보강
+- **검증**: 동일 blog_id 재실행 성공 — baby `기저귀분유` / interior `거실다우닝가구느낌` / golf `아이언세트` 2026-09-03 SUCCESS
 
 ## 2. 썸네일/이미지
 

@@ -387,18 +387,21 @@
 - **검증**: 해당 블로그의 freshness·표준 compliance가 정상화되고, 발행이 succeeds.
 - **비가역 플래그**: 없음.
 
-#### P14 — keyword 소진 / 제품 멸망 (informational_keyword)
+#### P14 — keyword 소진 / 제품 멸망 (informational_keyword) — curation poison 서브타입 포함
 
-- **정의**: 키워드 소스로 쓸 데이터가 고갈되거나 제품이 멸망해 발행 불가 상태. 현재 `auto_skipped`.
+- **정의**: 키워드 소스로 쓸 데이터가 고갈되거나 제품이 멸망/필터 탈락해 발행 불가 상태. curation에서는 `insufficient_products`(pool<3) / `irrelevant_products`(CATEGORY_FILTERS 허용어 미포함) / `low_relevance`(gate avg<0.5) 로 세분. 현재 `auto_skipped`.
 - **status별**:
-  - `auto_skipped` (현재): 자동 스킵 중. **D**(현재 상태 유지). 재발·정책 변경 시 아래.
-  - 활성 fail: **C** — 키워드 소스 보충·콘텐츠 방향 결정 필요.
-- **수정 의도 (목표 상태)**: 유효한 키워드·데이터 소스가 확보되어 파이프라인이 다시 콘텐츠를 생성할 수 있는 상태.
-- **허용 범위**: 데이터 소스·키워드 설정 영역.
-- **사용자 결정지점 (C)**: 키워드 소스를 어떻게 보충할지(새 소스 추가, 기존 소스 재수집, 콘텐츠 방향 전환 등) 결정 1회.
-- **STOP 조건**: (e) "키워드 보충"이 구체적인 소스로 특정되지 않음 → 중단·보고.
-- **검증**: 해당 블로그 발행 정상화가 확인됨.
+  - `auto_skipped` (현재): 자동 스킵 중. **D**(현재 상태 유지). 재발·정책 변경 시 아래. curation poison fallback은 이미 2026-09-03 fix(3ca9f463d)로 패치됨 — 재발 시 동일 레시피.
+  - 활성 fail: **C** — 키워드 소스 보충·콘텐츠 방향 결정 필요. 단, curation poison 2종은 B로 강등 가능(코드 패치로 해결).
+- **수정 의도 (목표 상태)**: 유효한 키워드·데이터 소스가 확보되어 파이프라인이 다시 콘텐츠를 생성할 수 있는 상태. curation poison의 경우 pool≥3且relevant 제품 확보.
+- **허용 범위**: 데이터 소스·키워드 설정 영역. curation poison은 `pipelines/curation/pipeline.py` CATEGORY_FILTERS + fallback quarantine 필터.
+- **사용자 결정지점 (C)**: 키워드 소스를 어떻게 보충할지(새 소스 추가, 기존 소스 재수집, 콘텐츠 방향 전환 등) 결정 1회. curation poison fallback/Bare-term은 에이전트 단독 패치 가능(B).
+- **STOP 조건**: (e) "키워드 보충"이 구체적인 소스로 특정되지 않음 → 중단·보고. curation bare-term 추가 시 allowed가 과도하게 넓어지면 (f) STOP.
+- **검증**: 해당 블로그 발행 정상화가 확인됨 — 예: baby/interior/golf 2026-09-03 SUCCESS 3연속.
 - **비가역 플래그**: 없음.
+- **curation poison 서브타입 (2026-09-03 교훈)**:
+  - **fallback quarantine 미필터**: `health_store.is_quarantined(keyword)`가 fallback 2곳(라인 ~478, ~1004)에 없어 poison 키워드(네오가정용체온계 5회, 가구야놀자 3회)가 재선택 → `insufficient_products` 3일 반짝임. fix: 두 fallback 루프에 `if is_quarantined(kw): continue` 추가 (ponytail, 2파일 아님 1파일 2포인트).
+  - **golf bare term 누락**: `CATEGORY_FILTERS[golf]`에 `골프` bare 미포함 → transpile `골프모자` 등 9/10 필터 → `irrelevant_products` → gate 0.17 fail. fix: allowed에 `골프, 드라이버, 아이언` bare 추가.
 
 #### P17 — 매일 소진 (일일 소진 한도)
 
