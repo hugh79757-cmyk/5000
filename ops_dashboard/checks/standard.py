@@ -912,6 +912,24 @@ def _check_c08(site: Path) -> tuple[bool, str]:
     return None, "C08: 표준루프는 N/A — 권위 상태는 c08_live_file_mismatch"
 
 
+# W7-a 경고 해소: registry에 선언됐으나 standard.py에 없던 check_fn 래퍼
+# ponytail: 별도 체크(data_stock/frontmatter/content_freshness)는 자체 @register_check로
+# run_all_checks에서 이미 수행됨. 표준 루프에서는 N/A로 위임해 warning/집계 왜곡 방지.
+def _check_data_stock(site: Path) -> tuple[bool, str]:
+    """data_stock — 브랜드 재고 검사는 data_stock.py @register_check에서 수행. 표준 루프 N/A."""
+    return None, "data_stock: 표준루프 N/A — 권위 상태는 data_stock 체크"
+
+
+def _check_frontmatter(site: Path) -> tuple[bool, str]:
+    """FM-* — 프론트매터 검사는 frontmatter.py @register_check에서 수행. 표준 루프 N/A."""
+    return None, "FM-*: 표준루프 N/A — 권위 상태는 frontmatter 체크"
+
+
+def check_content_freshness(site: Path) -> tuple[bool, str]:
+    """CF-01 — 신선도 검사는 content_freshness.py @register_check에서 수행. 표준 루프 N/A."""
+    return None, "CF-01: 표준루프 N/A — 권위 상태는 content_freshness 체크"
+
+
 @register_check("standard_compliance")
 def check_standard_compliance(conn, blog_id: str) -> dict:
     """Run R01-R12 standard checks for a blog. Returns status dict.
