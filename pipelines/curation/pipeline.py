@@ -3,6 +3,7 @@
 흐름: 키워드 선택 → 상품 수집(캐시) → AI 글 생성 → Hugo 발행
 """
 import logging
+import json
 import os
 import re
 import sqlite3
@@ -151,6 +152,29 @@ def _extract_category(keyword):
     return tokens[0] if tokens else keyword
 
 
+def _boost_by_signals(candidates: list, signals: list) -> list:
+    """수요 신호와 토큰 공유하는 후보를 선두로 (stable sort, Phase 77 W2)."""
+    signal_tokens = {tok for q in signals for tok in str(q).split()}
+    return sorted(candidates, key=lambda k: not (set(k.split()) & signal_tokens))
+
+
+def _apply_perf_signal_boost(candidates, blog_id):
+    """PERF_SIGNALS env 켜짐 + 신호 존재 시 후보 재정렬. 실패 시 원본 그대로 반환."""
+    if not candidates or os.environ.get("PERF_SIGNALS", "") in ("", "0"):
+        return candidates
+    try:
+        signals = json.loads((PROJECT_DIR / "data" / "keyword_performance.json").read_text(encoding="utf-8"))
+        blog_signals = signals.get(blog_id) or []
+        if blog_signals:
+            boosted = _boost_by_signals(candidates, blog_signals)
+            if boosted != candidates:
+                logger.info(f"[{blog_id}] perf-signal boost: {[k for k in boosted if set(k.split()) & {t for q in blog_signals for t in q.split()}][:3]} → 선두")
+            return boosted
+    except Exception:
+        pass
+    return candidates
+
+
 def _select_keyword(blog_id):
     """키워드 선택 - 30일 TTL + 카테고리 14일 중복 억제
 
@@ -198,6 +222,7 @@ def _select_keyword(blog_id):
 
     cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
     candidates = cat_filtered or available
+    candidates = _apply_perf_signal_boost(candidates, blog_id)
 
     conn = _sq.connect(str(DB_PATH))
     # candidates → available → 전체 순으로 상품 3개 이상인 키워드 탐색
