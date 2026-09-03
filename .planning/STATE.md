@@ -7,8 +7,8 @@ last_updated: "2026-08-25T13:30:00Z"
 progress:
   # 코드·아티팩트 기준 실제 상태. "완료"는 커밋/PLAN+VERIFICATION/구현 코드가 존재하는 것.
   # 진행 중/미시작 포함 총 관리 대상 Phase 수(문서상 개별 추적 행 기준).
-  total_phases: 35
-  completed_phases: 31
+  total_phases: 36
+  completed_phases: 32
   in_progress_phases: 3
   planned_phases: 4
   percent: 89
@@ -575,6 +575,32 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 - Promote: without `--approve` → exit 1 + "인간 승인 필요" ✅; with `--approve` on copy → severity updated ✅
 - Demo validation: C01 data → 100% detection + 0% false positive → exit 0 ✅
 
-**다음 단계:** 64-07 (차터 운영화: AGENTS.md 포인터 + dispatcher dry-run flag) 병렬 실행
+**다음 단계:** 64-07 (차터 운영화: AGENTS.md 포인터 + dispatcher dry-run flag) 병렬 실행 대기
 
-*Last updated: 2026-08-24 - Phase 64 Task 64-06 완료 (runbook + reverse-validate + promote helper, 커밋 1ea5125ff). Phase 64 Wave 3 진행 중 (64-07 차터 운영화 병렬 대기). M5 IN_PROGRESS/ACTIVE_WAITING.*
+### Phase 77: Analytics 기반 셀프 개선 루프 ✅ (2026-09-03)
+
+**완료일:** 2026-09-03
+**커밋:** `d97e9b868` (W1 추출기+훅) → `0d730ce7e` (W2 boost) → `74f2dc45a` (W3 runbook+phase 문서)
+**Context:** `.planning/phases/phase-77-analytics-self-improvement/` (CONTEXT/PLAN/RUNBOOK-enable/VERIFICATION)
+
+**구현물:**
+- `shared/performance_signals.py` (83줄) — gsc_keywords 클릭≥1, 90일 윈도우 → `data/keyword_performance.json` 원자적 쓰기 (7 blogs / 23 patterns: 유지비·드라이브·예비군 계열)
+- `scripts/collect_analytics.sh` 말미 non-fatal 훅 — 기존 6h launchd 주기 재사용 (별도 launchd 불필요)
+- `pipelines/curation/pipeline.py` `_boost_by_signals`(순수함수) + `_apply_perf_signal_boost`(env 게이트) — 필터 후 최종 선택 전 리스트 정렬만, `PERF_SIGNALS` 기본 OFF
+- `tests/test_performance_signals.py` — 9 테스트 (boost/OFF/파일부재/손상JSON/타블로그)
+- `RUNBOOK-enable.md` — 관찰 기간 체크(연속 ≥14회, ≈09-17 판정) + 활성화/되돌림 절차
+
+**검증 (VERIFICATION.md 5/5 PASS):**
+- 패턴 산출 23건 ≥ 3 기준 충족 [검증됨]
+- boost 9 테스트 통과 + 콜사이트 pipeline.py:225 확인 [검증됨]
+- 기본 OFF passthrough 5종 경로 재현 [검증됨]
+- 회귀 0건: 19F(pre-existing)/138P = baseline 19F/129P + 9 신규, 분해 일치 [검증됨]
+- launchd 6h 실주기 1회 확인 (09-03 08:08 perf-signals → ok) [검증됨], 장기 연속성은 ≈09-17 관찰 pending
+
+**잔여:** 반영 모드 활성화는 RUNBOOK 기준 충족 후 (관찰 기간 종료 + 수동 env 주입). travel fetcher 확장·슬로우/킬 자동 강등은 별도 phase 후보.
+
+*Last updated: 2026-09-03 - Phase 77 완료 (analytics 셀프개선 루프: 추출기+boost+runbook, VERIFICATION 5/5 PASS, 기본 OFF 관찰 모드). total 36 / completed 32.*
+
+</content>
+</invoke>
+
