@@ -279,7 +279,7 @@ CATEGORY_FILTERS = {
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구", "의류"],
     },
     "golf-hugo": {
-        "allowed": ["골프클럽", "골프드라이버", "아이언세트", "골프백", "골프거리측정기", "골프화", "퍼터", "골프공", "골프장갑", "골프의류", "골프우산", "스윙연습기", "골프장", "골프공", "골프용품", "골프연습", "골프티", "골프GPS", "골프모자"],
+        "allowed": ["골프", "골프클럽", "드라이버", "골프드라이버", "아이언", "아이언세트", "골프백", "골프거리측정기", "골프화", "퍼터", "골프공", "골프장갑", "골프의류", "골프우산", "스윙연습기", "골프장", "골프공", "골프용품", "골프연습", "골프티", "골프GPS", "골프모자"],
         "blocked": ["도서", "교재", "인형", "장난감", "식품", "완구"],
     },
     "bike-hugo": {
@@ -1415,7 +1415,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         ).fetchall()
         used_conn.close()
         used_set = {r[0] for r in used} | {keyword}
-        fallback_kws = [k for k in all_kws if k not in used_set]
+        fallback_kws = [k for k in all_kws if k not in used_set and not health_store.is_quarantined(blog_id, k)]
         if not fallback_kws:
             _record_failure(blog_id, "insufficient_products", "모든 키워드 사용 완료", keyword)
             return {"success": False, "reason": "insufficient_products"}
@@ -1471,7 +1471,7 @@ def _run_inner(cfg, blog_id, daily_quota):
         ).fetchall()
         used_conn.close()
         used_set = {r[0] for r in used} | {keyword}
-        fallback_kws = [k for k in all_kws if k not in used_set]
+        fallback_kws = [k for k in all_kws if k not in used_set and not health_store.is_quarantined(blog_id, k)]
         if not fallback_kws:
             logger.error(f"[{blog_id}] 대체 키워드 없음 — 발행 중단")
             _record_failure(blog_id, "irrelevant_products", "대체 키워드 없음", keyword)
