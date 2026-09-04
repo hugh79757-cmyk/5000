@@ -61,6 +61,17 @@
 - **수정**: URL sanitize(hugo_writer max_len 200), LLM 프롬프트 가드
 - **검증**: POST /api/run-checks → R2-01 pass
 
+### ERR-004b 본문 이미지 0건 — 워터스포츠 파생 (IMAGE-GUARD-02 / body_ 0)
+- **감지**: `pipelines/etap/quality_scanner.py score_post()`가 `etap/<slug>/body_` R2 이미지 개수를 별도 카운트. 제품카드 `![` 총합으로 마스킹되던 기존 `[WARNING] 이미지 없음`을 보완해 `body_ 0건 → [WARNING] 본문 이미지(body_*) 없음` 경고를 발송(점수 -10). `scan_results` 및 일간 Telegram 리포트(`/publish-errors` 유사)로 노출.
+- **진단**: `python3 -c "import glob,re; print(len([p for p in glob.glob('ETAP/*-hugo/content/posts/*/index.md') if 'etap/'+p.split('/')[-2]+'/body_' not in open(p).read()]))"` — 2026-09-03 기준 watersports 49, tours 112, ferry 71 등.
+  - 근본 원인: `watersports_pipeline.py:139-140`이 `fetch_city_image(city+" water sport", ...)`로 city 파라미터 오염 → `image_fetcher`가 Pexels 쿼리 `"Kampot water sport Cambodia skyline cityscape"` 생성 → Pexels 0건 → 폴백도 오염 → `body_N` 0건. `shared/publishers/hugo_writer.py`는 `^## ` H2 이후에만 삽입하므로 데이터 부족으로 H2가 `<strong>`으로 대체된 포스트는 삽입 자체가 불가.
+- **수정**:
+  1) 파이프라인: `fetch_city_image(city, country, slug)` / `fetch_body_images(city, country, slug)` 로 순수 city 전달 (watersports_pipeline.py fix, 2026-09-03). `pipelines/etap/image_fetcher.py`에 `_clean_city()` 방어 + 범용 폴백 `"tropical beach water sports kayak"` 추가.
+  2) 기존 포스트 일괄 복구: `python3 /tmp/repair_watersports.py` + `repair_watersports2.py`로 49개 전량 R2 body 2~3장 재생성 및 `<strong>`/lead 이후 삽입.
+  3) Hugo 빌드 후 배포는 `env -u CLOUDFLARE_API_TOKEN wrangler auth activate hugh79757 ETAP/watersports-hugo && env -u CLOUDFLARE_API_TOKEN wrangler pages deploy ETAP/watersports-hugo/public --project-name=watersports-hugo` (Pages 타입, Workers 아님)
+- **검증**: `grep -c "body_" ETAP/watersports-hugo/content/posts/kampot-water-sports/index.md` → 3, `HUGO_THEMESDIR=... hugo --gc --minify --source ETAP/watersports-hugo` → 512 pages, `score_post()` body 경고 없음, 라이브 배포 `Deployment complete!` URL 확인
+- **대시보드 노출**: 기존 `/standards` R2-01은 URL 손상만 탐지해 0건 미탐. 본 건은 `quality_scanner` 일간 스캔(`scan_yesterday`)으로 신규 탐지. `ops_dashboard` 수동 검토 5개 선정 로직은 아직 body_ 필터 미적용 — 향후 `get_sample_urls`에 body_ 0건 우선 필터 추가 예정. ERR-004b는 ERR-004 하위형이지만 탐지 경로가 달라 별도 코드로 분리 기록.
+
 ## 3. GA4/추적
 
 ### ERR-005 GA4 누락

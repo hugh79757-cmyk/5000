@@ -1,3 +1,4 @@
+- 2026-09-03 | fix | etap-image-fetcher-city-pollution-batch-fix | ETAP 24 pipeline city+오염 일괄 pure화 + _clean_city 47 suffix 확장 + Hugo24 빌드 + Pages 3 배포
 - 2026-09-02 | fix | five-alert-keyword-purge-preflight-cost | kitchen/fitness P36+P14 정크키워드 purge + tour-hugo P25 preflight S01 900s→3.1s + rap P16 자연해소
 - 2026-09-02 | fix | fleet-keyword-purge-watersports-rotation | curation 9블로그 정크 734 purge(car/golf/interior/beauty/baby/health/pet/appliance/camping) + watersports P02 토픽 회전 재시도 + travel P01 실발행 확인 + rap3 P16 가드 정상 판정
 - 2026-09-02 | fix | best-fleet-3day-interval-and-rank-shuffle | best fleet 3일 주기 + 랭크 셔플 — interval gate + 썸네일 반복 수정
