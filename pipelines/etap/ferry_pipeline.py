@@ -120,8 +120,8 @@ def _run_impl() -> bool:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
     search_term = origin or dest
-    cover = fetch_city_image(search_term + " ferry port", "", article["slug"]) if search_term else None
-    body = fetch_body_images(search_term + " ferry sea", "", article["slug"], count=8) if search_term else []
+    cover = fetch_city_image(search_term, "", article["slug"]) if search_term else None
+    body = fetch_body_images(search_term, "", article["slug"], count=8) if search_term else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if origin:

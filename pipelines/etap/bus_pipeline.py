@@ -125,7 +125,7 @@ def _run_impl() -> bool:
     # photos; " bus station" + empty country rejected route photos -> identical fallback.
     cover_search = f"{origin} {dest}".strip() or search_term
     cover = fetch_city_image(cover_search, "", article["slug"]) if cover_search else None
-    body = fetch_body_images(search_term + " bus travel", "", article["slug"], count=8) if search_term else []
+    body = fetch_body_images(search_term, "", article["slug"], count=8) if search_term else []
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")

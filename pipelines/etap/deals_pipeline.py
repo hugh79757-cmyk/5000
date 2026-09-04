@@ -114,8 +114,8 @@ def _run_impl() -> dict | bool:
     # body: 동일하게 목적지 기반 분산 (origin만 쓰면 LA 출발 4건 모두 동일 Pexels 결과 → 동일 R2 etag)
     _deals_for_img = article.get("deals", [])
     _dest_for_cover = _deals_for_img[0].get("dest_city") if _deals_for_img and _deals_for_img[0].get("dest_city") else origin
-    cover = fetch_city_image(_dest_for_cover + " travel", _dest_for_cover, article["slug"]) if _dest_for_cover else None
-    body = fetch_body_images(_dest_for_cover + " city travel", _dest_for_cover, article["slug"], count=8) if _dest_for_cover else []
+    cover = fetch_city_image(_dest_for_cover, _dest_for_cover, article["slug"]) if _dest_for_cover else None
+    body = fetch_body_images(_dest_for_cover, _dest_for_cover, article["slug"], count=8) if _dest_for_cover else []
     # cross-sell: base pipeline 표준 블록 (deals는 도시 기반 — origin을 city로 사용)
     cross_html = build_cross_sell_html(
         country=article.get("country", ""),

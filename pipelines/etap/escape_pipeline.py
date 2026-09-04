@@ -129,8 +129,8 @@ def _run_impl(cfg=None) -> bool:
     # B-step: 슬러그 중복 회전 (P12 lookbook) — 기존 발행 slug와 충돌 시 disambiguator 부여
     article["slug"] = _disambiguate_slug(article.get("slug", ""), article.get("city", ""))
     article = _add_product_cards(article)
-    cover = fetch_city_image(city + " escape room puzzle game", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " escape room adventure", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")

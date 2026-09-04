@@ -156,8 +156,8 @@ def _run_impl(force_topic_id: int | None = None) -> bool:
     article = _add_product_cards(article)
     city = article.get("city", "")
     country = article.get("country", "")
-    cover = fetch_city_image(city + " shore excursion", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " shore excursion", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     # 환각 가격 과다(is_draft) 감지 시 draft로 격리 작성 — 라이브 노출 방지.
     # return False로 건너뛰면 동일 토픽이 재시도되어 무한루프 →
     # draft 작성 + 소비 처리(_mark_published)로 격리 (airports_pipeline 패턴).

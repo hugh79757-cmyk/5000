@@ -122,14 +122,24 @@ def score_post(filepath: str, blog_id: str) -> dict:
         issues.append(f"[WARNING] H2 섹션 적음: {h2_count}개 (권장 4+)")
         score -= 5
 
-    # ── 이미지 삽입 여부
+    # ── 이미지 삽입 여부 (body_ R2 이미지 기준, 상품카드 이미지로 마스킹 방지)
     img_count = len(re.findall(r"!\[", body))
-    if img_count == 0:
+    body_img_count = len(re.findall(r"etap/[^/]+/body_", body))
+    r2_img_count = len(re.findall(r"r2\.dev/etap/[^/]+/body_", body))
+    if body_img_count == 0 and r2_img_count == 0:
+        # 상품카드(![)는 있어도 본문 body_ R2 이미지가 없으면 별도 경고
+        issues.append("[WARNING] 본문 이미지(body_*) 없음 — 워터스포츠 등 body 0건")
+        score -= 10
+    elif img_count == 0:
         issues.append("[WARNING] 이미지 없음")
         score -= 10
     elif img_count < 3:
         issues.append(f"[WARNING] 이미지 부족: {img_count}개 (권장 3+)")
         score -= 5
+    # body 이미지 부족 세부 경고 (r2 body가 1개면 추가 감점 없이 정보성)
+    if 0 < body_img_count < 2 or 0 < r2_img_count < 2:
+        # 이미 위에서 처리했으므로 중복 감점 없이 힌트만 (이미지 총량 부족은 위 로직에서 처리)
+        pass
 
     # ── $0 / 0만원 데이터 오류
     if re.search(r"\$0\b", body):

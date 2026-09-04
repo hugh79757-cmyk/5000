@@ -132,8 +132,8 @@ def _run_impl() -> dict | bool:
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
-    cover = fetch_city_image(city + " restaurant dining", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " food cuisine", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     # cross-sell: base pipeline.py:333-339 패턴 (F9 Golden Standard 픽스)
     cross_html = build_cross_sell_html(
         country=article.get("country", ""),

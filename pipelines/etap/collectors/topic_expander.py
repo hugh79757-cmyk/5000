@@ -59,9 +59,9 @@ BLOG_CATEGORIES = {
         "label": "Dining"
     },
     "escape": {
-        "cats": ("Escape Games", "Scavenger Hunts", "Treasure Hunts",
-                 "Mystery Games", "Interactive Tours"),
-        "label": "Escape Games"
+        "cats": ("Escape Rooms", "Scavenger Hunts", "Treasure Hunts",
+                 "Mystery Games", "Interactive Tours", "Fun & Games"),
+        "label": "Escape Rooms"
     },
     "eurail": {
         "cats": ("Rail Tours", "Train Tours", "Scenic Railroads"),

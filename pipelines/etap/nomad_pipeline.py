@@ -129,8 +129,8 @@ def _run_impl(cfg=None) -> bool:
         exclude_blog=BLOG_ID, max_items=3)
     if cross_html:
         article["content"] = insert_cross_sell_block(article["content"], cross_html, position="bottom")
-    cover = fetch_city_image(city + " coworking space digital nomad", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " coworking cafe laptop work", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     # F13(2026-08-23): write-fail 가드 — 쓰기 실패 시 mark_published 금지(canggu 팬텀 행 방지, multiday :136-140 패턴)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):

@@ -107,8 +107,8 @@ def _run_impl(cfg=None) -> bool:
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
-    cover = fetch_city_image(city + " ghost tour haunted historic", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " ghost tour haunted city", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID, article["title"], article["slug"])
     mark_entity_published(BLOG_ID, article["slug"])

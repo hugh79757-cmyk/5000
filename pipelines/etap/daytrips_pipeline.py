@@ -189,8 +189,8 @@ def _run_impl() -> bool:
     article = _maybe_add_trip_cta(article)
     city = article.get("city", "")
     country = article.get("country", "")
-    cover = fetch_city_image(city + " day trip", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " day trip", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")

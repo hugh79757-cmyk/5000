@@ -161,8 +161,8 @@ def _run_impl() -> bool:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
     article = _add_heritage_card(article)
-    cover = fetch_city_image(city + " museum art", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " culture history", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     _mark_published(article, BLOG_ID, TOPIC_TABLE, topic["id"])
     if city:

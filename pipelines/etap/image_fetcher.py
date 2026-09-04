@@ -209,9 +209,36 @@ def _trigger_unsplash_download(photo) -> None:
             pass
 
 
+def _clean_city(city: str) -> str:
+    """pipelines에서 city+' water sport' 같이 suffix 오염된 값 정화 (ponytail: minimal guard)"""
+    if not city:
+        return city
+    # ETAP 47 suffix 오염 전체 커버 + generic fallback (ponytail: list + endswith, 미커버 시에도 도시명 앞부분만 보존)
+    suffixes = [" water sport", " adventure activity", " city tour sightseeing", " city sightseeing tour",
+                " shore excursion", " museum art", " culture history", " day trip",
+                " restaurant dining", " food cuisine", " escape room puzzle game",
+                " escape room adventure", " extreme sports adventure", " extreme sports rafting zipline",
+                " hiking mountain bike trail", " hiking trail mountain", " ferry port", " ferry sea",
+                " sailing cruise water tour", " water tour sailing boat", " bus travel",
+                " luxury private tour", " luxury travel experience", " food tour",
+                " ghost tour haunted historic", " ghost tour haunted city",
+                " layover city tour airport", " layover stopover city tour",
+                " coworking space digital nomad", " coworking cafe laptop work",
+                " nature tour", " nightlife city lights entertainment", " nightlife entertainment show",
+                " photo tour", " landscape travel", " tour group travel",
+                " airport transfer taxi", " airport", " city travel", " walking tour", " travel",
+                " bus travel", " airline", " airplane"]
+    low = city.lower()
+    for suf in suffixes:
+        if low.endswith(suf):
+            return city[: -len(suf)].strip()
+    # generic: city 뒤에 2단어 이상 붙은 오염 의심 시 앞 1-3단어만 city로 추정하지 않고 원문 유지 (안전)
+    return city
+
 def fetch_city_image(city, country, slug, force=False):
     """커버 이미지 검색. 도시+국가명 관련성 필터 적용."""
     # ponytail: overall deadline 40s — P25 guard
+    city = _clean_city(city)
     import time as _t2
     _deadline2 = _t2.monotonic() + 40
     # 여러 쿼리 패턴 시도 (구체적 → 일반적)
@@ -266,6 +293,7 @@ def fetch_city_image(city, country, slug, force=False):
 
 def fetch_body_images(city, country, slug, count=3, force=False):
     """본문 이미지. 관련성 필터 적용, 다양한 쿼리."""
+    city = _clean_city(city)
     # ponytail: overall deadline 60s — P25 guard, per-query 10s timeouts ×5 queries could exceed pipeline_timeout
     import time as _t
     _deadline = _t.monotonic() + 60
@@ -306,6 +334,10 @@ def fetch_body_images(city, country, slug, count=3, force=False):
     if not collected:
         logger.warning("[Image] No relevant body images for %s, trying without filter", slug)
         results = _search_with_fallback(f"{city} travel", per_page=15, city="", country="")
+        # 2차 범용 폴백: 도시 특화 쿼리마저 0건이면 범용 해양 이미지로라도 채움 (본문 0 이미지 방지)
+        if not results:
+            logger.warning("[Image] city-specific fallback 0 for %s, trying generic water sports", slug)
+            results = _search_with_fallback("tropical beach water sports kayak", per_page=15, city="", country="")
         for photo in results:
             if len(collected) >= count:
                 break

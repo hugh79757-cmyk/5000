@@ -131,8 +131,8 @@ def _run_impl() -> bool:
     if post_issues:
         logger.info(f"[{BLOG_ID}] Quality warnings: {post_issues}")
     article = _add_product_cards(article)
-    cover = fetch_city_image(city + " airport", country, article["slug"]) if city else None
-    body = fetch_body_images(city + " airport transfer taxi", country, article["slug"], count=8) if city else []
+    cover = fetch_city_image(city, country, article["slug"]) if city else None
+    body = fetch_body_images(city, country, article["slug"], count=8) if city else []
     write_result = _write_hugo_post(article, cover, body, BLOG_ID, SITE_PATH, CATEGORY)
     if write_result is None or (isinstance(write_result, dict) and not write_result.get("success")):
         logger.error(f"[{BLOG_ID}] _write_hugo_post failed for {article['slug']} — 발행 차단")
