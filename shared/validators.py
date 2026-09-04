@@ -83,11 +83,8 @@ def sanitize_title(title: str) -> str:
     t = " ".join(final)
     # 5) 공백 정리
     t = _re.sub(r"\s+", " ", t).strip()
-    # 6) 35자 소프트 트렁케이션 — SEO 최적 (Google 검색결과 잘림 방지)
-    #    word boundary 우선, 없으면 exact 35
-    if len(t) > 35:
-        truncated = t[:35].rsplit(" ", 1)
-        t = truncated[0] + "…" if len(truncated) > 1 else t[:35]
+    # 6) 35자 트렁케이션 제거(2026-09-04, CAP phase-01) —
+    #    명사/조사 중간 절단 결함(108/160, 67.5%). 35자+ 제목은 그대로 반환.
     return t
 
 

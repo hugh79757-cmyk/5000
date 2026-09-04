@@ -325,11 +325,13 @@ def run(blog_cfg):
             f"{datetime.now().strftime('%Y년 %m월')} 기준 실비용 비교."
         )
     else:
-        _maint_m = round((data.get("tax_annual",0)+data.get("insurance_estimate",0)+data.get("annual_fuel_cost",0))/12)
+        # 2026-09-04: desc 라벨-값 정의 불일치 수정 —
+        # 총비용÷36 값이므로 라벨을 '월 환산'으로 통일(기존 라벨은 유지비 전용 합계 암시)
+        _maint_m = round(data.get("three_year_total_cost", 0) / 36)
         _seo_desc = (
             f"{data['model']} {data.get('trim','')} "
-            f"3년 총비용 {data.get('three_year_total_cost',0):,}만원, "
-            f"월 유지비 약 {_maint_m}만원. "
+            f"3년 총비용 {data.get('three_year_total_cost',0):,}만원"
+            f"(월 환산 약 {_maint_m}만원). "
             f"{datetime.now().strftime('%Y년 %m월')} 기준 분석."
         )
     body = "<!-- DESC: " + _seo_desc[:160] + " -->\n" + body

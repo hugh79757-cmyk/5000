@@ -79,15 +79,17 @@ class TestSanitizeTitle:
         assert "제주도 렌트카" in result
 
     def test_soft_truncation_at_word_boundary(self):
+        # 2026-09-04: 35자 트렁케이션 제거 — 긴 제목은 잘리지 않고 그대로 반환
         long_title = "가 나 다 라 마 바 사 아 자 차 카 타 파 하 " * 5
         result = sanitize_title(long_title)
-        assert len(result) <= 36  # 35 + "…"
-        assert result.endswith("…"), f"expected ellipsis, got {result!r}"
+        assert "…" not in result, f"expected no ellipsis, got {result!r}"
+        assert len(result) > 35, f"expected full title, got {len(result)}: {result!r}"
 
     def test_soft_truncation_no_space(self):
+        # 2026-09-04: 35자 트렁케이션 제거 — 공백 없는 긴 제목도 그대로 반환
         long_title = "가나다라마바사" * 12  # 84 chars, no spaces
         result = sanitize_title(long_title)
-        assert len(result) == 35, f"expected 35 chars, got {len(result)}: {result!r}"
+        assert len(result) == 84, f"expected 84 chars, got {len(result)}: {result!r}"
         assert not result.endswith("…")
 
     def test_preserves_short_title(self):
