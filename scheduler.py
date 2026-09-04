@@ -357,6 +357,8 @@ def run_publish(blog_id) -> bool | None:
 
     반환: True=성공 / False=실패 / None=실행 생략 (availability gate 차단)
     """
+    global _last_publish_reason
+    _last_publish_reason = None  # 매 호출마다 초기화 — 이전 호출 잔여 방지
     blog_cfg = None
     # 중앙 quota 체크: ledger 기준으로 초과 시 skip
     try:
@@ -390,6 +392,7 @@ def run_publish(blog_id) -> bool | None:
         # consecutive_failures 미증가(실패 집계 제외). bool|None 계약 준수.
         return None
 
+    _last_publish_reason = None  # dispatcher JSON에서 파싱된 reason
     try:
         # env var로 슬롯 ID 상속 (자식 dispatcher가 이중 acquire 방지)
         run_env = os.environ.copy()
@@ -418,6 +421,7 @@ def run_publish(blog_id) -> bool | None:
                     logger.info(f"[PUBLISH] {blog_id} 발행 성공")
                 else:
                     reason = parsed.get("reason", "unknown")
+                    _last_publish_reason = reason
                     logger.error(f"[PUBLISH] {blog_id} 발행 실패 — stage={reason}")
             except (_json.JSONDecodeError, Exception):
                 pass
@@ -490,7 +494,7 @@ def _drain_queue() -> None:
         try:
             _success = run_publish(blog_id)
             if _success is not None:
-                _track_publish_result(blog_id, bool(_success))
+                _track_publish_result(blog_id, bool(_success), _last_publish_reason)
         except Exception as e:
             logger.exception(f"Queue publish failed: {blog_id} - {e}")
             _track_publish_result(blog_id, False)
@@ -628,7 +632,7 @@ def _catchup_missed_inner() -> None:
                 # availability gate 차단 (후보 없음) — 실패로 집계하지 않는다
                 logger.info(f"CATCHUP: {blog_id} 후보 없음 — 보충 생략")
                 continue
-            _track_publish_result(blog_id, bool(success))
+            _track_publish_result(blog_id, bool(success), _last_publish_reason)
             if not success:
                 logger.warning(f"CATCHUP: {blog_id} 보충 실패 ({attempts + 1}/{MAX_CATCHUP_PER_BLOG})")
                 after = _events.get_open_incident(blog_id, "P01", reason="no_topics")
@@ -1488,11 +1492,17 @@ def _wait_for_network(timeout=300) -> bool:
 # ── Consecutive Failure Detection ──────────────────────────────
 _CONSECUTIVE_FAILURES: dict[str, int] = {}
 _FAILURE_THRESHOLD = 5  # 2026-08-25: 상향 3→5 (일시적 장애 1~4회로 블로그 중단 방지)
+# 파이프라인에서 조용히 스킵하는 reason — 스케줄러 consecutive_failures 집계에서 제외
+_SILENT_SKIP_REASONS = frozenset({"interval_skip", "quota_met", "similar_title", "already_running"})
 
 
-def _track_publish_result(blog_id: str, success: bool) -> None:
+def _track_publish_result(blog_id: str, success: bool, reason: str | None = None) -> None:
     """Track consecutive publish failures per blog_id.
-    Resets on success. Sends Telegram alert on threshold breach."""
+    Resets on success. Sends Telegram alert on threshold breach.
+
+    reason이 _SILENT_SKIP_REASONS에 해당하면 실패로 집계하지 않는다 —
+    파이프라인 의도적 스킵이지 콘텐츠 생성 실패가 아니다.
+    """
     if success:
         _CONSECUTIVE_FAILURES.pop(blog_id, None)
         # timeout(P25) 후 재시도 성공 시 stale P25 이벤트 close
@@ -1508,6 +1518,11 @@ def _track_publish_result(blog_id: str, success: bool) -> None:
                 conn.close()
         except Exception as _e:
             logger.warning(f"[scheduler] P25 close 실패: {blog_id}: {_e}")
+        return
+
+    # 파이프라인 의도적 스킵 — 실패로 집계하지 않는다
+    if reason and reason in _SILENT_SKIP_REASONS:
+        logger.info(f"[SKIP] {blog_id} reason={reason} — consecutive_failures 미집계")
         return
 
     count = _CONSECUTIVE_FAILURES.get(blog_id, 0) + 1
