@@ -86,11 +86,14 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
     return c.execute("""
         SELECT t.* FROM topics t
         LEFT JOIN publish_log p ON t.id = p.topic_id
-        WHERE (t.status = 'pending' OR t.status = 'published') {_reuse} {_market} AND t.site_id = ?
-        AND t.id NOT IN ({}){}
+        WHERE (t.status = 'pending' OR t.status = 'published') REUSE_CLAUSE MARKET_CLAUSE AND t.site_id = ?
+        AND t.id NOT IN (SKIP_PH)PT_CLAUSE
         ORDER BY p.published_at ASC NULLS FIRST
         LIMIT 1
-        """.format(placeholder, " AND t.post_type = ?" if post_type else "").replace("{_reuse}", _reuse).replace("{_market}", _market),
+        """.replace("REUSE_CLAUSE", _reuse.replace("AND id NOT IN", "AND t.id NOT IN"))
+         .replace("MARKET_CLAUSE", _market)
+         .replace("SKIP_PH", placeholder)
+         .replace("PT_CLAUSE", " AND t.post_type = ?" if post_type else ""),
              [cutoff, site_id] + (list(skip_set) if skip_set else []) + ([post_type] if post_type else [])).fetchone()
 
 def generate_title(data, site_id="hotissue"):
