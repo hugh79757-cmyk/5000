@@ -27,10 +27,12 @@ def _count_h2(md_text: str) -> int:
 
 def check_content_quality(blog_id: str, md_text: str, frontmatter: dict) -> dict:
     issues = []
+    suggestions = []
     # P38 H2 부족
     h2_cnt = _count_h2(md_text)
     if h2_cnt < 3:
         issues.append({"code": "P38", "detail": f"H2 count {h2_cnt} < 3"})
+        suggestions.append("데이터를 충분히 활용하여 실적 개요, 재무 지표 분석, 리스크 및 전망 등 자연스러운 섹션으로 확장 권장. 강제 삽입보다 공시 데이터 기반 서술 유도.")
     
     # P37 region mismatch
     region = frontmatter.get("region") or frontmatter.get("Region") or ""
@@ -49,7 +51,7 @@ def check_content_quality(blog_id: str, md_text: str, frontmatter: dict) -> dict
         if "coupang" not in md_text.lower() and "source" not in md_text.lower():
             issues.append({"code": "P36", "detail": "price without source"})
     
-    return {"blog_id": blog_id, "issues": issues, "h2_count": h2_cnt}
+    return {"blog_id": blog_id, "issues": issues, "suggestions": suggestions, "h2_count": h2_cnt}
 
 def run_live_check(blog_id: str, md_path: Path):
     if blog_id in EXCLUDE_BLOGS:

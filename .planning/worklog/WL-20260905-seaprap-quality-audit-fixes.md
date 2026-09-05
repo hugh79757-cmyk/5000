@@ -54,3 +54,23 @@ SEAP+RAP 블로그 품질 감사(CAP 체크리스트 동일 적용) → 근본 �
 - R3 senior-blogger: .planning/handoff/senior-blogger-blogger-template-fix-guide.md 작성(Blogger 콘솔 수동 절차 — desc/canonical 추가 + 로더 4중→1).
 - R4 rap4 키워드 편중: 오판 정정 — active 2,322 중 비-서울 1,322, 최근 30일 24개 지역 다양 발행. 조치 불필요.
 - R5 스크립트 안전화: fix_rap_desc_pollution.py — yaml_safe_desc(쌍따옴표 랩, 콜론 버그 9건 방지) + 교체 후 PyYAML 파싱 검증(folded 유입 6건 방지, 실패 시 skip). dry-run 0건(전멸 상태 정합).
+
+## Senior-blogger 마무리 (14:55)
+
+- searchDescription 오판 정정: Blogger API는 searchDescription 미지원(공식 필드 아님 — insert에 넣어도 무시, 응답에 미반환). 라이브 테스트 3회(draft 2+live 2, 전부 즉시 삭제)로 확인: **테마가 본문에서 자동 추출해 meta description 렌더 중** — 최신 글 전부 정상. b37의 "searchDescription None 10/10"은 API 미지원 필드 측정 = 오판. 75-2.html(9/4 삼중발행 유물)만 빈 desc — 별개 이슈, 글 자체 재발행 필요.
+- 체크박스 릭 백필 10건(파괴적 4단계): 사전 74개/10포스트 → 교체(`<li>[ ] ` → `<li>` + 잔여 제거) → 사후 API 10건 0개 + 라이브 curl 5건 0개, HTTP 200 유지. 백업: T/opencode/senior_checkbox_backfill_bak_20260905 (원본 JSON 10건).
+- writer.py L328 [PRODUCTION]: `- [ ] 구비서류` 예시 → 대시 목록 + 태스크리스트 금지 문구 (재발 방지).
+- 커밋 2d26722e4 push (6파일: writer.py, blogger 체크 desc_pollution/rap_region, render.py 3c, __init__.py, 로그).
+- 테스트 글 4건(제목/SEO/SEO-B/SEO-C) 전부 즉시 삭제 완료 — 라이브 잔존 0건.
+
+## Senior-blogger 백필 확장 (15:20)
+
+- 전수 스캔 결과 최신 10건만이 아닌 전체 81포스트/481개 [ ] 릭 발견 → 백필 범위 확장.
+- 4단계: 사전 81건/481개 → 백업 81건 전량 JSON → update 91회(멱등 재처리 포함, 타임아웃으로 2회 분할) → 사후 전수 772포스트 [ ] 0개 assert PASS.
+- 최종 상태: senior-blogger [ ] 릭 전멸. 재발 방지: writer.py 프롬프트 수정(커밋 2d26722e4).
+
+## 재발방지 하드 게이트 + 스킬 (15:35)
+
+- 75-2.html 빈 desc 1건: 사용자 결정 — 방치.
+- 재발방지 이중화 완료: 소프트(writer.py:328 프롬프트) + 하드(validators.py:_check_senior CRITICAL 게이트, `( ^|\W)\[( |x|X)\]` 발행 전 차단). 단위 테스트 3/3(릭 탐지/대시 통과/링크 무오탐), pytest 48 passed. 커밋 648d91f8a.
+- 스킬 작성: ~/.config/opencode/skills/blogger-api-publishing/SKILL.md — pickle 토큰 인증, blog ID 매핑 3개, enum/502/sleep gotchas, searchDescription 미신화, [ ] 렌더 사고+게이트, 백필 4단계 패턴, 테스트 포스트 delete 주의.
