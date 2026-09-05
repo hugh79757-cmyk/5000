@@ -42,9 +42,14 @@ def make_desc_from_lead(body: str, limit: int = 120) -> str:
     return ""
 
 
+def yaml_safe_desc(s: str) -> str:
+    """YAML 특수문자(콜론 등) 파괴 방지 — 항상 쌍따옴표 랩. L40 콜론 버그(9건 빌드 실패) 수정분."""
+    return '"' + s.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def main() -> int:
     apply_mode = "--apply" in sys.argv
-    fixed, skipped_nolead, total_polluted = 0, 0, 0
+    fixed, skipped_nolead, skipped_yaml, total_polluted = 0, 0, 0, 0
     for site, d in SITES.items():
         for md in sorted(glob.glob(f"{d}/*/index.md")):
             src = open(md).read()
@@ -61,13 +66,21 @@ def main() -> int:
             if not new_desc:
                 skipped_nolead += 1
                 continue
+            new_fm = fm[:dm.start(1)] + yaml_safe_desc(new_desc) + fm[dm.end(1):]
             if apply_mode:
-                new_fm = fm[:dm.start(1)] + new_desc + fm[dm.end(1):]
+                # 교체 후 YAML 파식 검증 — 실패 시 원본 유지(folded scalar 유입 6건 손상 방지)
+                try:
+                    import yaml
+                    yaml.safe_load(new_fm)
+                except Exception:
+                    skipped_yaml += 1
+                    print(f"YAML-FAIL(skip) {md}")
+                    continue
                 open(md, "w").write("---\n" + new_fm + "---\n" + body)
             fixed += 1
             if total_polluted <= 3 or not apply_mode:
                 print(f"{'FIX' if apply_mode else 'DRY'} {md.split('/posts/')[1][:50]}: {new_desc[:60]}")
-    print(f"\n오염 {total_polluted}건 중 교체 {'완료' if apply_mode else '예정'} {fixed}건, 리드 없음 skip {skipped_nolead}건")
+    print(f"\n오염 {total_polluted}건 중 교체 {'완료' if apply_mode else '예정'} {fixed}건, 리드 없음 {skipped_nolead}건, YAML 검증실패 skip {skipped_yaml}건")
     return 0
 
 

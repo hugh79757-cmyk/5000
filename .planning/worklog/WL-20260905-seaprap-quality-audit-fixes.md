@@ -47,3 +47,10 @@ SEAP+RAP 블로그 품질 감사(CAP 체크리스트 동일 적용) → 근본 �
 ## 커밋 대상 (5000 repo)
 - shared/validators.py(_check_rap), pipelines/rap/pipeline.py(게이트 2종), scripts/fix_rap_desc_pollution.py(신규 — 재사용 시 PyYAML 검증 필수 주석 포함)
 - RAP/SEAP repo 사이트 파일은 .gitignore — 배포가 유일 반영 수단
+
+## 잔존 위험 해소 (12:00-12:05 추가)
+- R1 엣지 캐시: API 퍼지 전 경로 401(cache_purge 스코프 부재). 해소: R2 _headers 재배포로 캐시 헤더 s-maxage=3600 교체 — 관악/사당롯데는 바디 이미 404(상태코드만 옛 200), apply 2건(제목/청약정정공고)은 옛 콘텐츠 age=2565 → 최대 15분 내 자연 소멸. 대시보드 수동 퍼지 불필요.
+- R2 _headers: 6사이트 static/_headers 생성(/* nosniff + /posts/* s-maxage=3600). 빌드 6/6 + 재배포 6/6 rc=True. 근본 해결 — 이후 콘텐츠 삭제 시 최대 1시간 내 엣지 반영.
+- R3 senior-blogger: .planning/handoff/senior-blogger-blogger-template-fix-guide.md 작성(Blogger 콘솔 수동 절차 — desc/canonical 추가 + 로더 4중→1).
+- R4 rap4 키워드 편중: 오판 정정 — active 2,322 중 비-서울 1,322, 최근 30일 24개 지역 다양 발행. 조치 불필요.
+- R5 스크립트 안전화: fix_rap_desc_pollution.py — yaml_safe_desc(쌍따옴표 랩, 콜론 버그 9건 방지) + 교체 후 PyYAML 파싱 검증(folded 유입 6건 방지, 실패 시 skip). dry-run 0건(전멸 상태 정합).
