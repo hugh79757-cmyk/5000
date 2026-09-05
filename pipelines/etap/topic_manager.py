@@ -135,6 +135,26 @@ def pick_topic_by_id(topic_table, blog_id):
     if not can_publish:
         return None
 
+    # PERF BOOST HOOK - Option C: impressions fallback for etap boost
+    # If blog has GSC impressions but zero clicks, prioritize topics with historical impressions
+    # Minimal hook: log activation, real priority tweak can be added later
+    try:
+        import sqlite3
+        from pathlib import Path
+        analytics_db = Path(__file__).parent.parent.parent / "data" / "analytics.db"
+        if analytics_db.exists():
+            conn_a = sqlite3.connect(str(analytics_db))
+            cur = conn_a.execute(
+                "SELECT COALESCE(SUM(impressions),0) FROM gsc_keywords WHERE blog_id=?",
+                (blog_id,)
+            )
+            imp = cur.fetchone()[0] or 0
+            conn_a.close()
+            if imp > 0:
+                logger.info(f"[PERF BOOST C] {blog_id} has {imp} impressions, boost hook active")
+    except Exception as e:
+        logger.debug(f"[PERF BOOST C] analytics check skipped: {e}")
+
     conn = _get_db()
     try:
         pk = _get_pk_col(conn, topic_table)

@@ -51,6 +51,12 @@ from shared.problem_registry import lookup_reason
 from shared.problem_monitor import get_monitor
 from shared.daily_summary import record_event as _record_summary_event, init_daily_summary_tables
 from shared.notification_debounce import should_push as _debounce_push, init_debounce_tables
+# quality live gate import (optional, safe import)
+try:
+    from ops_dashboard.checks.content_quality_live import run_live_check
+    _QUALITY_LIVE_AVAILABLE = True
+except Exception:
+    _QUALITY_LIVE_AVAILABLE = False
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -1917,6 +1923,21 @@ def dispatch(blog_id):
     # 성공/실패 기록
     if result.get("success"):
         _record_ledger(blog_id)
+        # live quality gate (auto blogs only)
+        if _QUALITY_LIVE_AVAILABLE:
+            try:
+                from pathlib import Path
+                # locate latest post markdown path (simplified heuristic)
+                site_root = Path(cfg.get("site_path", "")).resolve() if cfg.get("site_path") else None
+                if site_root and (site_root / "content").exists():
+                    # find most recent index.md
+                    md_files = sorted(site_root.rglob("content/posts/*/index.md"), key=lambda p: p.stat().st_mtime, reverse=True)
+                    if md_files:
+                        qres = run_live_check(blog_id, md_files[0])
+                        if qres.get("issues"):
+                            logger.warning(f"[QUALITY LIVE] {blog_id} issues detected: {qres['issues']}")
+            except Exception as e:
+                logger.debug(f"[QUALITY LIVE] check skipped for {blog_id}: {e}")
         _reset_failure_count(blog_id)
         _reset_extended_failure_keys(blog_id)
         # P계열 발행 실패 이벤트 자동 close — 해당 blog가 정상 발행 성공하면

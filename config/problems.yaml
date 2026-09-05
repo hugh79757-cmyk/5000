@@ -1218,3 +1218,98 @@ problems:
   summary_human: 'CUAP 형식/톤 위반(P35): 라벨 덤프(가격:/장점: 등) 또는 반말체(~다) 비율 초과 발견 → writer 지시 준수하여 ~입니다/~습니다 체로 재생성.'
   summary_llm: '{"problem_id": "P35", "name_ko": "CUAP 형식/톤 위반 (라벨덤프·반말체)", "severity": "MAJOR", "family": "content_quality", "one_line_action": "CUAP 포스트 본문의 라벨 덤프 및 반말체 비율 점검 → ~입니다/~습니다 체로 재생성", "needs_human": false, "target_files": [{"path": "ops_dashboard/checks/content_integrity.py", "hint": "check_c10 (c10_cuap_format_tone) — CUAP 전용 검사"}, {"path": "pipelines/curation/writer.py", "hint": "라벨 표기 금지 + ~입니다 통일 지시"}], "how_to_add": "config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가. code 미중복."}'
   how_to_add: 'config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가. code 미중복. 저장 후 프로세스 리로드/재기동 시 자동 반영'
+- code: P36
+  name_ko: 할루시네이션·비공식 가격 표기
+  severity: CRITICAL
+  family: content_quality
+  hook: content_check
+  automation_level: human_approval
+  one_line_action: 가격·재고 정보 원본 출처 일치 여부, 환율·세금 추정치 표기 검증 → 출처 기반 재생성
+  target_files:
+    - path: ops_dashboard/checks/content_integrity.py
+      hint: check_hallucination_price() 구현 — 쿠팡/공식 API 가격 대비 차이 검출
+    - path: pipelines/curation/writer.py
+      hint: 가격 생성 시 출처 인용 강제
+  verify:
+    - 게시물 가격 출처 일치율 100%
+    - check_results hallucination_price status=pass
+  needs_human: false
+  reason_keys:
+    - hallucination
+    - price_mismatch
+  threshold: always
+  alert_template: '🚨 [CRITICAL] 할루시네이션/가격 왜곡
+
+    블로그: {blog_id}
+
+    문제: P36 — {name_ko}
+
+    글: {matched}'
+  action: 원본 재수집 및 가격·정보 출처 기반 재생성
+  playbook_ref: ERROR_PLAYBOOKS.md#p36
+  summary_human: '할루시네이션·비공식 가격 표기(P36): 가격/재고가 원본과 불일치 → 출처 재수집 후 재생성.'
+  summary_llm: '{"problem_id":"P36","name_ko":"할루시네이션·비공식 가격 표기","severity":"CRITICAL","family":"content_quality","one_line_action":"가격·재고 원본 일치 검증 → 출처 기반 재생성","needs_human":false}'
+  how_to_add: 'config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가.'
+- code: P37
+  name_ko: 지역/시군구 불일치
+  severity: CRITICAL
+  family: content_quality
+  hook: content_check
+  automation_level: human_approval
+  one_line_action: frontmatter region과 본문 언급 시군구, slug 일치 검증 → 불일치 시 재생성
+  target_files:
+    - path: ops_dashboard/checks/content_integrity.py
+      hint: check_region_mismatch() — frontmatter region vs 본문 시군구 추출 비교
+    - path: pipelines/rap/pipeline.py
+      hint: region 추출 및 slug 생성 로직
+  verify:
+    - region 일치율 100%
+    - check_results region_mismatch status=pass
+  needs_human: false
+  reason_keys:
+    - region_mismatch
+    - district_mismatch
+  threshold: always
+  alert_template: '🚨 [CRITICAL] 지역 불일치
+
+    블로그: {blog_id}
+
+    문제: P37 — {name_ko}
+
+    글: {matched}'
+  action: region 정보 재확인 후 재생성
+  playbook_ref: ERROR_PLAYBOOKS.md#p37
+  summary_human: '지역/시군구 불일치(P37): frontmatter region과 본문 불일치 → 재생성.'
+  summary_llm: '{"problem_id":"P37","name_ko":"지역/시군구 불일치","severity":"CRITICAL","family":"content_quality","one_line_action":"region 일치 검증 → 재생성","needs_human":false}'
+  how_to_add: 'config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가.'
+- code: P38
+  name_ko: 구조 위반 H2 부족
+  severity: MAJOR
+  family: content_quality
+  hook: content_check
+  automation_level: human_approval
+  one_line_action: 본문 H2 개수 3개 미만 검출 → 구조 재생성
+  target_files:
+    - path: ops_dashboard/checks/content_integrity.py
+      hint: check_h2_count() — H2 개수 검증
+    - path: shared/publishers/hugo_writer.py
+      hint: H2 강제 삽입 가드
+  verify:
+    - H2 개수 >=3
+    - check_results h2_count status=pass
+  needs_human: false
+  reason_keys:
+    - h2_insufficient
+  threshold: always
+  alert_template: '⚠️ [MAJOR] 구조 위반 H2 부족
+
+    블로그: {blog_id}
+
+    문제: P38 — {name_ko}
+
+    글: {matched}'
+  action: 구조 재생성 및 H2 3개 이상 보장
+  playbook_ref: ERROR_PLAYBOOKS.md#p38
+  summary_human: '구조 위반 H2 부족(P38): H2 3개 미만 → 재생성.'
+  summary_llm: '{"problem_id":"P38","name_ko":"구조 위반 H2 부족","severity":"MAJOR","family":"content_quality","one_line_action":"H2 개수 검증 → 재생성","needs_human":false}'
+  how_to_add: 'config/problems.yaml 의 problems: 아래에 동일 형식으로 항목 추가.'
