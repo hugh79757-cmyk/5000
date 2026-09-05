@@ -140,3 +140,13 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import desc_pollution  # noqa: F401
+except ImportError:
+    pass
+
+try:
+    from ops_dashboard.checks import rap_region  # noqa: F401
+except ImportError:
+    pass
+

@@ -134,11 +134,23 @@ _ADSENSE_FAMILY: dict[str, str] = {
     "aikorea24.kr": "ca-pub-5938862195544185",
 }
 
+# 기록된 예외 (AGENTS.md 섹션 1): pick/rank는 informationhot.kr 도메인이나
+# ca-pub-8772455780561463 사용 — 2026-09-04 사용자 결정, 라이브 백지 없음 3개월+ 입증.
+# 문서-코드 정합 상태. 슬롯 재생성 리스크로 유지. 건드리지 말 것.
+_ADSENSE_EXCEPTIONS: dict[str, str] = {
+    "pick.informationhot.kr": "ca-pub-8772455780561463",
+    "rank.informationhot.kr": "ca-pub-8772455780561463",
+}
+
 _PUB_RE = re.compile(r"ca-pub-\d+")
 
 
 def _expected_pub_id(domain: str) -> str | None:
-    """도메인 접미사로 계열 매핑된 기대 Publisher ID 반환 (미등록 계열은 None)."""
+    """도메인 접미사로 계열 매핑된 기대 Publisher ID 반환 (미등록 계열은 None).
+    기록된 예외 도메인(pick/rank)은 예외 ID 우선."""
+    for suffix, pub in _ADSENSE_EXCEPTIONS.items():
+        if domain == suffix or domain.endswith("." + suffix):
+            return pub
     for suffix, pub in _ADSENSE_FAMILY.items():
         if domain == suffix or domain.endswith("." + suffix):
             return pub
@@ -225,6 +237,16 @@ async def _check_single_blog(client: httpx.AsyncClient, semaphore: asyncio.Semap
         ok_pub, pub_detail = _check_adsense_publisher_id(combined_html, domain)
         if not ok_pub:
             failures.append(pub_detail or "ADSENSE-ID-MISMATCH")
+
+        # 3c. adsbygoogle.js 로더 2중 로드 검사 (ERR-031, detect-only)
+        #     정상 = 1회. 테마 head.html + extend-head.html 수동 선언 시 2회 =
+        #     중복 로드(성능/정책 위험). 홈+포스트 합산 기준 2 이하면 허용
+        #     (홈 1 + 포스트 1 = 정상 아닌데 페이지별 1이면 합산 2가 됨).
+        #     → 페이지별 카운트로 정확히 판정: 각 페이지 1회 초과 시 fail.
+        loader_home = html.count("pagead2.googlesyndication.com/pagead/js/adsbygoogle.js")
+        loader_post = post_html.count("pagead2.googlesyndication.com/pagead/js/adsbygoogle.js") if post_html else 0
+        if loader_home > 1 or loader_post > 1:
+            failures.append(f"ADS-LOADER-DUP home={loader_home} post={loader_post} (각 1회 초과)")
 
         if failures:
             return {
