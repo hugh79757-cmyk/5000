@@ -20,7 +20,7 @@ CONFIG_DIR = os.path.join(
 
 # Circuit breaker state (module level)
 _circuit_state = {"failures": 0, "open_until": 0.0}
-CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
+CIRCUIT_BREAKER_THRESHOLD = 9999     # circuit breaker 비활성화
 CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
 
@@ -201,7 +201,7 @@ def _get_tier_order(config):
     return config.get("tier_order", _DEFAULT_TIER_ORDER)
 
 # Circuit breaker 설정
-CIRCUIT_BREAKER_THRESHOLD = 10     # 연속 실패 N회 → 차단
+CIRCUIT_BREAKER_THRESHOLD = 9999     # circuit breaker 비활성화
 CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
 # ── 회전 상태 (프로세스 메모리) ──────────────────────────────────────────
