@@ -576,6 +576,11 @@ def _check_senior(title: str, body: str, ctx: dict) -> list:
     """Senior 전용 검증: 정책 시행일, 정부24 데이터 유효성."""
     issues = []
 
+    # 태스크리스트 문법 릭 차단 (Blogger는 리터럴 '[ ]'로 렌더됨 — 2026-09-05 백필 81건 사고)
+    import re as _re
+    if _re.search(r"(^|\W)\[( |x|X)\]", body or ""):
+        issues.append("[CRITICAL] 태스크리스트 문법('[ ]'/'[x]') 포함 — Blogger에서 리터럴로 렌더됨. 대시(-) 목록으로 재작성 필요")
+
     # 정책 시행일 경과 여부
     policy_date = ctx.get("event_date", "") or ctx.get("policy_date", "")
     if policy_date:
