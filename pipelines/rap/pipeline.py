@@ -1047,6 +1047,7 @@ def run(blog_cfg):
     # ─── 실거래가 전략 ───
     if strategy == "trade":
         lawd_cd, city, district = find_lawd_cd(keyword)
+        lawd_matched = bool(lawd_cd)
         if not lawd_cd:
             import random as _rand
             BLOG_REGION_POOL = {
@@ -1073,6 +1074,21 @@ def run(blog_cfg):
             _title_keyword = f"{district} 실거래가 종합"
             logger.info(f"단지 실거래 없음 → 제목 키워드 교체: [{keyword}] → [{_title_keyword}]")
             keyword = _title_keyword
+        # ── 키워드-지역 이중 미매칭 방지: 단지명 추출됐는데 lawd_cd 랜덤 fallback이었고
+        # 단지 실거래도 0건이면, 키워드와 무관한 지역 데이터로 글을 쓰는 것이라 발행 자체를 중단.
+        # (관악드림타운 사례: lawd 미매칭→랜덤 강남구, 단지 미매칭→강남구 종합글로 오인 발행)
+        if isinstance(trades, dict) and trades.get("apt_kw") and not trades.get("keyword_trades") \
+                and not lawd_matched:
+            try:
+                if os.path.exists(RAP_DB_PATH):
+                    _gc = sqlite3.connect(RAP_DB_PATH, timeout=30)
+                    _gc.execute("UPDATE keywords SET status='inactive' WHERE keyword=?", (keyword,))
+                    _gc.commit()
+                    _gc.close()
+                logger.warning(f"키워드 자동 비활성화(이중 미매칭): {keyword}")
+            except Exception as _dbe:
+                logger.warning(f"키워드 비활성화 실패: {_dbe}")
+            return {"success": False, "reason": "no_trade_data"}
         if not trades:
             tg_error(blog_id, "fetcher", f"실거래가 0건: {keyword}")
             try:
@@ -1199,13 +1215,14 @@ def run(blog_cfg):
     # ── 발행 전 검증 ──
     _is_draft = blog_cfg.get("force_draft", False) or False
     try:
-        from shared.validators import validate_post as _validate
+        from shared.validators import validate_post_extended as _validate
         _val_ctx = {
             "keyword": keyword,
             "event_date": article.get("event_date", ""),
             "daily_quota": article.get("daily_quota", 5),
+            "description": article.get("description", ""),
         }
-        _issues = _validate(blog_id, article.get("title", ""), article["body_md"], _val_ctx)
+        _issues = _validate(blog_id, article.get("title", ""), article["body_md"], _val_ctx, pipeline="rap")
         if _issues:
             _is_draft = True
             logger.warning(f"[Validate] {len(_issues)} issues → draft: {_issues}")

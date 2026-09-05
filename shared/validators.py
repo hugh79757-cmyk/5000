@@ -603,6 +603,46 @@ def _check_senior(title: str, body: str, ctx: dict) -> list:
     return issues
 
 
+def _check_rap(title: str, body: str, ctx: dict) -> list:
+    """RAP 전용 검증: 지역명 정합(키워드 시군구 vs 본문), desc 오염(related 블록) 차단.
+
+    배경:
+    - 관악드림타운 사례(2026-03): 관악구 단지인데 본문 전체가 '강남구' — LLM 지역 왜곡이
+      발행 후 대조 게이트 없이 라이브 노출. 키워드의 시군구와 본문 지역명이 어긋나면 draft 강등.
+    - desc 오염(2026-08-01 이전 ~703건): 기계적 후처리가 본문 하단 related 링크 블록을
+      desc로 복사. LLM이 아닌 후처리 결함이지만, 재발 시 탐지를 위해 related 마커가
+      desc에 있으면 draft 강등.
+    """
+    import re
+
+    issues = []
+    keyword = ctx.get("keyword", "")
+
+    # ── 1. 지역명 정합 게이트 ──
+    # keyword 형식: '{단지명} {시군구} 실거래가' / '... {시군구} ...' — 시/군/구 접미사 단위 추출
+    if keyword:
+        m = re.search(r"([가-힣A-Za-z]+(?:시|군|구))\b", keyword)
+        if m:
+            region = m.group(1)
+            # 시/군/구 접미사가 '구'인 경우 자치구 비교 — 예: 관악구
+            # 본문/제목 어디에도 해당 지역명이 없으면 지역 왜곡 확정
+            if region not in title and region not in body:
+                # 세종특별자치시/제주 등 접미사 없는 특례는 keyword에도 없으므로 여기 도달 안 함
+                issues.append(
+                    f"[CRITICAL] 지역 왜곡 차단: 키워드 지역 '{region}'이(가) 본문에 없음 — LLM 지역 환각"
+                )
+
+    # ── 2. desc 오염 게이트 ──
+    # desc는 ctx에 전달 시 검사 (article dict의 description 필드)
+    desc = ctx.get("description", "") or ""
+    if desc:
+        pollution_markers = ["함께 읽으면", "<strong>함께", "](/posts/", "](/"]
+        if any(marker in desc for marker in pollution_markers):
+            issues.append("[CRITICAL] desc 오염 차단: related 링크 블록이 description에 포함됨")
+
+    return issues
+
+
 def _check_stap(title: str, body: str, ctx: dict) -> list:
     """STAP 전용 검증: 종목코드, 주가 날짜, 빈 데이터 차단."""
     issues = []
@@ -686,6 +726,7 @@ _PIPELINE_VALIDATORS = {
     "travel": _check_travel,
     "senior": _check_senior,
     "stap": _check_stap,
+    "rap": _check_rap,
 }
 
 
