@@ -96,11 +96,13 @@ def _pick_keyword(blog_id):
 
         if not using_gap:
             # RAP DB: blog_target 필터 우선
+            # LIMIT 200: Q-D district 차단이 상위 200을 전소시킨 사례(2026-09-05 rap4 no_keyword) —
+            # SELECT 단계에서 30일 district 제외를 SQL로 못 하는 구조라, 후 파이썬 필터 감안 넉넉히.
             rows = conn.execute(
                 "SELECT keyword, category FROM keywords "
                 "WHERE status='active' AND (blog_target=? OR blog_target IS NULL OR blog_target='') "
                 "ORDER BY use_count ASC, last_used_at ASC NULLS FIRST "
-                "LIMIT 200",
+                "LIMIT 2000",
                 (blog_id,)
             ).fetchall()
         else:
