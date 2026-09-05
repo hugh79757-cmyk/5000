@@ -147,7 +147,7 @@ def _pre_deploy_image_gate(site: Path) -> None:
         body = _strip_frontmatter(text)
         _has_img = (
             re.search(r"<img\s", body)
-            or re.search(r"!\[[^\]]*\]\(", body)
+            or re.search(r"!\[[^\n]*\]\(", body)
             or re.search(r"\{\{<\s*(?:figure|img|image|thumbnail)\b", body)
         )
         if not _has_img and not _r13_exempt:

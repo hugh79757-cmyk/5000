@@ -69,12 +69,14 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
             return t
     if post_type:
         topics = c.execute("""
-            SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? AND post_type = ? ORDER BY priority DESC, RANDOM()
-        """.replace("{_reuse}", _reuse).replace("{_market}", _market), (cutoff, site_id, post_type)).fetchall()
+            SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? AND post_type = ? {_combo_filter} ORDER BY priority DESC, RANDOM()
+        """.replace("{_reuse}", _reuse).replace("{_market}", _market).replace("{_combo_filter}", _combo_filter),
+            (cutoff, site_id, post_type) + tuple(_combo_params)).fetchall()
     else:
         topics = c.execute("""
-            SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? ORDER BY priority DESC, RANDOM()
-        """.replace("{_reuse}", _reuse).replace("{_market}", _market), (cutoff, site_id)).fetchall()
+            SELECT * FROM topics WHERE (status = 'pending' OR status = 'published') {_reuse} {_market} AND site_id = ? {_combo_filter} ORDER BY priority DESC, RANDOM()
+        """.replace("{_reuse}", _reuse).replace("{_market}", _market).replace("{_combo_filter}", _combo_filter),
+            (cutoff, site_id) + tuple(_combo_params)).fetchall()
     skip_set = set(skip_ids) if skip_ids else set()
     for t in topics:
         if t["id"] in skip_set:
@@ -86,15 +88,16 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
     return c.execute("""
         SELECT t.* FROM topics t
         LEFT JOIN publish_log p ON t.id = p.topic_id
-        WHERE (t.status = 'pending' OR t.status = 'published') REUSE_CLAUSE MARKET_CLAUSE AND t.site_id = ?
+        WHERE (t.status = 'pending' OR t.status = 'published') REUSE_CLAUSE MARKET_CLAUSE COMBO_CLAUSE AND t.site_id = ?
         AND t.id NOT IN (SKIP_PH)PT_CLAUSE
         ORDER BY p.published_at ASC NULLS FIRST
         LIMIT 1
         """.replace("REUSE_CLAUSE", _reuse.replace("AND id NOT IN", "AND t.id NOT IN"))
          .replace("MARKET_CLAUSE", _market)
+         .replace("COMBO_CLAUSE", _combo_filter.replace("car_id", "t.car_id"))
          .replace("SKIP_PH", placeholder)
          .replace("PT_CLAUSE", " AND t.post_type = ?" if post_type else ""),
-             [cutoff, site_id] + (list(skip_set) if skip_set else []) + ([post_type] if post_type else [])).fetchone()
+              [cutoff, site_id] + _combo_params + (list(skip_set) if skip_set else []) + ([post_type] if post_type else [])).fetchone()
 
 def generate_title(data, site_id="hotissue"):
     """title_engine의 사이트별 고CTR 템플릿 엔진으로 위임"""

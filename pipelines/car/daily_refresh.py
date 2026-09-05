@@ -358,6 +358,21 @@ def refresh_images(conn):
     return total_new
 
 
+def reset_skip_no_data(conn, days=7):
+    """N일+ 경과한 skip_no_data 토픽을 pending으로 복귀 — 데이터가 보충되었을 수 있으므로 재시도.
+    최근 skip_no_data는 유지(직전 실패 원인 재현 방지)."""
+    c = conn.cursor()
+    cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+    cur = c.execute(
+        "UPDATE topics SET status='pending' WHERE status='skip_no_data' AND created_at < ?",
+        (cutoff,)
+    )
+    conn.commit()
+    if cur.rowcount:
+        logger.info(f"  [skip_no_data 리셋] {cur.rowcount}건 pending 복귀 (기준 {days}일)")
+    return cur.rowcount
+
+
 def replenish_topics(conn, min_pending=50):
     """사이트별 post_type 토픽이 min_pending 미만이면 자동 보충"""
     c = conn.cursor()
@@ -454,7 +469,7 @@ def replenish_topics(conn, min_pending=50):
                 if created >= need:
                     break
                 exists = c.execute(
-                    "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                    "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','published')",
                     (car_a, car_b, post_type, site_id)
                 ).fetchone()
                 if not exists:
@@ -472,7 +487,7 @@ def replenish_topics(conn, min_pending=50):
                     if unpop_created >= need_unpopular or created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','published')",
                         (car_a, car_b, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -511,7 +526,7 @@ def replenish_topics(conn, min_pending=50):
                     if created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        "SELECT 1 FROM topics WHERE car_id=? AND competitor_car_id=? AND post_type=? AND site_id=? AND status IN ('pending','published')",
                         (a, b, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -528,7 +543,7 @@ def replenish_topics(conn, min_pending=50):
                     if created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','published')",
                         (car_id, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -594,7 +609,7 @@ def replenish_topics(conn, min_pending=50):
                     ]
                     competitor_id = random.choice(rivals) if rivals else None
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','published')",
                         (car_id, post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -657,7 +672,7 @@ def replenish_topics(conn, min_pending=50):
                     if created >= need:
                         break
                     exists = c.execute(
-                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','skip_no_data','published')",
+                        "SELECT 1 FROM topics WHERE car_id=? AND post_type=? AND site_id=? AND status IN ('pending','published')",
                         (car["car_id"], post_type, site_id)
                     ).fetchone()
                     if not exists:
@@ -759,6 +774,11 @@ def run_refresh() -> dict:
         price_changes = detect_price_changes(conn)
     except Exception as e:
         logger.exception(f"detect_price_changes 실패: {e}")
+
+    try:
+        reset_skip_no_data(conn)
+    except Exception as e:
+        logger.exception(f"reset_skip_no_data 실패: {e}")
 
     try:
         topics_created = replenish_topics(conn)
