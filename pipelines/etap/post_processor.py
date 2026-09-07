@@ -6,13 +6,17 @@ import re
 logger = logging.getLogger(__name__)
 
 
-def insert_product_cards(content: str, products: list, max_cards: int = 5) -> str:
+def insert_product_cards(content: str, products: list, max_cards: int = 5,
+                         card_title: str = "Top Tours &amp; Activities",
+                         btn_text: str = "Book Now") -> str:
     """본문 하단(마지막 H2 앞 또는 끝)에 Viator 상품 카드 HTML 삽입.
 
     Args:
         content: 마크다운 본문
         products: list of dict (name, price, currency, discount, image_url, link, category)
         max_cards: 최대 카드 수
+        card_title: 카드 섹션 H2 제목 (기본 "Top Tours &amp; Activities")
+        btn_text: CTA 버튼 문구 (기본 "Book Now", 항공권은 "Search Flights")
     Returns:
         상품 카드가 삽입된 본문
 
@@ -22,7 +26,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
 
     cards = products[:max_cards]
     lines = ['\n\n<div class="etap-product-cards">\n']
-    lines.append('<h2 class="etap-card-title">Top Tours &amp; Activities</h2>\n\n')
+    lines.append(f'<h2 class="etap-card-title">{card_title}</h2>\n\n')
 
     for p in cards:
         name = p.get("name", "")
@@ -35,6 +39,8 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
         image_url = p.get("image_url", "")
         link = p.get("link", "#")
         category = p.get("category", "")
+
+        lines.append('<div class="affiliate-card">\n')
 
         discount_badge = ""
         if discount and str(discount) not in ("0", ""):
@@ -64,7 +70,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5) -> st
             except (ValueError, TypeError):
                 pass
             lines.append(f"From **{ps}**\n\n")
-        lines.append(f'<a href="{link}" rel="sponsored noopener" target="_blank">Book Now</a>\n\n---\n\n')
+        lines.append(f'<a href="{link}" rel="sponsored noopener" target="_blank" class="affiliate-btn">{btn_text}</a>\n\n</div>\n\n---\n\n')
 
     lines.append("</div>\n")
     card_block = "".join(lines)

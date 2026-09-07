@@ -74,3 +74,13 @@ SEAP+RAP 블로그 품질 감사(CAP 체크리스트 동일 적용) → 근본 �
 - 75-2.html 빈 desc 1건: 사용자 결정 — 방치.
 - 재발방지 이중화 완료: 소프트(writer.py:328 프롬프트) + 하드(validators.py:_check_senior CRITICAL 게이트, `( ^|\W)\[( |x|X)\]` 발행 전 차단). 단위 테스트 3/3(릭 탐지/대시 통과/링크 무오탐), pytest 48 passed. 커밋 648d91f8a.
 - 스킬 작성: ~/.config/opencode/skills/blogger-api-publishing/SKILL.md — pickle 토큰 인증, blog ID 매핑 3개, enum/502/sleep gotchas, searchDescription 미신화, [ ] 렌더 사고+게이트, 백필 4단계 패턴, 테스트 포스트 delete 주의.
+
+## rap4-hugo P01 no_trade_data 트리아지 (19:07 해결)
+
+- 알림: rap4-hugo fetcher P02 → 실제 no_trade_data 3회(11:50/14:50/18:00). 키워드: 새샘마을3단지(모아미래도리버시티) 세종시 전세.
+- 근본 원인: SYNC_REGIONS(58개)에 세종시 등 11개 지역 부재 → rents 커버리지 구멍. 세종 rents 0건 + trades는 202604만료(3개월 폴백 윈도 밖) → no_trade_data → 자동 비활성화. 영향 active 키워드 1,124건(세종/광산구/달서구/수영구/남동구/대구동구/대전동구/유성구/수원권선/진천/아산 — 아파트명 오탐 제거 후 법정동 기준).
+- 수정 [PRODUCTION]: rap_data_sync.py SYNC_REGIONS 58→69개 — 신규 11개(36110 세종/26410 수영/27140 대구동/27290 달서/28200 남동/29200 광산/30140 대전동/30200 유성/41113 수원권선/43750 진천/44200 아산).
+- 즉시 수집: 신규 지역 3개월치 — rents +2,367건, trades +2,073건. 광산구(29200)만 API totalCount=0(공공데이터 자체 부재 — 네트워크/코드 문제 아님).
+- 키워드 복구: 오늘 자동 비활성화 6건(새샘3 전세+실거래/호려울7 전세+실거래/탕정 전세+실거래/첫마을3 실거래) → active.
+- 검증: 세종 rents 276건/새샘3단지 2건(전세 2.5억/월세 5천+46) 확보. dispatcher rap4-hugo 재실행 → 발행 성공 article_id 13056 (대전 유성구 전월세 — 유성구도 신규 수집 지역), 배포 rc=0, 라이브 200. 1차 시도 썸네일 Playwright networkidle 타임아웃(unsplash 지연, 일시) → 재시도 성공.
+- 재발 방지: SYNC_REGIONS에 추가 완료 — 이후 매일 01:00 daily sync가 자동 수집. 커버리지 밖 지역 키워드 전부 데이터 보유 상태.

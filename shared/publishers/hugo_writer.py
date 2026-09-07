@@ -565,14 +565,22 @@ def _clean_body(body_md, site_path=""):
     ]
     _ALLOWED_H2_RE = re.compile("|".join(_ALLOWED_H2_PATTERNS))
 
+    # ── ETAP 영어 콘텐츠 H2 보존 (2026-09-06) ──
+    # _ALLOWED_H2_PATTERNS는 한국어 소제목용이라 영어 H2는 전부 강등됨.
+    # 영어 본문(한글 미포함)이면 강등 skip — ETAP 14개 블로그 H2 구조 복구.
+    _has_hangul = bool(re.search(r"[\uAC00-\uD7A3]", body_md))
+
     def _fix_invalid_h2(match):
+        if not _has_hangul:
+            return match.group(0)
         heading_text = match.group(1).strip()
         if _ALLOWED_H2_RE.search(heading_text):
             return match.group(0)
         logger.warning(f"[H2-GUARD] 부적절한 H2 헤딩 감지 → bold 문단 변환: '{heading_text[:50]}'")
         return f"\n\n<strong>{heading_text}</strong>\n\n"
 
-    body_md = re.sub(r"\n##\s+([^\n]+)", _fix_invalid_h2, body_md)
+    if _has_hangul:
+        body_md = re.sub(r"\n##\s+([^\n]+)", _fix_invalid_h2, body_md)
     
     # ── 긴 이미지 URL → R2 업로드 + 짧은 URL 대체 (파일명 255자 제한 회피) ──
     _DEFAULT_IMG = "https://pub-2f5c7af1c303419a933069212bc25874.r2.dev/common/default-thumbnail.webp"

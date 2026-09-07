@@ -352,6 +352,20 @@ def fetch_festival(_is_retry=False):
                         published_ids.add(cid)
             cconn.close()
 
+        # stap_content.db articles도 확인 (publisher source_exists와 DB 일치시킴 —
+        # content.db만 보면 stap_content에만 있는 발행분을 못 걸러 duplicate_source_id 무한 실패)
+        from shared.db_paths import ARTICLES_DB as _ARTICLES_DB
+        if os.path.exists(_ARTICLES_DB):
+            _aconn = sqlite3.connect(_ARTICLES_DB)
+            for row in _aconn.execute(
+                "SELECT source_id FROM articles WHERE blog_id='travel1-hugo' AND source_id != ''"
+            ).fetchall():
+                for cid in row[0].split(","):
+                    cid = cid.strip()
+                    if cid:
+                        published_ids.add(cid)
+            _aconn.close()
+
         conn = sqlite3.connect(DB_PATH)
         conn.row_factory = sqlite3.Row
         now = datetime.now()

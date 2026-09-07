@@ -187,7 +187,14 @@ def guess_segment(title) -> str:
 
 
 def scan_new_cars(conn):
-    """카이즈유에서 최신 차량 탐색 + 자동 등록"""
+    """카이즈유에서 최신 차량 탐색 + 자동 등록
+
+    커서 기준: cars.MAX(carisyou_id) — 등록된 마지막 차량 다음부터 스캔.
+    scan_log.max_scanned_id를 우선하지 않음: carisyou가 빈 쓰레기 id
+    (len<50000) 대역을 앞당겨 발급해도, 실제 모델은 낮은 id 대역에
+    늦게 등록되는 경우가 있어 지나친 구간을 다시 봐야 하기 때문.
+    (실측: cars.MAX=7830, scan_log=12293 — 7831+에 18개 실모델 미스캔)
+    """
     c = conn.cursor()
     today = datetime.now().strftime("%Y-%m-%d")
     already = c.execute("SELECT id FROM scan_log WHERE scan_date=?", (today,)).fetchone()
@@ -196,9 +203,6 @@ def scan_new_cars(conn):
         return []
 
     max_id = c.execute("SELECT MAX(carisyou_id) FROM cars").fetchone()[0] or 7650
-    last_scan = c.execute("SELECT max_scanned_id FROM scan_log ORDER BY id DESC LIMIT 1").fetchone()
-    if last_scan and last_scan[0] > max_id:
-        max_id = last_scan[0]
     scan_start = max_id + 1
     scan_end = scan_start + 30
 
@@ -360,11 +364,20 @@ def refresh_images(conn):
 
 def reset_skip_no_data(conn, days=7):
     """N일+ 경과한 skip_no_data 토픽을 pending으로 복귀 — 데이터가 보충되었을 수 있으므로 재시도.
-    최근 skip_no_data는 유지(직전 실패 원인 재현 방지)."""
+    최근 skip_no_data는 유지(직전 실패 원인 재현 방지).
+    본체/경쟁차량이 여전히 시판 trims 없으면 복귀하지 않음(영구 블록 무한 순환 방지)."""
     c = conn.cursor()
     cutoff = (datetime.now() - timedelta(days=days)).isoformat()
     cur = c.execute(
-        "UPDATE topics SET status='pending' WHERE status='skip_no_data' AND created_at < ?",
+        """
+        UPDATE topics SET status='pending'
+        WHERE status='skip_no_data' AND created_at < ?
+        AND EXISTS (SELECT 1 FROM trims WHERE car_id=topics.car_id AND status='시판' AND price>=500)
+        AND (
+            competitor_car_id IS NULL OR competitor_car_id = ''
+            OR EXISTS (SELECT 1 FROM trims WHERE car_id=topics.competitor_car_id AND status='시판' AND price>=500)
+        )
+        """,
         (cutoff,)
     )
     conn.commit()

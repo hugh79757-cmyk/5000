@@ -69,34 +69,84 @@ def pick_topic():
     return pick_topic_by_id(TOPIC_TABLE, BLOG_ID)
 
 def _add_product_cards(article):
+    """flight_prices 기반 항공권 예약 카드 (Travelpayouts aviasales/jetradar 마커 링크).
+
+    스킬: travelpayouts-affiliate-links
+    - 링크: jetradar searches/new (dep_date=오늘+30일, DB 날짜 과거/빈값 폴백)
+    - 가격: flight_prices 실존 값만 (발명 금지)
+    - 마커 없으면 카드 미생성 (수익 0 링크 유출 방지)
+    """
     iata = article.get("iata", "")
     if not iata:
         return article
+    marker = os.getenv("TRAVELPAYOUTS_MARKER", "") or os.getenv("AVIASALES_MARKER", "")
+    if not marker:
+        logger.info("[airlines-hugo] TRAVELPAYOUTS_MARKER 없음 - 항공권 카드 생략")
+        return article
     conn = _get_db()
-    cross = []
-    dest_cities = conn.execute(
-        "SELECT DISTINCT destination FROM airline_routes WHERE airline = ? LIMIT 3",
-        (iata,)
-    ).fetchall()
-    for dc in dest_cities:
-        code = dc[0]
-        tour = conn.execute(
-            "SELECT product_name, price, currency, deep_link, image_url, category FROM viator_tours "
-            "WHERE deep_link != '' AND (city LIKE ? OR country LIKE ?) "
-            "ORDER BY CAST(price AS REAL) ASC LIMIT 1",
-            ("%" + code + "%", "%" + code + "%")
+
+    # 항공사 허브(최다 origin) 찾기: airline_routes → flight_direct → calendar
+    hub = conn.execute(
+        "SELECT origin, COUNT(*) c FROM airline_routes WHERE airline=? "
+        "GROUP BY origin ORDER BY c DESC LIMIT 1", (iata,)
+    ).fetchone()
+    if not hub:
+        hub = conn.execute(
+            "SELECT origin, COUNT(*) c FROM flight_direct WHERE airline=? "
+            "GROUP BY origin ORDER BY c DESC LIMIT 1", (iata,)
         ).fetchone()
-        if tour:
-            tour = dict(tour)
-            cross.append({
-                "name": tour["product_name"], "price": tour["price"],
-                "currency": tour.get("currency","USD"), "discount": "",
-                "image_url": tour.get("image_url",""), "link": tour["deep_link"],
-                "category": tour.get("category",""),
-            })
+    if not hub:
+        hub = conn.execute(
+            "SELECT origin, COUNT(*) c FROM flight_calendar WHERE airline=? "
+            "GROUP BY origin ORDER BY c DESC LIMIT 1", (iata,)
+        ).fetchone()
+    if not hub:
+        # 어느 소스에도 노선 없음 - 카드 생략
+        conn.close()
+        return article
+    origin_code = hub[0]
+
+    # 허브 출발 노선 최저가 (flight_prices는 OTA 스크린샷 - 항공사 무관 시장가)
+    rows = conn.execute(
+        "SELECT destination, MIN(price) min_price, COUNT(*) offers, "
+        "GROUP_CONCAT(DISTINCT airline) sellers "
+        "FROM flight_prices WHERE origin=? GROUP BY destination "
+        "HAVING offers >= 3 ORDER BY min_price ASC LIMIT 3",
+        (origin_code,)
+    ).fetchall()
+
+    # IATA → 도시명
+    def _city(code):
+        r = conn.execute("SELECT city FROM airports_topics WHERE iata_code=?",
+                         (code,)).fetchone()
+        return r[0] if r else code
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    future_date = (datetime.now() + timedelta(days=30)).strftime("%Y-%m-%d")
+    hub_city = _city(origin_code)
+    cards = []
+    for dest, min_price, offers, sellers in rows:
+        dep_city, arr_city = hub_city, _city(dest)
+        link = (f"https://www.jetradar.com/searches/new?origin_iata={origin_code}"
+                f"&destination_iata={dest}&depart_date={future_date}&adults=1"
+                f"&marker={marker}")
+        cards.append({
+            "name": f"{dep_city} to {arr_city} Flights",
+            "price": f"{int(min_price)}",
+            "currency": "USD",
+            "discount": "",
+            "image_url": "",
+            "link": link,
+            "category": "Flight Deals",
+        })
     conn.close()
-    if cross:
-        article["content"] = insert_product_cards(article["content"], cross, max_cards=3)
+
+    if cards:
+        article["content"] = insert_product_cards(
+            article["content"], cards, max_cards=3,
+            card_title=f"Flight Deals from {hub_city}",
+            btn_text="Search Flights")
+        logger.info(f"[airlines-hugo] 항공권 카드 {len(cards)}개 추가 (hub={origin_code})")
     return article
 
 def _run_impl() -> bool:

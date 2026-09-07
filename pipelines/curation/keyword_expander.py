@@ -78,7 +78,7 @@ DEFAULT_SEEDS = {
     "kitchen-hugo": ["냄비", "프라이팬", "도마", "칼", "식기"],
     "beauty-hugo": ["화장품", "스킨케어", "메이크업", "샴푸", "선크림"],
     "camping-hugo": ["텐트", "캠핑", "등산", "배낭", "침낭"],
-    "golf-hugo": ["골프", "골프용품", "골프연습", "퍼팅", "드라이버"],
+    "golf-hugo": ["골프", "골프용품", "골프연습", "퍼팅", "골프드라이버"],
 }
 
 def get_root_seeds(blog_id: str) -> list[str]:
