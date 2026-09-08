@@ -1430,9 +1430,12 @@ def register_schedules():
     logger.info(f"P32 scan scheduled every 6h (00:00, 06:00, 12:00, 18:00)")
     job_count += 1
 
-    # Phase 71 (SC-1): 전체 재검사 — 매시간 1회 (발행훅 외 2차 안전망)
-    schedule.every().hour.do(_run_recheck_all)
-    logger.info("RecheckAll scheduled every hour (ops_dashboard run_all_checks)")
+    # Phase 71 (SC-1): 전체 재검사 — 6시간 간격 (발행훅 외 2차 안전망)
+    # 2026-09-08: 매시간→6시간. 94블로그×28체크에 80~90분 소요되어 매시간
+    # 실행 시 사실상 상시 CPU 90%+ 점유 + 게이트 로그로 하루 300MB stderr
+    # 폭발 → 디스크 100%(Errno 28 파생 오류 다수)의 근본 원인.
+    schedule.every(6).hours.do(_run_recheck_all)
+    logger.info("RecheckAll scheduled every 6h (ops_dashboard run_all_checks)")
     job_count += 1
 
     # CUAP weekly off-topic 리포트: 매주 월요일 10:00

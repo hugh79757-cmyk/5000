@@ -2204,6 +2204,12 @@ def main() -> None:
 
     cmd = sys.argv[1]
 
+    # CLI 플래그/도움말 인자는 blog_id가 아님 — publish_error_event로
+    # 기록되지 않게 usage로 즉시 종료 (2026-08-14 '--help' P21 오기록 재발 방지)
+    if cmd.startswith("-"):
+        print("usage: dispatcher.py <blog_id|report|init-db> [--quality]")
+        sys.exit(1)
+
     if cmd == "init-db":
         from shared.content_store import init_db
         init_db()

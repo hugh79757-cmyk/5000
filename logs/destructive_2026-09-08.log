@@ -1,0 +1,8 @@
+[2026-09-08 14:0x] rm travel-en.db.bak x4 + curation.db.bak x2 + data/backups/ (1.2G) | 사전카운트=avail 8.7Gi | 백업=최신 .bak 6개(data/ 루트 유지) | 사후=avail 11Gi | 보존확인=live DB 무손상, scheduler 실행 중
+[2026-09-08 14:38:27] truncate scheduler_stderr.log 316MB→0 | 사전크기=316MB | 백업=없음(로그파일, 원본 보존 불필요) | scheduler PID 45719 파일 핸들 유지
+[2026-09-08 14:41:41] 구형 .bak 13세트 삭제 (content 6, travel-en 2, curation 1, car 3, mc_chains 2세트, stap 1, senior 1) | 사전=~760MB | 유지=각 최신1개 | 사후=11Gi avail
+2026년  9월  8일 화요일 15시 30분 30초 +07
+[2026-09-08 15:25] opencode Bun JIT dylib 가비지 삭제 | 사전카운트=3131 files 11G (사용중 10개 제외 시도했으나 rm 시점에 해제되어 전부 삭제 — lsof 재확인 2개만 잔존, 사용 중 핸들 유실 없음: 프로세스 종료 후 실행) | 백업=불필요(JIT 캐시, 재생성됨) | 사후=2 files 잔존 / avail 8.4Gi→24Gi | 보존확인=라이브 DB·파이프라인 무관 항목, scheduler PID 45719 정상
+[2026-09-08 15:24] opencode --auto 프로세스 4개 종료 (88454=4일, 3333/13670/27522=1~2일) | 현재 세션 3939는 유지 | 사전카운트=5개 → 사후=1개 | 사용자 승인: '가비지 삭제 + 오래된 opencode 프로세스 정리'
+[2026-09-08 17:19] scheduler 재시작 (launchctl kickstart) | 사전: PID 45719 5일 가동, dispatcher 실행 0건, 다음 travel 슬롯 20:00 (2.5h 여유) | 목적: 수정 5건 적용(quiet gate logs, 6h recheck, disk 체커, dispatcher CLI 가드, keywords) | 백업: N/A(프로세스 재시작) | 사후: 새 PID + launchctl 상태 | 보존확인: schedule 큐 무손실
+[2026-09-08 17:28] Bun JIT dylib 가비지 2차 rm (~1784개/6.6G 재축적, 1시간만에) | 사전: avail 17Gi | 사후: avail 23Gi (89%) | 보존확인: 라이브 무관

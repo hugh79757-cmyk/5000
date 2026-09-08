@@ -937,11 +937,37 @@ def _get_source_data_from_slug(slug: str, blog_id: str) -> dict:
         return {}
 
 
+def _quiet_gate_logs():
+    """quality_gate 로거를 ERROR로 올리는 컨텍스트 매니저.
+
+    체커가 게이트를 50포스트×200corpus호 시간당 수천 번 호출하는데
+    게이트가 매 계산마다 WARNING/INFO 로그를 stderr에 뿌림 →
+    하루 300MB+ 로그 폭발(2026-09-08 디스크 100% 사고 원인).
+    체커 결과 자체가 detail에 요약되므로 게이트 단위 로그는 중복.
+    """
+    import logging as _logging
+    import contextlib
+    from contextlib import contextmanager
+    _qg = _logging.getLogger("pipelines.etap.quality_guard")
+
+    @contextmanager
+    def _cm():
+        _saved = _qg.level
+        _qg.setLevel(_logging.ERROR)
+        try:
+            yield
+        finally:
+            _qg.setLevel(_saved)
+
+    return _cm()
+
+
 def _check_s01_uniqueness(content: str, corpus: list[str]) -> tuple[bool, str]:
     """S01: Uniqueness Ratio ≥ 0.85 vs corpus."""
     try:
         from pipelines.etap.quality_guard import uniqueness_ratio_gate
-        passed, ratio, details = uniqueness_ratio_gate(content, corpus, threshold=0.85)
+        with _quiet_gate_logs():
+            passed, ratio, details = uniqueness_ratio_gate(content, corpus, threshold=0.85)
         if not passed:
             return False, f"S01 위반: uniqueness={ratio:.4f} (threshold=0.85), max_sim={details.get('max_similarity', 0):.4f}"
         return True, f"S01 통과: uniqueness={ratio:.4f}"
@@ -956,7 +982,8 @@ def _check_s02_structural(content: str, corpus: list[str]) -> tuple[bool, str]:
     """S02: Structural Similarity ≤ 0.70 (H2 sequence overlap)."""
     try:
         from pipelines.etap.quality_guard import structural_similarity_gate
-        passed, sim, details = structural_similarity_gate(content, corpus, threshold=0.70)
+        with _quiet_gate_logs():
+            passed, sim, details = structural_similarity_gate(content, corpus, threshold=0.70)
         if not passed:
             return False, f"S02 위반: structural_sim={sim:.4f} (threshold=0.70)"
         return True, f"S02 통과: structural_sim={sim:.4f}"
@@ -971,7 +998,8 @@ def _check_s03_data_points(content: str, source_data: dict) -> tuple[bool, str]:
     """S03: Unique Data Points ≥ 3 verifiable points."""
     try:
         from pipelines.etap.quality_guard import unique_data_points_gate
-        passed, count, details = unique_data_points_gate(content, source_data, threshold=3)
+        with _quiet_gate_logs():
+            passed, count, details = unique_data_points_gate(content, source_data, threshold=3)
         if not passed:
             return False, f"S03 위반: data_points={count} (threshold=3), found={details.get('found_points', [])}"
         return True, f"S03 통과: data_points={count}"

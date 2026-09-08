@@ -150,3 +150,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import disk_space  # noqa: F401
+except ImportError:
+    pass
+
