@@ -629,9 +629,13 @@ def _check_rap(title: str, body: str, ctx: dict) -> list:
         m = re.search(r"([가-힣A-Za-z]+(?:시|군|구))\b", keyword)
         if m:
             region = m.group(1)
-            # 시/군/구 접미사가 '구'인 경우 자치구 비교 — 예: 관악구
+            # 복합 지역명 분해 (2026-09-08): 키워드가 '수원시영통구'처럼 시+구가 붙어 있으면
+            # '수원시'/'영통구'로 분해 — 본문이 공백 표기('수원시 영통구')일 때 오탐 방지.
+            # rap3-hugo 9/8 사례: 본문 정상인데 CRITICAL 지역 왜곡 알림 발생.
+            sub_regions = re.findall(r"[가-힣]+?(?:시|군|구)", region)
+            regions_to_check = [region] + sub_regions
             # 본문/제목 어디에도 해당 지역명이 없으면 지역 왜곡 확정
-            if region not in title and region not in body:
+            if not any(r in title or r in body for r in regions_to_check):
                 # 세종특별자치시/제주 등 접미사 없는 특례는 keyword에도 없으므로 여기 도달 안 함
                 issues.append(
                     f"[CRITICAL] 지역 왜곡 차단: 키워드 지역 '{region}'이(가) 본문에 없음 — LLM 지역 환각"
