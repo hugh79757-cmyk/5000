@@ -435,40 +435,9 @@ def generate_airlines(count=50):
         rows.append((iata,name,country,is_lowcost,title,slug))
         if len(rows)>=800:
             break
-    # synthetic fill if seed overlaps heavily
-    if len(rows) < count*2:
-        import string, itertools
-        # generate unused IATA (2-char)
-        try:
-            import sqlite3
-            db=DB_PATH
-            if db.exists():
-                conn=sqlite3.connect(str(db))
-                existing=set(r[0] for r in conn.execute("SELECT iata_code FROM airlines_topics").fetchall())
-                conn.close()
-            else:
-                existing=set(r[0] for r in rows)
-        except Exception:
-            existing=set(r[0] for r in rows)
-        existing.update(r[0] for r in rows)
-        synth_countries=["United States","United Kingdom","Germany","France","Japan","Australia","Canada","Brazil","India","Spain","Italy","Mexico","Turkey","Thailand","Singapore","South Korea","China","United Arab Emirates","Netherlands","Switzerland"]
-        chars=string.ascii_uppercase+string.digits
-        for a in chars:
-            for b in chars:
-                code=a+b
-                if code in existing:
-                    continue
-                idx=len(rows)
-                country=synth_countries[idx % len(synth_countries)]
-                name=f"Aero {country.split()[-1]} {code} Airways"
-                slug=_slug(name)+"-airline-review"
-                title=f"{name} Airline Review"
-                rows.append((code,name,country, idx%3==0, title, slug))
-                existing.add(code)
-                if len(rows)>= max(count*3, 600):
-                    break
-            if len(rows)>= max(count*3, 600):
-                break
+    # synthetic fill disabled 2026-09-09: fake "Aero {country} {code} Airways" airlines
+    # have no airline_routes data -> every publish attempt fails + exhausts 1 topic/run.
+    # Real seeds above are sufficient; no synthetic backfill.
     return rows
 
 def generate_airports(count=50):

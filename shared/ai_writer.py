@@ -53,13 +53,22 @@ def get_client(provider_name, providers):
 
 
 def _is_chinese_content(text: str) -> bool:
-    """한국어 vs 중국어 비율 검사 — 중국어가 더 많으면 True"""
+    """한국어 vs 중국어 비율 검사 — 중국어가 더 많으면 True
+
+    영어 콘텐츠(ETAP 등)에는 CJK 고유명사(高雄, 美麗島 등)가 정상 포함될 수
+    있으므로, 라틴 문자가 CJK 합계보다 많으면 영어 글로 판정해 차단하지
+    않는다. 2026-09-09 nomad-hugo Kaohsiung chain_timeout(중국어 오판 →
+    tier별 3회 재시도 소진 → 120s 예산 초과) 수정.
+    """
     if not text:
         return False
     hangul = len(re.findall(r"[\uAC00-\uD7AF]", text))
     chinese = len(re.findall(r"[\u4E00-\u9FFF]", text))
+    latin = len(re.findall(r"[A-Za-z]", text))
     total = hangul + chinese
     if total == 0:
+        return False
+    if latin > total:  # 영어 글 + CJK 고유명사 — 중국어 콘텐츠 아님
         return False
     return chinese > hangul  # 중국어 비율이 한글보다 높으면 차단
 

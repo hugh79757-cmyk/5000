@@ -393,6 +393,9 @@ def run_publish(blog_id) -> bool | None:
         return None
 
     _last_publish_reason = None  # dispatcher JSON에서 파싱된 reason
+    # 실행 중 마킹 — catchup이 이 blog_id를 병렬 재실행하지 못하게 (race guard)
+    with _running_lock:
+        _running_publishes.add(blog_id)
     try:
         # env var로 슬롯 ID 상속 (자식 dispatcher가 이중 acquire 방지)
         run_env = os.environ.copy()
@@ -417,8 +420,17 @@ def run_publish(blog_id) -> bool | None:
             try:
                 parsed = _json.loads(last_line)
                 parsed_success = bool(parsed.get("success"))
+                _reason = parsed.get("reason", "")
                 if parsed_success:
-                    logger.info(f"[PUBLISH] {blog_id} 발행 성공")
+                    # 2026-09-09: cooldown/QUOTA 스킵은 'success: true'로 보고되나 실제
+                    # 발행이 아님 (travel4-hugo 9/9 오판 사례 — cooldown을 발행 성공으로
+                    # 기록해 catchup 성공 마킹+retry reset까지 유발). 스킵으로 처리해
+                    # 거짓 성공 로그를 제거한다. 실패 집계는 하지 않는다 (게이트와 동일).
+                    if _reason in ("cooldown", "quota_met", "interval_skip", "already_running"):
+                        logger.info(f"[PUBLISH] {blog_id} 스킵 (reason={_reason})")
+                        parsed_success = None
+                    else:
+                        logger.info(f"[PUBLISH] {blog_id} 발행 성공")
                 else:
                     reason = parsed.get("reason", "unknown")
                     _last_publish_reason = reason
@@ -431,6 +443,10 @@ def run_publish(blog_id) -> bool | None:
             _tg_error(blog_id, "scheduler", error_text[-300:])
             return False
         if parsed_success is not True:
+            # 2026-09-09: 스킵(cooldown 등)은 None 반환 — catchup이 "후보 없음"처럼
+            # 보충 생략하게 하고 실패 집계를 피한다 (run_publish None 계약과 동일).
+            if parsed_success is None:
+                return None
             if result.stderr:
                 logger.error("  ERR: " + result.stderr.strip().splitlines()[-1][-500:])
             logger.error(f"[PUBLISH] {blog_id} dispatcher reported failure or missing JSON")
@@ -447,6 +463,9 @@ def run_publish(blog_id) -> bool | None:
         _tg_error(blog_id, "scheduler", str(e)[:300])
         return False
     finally:
+        # 실행 중 마킹 해제 (race guard)
+        with _running_lock:
+            _running_publishes.discard(blog_id)
         # 슬롯 반납 (crash-safe: 프로세스가 살아있으면 여기서 반납,
         # 사망 시 pid 체크로 다른 acquire에서 자동 회수)
         release_publish_slot(slot_id, blog_id)
@@ -456,6 +475,11 @@ def run_publish(blog_id) -> bool | None:
 
 _publish_queue = []
 _queue_lock = threading.Lock()
+
+# 실행 중 발행 blog_id 집합 — 큐 드레인/catchup 병렬 race 방지
+# (rap3-hugo 9/8 21:33 404 race: 큐에서 pop된 실행 중 blog_id를 catchup이 재실행)
+_running_publishes: set = set()
+_running_lock = threading.Lock()
 
 
 def queue_publish(blog_id) -> None:
@@ -617,6 +641,13 @@ def _catchup_missed_inner() -> None:
         # 중복 방지: 현재 큐에 같은 blog_id가 있으면 skip
         with _queue_lock:
             if blog_id in _publish_queue:
+                continue
+        # race guard: 실행 중인 발행이 있으면 병렬 재실행 금지
+        # (rap3-hugo 9/8: 큐에서 pop된 실행 중 blog_id를 catchup이 재실행해
+        #  빌드 race → public 누락 배포. 실행 중 집합으로 차단)
+        with _running_lock:
+            if blog_id in _running_publishes:
+                logger.info(f"CATCHUP: {blog_id} 실행 중 — 보충 생략 (race guard)")
                 continue
 
         _events.set_catchup_attempts(blog_id, today_str, attempts + 1)
@@ -1496,7 +1527,7 @@ def _wait_for_network(timeout=300) -> bool:
 _CONSECUTIVE_FAILURES: dict[str, int] = {}
 _FAILURE_THRESHOLD = 5  # 2026-08-25: 상향 3→5 (일시적 장애 1~4회로 블로그 중단 방지)
 # 파이프라인에서 조용히 스킵하는 reason — 스케줄러 consecutive_failures 집계에서 제외
-_SILENT_SKIP_REASONS = frozenset({"interval_skip", "quota_met", "similar_title", "already_running"})
+_SILENT_SKIP_REASONS = frozenset({"interval_skip", "quota_met", "similar_title", "already_running", "cooldown"})
 
 
 def _track_publish_result(blog_id: str, success: bool, reason: str | None = None) -> None:

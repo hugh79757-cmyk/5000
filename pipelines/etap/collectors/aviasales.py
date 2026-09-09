@@ -364,9 +364,12 @@ def run_full_collection():
                 time.sleep(0.5)
 
     # Phase 4: 주요 항공사 인기 노선
+    # 2026-09-09: CM/YX/LX/HY/9E/TS/VN 추가 — airlines_topics 미소진 7개가
+    # routes 데이터 없어 매 발행 실패하던 것 해결 (API 지원 확인 완료)
     major_airlines = ["AA", "UA", "DL", "WN", "B6", "NK", "F9", "AS",
                       "BA", "LH", "AF", "EK", "SQ", "CX", "NH", "JL",
-                      "TG", "QR", "TK", "KE", "OZ"]
+                      "TG", "QR", "TK", "KE", "OZ",
+                      "CM", "YX", "LX", "HY", "9E", "TS", "VN"]
     for airline in major_airlines:
         total += collect_airline_routes(airline, limit=30)
         time.sleep(0.3)
