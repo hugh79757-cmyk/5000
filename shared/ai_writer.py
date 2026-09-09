@@ -1,4 +1,5 @@
 import logging
+import json
 import os
 import re
 import time
@@ -18,7 +19,7 @@ CONFIG_DIR = os.path.join(
 )
 
 
-# Circuit breaker state (module level)
+# Circuit breaker state (module level) — 사실상 비활성화 상태 유지 (threshold 9999)
 _circuit_state = {"failures": 0, "open_until": 0.0}
 CIRCUIT_BREAKER_THRESHOLD = 9999     # circuit breaker 비활성화
 CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
@@ -213,12 +214,34 @@ def _get_tier_order(config):
 CIRCUIT_BREAKER_THRESHOLD = 9999     # circuit breaker 비활성화
 CIRCUIT_BREAKER_RESET_SEC = 300    # 5분 후 자동 복구
 
-# ── 회전 상태 (프로세스 메모리) ──────────────────────────────────────────
-_ROTATION_STATE = {"last_success_tier": None}
+# ── 회전 상태 — 순수 회전 큐 (llm-fallback-chain-management 스킬 v3) ──────────
+# 유일 상태: 마지막 성공 tier(=front). 타임스탬프·카운터·cooldown 절대 없음.
+# dispatcher가 블로그마다 신규 프로세스로 실행되므로 디스크 영속화 필수 —
+# 없으면 매 실행이 같은 front를 두드려 특정 provider quota를 태운다.
+_ROTATION_STATE_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "llm_rotation_state.json")
+_ROTATION_STATE = {"front": None}
 
-# ── 구조적 오류 cooldown (잠시 내려두기, 영구삭제 아님) ──────────────────────
-_STRUCTURAL_COOLDOWN = {}          # {tier_name: cooldown_until_timestamp}
-_STRUCTURAL_COOLDOWN_SEC = 300     # 5분 후 자동 복귀
+
+def _load_rotation_state():
+    """프로세스 시작 시 front 복원 (디스크 → 메모리). 실패해도 회전은 계속."""
+    if _ROTATION_STATE["front"] is None:
+        try:
+            with open(_ROTATION_STATE_FILE, "r", encoding="utf-8") as f:
+                _ROTATION_STATE["front"] = json.load(f).get("front")
+        except (OSError, ValueError):
+            pass  # 파일 없음/손상 → 기본 순서로 시작 (회전은 정상 동작)
+
+
+def _persist_rotation_state():
+    """front 원자적 저장 (temp + os.replace) — 프로세스 사망에도 회전 위치 유지."""
+    try:
+        os.makedirs(os.path.dirname(_ROTATION_STATE_FILE), exist_ok=True)
+        tmp = _ROTATION_STATE_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump({"front": _ROTATION_STATE["front"]}, f)
+        os.replace(tmp, _ROTATION_STATE_FILE)
+    except OSError:
+        pass  # 저장 실패는 회전을 멈추지 않음
 
 # ── 체인 시간 예산 (600초 P25 대신 조기 종료) ───────────────────────────
 CHAIN_TIME_BUDGET = 120            # 초 — 단일 generate() 최대 허용 시간
@@ -237,8 +260,8 @@ def _is_quota_error(exc: Exception) -> bool:
 def _is_structural_error(exc: Exception) -> bool:
     """재시도해도 의미 없는 구조적 오류 판별 (401/403/404 + 메시지 키워드).
 
-    판정 시 해당 tier는 _STRUCTURAL_COOLDOWN에 기록되어 _STRUCTURAL_COOLDOWN_SEC 동안
-    skip된다. 시간이 지나면 자동 복귀 — 영구 enabled:false 아님.
+    스킬 v3 순수 회전 계약: 판정되어도 제외/cooldown 하지 않고 맨 뒤로 회전만.
+    (데드 tier는 소유자가 models.yaml에서 제거 — 체인이 스스로 제거하지 않음)
     """
     code = getattr(getattr(exc, "response", None), "status_code", None)
     if code in (401, 403, 404):
@@ -251,6 +274,18 @@ def _is_structural_error(exc: Exception) -> bool:
     ]):
         return True
     return False
+
+
+def _is_gone_error(exc: Exception) -> bool:
+    """HTTP 410 Gone — 프로바이더가 모델 폐기(decommission).
+
+    스킬 v3 순수 회전 계약: 410도 제외하지 않고 맨 뒤로 회전만.
+    (소유자가 models.yaml에서 제거할 때까지 한 패스에 1 요청만 낭비)
+    """
+    code = getattr(getattr(exc, "response", None), "status_code", None)
+    if code == 410:
+        return True
+    return "410" in str(exc) and "gone" in str(exc).lower()
 
 
 def generate(
@@ -276,7 +311,7 @@ def generate(
     start_idx = 0 if tier == "default" else TIER_ORDER.index(tier)
     attempted_tiers = TIER_ORDER[start_idx:]
 
-    # ── 회전 적용 tier 리스트: enabled:false skip + last_success_tier 1순위 ──
+    # ── 회전 적용 tier 리스트: enabled:false skip + front(마지막 성공) 1순위 ──
     active_tiers = []
     for t in attempted_tiers:
         if t in config and t != "default":
@@ -285,12 +320,18 @@ def generate(
                 continue
         active_tiers.append(t)
 
-    # 이전 성공 tier가 active_tiers에 있으면 1순위로
-    last_ok = _ROTATION_STATE.get("last_success_tier")
-    if last_ok and last_ok in active_tiers:
-        active_tiers.remove(last_ok)
-        active_tiers.insert(0, last_ok)
-        logger.info(f"[ai_writer] rotation: 이전 성공 tier '{last_ok}' → 1순위 유지")
+    # 유료 tier(default)는 항상 맨 뒤 고정 — 스킬 계약: paid pinned last
+    if "default" in active_tiers and active_tiers[-1] != "default":
+        active_tiers.remove("default")
+        active_tiers.append("default")
+
+    # 마지막 성공 tier(front)가 있으면 1순위로 — 디스크에서 복원된 위치 포함
+    _load_rotation_state()
+    front = _ROTATION_STATE.get("front")
+    if front and front in active_tiers and front != "default":
+        active_tiers.remove(front)
+        active_tiers.insert(0, front)
+        logger.info(f"[ai_writer] rotation: 이전 성공 tier '{front}' → 1순위 유지")
 
     last_error = None
     any_truncation_failed = False  # 전 tier 걸친 트렁케이션 실패 추적
@@ -306,25 +347,7 @@ def generate(
             raise RuntimeError(f"chain_timeout: LLM 체인 시간 예산 {CHAIN_TIME_BUDGET}초 초과")
         attempt_tier = active_tiers[idx]
 
-        # 구조적 오류 cooldown 체크 — 잠시 내려둔 tier skip (시간 경과 시 자동 복귀)
-        if attempt_tier in _STRUCTURAL_COOLDOWN:
-            until = _STRUCTURAL_COOLDOWN[attempt_tier]
-            if until > time.time():
-                logger.info(
-                    f"[ai_writer] tier '{attempt_tier}' 구조적 오류 cooldown 중 "
-                    f"(잔여 {until - time.time():.0f}초) — skip"
-                )
-                idx += 1
-                continue
-            else:
-                del _STRUCTURAL_COOLDOWN[attempt_tier]  # cooldown 해제 → 재도전 허용
-
-        # Circuit breaker check
-        if _circuit_state["open_until"] > time.time():
-            logger.warning("[ai_writer] Circuit breaker OPEN — 5분 대기")
-            time.sleep(60)
-            idx += 1
-            continue
+        # (순수 회전 — 스킬 v3: cooldown·circuit breaker·대기 없음. 어떤 tier도 제외하지 않는다)
 
         # tier 키 존재 방어 — models.yaml에 없는 tier(예: branch의 fallback1)는 skip
         if attempt_tier not in config:
@@ -355,7 +378,6 @@ def generate(
         tier_truncation_failed = False  # 현재 tier 내 트렁케이션 실패
         tier_truncation_increments = 0   # 현재 tier 내 truncation max_tokens 증분 횟수
         rotation_quota_break = False     # 429/quota로 break했는지 플래그
-        structural_cooldown_break = False  # 구조적 오류로 cooldown 진입했는지 플래그
         for attempt in range(MAX_RETRIES):
             # ponytail: per-attempt chain budget — prevents 600s scheduler kill when single tier hangs
             if time.time() - chain_start > CHAIN_TIME_BUDGET:
@@ -433,10 +455,9 @@ def generate(
                     _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": f"leak:{leak_name}"})
                     continue
 
-                # 성공 → circuit breaker 리셋 + ★ 회전 상태 저장
-                _circuit_state["failures"] = 0
-                _circuit_state["open_until"] = 0.0
-                _ROTATION_STATE["last_success_tier"] = attempt_tier
+                # 성공 → ★ front 저장 + 디스크 영속화 (스킬 v3: 순수 회전)
+                _ROTATION_STATE["front"] = attempt_tier
+                _persist_rotation_state()
 
                 logger.info(
                     f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자) [rotation: 이 tier가 다음 호출 1순위]"
@@ -460,34 +481,17 @@ def generate(
                     "is_draft": False,
                 }
             except Exception as e:
-                _circuit_state["failures"] += 1
-                if _circuit_state["failures"] >= CIRCUIT_BREAKER_THRESHOLD:
-                    _circuit_state["open_until"] = time.time() + CIRCUIT_BREAKER_RESET_SEC
-                    logger.critical(f"[ai_writer] Circuit breaker OPEN: {_circuit_state['failures']} failures")
-
-                # ★ 회전: 429/quota → 즉시 맨 뒤로 이동, 재시도 없이
-                if _is_quota_error(e):
+                # ★ 순수 회전 (스킬 v3): 429/401/403/404/410 전부 같은 취급 —
+                # 맨 뒤로 이동, 재시도 없이 즉시 다음 tier. 추적·제외·대기 없음.
+                if _is_quota_error(e) or _is_structural_error(e) or _is_gone_error(e):
+                    reason = "quota_rotated" if _is_quota_error(e) else "structural_rotated"
                     logger.warning(
-                        f"[ai_writer] {attempt_tier}: 429/무료소진 → 재시도 없이 맨 뒤로 회전"
+                        f"[ai_writer] {attempt_tier}: 실패({reason}) → 재시도 없이 맨 뒤로 회전"
                     )
                     active_tiers.pop(idx)  # 현재 위치 제거
                     active_tiers.append(attempt_tier)  # 맨 뒤 추가
                     rotation_quota_break = True
                     break  # MAX_RETRIES 루프 종료 (재시도 없이)
-                elif _is_structural_error(e):
-                    # 구조적 오류(401/403/404/모델없음/키없음) → 재시도 무의미
-                    # → cooldown 기록 후 즉시 다음 tier로 skip (시간 기반 복귀)
-                    _STRUCTURAL_COOLDOWN[attempt_tier] = time.time() + _STRUCTURAL_COOLDOWN_SEC
-                    logger.info(
-                        f"[ai_writer] tier '{attempt_tier}' 구조적 오류 → "
-                        f"{_STRUCTURAL_COOLDOWN_SEC}초 cooldown (이후 자동 복귀)"
-                    )
-                    _trace_attempts.append({
-                        "tier": attempt_tier, "model": tier_config["model"],
-                        "provider": tier_config["provider"], "reason": "structural_cooldown"
-                    })
-                    structural_cooldown_break = True
-                    break  # for 루프 종료 → while 루프에서 idx 증가로 skip
                 else:
                     # 5xx/timeout/truncation: 기존 재시도 유지 (시간 조이기)
                     wait = (2 ** attempt) * 0.5  # 0.5s, 1s, 2s
@@ -500,11 +504,13 @@ def generate(
 
         # 현재 tier에서 MAX_RETRIES 소진 / 429 회전 처리
         if rotation_quota_break:
-            # 429/quota로 break: active_tiers 이미 수정됨, idx 그대로
-            _trace_attempts.append({
-                "tier": attempt_tier, "model": tier_config["model"],
-                "provider": tier_config["provider"], "reason": "quota_rotated"
-            })
+            # 429/quota/구조적 오류로 break: active_tiers 이미 수정됨, idx 그대로
+            # (구조적 오류도 이제 같은 회전 경로 — structural_rotated는 except에서 append됨)
+            if not any(a.get("reason") == "structural_rotated" and a.get("tier") == attempt_tier for a in _trace_attempts):
+                _trace_attempts.append({
+                    "tier": attempt_tier, "model": tier_config["model"],
+                    "provider": tier_config["provider"], "reason": "quota_rotated"
+                })
             # idx는 그대로 (다음 while iter에서 idx 위치의 다음 tier 시도)
             continue
         elif tier_truncation_failed:
@@ -516,11 +522,6 @@ def generate(
                 "tier": attempt_tier, "model": tier_config["model"],
                 "provider": tier_config["provider"], "reason": "truncation_exhausted"
             })
-            idx += 1
-            continue
-        elif structural_cooldown_break:
-            # 구조적 오류(401/403/404/모델없음/키없음) → cooldown 기록 + skip
-            # (active_tiers는 수정하지 않음 — cooldown 시간은 _STRUCTURAL_COOLDOWN에서 관리)
             idx += 1
             continue
         else:
