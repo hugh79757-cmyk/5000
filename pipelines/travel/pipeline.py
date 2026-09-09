@@ -212,9 +212,12 @@ def _run_single(target_blog_id, blog_cfg=None):
     quota = blog_cfg.get("daily_quota", 50)
     current = get_today_count(target_blog_id)
 
-    if current >= quota:  # QUOTA_OVERRIDE: 임시 우회
+    if current >= quota:
+        # 2026-09-09: None 반환은 dispatcher.py:1893에서 no_result로 오분류되어
+        # P01 알림 + cooldown + failure_count 증가를 유발 (travel2-hugo 9/8 오보고).
+        # 타 파이프라인(car/rap/senior/stock)과 동일하게 quota_met dict 반환.
         logger.info(target_blog_id + " quota reached: " + str(current) + "/" + str(quota))
-        return None
+        return {"success": False, "reason": "quota_met"}
 
     _MAX_SIGUNGU_RETRIES = 5
     for _attempt in range(1, _MAX_SIGUNGU_RETRIES + 1):

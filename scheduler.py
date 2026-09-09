@@ -426,7 +426,7 @@ def run_publish(blog_id) -> bool | None:
                     # 발행이 아님 (travel4-hugo 9/9 오판 사례 — cooldown을 발행 성공으로
                     # 기록해 catchup 성공 마킹+retry reset까지 유발). 스킵으로 처리해
                     # 거짓 성공 로그를 제거한다. 실패 집계는 하지 않는다 (게이트와 동일).
-                    if _reason in ("cooldown", "quota_met", "interval_skip", "already_running"):
+                    if _reason in ("cooldown", "quota_met", "daily_quota_reached", "interval_skip", "already_running"):
                         logger.info(f"[PUBLISH] {blog_id} 스킵 (reason={_reason})")
                         parsed_success = None
                     else:
@@ -1527,7 +1527,7 @@ def _wait_for_network(timeout=300) -> bool:
 _CONSECUTIVE_FAILURES: dict[str, int] = {}
 _FAILURE_THRESHOLD = 5  # 2026-08-25: 상향 3→5 (일시적 장애 1~4회로 블로그 중단 방지)
 # 파이프라인에서 조용히 스킵하는 reason — 스케줄러 consecutive_failures 집계에서 제외
-_SILENT_SKIP_REASONS = frozenset({"interval_skip", "quota_met", "similar_title", "already_running", "cooldown"})
+_SILENT_SKIP_REASONS = frozenset({"interval_skip", "quota_met", "daily_quota_reached", "similar_title", "already_running", "cooldown"})
 
 
 def _track_publish_result(blog_id: str, success: bool, reason: str | None = None) -> None:
