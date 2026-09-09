@@ -220,19 +220,6 @@ _ROTATION_STATE = {"last_success_tier": None}
 _STRUCTURAL_COOLDOWN = {}          # {tier_name: cooldown_until_timestamp}
 _STRUCTURAL_COOLDOWN_SEC = 300     # 5분 후 자동 복귀
 
-# ── per-tier 쿼타/서버오류 cooldown (llm-fallback-chain-management 스킬 계약) ──
-# 429/quota → 해당 tier만 5분 cooldown (전체 체인 차단 없음 — 회전만)
-# 5xx → 해당 tier만 1시간 cooldown
-_QUOTA_COOLDOWN = {}               # {tier_name: cooldown_until_timestamp} — 429/무료소진
-_QUOTA_COOLDOWN_SEC = 300          # 5분
-_SERVER_COOLDOWN = {}              # {tier_name: cooldown_until_timestamp} — 5xx
-_SERVER_COOLDOWN_SEC = 3600        # 1시간
-
-# ── 410 Gone 영구 제거 목록 (프로바이더가 폐기한 모델 — 체인에서 삭제) ──
-# 스킬 계약: 410은 decommission 신호. cooldown이 아니라 체인에서 제거해
-# 매 호출 1회 낭비를 방지한다. 프로세스 재시작 시 초기화(재확인 기회).
-_GONE_TIERS = set()
-
 # ── 체인 시간 예산 (600초 P25 대신 조기 종료) ───────────────────────────
 CHAIN_TIME_BUDGET = 120            # 초 — 단일 generate() 최대 허용 시간
 
@@ -245,27 +232,6 @@ def _is_quota_error(exc: Exception) -> bool:
     msg = str(exc)
     return ("429" in msg or "FreeUsageLimitError" in msg
             or "quota" in msg.lower() or "rate limit" in msg.lower())
-
-
-def _is_gone_error(exc: Exception) -> bool:
-    """HTTP 410 Gone → 프로바이더가 모델을 폐기(decommission).
-
-    llm-fallback-chain-management 스킬 계약: 410은 영구 제거 대상.
-    cooldown이 아니라 체인에서 제거해 매 호출 1회 요청 낭비를 방지한다.
-    """
-    code = getattr(getattr(exc, "response", None), "status_code", None)
-    if code == 410:
-        return True
-    return "410" in str(exc) and "gone" in str(exc).lower()
-
-
-def _is_server_error(exc: Exception) -> bool:
-    """HTTP 5xx → 서버 오류 (해당 tier 1시간 cooldown 후 재시도)."""
-    code = getattr(getattr(exc, "response", None), "status_code", None)
-    if code is not None and 500 <= code < 600:
-        return True
-    msg = str(exc).lower()
-    return any(f"http {c}" in msg or f"{c} " in msg for c in range(500, 600)) or "server error" in msg
 
 
 def _is_structural_error(exc: Exception) -> bool:
@@ -325,32 +291,6 @@ def generate(
         active_tiers.remove(last_ok)
         active_tiers.insert(0, last_ok)
         logger.info(f"[ai_writer] rotation: 이전 성공 tier '{last_ok}' → 1순위 유지")
-
-    # ── per-tier cooldown 정리 (스킬 계약: 만료된 cooldown은 시작 시 제거) ──
-    now = time.time()
-    for cd_map in (_QUOTA_COOLDOWN, _SERVER_COOLDOWN, _STRUCTURAL_COOLDOWN):
-        expired = [t for t, until in cd_map.items() if until <= now]
-        for t in expired:
-            del cd_map[t]
-
-    # ── 410 Gone tier + cooling-down tier 제외 (스킬 계약: effective order) ──
-    if _GONE_TIERS:
-        before = len(active_tiers)
-        active_tiers = [t for t in active_tiers if t not in _GONE_TIERS]
-        if len(active_tiers) < before:
-            logger.info(f"[ai_writer] 410 Gone tier {before - len(active_tiers)}개 제외 — 체인에서 영구 제거됨")
-    usable_tiers = [
-        t for t in active_tiers
-        if t not in _QUOTA_COOLDOWN and t not in _SERVER_COOLDOWN and t not in _STRUCTURAL_COOLDOWN
-    ]
-    if not usable_tiers:
-        # 전 tier cooldown 중 — 스킬 계약: 가장 빨리 만료하는 tier 1개만 시도
-        all_cd = {**_QUOTA_COOLDOWN, **_SERVER_COOLDOWN, **_STRUCTURAL_COOLDOWN}
-        if all_cd:
-            earliest = min(all_cd, key=all_cd.get)
-            usable_tiers = [earliest]
-            logger.warning(f"[ai_writer] 전 tier cooldown 중 — 최단 만료 tier '{earliest}'만 시도 (스킬 계약)")
-    active_tiers = usable_tiers
 
     last_error = None
     any_truncation_failed = False  # 전 tier 걸친 트렁케이션 실패 추적
@@ -493,12 +433,10 @@ def generate(
                     _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": f"leak:{leak_name}"})
                     continue
 
-                # 성공 → circuit breaker 리셋 + ★ 회전 상태 저장 + cooldown 해제 (스킬 계약)
+                # 성공 → circuit breaker 리셋 + ★ 회전 상태 저장
                 _circuit_state["failures"] = 0
                 _circuit_state["open_until"] = 0.0
                 _ROTATION_STATE["last_success_tier"] = attempt_tier
-                for _cd in (_QUOTA_COOLDOWN, _SERVER_COOLDOWN, _STRUCTURAL_COOLDOWN):
-                    _cd.pop(attempt_tier, None)
 
                 logger.info(
                     f"[ai_writer] 성공: {attempt_tier}/{tier_config['model']} ({len(content)}자) [rotation: 이 tier가 다음 호출 1순위]"
@@ -527,29 +465,15 @@ def generate(
                     _circuit_state["open_until"] = time.time() + CIRCUIT_BREAKER_RESET_SEC
                     logger.critical(f"[ai_writer] Circuit breaker OPEN: {_circuit_state['failures']} failures")
 
-                # ★ 회전: 429/quota → 즉시 맨 뒤로 이동, 재시도 없이 + 5분 per-tier cooldown (스킬 계약)
+                # ★ 회전: 429/quota → 즉시 맨 뒤로 이동, 재시도 없이
                 if _is_quota_error(e):
-                    _QUOTA_COOLDOWN[attempt_tier] = time.time() + _QUOTA_COOLDOWN_SEC
                     logger.warning(
-                        f"[ai_writer] {attempt_tier}: 429/무료소진 → 재시도 없이 맨 뒤로 회전 "
-                        f"+ {_QUOTA_COOLDOWN_SEC}초 cooldown"
+                        f"[ai_writer] {attempt_tier}: 429/무료소진 → 재시도 없이 맨 뒤로 회전"
                     )
                     active_tiers.pop(idx)  # 현재 위치 제거
                     active_tiers.append(attempt_tier)  # 맨 뒤 추가
                     rotation_quota_break = True
                     break  # MAX_RETRIES 루프 종료 (재시도 없이)
-                elif _is_gone_error(e):
-                    # 410 Gone → 체인에서 영구 제거 (스킬 계약: decommission)
-                    _GONE_TIERS.add(attempt_tier)
-                    logger.warning(
-                        f"[ai_writer] tier '{attempt_tier}' 410 Gone → 체인에서 영구 제거"
-                    )
-                    _trace_attempts.append({
-                        "tier": attempt_tier, "model": tier_config["model"],
-                        "provider": tier_config["provider"], "reason": "gone_removed"
-                    })
-                    idx += 1
-                    break  # for 루프 종료 → while에서 다음 tier
                 elif _is_structural_error(e):
                     # 구조적 오류(401/403/404/모델없음/키없음) → 재시도 무의미
                     # → cooldown 기록 후 즉시 다음 tier로 skip (시간 기반 복귀)
@@ -601,13 +525,6 @@ def generate(
             continue
         else:
             # 절단 아닌 다른 사유로 재시도 소진 → 다음 tier 폴백
-            # 5xx 서버 오류로 소진된 경우 → 해당 tier 1시간 cooldown (스킬 계약)
-            if _is_server_error(Exception(last_error or "")):
-                _SERVER_COOLDOWN[attempt_tier] = time.time() + _SERVER_COOLDOWN_SEC
-                logger.info(
-                    f"[ai_writer] tier '{attempt_tier}' 5xx 서버 오류 → "
-                    f"{_SERVER_COOLDOWN_SEC}초 cooldown"
-                )
             logger.warning(
                 f"[ai_writer] {attempt_tier}: 재시도 {MAX_RETRIES}회 소진 — 다음 tier 폴백"
             )
