@@ -378,6 +378,7 @@ def generate(
         tier_truncation_failed = False  # 현재 tier 내 트렁케이션 실패
         tier_truncation_increments = 0   # 현재 tier 내 truncation max_tokens 증분 횟수
         rotation_quota_break = False     # 429/quota로 break했는지 플래그
+        tier_content_failed = False      # 빈 응답/중국어/누수 등 콘텐츠 품질 실패 (v3: 0회 재시도)
         for attempt in range(MAX_RETRIES):
             # ponytail: per-attempt chain budget — prevents 600s scheduler kill when single tier hangs
             if time.time() - chain_start > CHAIN_TIME_BUDGET:
@@ -396,7 +397,8 @@ def generate(
                 content = message.content
                 finish_reason = getattr(choice, "finish_reason", None)
                 
-                # (B) reasoning 모델 대응: content가 비어있으면 skip → 다음 tier
+                # (B) reasoning 모델 대응: content가 비어있으면 tier 실패 → 즉시 다음 tier 회전
+                # (스킬 v3: 빈 응답 0회 재시도 — 같은 tier 재호출은 tier당 3회 소진의 원인)
                 if not content:
                     # Groq GPT OSS는 message.reasoning, 기타 제공자는 message.reasoning_content 사용
                     reasoning = getattr(message, 'reasoning_content', None) or getattr(message, 'reasoning', None)
@@ -404,8 +406,10 @@ def generate(
                         # reasoning 속성을 사용하지 않음 — 누수 위험 (내용 로그에 포함하지 않음)
                         logger.warning(f"[ai_writer] reasoning 감지됨 (미사용): {attempt_tier}")
                     last_error = f"{attempt_tier}: 빈 응답"
-                    logger.warning(f"[ai_writer] {last_error}")
-                    continue
+                    logger.warning(f"[ai_writer] {last_error} — 다음 tier로 회전")
+                    _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "empty_response"})
+                    tier_content_failed = True
+                    break
 
                 # (A) 트렁케이션 게이트: finish_reason='length' 또는 구조 절단 시 재시도
                 # 최대 2회까지만 max_tokens 증분. 2회 초과 시 tier 실패 → 다음 tier 회전.
@@ -439,21 +443,24 @@ def generate(
                 from shared.ai_response_parser import _strip_thinking_tags
                 content = _strip_thinking_tags(content)
 
-                # 중국어 검증
+                # 중국어 검증 — 스킬 v3: 품질 실패는 0회 재시도 즉시 회전
                 if _is_chinese_content(content):
                     last_error = f"{attempt_tier}: 중국어 콘텐츠 감지"
-                    logger.warning(f"[ai_writer] {last_error} — 다음 tier로 폴백")
+                    logger.warning(f"[ai_writer] {last_error} — 다음 tier로 회전")
                     _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "chinese_content"})
-                    continue
+                    tier_content_failed = True
+                    break
 
                 # 다국어 누수 검증 (generate() 수준 — 모든 호출자 공통)
+                # 스킬 v3: 품질 실패는 0회 재시도 즉시 회전
                 from shared.ai_response_parser import _check_multilingual_leak
                 has_leak, leak_name, leak_text = _check_multilingual_leak(content)
                 if has_leak:
                     last_error = f"{attempt_tier}: 누수 감지 ({leak_name}: {leak_text})"
-                    logger.warning(f"[ai_writer] {last_error} — 재생성")
+                    logger.warning(f"[ai_writer] {last_error} — 다음 tier로 회전")
                     _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": f"leak:{leak_name}"})
-                    continue
+                    tier_content_failed = True
+                    break
 
                 # 성공 → ★ front 저장 + 디스크 영속화 (스킬 v3: 순수 회전)
                 _ROTATION_STATE["front"] = attempt_tier
@@ -512,6 +519,13 @@ def generate(
                     "provider": tier_config["provider"], "reason": "quota_rotated"
                 })
             # idx는 그대로 (다음 while iter에서 idx 위치의 다음 tier 시도)
+            continue
+        elif tier_content_failed:
+            # 빈 응답/중국어/누수 등 콘텐츠 품질 실패 (스킬 v3: 0회 재시도) → 다음 tier
+            logger.warning(
+                f"[ai_writer] {attempt_tier}: 콘텐츠 실패({last_error}) — 다음 tier 폴백"
+            )
+            idx += 1
             continue
         elif tier_truncation_failed:
             # 절단으로 인한 재시도 소진 → 다음 tier로 폴백
