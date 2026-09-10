@@ -50,13 +50,18 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5,
             except (ValueError, TypeError):
                 discount_badge = f' <span class="badge">-{discount}%</span>'
 
+        import html as _html
+        esc_name = _html.escape(name, quote=True)
         img_tag = ""
         if image_url:
-            img_tag = f"[![{name}]({image_url})]({link})\n\n"
+            # Goldmark HTML 블록 내부의 마크다운([![..](..)])은 렌더링되지 않고
+            # raw로 노출됨(코드 릭) — 순수 HTML 태그로 출력 (2026-09-10 visa-hugo 사례)
+            img_tag = (f'<a href="{link}" rel="sponsored noopener" target="_blank">'
+                       f'<img src="{image_url}" alt="{esc_name}" loading="lazy"></a>\n\n')
 
-        lines.append(f'{img_tag}<a href="{link}" rel="sponsored noopener" target="_blank">**{name}**</a>{discount_badge}\n\n')
+        lines.append(f'{img_tag}<a href="{link}" rel="sponsored noopener" target="_blank"><strong>{esc_name}</strong></a>{discount_badge}\n\n')
         if category:
-            lines.append(f"_{category}_\n\n")
+            lines.append(f"<em>{_html.escape(str(category))}</em>\n\n")
         if price:
             try:
                 pv = float(str(price).replace("$","").replace(",",""))
@@ -69,7 +74,7 @@ def insert_product_cards(content: str, products: list, max_cards: int = 5,
                 ps = f"${round(_pv)}"
             except (ValueError, TypeError):
                 pass
-            lines.append(f"From **{ps}**\n\n")
+            lines.append(f"From <strong>{ps}</strong>\n\n")
         lines.append(f'<a href="{link}" rel="sponsored noopener" target="_blank" class="affiliate-btn">{btn_text}</a>\n\n</div>\n\n---\n\n')
 
     lines.append("</div>\n")
