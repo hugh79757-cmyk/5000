@@ -1,55 +1,52 @@
 blogs:
-- domain: rotcha.kr
-  id: rotcha-blog
+- cf_project: rotcha-blog
   deploy_type: pages
-  cf_project: rotcha-blog
+  domain: rotcha.kr
+  funnel_stage: landing
+  id: rotcha-blog
+  managed_by: mde2
   name: 로차 블로그
   platform: hugo
   site_path: /Users/twinssn/Projects/rotcha-blog
   status: paused
-  funnel_stage: landing
-  managed_by: mde2
-
-- domain: informationhot.kr
-  id: informationhot-hugo
+- cf_project: informationhot-hugo
   deploy_type: pages
-  cf_project: informationhot-hugo
+  domain: informationhot.kr
+  funnel_stage: landing
+  id: informationhot-hugo
+  managed_by: mde2
   name: 인포메이션핫
+  pipeline: curation
   platform: hugo
   site_path: /Users/twinssn/Projects/informationhot-hugo
-  status: paused
-  funnel_stage: landing
-  managed_by: mde2
-
-- domain: techpawz.com
-  id: techpawz-hugo
+  status: active
+- cf_project: techpawz-hugo
   deploy_type: pages
-  cf_project: techpawz-hugo
+  domain: techpawz.com
+  funnel_stage: landing
+  id: techpawz-hugo
+  managed_by: mde2
   name: 테크포즈
   platform: hugo
   site_path: /Users/twinssn/Projects/techpawz-hugo
   status: paused
-  funnel_stage: landing
-  managed_by: mde2
-
-- domain: biz.techpawz.com
-  id: biz-techpawz-hugo
+- cf_project: biz-techpawz
   deploy_type: pages
-  cf_project: biz-techpawz
+  domain: biz.techpawz.com
+  funnel_stage: landing
+  id: biz-techpawz-hugo
+  managed_by: mde2
   name: 테크포즈 비즈
   platform: hugo
   site_path: /Users/twinssn/Projects/biz.techpawz-hugo
   status: paused
-  funnel_stage: landing
-  managed_by: mde2
-
-- domain: issue.techpawz.com
-  id: issue-techpawz-hugo
+- cf_project: issue-techpawz-hugo
   deploy_type: pages
-  cf_project: issue-techpawz-hugo
+  domain: issue.techpawz.com
+  funnel_stage: landing
+  id: issue-techpawz-hugo
+  managed_by: mde2
   name: 테크포즈 이슈
   platform: hugo
   site_path: /Users/twinssn/Projects/issue-techpawz-hugo
   status: paused
-  funnel_stage: landing
-  managed_by: mde2

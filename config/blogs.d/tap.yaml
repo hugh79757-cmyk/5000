@@ -11,8 +11,8 @@ blogs:
   schedule:
     times:
     - 06:00
-    - '10:00'
-    - '14:00'
+    - 09:40
+    - '15:10'
   status: active
 - cf_project: travel-hugo
   daily_quota: 3
@@ -30,11 +30,11 @@ blogs:
   repo: travel-hugo
   schedule:
     times:
-    - 07:00
-    - '10:00'
-    - '13:00'
-    - '16:00'
-    - '20:00'
+    - 06:05
+    - 09:45
+    - '13:15'
+    - '17:05'
+    - '20:20'
   shortcodes_enabled: true
   site_path: /Users/twinssn/Projects/TAP/travel-hugo
   status: active
@@ -61,11 +61,11 @@ blogs:
   repo: travel1-hugo
   schedule:
     times:
-    - 07:02
-    - '10:02'
-    - '13:02'
-    - '16:02'
-    - '20:02'
+    - 06:10
+    - 09:45
+    - '13:15'
+    - '17:05'
+    - '20:25'
   site_path: /Users/twinssn/Projects/TAP/travel1-hugo
   status: active
   theme: Blowfish
@@ -91,11 +91,11 @@ blogs:
   repo: travel2-hugo
   schedule:
     times:
-    - 07:04
-    - '10:04'
-    - '13:04'
-    - '16:04'
-    - '20:04'
+    - 06:10
+    - 09:50
+    - '13:20'
+    - '17:10'
+    - '20:25'
   site_path: /Users/twinssn/Projects/TAP/travel2-hugo
   status: active
   theme: Blowfish
@@ -121,11 +121,11 @@ blogs:
   repo: travel3-hugo
   schedule:
     times:
-    - 07:06
-    - '10:06'
-    - '13:06'
-    - '16:06'
-    - '20:06'
+    - 06:15
+    - 09:55
+    - '13:25'
+    - '17:15'
+    - '20:30'
   site_path: /Users/twinssn/Projects/TAP/travel3-hugo
   status: active
   theme: Blowfish
@@ -151,11 +151,11 @@ blogs:
   repo: travel4-hugo
   schedule:
     times:
-    - 07:08
-    - '10:08'
-    - '13:08'
-    - '16:08'
-    - '20:08'
+    - 06:20
+    - 09:55
+    - '13:25'
+    - '17:20'
+    - '20:35'
   site_path: /Users/twinssn/Projects/TAP/travel4-hugo
   status: active
   theme: Blowfish

@@ -10,11 +10,11 @@ blogs:
   repo: finance-hugo
   schedule:
     times:
-    - 07:32
-    - '10:32'
-    - '13:32'
-    - '16:32'
-    - '20:32'
+    - 07:25
+    - '11:10'
+    - '14:30'
+    - '18:15'
+    - '21:40'
   status: active
   theme: blowfish
   site_path: /Users/twinssn/Projects/STAP/finance-hugo
@@ -31,11 +31,11 @@ blogs:
   repo: stock-blog
   schedule:
     times:
-    - 07:22
-    - '10:22'
-    - '13:22'
-    - '16:22'
-    - '20:22'
+    - 06:55
+    - '10:35'
+    - '14:00'
+    - '17:50'
+    - '21:10'
   site_path: /Users/twinssn/Projects/STAP/stock-hugo
   status: active
   theme: blowfish
@@ -57,11 +57,11 @@ blogs:
   repo: dividend-hugo
   schedule:
     times:
-    - 07:24
-    - '10:24'
-    - '13:24'
-    - '16:24'
-    - '20:24'
+    - 07:00
+    - '10:40'
+    - '14:00'
+    - '17:50'
+    - '21:10'
   site_path: /Users/twinssn/Projects/STAP/dividend-hugo
   status: active
   theme: blowfish
@@ -81,11 +81,11 @@ blogs:
   repo: etf-hugo
   schedule:
     times:
-    - 07:26
-    - '10:26'
-    - '13:26'
-    - '16:26'
-    - '20:26'
+    - 07:05
+    - '10:45'
+    - '14:05'
+    - '17:55'
+    - '21:20'
   site_path: /Users/twinssn/Projects/STAP/etf-hugo
   status: active
   theme: blowfish
@@ -105,11 +105,11 @@ blogs:
   repo: sector-hugo
   schedule:
     times:
-    - 07:28
-    - '10:28'
-    - '13:28'
-    - '16:28'
-    - '20:28'
+    - 07:10
+    - '10:50'
+    - '14:10'
+    - '18:00'
+    - '21:20'
   site_path: /Users/twinssn/Projects/STAP/sector-hugo
   status: active
   theme: blowfish
@@ -130,11 +130,11 @@ blogs:
   repo: ipo-hugo
   schedule:
     times:
-    - 07:30
-    - '10:30'
-    - '13:30'
-    - '16:30'
-    - '20:30'
+    - 07:20
+    - '11:00'
+    - '14:25'
+    - '18:10'
+    - '21:35'
   site_path: /Users/twinssn/Projects/STAP/ipo-hugo
   theme: blowfish
   funnel_stage: monetize

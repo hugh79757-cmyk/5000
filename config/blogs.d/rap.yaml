@@ -13,11 +13,11 @@ blogs:
   managed_by: pipeline
   schedule:
     times:
-    - 07:50
-    - '10:50'
-    - '13:50'
-    - '16:50'
-    - '20:50'
+    - 08:05
+    - '11:50'
+    - '15:05'
+    - '18:55'
+    - '22:20'
   funnel_stage: landing
   depth_next:
   - id: rap3-hugo
@@ -40,11 +40,11 @@ blogs:
   managed_by: pipeline
   schedule:
     times:
-    - 08:10
-    - '11:10'
-    - '14:10'
-    - '17:10'
-    - '21:10'
+    - 08:15
+    - '12:00'
+    - '15:20'
+    - '19:00'
+    - '22:30'
   funnel_stage: bridge
   bridge_to:
   - id: finance-hugo
@@ -64,11 +64,11 @@ blogs:
   managed_by: pipeline
   schedule:
     times:
-    - 08:30
-    - '11:30'
-    - '14:30'
-    - '17:30'
-    - '21:30'
+    - 08:40
+    - '12:20'
+    - '15:50'
+    - '19:20'
+    - '23:05'
   funnel_stage: bridge
   depth_next:
   - id: rap4-hugo
@@ -91,11 +91,11 @@ blogs:
   managed_by: pipeline
   schedule:
     times:
-    - 08:50
-    - '11:50'
-    - '14:50'
-    - '17:50'
-    - '21:50'
+    - 08:55
+    - '12:35'
+    - '16:05'
+    - '19:35'
+    - '23:20'
   funnel_stage: bridge
   bridge_to:
   - id: finance-hugo
@@ -116,10 +116,10 @@ blogs:
   schedule:
     times:
     - 09:10
-    - '12:10'
-    - '15:10'
-    - '18:10'
-    - '22:10'
+    - '12:50'
+    - '16:20'
+    - '19:50'
+    - '23:40'
   funnel_stage: landing
   depth_next:
   - id: rap-hugo

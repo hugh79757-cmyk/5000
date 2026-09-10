@@ -17,11 +17,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 08:35
-    - '11:35'
-    - '14:35'
-    - '17:35'
-    - '21:35'
+    - 08:40
+    - '12:20'
+    - '15:50'
+    - '19:25'
+    - '23:10'
 - id: airlines-hugo
   deploy_type: pages
   name: Airlines Reviews
@@ -41,11 +41,11 @@ blogs:
   ga4_property: '531035921'
   schedule:
     times:
-    - 07:31
-    - '10:31'
-    - '13:31'
-    - '16:31'
-    - '20:31'
+    - 07:25
+    - '11:05'
+    - '14:25'
+    - '18:10'
+    - '21:40'
 - id: airports-hugo
   deploy_type: pages
   name: Airports Guide
@@ -64,11 +64,11 @@ blogs:
   ga4_property: '531044776'
   schedule:
     times:
-    - 07:33
-    - '10:33'
-    - '13:33'
-    - '16:33'
-    - '20:33'
+    - 07:30
+    - '11:10'
+    - '14:30'
+    - '18:15'
+    - '21:45'
 - id: bus-hugo
   deploy_type: pages
   ga4_property: '531065834'
@@ -87,11 +87,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 08:45
-    - '11:45'
-    - '14:45'
-    - '17:45'
-    - '21:45'
+    - 08:50
+    - '12:30'
+    - '16:00'
+    - '19:30'
+    - '23:15'
 - id: cruise-hugo
   deploy_type: pages
   ga4_property: '531006370'
@@ -110,11 +110,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 09:35
-    - '12:35'
-    - '15:35'
-    - '18:35'
-    - '22:35'
+    - 09:30
+    - '13:00'
+    - '16:50'
+    - '20:05'
+    - '23:50'
 - id: culture-hugo
   deploy_type: pages
   ga4_property: '531065835'
@@ -134,10 +134,10 @@ blogs:
   schedule:
     times:
     - 09:00
-    - '12:00'
-    - '15:00'
-    - '18:00'
-    - '22:00'
+    - '12:40'
+    - '16:10'
+    - '19:40'
+    - '23:30'
 - id: daytrips-hugo
   deploy_type: pages
   ga4_property: '531054102'
@@ -156,11 +156,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 08:20
-    - '11:20'
-    - '14:20'
-    - '17:20'
-    - '21:20'
+    - 08:25
+    - '12:05'
+    - '15:30'
+    - '19:10'
+    - '22:45'
 - id: deals-hugo
   deploy_type: pages
   ga4_property: '531065294'
@@ -168,8 +168,8 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: 소진  # 토픽소진 134/134 valid exhausted (330 total, 196 invalid origin filtered) — flight_prices 10 origins 외 신규 origin 시딩 필요, valid pool 0 → 발행 중지
-  enabled: false  # scheduler skip — 데이터없음 발행 비활성화 (2026-08-30)
+  status: 소진
+  enabled: false
   daily_quota: 5
   pipeline_timeout: 900
   domain: deals.techpawz.com
@@ -181,10 +181,10 @@ blogs:
   schedule:
     times:
     - 09:25
-    - '12:25'
-    - '15:25'
-    - '18:25'
-    - '22:25'
+    - '12:55'
+    - '16:40'
+    - '20:00'
+    - '23:45'
 - id: dining-hugo
   deploy_type: pages
   ga4_property: '531047182'
@@ -204,18 +204,18 @@ blogs:
   schedule:
     times:
     - 08:55
-    - '11:55'
-    - '14:55'
-    - '17:55'
-    - '21:55'
+    - '12:35'
+    - '16:05'
+    - '19:40'
+    - '23:25'
 - id: esim-hugo
   deploy_type: pages
   name: eSIM Plans
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: 소진  # 토픽소진 212/212 (2026-08-28, 7 신규 잔여→소진 임박) — city 컬럼 없어 expander 리필 불가, 하드 고갈. entity-link 허브 아님 → 발행 중지
-  enabled: false  # scheduler skip — 토픽소진
+  status: 소진
+  enabled: false
   daily_quota: 5
   pipeline_timeout: 900
   domain: esim.techpawz.com
@@ -229,10 +229,10 @@ blogs:
   schedule:
     times:
     - 07:35
-    - '10:35'
-    - '13:35'
-    - '16:35'
-    - '20:35'
+    - '11:20'
+    - '14:35'
+    - '18:25'
+    - '21:50'
 - id: eurail-hugo
   deploy_type: pages
   ga4_property: '531024940'
@@ -251,11 +251,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 09:30
-    - '12:30'
-    - '15:30'
-    - '18:30'
-    - '22:30'
+    - 09:25
+    - '13:00'
+    - '16:45'
+    - '20:00'
+    - '23:50'
 - id: ferry-hugo
   deploy_type: pages
   ga4_property: '531123458'
@@ -275,10 +275,10 @@ blogs:
   schedule:
     times:
     - 08:50
-    - '11:50'
-    - '14:50'
-    - '17:50'
-    - '21:50'
+    - '12:30'
+    - '16:00'
+    - '19:35'
+    - '23:20'
 - id: flights-hugo
   deploy_type: pages
   name: Flights Deals
@@ -298,11 +298,11 @@ blogs:
   ga4_property: '531065272'
   schedule:
     times:
-    - 07:37
-    - '10:37'
-    - '13:37'
-    - '16:37'
-    - '20:37'
+    - 07:40
+    - '11:25'
+    - '14:45'
+    - '18:30'
+    - '21:55'
 - id: foodtour-hugo
   deploy_type: pages
   ga4_property: '531167909'
@@ -321,11 +321,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 08:30
-    - '11:30'
-    - '14:30'
-    - '17:30'
-    - '21:30'
+    - 08:35
+    - '12:15'
+    - '15:45'
+    - '19:15'
+    - '23:00'
 - id: michelin-hugo
   deploy_type: pages
   name: Michelin Guide
@@ -345,11 +345,11 @@ blogs:
   ga4_property: '531066288'
   schedule:
     times:
-    - 07:39
-    - '10:39'
-    - '13:39'
-    - '16:39'
-    - '20:39'
+    - 07:45
+    - '11:25'
+    - '14:45'
+    - '18:30'
+    - '22:00'
 - id: multiday-hugo
   deploy_type: pages
   ga4_property: '531139671'
@@ -368,11 +368,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 09:10
-    - '12:10'
-    - '15:10'
-    - '18:10'
-    - '22:10'
+    - 09:05
+    - '12:45'
+    - '16:20'
+    - '19:45'
+    - '23:35'
 - id: nature-hugo
   deploy_type: pages
   ga4_property: '531055811'
@@ -392,10 +392,10 @@ blogs:
   schedule:
     times:
     - 09:15
-    - '12:15'
-    - '15:15'
-    - '18:15'
-    - '22:15'
+    - '12:50'
+    - '16:25'
+    - '19:55'
+    - '23:40'
 - id: phototour-hugo
   deploy_type: pages
   ga4_property: '531036743'
@@ -414,11 +414,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 09:40
-    - '12:40'
-    - '15:40'
-    - '18:40'
-    - '22:40'
+    - 09:30
+    - '13:05'
+    - '16:55'
+    - '20:05'
+    - '23:55'
 - cf_project: tour-hugo
   daily_quota: 5
   pipeline_timeout: 900
@@ -431,11 +431,11 @@ blogs:
   repo: tour-hugo
   schedule:
     times:
-    - 07:30
-    - '10:30'
-    - '13:30'
-    - '16:30'
-    - '20:30'
+    - 07:15
+    - '10:55'
+    - '14:20'
+    - '18:05'
+    - '21:30'
   site_path: /Users/twinssn/Projects/ETAP/tour-hugo
   managed_by: pipeline
   status: active
@@ -463,11 +463,11 @@ blogs:
   ga4_property: '531081222'
   schedule:
     times:
-    - 07:41
-    - '10:41'
-    - '13:41'
-    - '16:41'
-    - '20:41'
+    - 07:50
+    - '11:35'
+    - '14:55'
+    - '18:40'
+    - '22:05'
 - id: trains-hugo
   deploy_type: pages
   name: Trains Bus Guide
@@ -487,11 +487,11 @@ blogs:
   ga4_property: '531082945'
   schedule:
     times:
-    - 07:43
-    - '10:43'
-    - '13:43'
-    - '16:43'
-    - '20:43'
+    - 07:55
+    - '11:40'
+    - '14:55'
+    - '18:40'
+    - '22:10'
 - id: transfers-hugo
   deploy_type: pages
   ga4_property: '531012256'
@@ -510,11 +510,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 09:05
-    - '12:05'
-    - '15:05'
-    - '18:05'
-    - '22:05'
+    - 09:00
+    - '12:45'
+    - '16:10'
+    - '19:45'
+    - '23:35'
 - id: visa-hugo
   deploy_type: pages
   name: Visa Requirements
@@ -534,11 +534,11 @@ blogs:
   ga4_property: '531039430'
   schedule:
     times:
-    - 07:45
-    - '10:45'
-    - '13:45'
-    - '16:45'
-    - '20:45'
+    - 07:55
+    - '11:40'
+    - '15:00'
+    - '18:45'
+    - '22:10'
 - id: visafree-hugo
   deploy_type: pages
   ga4_property: '531135786'
@@ -546,8 +546,8 @@ blogs:
   pipeline: etap
   platform: hugo
   managed_by: pipeline
-  status: 소진  # 토픽소진 199/199 (2026-08-28) — entity-link 참조용 유지, 재발행 시 visa_requirements 기반 별도 seeder 필요
-  enabled: false  # scheduler skip — 토픽소진으로 발행 중지
+  status: 소진
+  enabled: false
   daily_quota: 5
   pipeline_timeout: 900
   domain: visafree.techpawz.com
@@ -559,10 +559,10 @@ blogs:
   schedule:
     times:
     - 09:20
-    - '12:20'
-    - '15:20'
-    - '18:20'
-    - '22:20'
+    - '12:55'
+    - '16:35'
+    - '19:55'
+    - '23:45'
 - id: walking-hugo
   deploy_type: pages
   ga4_property: '531135787'
@@ -582,10 +582,10 @@ blogs:
   schedule:
     times:
     - 08:25
-    - '11:25'
-    - '14:25'
-    - '17:25'
-    - '21:25'
+    - '12:10'
+    - '15:35'
+    - '19:10'
+    - '22:50'
 - id: watersports-hugo
   deploy_type: pages
   ga4_property: '531139672'
@@ -604,11 +604,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 08:40
-    - '11:40'
-    - '14:40'
-    - '17:40'
-    - '21:40'
+    - 08:45
+    - '12:25'
+    - '15:55'
+    - '19:30'
+    - '23:15'
 - id: luxury-hugo
   deploy_type: pages
   ga4_property: '533565769'
@@ -627,11 +627,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:00
-    - '10:00'
-    - '13:00'
-    - '16:00'
-    - '20:00'
+    - 06:05
+    - 09:40
+    - '13:10'
+    - '17:00'
+    - '20:15'
 - id: citytours-hugo
   deploy_type: pages
   ga4_property: '533547904'
@@ -650,11 +650,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:05
-    - '10:05'
-    - '13:05'
-    - '16:05'
-    - '20:05'
+    - 06:15
+    - 09:50
+    - '13:20'
+    - '17:10'
+    - '20:30'
 - id: watertours-hugo
   deploy_type: pages
   ga4_property: '533560944'
@@ -673,11 +673,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:10
+    - 06:25
     - '10:10'
-    - '13:10'
-    - '16:10'
-    - '20:10'
+    - '13:35'
+    - '17:25'
+    - '20:40'
 - id: hiking-hugo
   deploy_type: pages
   ga4_property: '533501468'
@@ -696,11 +696,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:15
-    - '10:15'
-    - '13:15'
-    - '16:15'
-    - '20:15'
+    - 06:35
+    - '10:20'
+    - '13:45'
+    - '17:35'
+    - '20:55'
 - id: escape-hugo
   deploy_type: pages
   ga4_property: '533557099'
@@ -719,11 +719,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:20
-    - '10:20'
-    - '13:20'
-    - '16:20'
-    - '20:20'
+    - 06:50
+    - '10:30'
+    - '13:55'
+    - '17:45'
+    - '21:05'
 - id: extreme-hugo
   deploy_type: pages
   ga4_property: '533528727'
@@ -742,11 +742,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:25
-    - '10:25'
-    - '13:25'
-    - '16:25'
-    - '20:25'
+    - 07:05
+    - '10:45'
+    - '14:05'
+    - '17:55'
+    - '21:15'
 - id: nightlife-hugo
   deploy_type: pages
   ga4_property: '533501469'
@@ -765,11 +765,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:30
-    - '10:30'
-    - '13:30'
-    - '16:30'
-    - '20:30'
+    - 07:20
+    - '11:00'
+    - '14:20'
+    - '18:05'
+    - '21:35'
 - id: ghost-hugo
   deploy_type: pages
   ga4_property: '533502285'
@@ -788,11 +788,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:35
-    - '10:35'
-    - '13:35'
-    - '16:35'
-    - '20:35'
+    - 07:40
+    - '11:20'
+    - '14:40'
+    - '18:25'
+    - '21:50'
 - id: layover-hugo
   deploy_type: pages
   ga4_property: '533564578'
@@ -811,11 +811,11 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:40
-    - '10:40'
-    - '13:40'
-    - '16:40'
-    - '20:40'
+    - 07:50
+    - '11:30'
+    - '14:50'
+    - '18:35'
+    - '22:05'
 - id: nomad-hugo
   deploy_type: pages
   ga4_property: '533489259'
@@ -833,8 +833,8 @@ blogs:
   language: en
   schedule:
     times:
-    - 07:45
-    - '10:45'
-    - '13:45'
-    - '16:45'
-    - '20:45'
+    - 08:00
+    - '11:45'
+    - '15:00'
+    - '18:45'
+    - '22:15'

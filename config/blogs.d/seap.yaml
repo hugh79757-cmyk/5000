@@ -10,11 +10,11 @@ blogs:
   managed_by: pipeline
   schedule:
     times:
-    - 08:10
-    - '11:10'
-    - '14:10'
-    - '17:10'
-    - '21:10'
+    - 08:15
+    - '12:00'
+    - '15:20'
+    - '19:05'
+    - '22:35'
   status: active
 - cf_project: senior-hugo
   daily_quota: 5
@@ -28,11 +28,11 @@ blogs:
   managed_by: pipeline
   schedule:
     times:
-    - 07:34
-    - '10:34'
-    - '13:34'
-    - '16:34'
-    - '20:34'
+    - 07:35
+    - '11:15'
+    - '14:35'
+    - '18:20'
+    - '21:45'
   site_path: /Users/twinssn/Projects/SEAP/senior-hugo
   status: active
   theme: blowfish

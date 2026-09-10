@@ -12,11 +12,11 @@ blogs:
   repo: compare-hugo
   schedule:
     times:
-    - 07:16
-    - '10:16'
-    - '13:16'
-    - '16:16'
-    - '20:16'
+    - 06:40
+    - '10:20'
+    - '13:45'
+    - '17:35'
+    - '20:55'
   site_path: /Users/twinssn/Projects/cap/compare-hugo
   status: active
   theme: Blowfish
@@ -42,11 +42,11 @@ blogs:
   repo: deal-hugo
   schedule:
     times:
-    - 07:14
-    - '10:14'
-    - '13:14'
-    - '16:14'
-    - '20:14'
+    - 06:35
+    - '10:15'
+    - '13:40'
+    - '17:30'
+    - '20:45'
   site_path: /Users/twinssn/Projects/cap/deal-hugo
   status: active
   theme: Blowfish
@@ -64,11 +64,11 @@ blogs:
   repo: ev-hugo
   schedule:
     times:
-    - 07:20
-    - '10:20'
-    - '13:20'
-    - '16:20'
-    - '20:20'
+    - 06:45
+    - '10:25'
+    - '13:50'
+    - '17:40'
+    - '21:00'
   site_path: /Users/twinssn/Projects/cap/ev-hugo
   status: active
   theme: Blowfish
@@ -86,11 +86,11 @@ blogs:
   repo: guide-hugo
   schedule:
     times:
-    - 07:18
-    - '10:18'
-    - '13:18'
-    - '16:18'
-    - '20:18'
+    - 06:40
+    - '10:25'
+    - '13:50'
+    - '17:40'
+    - '21:00'
   site_path: /Users/twinssn/Projects/cap/guide-hugo
   status: active
   theme: Blowfish
@@ -120,11 +120,11 @@ blogs:
   repo: hotissue-hugo
   schedule:
     times:
-    - 07:10
-    - '10:10'
-    - '13:10'
-    - '16:10'
-    - '20:10'
+    - 06:20
+    - '10:00'
+    - '13:30'
+    - '17:20'
+    - '20:35'
   site_path: /Users/twinssn/Projects/cap/hotissue-hugo
   status: active
   theme: Blowfish
@@ -150,11 +150,11 @@ blogs:
   repo: tco-hugo
   schedule:
     times:
-    - 07:12
-    - '10:12'
-    - '13:12'
-    - '16:12'
-    - '20:12'
+    - 06:30
+    - '10:10'
+    - '13:35'
+    - '17:30'
+    - '20:45'
   site_path: /Users/twinssn/Projects/cap/tco-hugo
   status: active
   theme: Blowfish
@@ -172,7 +172,7 @@ blogs:
   repo: rank-hugo
   schedule:
     times:
-    - 07:22
+    - 06:50
   site_path: /Users/twinssn/Projects/cap/rank-hugo
   status: active
   theme: Blowfish
@@ -191,7 +191,7 @@ blogs:
   repo: pick-hugo
   schedule:
     times:
-    - 07:24
+    - 06:55
   site_path: /Users/twinssn/Projects/cap/pick-hugo
   status: active
   theme: Blowfish

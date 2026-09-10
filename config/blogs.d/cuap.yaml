@@ -14,11 +14,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:50
-    - '10:50'
-    - '13:50'
-    - '16:50'
-    - '20:50'
+    - 08:05
+    - '11:45'
+    - '15:05'
+    - '18:50'
+    - '22:15'
   gsc_site: https://appliance.informationhot.kr/
   ga4_property: '532414941'
 - id: baby-hugo
@@ -37,10 +37,10 @@ blogs:
   schedule:
     times:
     - 08:10
-    - '11:10'
-    - '14:10'
-    - '17:10'
-    - '21:10'
+    - '11:55'
+    - '15:15'
+    - '19:00'
+    - '22:25'
   gsc_site: https://baby.informationhot.kr/
   ga4_property: '532411814'
 - id: fitness-hugo
@@ -59,10 +59,10 @@ blogs:
   schedule:
     times:
     - 08:20
-    - '11:20'
-    - '14:20'
-    - '17:20'
-    - '21:20'
+    - '12:05'
+    - '15:25'
+    - '19:05'
+    - '22:40'
   gsc_site: https://fitness.informationhot.kr/
   ga4_property: '532414997'
 - id: interior-hugo
@@ -80,11 +80,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 08:00
-    - '11:00'
-    - '14:00'
-    - '17:00'
-    - '21:00'
+    - 08:10
+    - '11:50'
+    - '15:10'
+    - '18:55'
+    - '22:20'
   gsc_site: https://interior.informationhot.kr/
   ga4_property: '532439844'
 - id: laptop-hugo
@@ -102,11 +102,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:40
-    - '10:40'
-    - '13:40'
-    - '16:40'
-    - '20:40'
+    - 07:45
+    - '11:30'
+    - '14:50'
+    - '18:35'
+    - '22:00'
   gsc_site: https://laptop.informationhot.kr/
   ga4_property: '532425912'
 - id: health-hugo
@@ -124,11 +124,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:30
-    - '10:30'
-    - '13:30'
-    - '16:30'
-    - '20:30'
+    - 07:10
+    - '10:50'
+    - '14:15'
+    - '18:00'
+    - '21:25'
   gsc_site: https://health.informationhot.kr/
   ga4_property: ''
 - id: pet-hugo
@@ -146,11 +146,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:00
-    - '10:00'
-    - '13:00'
-    - '16:00'
-    - '20:00'
+    - 06:00
+    - 09:35
+    - '13:05'
+    - '16:55'
+    - '20:15'
   gsc_site: https://pet.informationhot.kr/
   ga4_property: ''
 - id: kitchen-hugo
@@ -169,10 +169,10 @@ blogs:
   schedule:
     times:
     - 08:30
-    - '11:30'
-    - '14:30'
-    - '17:30'
-    - '21:30'
+    - '12:15'
+    - '15:40'
+    - '19:15'
+    - '22:55'
   gsc_site: https://kitchen.informationhot.kr/
   ga4_property: ''
 - id: beauty-hugo
@@ -190,11 +190,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 08:40
-    - '11:40'
-    - '14:40'
-    - '17:40'
-    - '21:40'
+    - 08:45
+    - '12:25'
+    - '15:55'
+    - '19:25'
+    - '23:10'
   gsc_site: https://beauty.informationhot.kr/
   ga4_property: ''
 - id: camping-hugo
@@ -212,11 +212,11 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:10
-    - '10:10'
-    - '13:10'
-    - '16:10'
-    - '20:10'
+    - 06:25
+    - '10:00'
+    - '13:30'
+    - '17:25'
+    - '20:40'
   gsc_site: https://camping.informationhot.kr/
   ga4_property: ''
 - id: massage-hugo
@@ -234,9 +234,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:20
-    - '13:20'
-    - '19:20'
+    - 06:45
+    - '13:55'
+    - '20:10'
   gsc_site: https://massage.informationhot.kr/
   ga4_property: ''
 - id: car-hugo
@@ -254,9 +254,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 07:30
-    - '13:30'
-    - '19:30'
+    - 07:15
+    - '14:15'
+    - '20:10'
   gsc_site: https://car.informationhot.kr/
   ga4_property: ''
 - id: homeappliance-hugo
@@ -275,8 +275,8 @@ blogs:
   schedule:
     times:
     - 08:20
-    - '14:20'
-    - '20:20'
+    - '15:30'
+    - '21:05'
   gsc_site: https://homeappliance.informationhot.kr/
   ga4_property: ''
 - id: golf-hugo
@@ -294,9 +294,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 08:30
-    - '14:30'
-    - '20:30'
+    - 08:35
+    - '15:40'
+    - '21:30'
   gsc_site: https://golf.informationhot.kr/
   ga4_property: ''
 - id: bike-hugo
@@ -314,9 +314,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 09:20
-    - '15:20'
-    - '21:20'
+    - 09:15
+    - '16:30'
+    - '22:40'
   gsc_site: https://bike.informationhot.kr/
   ga4_property: ''
 - id: best-kitchen-hugo
@@ -336,9 +336,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 09:15
-    - '14:15'
-    - '20:15'
+    - 09:10
+    - '15:25'
+    - '20:50'
   gsc_site: https://best-kitchen.informationhot.kr/
   ga4_property: ''
 - id: best-beauty-hugo
@@ -358,9 +358,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - 09:25
-    - '14:25'
-    - '20:25'
+    - 09:20
+    - '15:35'
+    - '21:15'
   gsc_site: https://best-beauty.informationhot.kr/
   ga4_property: ''
 - id: best-electronics-hugo
@@ -380,9 +380,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '10:10'
-    - '15:10'
-    - '21:10'
+    - '10:05'
+    - '16:15'
+    - '22:30'
   gsc_site: https://best-electronics.rotcha.kr/
   ga4_property: ''
 - id: best-sports-hugo
@@ -403,8 +403,8 @@ blogs:
   schedule:
     times:
     - '10:15'
-    - '15:15'
-    - '21:15'
+    - '16:25'
+    - '22:35'
   gsc_site: https://best-sports.rotcha.kr/
   ga4_property: ''
 - id: best-books-hugo
@@ -424,9 +424,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '10:20'
-    - '15:20'
-    - '21:20'
+    - '10:30'
+    - '16:30'
+    - '22:45'
   gsc_site: https://best-books.rotcha.kr/
   ga4_property: ''
 - id: best-toys-hugo
@@ -446,9 +446,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '10:25'
-    - '15:25'
-    - '21:25'
+    - '10:40'
+    - '16:35'
+    - '22:50'
   gsc_site: https://best-toys.rotcha.kr/
   ga4_property: ''
 - id: best-stationery-hugo
@@ -468,9 +468,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '10:30'
-    - '15:30'
-    - '21:30'
+    - '10:55'
+    - '16:40'
+    - '23:00'
   gsc_site: https://best-stationery.rotcha.kr/
   ga4_property: ''
 - id: best-pet-supplies-hugo
@@ -490,9 +490,9 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '10:35'
-    - '15:35'
-    - '21:35'
+    - '11:15'
+    - '16:50'
+    - '23:05'
   gsc_site: https://best-pet-supplies.rotcha.kr/
   ga4_property: ''
 - id: best-unisex-clothing-hugo
@@ -512,8 +512,8 @@ blogs:
   managed_by: mde2
   schedule:
     times:
-    - '11:00'
-    - '16:00'
-    - '22:00'
+    - '11:55'
+    - '17:00'
+    - '23:30'
   gsc_site: https://best-unisex-clothing.rotcha.kr/
   ga4_property: ''
