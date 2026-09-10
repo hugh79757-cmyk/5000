@@ -82,12 +82,25 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
         search_key = model_clean.split()[0] if model_clean.split() else model_clean
     brand_names = BRAND_MAP_API.get(brand, [brand])
     placeholders = ",".join(["?" for _ in brand_names])
-    query = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
+    # 연비 조회 소스: CAREFF 우선 → CAR_GRADE 폴백 (2026-09-10 compare-hugo no_data:
+    # 무쏘/EV4/LX/EX30 등 trims.fuel_efficiency=0 차량의 연비 행이 CAR_GRADE에만 존재 —
+    # CAREFF 고정 조회가 폴백을 못 찾아 pending 45개 전부 [BLOCK] 연비 데이터 없음)
+    query = "SELECT display_eff, engine_displacement, fuel_nm, model_nm FROM public_fuel_data WHERE source IN ('CAREFF','CAR_GRADE') AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CASE source WHEN 'CAREFF' THEN 0 ELSE 1 END, CAST(year AS INTEGER) DESC LIMIT 5"
     params = ["%" + search_key + "%", *brand_names]
     rows = c.execute(query, params).fetchall()
     if not rows:
-        query2 = "SELECT display_eff, engine_displacement, fuel_nm FROM public_fuel_data WHERE source='CAREFF' AND model_nm LIKE ? ORDER BY CAST(year AS INTEGER) DESC LIMIT 5"
+        query2 = "SELECT display_eff, engine_displacement, fuel_nm, model_nm FROM public_fuel_data WHERE source IN ('CAREFF','CAR_GRADE') AND model_nm LIKE ? ORDER BY CASE source WHEN 'CAREFF' THEN 0 ELSE 1 END, CAST(year AS INTEGER) DESC LIMIT 5"
         rows = c.execute(query2, ["%" + search_key + "%"]).fetchall()
+    # 토큰 정확 매칭 — 부분 문자열 오염 방지 (2026-09-10: 'EV4'가 '재규어 I-PACE EV400'에
+    # %EV4% LIKE로 오매칭되어 재규어 연비를 기아에 적용하는 사례. 토큰 경계 일치만 허용.
+    # search_key가 MODEL_NAME_MAP 매핑값(예: '무쏘 2.3')일 수 있으므로 첫 토큰 기준 비교)
+    _first_tok = search_key.split()[0] if search_key.split() else search_key
+    _tok_rows = []
+    for r in rows:
+        nm_tokens = (r["model_nm"] or "").replace("(", " ").replace(")", " ").replace("-", " ").split()
+        if _first_tok in nm_tokens:
+            _tok_rows.append(r)
+    rows = _tok_rows  # 매칭 0건이면 오염 행 배제 → None (부분매칭 채택 금지)
     if rows:
         for r in rows:
             eff = r["display_eff"]
@@ -111,9 +124,18 @@ def lookup_ev_specs(conn, brand, model):
     rows = c.execute("""
         SELECT display_eff, range_per_charge, engine_displacement, fuel_nm, model_nm
         FROM public_fuel_data
-        WHERE source='CAREFF' AND fuel_nm='전기' AND model_nm LIKE ?
-        ORDER BY CAST(year AS INTEGER) DESC LIMIT 1
+        WHERE source IN ('CAREFF','CAR_GRADE') AND fuel_nm='전기' AND model_nm LIKE ?
+        ORDER BY CAST(year AS INTEGER) DESC LIMIT 5
     """, ["%" + search_key + "%"]).fetchall()
+
+    # 토큰 정확 매칭 — 부분 문자열 오염 방지 (2026-09-10: '아이오닉 6' 조회가
+    # %아이오닉% LIKE로 '아이오닉5 N-line' 스펙을 가져오는 사례. lookup_fuel_efficiency와 동일 규칙)
+    _tok_rows = []
+    for r in rows:
+        nm_tokens = (r["model_nm"] or "").replace("(", " ").replace(")", " ").replace("-", " ").split()
+        if search_key in nm_tokens:
+            _tok_rows.append(r)
+    rows = _tok_rows
 
     if rows:
         r = rows[0]
