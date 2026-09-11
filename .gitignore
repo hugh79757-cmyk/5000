@@ -99,3 +99,14 @@ rollback_bouches_log5593.sql
 !.planning/worklog/WL-*.md
 scripts/master_backup.py.pre-r2-fix-*
 data/keyword_performance.json
+
+# ===== 2026-09-11 Phase 78 Task 1: 시크릿 감사 기반 untracked 민감파일 보호 =====
+# Naver SearchAdvisor 계정 비밀번호 평문 (utils/searchadvisor.py 사용 중 — 삭제 금지, 무시만)
+.sa_creds_tmp
+naver_captcha*.txt
+# LLM 폴백 회전 상태 (발행마다 갱신되는 런타임 상태)
+data/llm_rotation_state.json
+data/.lock_*
+# 로컬 산출물/이미지/로그 (output/은 기존 12개 파일 git 추적 중 — 제거 시 git rm 필요하므로 현행 유지)
+blow_copy.png
+ops_dashboard/logs/
