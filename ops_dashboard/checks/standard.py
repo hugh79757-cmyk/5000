@@ -173,6 +173,11 @@ ALLOWED_OVERRIDES = {
     "layouts/partials/jsonld.html",
     "layouts/partials/templates/opengraph.html",
     "layouts/partials/templates/twitter_cards.html",
+    # 2026-09-10 추가: ETAP 32사이트 의도적 오버라이드 (R12 위반 67건 해소)
+    # - disclaimer.html: 제휴 고지 partial
+    # - affiliate-card.html: 제휴 카드 partial (카드 릭 수정 7fb420dd8 관련 사용)
+    "layouts/partials/disclaimer.html",
+    "layouts/partials/affiliate-card.html",
 }
 
 # 오버라이드가 아닌 정크 파일: 위반으로 보고하지 않지만 별도로 집계한다.

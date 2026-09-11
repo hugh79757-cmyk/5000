@@ -142,6 +142,17 @@ def _read_post_files(site: Path) -> list[tuple[Path, str]]:
         safe_include = date_ts is None  # date 파싱 불가/없음 → 안전측 포함
         if mtime_ok or date_ok or safe_include:
             results.append((md_file, content))
+    # 최신 발행순 정렬 (frontmatter date 내림차순, 파싱 불가는 mtime fallback).
+    # 2026-09-10: 카드 릭 일괄 치환이 전 파일 mtime를 갱신 → 7일 mtime 필터가
+    # 4~5월 과거 글까지 전소 대상화 → S01/S02/C08 폭증(과거누적 fail 250+).
+    # _S_POST_SAMPLE 상한이 최신 N개를 잡도록 date 내림차순 정렬 보장.
+    def _sort_key(item):
+        md_file, content = item
+        ts = _frontmatter_date_ts(content)
+        if ts is None:
+            ts = md_file.stat().st_mtime
+        return -ts
+    results.sort(key=_sort_key)
     return results
 
 
@@ -887,6 +898,36 @@ def _extract_corpus(site: Path, blog_id: str, exclude_slug: str = "") -> list[st
     return corpus
 
 
+def _extract_corpus_by_slug(site: Path) -> dict:
+    """slug→body dict corpus (self-match 제외용).
+
+    2026-09-10: 체커가 최신 글(자기 자신 포함)을 corpus에 넣고 검사해
+    uniqueness=0.0000 / max_sim=1.0000 self-match 오탐 발생 (panama-city-water-sports
+    23:15 발행 직후 23:16 fail 사례). 검사 루프에서 자기 slug를 제외하기 위해 dict 반환.
+    stride 샘플링은 _extract_corpus와 동일 — _S_CORPUS_CAP 초과 시 균등 축소.
+    """
+    posts_dir = site / "content" / "posts"
+    if not posts_dir.exists():
+        return {}
+    corpus: dict = {}
+    for md_file in posts_dir.rglob("*.md"):
+        slug = md_file.parent.name
+        try:
+            content = md_file.read_text(encoding="utf-8", errors="replace")
+            body_start = content.find("---\n", 4)
+            if body_start > 0:
+                body = content[body_start + 4:]
+                if len(body) > 200:
+                    corpus[slug] = body
+        except Exception:
+            pass
+    if len(corpus) > _S_CORPUS_CAP:
+        _step = len(corpus) // _S_CORPUS_CAP + 1
+        keys = list(corpus)[::_step][:_S_CORPUS_CAP]
+        corpus = {k: corpus[k] for k in keys}
+    return corpus
+
+
 def _get_source_data_from_slug(slug: str, blog_id: str) -> dict:
     """slug를 이용해 source_data 재구성 (S03 게이트용).
     
@@ -1075,8 +1116,10 @@ def check_s01(conn, blog_id: str) -> dict:
         return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
     
     # corpus를 루프 밖에서 1회만 구축 (303포스트 × 302 corpus = 91,000회 계산 방지)
-    corpus = _extract_corpus(site, blog_id)
-    if not corpus:
+    # 2026-09-10: slug dict로 구축 — 검사 대상 글이 corpus에 자기 자신 포함 시
+    # self-match(max_sim=1.0 → uniqueness=0.0000) 오탐. 루프에서 자기 slug 제외.
+    corpus_by_slug = _extract_corpus_by_slug(site)
+    if not corpus_by_slug:
         return {"status": "unknown", "detail": "corpus 없음"}
     
     # 포스트 수가 많으면 샘플링 (post-publish check 비용 상한)
@@ -1088,6 +1131,9 @@ def check_s01(conn, blog_id: str) -> dict:
         _, fm = _parse_frontmatter(content)
         body_start = content.find("---\n", 4)
         body = content[body_start + 4:] if body_start > 0 else content
+        corpus = [b for s, b in corpus_by_slug.items() if s != slug]
+        if not corpus:
+            continue
         passed, detail = _check_s01_uniqueness(body, corpus)
         if not passed:
             violations.append(f"{slug}: {detail}")
@@ -1095,7 +1141,7 @@ def check_s01(conn, blog_id: str) -> dict:
     if violations:
         return {"status": "fail",
                 "detail": f"S01 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
-    return {"status": "pass", "detail": f"S01 통과 ({len(_posts)}건 검사, corpus {len(corpus)}건)"}
+    return {"status": "pass", "detail": f"S01 통과 ({len(_posts)}건 검사, corpus {len(corpus_by_slug)}건)"}
 
 
 @register_check("s02_structural_similarity")
@@ -1112,8 +1158,9 @@ def check_s02(conn, blog_id: str) -> dict:
         return {"status": "unknown", "detail": "최근 7일 포스트 없음"}
     
     # corpus를 루프 밖에서 1회만 구축
-    corpus = _extract_corpus(site, blog_id)
-    if not corpus:
+    # 2026-09-10: slug dict — S01과 동일 self-match 제외 (H2 시퀀스도 자기 자신과 100% 일치)
+    corpus_by_slug = _extract_corpus_by_slug(site)
+    if not corpus_by_slug:
         return {"status": "unknown", "detail": "corpus 없음"}
     
     _posts = posts[:_S_POST_SAMPLE] if len(posts) > _S_POST_SAMPLE else posts
@@ -1124,6 +1171,9 @@ def check_s02(conn, blog_id: str) -> dict:
         _, fm = _parse_frontmatter(content)
         body_start = content.find("---\n", 4)
         body = content[body_start + 4:] if body_start > 0 else content
+        corpus = [b for s, b in corpus_by_slug.items() if s != slug]
+        if not corpus:
+            continue
         passed, detail = _check_s02_structural(body, corpus)
         if not passed:
             violations.append(f"{slug}: {detail}")
@@ -1131,7 +1181,7 @@ def check_s02(conn, blog_id: str) -> dict:
     if violations:
         return {"status": "fail",
                 "detail": f"S02 위반 {len(violations)}건: {'; '.join(violations[:3])}"}
-    return {"status": "pass", "detail": f"S02 통과 ({len(_posts)}건 검사, corpus {len(corpus)}건)"}
+    return {"status": "pass", "detail": f"S02 통과 ({len(_posts)}건 검사, corpus {len(corpus_by_slug)}건)"}
 
 
 @register_check("s03_unique_data_points")
