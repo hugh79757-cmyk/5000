@@ -1,5 +1,6 @@
 blogs:
 - id: appliance-hugo
+  owner: mac
   deploy_type: pages
   name: 가전제품 추천 가이드
   pipeline: curation
@@ -22,6 +23,7 @@ blogs:
   gsc_site: https://appliance.informationhot.kr/
   ga4_property: '532414941'
 - id: baby-hugo
+  owner: mac
   deploy_type: workers
   name: 유아용품 추천 가이드
   pipeline: curation
@@ -44,6 +46,7 @@ blogs:
   gsc_site: https://baby.informationhot.kr/
   ga4_property: '532411814'
 - id: fitness-hugo
+  owner: mac
   deploy_type: workers
   name: 운동용품 추천 가이드
   pipeline: curation
@@ -66,6 +69,7 @@ blogs:
   gsc_site: https://fitness.informationhot.kr/
   ga4_property: '532414997'
 - id: interior-hugo
+  owner: mac
   deploy_type: pages
   name: 가구 인테리어 추천 가이드
   pipeline: curation
@@ -88,6 +92,7 @@ blogs:
   gsc_site: https://interior.informationhot.kr/
   ga4_property: '532439844'
 - id: laptop-hugo
+  owner: mac
   deploy_type: pages
   name: 노트북 추천 가이드
   pipeline: curation
@@ -110,6 +115,7 @@ blogs:
   gsc_site: https://laptop.informationhot.kr/
   ga4_property: '532425912'
 - id: health-hugo
+  owner: mac
   deploy_type: workers
   name: 건강기능식품 추천 가이드
   pipeline: curation
@@ -132,6 +138,7 @@ blogs:
   gsc_site: https://health.informationhot.kr/
   ga4_property: ''
 - id: pet-hugo
+  owner: mac
   deploy_type: workers
   name: 반려동물용품 추천 가이드
   pipeline: curation
@@ -154,6 +161,7 @@ blogs:
   gsc_site: https://pet.informationhot.kr/
   ga4_property: ''
 - id: kitchen-hugo
+  owner: mac
   deploy_type: workers
   name: 주방용품 추천 가이드
   pipeline: curation
@@ -176,6 +184,7 @@ blogs:
   gsc_site: https://kitchen.informationhot.kr/
   ga4_property: ''
 - id: beauty-hugo
+  owner: mac
   deploy_type: workers
   name: 뷰티/스킨케어 추천 가이드
   pipeline: curation
@@ -198,6 +207,7 @@ blogs:
   gsc_site: https://beauty.informationhot.kr/
   ga4_property: ''
 - id: camping-hugo
+  owner: mac
   deploy_type: workers
   name: 캠핑/아웃도어 추천 가이드
   pipeline: curation
@@ -220,6 +230,7 @@ blogs:
   gsc_site: https://camping.informationhot.kr/
   ga4_property: ''
 - id: massage-hugo
+  owner: mac
   deploy_type: workers
   name: 안마의자 헬스케어가전 추천 가이드
   pipeline: curation
@@ -240,6 +251,7 @@ blogs:
   gsc_site: https://massage.informationhot.kr/
   ga4_property: ''
 - id: car-hugo
+  owner: mac
   deploy_type: workers
   name: 자동차용품 전자기기 추천 가이드
   pipeline: curation
@@ -260,6 +272,7 @@ blogs:
   gsc_site: https://car.informationhot.kr/
   ga4_property: ''
 - id: homeappliance-hugo
+  owner: mac
   deploy_type: workers
   name: 프리미엄 대형가전 추천 가이드
   pipeline: curation
@@ -280,6 +293,7 @@ blogs:
   gsc_site: https://homeappliance.informationhot.kr/
   ga4_property: ''
 - id: golf-hugo
+  owner: mac
   deploy_type: workers
   name: 골프용품 추천 가이드
   pipeline: curation
@@ -300,6 +314,7 @@ blogs:
   gsc_site: https://golf.informationhot.kr/
   ga4_property: ''
 - id: bike-hugo
+  owner: mac
   deploy_type: workers
   name: 전기자전거 자전거 추천 가이드
   pipeline: curation
@@ -320,6 +335,7 @@ blogs:
   gsc_site: https://bike.informationhot.kr/
   ga4_property: ''
 - id: best-kitchen-hugo
+  owner: mac
   deploy_type: workers
   name: 주방용품 베스트 추천 가이드
   pipeline: curation
@@ -342,6 +358,7 @@ blogs:
   gsc_site: https://best-kitchen.informationhot.kr/
   ga4_property: ''
 - id: best-beauty-hugo
+  owner: mac
   deploy_type: workers
   name: 뷰티 베스트 추천 가이드
   pipeline: curation
@@ -364,6 +381,7 @@ blogs:
   gsc_site: https://best-beauty.informationhot.kr/
   ga4_property: ''
 - id: best-electronics-hugo
+  owner: mac
   deploy_type: workers
   name: 가전디지털 베스트 추천 가이드
   pipeline: curation
@@ -386,6 +404,7 @@ blogs:
   gsc_site: https://best-electronics.rotcha.kr/
   ga4_property: ''
 - id: best-sports-hugo
+  owner: mac
   deploy_type: workers
   name: 스포츠/레저 베스트 추천 가이드
   pipeline: curation
@@ -408,6 +427,7 @@ blogs:
   gsc_site: https://best-sports.rotcha.kr/
   ga4_property: ''
 - id: best-books-hugo
+  owner: mac
   deploy_type: workers
   name: 도서/음반 베스트 추천 가이드
   pipeline: curation
@@ -430,6 +450,7 @@ blogs:
   gsc_site: https://best-books.rotcha.kr/
   ga4_property: ''
 - id: best-toys-hugo
+  owner: mac
   deploy_type: workers
   name: 완구/취미 베스트 추천 가이드
   pipeline: curation
@@ -452,6 +473,7 @@ blogs:
   gsc_site: https://best-toys.rotcha.kr/
   ga4_property: ''
 - id: best-stationery-hugo
+  owner: mac
   deploy_type: workers
   name: 문구/사무용품 베스트 추천 가이드
   pipeline: curation
@@ -474,6 +496,7 @@ blogs:
   gsc_site: https://best-stationery.rotcha.kr/
   ga4_property: ''
 - id: best-pet-supplies-hugo
+  owner: mac
   deploy_type: workers
   name: 반려동물용품 베스트 추천 가이드
   pipeline: curation
@@ -496,6 +519,7 @@ blogs:
   gsc_site: https://best-pet-supplies.rotcha.kr/
   ga4_property: ''
 - id: best-unisex-clothing-hugo
+  owner: mac
   deploy_type: workers
   name: 남녀공용의류 베스트 추천 가이드
   pipeline: curation

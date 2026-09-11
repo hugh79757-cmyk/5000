@@ -1,5 +1,6 @@
 blogs:
 - id: tap-blogger
+  owner: mac
   deploy_type: pages
   name: travel.rotcha.kr (Blogger)
   pipeline: travel
@@ -21,6 +22,7 @@ blogs:
   - type: camping
     weight: 1.0
   id: travel-hugo
+  owner: mac
   deploy_type: pages
   name: 캠핑·아웃도어
   pipeline: travel
@@ -43,6 +45,7 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: travel4-hugo
+    owner: mac
     topic: 캠핑 여행 코스 추천
 - cf_project: travel1-hugo
   daily_quota: 3
@@ -51,6 +54,7 @@ blogs:
   - type: festival
     weight: 1.0
   id: travel1-hugo
+  owner: mac
   deploy_type: pages
   name: 축제·행사
   pipeline: travel
@@ -73,6 +77,7 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: travel4-hugo
+    owner: mac
     topic: 축제 연계 여행 코스
 - cf_project: travel2-hugo
   daily_quota: 3
@@ -81,6 +86,7 @@ blogs:
   - type: heritage
     weight: 1.0
   id: travel2-hugo
+  owner: mac
   deploy_type: pages
   name: 문화유산
   pipeline: travel
@@ -103,6 +109,7 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: travel4-hugo
+    owner: mac
     topic: 문화유산 탐방 코스
 - cf_project: travel3-hugo
   daily_quota: 3
@@ -111,6 +118,7 @@ blogs:
   - type: food
     weight: 1.0
   id: travel3-hugo
+  owner: mac
   deploy_type: pages
   name: 맛집·카페
   pipeline: travel
@@ -133,6 +141,7 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: travel4-hugo
+    owner: mac
     topic: 맛집 투어 코스
 - cf_project: travel4-hugo
   daily_quota: 3
@@ -141,6 +150,7 @@ blogs:
   - type: course
     weight: 1.0
   id: travel4-hugo
+  owner: mac
   deploy_type: pages
   name: 여행코스
   pipeline: travel

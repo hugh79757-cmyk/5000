@@ -3,6 +3,7 @@ blogs:
   daily_quota: 5
   domain: finance.techpawz.com
   id: finance-hugo
+  owner: mac
   deploy_type: pages
   name: 금리·예적금 비교
   pipeline: stock
@@ -24,6 +25,7 @@ blogs:
   daily_quota: 5
   domain: stock.informationhot.kr
   id: stock-hugo
+  owner: mac
   deploy_type: pages
   name: 캔들트렌드 주식분석
   pipeline: stock
@@ -43,13 +45,16 @@ blogs:
   managed_by: pipeline
   depth_next:
   - id: dividend-hugo
+    owner: mac
     topic: 배당주 투자와 수익률 비교
   - id: sector-hugo
+    owner: mac
     topic: 업종별 주가 동향 분석
 - cf_project: dividend-hugo
   daily_quota: 5
   domain: dividend.techpawz.com
   id: dividend-hugo
+  owner: mac
   deploy_type: pages
   name: 배당주 투자 가이드
   pipeline: stock
@@ -69,11 +74,13 @@ blogs:
   managed_by: pipeline
   depth_next:
   - id: etf-hugo
+    owner: mac
     topic: 배당 ETF vs 개별 배당주 비교
 - cf_project: etf-hugo
   daily_quota: 5
   domain: etf.techpawz.com
   id: etf-hugo
+  owner: mac
   deploy_type: pages
   name: ETF 투자 분석
   pipeline: stock
@@ -93,11 +100,13 @@ blogs:
   managed_by: pipeline
   depth_next:
   - id: sector-hugo
+    owner: mac
     topic: ETF 구성 섹터 분석
 - cf_project: sector-hugo
   daily_quota: 5
   domain: sector.techpawz.com
   id: sector-hugo
+  owner: mac
   deploy_type: pages
   name: 섹터 분석 리포트
   pipeline: stock
@@ -117,11 +126,13 @@ blogs:
   managed_by: pipeline
   depth_next:
   - id: ipo-hugo
+    owner: mac
     topic: IPO 공모주 섹터별 분석
 - cf_project: ipo-hugo
   daily_quota: 5
   domain: ipo.techpawz.com
   id: ipo-hugo
+  owner: mac
   deploy_type: pages
   name: IPO·공모주 분석
   pipeline: stock

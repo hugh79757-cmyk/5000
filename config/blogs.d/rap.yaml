@@ -1,5 +1,6 @@
 blogs:
 - id: rap-hugo
+  owner: mac
   name: 부동산 시세 청약 분석
   pipeline: rap
   platform: hugo
@@ -21,12 +22,16 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: rap3-hugo
+    owner: mac
     topic: 취득세와 양도세 계산 방법
   - id: rap4-hugo
+    owner: mac
     topic: 전세 보증금과 월세 시세
   - id: rap2-hugo
+    owner: mac
     topic: 청약 일정과 조건 확인
 - id: rap2-hugo
+  owner: mac
   name: 청약 알리미
   pipeline: rap
   platform: hugo
@@ -48,9 +53,11 @@ blogs:
   funnel_stage: bridge
   bridge_to:
   - id: finance-hugo
+    owner: mac
     topic: 청약 전 금융 준비 방법
     bridge_context: 청약저축과 주택담보대출 연계 전략
 - id: rap3-hugo
+  owner: mac
   name: 부동산 세금 가이드
   pipeline: rap
   platform: hugo
@@ -72,12 +79,15 @@ blogs:
   funnel_stage: bridge
   depth_next:
   - id: rap4-hugo
+    owner: mac
     topic: 임대 비용과 세금 관계
   bridge_to:
   - id: finance-hugo
+    owner: mac
     topic: 취득세 vs 대출 이자 비교
     bridge_context: 부동산 세금 납부와 주택담보대출 금리 비교
 - id: rap4-hugo
+  owner: mac
   name: 전세월세 리포트
   pipeline: rap
   platform: hugo
@@ -99,9 +109,11 @@ blogs:
   funnel_stage: bridge
   bridge_to:
   - id: finance-hugo
+    owner: mac
     topic: 전세대출 금리 비교
     bridge_context: 전세자금대출 조건과 금리 확인
 - id: rap5-hugo
+  owner: mac
   name: 브랜드 아파트 백과
   pipeline: rap
   platform: hugo
@@ -123,6 +135,8 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: rap-hugo
+    owner: mac
     topic: 아파트 브랜드별 시세
   - id: rap2-hugo
+    owner: mac
     topic: 브랜드 아파트 청약 정보

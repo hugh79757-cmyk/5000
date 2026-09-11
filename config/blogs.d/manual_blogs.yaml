@@ -1,5 +1,6 @@
 blogs:
 - id: tvshow-blogger
+  owner: mac
   deploy_type: pages
   name: tv-show 맛집블로그
   domain: tv-show.informationhot.kr
@@ -8,6 +9,7 @@ blogs:
   managed_by: manual
   status: paused
 - id: ud-blogger
+  owner: mac
   deploy_type: pages
   name: ud 레시피블로그
   domain: ud.informationhot.kr

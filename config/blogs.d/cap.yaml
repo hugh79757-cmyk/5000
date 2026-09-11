@@ -3,6 +3,7 @@ blogs:
   daily_quota: 5
   domain: compare.rotcha.kr
   id: compare-hugo
+  owner: mac
   deploy_type: pages
   name: 비교분석
   pipeline: car
@@ -24,15 +25,18 @@ blogs:
   funnel_stage: bridge
   depth_next:
   - id: pick-hugo
+    owner: mac
     topic: 비교 결과 내 조건에 맞는 차 찾기
   bridge_to:
   - id: finance-hugo
+    owner: mac
     topic: 비교한 차량 가격으로 적금 vs 차량 할부 비교
     bridge_context: 차량 구매 자금 마련 — 할부 금리와 적금 누적액 비교
 - cf_project: deal-hugo
   daily_quota: 5
   domain: deal.rotcha.kr
   id: deal-hugo
+  owner: mac
   deploy_type: pages
   name: 프로모션
   pipeline: car
@@ -55,6 +59,7 @@ blogs:
   daily_quota: 5
   domain: ev.rotcha.kr
   id: ev-hugo
+  owner: mac
   deploy_type: pages
   name: 전기차분석
   pipeline: car
@@ -81,6 +86,7 @@ blogs:
   daily_quota: 5
   domain: guide.rotcha.kr
   id: guide-hugo
+  owner: mac
   deploy_type: pages
   name: 초보가이드
   pipeline: car
@@ -103,6 +109,7 @@ blogs:
   daily_quota: 5
   domain: hotissue.rotcha.kr
   id: hotissue-hugo
+  owner: mac
   deploy_type: pages
   name: 핫이슈
   pipeline: car
@@ -136,15 +143,19 @@ blogs:
   funnel_stage: landing
   depth_next:
   - id: compare-hugo
+    owner: mac
     topic: 자동차 비교 분석
   - id: pick-hugo
+    owner: mac
     topic: 내 예산에 맞는 차 찾기
   - id: rank-hugo
+    owner: mac
     topic: 인기 차량 랭킹
 - cf_project: tco-hugo
   daily_quota: 5
   domain: tco.rotcha.kr
   id: tco-hugo
+  owner: mac
   deploy_type: pages
   name: TCO분석
   pipeline: car
@@ -167,6 +178,7 @@ blogs:
   daily_quota: 1
   domain: rank.informationhot.kr
   id: rank-hugo
+  owner: mac
   deploy_type: pages
   name: 자동차랭킹
   pipeline: car
@@ -186,6 +198,7 @@ blogs:
   daily_quota: 1
   domain: pick.informationhot.kr
   id: pick-hugo
+  owner: mac
   deploy_type: pages
   name: 내차찾기
   pipeline: car

@@ -4,6 +4,7 @@ blogs:
   domain: rotcha.kr
   funnel_stage: landing
   id: rotcha-blog
+  owner: mac
   managed_by: mde2
   name: 로차 블로그
   platform: hugo
@@ -14,6 +15,7 @@ blogs:
   domain: informationhot.kr
   funnel_stage: landing
   id: informationhot-hugo
+  owner: mac
   managed_by: mde2
   name: 인포메이션핫
   pipeline: curation
@@ -25,6 +27,7 @@ blogs:
   domain: techpawz.com
   funnel_stage: landing
   id: techpawz-hugo
+  owner: mac
   managed_by: mde2
   name: 테크포즈
   platform: hugo
@@ -35,6 +38,7 @@ blogs:
   domain: biz.techpawz.com
   funnel_stage: landing
   id: biz-techpawz-hugo
+  owner: mac
   managed_by: mde2
   name: 테크포즈 비즈
   platform: hugo
@@ -45,6 +49,7 @@ blogs:
   domain: issue.techpawz.com
   funnel_stage: landing
   id: issue-techpawz-hugo
+  owner: mac
   managed_by: mde2
   name: 테크포즈 이슈
   platform: hugo
