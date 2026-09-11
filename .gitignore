@@ -34,7 +34,10 @@ data/*.db-journal
 data/*.empty_*
 data/*.m4_before_*
 **/*.bak_*
-themes/
+# themes/ 무시하되 blowfish는 러너 배포용으로 포함 (Phase 78 Task 5.3)
+# ponytail: PaperMod submodule 잔해 themes/ 제거됨 (사용처 0)
+themes/*
+!themes/blowfish/
 resources/
 hugo_stats.json
 # pipelines/ — 하위 민감파일만 개별 지정
