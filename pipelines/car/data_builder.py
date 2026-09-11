@@ -70,7 +70,7 @@ BRAND_MAP_API = {
     "혼다": ["혼다코리아(주)"],
 }
 
-def lookup_fuel_efficiency(conn, brand, model, displacement=None):
+def lookup_fuel_efficiency(conn, brand, model, displacement=None, fuel_type=None):
     c = conn.cursor()
     model_clean = model
     for suffix in [" 하이브리드", " 가솔린", " 디젤", " 터보", " LPi", " LPG", " 2.5", " 2.2", " 1.6"]:
@@ -85,11 +85,11 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
     # 연비 조회 소스: CAREFF 우선 → CAR_GRADE 폴백 (2026-09-10 compare-hugo no_data:
     # 무쏘/EV4/LX/EX30 등 trims.fuel_efficiency=0 차량의 연비 행이 CAR_GRADE에만 존재 —
     # CAREFF 고정 조회가 폴백을 못 찾아 pending 45개 전부 [BLOCK] 연비 데이터 없음)
-    query = "SELECT display_eff, engine_displacement, fuel_nm, model_nm FROM public_fuel_data WHERE source IN ('CAREFF','CAR_GRADE') AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CASE source WHEN 'CAREFF' THEN 0 ELSE 1 END, CAST(year AS INTEGER) DESC LIMIT 5"
+    query = "SELECT display_eff, engine_displacement, fuel_nm, model_nm FROM public_fuel_data WHERE source IN ('CAREFF','CAR_GRADE') AND model_nm LIKE ? AND comp_nm IN (" + placeholders + ") ORDER BY CASE source WHEN 'CAREFF' THEN 0 ELSE 1 END, CAST(year AS INTEGER) DESC LIMIT 15"
     params = ["%" + search_key + "%", *brand_names]
     rows = c.execute(query, params).fetchall()
     if not rows:
-        query2 = "SELECT display_eff, engine_displacement, fuel_nm, model_nm FROM public_fuel_data WHERE source IN ('CAREFF','CAR_GRADE') AND model_nm LIKE ? ORDER BY CASE source WHEN 'CAREFF' THEN 0 ELSE 1 END, CAST(year AS INTEGER) DESC LIMIT 5"
+        query2 = "SELECT display_eff, engine_displacement, fuel_nm, model_nm FROM public_fuel_data WHERE source IN ('CAREFF','CAR_GRADE') AND model_nm LIKE ? ORDER BY CASE source WHEN 'CAREFF' THEN 0 ELSE 1 END, CAST(year AS INTEGER) DESC LIMIT 15"
         rows = c.execute(query2, ["%" + search_key + "%"]).fetchall()
     # 토큰 정확 매칭 — 부분 문자열 오염 방지 (2026-09-10: 'EV4'가 '재규어 I-PACE EV400'에
     # %EV4% LIKE로 오매칭되어 재규어 연비를 기아에 적용하는 사례. 토큰 경계 일치만 허용.
@@ -101,6 +101,19 @@ def lookup_fuel_efficiency(conn, brand, model, displacement=None):
         if _first_tok in nm_tokens:
             _tok_rows.append(r)
     rows = _tok_rows  # 매칭 0건이면 오염 행 배제 → None (부분매칭 채택 금지)
+    # FIX (2026-09-11): 연료종 오매칭 방지 — 코나 하이브리드가 연식 높은 코나 일렉트릭
+    # 전비 행(4.7 km/kWh)을 연비로 취하는 사례. fuel_type(또는 '하이브리드' 모델명 추론)에
+    # 맞는 fuel_nm 행을 우선정렬. 일치 행 없으면 원래 순서 유지 — 기존 동작 회귀 없음.
+    _fuel_pref = None
+    if fuel_type:
+        _fuel_pref = {"전기": "전기", "가솔린/하이브리드": "휘발유", "가솔린": "휘발유",
+                      "디젤": "경유", "LPG": "LPG"}.get(fuel_type)
+    elif "하이브리드" in (model or ""):
+        _fuel_pref = "휘발유"
+    if _fuel_pref and rows:
+        _pref = [r for r in rows if (r["fuel_nm"] or "").strip() == _fuel_pref]
+        if _pref:
+            rows = _pref + [r for r in rows if (r["fuel_nm"] or "").strip() != _fuel_pref]
     if rows:
         for r in rows:
             eff = r["display_eff"]
