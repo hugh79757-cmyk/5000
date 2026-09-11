@@ -247,6 +247,12 @@ def _load_all_blogs():
             with open(fpath, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
             config["blogs"].extend(data.get("blogs", []))
+    # Phase 78 Task 9: site_path SITES_ROOT 재해석 (env 미설정 시 원본 그대로)
+    from shared.paths import resolve_site_path
+    for b in config["blogs"]:
+        sp = b.get("site_path") if isinstance(b, dict) else None
+        if sp:
+            b["site_path"] = resolve_site_path(sp)
     return config
 
 def get_blog_config(blog_id):

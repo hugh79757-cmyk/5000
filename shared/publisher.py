@@ -65,6 +65,12 @@ def load_blogs():
                 with open(os.path.join(blogs_d, fname), encoding="utf-8") as f:
                     d = yaml.safe_load(f) or {}
                 blogs.extend(d.get("blogs", []))
+    # Phase 78 Task 9: site_path SITES_ROOT 재해석 (env 미설정 시 원본 그대로)
+    from shared.paths import resolve_site_path
+    for b in blogs:
+        sp = b.get("site_path") if isinstance(b, dict) else None
+        if sp:
+            b["site_path"] = resolve_site_path(sp)
     return blogs
 
 

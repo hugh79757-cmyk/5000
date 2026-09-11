@@ -46,6 +46,10 @@ def _blog_sites_from_config() -> list[tuple[str, str, str]]:
             bid = b.get("id", "")
             sp = b.get("site_path", "")
             dom = b.get("domain", "")
+            # Phase 78 Task 9: site_path SITES_ROOT 재해석 (env 미설정 시 원본 그대로)
+            from shared.paths import resolve_site_path
+            if sp:
+                sp = resolve_site_path(sp)
             if sp and Path(sp).is_dir():
                 sites.append((bid, sp, dom))
     return sites
