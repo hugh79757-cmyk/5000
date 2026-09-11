@@ -1,0 +1,1 @@
+2026-09-12 02:04:00 launchctl kickstart -k gui/501/com.5000.scheduler (Phase 78 P1 코드 로드: 0d3ee8349/9373a53db/71d3649ca/77a8a9b5c) | 사전카운트=스케줄러 PID 762 | 백업=git 커밋 4개(롤백=revert+kickstart 재실행) | 사후=PID 10152, py_compile 6파일 OK, 슬롯 등록 로그 정상 | 보존확인=진행 중 발행 0건(02:00 윈도우 내 슬롯 없음)

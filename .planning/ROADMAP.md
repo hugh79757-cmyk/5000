@@ -823,3 +823,18 @@ Total in 898 ms +
 - Charter: `docs/superpowers/track-c-charter.md` (Cross-Branch Investigation & Synthesis, branch `track-c-etap-quality-overhaul`)
 - ETAP branch 1: 35→34 (airports paused), 36/36 hugo build ok, snapshot `/tmp/etap_hyphen_backup_20260821.tgz`, GA fallback G-N4Q99745QT (12 sites 신규 측정), disclosure+rel 렌더 레이어 이전 (재빌드=백필)
 - Next: S1 michelin 6-checks → S2 34-blog batch rebuild → S3 live curl verify; deals-hugo 106d stall 별도 진단
+
+---
+
+## Phase 78: Mac→GH Actions+CF 이관 준비 (P0+P1)
+
+**Status:** ✅ Complete (2026-09-12) — Task 2+4b 병렬 트랙 잔류 (로테이션 완료 후 재개)  
+**Created:** 2026-09-11 | **Completed:** 2026-09-12  
+**상위 규약:** `.planning/migration/MASTER-PLAN.md` (I1~I10 불변식 — 세부플랜은 규약 위반 불가)  
+**Phase dir:** `.planning/phases/phase-78-migration-preparation/`
+
+**Goal:** 이관 실행(P2 파일럿)에 필요한 준비 완료 — 시크릿 감사 → public 전환 → R2 상태 버킷(5000-state) → GH Secrets → 96 repo clone 검증 → quota 재검증(400/일) + 코드 4건 점증 수정(deploy.py token pop 조건화, scheduler 함수 추출, site_path SITES_ROOT 치환, round-trip+WAL 체크포인트) + owner 필드 도입.
+
+**범위 밖:** P2 파일럿(G0 compare-hugo) — phase-79 예정. STAP/TAP(G6) 별도 GSD. Pages git 빌드 영구 기각.
+
+**Gate:** P1 4개 diff 커밋 전 공동 검토 필수. Task 2 public 전환 실행 직전 사용자 확인.
