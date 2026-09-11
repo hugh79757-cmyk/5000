@@ -533,6 +533,39 @@ def _drain_queue() -> None:
 _catchup_lock = threading.Lock()  # catchup 중복 실행 방지
 
 
+def active_blogs(config):
+    """status=active 블로그 리스트 (register_schedules:1299-1303,
+    _catchup_missed_inner:575-577 인라인 패턴 추출 — 동일 필터)"""
+    return [b for b in config.get("blogs", [])
+            if isinstance(b, dict) and b.get("status") == "active"]
+
+
+def quota_left(blog, date_str):
+    """daily_quota - 오늘 발행 수 (_catchup_missed_inner:612-616 인라인 추출)"""
+    quota = blog.get("daily_quota", 50)
+    actual = _get_ledger_count(blog["id"], date_str)
+    return max(0, quota - actual)
+
+
+def due_today(blog, now=None):
+    """오늘 현재시각까지 경과한 스케줄 슬롯 수 (_catchup_missed_inner:619-633 추출).
+    반환값 = expected (경과 슬롯 수). 0이면 오늘 발행 예정 없음."""
+    now = now or datetime.now()
+    expected = 0
+    for t in blog.get("schedule", {}).get("times", []):
+        parts = str(t).split(":")
+        if len(parts) != 2:
+            logger.warning(f"SCHEDULE: 잘못된 시각 무시 — {blog.get('id')} time={t!r}")
+            continue
+        try:
+            h, m = map(int, parts)
+        except ValueError:
+            continue
+        if h < now.hour or (h == now.hour and m <= now.minute):
+            expected += 1
+    return expected
+
+
 def _get_ledger_count(blog_id, date_str):
     """publish_ledger에서 오늘 발행 건수 조회 — published만 카운트"""
     try:
@@ -615,21 +648,8 @@ def _catchup_missed_inner() -> None:
         if actual >= daily_quota:
             continue
 
-        # 오늘 발행해야 할 횟수: 현재 시각 이전 스케줄 수
-        times = blog.get("schedule", {}).get("times", [])
-        expected = 0
-        for t in times:
-            parts = str(t).split(":")
-            if len(parts) != 2:
-                logger.warning(f"CATCHUP: 잘못된 스케줄 시각 무시 — {blog_id} time={t!r}")
-                continue
-            try:
-                h, m = map(int, parts)
-            except ValueError:
-                logger.warning(f"CATCHUP: 잘못된 스케줄 시각 무시 — {blog_id} time={t!r}")
-                continue
-            if h < now.hour or (h == now.hour and m <= now.minute):
-                expected += 1
+        # 오늘 발행해야 할 횟수: 현재 시각 이전 스케줄 수 (due_today로 재배선)
+        expected = due_today(blog, now)
 
         if expected == 0:
             continue
