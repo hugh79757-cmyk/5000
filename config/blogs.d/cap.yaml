@@ -59,8 +59,12 @@ blogs:
   name: 전기차분석
   pipeline: car
   platform: hugo
-  post_type: ev_analysis
-  prompt: ev/ev_analysis.md
+  post_type:
+  - ev_analysis
+  - top5_rank
+  prompt:
+    ev_analysis: ev/ev_analysis.md
+    top5_rank: rank/top5_rank.md
   repo: ev-hugo
   schedule:
     times:
