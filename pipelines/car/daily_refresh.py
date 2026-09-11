@@ -447,8 +447,15 @@ def replenish_topics(conn, min_pending=50):
 
     # FIX C: 시판 trim 보유 차량만 보충 풀에 포함 (displ=0·단종 재삽입 무한순환 방지)
     market_ok = {r[0] for r in c.execute("SELECT DISTINCT car_id FROM trims WHERE status='시판'").fetchall()}
+    # FIX C-2: 연비 데이터 게이트 — lookup_fuel_efficiency 통과 차량만 (skip_no_data 재순환 방지)
+    from pipelines.car.data_builder import lookup_fuel_efficiency
+    def _fuel_ok(car_row):
+        try:
+            return lookup_fuel_efficiency(conn, car_row["brand"], car_row["model"]) is not None
+        except Exception:
+            return False
     # EV 전용 필터
-    ev_cars = [car["car_id"] for car in popular if car["fuel_type"] in ("전기", "가솔린/하이브리드") and car["car_id"] in market_ok]
+    ev_cars = [car["car_id"] for car in popular if car["fuel_type"] in ("전기", "가솔린/하이브리드") and car["car_id"] in market_ok and _fuel_ok(car)]
 
     total_created = 0
 
@@ -470,6 +477,21 @@ def replenish_topics(conn, min_pending=50):
             (site_id, post_type)
         ).fetchone()[0]
         unpop_pending = current - pop_pending
+
+        # FIX C-2: ev_analysis는 연비 게이트까지 통과한 pending만 유효으로 계산
+        if post_type == "ev_analysis":
+            _rows = c.execute(
+                "SELECT c.car_id, c.brand, c.model, c.is_popular FROM topics t JOIN cars c ON t.car_id=c.car_id "
+                "WHERE t.site_id=? AND t.post_type=? AND t.status='pending' "
+                "AND EXISTS (SELECT 1 FROM trims tr WHERE tr.car_id=t.car_id AND tr.status='시판')",
+                (site_id, post_type)
+            ).fetchall()
+            _ok = [r for r in _rows if _fuel_ok(r)]
+            current = len(_ok)
+            if current >= min_pending:
+                continue
+            pop_pending = sum(1 for r in _ok if r["is_popular"])
+            unpop_pending = current - pop_pending
         min_popular = min_pending * 2 // 3      # 20
         min_unpopular = min_pending - min_popular  # 10
         need_popular = max(0, min_popular - pop_pending)
@@ -554,7 +576,7 @@ def replenish_topics(conn, min_pending=50):
 
             # 인기 EV 소진 시 비인기 전기차/하이브리드 추가
             if created < need:
-                unpop_ev = [car["car_id"] for car in unpopular if car["fuel_type"] in ("전기", "가솔린/하이브리드") and car["car_id"] in market_ok]
+                unpop_ev = [car["car_id"] for car in unpopular if car["fuel_type"] in ("전기", "가솔린/하이브리드") and car["car_id"] in market_ok and _fuel_ok(car)]
                 for car_id in unpop_ev:
                     if created >= need:
                         break
