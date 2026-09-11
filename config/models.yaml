@@ -69,6 +69,7 @@ gemini-3.5-flash:
   provider: google
   model: gemini-3.5-flash
   temperature: 0.85
+  enabled: false  # 2026-09-11 503 high-demand + empty content — 순수회전 낭비, 소유자 재활성화 시 제거
 gemini-3.5-flash-lite:
   provider: google
   model: gemini-3.5-flash-lite
@@ -81,6 +82,7 @@ gemini-2.5-flash:
   provider: google
   model: gemini-2.5-flash
   temperature: 0.85
+  enabled: false  # 2026-09-11 404 gone — "use gemini-3.6-flash" — dead tier, 매 패스 1요청 낭비 방지
 zen-bigpickle:
   provider: opencode-zen
   model: big-pickle
