@@ -60,6 +60,11 @@ def _analyze(html: str) -> list[str]:
     """렌더된 라이브 HTML 기준 구조 결함 목록 (빈 리스트면 정상)."""
     issues = []
 
+    # CQ03~CQ07은 쿠팡 상품구조(그리드/CTA/제휴문구)를 전제한 검사.
+    # 쿠팡 링크가 하나도 없는 글(비쿠팡 블로그: car/ETAP/stock/travel 등)은
+    # 제휴문구·상품이미지 검사 대상이 아님 → 스킵 (CQ03/CQ05 오탐 55건 해소)
+    is_coupang = bool(re.search(r"ads-partners\.coupang\.com|coupangcdn\.com|curation-images", html))
+
     # 1) 빈 리스트 항목 (라벨만 / 완전 빈 <li>)
     if re.search(r"<li>\s*(배송|이미지|쿠팡순위)\s*:\s*</li>", html):
         issues.append("[CQ01] 빈 불릿(라벨만)")
@@ -70,15 +75,15 @@ def _analyze(html: str) -> list[str]:
     if re.search(r"<li>[^<]*<[^>]*btn-price-check", html):
         issues.append("[CQ02] CTA가 리스트 항목에 갇힘")
 
-    # 3) 제휴문구 개수 (정상 1~2회)
+    # 3) 제휴문구 개수 (정상 1~2회) — 쿠팡 글에만 적용
     n = html.count(DISCLOSURE)
-    if n == 0:
+    if is_coupang and n == 0:
         issues.append("[CQ03] 제휴문구 누락")
     elif n > 2:
         issues.append(f"[CQ03] 제휴문구 과다({n}회)")
 
-    # 4) 상품/썸네일 이미지 누락 (r2 썸네일 또는 쿠팡 상품 이미지)
-    if not re.search(r"curation-images|r2\.dev|ads-partners\.coupang\.com|coupangcdn\.com", html):
+    # 4) 상품/썸네일 이미지 누락 — 쿠팡 글에만 적용
+    if is_coupang and not re.search(r"curation-images|r2\.dev|ads-partners\.coupang\.com|coupangcdn\.com", html):
         issues.append("[CQ05] 상품/썸네일 이미지 없음")
 
 

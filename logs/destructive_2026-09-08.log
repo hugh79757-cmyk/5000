@@ -6,3 +6,7 @@
 [2026-09-08 15:24] opencode --auto 프로세스 4개 종료 (88454=4일, 3333/13670/27522=1~2일) | 현재 세션 3939는 유지 | 사전카운트=5개 → 사후=1개 | 사용자 승인: '가비지 삭제 + 오래된 opencode 프로세스 정리'
 [2026-09-08 17:19] scheduler 재시작 (launchctl kickstart) | 사전: PID 45719 5일 가동, dispatcher 실행 0건, 다음 travel 슬롯 20:00 (2.5h 여유) | 목적: 수정 5건 적용(quiet gate logs, 6h recheck, disk 체커, dispatcher CLI 가드, keywords) | 백업: N/A(프로세스 재시작) | 사후: 새 PID + launchctl 상태 | 보존확인: schedule 큐 무손실
 [2026-09-08 17:28] Bun JIT dylib 가비지 2차 rm (~1784개/6.6G 재축적, 1시간만에) | 사전: avail 17Gi | 사후: avail 23Gi (89%) | 보존확인: 라이브 무관
+[2026-09-09 00:27] opencode Bun JIT dylib 가비지 3차 정리 | 사전카운트=3800개(14.4GB) | 백업=N/A(가비지) | 사후=잔존 1개(활성 핸들) avail 36→50Gi | 보존확인=YES(라이브 DB/파이프라인 무관)
+[2026-09-09 08:56] airlines_topics 가짜 항공사(Aero X Airways) exhausted 마킹 [DB UPDATE] | 사전카운트=100개(47+53) | 백업=data/travel-en.db.bak_aero_cleanup_20260909 | 사후=exhausted 1128, 미소진 9개(전부 실존 항공사) | 보존확인=YES(라이브 글/publish_log 무변경)
+[2026-09-09 16:59] rank-hugo 재배포 (검색 index.json 404 복구) — hugo.yaml outputs+search.enable 추가, _index.md frontmatter 작성, 빌드 rc=0, 배포 후 index.json/search 200 확인
+[2026-09-09 21:13] pick-hugo 검색 복구 배포 (hugo.yaml outputs/search 추가) | 사전=404 | 사후=200 index.json 934KB | 보존=YES
