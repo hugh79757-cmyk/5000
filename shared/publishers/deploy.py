@@ -19,12 +19,16 @@ def build_wrangler_env() -> dict:
       적용되어 잘못된 계정으로 배포하거나 Authentication error code: 10000을 유발.
       따라서 반드시 제거한다.
     - .env.common + 5000/.env를 로드해 계정 ID를 확보하고 복원한다.
+    - Phase 78: WRANGLER_TOKEN_AUTH=1이면 env var 토큰(GH Actions 주입)을
+      유지해 러너 배포를 허용한다. 미설정(Mac 기본)이면 기존대로 pop해
+      OAuth auth profile(hugh79757)을 강제한다 (I5 점증 수정).
     """
     from dotenv import load_dotenv
     load_dotenv(os.path.expanduser("~/.env.common"))
     load_dotenv(os.path.join(FIVEK_ROOT, ".env"), override=True)
     env = os.environ.copy()
-    env.pop("CLOUDFLARE_API_TOKEN", None)
+    if os.getenv("WRANGLER_TOKEN_AUTH", "") != "1":
+        env.pop("CLOUDFLARE_API_TOKEN", None)
     _cf_account = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
     if _cf_account:
         env["CLOUDFLARE_ACCOUNT_ID"] = _cf_account
