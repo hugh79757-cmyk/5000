@@ -50,7 +50,7 @@ def load_models_config():
 def get_client(provider_name, providers):
     provider = providers[provider_name]
     api_key = os.getenv(provider["api_key_env"], "")
-    return OpenAI(api_key=api_key, base_url=provider["base_url"], timeout=30)
+    return OpenAI(api_key=api_key, base_url=provider["base_url"], timeout=60)
 
 
 def _is_chinese_content(text: str) -> bool:
@@ -244,7 +244,7 @@ def _persist_rotation_state():
         pass  # 저장 실패는 회전을 멈추지 않음
 
 # ── 체인 시간 예산 (600초 P25 대신 조기 종료) ───────────────────────────
-CHAIN_TIME_BUDGET = 120            # 초 — 단일 generate() 최대 허용 시간
+CHAIN_TIME_BUDGET = 300            # 초 — 단일 generate() 최대 허용 시간
 
 
 def _is_quota_error(exc: Exception) -> bool:

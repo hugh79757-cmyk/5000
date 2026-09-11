@@ -87,14 +87,17 @@ zen-bigpickle:
   provider: opencode-zen
   model: big-pickle
   temperature: 0.85
+  enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
 zen-deepseek-free:
   provider: opencode-zen
   model: deepseek-v4-flash-free
   temperature: 0.85
+  enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
 zen-mimo-free:
   provider: opencode-zen
   model: mimo-v2.5-free
   temperature: 0.85
+  enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
 providers:
   openai:
     api_key_env: OPENAI_API_KEY
