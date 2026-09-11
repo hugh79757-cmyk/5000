@@ -3,3 +3,4 @@
 [2026-09-11 10:59] ev-hugo index.md 본문 이미지 삽입 2건 + deploy_site 재배포 | 사전카운트=이미지 0장 2포스트 | 백업=git 관리 대상 아님(외부 repo), 삽입 전 grep 확인 | 사후=ev.rotcha.kr 2 URL HTTP 200 + 이미지 렌더 확인 | 보존확인=본문 텍스트 무변경
 [2026-09-11 11:00] ops.db publish_error_events ev-hugo P04 5a3f216e closed 처리 (배포 완료로 해소) | 사전카운트=open 1행 | 백업=ops.db.bak_20260911_evclose | 사후=closed 1행 resolved_at 세팅 | 보존확인=타 블로그 행 무변경
 [2026-09-11 11:05] cars.displacement UPDATE 2행 (kona_hev_2027=1580, k8_hev_2027=1598 — public_fuel_data 코나 1.6GDI HEV/K8 1.6TGDI HEV 근거) | 사전카운트=displacement 0인 2행 | 백업=car.db.bak_20260911_evtopics | 사후=2행 세팅 + topics 5062/5063 skip_no_data→pending 복귀 | 보존확인=타 차량 행 무변경
+[2026-09-11 15:17:59] kona_hev_2027 연비 4.7 오류글 철회(재생성 대기): publish_log(topic 5062) 삭제, topics 5062 pending 복귀, content.db articles(ev-hugo/kona/ev_analysis) 삭제, Hugo 포스트 dir 삭제 — car.db/content.db 백업 .bak_20260911_evtype
