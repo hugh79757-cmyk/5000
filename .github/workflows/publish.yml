@@ -86,8 +86,9 @@ jobs:
           # 5000 리포 slim 8.3MB (26a6b26c5) — deploy.py 로컬 테마 감지 경유
 
       - name: run slot (R2 round-trip + dispatcher)
-        run: python scripts/run_slot.py tco-hugo ${{ inputs.dry_run && '--dry-run' || '' }}
-          # store_true 플래그는 조건부 포함 — '--dry-run=false' 형태는 argparse가 거부(exit 2)하므로 직접 치환 금지 (lint 수정 2026-09-12)
+        run: python scripts/run_slot.py tco-hugo ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
+          # store_true 플래그는 조건부 포함 — '--dry-run=false' 형태는 argparse가 거부(exit 2)하므로 직접 치환 금지.
+          # UI dispatch(boolean true)와 gh CLI(-f dry_run=true → 문자열 "true") 양쪽 커버 (lint 수정 2026-09-12/13)
 
       - name: elapsed report
         if: always()

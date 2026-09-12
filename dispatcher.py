@@ -1800,6 +1800,16 @@ def dispatch(blog_id):
         _record_failure(blog_id, "config_error", "blogs.yaml에 없는 blog_id")
         _tg_error(blog_id, "config", "blogs.yaml에 없는 blog_id")
         return None
+    # ── I1 상호배제 진입 가드 (Phase 79 G-②) ──
+    # scheduler 3곳 필터만으로는 우회 경로 존재: 대시보드 approve→execute_pending_fix→dispatch,
+    # 수동 CLI `python dispatcher.py <id>`. env 플래그로 대칭 차단:
+    #   - Mac (5000_RUNNER 미설정) → owner=runner 블로그 거부
+    #   - 러너 (5000_RUNNER=1) → owner=mac 블로그 거부
+    _owner = cfg.get("owner", "mac")
+    _is_runner = os.getenv("5000_RUNNER", "") == "1"
+    if (_is_runner and _owner == "mac") or (not _is_runner and _owner == "runner"):
+        logger.warning(f"[I1-GUARD] {blog_id} owner={_owner} vs env runner={_is_runner} — 차단")
+        return {"success": False, "reason": "owner_mismatch", "blog_id": blog_id}
     if cfg.get("status") != "active":
         logger.info(f"{blog_id} is not active")
         _record_failure(blog_id, "inactive", f"blog status = {cfg.get('status')}")

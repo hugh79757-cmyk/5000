@@ -501,6 +501,9 @@ def queue_publish(blog_id) -> None:
         if _blog_cfg and _blog_cfg.get("status") != "active":
             logger.info(f"Queue skip (inactive): {blog_id}")
             return
+        if _blog_cfg and _blog_cfg.get("owner", "mac") != "mac":
+            logger.info(f"[SKIP] {blog_id} owner={_blog_cfg.get('owner')} — runner 소유")
+            return
     except Exception as _e:
         logger.warning(f"queue_publish config check failed: {_e}")
 
@@ -613,6 +616,9 @@ def _catchup_missed_inner() -> None:
 
     for blog in blogs:
         if not isinstance(blog, dict) or blog.get("status") != "active":
+            continue
+        if blog.get("owner", "mac") != "mac":
+            logger.info(f"[SKIP] {blog.get('id')} owner={blog.get('owner')} — runner 소유 (catchup)")
             continue
         blog_id = blog["id"]
 
@@ -1325,6 +1331,9 @@ def register_schedules():
 
     for blog in blogs:
         if blog.get("status") != "active":
+            continue
+        if blog.get("owner", "mac") != "mac":
+            logger.info(f"[SKIP] {blog.get('id')} owner={blog.get('owner')} — runner 소유")
             continue
         blog_id = blog["id"]
         times = blog.get("schedule", {}).get("times", [])
