@@ -48,7 +48,7 @@
 
 | 프로바이더 | env var | Base URL | 무료 한도 |
 |-----------|---------|----------|----------|
-| Google | `GEMINI_API_KEY` | `generativelanguage.googleapis.com/v1beta/openai/` | - |
+| Google | `GEMINI_API_KEY` (+`_2`, `_3`) | `generativelanguage.googleapis.com/v1beta/openai/` | 3키 로테이션 (live=2번, 2026-09-12) |
 | Groq | `GROQ_API_KEY` | `api.groq.com/openai/v1` | 1,000 RPD |
 | Cerebras | `CEREBRAS_API_KEY` | `api.cerebras.ai/v1` | - |
 | OpenCode Zen | `OPENCODE_ZEN_API_TOKEN` | `opencode.ai/zen/v1` | - |
