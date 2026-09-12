@@ -43,6 +43,13 @@ def _md5(path: Path) -> str:
     return h.hexdigest()
 
 
+def _r2_key(local_path: str) -> str:
+    """R2 객체 키 = basename (Phase 78 Task 3 put 규격 — bare name).
+    probe #4 실패 수정: manifest 키(bare)와 STATE_FILES 경로(data/...)가 달라
+    get은 repo 루트에 내려받고 put은 data/에서 못 찾는 불일치 발생."""
+    return local_path.rsplit("/", 1)[-1]
+
+
 def get_state(s3) -> bool:
     """R2 → 로컬 복원 + manifest 대조. 불일치/부재 시 False (exit 2)."""
     manifest_path = ROOT / "data" / "manifest.json"
@@ -53,16 +60,18 @@ def get_state(s3) -> bool:
         return False
     manifest = json.loads(manifest_path.read_text())
     ok = 0
-    for key, expect in manifest.items():
-        if key == "manifest.json":
-            continue
+    for key in STATE_FILES:
         # manifest 엔트리 2형식 허용: plain md5 문자열(run_slot put) 또는
         # {'path','md5','size'} dict (Phase 78 Task 3 Mac put) — probe #3 실패 수정
-        expect_md5 = expect.get("md5", "") if isinstance(expect, dict) else expect
+        entry = manifest.get(_r2_key(key), manifest.get(key))
+        if entry is None:
+            print(f"[run_slot] get 실패: manifest에 없음: {key}", file=sys.stderr)
+            return False
+        expect_md5 = entry.get("md5", "") if isinstance(entry, dict) else entry
         local = ROOT / key
         local.parent.mkdir(parents=True, exist_ok=True)
         try:
-            s3.download_file(STATE_BUCKET, key, str(local))
+            s3.download_file(STATE_BUCKET, _r2_key(key), str(local))
         except Exception as e:
             print(f"[run_slot] get 실패: {key} — {e}", file=sys.stderr)
             return False
@@ -71,7 +80,7 @@ def get_state(s3) -> bool:
             print(f"[run_slot] md5 불일치: {key} expect={expect_md5} actual={actual}", file=sys.stderr)
             return False
         ok += 1
-    print(f"[run_slot] get_state: {ok}/{len(manifest)-1} 객체 복원+md5 OK")
+    print(f"[run_slot] get_state: {ok}/{len(STATE_FILES)} 객체 복원+md5 OK")
     return True
 
 
@@ -91,11 +100,16 @@ def put_state(s3, skip_opsdb: bool) -> bool:
                 print(f"[run_slot] WAL 체크포인트 실패 — put 금지: {key}", file=sys.stderr)
                 return False
         try:
-            s3.upload_file(str(local), STATE_BUCKET, key)
+            s3.upload_file(str(local), STATE_BUCKET, _r2_key(key))
         except Exception as e:
             print(f"[run_slot] put 실패: {key} — {e}", file=sys.stderr)
             return False
-        manifest[key] = _md5(local)
+        # manifest 규격 = Phase 78 Task 3 형식 (bare 키 → {path, md5, size})
+        manifest[_r2_key(key)] = {"path": key, "md5": _md5(local), "size": local.stat().st_size}
+    if not manifest:
+        # probe #4 교훈: 0객체 put 상태에서 manifest를 {}로 덮으면 R2 기준 무결성 파괴 — put 금지
+        print("[run_slot] put 0객체 — manifest 갱신 거부 (R2 기준 보호)", file=sys.stderr)
+        return False
     s3.put_object(Bucket=STATE_BUCKET, Key="manifest.json",
                   Body=json.dumps(manifest, indent=2, sort_keys=True).encode())
     print(f"[run_slot] put_state: {len(manifest)} 객체 put + manifest 갱신 OK (ops.db 제외: {skip_opsdb})")
