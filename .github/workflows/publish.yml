@@ -1,0 +1,97 @@
+name: publish (P2 pilot — tco-hugo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "dry-run (dispatcher 스킵)"
+        type: boolean
+        default: true
+  # cron 5개 슬롯은 Task 6에서 별도 커밋으로 추가 (PLAN Task 6 — G-C 게이트 후)
+
+concurrency:
+  group: publish-runner          # MASTER-PLAN §2 직렬화 — 러너 발행 1개씩만
+  cancel-in-progress: false
+
+env:
+  # LLM 10 (GH Secrets — Phase 78 Task 4a 등록분)
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+  ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+  NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  UPSTAGE_API_KEY: ${{ secrets.UPSTAGE_API_KEY }}
+  CLOVA_API_KEY: ${{ secrets.CLOVA_API_KEY }}
+  OPENCODE_ZEN_API_TOKEN: ${{ secrets.OPENCODE_ZEN_API_TOKEN }}
+  # Coupang 3 + Telegram 2
+  COUPANG_ACCESS_KEY: ${{ secrets.COUPANG_ACCESS_KEY }}
+  COUPANG_SECRET_KEY: ${{ secrets.COUPANG_SECRET_KEY }}
+  COUPANG_PARTNER_ID: ${{ secrets.COUPANG_PARTNER_ID }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  # R2 (이미지 + 상태 round-trip)
+  R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_STATE_BUCKET: 5000-state
+  # Cloudflare (deploy.py WRANGLER_TOKEN_AUTH=1 → env 토큰 사용 — Phase 78 abd3e066a)
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  WRANGLER_TOKEN_AUTH: "1"
+  # I1 진입 가드 — dispatcher.py dispatch() owner 가드가 env 플래그로 Mac↔러너 대칭 차단 (G-②)
+  5000_RUNNER: "1"
+  # 사이트 루트 — paths.py resolve_site_path가 /Users/twinssn/Projects prefix 치환 (Phase 78 71d3649ca)
+  SITES_ROOT: ${{ github.workspace }}/sites
+  # Python
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20   # 파일럿 예외 (MASTER-PLAN §2 주석 승인 완료): 설치~4분+왕복~4분+발행~2분+여유. §2 ≥360은 G4 80건/슬롯 기준.
+
+    steps:
+      - name: elapsed marker
+        run: date +%s > /tmp/t0
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: pip install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Hugo extended setup
+        uses: peaceiris/action-hugo-setup@v3
+        with:
+          hugo-version: "0.160.1"
+          extended: true
+
+      - name: wrangler install
+        run: npm install -g wrangler
+
+      - name: clone tco-hugo site
+        run: |
+          git clone --depth 1 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/tco-hugo.git sites/cap/tco-hugo
+          # SITES_ROOT/sites/cap/tco-hugo = resolve_site_path("/Users/twinssn/Projects/cap/tco-hugo") 치환 결과와 동일 구조
+
+      - name: blowfish theme copy
+        run: cp -r themes/blowfish sites/cap/tco-hugo/themes/blowfish
+          # 5000 리포 slim 8.3MB (26a6b26c5) — deploy.py 로컬 테마 감지 경유
+
+      - name: run slot (R2 round-trip + dispatcher)
+        run: python scripts/run_slot.py tco-hugo ${{ inputs.dry_run && '--dry-run' || '' }}
+          # store_true 플래그는 조건부 포함 — '--dry-run=false' 형태는 argparse가 거부(exit 2)하므로 직접 치환 금지 (lint 수정 2026-09-12)
+
+      - name: elapsed report
+        if: always()
+        run: |
+          T0=$(cat /tmp/t0); T1=$(date +%s)
+          echo "## ⏱ minutes 실측 (스코프 ④)" >> $GITHUB_STEP_SUMMARY
+          echo "total: $((T1 - T0))s" >> $GITHUB_STEP_SUMMARY
