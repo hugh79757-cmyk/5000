@@ -15,6 +15,8 @@ tier_order:
 - zen-mimo-free
 - zen-bigpickle
 - zhipu-glm
+- orca-ds4free
+- orca-hy3
 - default
 default:
   provider: deepseek
@@ -98,6 +100,14 @@ zen-mimo-free:
   model: mimo-v2.5-free
   temperature: 0.85
   enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
+orca-ds4free:
+  provider: orca
+  model: deepseek/deepseek-v4-flash-free
+  temperature: 0.85
+orca-hy3:
+  provider: orca
+  model: tencent/hy3-free
+  temperature: 0.85
 providers:
   openai:
     api_key_env: OPENAI_API_KEY
@@ -123,6 +133,9 @@ providers:
   nvidia:
     api_key_env: NVIDIA_API_KEY
     base_url: https://integrate.api.nvidia.com/v1
+  orca:
+    api_key_env: ORCA_API_KEY
+    base_url: https://api.orcarouter.ai/v1
   google:
     api_key_env: GOOGLE_API_KEY
     base_url: https://generativelanguage.googleapis.com/v1beta/openai/

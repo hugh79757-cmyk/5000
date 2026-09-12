@@ -1,16 +1,16 @@
 # LLM Fallback Chain — 글쓰기 모델 순서
 
-> 최종 갱신: 2026-08-04
+> 최종 갱신: 2026-09-12 (ORCA 2종 추가 — OrcaRouter 활성 확인)
 > 적용 대상: `shared/ai_writer.py` → `config/models.yaml`의 `tier_order`
 
 ## 동작 방식
 
 ```
-글쓰기 요청 → 무료 모델 16개 순차 시도 → 전부 실패 시 → 유료 DeepSeek V4 Flash
+글쓰기 요청 → 무료 모델 18개 순차 시도 → 전부 실패 시 → 유료 DeepSeek V4 Flash
 ```
 
 각 모델은 3회 재시도(exponential backoff) 후 다음 모델로 폴백.
-16개 무료 모델이 모두 실패해야 유료 DeepSeek가 호출됨.
+18개 무료 모델이 모두 실패해야 유료 DeepSeek가 호출됨.
 
 ## 폴백 체인 (순서대로)
 
@@ -32,7 +32,9 @@
 | 14 | zen-mimo-free | OpenCode Zen | mimo-v2.5-free | 무료 |
 | 15 | zen-bigpickle | OpenCode Zen | big-pickle | 무료 |
 | 16 | zhipu-glm | Zhipu AI | glm-4.5-flash | 무료 |
-| **17** | **default** | **DeepSeek** | **deepseek-v4-flash** | **★ 유료 — 최후 수단** |
+| 17 | orca-ds4free | OrcaRouter | deepseek/deepseek-v4-flash-free | 무료 (2026-09-12 활성 확인) |
+| 18 | orca-hy3 | OrcaRouter | tencent/hy3-free | 무료 (2026-09-12 활성 확인) |
+| **19** | **default** | **DeepSeek** | **deepseek-v4-flash** | **★ 유료 — 최후 수단** |
 
 ## Thinking 비활성화 모델
 
@@ -52,6 +54,7 @@
 | OpenCode Zen | `OPENCODE_ZEN_API_TOKEN` | `opencode.ai/zen/v1` | - |
 | NVIDIA NIM | `NVIDIA_API_KEY` | `integrate.api.nvidia.com/v1` | 40 RPM |
 | Zhipu AI | `ZHIPU_API_KEY` | `open.bigmodel.cn/api/paas/v4` | - |
+| OrcaRouter | `ORCA_API_KEY` | `api.orcarouter.ai/v1` | 무료 (GitHub 연동 활성) |
 | DeepSeek | `DEEPSEEK_API_TOKEN` | `api.deepseek.com/v1` | ★ 유료 |
 
 ## 설정 파일
@@ -82,4 +85,6 @@ gemini-2.5-flash   → google/gemini-2.5-flash
 zen-bigpickle      → opencode-zen/big-pickle
 zen-deepseek-free  → opencode-zen/deepseek-v4-flash-free
 zen-mimo-free      → opencode-zen/mimo-v2.5-free
+orca-ds4free       → orca/deepseek/deepseek-v4-flash-free
+orca-hy3           → orca/tencent/hy3-free
 ```
