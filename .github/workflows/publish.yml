@@ -82,8 +82,10 @@ jobs:
           # SITES_ROOT/sites/cap/tco-hugo = resolve_site_path("/Users/twinssn/Projects/cap/tco-hugo") 치환 결과와 동일 구조
 
       - name: blowfish theme copy
-        run: cp -r themes/blowfish sites/cap/tco-hugo/themes/blowfish
-          # 5000 리포 slim 8.3MB (26a6b26c5) — deploy.py 로컬 테마 감지 경유
+        run: |
+          mkdir -p sites/cap/tco-hugo/themes
+          cp -r themes/blowfish sites/cap/tco-hugo/themes/blowfish
+          # 5000 리포 slim 8.3MB (26a6b26c5). mkdir -p 필수 — depth-1 clone은 submodule 미초기화로 themes/ 부재 (probe #2 실패 수정)
 
       - name: run slot (R2 round-trip + dispatcher)
         run: python scripts/run_slot.py tco-hugo ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
