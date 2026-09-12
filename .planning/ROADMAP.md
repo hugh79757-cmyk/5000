@@ -838,3 +838,18 @@ Total in 898 ms +
 **범위 밖:** P2 파일럿(G0 compare-hugo) — phase-79 예정. STAP/TAP(G6) 별도 GSD. Pages git 빌드 영구 기각.
 
 **Gate:** P1 4개 diff 커밋 전 공동 검토 필수. Task 2 public 전환 실행 직전 사용자 확인.
+
+---
+
+## Phase 79: P2 파일럿 — G0 compare-hugo 러너 이관 (publish.yml + owner 플립 + 5슬롯 Gate)
+
+**Status:** 🔄 In Planning
+**Created:** 2026-09-12
+**상위 규약:** `.planning/migration/MASTER-PLAN.md` (I1~I10 불변식)
+**Phase dir:** `.planning/phases/phase-79-pilot-runner-g0/`
+
+**Goal:** compare-hugo 1개 블로그를 GH Actions 러너로 발행 이관, I6 관찰 게이트(5연속 슬롯: 러너 발행 정상+배포 라이브 200+catchup 정상+Mac 0건 교차 증명) 판정. 사용자 지정 스코프 6종 — ①publish.yml 스캐폴딩+probe ②WAL 체크포인트 round-trip 연결 ③owner 플립 실연(I1/I6) ④minutes 실측(R4) ⑤킬 스위치(I7 ≤10분) ⑥Gate 기준 유지.
+
+**블로커 (Task 0):** compare-hugo repo 낙후(unpushed 4 commits + 577 dirty — clone 시 다른 사이트 빌드됨), no_topics 4연실패(Gate 기준 재정의 필요).
+
+**Gate:** G-0(push 직전) / G-A(ops.db·content.db 창 — 안 a·b 사용자 결정) / G-①(WAL diff 공동 검토) / G-②(owner diff 공동 검토) / G-B(Gate 기준 안 A·B 사용자 결정) / G-C(cron 활성화 직전).
