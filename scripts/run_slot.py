@@ -56,6 +56,9 @@ def get_state(s3) -> bool:
     for key, expect in manifest.items():
         if key == "manifest.json":
             continue
+        # manifest 엔트리 2형식 허용: plain md5 문자열(run_slot put) 또는
+        # {'path','md5','size'} dict (Phase 78 Task 3 Mac put) — probe #3 실패 수정
+        expect_md5 = expect.get("md5", "") if isinstance(expect, dict) else expect
         local = ROOT / key
         local.parent.mkdir(parents=True, exist_ok=True)
         try:
@@ -64,8 +67,8 @@ def get_state(s3) -> bool:
             print(f"[run_slot] get 실패: {key} — {e}", file=sys.stderr)
             return False
         actual = _md5(local)
-        if actual != expect:
-            print(f"[run_slot] md5 불일치: {key} expect={expect} actual={actual}", file=sys.stderr)
+        if actual != expect_md5:
+            print(f"[run_slot] md5 불일치: {key} expect={expect_md5} actual={actual}", file=sys.stderr)
             return False
         ok += 1
     print(f"[run_slot] get_state: {ok}/{len(manifest)-1} 객체 복원+md5 OK")
