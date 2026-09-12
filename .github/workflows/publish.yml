@@ -68,7 +68,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Hugo extended setup
-        uses: peaceiris/action-hugo-setup@v3
+        uses: peaceiris/actions-hugo@v3
         with:
           hugo-version: "0.160.1"
           extended: true
