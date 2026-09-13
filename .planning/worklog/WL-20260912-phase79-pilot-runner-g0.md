@@ -59,3 +59,39 @@
 - probe는 dry-run — dispatcher 실발행 경로는 Task 5에서 최초 검증
 - R2 객체는 Task 3 시점(9/11 14:00) 바이트 + probe dry-run put (runner가 get한 그대로 반납, 바이트 동일)
 - Actions minutes 잔여 미실측 (billing API 404) — probe 1m44s/run 실측으로 역산 예정
+
+## Task 4 플립 실행 (2026-09-13 21:45~21:55, 시나리오 A — 20:45 quota_met 스킵 확정으로 조기 개시)
+
+- **20:45 슬롯 실측**: quota reached: 5 정시+catchup(3/3) 둘 다 `reason=quota_met` 스킵, consecutive 미집계. 17:31 마지막 발행+30분 경과 → 21:15 대기 불필요.
+- **T0 소모 정합**: 오늘 tco 5/5 발행 (bmw_x6_m, renault, k9, bmw_ix1, benz_sl). dispatcher 600s 수정(371b5fe23) 반영 후 13:35/17:30 정시 슬롯 2연속 성공.
+- **Step 1 최종 put**: WAL 체크포인트 전수(TRUNCATE 로그 (0,0,0)/(0,-1,-1)) → 11객체 중 10 put (ops.db 제외 — 안 b) + manifest 10 entries. R2 사후대조: 오늘 갱신 11객체 키 일치.
+- **Step 2 flip 커밋**: `3fbbf7266` tco-hugo owner: mac→runner (cap.yaml 1줄+주석).
+- **Step 3 push**: 10커밋 push (flip+대시보드 세션 수정분 전부), 패리티 0. destructive 로그 기록.
+- **Step 4 Mac pull 불필요**: Mac 워킹카피=flip 커밋 생성 원본. 러너가 origin에서 get.
+- **Step 5 가드 반대측 실측 [검증됨]**: Mac에서 `python3 dispatcher.py tco-hugo` → `[I1-GUARD] tco-hugo owner=runner vs env runner=False — 차단` + `{"success": false, "reason": "owner_mismatch"}`. 양측 대칭 가드 완결 (러너측 owner=mac 차단 (b/m0263 인용) + Mac측 owner=runner 차단).
+
+## 다음: 내일 06:30 슬롯 [SKIP] 확인 (Mac) → Task 5 러너 실발행 (workflow_dispatch dry_run=false) → Gate G-B 5슬롯 관찰 (Task 6 cron 활성화는 G-C 승인 후)
+
+## Task 5 러너 실발행 실행 (2026-09-13 18:05~18:12 UTC / 2026-09-14 KST, dry_run=false)
+
+### 1차 시도 #9 (34772373825) — 발행 성공, 배포 실패: Hugo build
+- 발행 OK (article_id=1, 싼타페 하이브리드, chars=3155, 품질게이트 전부 통과)
+- 배포 실패: `Hugo build failed: see deploy.log`
+- 근본원인: tco-hugo hugo.toml `themesDir = "/Users/twinssn/Projects/shared-themes"` Mac 절대경로. 러너에 부재. deploy.py는 로컬 테마(site/themes/blowfish) 존재 시 HUGO_THEMESDIR env 미세팅 → hugo.toml 절대경로 그대로 → 테마 로드 실패.
+- 수정: `ff48d7ae9` — deploy.py: 로컬 테마 존재해도 hugo.toml themesDir이 해당 머신에 부재하면 `HUGO_THEMESDIR=site/themes` override. 단위+종단간 hugo 빌드 검증 통과.
+
+### 2차 시도 (34773062833) — 발행 성공, 배포 실패: wrangler rc=1 (2.0s fast-fail)
+- 발행 OK (마이바흐 GLS 잔존가치, chars=3396). Hugo 빌드는 수정으로 통과 — 1차 원인 해결 확인.
+- 배포 실패: `Authentication error [code: 10000]` — GH Secret CLOUDFLARE_API_TOKEN(cfut_p2c... .env.common 것)이 hugh79757 계정 스코프 아님 (계정 API 실측: code 9109 Unauthorized).
+- 보조 수정: `191cd1a3a` — deploy.py wrangler 실패 시 tail 6줄만 로깅하던 것을 stderr 전체 라인 로깅으로 확대 (원인 파악용).
+- 수정: GH Secret CLOUDFLARE_API_TOKEN ← wrangler OAuth profile(hugh79757) 토큰(93자)으로 갱신 (PyNaCl 암호화 PUT, HTTP 204).
+
+### 3차 시도 (34773754514) — 완전 성공 [검증됨]
+- 발행 OK: "신차 Z4 10,090만원, 취등록세탁송비보험 더하면 실제 출고비용은 얼마?" (article_id=1, chars=3041, coupang=OK)
+- 배포 OK: wrangler rc=0 dur=8.1s, `deployed: true, pipeline_status: SUCCESS`
+- 라이브 확인: https://tco.rotcha.kr/posts/신차-z4-10090만원-취등록세탁송비보험-더하면-실제-출고비용은-얼마/ HTTP 200
+- Round-trip: get_state 11/11 + put_state 11 객체 + ops.db 보존 OK
+
+### 상태
+- tco-hugo 러너 파이프라인 종단간 (R2 상태 → 발행 → Hugo 빌드 → wrangler 배포 → 라이브) 전부 검증 완료.
+- 다음: Task 6 (cron 5슬롯) — G-C 게이트 승인 후 활성화. Task 7 minutes/킬스위치, Task 9 BUG-12 (G1 진입 전 필수).
