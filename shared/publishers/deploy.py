@@ -333,6 +333,11 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
     _local_theme = site / "themes" / _hugo_theme if _hugo_theme else None
     if not (_local_theme and _local_theme.is_dir()):
         _wrangler_env.setdefault("HUGO_THEMESDIR", _themes_dir)
+    elif not Path(_themes_dir).is_dir():
+        # Phase 79 T5: hugo.toml themesDir(Mac 절대경로)이 이 머신에 없고 로컬
+        # 테마(site/themes/)가 있으면 site/themes로 override — GH 러너 환경.
+        # HUGO_THEMESDIR env는 hugo.toml themesDir보다 우선 적용된다.
+        _wrangler_env["HUGO_THEMESDIR"] = str(site / "themes")
 
     log_path = Path(os.path.join(FIVEK_ROOT, "logs", "deploy.log"))
     if not _run_hugo_build(site, _wrangler_env, log_path):
