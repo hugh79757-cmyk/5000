@@ -47,8 +47,16 @@ def select_topic(conn, site_id="hotissue", days_window=7, skip_ids=None, post_ty
         " AND published_at > datetime('now', '-90 days')" + _pt_sql,
         (_blog_id,) + ((post_type,) if post_type else ()),
     ).fetchall()
+    # 30일 무조건 차단: publisher.py 가드#2(source_exists days=30, post_type 무관)와 정합.
+    # 이 쿼리 없으면 30일 내 다른 post_type으로 발행된 차량이 선택되어 AI 생성 후
+    # duplicate_source_id로 폐기됨(santafe_hev_2026 사례 — AI 비용 낭비 + P02 연쇄).
+    _blocked_30 = _cconn.execute(
+        "SELECT DISTINCT source_id FROM articles WHERE blog_id = ? AND data_source = 'car_db'"
+        " AND published_at > datetime('now', '-30 days')",
+        (_blog_id,),
+    ).fetchall()
     _cconn.close()
-    _combo_blocked = {r[0] for r in _blocked}
+    _combo_blocked = {r[0] for r in _blocked} | {r[0] for r in _blocked_30}
     _combo_filter = ""
     _combo_params = []
     if _combo_blocked:
