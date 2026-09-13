@@ -86,8 +86,18 @@ def get_state(s3) -> bool:
 
 def put_state(s3, skip_opsdb: bool) -> bool:
     """WAL 체크포인트 전수 → put → manifest 갱신 put.
-    규약: 체크포인트 실패 시 해당 DB put 금지 (shared/runner_state.py:34-43)."""
+    규약: 체크포인트 실패 시 해당 DB put 금지 (shared/runner_state.py:34-43).
+    skip_opsdb 시: ops.db는 put하지 않되 기존 manifest 항목은 보존
+    (get_state가 11파일 전부 manifest에서 찾으므로 항목 유실 시 다음 get 실패)."""
     keys = [k for k in PUT_KEYS if not (skip_opsdb and k == OPS_DB_KEY)] if skip_opsdb else PUT_KEYS
+    # 기존 manifest 로드 — skip_opsdb 시 ops.db 항목 보존 (G-A 안 b)
+    old_manifest = {}
+    try:
+        mp = ROOT / "data" / "manifest.json"
+        s3.download_file(STATE_BUCKET, "manifest.json", str(mp))
+        old_manifest = json.loads(mp.read_text())
+    except Exception:
+        pass
     manifest = {}
     for key in keys:
         local = ROOT / key
@@ -106,6 +116,12 @@ def put_state(s3, skip_opsdb: bool) -> bool:
             return False
         # manifest 규격 = Phase 78 Task 3 형식 (bare 키 → {path, md5, size})
         manifest[_r2_key(key)] = {"path": key, "md5": _md5(local), "size": local.stat().st_size}
+    # skip_opsdb: 기존 manifest의 ops.db 항목 보존 (put하지 않지만 get_state에서 필요)
+    if skip_opsdb and OPS_DB_KEY not in manifest:
+        ops_r2 = _r2_key(OPS_DB_KEY)
+        if ops_r2 in old_manifest:
+            manifest[ops_r2] = old_manifest[ops_r2]
+            print(f"[run_slot] manifest에 ops.db 항목 복원 (get-only 보존)", file=sys.stderr)
     if not manifest:
         # probe #4 교훈: 0객체 put 상태에서 manifest를 {}로 덮으면 R2 기준 무결성 파괴 — put 금지
         print("[run_slot] put 0객체 — manifest 갱신 거부 (R2 기준 보호)", file=sys.stderr)
