@@ -299,7 +299,7 @@ blogs:
   platform: hugo
   managed_by: pipeline
   status: active
-  daily_quota: 5
+  daily_quota: 3
   pipeline_timeout: 900
   domain: flights.techpawz.com
   cf_project: flights-hugo
@@ -311,10 +311,8 @@ blogs:
   ga4_property: '531065272'
   schedule:
     times:
-    - 07:40
     - '11:25'
     - '14:45'
-    - '18:30'
     - '21:55'
 - id: foodtour-hugo
   owner: mac
