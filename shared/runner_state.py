@@ -1,8 +1,10 @@
 """GH Actions 러너 ↔ R2 상태 round-trip 규약 (Phase 78, MASTER-PLAN I2).
 
 - I2 목록 원장 SSOT: 러너가 발행에 쓰는 상태 파일 전부.
-- STAP 원장(../STAP/data/stap_content.db) 제외 — 5000/data/stap_content.db는
-  사본 함정 (13,736행 vs STAP 정본 3,220행, WL-20260911 문서화).
+- STAP 외부 원장(../STAP/data/stap_content.db) 제외 — 5000/data/stap_content.db가
+  articles 원장 실체(콤보가드 source_exists 실소스, ARTICLES_DB 경유)이므로
+  **반드시 포함**. 외부 ../STAP 경로만 제외 (WL-20260911 사본 함정과 정합 —
+  5000/data 쪽이 러너 복원용 실체).
 - put 직전 WAL TRUNCATE 체크포인트 필수 — live WAL DB는 put↔get 사이
   변경되므로 체크포인트 없이 put하면 원본-객체 불일치 (Task 3 실증:
   1차 대조 4/4 MISMATCH → 스냅샷 절차로 12/12 OK).
@@ -24,6 +26,7 @@ STATE_FILES = [
     "data/rap.db",          # RAP (WAL)
     "data/stock.db",        # STAP (DELETE)
     "data/senior.db",       # SEAP (DELETE)
+    "data/stap_content.db",  # articles 원장 (콤보가드 실소스) — 갭B 수정 2026-09-13
     "data/failure_count.json",
     "data/cooldown.json",
     "data/llm_rotation_state.json",

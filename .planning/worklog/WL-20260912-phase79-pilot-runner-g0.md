@@ -95,3 +95,23 @@
 ### 상태
 - tco-hugo 러너 파이프라인 종단간 (R2 상태 → 발행 → Hugo 빌드 → wrangler 배포 → 라이브) 전부 검증 완료.
 - 다음: Task 6 (cron 5슬롯) — G-C 게이트 승인 후 활성화. Task 7 minutes/킬스위치, Task 9 BUG-12 (G1 진입 전 필수).
+
+## 갭A/B 긴급 수정 (2026-09-14 03:00 KST — 사용자 지시 m0467 D/F/V 시퀀스)
+
+### 진단 확정
+- **D-1 원격 car.db**: 러너 발행 4행 존재 (santafe 17:43, maybach 17:57, q8 18:04, z4 18:11 UTC). Mac→원격 put 정상 (sl 17:30 포함, 351행 = 맥 347 + 러너 4).
+- **D-2 BUG-14 확정**: 원격·맥 모두 santafe 8/27행 존재 → 러너가 17일 전 발행 차량 재발행. 원인 2단: (1) dup-precheck SQL이 `-14 days` 윈도우(주석은 30일) — 8/27은 9/13 기준 17일 전이라 precheck 통과. (2) publisher 가드(source_exists)는 ARTICLES_DB=stap_content.db 조회인데 **stap_content.db가 STATE_FILES/R2에 부재(NoSuchKey)** → 러너는 빈 articles로 가드 통과. → santafe/maybach/q8 팬텀 재발행(중복). z4는 5/24 마지막 발행이라 정상 신규.
+- **D-3**: run_slot put/get은 boto3+R2_ENDPOINT(원격)만 — local 함정 없음. npx wrangler CLI에 CLOUDFLARE_API_TOKEN env 함정 재확인(env -u 필수).
+- **D-4**: 러너 발행 3+1건 슬러그 origin 부재 (z4/maybach/q8/santafe 전부 git ls-tree 0) — 갭A 확정.
+
+### 수정 완료
+- **F-1 갭B**: `shared/runner_state.py` STATE_FILES에 `data/stap_content.db` 추가 + 모듈 docstring 정정 (5000/data 쪽이 articles 원장 실체, 콤보가드 실소스 — 외부 ../STAP 경로만 제외).
+- **F-2 갭A**: `scripts/run_slot.py` push_back_site() 추가 — dispatcher 성공 후 sites/{group}/{blog} content/posts만 commit→pull --rebase→push(CAP_PAT). nothing-to-commit 정상통과, push 실패=exit 4(G-B 러너 귀속 실패). CAP_PAT 권한 실측: tco-hugo admin/push OK. publish.yml clone depth 1→50 (rebase 안정).
+- **F-3 갭A 백필**: 맥 9/13 발행 5건 origin push (baccd5f) — 346 파일(341+5) 정합 확인.
+- **F-4 맥 권위 병합-재시딩**: 원격 러너 4행(publish_log 상세칼럼 포함) 맥 로컬 병합 + WAL 체크포인트 전수 + **12객체 전량 원격 put(stap 최초 포함, 129MB)** + manifest 12 entries 갱신 + **원격 get 12/12 md5 재검증 통과**. blind put 아닌 병합-재시딩 (G1 재시딩 프로토타입).
+- **F-5 Z4 회수 안 함**: z4는 5/24 마지막 발행(4개월+)이라 정상 신규 발행 — 원격 origin에 push-back 예정(러너 재실행 시). santafe/maybach/q8 팬텀 재발행 — live에는 각 2개 포스트 존재하나 콘텐츠 상이(다른 제목/슬러그)로 SEO 중복도 낮음. 라이브 삭제는 사용자 판단 사항으로 남김.
+
+### 검증 → G-B 재개 조건
+- V-1: dry-run probe 재실행 — get 12/12(stap 포함) → push-back no-op → put 12+manifest.
+- V-2: 통과 시 G-B 재개 — 기존 3회(귀속실패 2+상태공백 1) 카운트 리셋 후 5연속 관찰.
+- V-3: Task 6 cron 금지 유지 (G-B 통과 전까지).

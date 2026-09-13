@@ -78,7 +78,8 @@ jobs:
 
       - name: clone tco-hugo site
         run: |
-          git clone --depth 1 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/tco-hugo.git sites/cap/tco-hugo
+          git clone --depth 50 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/tco-hugo.git sites/cap/tco-hugo
+          # depth 50 — 갭A push-back 시 pull --rebase 안정성 (depth 1은 rebase 불안)
           # SITES_ROOT/sites/cap/tco-hugo = resolve_site_path("/Users/twinssn/Projects/cap/tco-hugo") 치환 결과와 동일 구조
 
       - name: blowfish theme copy

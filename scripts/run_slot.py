@@ -132,6 +132,52 @@ def put_state(s3, skip_opsdb: bool) -> bool:
     return True
 
 
+def push_back_site(blog_id: str, git_status_list: list) -> bool:
+    """갭A 수정: 발행된 Hugo 포스트를 site repo origin에 push-back.
+
+    러너 발행 파일이 ephemeral 환경에서 소실되는 것 방지 (G-B 러너 귀속).
+    sites/{group}/{blog}/ 에서 content/posts 변화분만 commit → pull --rebase → push.
+    nothing-to-commit는 정상 통과 (deploy만 실패한 슬롯 등).
+    """
+    import subprocess
+    # site 경로 찾기 — SITES_ROOT 하위 group 디렉터리 스캔
+    sites_root = Path(os.getenv("SITES_ROOT", str(ROOT / "sites")))
+    site_dir = None
+    for grp in sites_root.iterdir():
+        cand = grp / blog_id
+        if cand.is_dir() and (cand / ".git").exists():
+            site_dir = cand
+            break
+    if site_dir is None:
+        print(f"[run_slot] push-back 스킵: site repo 부재 ({blog_id})", file=sys.stderr)
+        return True  # 배포만 있는 블로그(사이트 repo 없음)는 정상
+    def _git(*args):
+        r = subprocess.run(["git", "-C", str(site_dir), *args],
+                            capture_output=True, text=True, timeout=120)
+        return r
+    _git("config", "user.email", "runner@5000.local")
+    _git("config", "user.name", "5000-runner")
+    r_add = _git("add", "content/posts")
+    r_ci = _git("commit", "-m", f"publish(runner): {blog_id} {git_status_list[0] if git_status_list else 'slot'}",
+                "--", "content/posts")
+    if r_ci.returncode != 0 and "nothing to commit" in (r_ci.stdout + r_ci.stderr):
+        print("[run_slot] push-back: 신규 commit 없음 — 정상 통과", file=sys.stderr)
+        return True
+    if r_ci.returncode != 0:
+        print(f"[run_slot] push-back commit 실패: {r_ci.stderr[:200]}", file=sys.stderr)
+        return False
+    r_pull = _git("pull", "--rebase", "origin", "main")
+    if r_pull.returncode != 0:
+        print(f"[run_slot] push-back pull 실패: {r_pull.stderr[:200]}", file=sys.stderr)
+        return False
+    r_push = _git("push", "origin", "HEAD:main")
+    if r_push.returncode != 0:
+        print(f"[run_slot] push-back push 실패: {r_push.stderr[:200]}", file=sys.stderr)
+        return False
+    print(f"[run_slot] push-back OK: {blog_id} content/posts → origin/main", file=sys.stderr)
+    return True
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("blog_id")
@@ -163,6 +209,16 @@ def main() -> int:
         if proc.returncode != 0:
             print(f"[run_slot] dispatcher exit={proc.returncode}", file=sys.stderr)
             return proc.returncode
+
+        # 갭A 수정: 발행 성공 시 site repo push-back (파일 소실 방지)
+        _files = []
+        for _ln in (proc.stdout or "").splitlines():
+            if '"file":' in _ln:
+                _f = _ln.split('"file": "')[1].split('"')[0] if '"file": "' in _ln else ""
+                if _f:
+                    _files.append(Path(_f).parent.name)
+        if _files and not push_back_site(args.blog_id, _files):
+            return 4  # G-B 러너 귀속 실패 — 명시적 실패
 
     # put은 발행 성공/실패 무관 상태 반납 (실패 시에도 실패 기록 카운터가 갱신돼야 함)
     if not put_state(s3, skip_opsdb=True):
