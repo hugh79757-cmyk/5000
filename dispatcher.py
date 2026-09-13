@@ -2049,7 +2049,7 @@ def dispatch(blog_id):
             get_monitor().report(
                 blog_id, {"reason": "deploy_error"}, phase="post_deploy", extra={})
             _record_failure(blog_id, "deploy", _deploy_err[:300])
-        if reason not in ("quota_met", "daily_quota_reached", "already_running", "duplicate_title", "cooldown"):
+        if reason not in ("quota_met", "daily_quota_reached", "already_running", "duplicate_title", "cooldown", "interval_skip"):
             _record_failure(blog_id, reason, f"pipeline 실패: {reason}")
             # no_result/no_content — 실제 파이프라인 실패 → 실시간 푸시 + 요약 기록
             if reason in ("no_result", "no_data", "fetch_error", "no_content"):

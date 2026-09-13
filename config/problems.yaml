@@ -1010,6 +1010,7 @@ problems:
   reason_keys:
   - invalid_result_contract
   - non_dict_result
+  - pipeline_returned_false
   threshold: consecutive:3
   alert_template: '[MAJOR] Invalid result contract
 

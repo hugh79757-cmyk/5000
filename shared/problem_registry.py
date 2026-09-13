@@ -683,7 +683,7 @@ _register(ProblemSpec(
 ))
 _register(ProblemSpec(
     problem_id="P28", name_ko="Invalid pipeline result contract", severity="MAJOR",
-    reason_keys=("invalid_result_contract", "non_dict_result"), hook="result_parse",
+    reason_keys=("invalid_result_contract", "non_dict_result", "pipeline_returned_false"), hook="result_parse",
     threshold="consecutive:3",
     alert_template="[MAJOR] Invalid result contract\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
     action="Update the pipeline to return the standard result dictionary.",
