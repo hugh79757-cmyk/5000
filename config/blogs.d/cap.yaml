@@ -155,7 +155,7 @@ blogs:
   daily_quota: 5
   domain: tco.rotcha.kr
   id: tco-hugo
-  owner: mac
+  owner: runner  # Phase 79 T4 플립 (2026-09-13) — G0 파일럿 러너 이관
   deploy_type: pages
   name: TCO분석
   pipeline: car
