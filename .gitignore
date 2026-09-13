@@ -110,6 +110,8 @@ naver_captcha*.txt
 # LLM 폴백 회전 상태 (발행마다 갱신되는 런타임 상태)
 data/llm_rotation_state.json
 data/.lock_*
+# playwright chromium self-heal 설치 시도 마커 (260913-g12)
+data/.pw_chromium_install_attempt
 # 로컬 산출물/이미지/로그 (output/은 기존 12개 파일 git 추적 중 — 제거 시 git rm 필요하므로 현행 유지)
 blow_copy.png
 ops_dashboard/logs/

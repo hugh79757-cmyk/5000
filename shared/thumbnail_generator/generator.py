@@ -136,6 +136,126 @@ def _import_playwright():
         return None, f"playwright import error: {e}"
 
 
+# ── Chromium self-heal (cache purge recovery) ────────────────────────────────
+# 사용자가 ~/Library/Caches/ms-playwright를 주기적으로 삭제해 chromium 바이너리만
+# 유실되면 "Executable doesn't exist" 크래시로 파이프라인이 며칠간 중단된다.
+# launch 직전 부재를 감지해 자동 설치 후 계속 진행한다 (260913-g12).
+
+_PW_INSTALL_LOCK = "/tmp/5000_pw_chromium_install.lock"
+_PW_INSTALL_RETRY_SECONDS = 6 * 3600  # 설치 실패(오프라인 등) 후 6시간 재시도 쿨다운
+_PW_INSTALL_WAIT_SECONDS = 240  # 다른 프로세스가 설치 중일 때 executable 출현 폴링 상한
+_PW_INSTALL_TIMEOUT = 600  # playwright install chromium 다운로드 timeout (280MB)
+
+
+def _chromium_attempt_marker() -> Path:
+    """설치 시도 마커 경로 — repo_root/data/ 기준 (CWD 무관)."""
+    return Path(__file__).resolve().parents[2] / "data" / ".pw_chromium_install_attempt"
+
+
+def _install_chromium_locked() -> None:
+    """
+    chromium 바이너리가 없을 때 1회 자동 설치한다.
+
+    - /tmp lock(non-blocking)으로 dispatcher 동시 실행 시 중복 280MB 다운로드 방지
+    - 잠금 획득 실패(다른 프로세스 설치 중) → executable 출현을 5s 간격 폴링
+    - 마커 쿨다운(6h)으로 오프라인 재시도 루프 방지
+    - 실패는 조용히 통과하지 않고 RuntimeError raise
+    """
+    import fcntl as _fl
+    import subprocess
+    import time as _time
+
+    from playwright.sync_api import sync_playwright as _spw
+
+    marker = _chromium_attempt_marker()
+
+    # 마커 쿨다운 — 최근 실패(성공 여부와 무관하게 마지막 시도) 후 6h 내 재시도 금지.
+    # 마커에는 성공 시각도 기록하나, 성공 시 executable이 존재하므로 이 경로 자체에
+    # 진입하지 않는다. 여기 도달했다는 것은 마지막 시도가 실패했다는 뜻이다.
+    if marker.exists():
+        try:
+            last = _time.time() - marker.stat().st_mtime
+            if last < _PW_INSTALL_RETRY_SECONDS:
+                raise RuntimeError(
+                    f"[ThumbGen] playwright chromium install skipped — "
+                    f"last attempt {_PW_INSTALL_RETRY_SECONDS // 3600}h cooldown "
+                    f"(marker: {marker}, age: {int(last)}s)"
+                )
+        except OSError:
+            pass  # 마커 stat 실패는 설치 시도를 계속 진행
+
+    lock_file = open(_PW_INSTALL_LOCK, "w")
+    try:
+        try:
+            _fl.flock(lock_file, _fl.LOCK_EX | _fl.LOCK_NB)
+        except BlockingIOError:
+            # 다른 프로세스가 이미 설치 중 — 출현 폴링
+            deadline = _time.time() + _PW_INSTALL_WAIT_SECONDS
+            with _spw() as pw:
+                exe = pw.chromium.executable_path
+            while _time.time() < deadline:
+                if os.path.exists(exe):
+                    logger.info("[ThumbGen] Chromium installed by concurrent process — continuing")
+                    return
+                _time.sleep(5)
+            raise RuntimeError(
+                f"[ThumbGen] timed out waiting for concurrent chromium install "
+                f"({_PW_INSTALL_WAIT_SECONDS}s): {exe}"
+            )
+
+        # 잠금 획득 — 다른 프로세스가 방금 완료했을 수 있으니 재확인
+        with _spw() as pw:
+            exe = pw.chromium.executable_path
+        if os.path.exists(exe):
+            logger.info("[ThumbGen] Chromium appeared while waiting for lock — skipping install")
+            return
+
+        logger.info(
+            "[ThumbGen] Chromium executable missing — attempting self-install "
+            "(this can take a few minutes)"
+        )
+        proc = subprocess.run(
+            [sys.executable, "-m", "playwright", "install", "chromium"],
+            timeout=_PW_INSTALL_TIMEOUT,
+            capture_output=True,
+        )
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.touch()  # 성공/실패 모두 시도 시각 기록
+
+        if proc.returncode != 0:
+            logger.error(
+                "[ThumbGen] playwright install chromium FAILED (rc=%d): %s",
+                proc.returncode,
+                (proc.stderr or b"").decode(errors="replace")[-500:],
+            )
+            raise RuntimeError(
+                f"[ThumbGen] playwright install chromium failed (rc={proc.returncode}): "
+                f"{(proc.stderr or b'').decode(errors='replace')[-500:]}"
+            )
+        if not os.path.exists(exe):
+            raise RuntimeError(
+                f"playwright chromium executable missing after install attempt: {exe}"
+            )
+        logger.info("[ThumbGen] Chromium self-install complete")
+    finally:
+        # 잠금 획득 성공 여부와 무관게 fd는 닫는다 (close가 flock 해제)
+        try:
+            lock_file.close()
+        except OSError:
+            pass
+
+
+def _ensure_chromium(pw) -> None:
+    """
+    chromium 실행 파일이 존재하는지 확인하고, 없으면 자동 설치한다.
+
+    정상 상태(이미 설치됨)에서는 os.path.exists 1회 체크만 추가된다.
+    """
+    if os.path.exists(pw.chromium.executable_path):
+        return
+    _install_chromium_locked()
+
+
 # ── Public API ──────────────────────────────────────────────────────────────
 
 def generate_thumbnail(
@@ -219,6 +339,7 @@ def generate_thumbnail(
                 raise RuntimeError(err)
 
             with sync_playwright() as pw:
+                _ensure_chromium(pw)
                 browser = pw.chromium.launch()
                 page = browser.new_page(
                     viewport={"width": RENDER_WIDTH, "height": RENDER_HEIGHT},
@@ -406,6 +527,7 @@ def generate_batch(
 
     results = []
     with sync_playwright() as pw:
+        _ensure_chromium(pw)
         browser = pw.chromium.launch()
         page = browser.new_page(
             viewport={"width": RENDER_WIDTH, "height": RENDER_HEIGHT},
