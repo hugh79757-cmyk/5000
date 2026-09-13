@@ -94,6 +94,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-09-13 | Quick 260913-g12 — playwright chromium self-heal guard (generator.py `_ensure_chromium` 2 launch 지점 배선, fcntl 잠금+6h 쿨다운+240s 대기, 단위테스트 6건) | `c87682b88`, `7703a72c3` |
 | 2026-09-07 | ETAP H2-GUARD 영어 바이패스 + affiliate 카드 버튼 마크업 + 라이브 14블로그 H2 4,196 복원/Book Now 2,573 버튼화 + Pages 재배포 2회차 | `미커밋` |
 | 2026-08-26 | 발행 오류 트리아지 — senior W5 R13 Hugo 본문이미지 삽입(_ensure_body_image) + 백필 12건+twitter_card 19건 배포, playwright chromium 재설치(rap3/5 회복), foodtour/adventure 스테일 확인 | `본 커밋` |
 | 2026-08-25 | ETAP topic_expander — 5블로그(airlines/airports/nature/watersports/deals) auto-refill + scheduler 01:00 연동 | `27130ee` + `62691e6` |
