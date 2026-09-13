@@ -407,6 +407,12 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
         tail = ""
         try:
             tail_lines = Path(log_path).read_text(encoding="utf-8", errors="replace").splitlines()[-40:]
+            # Phase 79 T5: tail 6줄이 wrangler 트레일러만 잡아 실제 에러가 잘림.
+            # 에러 컨텍스트 전체를 stderr 라인 단위로 로깅한다.
+            for _tl in tail_lines:
+                _tl_s = _tl.strip()
+                if _tl_s:
+                    logger.error("[deploy] %s wrangler-stderr | %s", site.name, _tl_s[:400])
             tail = " | ".join(tail_lines[-6:])
         except Exception:
             pass
