@@ -903,6 +903,9 @@ problems:
   reason_keys:
   - scheduler_timeout
   - timeout_600s
+  - pipeline_timeout_300s
+  - pipeline_timeout_600s
+  - pipeline_timeout_900s
   threshold: always
   alert_template: '[CRITICAL] Scheduler timeout
 

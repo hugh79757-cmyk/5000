@@ -659,7 +659,7 @@ def lookup_hook(problem_id: str) -> str | None:
 # --- Phase 70: structured operational error events ---
 _register(ProblemSpec(
     problem_id="P25", name_ko="Scheduler timeout", severity="CRITICAL",
-    reason_keys=("scheduler_timeout", "timeout_600s"), hook="scheduler",
+    reason_keys=("scheduler_timeout", "timeout_600s", "pipeline_timeout_300s", "pipeline_timeout_600s", "pipeline_timeout_900s"), hook="scheduler",
     threshold="always",
     alert_template="[CRITICAL] Scheduler timeout\nblog: {blog_id}\nproblem: {problem_id}\nstage: {phase}\naction: {action}",
     action="Review the blocked subprocess and its external request timeouts — preflight 확인: `python3 -c \"import sys; sys.path.insert(0,'.'); from dispatcher import preflight_check; preflight_check('{blog_id}')\"` (60s 초과 시 corpus cap/샘플링 로그 확인)",

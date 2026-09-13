@@ -1887,14 +1887,19 @@ def dispatch(blog_id):
         # defeating the 300s timeout. Abandon the thread on timeout instead.
         _exec = _DaemonThreadPoolExecutor(max_workers=1, thread_name_prefix="pipeline")
         _fut = _exec.submit(_run_pipeline, cfg)
+        # 2026-09-13: camping-hugo 오보고 수정 — 하드코딩 300s가 scheduler의
+        # per-blog pipeline_timeout(600/900s)보다 먼저 만료되어 deploy rc=0
+        # 성공(96.3s) 후에도 pipeline_timeout_300s 허위 실패 보고. config 값과
+        # 정렬한다 (scheduler.py:412와 동일 키, 기본 600).
+        _pipeline_timeout_s = int(cfg.get("pipeline_timeout", 600))
         try:
-            result = _fut.result(timeout=300)
+            result = _fut.result(timeout=_pipeline_timeout_s)
         except FuturesTimeoutError:
-            logger.warning(f"[dispatch] pipeline timeout 300s for {blog_id}")
+            logger.warning(f"[dispatch] pipeline timeout {_pipeline_timeout_s}s for {blog_id}")
             # ponytail: terminate spawned children (hugo/wrangler) so they release
             # /tmp/wrangler_deploy.lock instead of holding it for the full run.
             _terminate_pipeline_children(blog_id)
-            result = {"success": False, "reason": "pipeline_timeout_300s"}
+            result = {"success": False, "reason": f"pipeline_timeout_{_pipeline_timeout_s}s"}
         finally:
             _exec.shutdown(wait=False)  # abandon worker thread, let process exit
     except Exception as e:
