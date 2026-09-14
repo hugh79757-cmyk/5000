@@ -1,16 +1,20 @@
-name: publish (P2 pilot — tco-hugo)
+name: publish (P2 runner slot)
 
 on:
   workflow_dispatch:
     inputs:
+      blog:
+        description: "blog_id (cap 그룹: tco-hugo, ev-hugo 등)"
+        type: string
+        required: true
       dry_run:
         description: "dry-run (dispatcher 스킵)"
         type: boolean
         default: true
-  # cron 5개 슬롯은 Task 6에서 별도 커밋으로 추가 (PLAN Task 6 — G-C 게이트 후)
+  # cron N개 슬롯은 Task 6/G-C 승인 후 별도 커밋으로 추가 (활성화 금지 — 파라미터화만)
 
 concurrency:
-  group: publish-runner          # MASTER-PLAN §2 직렬화 — 러너 발행 1개씩만
+  group: publish-${{ inputs.blog || 'tco-hugo' }}   # 블로그별 그룹 분리 (m0125 #5) — car 그룹 DB 공유(car.db/content.db) 병렬 충돌 시 G-C에서 publish-lock-car 후보
   cancel-in-progress: false
 
 env:
@@ -76,20 +80,22 @@ jobs:
       - name: wrangler install
         run: npm install -g wrangler
 
-      - name: clone tco-hugo site
+      - name: clone site repo (CAP_PAT)
         run: |
-          git clone --depth 50 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/tco-hugo.git sites/cap/tco-hugo
+          BLOG=${{ inputs.blog || 'tco-hugo' }}
+          git clone --depth 50 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/${BLOG}.git sites/cap/${BLOG}
           # depth 50 — 갭A push-back 시 pull --rebase 안정성 (depth 1은 rebase 불안)
-          # SITES_ROOT/sites/cap/tco-hugo = resolve_site_path("/Users/twinssn/Projects/cap/tco-hugo") 치환 결과와 동일 구조
+          # SITES_ROOT/sites/cap/{blog} = resolve_site_path("/Users/twinssn/Projects/cap/{blog}") 치환 결과와 동일 구조
 
       - name: blowfish theme copy
         run: |
-          mkdir -p sites/cap/tco-hugo/themes
-          cp -r themes/blowfish sites/cap/tco-hugo/themes/blowfish
+          BLOG=${{ inputs.blog || 'tco-hugo' }}
+          mkdir -p sites/cap/${BLOG}/themes
+          cp -r themes/blowfish sites/cap/${BLOG}/themes/blowfish
           # 5000 리포 slim 8.3MB (26a6b26c5). mkdir -p 필수 — depth-1 clone은 submodule 미초기화로 themes/ 부재 (probe #2 실패 수정)
 
       - name: run slot (R2 round-trip + dispatcher)
-        run: python scripts/run_slot.py tco-hugo ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
+        run: python scripts/run_slot.py '${{ inputs.blog || 'tco-hugo' }}' ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
           # store_true 플래그는 조건부 포함 — '--dry-run=false' 형태는 argparse가 거부(exit 2)하므로 직접 치환 금지.
           # UI dispatch(boolean true)와 gh CLI(-f dry_run=true → 문자열 "true") 양쪽 커버 (lint 수정 2026-09-12/13)
 
