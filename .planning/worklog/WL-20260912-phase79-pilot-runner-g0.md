@@ -115,3 +115,33 @@
 - V-1: dry-run probe 재실행 — get 12/12(stap 포함) → push-back no-op → put 12+manifest.
 - V-2: 통과 시 G-B 재개 — 기존 3회(귀속실패 2+상태공백 1) 카운트 리셋 후 5연속 관찰.
 - V-3: Task 6 cron 금지 유지 (G-B 통과 전까지).
+
+## Task 5 실발행 2회 — push_back 실증 + G-B 1/5 (2026-09-14 09:45~09:56 KST)
+
+### 실행 창
+- 09:45 dispatch (run 34800267076): Mac 슬롯 회피 창(car계열 전무, luxury 발행 완료 직후 큐 빈 시점)
+- 09:53 dispatch (run 34800729631): 토큰 갱신 직후
+
+### 1차 (run 34800267076) — 4종 중 3통과, 배포만 실패
+- ① 발행: article 13999 "2026년 X5 구매 고민 중이라면 총비용 8336만원 시뮬레이션으로 결정하세요" (coupang=OK)
+- ② 배포 실패: wrangler rc=1 2.9s — `Authentication error [code: 10000]` / `Invalid access token [code: 9109]`
+- ③ push-back OK: X5 슬러그 origin/main 실재 (content/posts 347 = 346+1 정합)
+- ④ round-trip 12/12 OK
+- 원인: GH Secret CLOUDFLARE_API_TOKEN(wrangler OAuth 토큰, 9/13 18:41 추출)이 ~15h 만료. wrangler OAuth access token 수명 짧음 — 로컬은 refresh 자동갱신, GH Secret 정적 저장은 갱신 안 됨.
+- X5 글 origin 커밋됐으나 라이브 미배포(deployed:false FAILED_TRANSIENT) — 다음 러너 실행 시 catchup 재배포 예정
+
+### 토큰 갱신
+- fresh 토큰: `env -u CLOUDFLARE_API_TOKEN wrangler auth token` → CF API /accounts 실측 유효(hugh79757)
+- GH Secret PUT 422(키 로테이션) → repo public-key 재조회 → SealedBox+key_id → PUT 204
+
+### 2차 (run 34800729631) — 4종 전부 통과 [G-B 1/5 카운트]
+- ① 발행: article 14000 "마이바흐 S클래스를 사면 매달 얼마가 빠질까? 유지비 총정리 [2026년 9월]" (chars=3149, coupang=OK)
+- ② 배포: wrangler rc=0 8.2s deployed:true SUCCESS
+- ③ push-back OK: 마이바흐 슬러그 origin/main 실재 (content/posts 348 = 347+1 정합)
+- ④ round-trip: get_state 12/12 + put_state 12 + ops.db 제외 True
+- 라이브 HTTP 200 확인 (tco.rotcha.kr/posts/마이바흐-s클래스를-사면-...)
+- 후보 가드: EV4/일렉트리파이드 G80/EX30/EV5/LX 연비 데이터 없음 차단 = 정상 데이터 가드
+
+### 구조 리스크 기록 (Task 6 cron 전 해결 필요)
+- wrangler OAuth 토큰 ~15h 수명 → GH Secret 정적 저장은 매일 만료. cron 전 구조 대안: (a) 매 dispatch 전 Mac에서 Secret 갱신 (b) 장수명 CF API 토큰 발급(배포 스코프 한정)
+- tco 9/14 UTC 발행: 러너 2건(X5 13999 미배포, 마이바흐 14000 배포) — quota 2/5
