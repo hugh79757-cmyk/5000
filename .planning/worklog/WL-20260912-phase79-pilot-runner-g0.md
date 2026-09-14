@@ -181,3 +181,12 @@
 - G-B 2/5 (슬롯1 마이바흐 4/4 + 슬롯3 M4 4/4; 슬롯2 M5는 토큰 만료 no-count)
 - quota 4/5 (러너 9/14 UTC: X5·마이바흐·M5·M4)
 - 미배포 적체 0건 — 전부 라이브 반영 완료
+
+## tco-hugo Pages git 연동 완전 해제 (2026-09-14 12:30 KST)
+
+- 사용자 지시: "tco 블로그도 깃허브 연동을 끊어라. 다른 블로그와 마찬가지로 랭글러 직접빌드로 해줘."
+- 3종 플래그 전부 false 처리: deployments_enabled / production_deployments_enabled / pr_comments_enabled (PATCH API)
+- source.type=github 메타데이터 자체는 CF API로 제거 불가(null 무시됨) — 프로젝트 삭제+재생성만 가능하나 도메인(tco.rotcha.kr) 유지 리스크로 불필요. 플래그 3종 false로 자동빌드는 구조적으로 차단.
+- **실증**: 테스트 push(d2e9394) 후 60초 — CF deployments 새 빌드 0건. 이전 기록(X5/M5/마이바흐/M4 push마다 build failure) 대비 완전 해제 확인.
+- 테스트 커밋은 즉시 revert(84a3dd3) — 워킹카피 clean.
+- 배포 경로: 기존과 동일 wrangler 직접 업로드(dispatcher/deploy.py) — 다른 9개 Pages 프로젝트(source=none)와 배포 방식 정합. git push는 콘텐츠 버전관리 전용.
