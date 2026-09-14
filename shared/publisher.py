@@ -833,7 +833,12 @@ def publish(blog_id, title, body_md, body_html=None, segment="", fuel_type="", b
                     "blog_id": blog_id,
                     "source_id": source_id,
                 }
-        if source_exists(blog_id, data_source, source_id, days=30 if data_source == "car_db" else None):
+        # BUG-12: 3층 가드 동일 기준 — car_db 2번 가드도 post_type(prompt_id) 스코프화.
+        # 선택층(topic_manager _blocked_30·precheck 30일)이 30일 무조건 차단을 담당하므로
+        # 발행층은 동일 post_type만 스코프. 빈 prompt_id는 엣지 방어로 30일 무조건 유지.
+        if source_exists(blog_id, data_source, source_id,
+                         prompt_id=prompt_id if data_source == "car_db" else None,
+                         days=30 if data_source == "car_db" else None):
             return {
                 "success": False,
                 "reason": "duplicate_source_id",

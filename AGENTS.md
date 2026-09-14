@@ -434,6 +434,14 @@
 | `config/blogs.d/tap.yaml`                          | TAP 블로그 설정 — schedule, pipeline, fetch_sources                        |
 | `config/blogs.d/stap.yaml`                         | STAP 블로그 설정                                                           |
 | `data/stap_content.db`                             | STAP 콘텐츠 DB — articles 테이블 (sector-hugo 329건 발행)                      |
+
+> **동명 DB 함정 (2026-09-14, Phase 80/T9)**: `stap_content.db`는 2벌이 존재한다. ①
+> `5000/data/stap_content.db`(~124MB) — 5000계열 블로그(tco/rap2/ev 등)의 articles
+> 원장이자 car 콤보가드(`publisher.py` source_exists)의 실소스. ②
+> `STAP/data/stap_content.db`(~19MB) — STAP계열(stock/finance/dividend 등) 전용.
+> 동명 파일·다른 내용. 5000 워커가 원장을 조회할 때는 반드시 `shared/db_paths.py`
+> `ARTICLES_DB`(=①)를 경유할 것 — raw 경로로 ②를 열면 빈/과거 데이터로 가드가
+> 뚫린다(BUG-14 팬텀 재발행의 구조적 뿌리). Phase 79 러너 round-trip은 ①만 대상.
 | `md-editor-nicegui/core/publish/auto_scheduler.py` | blogsmith auto-publisher (30분마다 blogsmith output → Hugo/WordPress 발행) |
 | `md-editor-nicegui/core/publish/thumbnail_gen.py`  | auto-publisher용 gradient 썸네일 생성기                                      |
 | `md-editor-nicegui/core/publish/hugo.py`           | auto-publisher Hugo 발행 + R2 업로드 + wrangler deploy                     |

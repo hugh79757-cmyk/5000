@@ -146,7 +146,7 @@ def run(blog_cfg):
             _site = blog_id.replace("-hugo", "")
             _recent = conn.execute(
                 "SELECT 1 FROM publish_log p JOIN topics t ON t.id=p.topic_id "
-                "WHERE p.site=? AND t.car_id=? AND p.published_at > datetime('now','-14 days') LIMIT 1",
+                "WHERE p.site=? AND t.car_id=? AND p.published_at > datetime('now','-30 days') LIMIT 1",
                 (_site, topic["car_id"]),
             ).fetchone()
             if _recent:
