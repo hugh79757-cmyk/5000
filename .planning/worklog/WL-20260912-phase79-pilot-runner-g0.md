@@ -145,3 +145,13 @@
 ### 구조 리스크 기록 (Task 6 cron 전 해결 필요)
 - wrangler OAuth 토큰 ~15h 수명 → GH Secret 정적 저장은 매일 만료. cron 전 구조 대안: (a) 매 dispatch 전 Mac에서 Secret 갱신 (b) 장수명 CF API 토큰 발급(배포 스코프 한정)
 - tco 9/14 UTC 발행: 러너 2건(X5 13999 미배포, 마이바흐 14000 배포) — quota 2/5
+
+## G-B 슬롯 2 (run 34806014258, 2026-09-14 11:25 KST) — 발행/push-back OK, 배포 토큰 만료
+- ① 발행 OK: article 14001 "2026년형 M5 4.4 투어링 유지비 총정리" (chars=4264)
+- ② 배포 FAIL: wrangler rc=1 2.1s — Authentication error 10000 / Invalid access token 9109
+- ③ push-back OK: M5 슬러그 origin/main 커밋 (content/posts 349)
+- ④ round-trip: get 12/12 + put 12 OK
+- **토큰 수명 실측 확정: 09:52 갱신 → 11:27 만료 = ~1h.** wrangler OAuth access token은 1시간 수명 — GH Secret 정적 저장 구조적으로 불가. 1차 "15h 만료" 추정은 오류였음.
+- 판정: G-B no-count (4종 미충족이나 귀속 실패 아님 — 인프라 대기). G-B 1/5 유지, quota 3/5.
+- 미배포 적체: X5(13999), M5(14001) — origin 커밋 완료, 다음 성공 배포 시 함께 라이브.
+- **Task 6 cron 전 필수: CF API 토큰 발급 필요 (Pages:Edit 스코프, 장수명) — 사용자 대시보드 액션.** 대안 없음 (dispatch 전 갱신은 cron 불가).
