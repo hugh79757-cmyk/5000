@@ -190,3 +190,13 @@
 - **실증**: 테스트 push(d2e9394) 후 60초 — CF deployments 새 빌드 0건. 이전 기록(X5/M5/마이바흐/M4 push마다 build failure) 대비 완전 해제 확인.
 - 테스트 커밋은 즉시 revert(84a3dd3) — 워킹카피 clean.
 - 배포 경로: 기존과 동일 wrangler 직접 업로드(dispatcher/deploy.py) — 다른 9개 Pages 프로젝트(source=none)와 배포 방식 정합. git push는 콘텐츠 버전관리 전용.
+
+## G-B 슬롯 4 (run 34810345834, 12:37 KST dispatch) — 4/4 통과 [G-B 3/5] (2026-09-14)
+
+- ① 발행: article 14003 "X6 x드라이브40d M 스포츠 프로 14,140만원 3년 타고 팔면 실제로 8,588만원 나가는 이유" (chars=3352, coupang=OK)
+- ② 배포: wrangler rc=0 8.0s deployed:true
+- ③ push-back OK: X6 슬러그 origin/main (content/posts 351개)
+- ④ round-trip: get_state 12/12 + put_state 12 + ops.db 제외 True
+- 라이브 HTTP 200
+- 실행 창: 12:37 — 활성 잠금 0, 최근 발행 완료(ferry/bus 12:36) 직후 회피 창
+- **quota 5/5 도달** (러너 9/14 UTC: X5 13999·마이바흐 14000·M5 14001·M4 14002·X6 14003) — 다음 dispatch는 quota_met 스킵 예상, UTC 자정(Mac 07:00) 리셋 후 G-B 슬롯 5 진행
