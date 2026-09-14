@@ -853,3 +853,16 @@ Total in 898 ms +
 **블로커 (Task 0):** compare-hugo repo 낙후(unpushed 4 commits + 577 dirty — clone 시 다른 사이트 빌드됨), no_topics 4연실패(Gate 기준 재정의 필요).
 
 **Gate:** G-0(push 직전) / G-A(ops.db·content.db 창 — 안 a·b 사용자 결정) / G-①(WAL diff 공동 검토) / G-②(owner diff 공동 검토) / G-B(Gate 기준 안 A·B 사용자 결정) / G-C(cron 활성화 직전).
+
+## Phase 81: G1 그룹 이관 — car/cap 잔여 7블로그 러너 전환
+
+**Status:** 🔄 In Planning
+**Created:** 2026-09-14
+**상위 규약:** `.planning/migration/MASTER-PLAN.md` (§3 G1, §4 P3)
+**Phase dir:** `.planning/phases/phase-81-g1-car-cap-migration/`
+
+**Goal:** compare·deal·ev·guide·hotissue·rank·pick 7블로그 owner Mac→러너 전환 (P3 절차: 재시딩→플립→활성화→공동 검토→5슬롯 Gate). G1 완료 시 car/cap 8블로그 전부 러너 소유.
+
+**블로커:** B1 minutes(private 2,000분/월 < G1 ~2,700분 — public 전환 필수, 전제: Blogger OAuth 로테이션 P0 사용자 개입) / B2 publish.yml tco 하드코딩 파라미터화 / B5 tco REG#4 (수정 후 러너 run) 관찰 중.
+
+**Gate:** 각 블로그 첫 전환 공동 검토 → 5슬롯 Gate (러너 정상·배포 200·catchup 정상·Mac 0건).

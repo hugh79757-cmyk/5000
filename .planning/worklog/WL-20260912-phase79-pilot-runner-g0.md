@@ -217,6 +217,27 @@
 
 ### Task-9-REG 회귀 관찰 (G-B 관찰과 판정 분리 태그)
 - REG #1 [통과] hotissue 13:55 슬롯(커밋 후 첫 실행): article 14060 "2026 X2 … 잔존가치 분석" 발행+wrangler rc=0 33.9s deployed:true, duplicate_source_id 0건
-- REG #2 [대기] ev-hugo 다음 슬롯 17:20
-- REG #3 [대기] guide-hugo — 13:55 chain_timeout(LLM 지연, 무관) 후 보충 대기
-- REG #4 [대기] tco-hugo 러너 — quota 리셋(내일 Mac 07:00) 후 dispatch, publish.yml이 cf505604d 반영해 실행되는지(러너 checkout 경로) 확인 포함
+- REG #2 [판정: 게이트 충족 불가 — 회귀 아님 규명] ev-hugo 전 슬롯(07:05~17:40) `no_topics`. 근거: 시판 pool 41 car_id 중 35개 = 30일 콤보가드 차단(정상), 잔여 6개(ev4/ev5/G80/EX30/2027 2종) = 전 토픽 `skip_no_data`(데이터 없음). 09-12~13의 duplicate_source_id 연쇄가 선택층에서 선제 차단으로 전환 — 3층 가드 불변식 의도대로 동작. 회귀 아님. 복구: ev 데이터 리프레시 필요(선택 사항)
+- REG #3 [통과] guide-hugo 17:40:55 슬롯: 발행 성공, duplicate 0건 (07:05·10:33 성공은 수정 전, 14:01 chain_timeout은 무관)
+- REG #4 [부분검증] tco-hugo 러너 — 오늘 러너 발행 3건은 수정 전 코드(checkout 02:27~03:39 UTC < 커밋 06:43 UTC). 수정 후 첫 증거는 다음 러너 슬롯. quota는 UTC 자정 리셋됨
+
+### Task-9-REG 최종 판정 (2026-09-14 18:00 KST, 사용자 "1. 시작" 승인)
+- hotissue [통과] + guide [통과] + ev [회귀 아님 규명] + tco [부분검증 대기] → **게이트 충족 판정. G1 진입 승인.**
+- 근거: 회귀(=수정이 유발한 duplicate 재발)는 전 4사이트 0건. ev no_topics는 수정 전부터 존재하던 풀 고갈 상태(09-11 3건 발행 → 09-12 duplicate 연쇄 → 풀 소진)의 자연 귀결.
+
+## Task 7 완료 (2026-09-14 18:0x KST) — minutes 실측 + 킬 스위치
+
+- **minutes 실측 [검증됨]**: 성공 run 4종 steps API 실측 평균 **~2m30s/run** (RESEARCH 예산 5-8분 대비 절감). 월 환산: G0 375분/월 여유 / G1 8블로그 ~2,700분/월 **private 한도 초과 → public 전환 필수**. 산출: `phase-79-pilot-runner-g0/REPORT-minutes.md`
+- **킬 스위치 문서화 [검증됨]**: `.planning/migration/KILL-SWITCH.md` 신규 작성 — 감지 4신호 + 5단계 절차(revert→pull→kickstart→workflow disable→확인) + 실측 소요 명시, 합계 5분+여유 = ≤10분 증명. R2 오염 별도 경로 포함.
+- gh billing API 404 (user scope 부족) — Actions 잔여 minutes 콘솔 확인 필요. `env -u GITHUB_TOKEN` 우회로 run/step 조회는 가능 (GITHUB_TOKEN env PAT가 repo 스코프 부족한 것과 별개 문제).
+
+## G1 진입 (2026-09-14 18:0x KST — 사용자 "1. 시작")
+
+- MASTER-PLAN §3 G1 = car/cap 잔여: compare·deal·ev·guide·hotissue·rank·pick (tco 제외 — 이미 runner 소유). 전부 car pipeline 1개, car.db 1벌 공유.
+- **블로커 확인 (G1 세부플랜 반영)**:
+  1. **minutes**: G1 전체 시 ~2,700분/월 → private 2,000분 초과. public 전환 선행 필요. public 전환은 Blogger OAuth 로테이션(SECRET-AUDIT P0, 사용자 개입) 전제 — 로테이션 완료 전까지 G1 cron 활성화 불가.
+  2. **repo 상태**: 7개 중 5개(ev/guide/hotissue/deal/compare) private (public 전환 대상), rank·pick은 이미 public. 7개 전부 GitHub repo 존재 확인됨.
+  3. **publish.yml 파라미터화**: 현재 tco-hugo 하드코딩(clone step, run_slot 인자). G1 전 블로그 선택 구조 필요.
+  4. **테마**: tco는 themes/blowfish 5000 리포 내장. 7개 블로그 전부 Blowfish 계열 여부 확인 필요 (G1 세부플랜 1st 스텝).
+  5. **스케줄 회피**: Mac scheduler가 [SKIP] 처리하는 owner 플립 시점 — 최초 1회 git pull 인지 커밋 후 자동인지 (G1 플랜에서 명시).
+- 다음: Phase 81 (G1 그룹 이관) 세부플랜 작성.

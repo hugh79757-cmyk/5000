@@ -100,6 +100,15 @@ rollback_bouches_log5593.sql
 .planning/*
 !.planning/worklog/
 !.planning/worklog/WL-*.md
+# Phase 81 관리 문서 추적 (각 dir 내용은 재차단, 파일 단위 좁은 예외만)
+!.planning/migration/
+.planning/migration/*
+!.planning/migration/KILL-SWITCH.md
+!.planning/phases/
+.planning/phases/*
+!.planning/phases/phase-79-pilot-runner-g0/
+.planning/phases/phase-79-pilot-runner-g0/*
+!.planning/phases/phase-79-pilot-runner-g0/REPORT-minutes.md
 scripts/master_backup.py.pre-r2-fix-*
 data/keyword_performance.json
 
