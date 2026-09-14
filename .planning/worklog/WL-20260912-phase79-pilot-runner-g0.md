@@ -155,3 +155,29 @@
 - 판정: G-B no-count (4종 미충족이나 귀속 실패 아님 — 인프라 대기). G-B 1/5 유지, quota 3/5.
 - 미배포 적체: X5(13999), M5(14001) — origin 커밋 완료, 다음 성공 배포 시 함께 라이브.
 - **Task 6 cron 전 필수: CF API 토큰 발급 필요 (Pages:Edit 스코프, 장수명) — 사용자 대시보드 액션.** 대안 없음 (dispatch 전 갱신은 cron 불가).
+
+## G-B 슬롯 3 — CF API 토큰 전환+완결 + Pages git 자동빌드 해제 (2026-09-14 12:00 KST)
+
+### CF API 토큰 (장수명)
+- 사용자 발급: cfut_iKfI... (Pages:Edit + Workers Scripts:Edit + Account Settings:Read, hugh79757 계정)
+- 실측: /accounts OK(fac9808c...), Pages 10프로젝트(tco-hugo 포함), Workers 68스크립트 — 3권한 전부 통과
+- GH Secret CLOUDFLARE_API_TOKEN 교체 (PyNaCl SealedBox, PUT 204) — wrangler OAuth ~1h 수명 문제 구조적 해소
+
+### G-B 슬롯 3 (run 34807882904, 11:57 dispatch → completed success) — 4/4 통과 [G-B 2/5]
+- ① 발행: article 14002 "M4 보험료 280만원 다이렉트 전환 시 얼마나 줄일 수 있나" (chars=4016, coupang=OK)
+- ② 배포: wrangler rc=0 7.0s deployed:true
+- ③ push-back OK: M4 슬러그 origin/main
+- ④ round-trip: get_state 12/12 + put_state 12 + ops.db 제외 True
+- 라이브 HTTP 200 (M4 신규)
+- **미배포 적체 2건 해소**: X5(13999)+M5(14001) — 이번 wrangler 배포의 Hugo 전체 빌드에 포함돼 라이브 반영 (X5 200, M5 신규 200 실측)
+
+### Pages git 자동빌드 이중 소진 발견+해제
+- tco-hugo Pages 프로젝트가 github 소스 연동(source.type=github, deployments_enabled=true) — 러너 push_back 시 CF 자체 빌드 트리거 → build failure 반복(X5/M5/마이바흐/M4 push마다 failure 기록)
+- AGENTS.md 배포 규칙 위반 상태(월 500회 빌드 한도 이중 소진)
+- 해제: PATCH deployments_enabled=false (실측 반영 확인)
+- 전수 확인: 나머지 9개 Pages(rap/rap2/nomad/visa/trains/tours/layover/michelin/flights)는 전부 source=none — git 연동 자체 없음, 영향 없음. tco만 대시보드 생성 시 git 연동으로 만들어진 것
+
+### 상태
+- G-B 2/5 (슬롯1 마이바흐 4/4 + 슬롯3 M4 4/4; 슬롯2 M5는 토큰 만료 no-count)
+- quota 4/5 (러너 9/14 UTC: X5·마이바흐·M5·M4)
+- 미배포 적체 0건 — 전부 라이브 반영 완료
