@@ -200,3 +200,23 @@
 - 라이브 HTTP 200
 - 실행 창: 12:37 — 활성 잠금 0, 최근 발행 완료(ferry/bus 12:36) 직후 회피 창
 - **quota 5/5 도달** (러너 9/14 UTC: X5 13999·마이바흐 14000·M5 14001·M4 14002·X6 14003) — 다음 dispatch는 quota_met 스킵 예상, UTC 자정(Mac 07:00) 리셋 후 G-B 슬롯 5 진행
+
+## Task 9 — BUG-12·14 수정+회귀 (2026-09-14, 커밋 cf505604d)
+
+### 수정 3건 (사용자 승인 diff 그대로)
+1. publisher.py 2번 가드(30일) prompt_id 스코프화 — car_db만, 빈 prompt_id는 엣지 방어 30일 무조건, 비-car 기존 동작 무변경 (BUG-12)
+2. pipeline.py dup-precheck SQL -14→-30일 — 주석/로그 정합, BUG-14 1단 해소
+3. AGENTS.md 동명 stap_content.db 2벌 함정 문서화 (BUG-14 2단 뿌리)
+
+### 단위검증 [검증됨]
+3분기 mock 실측: non-car (days=None, pid=None 기존 무변경) / car+pid (가드1 90일+가드2 30일 둘 다 pid 스코프) / car+빈pid (가드2만 30일 무조건) — 전부 통과. py_compile OK.
+
+### 3층 가드 불변식 (수정 후)
+- 선택층: topic_manager _blocked_30(30일 무조건)+콤보 90일, precheck 30일 → 무조건 차단 담당
+- 발행층: 가드1 90일 동일 post_type + 가드2 30일 동일 post_type (스코프화) → 사실상 0 도달 방어
+
+### Task-9-REG 회귀 관찰 (G-B 관찰과 판정 분리 태그)
+- REG #1 [통과] hotissue 13:55 슬롯(커밋 후 첫 실행): article 14060 "2026 X2 … 잔존가치 분석" 발행+wrangler rc=0 33.9s deployed:true, duplicate_source_id 0건
+- REG #2 [대기] ev-hugo 다음 슬롯 17:20
+- REG #3 [대기] guide-hugo — 13:55 chain_timeout(LLM 지연, 무관) 후 보충 대기
+- REG #4 [대기] tco-hugo 러너 — quota 리셋(내일 Mac 07:00) 후 dispatch, publish.yml이 cf505604d 반영해 실행되는지(러너 checkout 경로) 확인 포함
