@@ -241,3 +241,16 @@
   4. **테마**: tco는 themes/blowfish 5000 리포 내장. 7개 블로그 전부 Blowfish 계열 여부 확인 필요 (G1 세부플랜 1st 스텝).
   5. **스케줄 회피**: Mac scheduler가 [SKIP] 처리하는 owner 플립 시점 — 최초 1회 git pull 인지 커밋 후 자동인지 (G1 플랜에서 명시).
 - 다음: Phase 81 (G1 그룹 이관) 세부플랜 작성.
+
+## G-B 슬롯 5 + REG#4 완결 (run 34917164936, 2026-09-15 08:25 KST dispatch) — 4/4 통과 [G-B 4/5]
+
+- 사전: quota 0 (UTC date 리셋 실측 — stap_content articles date(created_at) 기준, KST 07:00 리셋), 회피창 OK (car Mac 슬롯 06:20~06:55 종료, 다음 10:00)
+- checkout SHA d42c27c83 (cf505604d 자손 — merge-base 실증). dry_run=false.
+- ① 발행: article 14004 "AMG GT 진짜 비용 3년 10,585만원" (success true, pipeline_status SUCCESS)
+- ② 배포: wrangler rc=0 dur=10.7s deployed:true + 라이브 HTTP 200 실측
+- ③ push-back OK: tco-hugo origin d1e96cf4b (AMG GT 슬러그) — 앞 커밋 2bd29a579(X6) 정합
+- ④ round-trip: get_state 12/12 + put_state 12 + ops.db 제외 True
+- duplicate_source_id 0건 (run SUCCESS — 가드 통과)
+- **REG#4 판정 [검증됨]**: 수정 후 코드(cf505604d→d42c27c83) 첫 tco 러너 실발행, 4/4 통과, dup 0 → REG#4 완결. Task 9 "G1 진입 전 필수" 충족.
+- G-B 집계: 슬롯1(마이바흐 4/4)+슬롯3(M4 4/4)+슬롯4(X6 4/4)+**슬롯5(AMG GT 4/4)=4/5**. 슬롯2(M5 토큰만료)=no-count 제외 — 카운트 리셋 없음(연속 통과 streak 유지, no-count은 streak 중단 아님 — V-2 기준). 5/5까지 1슬롯 잔여.
+- Mac 로컬 stap_content tco-hugo 금일 0행 = 예상 동작 (러너 발행은 R2에 반영, Mac 병합은 F-4 수행 시점). Mac quota 카운터(로컬)는 R2 대비 지연됨 — 러너 quota는 R2 복원본 기준.

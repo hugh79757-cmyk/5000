@@ -49,6 +49,14 @@ Mac 원본 data/에서 Phase 78 Task 3 절차 재-put:
 `python3 scripts/run_slot.py X-hugo --put-only` (또는 runner_state put_state 수동)
 — Mac 로컬 SSOT에서 R2 전량 재시딩, ≤10분.
 
+## 동시성 위험 (2026-09-14 d42c27c83 파라미터화 이후)
+
+publish.yml concurrency 그룹 = `publish-${{ inputs.blog }}` (블로그별 분리).
+**부작용**: 서로 다른 블로그의 run이 병렬 실행 가능. car 그룹 블로그(tco/compare/deal/ev/guide/hotissue/rank/pick)는 run_slot의 R2 round-trip이 **동일 STATE_FILES 12객체**(car.db·content.db·stap_content.db 포함)를 get/put하므로, 병렬 시 한쪽 put이 다른쪽 put을 덮어쓸 수 있음 (lost update).
+
+- **현재 완화**: 전 수동 dispatch — 슬롯 시각 분산 + 회피창(±30분) 운영으로 실질 병렬 0건.
+- **G-C 승인 시 필요**: DB 공유 그룹 키 락 — `concurrency.group: publish-lock-car` (car 파생 블로그 전부 공유 1그룹) 또는 STATE_FILES 접미사 기반 라우팅. 워크플로우 cron 활성화 전까지는 회피창 운영으로 대체.
+
 ## 기록 의무 (I3)
 
 킬 스위치 실행 시 `logs/destructive_YYYY-MM-DD.log` 한 줄 append:
