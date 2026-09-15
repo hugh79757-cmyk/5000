@@ -11,10 +11,17 @@ on:
         description: "dry-run (dispatcher 스킵)"
         type: boolean
         default: true
-  # cron N개 슬롯은 Task 6/G-C 승인 후 별도 커밋으로 추가 (활성화 금지 — 파라미터화만)
+  schedule:
+    - cron: "30 23 * * *"   # tco 슬롯1 06:30 로컬(+07)
+    - cron: "10 3 * * *"    # tco 슬롯2 10:10
+    - cron: "35 6 * * *"    # tco 슬롯3 13:35
+    - cron: "30 10 * * *"   # tco 슬롯4 17:30
+    - cron: "45 13 * * *"   # tco 슬롯5 20:45
 
 concurrency:
-  group: publish-${{ inputs.blog || 'tco-hugo' }}   # 블로그별 그룹 분리 (m0125 #5) — car 그룹 DB 공유(car.db/content.db) 병렬 충돌 시 G-C에서 publish-lock-car 후보
+  # G-C 전환: car 파이프라인 전 블로그 직렬화 (STATE_FILES 12객체 공유 — car.db/content.db/stap_content.db
+  # 병렬 lost update 방지. KILL-SWITCH.md 동시성 위험 섹션 참조)
+  group: publish-lock-car
   cancel-in-progress: false
 
 env:
