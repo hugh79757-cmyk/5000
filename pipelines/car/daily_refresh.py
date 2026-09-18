@@ -457,6 +457,147 @@ def replenish_topics(conn, min_pending=50):
     # EV 전용 필터
     ev_cars = [car["car_id"] for car in popular if car["fuel_type"] in ("전기", "가솔린/하이브리드") and car["car_id"] in market_ok and _fuel_ok(car)]
 
+    def _count_eligible_topics(conn, site_id, post_type, days_window=14):
+        """select_topic과 동일한 가드 세트 + 연비 데이터 게이트로 실제 발행 가능 토픽 수 계산.
+        
+        가드:
+        1. Market filter: trims.status='시판' 존재
+        2. Combo block 90-day: articles(stap_content.db) data_source='car_db' 90일 내 발행
+        3. Combo block 30-day (any post_type): articles 30일 내 발행 (post_type 무관)
+        4. Reuse filter: publish_log 7일 내 동일 topic_id 발행
+        5. Recent keys: publish_log 14일 내 car_id:competitor_key 발행 (select_topic과 일치)
+        6. Fuel efficiency gate: lookup_fuel_efficiency 통과 (build_input과 일치)
+        """
+        from shared.db_paths import ARTICLES_DB
+        from pipelines.car.data_builder import lookup_fuel_efficiency
+        c = conn.cursor()
+        cutoff = (datetime.now() - timedelta(days=days_window)).isoformat()
+        
+        # 1. Recent keys (days_window from publish_log)
+        recent = c.execute("""
+            SELECT DISTINCT t.car_id || ':' || COALESCE(t.competitor_car_id,'')
+            FROM topics t JOIN publish_log p ON t.id = p.topic_id
+            WHERE p.published_at > ? AND p.site = ?
+        """, (cutoff, site_id)).fetchall()
+        recent_keys = {r[0] for r in recent}
+        
+        # 2. Combo blocks from articles (stap_content.db)
+        _blog_id = site_id + "-hugo"
+        _cconn = sqlite3.connect(ARTICLES_DB)
+        _blocked = _cconn.execute(
+            "SELECT DISTINCT source_id FROM articles WHERE blog_id = ? AND data_source = 'car_db' AND published_at > datetime('now', '-90 days') AND prompt_id = ?",
+            (_blog_id, post_type)
+        ).fetchall()
+        _blocked_30 = _cconn.execute(
+            "SELECT DISTINCT source_id FROM articles WHERE blog_id = ? AND data_source = 'car_db' AND published_at > datetime('now', '-30 days')",
+            (_blog_id,)
+        ).fetchall()
+        _cconn.close()
+        _combo_blocked = {r[0] for r in _blocked} | {r[0] for r in _blocked_30}
+        
+        # 3. Build query with all guards
+        _combo_filter = ""
+        _combo_params = []
+        if _combo_blocked:
+            _ph = ",".join("?" * len(_combo_blocked))
+            _combo_filter = f" AND t.car_id NOT IN ({_ph})"
+            _combo_params = list(_combo_blocked)
+        
+        reuse_sql = "AND t.id NOT IN (SELECT topic_id FROM publish_log WHERE published_at > ?)"
+        market_sql = "AND t.car_id IN (SELECT car_id FROM trims WHERE status = '시판')"
+        post_filter = " AND t.post_type = ?"
+        
+        sql = f"""
+            SELECT t.*, c.brand, c.model, c.fuel_type, c.displacement, c.year
+            FROM topics t JOIN cars c ON t.car_id = c.car_id
+            WHERE (t.status = 'pending' OR t.status = 'published') 
+            {reuse_sql} {market_sql} AND t.site_id = ? 
+            {_combo_filter}{post_filter}
+        """
+        params = (cutoff, site_id) + tuple(_combo_params) + (post_type,)
+        topics = c.execute(sql, params).fetchall()
+        
+        # 4. Apply recent_keys filter + fuel efficiency gate
+        count = 0
+        for t in topics:
+            key = f"{t['car_id']}:{t['competitor_car_id'] or ''}"
+            if key not in recent_keys:
+                # Fuel efficiency check (matches build_input:396-401)
+                try:
+                    fuel_eff = lookup_fuel_efficiency(conn, t['brand'], t['model'], t['displacement'])
+                    if fuel_eff and fuel_eff > 0:
+                        count += 1
+                except Exception:
+                    pass
+        return count
+
+    def _count_eligible_topics_popular(conn, site_id, post_type, days_window=14):
+        """select_topic 가드 + 연비 게이트 적용 후 인기차(is_popular=1) 토픽 수만 계산.
+        
+        recent_keys 윈도우: 14일 (select_topic과 일치)
+        """
+        from shared.db_paths import ARTICLES_DB
+        from pipelines.car.data_builder import lookup_fuel_efficiency
+        c = conn.cursor()
+        cutoff = (datetime.now() - timedelta(days=days_window)).isoformat()
+        
+        # 1. Recent keys
+        recent = c.execute("""
+            SELECT DISTINCT t.car_id || ':' || COALESCE(t.competitor_car_id,'')
+            FROM topics t JOIN publish_log p ON t.id = p.topic_id
+            WHERE p.published_at > ? AND p.site = ?
+        """, (cutoff, site_id)).fetchall()
+        recent_keys = {r[0] for r in recent}
+        
+        # 2. Combo blocks
+        _blog_id = site_id + "-hugo"
+        _cconn = sqlite3.connect(ARTICLES_DB)
+        _blocked = _cconn.execute(
+            "SELECT DISTINCT source_id FROM articles WHERE blog_id = ? AND data_source = 'car_db' AND published_at > datetime('now', '-90 days') AND prompt_id = ?",
+            (_blog_id, post_type)
+        ).fetchall()
+        _blocked_30 = _cconn.execute(
+            "SELECT DISTINCT source_id FROM articles WHERE blog_id = ? AND data_source = 'car_db' AND published_at > datetime('now', '-30 days')",
+            (_blog_id,)
+        ).fetchall()
+        _cconn.close()
+        _combo_blocked = {r[0] for r in _blocked} | {r[0] for r in _blocked_30}
+        
+        _combo_filter = ""
+        _combo_params = []
+        if _combo_blocked:
+            _ph = ",".join("?" * len(_combo_blocked))
+            _combo_filter = f" AND t.car_id NOT IN ({_ph})"
+            _combo_params = list(_combo_blocked)
+        
+        reuse_sql = "AND t.id NOT IN (SELECT topic_id FROM publish_log WHERE published_at > ?)"
+        market_sql = "AND t.car_id IN (SELECT car_id FROM trims WHERE status = '시판')"
+        post_filter = " AND t.post_type = ?"
+        
+        sql = f"""
+            SELECT t.*, c.brand, c.model, c.fuel_type, c.displacement, c.year, c.is_popular
+            FROM topics t JOIN cars c ON t.car_id = c.car_id
+            WHERE (t.status = 'pending' OR t.status = 'published') 
+            {reuse_sql} {market_sql} AND t.site_id = ? 
+            {_combo_filter}{post_filter} AND c.is_popular=1
+        """
+        params = (cutoff, site_id) + tuple(_combo_params) + (post_type,)
+        topics = c.execute(sql, params).fetchall()
+        
+        # 3. Apply recent_keys filter + fuel efficiency gate
+        count = 0
+        for t in topics:
+            key = f"{t['car_id']}:{t['competitor_car_id'] or ''}"
+            if key not in recent_keys:
+                # Fuel efficiency check (matches build_input:396-401)
+                try:
+                    fuel_eff = lookup_fuel_efficiency(conn, t['brand'], t['model'], t['displacement'])
+                    if fuel_eff and fuel_eff > 0:
+                        count += 1
+                except Exception:
+                    pass
+        return count
+
     total_created = 0
 
     for site_id, post_type in SITE_POST_TYPE.items():
@@ -464,18 +605,16 @@ def replenish_topics(conn, min_pending=50):
         # 단종/미시판 pending이 raw-count를 오염시켜 신차 보충(need)이 0으로 잡히는 결함 해소.
         # 유효 = trims.status='시판' 존재 (market guard와 동일 기준), 단 ev_analysis는
         # 연비 데이터 게이트(fuel NULL·90일 콤보 가드)도 통과해야 실제 발행 가능.
-        usable = "SELECT COUNT(*) FROM topics t JOIN cars c ON t.car_id=c.car_id WHERE t.site_id=? AND t.post_type=? AND t.status='pending' AND EXISTS (SELECT 1 FROM trims tr WHERE tr.car_id=t.car_id AND tr.status='시판')"
-        row = c.execute(usable, (site_id, post_type)).fetchone()
-        current = row[0]
+        # FIX C-3 (2026-09-18): select_topic과 동일한 가드 세트(combo 90/30일, reuse 7일, recent_keys 7일)
+        # 적용해 실제 발행 가능 토픽만 계산 → replenish 트리거 정합성 확보.
+        current = _count_eligible_topics(conn, site_id, post_type, days_window=14)
 
         if current >= min_pending:
             continue
 
         # 인기차/비인기차 비율: 전체의 2/3는 인기차, 1/3은 비인기차 (동일 기준 적용)
-        pop_pending = c.execute(
-            "SELECT COUNT(*) FROM topics t JOIN cars c ON t.car_id=c.car_id WHERE t.site_id=? AND t.post_type=? AND t.status='pending' AND c.is_popular=1 AND EXISTS (SELECT 1 FROM trims tr WHERE tr.car_id=t.car_id AND tr.status='시판')",
-            (site_id, post_type)
-        ).fetchone()[0]
+        # select_topic 가드 적용된 인기차 수 별도 계산 필요
+        pop_pending = _count_eligible_topics_popular(conn, site_id, post_type, days_window=14)
         unpop_pending = current - pop_pending
 
         # FIX C-2: ev_analysis는 연비 게이트까지 통과한 pending만 유효으로 계산
