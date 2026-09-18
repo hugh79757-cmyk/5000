@@ -1,0 +1,5 @@
+[00:16] Task 0 tco-hugo push | 사전카운트(12:00 기준)=dirty 295(??75+M219+D1)+미푸시 5, 갱신(00:15 기준)=dirty 298(??78+M219+D1, posts 282)+미푸시 5 — 21:34 슬롯 성공분 신규 반영 | 백업=로컬 SSOT 보존(추가성) | 사후=origin posts 272→341(+69 new), Mac ls-files 341=origin 341, clean | 보존확인=미푸시 0건
+[00:18] Task 0 compare-hugo push | 사전카운트(00:15 기준)=dirty 574(??125+M448+D1, posts 560)+미푸시 4 | 백업=로컬 SSOT 보존(추가성) | 사후=origin posts 994→1110(+116 new), Mac ls-files 1110=origin 1110, clean, origin-only 0건 유지 | 보존확인=미푸시 0건
+[01:0x] R2 manifest.json 재앵커 | 사전=probe #4 put_state가 manifest를 {}로 덮음 (0객체 put) — R2 객체 11건은 Task 3 바이트 그대로 보존 확인 | 백업=/tmp/r2state/manifest.json (Mac 로컬) | 사후=R2 11객체 다운로드→md5→manifest 재생성 11/11 put (content.db 2d84a087 = probe #3 expect와 일치) | 보존확인=R2 객체 11건 불변, manifest만 복원
+[01:1x] probe #5 success (run 34709682183, 1m44s) | get 11/11 + put 10객체 + manifest 갱신 (ops.db 제외) | R2 manifest 10 entries 확인
+[2026-09-13 21:5x] git push origin main | 사전카운트=미푸시 10커밋 | 백업=로컬 SSOT | 사후=패리티

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>CAP 신규 9대 이미지 검수 — car_images 87개</title>
+<style>
+body{font-family:-apple-system,sans-serif;margin:20px;background:#f5f5f5}
+h1{font-size:18px} h2{font-size:15px;margin:24px 0 8px;border-bottom:2px solid #333;padding-bottom:4px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.card{background:#fff;border-radius:8px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.card img{width:100%;height:140px;object-fit:cover;background:#ddd}
+.meta{font-size:12px;color:#555;margin:6px 0 4px;word-break:break-all}
+.btn{width:100%;padding:6px;border:none;border-radius:5px;cursor:pointer;font-size:13px}
+.del{background:#e74c3c;color:#fff}
+.card.deleted{opacity:.25;pointer-events:none}
+.card.deleted .btn.del{background:#999}
+#clip{position:fixed;top:0;right:0;padding:10px 16px;background:#2c3e50;color:#fff;border-radius:0 0 0 8px;font-size:13px;cursor:pointer}
+.note{background:#fff3cd;padding:12px;border-radius:8px;font-size:13px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div id="clip" onclick="navigator.clipboard.writeText(collected.join(',')).then(()=>this.textContent='복사됌�: '+collected.length+'개 ID')">삭제 ID 모으기(0)</div>
+<h1>CAP 신규 9대 이미지 검수 — 2026-09-07 등록분 (총 87개, verified=0 전체)</h1>
+<div class="note">차량과 안 맞는 이미지(다른 모델/쓰레기/로고만) → 삭제 버튼 → 상단 버튼으로 ID 복사 → "삭제할 ID: ..." 전달. blocked_images에 URL 등록되어 재수집 차단됨.</div>
+<script>
+let collected=[];
+</script>
+<h2>아우디 A6 2026 (audi_a6_2026)</h2>
+<div class="grid">
+<div class="card" id="card-16901">
+<img src="http://file.carisyou.com/upload/2021/02/16/FILE_202102160218336240.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16901 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16901, this)">삭제</button>
+</div>
+<div class="card" id="card-16902">
+<img src="http://file.carisyou.com/upload/2026/04/22/FILE_202604220319265610.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16902 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16902, this)">삭제</button>
+</div>
+<div class="card" id="card-16903">
+<img src="http://file.carisyou.com/upload/2026/04/06/FILE_202604061212313260.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16903 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16903, this)">삭제</button>
+</div>
+<div class="card" id="card-16904">
+<img src="http://file.carisyou.com/upload/2026/04/06/FILE_202604061212319211.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16904 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16904, this)">삭제</button>
+</div>
+<div class="card" id="card-16905">
+<img src="http://file.carisyou.com/upload/2026/04/06/FILE_202604061212324762.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16905 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16905, this)">삭제</button>
+</div>
+<div class="card" id="card-16906">
+<img src="http://file.carisyou.com/upload/2026/04/06/FILE_202604061212330263.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16906 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16906, this)">삭제</button>
+</div>
+<div class="card" id="card-16907">
+<img src="http://file.carisyou.com/upload/2026/04/06/FILE_202604061212346950.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16907 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16907, this)">삭제</button>
+</div>
+<div class="card" id="card-16908">
+<img src="http://file.carisyou.com/upload/2026/04/06/FILE_202604061212352281.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16908 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16908, this)">삭제</button>
+</div>
+<div class="card" id="card-16909">
+<img src="http://file.carisyou.com/upload/2026/06/25/EDITOR_202606251014308470.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16909 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16909, this)">삭제</button>
+</div>
+<div class="card" id="card-16910">
+<img src="http://file.carisyou.com/upload/2026/04/28/EDITOR_202604280420356600.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16910 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16910, this)">삭제</button>
+</div>
+<div class="card" id="card-16911">
+<img src="http://file.carisyou.com/upload/2024/01/04/FILE_202401040227284180.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16911 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16911, this)">삭제</button>
+</div>
+</div>
+<h2>BMW iX3 2026 (bmw_ix3_2026)</h2>
+<div class="grid">
+<div class="card" id="card-16880">
+<img src="http://file.carisyou.com/upload/2020/04/03/FILE_202004031126290740.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16880 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16880, this)">삭제</button>
+</div>
+<div class="card" id="card-16881">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190223425440.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16881 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16881, this)">삭제</button>
+</div>
+<div class="card" id="card-16882">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190202032146.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16882 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16882, this)">삭제</button>
+</div>
+<div class="card" id="card-16883">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190202027625.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16883 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16883, this)">삭제</button>
+</div>
+<div class="card" id="card-16884">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190202022874.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16884 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16884, this)">삭제</button>
+</div>
+<div class="card" id="card-16885">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190202017193.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16885 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16885, this)">삭제</button>
+</div>
+<div class="card" id="card-16886">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190202012562.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16886 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16886, this)">삭제</button>
+</div>
+<div class="card" id="card-16887">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190202007301.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16887 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16887, this)">삭제</button>
+</div>
+<div class="card" id="card-16888">
+<img src="http://file.carisyou.com/upload/2026/06/26/EDITOR_202606260953258640.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16888 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16888, this)">삭제</button>
+</div>
+<div class="card" id="card-16889">
+<img src="http://file.carisyou.com/upload/2025/06/26/FILE_202506260140237260.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16889 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16889, this)">삭제</button>
+</div>
+<div class="card" id="card-16890">
+<img src="http://file.carisyou.com/upload/2026/07/09/FILE_202607090356077700.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16890 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16890, this)">삭제</button>
+</div>
+</div>
+<h2>제네시스 일렉트리파이드 GV70 2027 (genesis_____gv70_2027)</h2>
+<div class="grid">
+<div class="card" id="card-16871">
+<img src="http://file.carisyou.com/upload/2024/01/09/FILE_202401091254404490.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16871 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16871, this)">삭제</button>
+</div>
+<div class="card" id="card-16872">
+<img src="http://file.carisyou.com/upload/2025/01/16/FILE_202501160957313300.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16872 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16872, this)">삭제</button>
+</div>
+<div class="card" id="card-16873">
+<img src="http://file.carisyou.com/upload/2026/04/23/FILE_202604230929221340.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16873 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16873, this)">삭제</button>
+</div>
+<div class="card" id="card-16874">
+<img src="http://file.carisyou.com/upload/2025/01/16/FILE_202501161053490861.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16874 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16874, this)">삭제</button>
+</div>
+<div class="card" id="card-16875">
+<img src="http://file.carisyou.com/upload/2025/01/16/FILE_202501161053496452.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16875 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16875, this)">삭제</button>
+</div>
+<div class="card" id="card-16876">
+<img src="http://file.carisyou.com/upload/2025/01/16/FILE_202501161053502253.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16876 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16876, this)">삭제</button>
+</div>
+<div class="card" id="card-16877">
+<img src="http://file.carisyou.com/upload/2025/01/16/FILE_202501161053519220.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16877 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16877, this)">삭제</button>
+</div>
+<div class="card" id="card-16878">
+<img src="http://file.carisyou.com/upload/2026/03/19/FILE_202603190245512770.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16878 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16878, this)">삭제</button>
+</div>
+<div class="card" id="card-16879">
+<img src="http://file.carisyou.com/upload/2026/07/02/FILE_202607020428475150.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16879 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16879, this)">삭제</button>
+</div>
+</div>
+<h2>제네시스 GV60 2027 (genesis_gv60_2027)</h2>
+<div class="grid">
+<div class="card" id="card-16862">
+<img src="http://file.carisyou.com/upload/2024/01/09/FILE_202401091254404490.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16862 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16862, this)">삭제</button>
+</div>
+<div class="card" id="card-16863">
+<img src="http://file.carisyou.com/upload/2025/03/07/FILE_202503070120256030.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16863 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16863, this)">삭제</button>
+</div>
+<div class="card" id="card-16864">
+<img src="http://file.carisyou.com/upload/2025/03/06/FILE_202503060532510580.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16864 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16864, this)">삭제</button>
+</div>
+<div class="card" id="card-16865">
+<img src="http://file.carisyou.com/upload/2025/03/06/FILE_202503060532512091.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16865 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16865, this)">삭제</button>
+</div>
+<div class="card" id="card-16866">
+<img src="http://file.carisyou.com/upload/2025/03/06/FILE_202503060641130380.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16866 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16866, this)">삭제</button>
+</div>
+<div class="card" id="card-16867">
+<img src="http://file.carisyou.com/upload/2025/03/06/FILE_202503060532514942.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16867 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16867, this)">삭제</button>
+</div>
+<div class="card" id="card-16868">
+<img src="http://file.carisyou.com/upload/2025/03/06/FILE_202503060532517923.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16868 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16868, this)">삭제</button>
+</div>
+<div class="card" id="card-16869">
+<img src="http://file.carisyou.com/upload/2025/03/06/FILE_202503060533231850.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16869 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16869, this)">삭제</button>
+</div>
+<div class="card" id="card-16870">
+<img src="http://file.carisyou.com/upload/2025/06/26/FILE_202506260140237260.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16870 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16870, this)">삭제</button>
+</div>
+</div>
+<h2>현대 코나 2027 (kona_2027)</h2>
+<div class="grid">
+<div class="card" id="card-16912">
+<img src="https://file.carisyou.com/upload/2017/02/16/FILE_201702160639384790.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16912 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16912, this)">삭제</button>
+</div>
+<div class="card" id="card-16913">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301190921384420.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16913 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16913, this)">삭제</button>
+</div>
+<div class="card" id="card-16914">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051552860.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16914 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16914, this)">삭제</button>
+</div>
+<div class="card" id="card-16915">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051555921.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16915 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16915, this)">삭제</button>
+</div>
+<div class="card" id="card-16916">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051558682.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16916 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16916, this)">삭제</button>
+</div>
+<div class="card" id="card-16917">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051561273.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16917 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16917, this)">삭제</button>
+</div>
+<div class="card" id="card-16918">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051564264.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16918 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16918, this)">삭제</button>
+</div>
+<div class="card" id="card-16919">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051584130.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16919 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16919, this)">삭제</button>
+</div>
+<div class="card" id="card-16920">
+<img src="http://file.carisyou.com/upload/2026/02/26/FILE_202602260119043900.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16920 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16920, this)">삭제</button>
+</div>
+</div>
+<h2>현대 코나 하이브리드 2027 (kona_hev_2027)</h2>
+<div class="grid">
+<div class="card" id="card-16921">
+<img src="https://file.carisyou.com/upload/2017/02/16/FILE_201702160639384790.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16921 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16921, this)">삭제</button>
+</div>
+<div class="card" id="card-16922">
+<img src="http://file.carisyou.com/upload/2023/01/18/FILE_202301181038184400.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16922 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16922, this)">삭제</button>
+</div>
+<div class="card" id="card-16923">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051552860.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16923 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16923, this)">삭제</button>
+</div>
+<div class="card" id="card-16924">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051555921.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16924 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16924, this)">삭제</button>
+</div>
+<div class="card" id="card-16925">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051558682.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16925 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16925, this)">삭제</button>
+</div>
+<div class="card" id="card-16926">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051561273.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16926 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16926, this)">삭제</button>
+</div>
+<div class="card" id="card-16927">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051564264.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16927 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16927, this)">삭제</button>
+</div>
+<div class="card" id="card-16928">
+<img src="http://file.carisyou.com/upload/2023/01/19/FILE_202301191051584130.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16928 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16928, this)">삭제</button>
+</div>
+<div class="card" id="card-16929">
+<img src="http://file.carisyou.com/upload/2026/03/12/FILE_202603120300109360.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16929 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16929, this)">삭제</button>
+</div>
+<div class="card" id="card-16930">
+<img src="http://file.carisyou.com/upload/2026/02/26/FILE_202602260119290930.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16930 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16930, this)">삭제</button>
+</div>
+</div>
+<h2>르노코리아 아르카나 2027 (renault___2027)</h2>
+<div class="grid">
+<div class="card" id="card-16844">
+<img src="http://file.carisyou.com/upload/2024/04/03/FILE_202404031028366230.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16844 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16844, this)">삭제</button>
+</div>
+<div class="card" id="card-16845">
+<img src="http://file.carisyou.com/upload/2024/04/03/FILE_202404030453563110.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16845 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16845, this)">삭제</button>
+</div>
+<div class="card" id="card-16846">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532230190.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16846 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16846, this)">삭제</button>
+</div>
+<div class="card" id="card-16847">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532245051.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16847 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16847, this)">삭제</button>
+</div>
+<div class="card" id="card-16848">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532251502.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16848 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16848, this)">삭제</button>
+</div>
+<div class="card" id="card-16849">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532256643.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16849 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16849, this)">삭제</button>
+</div>
+<div class="card" id="card-16850">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532261994.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16850 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16850, this)">삭제</button>
+</div>
+<div class="card" id="card-16851">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532267015.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16851 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16851, this)">삭제</button>
+</div>
+<div class="card" id="card-16852">
+<img src="http://file.carisyou.com/upload/2025/07/11/FILE_202507110214318090.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16852 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16852, this)">삭제</button>
+</div>
+</div>
+<h2>르노코리아 아르카나 하이브리드 2027 (renault______2027)</h2>
+<div class="grid">
+<div class="card" id="card-16853">
+<img src="http://file.carisyou.com/upload/2024/04/03/FILE_202404031028366230.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16853 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16853, this)">삭제</button>
+</div>
+<div class="card" id="card-16854">
+<img src="http://file.carisyou.com/upload/2025/04/01/FILE_202504011258345070.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16854 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16854, this)">삭제</button>
+</div>
+<div class="card" id="card-16855">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532230190.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16855 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16855, this)">삭제</button>
+</div>
+<div class="card" id="card-16856">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532245051.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16856 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16856, this)">삭제</button>
+</div>
+<div class="card" id="card-16857">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532251502.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16857 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16857, this)">삭제</button>
+</div>
+<div class="card" id="card-16858">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532256643.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16858 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16858, this)">삭제</button>
+</div>
+<div class="card" id="card-16859">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532261994.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16859 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16859, this)">삭제</button>
+</div>
+<div class="card" id="card-16860">
+<img src="http://file.carisyou.com/upload/2024/04/05/FILE_202404050532267015.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16860 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16860, this)">삭제</button>
+</div>
+<div class="card" id="card-16861">
+<img src="http://file.carisyou.com/upload/2023/12/06/FILE_202312060230172670.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16861 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16861, this)">삭제</button>
+</div>
+</div>
+<h2>볼보 EX90 2026 (volvo_ex90_2026)</h2>
+<div class="grid">
+<div class="card" id="card-16891">
+<img src="http://file.carisyou.com/upload/2021/03/10/FILE_202103100310367840.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16891 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16891, this)">삭제</button>
+</div>
+<div class="card" id="card-16892">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011113005720.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16892 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16892, this)">삭제</button>
+</div>
+<div class="card" id="card-16893">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011040346750.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16893 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16893, this)">삭제</button>
+</div>
+<div class="card" id="card-16894">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011040353171.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16894 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16894, this)">삭제</button>
+</div>
+<div class="card" id="card-16895">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011040359202.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16895 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16895, this)">삭제</button>
+</div>
+<div class="card" id="card-16896">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011040364223.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16896 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16896, this)">삭제</button>
+</div>
+<div class="card" id="card-16897">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011040369474.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16897 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16897, this)">삭제</button>
+</div>
+<div class="card" id="card-16898">
+<img src="http://file.carisyou.com/upload/2026/04/01/FILE_202604011040385660.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16898 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16898, this)">삭제</button>
+</div>
+<div class="card" id="card-16899">
+<img src="http://file.carisyou.com/upload/2026/04/28/EDITOR_202604280432209550.jpg" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16899 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16899, this)">삭제</button>
+</div>
+<div class="card" id="card-16900">
+<img src="http://file.carisyou.com/upload/2025/12/04/FILE_202512041015093090.png" loading="lazy" onerror="this.style.background='#e74c3c';this.alt='로드실패'">
+<div class="meta">ID 16900 · ?x? · carisyou</div>
+<button class="btn del" onclick="del(16900, this)">삭제</button>
+</div>
+</div>
+<script>
+function del(id, btn){
+  const card = btn.parentElement;
+  card.classList.toggle('deleted');
+  if(card.classList.contains('deleted')){
+    if(!collected.includes(id)) collected.push(id);
+  } else {
+    collected = collected.filter(x=>x!==id);
+  }
+  document.getElementById('clip').textContent = '삭제 ID 모으기('+collected.length+') — 클릭시 복사';
+}
+</script>
+</body></html>

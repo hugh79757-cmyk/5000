@@ -1,0 +1,62 @@
+{
+  "car.db": {
+    "md5": "3156eb30b575fb63004174d0601c3977",
+    "path": "data/car.db",
+    "size": 3928064
+  },
+  "content.db": {
+    "md5": "2b3e6e265d6ca425e6c7b039738026f4",
+    "path": "data/content.db",
+    "size": 43446272
+  },
+  "cooldown.json": {
+    "md5": "0365621677df6554b58625d025e1abb1",
+    "path": "data/cooldown.json",
+    "size": 1018
+  },
+  "curation.db": {
+    "md5": "8b7d9368b3f600837488d0ba4699ed29",
+    "path": "data/curation.db",
+    "size": 101736448
+  },
+  "failure_count.json": {
+    "md5": "1b7a48cba625b89761eab9573a9310b7",
+    "path": "data/failure_count.json",
+    "size": 951
+  },
+  "llm_rotation_state.json": {
+    "md5": "2b580f48ba3197b6ad758e3b6931f472",
+    "path": "data/llm_rotation_state.json",
+    "size": 34
+  },
+  "ops.db": {
+    "md5": "b7c29547c128ab0b153369bb8f3b454f",
+    "path": "ops_dashboard/ops.db",
+    "size": 5722112
+  },
+  "rap.db": {
+    "md5": "e24222dc0cde3a2719776099ec292f37",
+    "path": "data/rap.db",
+    "size": 36761600
+  },
+  "senior.db": {
+    "md5": "7eba9a80de387de1ab5598139ebb465d",
+    "path": "data/senior.db",
+    "size": 729088
+  },
+  "stap_content.db": {
+    "md5": "29ccacfc4d971e5ede4ce7acfd72beb0",
+    "path": "data/stap_content.db",
+    "size": 129069056
+  },
+  "stock.db": {
+    "md5": "3dd78022f6de1a02c043ad4a92aa183a",
+    "path": "data/stock.db",
+    "size": 16605184
+  },
+  "travel-en.db": {
+    "md5": "b1d489086a411dbc50381f282d8a7b42",
+    "path": "data/travel-en.db",
+    "size": 178769920
+  }
+}

@@ -1,17 +1,20 @@
 tier_order:
-- gemini-3.1-flash-lite
-- gemini-3.5-flash-lite
-- gemini-2.5-flash
-- gemini-3.5-flash
-- groq-llama
 - groq-qwen
 - groq-gpt120b
-- cerebras-gemma
-- cerebras-glm
-- zen-deepseek-free
-- nvidia-step
-- zen-mimo-free
-- zen-bigpickle
+- groq2-qwen
+- groq2-gpt120b
+- groq3-qwen
+- groq3-gpt120b
+- groq4-qwen
+- groq4-gpt120b
+- or-nexmini
+- or-nexpro
+- or-lingvl
+- mistral-codestral
+- cohere-commanda
+- gemini-flash
+- gemini2-flash
+- gemini3-flash
 - zhipu-glm
 - orca-ds4free
 - orca-hy3
@@ -20,76 +23,78 @@ default:
   provider: deepseek
   model: deepseek-v4-flash
   temperature: 0.85
-upstage-pro4:
-  provider: upstage
-  model: solar-pro4
-  temperature: 0.85
-groq-llama:
-  provider: groq
-  model: llama-3.3-70b-versatile
-  temperature: 0.85
 groq-qwen:
   provider: groq
-  model: qwen/qwen3.6-27b
+  model: qwen/qwen3.8-27b
   temperature: 0.85
   reasoning_effort: none
 groq-gpt120b:
   provider: groq
   model: openai/gpt-oss-120b
   temperature: 0.85
-cerebras-glm:
-  provider: cerebras
-  model: zai-glm-4.7
+groq2-qwen:
+  provider: groq2
+  model: qwen/qwen3.8-27b
   temperature: 0.85
   reasoning_effort: none
-cerebras-gemma:
-  provider: cerebras
-  model: gemma-4-31b
+groq2-gpt120b:
+  provider: groq2
+  model: openai/gpt-oss-120b
+  temperature: 0.85
+groq3-qwen:
+  provider: groq3
+  model: qwen/qwen3.8-27b
+  temperature: 0.85
+  reasoning_effort: none
+groq3-gpt120b:
+  provider: groq3
+  model: openai/gpt-oss-120b
+  temperature: 0.85
+groq4-qwen:
+  provider: groq4
+  model: qwen/qwen3.8-27b
+  temperature: 0.85
+  reasoning_effort: none
+groq4-gpt120b:
+  provider: groq4
+  model: openai/gpt-oss-120b
+  temperature: 0.85
+or-nexmini:
+  provider: openrouter
+  model: nex-agi/nex-n2.5-mini:free
+  temperature: 0.85
+or-nexpro:
+  provider: openrouter
+  model: nex-agi/nex-n2.5-pro:free
+  temperature: 0.85
+or-lingvl:
+  provider: openrouter
+  model: inclusionai/ling-3.0-flash-vl:free
+  temperature: 0.85
+mistral-codestral:
+  provider: mistral
+  model: codestral-latest
+  temperature: 0.85
+cohere-commanda:
+  provider: cohere
+  model: command-a-03-2025
+  temperature: 0.85
+gemini-flash:
+  provider: google
+  model: gemini-3.6-flash
+  temperature: 0.85
+gemini2-flash:
+  provider: google2
+  model: gemini-3.6-flash
+  temperature: 0.85
+gemini3-flash:
+  provider: google3
+  model: gemini-3.6-flash
   temperature: 0.85
 zhipu-glm:
   provider: zhipu
   model: glm-4.5-flash
   temperature: 0.85
-nvidia-step:
-  provider: nvidia
-  model: stepfun-ai/step-3.7-flash
-  temperature: 0.85
-  extra_body:
-    chat_template_kwargs:
-      thinking: false
-gemini-3.5-flash:
-  provider: google
-  model: gemini-3.5-flash
-  temperature: 0.85
-  enabled: false  # 2026-09-11 503 high-demand + empty content — 순수회전 낭비, 소유자 재활성화 시 제거
-gemini-3.5-flash-lite:
-  provider: google
-  model: gemini-3.5-flash-lite
-  temperature: 0.85
-gemini-3.1-flash-lite:
-  provider: google
-  model: gemini-3.1-flash-lite
-  temperature: 0.85
-gemini-2.5-flash:
-  provider: google
-  model: gemini-2.5-flash
-  temperature: 0.85
-  enabled: false  # 2026-09-11 404 gone — "use gemini-3.6-flash" — dead tier, 매 패스 1요청 낭비 방지
-zen-bigpickle:
-  provider: opencode-zen
-  model: big-pickle
-  temperature: 0.85
-  enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
-zen-deepseek-free:
-  provider: opencode-zen
-  model: deepseek-v4-flash-free
-  temperature: 0.85
-  enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
-zen-mimo-free:
-  provider: opencode-zen
-  model: mimo-v2.5-free
-  temperature: 0.85
-  enabled: false  # 2026-09-11 opencode-zen: opencode 에이전트 전용 — 글쓰기 체인 제외
 orca-ds4free:
   provider: orca
   model: deepseek/deepseek-v4-flash-free
@@ -102,9 +107,6 @@ providers:
   openai:
     api_key_env: OPENAI_API_KEY
     base_url: https://api.openai.com/v1
-  upstage:
-    api_key_env: UPSTAGE_API_KEY
-    base_url: https://api.upstage.ai/v1
   clova:
     api_key_env: CLOVA_API_KEY
     base_url: https://clovastudio.stream.ntruss.com
@@ -114,21 +116,36 @@ providers:
   groq:
     api_key_env: GROQ_API_KEY
     base_url: https://api.groq.com/openai/v1
-  cerebras:
-    api_key_env: CEREBRAS_API_KEY
-    base_url: https://api.cerebras.ai/v1
+  groq2:
+    api_key_env: GROQ_API_KEY_2
+    base_url: https://api.groq.com/openai/v1
+  groq3:
+    api_key_env: GROQ_API_KEY_3
+    base_url: https://api.groq.com/openai/v1
+  groq4:
+    api_key_env: GROQ_API_KEY_4
+    base_url: https://api.groq.com/openai/v1
   zhipu:
     api_key_env: ZHIPU_API_KEY
     base_url: https://open.bigmodel.cn/api/paas/v4
-  nvidia:
-    api_key_env: NVIDIA_API_KEY
-    base_url: https://integrate.api.nvidia.com/v1
   orca:
     api_key_env: ORCA_API_KEY
     base_url: https://api.orcarouter.ai/v1
   google:
     api_key_env: GOOGLE_API_KEY
     base_url: https://generativelanguage.googleapis.com/v1beta/openai/
-  opencode-zen:
-    api_key_env: OPENCODE_ZEN_API_TOKEN
-    base_url: https://opencode.ai/zen/v1
+  google2:
+    api_key_env: GEMINI_API_KEY_2
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+  google3:
+    api_key_env: GEMINI_API_KEY_3
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+  openrouter:
+    api_key_env: OPENROUTER_API_KEY
+    base_url: https://openrouter.ai/api/v1
+  mistral:
+    api_key_env: MISTRAL_API_KEY
+    base_url: https://api.mistral.ai/v1
+  cohere:
+    api_key_env: COHERE_API_KEY
+    base_url: https://api.cohere.com/compatibility/v1

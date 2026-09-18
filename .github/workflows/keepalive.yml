@@ -1,0 +1,34 @@
+name: keepalive (monthly cron health)
+
+on:
+  schedule:
+    - cron: "0 0 1 * *"  # 매월 1일 00:00 UTC (07:00 +07)
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check workflows enabled
+        run: |
+          gh api repos/hugh79757-cmyk/5000/actions/workflows --jq '.workflows[] | select(.state=="disabled_manually" or .state=="disabled_inactivity") | .name'
+      - name: Commit health summary
+        run: |
+          echo "## Keepalive $(date -u +%Y-%m-%d)" >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish.yml --limit 10 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-compare.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-deal.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-ev.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-guide.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-hotissue.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-rank.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-pick.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add HEALTH_SUMMARY.md
+          git commit -m "chore: monthly keepalive $(date +%Y%m)" || echo "No changes"
+          git push origin main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

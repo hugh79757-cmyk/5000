@@ -603,6 +603,13 @@ on-disk 불일치) 삭제 — 백업 `/tmp/cuap_stale_rows_backup_20260801-19163
 
 *Last updated: 2026-09-03 - Phase 77 완료 (analytics 셀프개선 루프: 추출기+boost+runbook, VERIFICATION 5/5 PASS, 기본 OFF 관찰 모드). total 36 / completed 32.*
 
+## Session Continuity
+
+Last session: 2026-09-16 09:42 +07:00 — project context restored from STATE.md, PROJECT.md, ROADMAP.md, checkpoints, and current git state.
+Stopped at: Phase 81 G1 migration planning; Phase 79 tco runner Gate observation remains partially open (G-B 4/5, REG#4 complete, one slot pending).
+Resume file: root `.continue-here.md` is stale (2026-09-11); `.planning/continue.md` is older TAP checkpoint; latest actionable artifact is `.planning/phases/phase-81-g1-car-cap-migration/PLAN.md`.
+Current divergence: tracked `HANDOFF.json` is complete but stale (2026-06-30) and lists no uncommitted files, while current git status has modified and untracked files. Handoff retained pending explicit cleanup approval.
+
 </content>
 </invoke>
 

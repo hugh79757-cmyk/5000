@@ -4,3 +4,4 @@
 [2026-09-11 11:00] ops.db publish_error_events ev-hugo P04 5a3f216e closed 처리 (배포 완료로 해소) | 사전카운트=open 1행 | 백업=ops.db.bak_20260911_evclose | 사후=closed 1행 resolved_at 세팅 | 보존확인=타 블로그 행 무변경
 [2026-09-11 11:05] cars.displacement UPDATE 2행 (kona_hev_2027=1580, k8_hev_2027=1598 — public_fuel_data 코나 1.6GDI HEV/K8 1.6TGDI HEV 근거) | 사전카운트=displacement 0인 2행 | 백업=car.db.bak_20260911_evtopics | 사후=2행 세팅 + topics 5062/5063 skip_no_data→pending 복귀 | 보존확인=타 차량 행 무변경
 [2026-09-11 15:17:59] kona_hev_2027 연비 4.7 오류글 철회(재생성 대기): publish_log(topic 5062) 삭제, topics 5062 pending 복귀, content.db articles(ev-hugo/kona/ev_analysis) 삭제, Hugo 포스트 dir 삭제 — car.db/content.db 백업 .bak_20260911_evtype
+[2026-09-11 20:20] wrangler r2 bucket create 5000-state + 초기 put 12 객체 | 사전카운트=신규 버킷(기존 객체 0) | 백업=불필요(신규 생성, 원본 불변) | 사후=put 12/12 원격 Upload complete, get 왕복 md5 대조 11/11 OK(manifest 포함) | 보존확인=원본 data/*.db 전부 무변경(읽기 복사본)

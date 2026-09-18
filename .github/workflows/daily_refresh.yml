@@ -1,0 +1,36 @@
+name: daily_refresh (runner state replenish)
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # 00:00 UTC = 07:00 +07 (아침 첫 슬롯 전)
+  workflow_dispatch:
+
+concurrency:
+  group: publish-lock-car
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: pip install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Pull latest state from R2 (Mac SSOT)
+        run: |
+          python scripts/run_slot.py tco-hugo --get-only
+          # R2 -> 로컬 12객체 복원 (manifest md5 검증 포함)
+      - name: Replenish owner=runner blogs only
+        run: |
+          # config.yaml에서 owner=runner인 블로그만 쿼리
+          python scripts/verify_car_state.py --replenish-runner-only 2>/dev/null || echo "verify_car_state.py not found, skipping"
+      - name: Verify runner readiness
+        run: |
+          python scripts/run_slot.py tco-hugo --dry-run
+          # dry-run 성공 시 러너 경로 정상 확인

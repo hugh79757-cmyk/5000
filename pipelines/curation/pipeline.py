@@ -175,6 +175,35 @@ def _apply_perf_signal_boost(candidates, blog_id):
     return candidates
 
 
+def _extract_district(keyword: str) -> str | None:
+    """키워드에서 목표 구/군 추출.
+
+    패턴: "서울 강남구 ..." 또는 "부산 해운대구 ..." 등
+    반환: 구/군 이름 (예: "강남구") 또는 일치하는 것이 없으면 None.
+    """
+    parts = keyword.split(" ", 1)
+    if len(parts) < 2:
+        return None
+    rest = parts[1]
+    m = re.match(r"^([가-힣]+(?:구|군))", rest)
+    if m:
+        return m.group(1)
+    return None
+
+
+def _has_rent_data(district: str, conn) -> bool:
+    """해당 구/군이 rents 테이블에 데이터가 있는지 확인."""
+    try:
+        row = conn.execute(
+            "SELECT COUNT(*) FROM rents WHERE district=?",
+            (district,),
+        ).fetchone()
+    except Exception:
+        # rents 테이블 없음(curation.db 등) → fail-open, 기존 후보 유지
+        return True
+    return row[0] > 0
+
+
 def _select_keyword(blog_id):
     """키워드 선택 - 30일 TTL + 카테고리 14일 중복 억제
 
@@ -223,6 +252,23 @@ def _select_keyword(blog_id):
     cat_filtered = [k for k in available if _extract_category(k) not in recent_cats]
     candidates = cat_filtered or available
     candidates = _apply_perf_signal_boost(candidates, blog_id)
+
+    # ── P01 no_trade_data 필터: 목표 구/군이 rents 테이블에 데이터가 있어야 함 ────
+    #district_rent_ok: district가 rents 테이블에 rows > 0 인 경우만 후보 유지
+    district_rent_ok = []
+    for kw in candidates:
+        district = _extract_district(kw)
+        if district is None:
+            # distrito 파arsing 불가하면 기존 후보로 유지 (데이터 부족 키워드 건너뜀 금지)
+            district_rent_ok.append(kw)
+        elif _has_rent_data(district, conn):
+            district_rent_ok.append(kw)
+        else:
+            logger.debug(
+                f"[{blog_id}] rent data skip: district={district} has no rows in rents table, kw={kw[:30]}"
+            )
+    candidates = district_rent_ok
+    #──── 끝 ────
 
     conn = _sq.connect(str(DB_PATH))
     # candidates → available → 전체 순으로 상품 3개 이상인 키워드 탐색
@@ -298,11 +344,9 @@ CATEGORY_FILTERS = {
                      "모니터", "키보드", "마우스", "프린터", "스캐너",
                      "태블릿", "아이패드", "2in1", "컨버터블",
                      "게이밍", "사무용", "학생용", "개발자", "프로그래밍"],
-        "blocked": ["도서", "교재", "필기", "실기", "기능사", "자격증",
-                     "스티커", "마우스패드", "장패드", "키보드", "마우스",
-                     "가방", "파우치", "거치대", "받침대", "쿨링패드",
-                     "모니터", "데스크탑", "태블릿", "아이패드", "갤럭시탭",
-                     "헤드셋", "이어폰", "이어버드", "스피커",
+"blocked": ["도서", "교재", "필기", "실기", "기능사", "자격증",
+                     "스티커", "마우스패드", "장패드",
+                 "가방", "파우치", "거치대", "받침대", "쿨링패드",
                      "웹캠", "캡쳐보드", "캡처보드",
                      "책상", "의자", "케이블", "HDMI", "USB허브",
                      "dock", "어댑터", "충전기", "보호필름", "스킨",

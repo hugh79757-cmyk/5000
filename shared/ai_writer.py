@@ -74,6 +74,26 @@ def _is_chinese_content(text: str) -> bool:
     return chinese > hangul  # 중국어 비율이 한글보다 높으면 차단
 
 
+_BILLING_TEXT_PATTERNS = (
+    "reached its budget", "reached your budget",
+    "insufficient credit", "insufficient balance", "insufficient fund",
+    "credits depleted", "credit balance", "needs top-up", "top up",
+    "quota exceeded", "rate limit exceeded",
+)
+
+
+def _is_billing_text(text: str) -> bool:
+    """HTTP 200 + 본문이 과금/쿼터 오류문 (스킬 2026-09-14 lesson).
+
+    OpenRouter류가 쿼터 오류를 content로 반환 — 성공으로 오인 금지.
+    앞 200자만 스캔, 적중 시 tier 실패 → 0회 재시도 즉시 회전.
+    """
+    if not text:
+        return False
+    head = text[:200].lower()
+    return any(p in head for p in _BILLING_TEXT_PATTERNS)
+
+
 def _clean_ai_output(text: str) -> str:
     """AI 출력에서 코드블록 마커, 취소선, 이모지 등 정리"""
     if not text:
@@ -203,7 +223,7 @@ def openai_chat_completions_with_retry(
 MAX_RETRIES = 3
 
 # 기본 tier 순서 (models.yaml의 tier_order가 있으면 그걸 사용)
-_DEFAULT_TIER_ORDER = ['zen-mimo-free', 'zen-deepseek-free', 'zen-bigpickle', 'groq-llama', 'groq-qwen', 'groq-gpt120b', 'groq-gpt20b', 'cerebras-gemma', 'cerebras-glm', 'zhipu-glm', 'nvidia-nemotron', 'nvidia-step', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-3.5-flash', 'default']
+_DEFAULT_TIER_ORDER = ['groq-qwen', 'groq-gpt120b', 'groq2-qwen', 'groq2-gpt120b', 'groq3-qwen', 'groq3-gpt120b', 'groq4-qwen', 'groq4-gpt120b', 'or-nexmini', 'or-nexpro', 'or-lingvl', 'mistral-codestral', 'cohere-commanda', 'gemini-flash', 'gemini2-flash', 'gemini3-flash', 'zhipu-glm', 'orca-ds4free', 'orca-hy3', 'default']
 
 
 def _get_tier_order(config):
@@ -459,6 +479,14 @@ def generate(
                     last_error = f"{attempt_tier}: 누수 감지 ({leak_name}: {leak_text})"
                     logger.warning(f"[ai_writer] {last_error} — 다음 tier로 회전")
                     _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": f"leak:{leak_name}"})
+                    tier_content_failed = True
+                    break
+
+                # HTTP 200 + 과금/쿼터 본문 — 스킬 2026-09-14: 실패 처리, 0회 재시도 즉시 회전
+                if _is_billing_text(content):
+                    last_error = f"{attempt_tier}: 과금/쿼터 오류문 감지"
+                    logger.warning(f"[ai_writer] {last_error} — 다음 tier로 회전")
+                    _trace_attempts.append({"tier": attempt_tier, "model": tier_config["model"], "provider": tier_config["provider"], "reason": "billing_text"})
                     tier_content_failed = True
                     break
 
