@@ -11,12 +11,12 @@ on:
         description: "dry-run (dispatcher 스킵)"
         type: boolean
         default: true
-  schedule:
-    - cron: "30 23 * * *"   # tco 슬롯1 06:30 로컬(+07)
-    - cron: "10 3 * * *"    # tco 슬롯2 10:10
-    - cron: "35 6 * * *"    # tco 슬롯3 13:35
-    - cron: "30 10 * * *"   # tco 슬롯4 17:30
-    - cron: "45 13 * * *"   # tco 슬롯5 20:45
+  # schedule: tco-hugo 비활성화로 제거 (재활성 시 복원)
+  #    - cron: "30 23 * * *"   # tco 슬롯1 06:30 로컬(+07)
+  #    - cron: "10 3 * * *"    # tco 슬롯2 10:10
+  #    - cron: "35 6 * * *"    # tco 슬롯3 13:35
+  #    - cron: "30 10 * * *"   # tco 슬롯4 17:30
+  #    - cron: "45 13 * * *"   # tco 슬롯5 20:45
 
 concurrency:
   # G-C 전환: car 파이프라인 전 블로그 직렬화 (STATE_FILES 12객체 공유 — car.db/content.db/stap_content.db
