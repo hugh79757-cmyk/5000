@@ -39,7 +39,7 @@ blogs:
     - '20:20'
   shortcodes_enabled: true
   site_path: /Users/twinssn/Projects/TAP/travel-hugo
-  status: active
+  status: paused
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
