@@ -1,4 +1,4 @@
-"""시니어 복지 데이터 수집 — 공공서비스(혜택) API + 노인일자리 API"""
+"""시니어 복지 데이터 수집 — 공공서비스(혜택) API + 복지로(지자체/중앙) API"""
 
 import logging
 import os
@@ -14,7 +14,8 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path
 API_KEY = os.getenv("DATA_GO_KR_API_KEY", "")
 SERVICE_LIST_URL = "https://api.odcloud.kr/api/gov24/v3/serviceList"
 SERVICE_DETAIL_URL = "https://api.odcloud.kr/api/gov24/v3/serviceDetail"
-SENIOR_JOB_URL = "http://apis.data.go.kr/B490007/sjfd100/sjfd100"
+WELFARE_LOCAL_URL = "http://apis.data.go.kr/B554287/LocalGovernmentWelfareInformations/LcgvWelfarelist"
+WELFARE_CENTRAL_URL = "http://apis.data.go.kr/B554287/NationalWelfareInformationsV001/NationalWelfarelistV001"
 
 SENIOR_KEYWORDS = [
     "노인", "고령", "65세", "어르신", "시니어", "기초연금", "장기요양",
@@ -108,30 +109,161 @@ def fetch_senior_services(page=1, per_page=100, max_pages=110):
     return senior_services
 
 
-def fetch_senior_jobs():
-    """한국노인인력개발원 노인 일자리 조회"""
-    logger.info("노인 일자리 API 조회")
+def fetch_welfare_services():
+    """복지로(지자체/중앙) API에서 시니어 관련 복지 서비스 조회"""
+    logger.info("복지로(지자체/중앙) API 조회 시작")
+    all_services = []
+    
+    def is_senior_service(item):
+        """XML item이 시니어(65세 이상) 전용/주대상 서비스인지 엄밀 판별"""
+        life_nm = item.findtext("lifeNmArray", "") or ""
+        intrs_thema = item.findtext("intrsThemaNmArray", "") or item.findtext("intrsThemaArray", "") or ""
+        serv_nm = item.findtext("servNm", "") or ""
+        serv_dgst = item.findtext("servDgst", "") or ""
+        trgter = item.findtext("trgterIndvdlNmArray", "") or ""
+        
+        # 1. 서비스명에 명시적 시니어 키워드 (최우선)
+        senior_name_keywords = ["노인", "어르신", "경로", "장수수당", "기초연금", "장기요양", "틀니", "임플란트", 
+                                 "개안수술", "인공관절", "경로당", "노인맞춤", "노인일자리", "배회감지기", 
+                                 "치매안심", "치매안심센터", "노인맞춤돌봄", "장수수당", "노인장기요양"]
+        if any(kw in serv_nm for kw in senior_name_keywords):
+            return True
+        
+        # 2. 대상자(trgter)에 명시적 시니어 조건
+        trgter_text = item.findtext("trgterIndvdlNmArray", "") or ""
+        if any(kw in trgter_text for kw in ["노인", "어르신", "65세", "70세", "기초연금수급", "경로우대", "만 65세 이상"]):
+            return True
+        
+        # 3. lifeNmArray가 "노년" 단독이거나 "고령"만 있는 경우 (혼합 연령대 제외)
+        # "노년"이 단독이거나 마지막에 오는 경우만 인정
+        if life_nm.strip() in ["노년", "고령"] or life_nm.endswith(", 노년") or life_nm.endswith(", 고령"):
+            # 추가로 서비스명/대상에 시니어 키워드가 있어야 함
+            if any(kw in serv_nm for kw in ["노인", "어르신", "경로", "기초연금", "장기요양", "장수수당"]):
+                return True
+            if any(kw in trgter for kw in ["노인", "어르신", "65세", "70세", "기초연금수급"]):
+                return True
+        
+        # 4. 테마가 명시적 시니어 복지 분야
+        senior_themes = ["노인복지", "노인일자리", "경로당", "장기요양", "치매관리", "기초연금", "노인돌봄", "노인맞춤돌봄"]
+        intrs_thema = item.findtext("intrsThemaNmArray", "") or item.findtext("intrsThemaArray", "") or ""
+        if any(kw in intrs_thema for kw in senior_themes):
+            # 테마만으로는 부족 — 서비스명/대상에 시니어 키워드 추가 필요
+            if any(kw in serv_nm for kw in ["노인", "어르신", "경로", "기초연금", "장기요양", "장수수당", "노인"]):
+                return True
+            if any(kw in trgter for kw in ["노인", "어르신", "65세", "70세", "기초연금수급"]):
+                return True
+        
+        # 5. 설명(servDgst)에 명시적 시니어 표현
+        serv_dgst = item.findtext("servDgst", "") or ""
+        senior_desc_keywords = ["어르신", "노인", "경로당", "장수수당", "기초연금", "장기요양", "틀니", "임플란트", 
+                                 "개안수술", "노인맞춤", "노인일자리", "노인맞춤돌봄", "배회감지기", "치매안심"]
+        if any(kw in serv_dgst for kw in senior_desc_keywords):
+            # 설명에만 있으면 서비스명/대상에 시니어 키워드 추가 필요
+            if any(kw in serv_nm for kw in ["노인", "어르신", "경로", "기초연금", "장기요양", "장수수당", "노인"]):
+                return True
+            if any(kw in trgter for kw in ["노인", "어르신", "65세", "70세", "기초연금수급"]):
+                return True
+        
+        return False
+    
+    # 1. 지자체 복지 API
+    logger.info("지자체 복지 API 조회")
     try:
-        params = {
-            "serviceKey": API_KEY,
-            "numOfRows": 50,
-            "pageNo": 1,
-            "type": "json",
-        }
-        resp = requests.get(SENIOR_JOB_URL, params=params, timeout=15)
-        if resp.status_code != 200:
-            logger.warning(f"노인일자리 API 응답: {resp.status_code}")
-            return []
-        data = resp.json()
-        items = data.get("response", {}).get("body", {}).get("items", {}).get("item", [])
-        if isinstance(items, dict):
-            items = [items]
-        logger.info(f"노인 일자리: {len(items)}건")
-        return items
+        page = 1
+        per_page = 500
+        while True:
+            params = {
+                "serviceKey": API_KEY,
+                "pageNo": page,
+                "numOfRows": per_page,
+            }
+            resp = requests.get(WELFARE_LOCAL_URL, params=params, timeout=15)
+            resp.raise_for_status()
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(resp.text)
+            total_count = int(root.findtext("totalCount", "0"))
+            items = root.findall(".//servList")
+            if not items:
+                break
+            
+            filtered_count = 0
+            for item in items:
+                if is_senior_service(item):
+                    filtered_count += 1
+                    all_services.append({
+                        "service_name": item.findtext("servNm", ""),
+                        "description": (item.findtext("servDgst", "") or "")[:500],
+                        "target": (item.findtext("lifeNmArray", "") or "")[:300],
+                        "category": "복지서비스",
+                        "apply_method": item.findtext("aplyMtdNm", ""),
+                        "apply_url": item.findtext("servDtlLink", ""),
+                        "department": item.findtext("bizChrDeptNm", ""),
+                        "service_id": item.findtext("inqNum", "") or item.findtext("servId", ""),
+                        "region": f"{item.findtext('ctpvNm', '')} {item.findtext('sggNm', '')}".strip(),
+                        "source": "지자체복지",
+                    })
+            
+            logger.info(f"  지자체 페이지 {page}: {len(items)}건 중 시니어 {filtered_count}건 필터링")
+            if len(items) < per_page:
+                break
+            page += 1
     except Exception as e:
-        logger.warning(f"노인일자리 API 오류 (무시): {e}")
-        return []
+        logger.warning(f"지자체 복지 API 오류: {e}")
+    
+    # 2. 중앙부처 복지 API
+    logger.info("중앙부처 복지 API 조회")
+    try:
+        page = 1
+        per_page = 500
+        while True:
+            params = {
+                "serviceKey": API_KEY,
+                "pageNo": page,
+                "numOfRows": per_page,
+                "srchKeyCode": "003",
+                "callTp": "L",
+            }
+            resp = requests.get(WELFARE_CENTRAL_URL, params=params, timeout=15)
+            resp.raise_for_status()
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(resp.text)
+            total_count = int(root.findtext("totalCount", "0"))
+            items = root.findall(".//servList")
+            if not items:
+                break
+            
+            filtered_count = 0
+            for item in items:
+                if is_senior_service(item):
+                    filtered_count += 1
+                    all_services.append({
+                        "service_name": item.findtext("servNm", ""),
+                        "description": (item.findtext("servDgst", "") or "")[:500],
+                        "target": (item.findtext("intrsThemaArray", "") or "")[:300],
+                        "category": "복지서비스",
+                        "apply_method": "방문/온라인",
+                        "apply_url": item.findtext("servDtlLink", ""),
+                        "department": item.findtext("jurOrgNm", ""),
+                        "service_id": item.findtext("inqNum", ""),
+                        "region": "전국",
+                        "source": "중앙복지",
+                    })
+            
+            logger.info(f"  중앙부처 페이지 {page}: {len(items)}건 중 시니어 {filtered_count}건 필터링")
+            if len(items) < per_page:
+                break
+            page += 1
+    except Exception as e:
+        logger.warning(f"중앙부처 복지 API 오류: {e}")
+    
+    logger.info(f"시니어 관련 복지 서비스: {len(all_services)}건 수집 완료")
+    return all_services
 
+
+def fetch_senior_jobs():
+    """노인일자리 API (폐기됨 — welfare 서비스로 대체)"""
+    logger.info("노인일자리 API 폐기됨 — 복지 서비스로 대체")
+    return []
 
 
 import sqlite3
@@ -359,8 +491,6 @@ def _save_cache(services) -> None:
     logger.info("캐시 저장: %d건 -> %s" % (len(services), CACHE_PATH))
 
 
-
-
 def enrich_service_detail(service):
     """gov24 상세 API로 서비스 데이터 보강"""
     svc_id = service.get("service_id", "")
@@ -512,15 +642,15 @@ def fetch_all(max_pages=10):
     logger.info(f"만료 필터: {len(services)}건 -> {len(filtered)}건 ({len(services)-len(filtered)}건 제외)")
     services = filtered
 
-    jobs = fetch_senior_jobs()
+    welfare = fetch_welfare_services()
     today = datetime.now().strftime("%Y년 %m월 %d일")
 
     return {
         "services": services,
-        "jobs": jobs,
+        "welfare": welfare,
         "today": today,
         "total_services": len(services),
-        "total_jobs": len(jobs),
+        "total_welfare": len(welfare),
         "categories": list(CATEGORIES.keys()),
     }
 
@@ -528,6 +658,6 @@ def fetch_all(max_pages=10):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     result = fetch_all()
-    print(f"\n수집 결과: 서비스 {result['total_services']}건, 일자리 {result['total_jobs']}건")
+    print(f"\n수집 결과: 서비스 {result['total_services']}건, 복지 {result['total_welfare']}건")
     for svc in result["services"][:5]:
         print(f"  [{svc['category']}] {svc['service_name']}")
