@@ -1,39 +1,65 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-30T12:19:43.965Z",
-  "phase": null,
-  "phase_name": null,
-  "phase_dir": null,
-  "plan": null,
-  "task": null,
-  "total_tasks": null,
-  "status": "complete",
+  "timestamp": "2026-09-20T07:43:10Z",
+  "phase": "81",
+  "phase_name": "G1 그룹 이관 — car/cap 잔여 7블로그 러너 전환",
+  "phase_dir": ".planning/phases/phase-81-g1-car-cap-migration/",
+  "plan": 1,
+  "task": 1,
+  "total_tasks": 7,
+  "status": "paused",
   "completed_tasks": [
-    {"id": 1, "name": "Tooling & Test Infrastructure", "status": "done"},
-    {"id": 2, "name": "Unit Tests for Shared Modules", "status": "done"},
-    {"id": 3, "name": "Dispatcher Registry", "status": "done"},
-    {"id": 4, "name": "Publisher Decomposition", "status": "done"},
-    {"id": 5, "name": "Backup File Cleanup", "status": "done"},
-    {"id": 6, "name": "Path Configuration", "status": "done"},
-    {"id": 7, "name": "Error Handling Audit", "status": "done"},
-    {"id": 8, "name": "External Dependency Isolation", "status": "done"}
+    {"id": 1, "name": "P-A: 사전 리시딩 (rank-hugo R2 pre-seeding)", "status": "done", "commit": "644104207, 4697b429b, bfea3e2dc"},
+    {"id": 2, "name": "P-B: 커밋 파일 10종 체크리스트 검증", "status": "done", "commit": "4697b429b (7) + 61941ff50 (2) + bfea3e2dc (1)"},
+    {"id": 3, "name": "Q-2: Worklog + 규칙 A/B 기록", "status": "done", "commit": "WL-20260920-g1-batch1-flip-violations.md"},
+    {"id": 4, "name": "Q-3: R-4 airlines P28 수정 (_run_impl dict 반환)", "status": "done", "commit": "pipelines/etap/airlines_pipeline.py"},
+    {"id": 5, "name": "Q-3: R-5 설계안 문서화", "status": "done", "commit": ".planning/R-5_ALERT_DIGEST_DESIGN.md"},
+    {"id": 6, "name": "Q-3: P-E Blogger 로테이션 안내 문서화", "status": "done", "commit": ".planning/P-E_BLOGGER_ROTATION_GUIDE.md"}
   ],
   "remaining_tasks": [
-    {"id": 9, "name": "v2: launchd auto-restart (STB-11)", "status": "deferred"},
-    {"id": 10, "name": "v2: Log aggregation (STB-12)", "status": "deferred"},
-    {"id": 11, "name": "v2: Config validation (STB-13)", "status": "deferred"},
-    {"id": 12, "name": "v2: validators.py coverage improvement", "status": "deferred"}
+    {"id": 7, "name": "Q-4: Rank 첫 자동 슬롯 관찰 (23:50 UTC / 06:50 +07) — 4/4 달성 시 G-C 종결", "status": "not_started"},
+    {"id": 8, "name": "Batch 1.5 (pick) 진입 — 게이트 5항목 최신본 적용", "status": "not_started"},
+    {"id": 9, "name": "R-ACCEL 09-21 창: pick flip + G2 rap READY → rap flip 동일 창", "status": "not_started"},
+    {"id": 10, "name": "P-D-1: senior frontmatter 수리 (5건 CH_FAILED)", "status": "not_started"},
+    {"id": 10, "name": "P-D-2: R-4 beauty P04 수리", "status": "not_started"},
+    {"id": 11, "name": "P-E: Blogger OAuth 로테이션 사용자 개입 대기 (.gitignore 선행 → 신규 Client → 검증 → Secrets → 구 폐기)", "status": "blocked_human_action"},
+    {"id": 12, "name": "Phase 81 Task 1: public 전환 + 로테이션 (B1) — 사용자 개입 완료 대기", "status": "blocked_human_action"}
   ],
-  "blockers": [],
-  "human_actions_pending": [],
+  "blockers": [
+    {"description": "B1: Blogger OAuth refresh_token+client_secret 로테이션 — 5000 리포 public 전환 전제. 사용자 Google Cloud Console 개입 필수", "type": "human_action", "workaround": "없음 — 사용자 완료 대기"},
+    {"description": "B2: publish.yml tco 하드코딩 — 파라미터화 필요 (blog 입력 1개로 7블로그 커버)", "type": "technical", "workaround": "Task 2에서 처리 예정"},
+    {"description": "compare/deal paused 상태에서 워크플로 활성화됨 — T-1로 비활성화 완료 (disabled_manually)", "type": "technical", "workaround": "완료"},
+    {"description": "R-ACCEL 가속 승인 — 배치 확대 가능하지만 Phase 2 승인 전 실모드 금지", "type": "advisory", "workaround": "PHASE 2 승인 대기"}
+  ],
+  "async_jobs": [],
+  "human_actions_pending": [
+    {"action": "Google Cloud Console에서 Blogger OAuth Client ID 재발급 + credentials.json 다운로드 + blogger_token.pickle 재생성", "context": "5000 리포 public 전환 + G4/travel 이관 선결조건 (B1)", "blocking": true},
+    {"action": "5000 리포 GitHub Settings에서 public 전환", "context": "Actions 무료 분 확보 (private 2,000분 → G1 2,700분/월)", "blocking": true}
+  ],
   "decisions": [
-    {"decision": "pyproject.toml for all tool config", "rationale": "Single source of truth", "phase": "1"},
-    {"decision": "Convention-based ETAP naming", "rationale": "Strip -hugo suffix, derive module name", "phase": "2"},
-    {"decision": "shared/publishers/ package split by concern", "rationale": "writer, deploy, content_enhancer", "phase": "2"},
-    {"decision": "~/.env.common fallback for secrets", "rationale": "Single env file, revoke-safe", "phase": "3"},
-    {"decision": "All external paths as env vars", "rationale": "5000_ROOT, STAP_ROOT, TAP_ROOT, HUGO_PATH", "phase": "3"}
+    {"decision": "규칙 A: 검증 주장에 원본 출력(git show --stat 등) 필수 — ✅ 요약만 금지", "rationale": "5~6회차 허위 3-way 주장 재발 방지", "phase": "81"},
+    {"decision": "규칙 B: 기계적 실행 직전 실출력-명세 대조 불일치 시 push 중단", "rationale": "동결 번들 불일치(9≠7) 재발 방지", "phase": "81"},
+    {"decision": "R-ACCEL 가속 승인 — 09-21 pick flip + G2 rap 동일 창 가능", "rationale": "사용자 '빨리 끝내라' 지시, 게이트 통과+회피창 준수 시 재승인 없이 진행", "phase": "81"},
+    {"decision": "P-A '완료' 판정 철회 — 증빙 미제출 인정, E-2 실제 수행 완료", "rationale": "6회차 '완료 선언-증빙 불일치' 패턴 기록", "phase": "81"}
   ],
-  "uncommitted_files": [],
-  "next_action": "Run /gsd-complete-milestone or start v2 work",
-  "context_notes": "Milestone v1.0 complete. All 3 phases done. Ready for milestone wrap-up or v2 planning."
+  "uncommitted_files": [
+    "M .continue-here.md",
+    "D .github/workflows/publish-pick-hugo.yml",
+    "D .github/workflows/publish-rank-hugo.yml",
+    "M FLIP-BUNDLE-PREVIEW.md",
+    "M G1-DESIGN.md",
+    "M G1_READINESS.md",
+    "M config/blogs.d/cap.yaml",
+    "M data/analytics_status.json",
+    "M pipelines/etap/airlines_pipeline.py",
+    "?? .github/workflows/publish-pick-hugo.disabled.yml",
+    "?? .github/workflows/publish-rank-hugo.disabled.yml",
+    "?? .planning/worklog/WL-20260919-data-exhaustion-disable.md",
+    "?? .planning/worklog/WL-20260920-g1-batch1-flip-violations.md",
+    "?? .planning/worklog/WL-20260920-rap-keyword-region-fix.md",
+    "?? B1_DEFINITION.md",
+    "?? logs/destructive_2026-09-19.log"
+  ],
+  "next_action": "Wait for 23:50 UTC (06:50 +07) rank-hugo first automatic slot — observe gh run list --workflow=publish-rank.yml. If 4/4 achieved → G-C 종결 → batch 1.5 pick. If B1 resolved → Task 2 publish.yml 파라미터화 → Task 3 재시딩 → Task 4 owner 플립.",
+  "context_notes": "G1 Batch 1 flip 완료 (compare/deal/rank runner 이관). rank 첫 슬롯 23:50 UTC 대기 중. B1/B2 블로커로 Phase 81 Task 1/2 대기. R-ACCEL 가속으로 09-21 pick+rap 동일 창 승인. P-A 실질 증빙 제출 완료 (R2 pre-seeding 12/12 md5, 30일 가드 23개 차단·280개 가용). Q-1~Q-3 완료, Q-4 rank 관찰이 다음 크리티컬 경로."
 }
