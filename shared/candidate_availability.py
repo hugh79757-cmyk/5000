@@ -11,7 +11,9 @@ scheduler가 dispatcher를 호출하기 전에 이 모듈의 `check_availability
 """
 from __future__ import annotations
 
+import random
 import sqlite3
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
@@ -103,14 +105,38 @@ def _count_pending(conn: sqlite3.Connection, site_id: str, post_types: list[str]
     return int(row[0]) if row else 0
 
 
+import time
+import random
+
+
+def _connect_car_db_with_retry(db_path: str | Path, max_retries: int = 3, base_timeout: int = 30) -> sqlite3.Connection:
+    """car.db 연결 with retry/backoff for WAL lock contention."""
+    last_error = None
+    for attempt in range(max_retries):
+        try:
+            conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, timeout=base_timeout)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except sqlite3.OperationalError as e:
+            last_error = e
+            if "unable to open database file" in str(e).lower() or "database is locked" in str(e).lower():
+                if attempt < max_retries - 1:
+                    wait_time = (2 ** attempt) * 0.5 + random.uniform(0, 0.2)
+                    time.sleep(wait_time)
+                    continue
+            raise
+    raise last_error
+
+
 def check_car_availability(blog_cfg: dict, car_db_path: str | Path | None = None) -> dict:
     """car pipeline 후보 가용성 판정 (읽기 전용, DB 쓰기 없음)."""
     blog_id = str(blog_cfg.get("id") or "")
     site_id = _site_id(blog_cfg)
     post_types = _post_types(blog_cfg)
     candidate_type = ",".join(post_types) if post_types else "*"
+    db_path = _car_db_path(car_db_path)
     try:
-        conn = sqlite3.connect(f"file:{_car_db_path(car_db_path)}?mode=ro", uri=True, timeout=5)
+        conn = _connect_car_db_with_retry(db_path)
         try:
             pending = _count_pending(conn, site_id, post_types)
         finally:
