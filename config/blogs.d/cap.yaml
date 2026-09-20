@@ -210,7 +210,7 @@ blogs:
     times:
     - 06:55
   site_path: /Users/twinssn/Projects/cap/pick-hugo
-  status: active
+  status: paused
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: monetize
