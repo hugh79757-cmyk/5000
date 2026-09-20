@@ -67,6 +67,68 @@ BLOG_STRATEGY = {
     "rap5-hugo": "trade",
 }
 
+# blog_id별 허용 지역 풀 (lawd_cd, city, district) — 키워드 선택 시 검증용
+BLOG_REGION_POOL = {
+    "rap-hugo":  [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
+                  ("11440","서울","마포구"), ("11560","서울","영등포구"), ("11200","서울","성동구")],
+    "rap3-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
+                  ("11170","서울","용산구"), ("11500","서울","강서구")],
+    "rap4-hugo": [("11440","서울","마포구"), ("11200","서울","성동구"), ("11215","서울","광진구"),
+                  ("11620","서울","관악구"), ("11590","서울","동작구"), ("11470","서울","양천구")],
+    "rap5-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
+                  ("11560","서울","영등포구"), ("11170","서울","용산구")],
+}
+
+# 모든 알려진 district 집합 (키워드에서 district 추출용)
+ALL_KNOWN_DISTRICTS = {d for pool in BLOG_REGION_POOL.values() for _, _, d in pool}
+
+# 추가 district (키워드에 등장하지만 풀에 없는 것들)
+ALL_KNOWN_DISTRICTS.update({
+    "용산구", "강서구", "노원구", "은평구", "종로구", "중구", "동대문구", "성북구",
+    "도봉구", "강북구", "관악구", "동작구", "서대문구", "마포구", "양천구", "강서구",
+    "구로구", "금천구", "영등포구", "동작구", "관악구", "서초구", "강남구", "송파구",
+    "강동구", "광진구", "성동구", "중랑구", "동대문구", "성북구", "종로구", "중구",
+    "용인시수지구", "용인시기흥구", "용인시처인구", "수원시영통구", "수원시권선구",
+    "수원시팔달구", "수원시장안구", "고양시덕양구", "고양시일산동구", "고양시일산서구",
+    "성남시분당구", "성남시수정구", "성남시중원구", "안양시동안구", "안양시만안구",
+    "부천시", "광명시", "시흥시", "군포시", "의왕시", "과천시", "하남시", "광주시",
+    "김포시", "파주시", "이천시", "평택시", "안성시", "오산시", "화성시", "양주시",
+    "포천시", "여주시", "연천군", "가평군", "양평군", "남양주시", "구리시", "의정부시",
+    "동두천시", "양주시", "연천군", "가평군", "양평군",
+    "인천시", "부평구", "계양구", "서구", "연수구", "남동구", "중구", "동구", "미추홀구",
+    "강화군", "옹진군",
+    "수성구", "달서구", "달성군", "동구", "서구", "북구", "중구", "남구",
+    "해운대구", "사하구", "금정구", "연제구", "수영구", "사상구", "기장군",
+    "남구", "동구", "서구", "유성구", "대덕구", "중구",
+    "남구", "달서구", "북구", "중구", "서구", "동구", "울주군",
+    "세종시", "서구", "동구", "남구", "북구", "광산구",
+    "아산시", "천안시", "공주시", "보령시", "논산시", "계룡시", "당진시",
+    "청주시", "충주시", "제천시", "보은군", "옥천군", "영동군", "증평군",
+    "진천군", "괴산군", "음성군", "단양군",
+    "전주시", "군산시", "익산시", "정읍시", "남원시", "김제시",
+    "완주군", "진안군", "무주군", "장수군", "임실군", "순창군", "고창군", "부안군",
+    "목포시", "여수시", "순천시", "나주시", "광양시", "담양군", "곡성군", "구례군",
+    "고흥군", "보성군", "화순군", "장흥군", "강진군", "해남군", "영암군", "무안군",
+    "함평군", "영광군", "장성군", "완도군", "진도군", "신안군",
+    "포항시", "경주시", "김천시", "안동시", "구미시", "영주시", "영천시", "상주시",
+    "문경시", "경산시", "군위군", "의성군", "청송군", "영양군", "영덕군", "청도군",
+    "고령군", "성주군", "칠곡군", "예천군", "봉화군", "울진군", "울릉군",
+    "창원시", "진주시", "통영시", "사천시", "김해시", "밀양시", "거제시", "양산시",
+    "의령군", "함안군", "창녕군", "고성군", "남해군", "하동군", "산청군", "함양군",
+    "거창군", "합천군",
+    "제주시", "서귀포시",
+})
+
+
+def _extract_district_from_keyword(keyword: str) -> str | None:
+    """키워드 텍스트에서 district 추출 — find_lawd_cd false positive 방지용"""
+    # 긴 district부터 매칭 (ex: "성남시분당구" before "분당구")
+    for district in sorted(ALL_KNOWN_DISTRICTS, key=len, reverse=True):
+        if district in keyword:
+            return district
+    return None
+
+
 WP_CATEGORY_MAP = {
     "부동산": 150,
     "실거래가": 150,
@@ -139,25 +201,47 @@ def _pick_keyword(blog_id):
             pass  # publish_log 테이블 없으면 스킵
 
         # Q-D: 최근 발행 단지 제외 (중복 방지) — 발견② 연동
+        # 허용 풀이 작은 블로그는 30일 차단 시 전수 차단되므로 7일로 단축 + 최소 잔여 풀 보장
         try:
             if blog_id in ("rap-hugo", "rap3-hugo", "rap4-hugo", "rap5-hugo"):
-                from pipelines.rap.fetcher import find_lawd_cd
                 recent_complexes = {r[0] for r in rap_conn.execute(
                     "SELECT DISTINCT data_key FROM publish_log "
-                    "WHERE blog_id=? AND published_at >= datetime('now', '-30 days') "
+                    "WHERE blog_id=? AND published_at >= datetime('now', '-7 days') "
                     "AND (data_key LIKE '%실거래가%' OR data_key LIKE '%전세%' OR data_key LIKE '%월세%')",
                     (blog_id,)
                 ).fetchall()}
-                # 같은 district의 keyword는 최근 발행되어도 제외 (data_key substring이 아니라 district 기준)
+                allowed_districts = {d for _, _, d in BLOG_REGION_POOL.get(blog_id, [])}
                 recent_districts = set()
                 for dk in recent_complexes:
-                    _, _, district = find_lawd_cd(dk)
-                    if district:
+                    district = _extract_district_from_keyword(dk)
+                    if district and district in allowed_districts:
                         recent_districts.add(district)
-                rows = [(kw, cat) for kw, cat in rows
-                        if not any(district in kw for district in recent_districts)]
+                # 잔여 허용 district가 2개 미만이면 차단 해제 (전수 차단 방지)
+                remaining = allowed_districts - recent_districts
+                if len(remaining) >= 2:
+                    rows = [(kw, cat) for kw, cat in rows
+                            if _extract_district_from_keyword(kw) not in recent_districts]
         except Exception:
             pass  # 에러 시 건너뜀
+
+        # 4단계: BLOG_REGION_POOL 검증 — 키워드의 district가 허용 풀에 있는지 확인
+        # (키워드-지역 불일치로 인한 no_trade_data 방지)
+        try:
+            if blog_id in BLOG_REGION_POOL:
+                allowed_districts = {d for _, _, d in BLOG_REGION_POOL[blog_id]}
+                region_filtered = []
+                for kw, cat in rows:
+                    district = _extract_district_from_keyword(kw)
+                    # 키워드에 특정 district가 없으면(일반 키워드) 제외 — 랜덤 fallback 시 no_trade_data 방지
+                    # district가 있고 허용 풀에 있으면만 통과
+                    if district is not None and district in allowed_districts:
+                        region_filtered.append((kw, cat))
+                    else:
+                        logger.debug(f"{blog_id}: 지역 불일치 제외 -> {kw} (district={district}, allowed={allowed_districts})")
+                rows = region_filtered
+                logger.info(f"{blog_id}: 지역 풀 검증 후 후보 {len(rows)}개 (허용 district: {allowed_districts})")
+        except Exception:
+            pass  # 에러 시 건너뜀 (기존 동작 보존)
 
         if not rows:
             logger.warning(f"{blog_id}: 사용 가능한 부동산 키워드 없음")
@@ -1050,16 +1134,6 @@ def run(blog_cfg):
         lawd_matched = bool(lawd_cd)
         if not lawd_cd:
             import random as _rand
-            BLOG_REGION_POOL = {
-                "rap-hugo":  [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
-                              ("11440","서울","마포구"), ("11560","서울","영등포구"), ("11200","서울","성동구")],
-                "rap3-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
-                              ("11170","서울","용산구"), ("11500","서울","강서구")],
-                "rap4-hugo": [("11440","서울","마포구"), ("11200","서울","성동구"), ("11215","서울","광진구"),
-                              ("11620","서울","관악구"), ("11590","서울","동작구"), ("11470","서울","양천구")],
-                "rap5-hugo": [("11680","서울","강남구"), ("11650","서울","서초구"), ("11710","서울","송파구"),
-                              ("11560","서울","영등포구"), ("11170","서울","용산구")],
-            }
             pool = BLOG_REGION_POOL.get(blog_id, [("11680","서울","강남구")])
             lawd_cd, city, district = _rand.choice(pool)
             logger.info(f"법정동코드 미매칭, 랜덤 선택: {city} {district}")
