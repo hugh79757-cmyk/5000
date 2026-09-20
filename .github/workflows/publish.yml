@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       blog:
-        description: "blog_id (cap 그룹: tco-hugo, ev-hugo 등)"
+        description: "blog_id (cap 그룹: rank-hugo 등)"
         type: string
         required: true
       dry_run:
@@ -89,20 +89,20 @@ jobs:
 
       - name: clone site repo (CAP_PAT)
         run: |
-          BLOG=${{ inputs.blog || 'tco-hugo' }}
+          BLOG=${{ inputs.blog || 'rank-hugo' }}
           git clone --depth 50 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/${BLOG}.git sites/cap/${BLOG}
           # depth 50 — 갭A push-back 시 pull --rebase 안정성 (depth 1은 rebase 불안)
           # SITES_ROOT/sites/cap/{blog} = resolve_site_path("/Users/twinssn/Projects/cap/{blog}") 치환 결과와 동일 구조
 
       - name: blowfish theme copy
         run: |
-          BLOG=${{ inputs.blog || 'tco-hugo' }}
+          BLOG=${{ inputs.blog || 'rank-hugo' }}
           mkdir -p sites/cap/${BLOG}/themes
           cp -r themes/blowfish sites/cap/${BLOG}/themes/blowfish
           # 5000 리포 slim 8.3MB (26a6b26c5). mkdir -p 필수 — depth-1 clone은 submodule 미초기화로 themes/ 부재 (probe #2 실패 수정)
 
       - name: run slot (R2 round-trip + dispatcher)
-        run: python scripts/run_slot.py '${{ inputs.blog || 'tco-hugo' }}' ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
+        run: python scripts/run_slot.py '${{ inputs.blog || 'rank-hugo' }}' ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
           # store_true 플래그는 조건부 포함 — '--dry-run=false' 형태는 argparse가 거부(exit 2)하므로 직접 치환 금지.
           # UI dispatch(boolean true)와 gh CLI(-f dry_run=true → 문자열 "true") 양쪽 커버 (lint 수정 2026-09-12/13)
 
