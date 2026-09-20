@@ -1,0 +1,78 @@
+name: daily_refresh (runner state replenish)
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # 00:00 UTC = 07:00 +07 (아침 첫 슬롯 전)
+  workflow_dispatch:
+
+concurrency:
+  group: publish-lock-car
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: pip install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Pull latest state from R2 (Mac SSOT)
+        run: |
+          python scripts/run_slot.py rank-hugo --get-only
+          # R2 -> 로컬 12객체 복원 (manifest md5 검증 포함)
+      - name: Replenish owner=runner blogs only — PHASE 1: 관찰 스테이징 (--dry-run)
+        # 전환 기준: 3일 연속 dry-run 성공 + replenish 시뮬 0건(rank 풀 유지) 또는 >0건(보충 확인)
+        # 전환 주체: 사용자 수동 승인 후 commit (FLIP-BUNDLE-PREVIEW step 0에 내장)
+        # 실모드 전환 시: 아래 --dry-run 제거 + verify_car_state.py 인자 제거
+        run: |
+          python scripts/verify_car_state.py --replenish-runner-only --dry-run 2>/dev/null || echo "verify_car_state.py not found, skipping"
+          # --dry-run: 실제 R2 put 없이 시뮬만 실행 (replenish 시뮬 로그 출력)
+      - name: Verify runner readiness
+        run: |
+          python scripts/run_slot.py rank-hugo --dry-run
+          # dry-run 성공 시 러너 경로 정상 확인
+      # --- PHASE 2 (실모드): 아래 주석 해제 후 커밋 ---
+      # - name: Replenish owner=runner blogs only — PHASE 2: 실모드
+      #   run: |
+      #     python scripts/verify_car_state.py --replenish-runner-only 2>/dev/null || echo "verify_car_state.py not found, skipping"
+      # - name: Verify runner readiness (실모드)
+      #   run: |
+      #     python scripts/run_slot.py rank-hugo
+      #     # 실발행 없이 R2 round-trip만 (dispatcher 스킵)
+
+# ============================================================================
+# ACTIVE PATH DEFINITION (X-1) — daily_refresh 활성 경로 명세
+# ============================================================================
+# 1. PHASE 1: 관찰 스테이징 (현재 배포 상태)
+#    - 매일 00:00 UTC 실행
+#    - run_slot.py --get-only: R2 → 로컬 상태 복원 (12객체, md5 검증)
+#    - verify_car_state.py --replenish-runner-only --dry-run: 실제 replenish 없이 시뮬만
+#      * rank-hugo 풀(56) 유지 시 → 시뮬 0건 로그
+#      * 풀 < min_pending(50) 시 → 보충 필요 건수 로그 (실제 put 안 함)
+#    - run_slot.py --dry-run: dispatcher 스킵, R2 round-trip 정상 확인
+#    - 목적: rank-hugo 자가급유(56→유지) 검증, R2 경로 무결성 확인, KILL-SWITCH 자극 없음
+#
+# 2. 전환 기준 (PHASE 1 → PHASE 2)
+#    - 조건 A: 3일 연속 dry-run 성공 (워크플로 conclusion=success)
+#    - 조건 B: replenish 시뮬 로그에서 rank-hugo 풀 56 유지 또는 보충 필요 건수 확인
+#    - 조건 C: KILL-SWITCH 4신호 0건 유지
+#    - 전환 주체: 사용자 수동 승인 → daily_refresh.yml 수정 커밋 (--dry-run 제거)
+#    - 전환 시점: 다음 daily_refresh 실행 전 (00:00 UTC 이전)
+#
+# 3. PHASE 2: 실모드 (전환 후)
+#    - verify_car_state.py --replenish-runner-only (--dry-run 제거)
+#      * 실제 replenish 실행 → R2 put (회피창 준수: daily_refresh 00:00 UTC = rank 23:50 UTC + 10분)
+#    - run_slot.py (--dry-run 제거): R2 round-trip 완료, dispatcher 스킵 유지
+#    - rank-hugo 자가급유 완전 자동화 (매일 00:00 UTC 보충 → 06:50 슬롯 발행)
+#
+# 4. 문서화 위치
+#    - 본 파일: 워크플로 내 주석으로 상시 참조 가능
+#    - FLIP-BUNDLE-PREVIEW.md: step 0 전제에 전환 스텝 내장
+#    - worklog: 전환 시 WL-YYYYMMDD-daily-refresh-live-mode.md 생성
+# ============================================================================

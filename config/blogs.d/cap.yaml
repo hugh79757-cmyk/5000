@@ -3,7 +3,7 @@ blogs:
   daily_quota: 5
   domain: compare.rotcha.kr
   id: compare-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 비교분석
   pipeline: car
@@ -36,7 +36,7 @@ blogs:
   daily_quota: 5
   domain: deal.rotcha.kr
   id: deal-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 프로모션
   pipeline: car
@@ -49,8 +49,8 @@ blogs:
     - 06:35
     - '10:15'
     - '13:40'
-    - '17:30'
-    - '20:45'
+    - '17:45'
+    - '20:50'
   site_path: /Users/twinssn/Projects/cap/deal-hugo
   status: paused
   theme: Blowfish
@@ -155,7 +155,7 @@ blogs:
   daily_quota: 5
   domain: tco.rotcha.kr
   id: tco-hugo
-  owner: runner  # Phase 79 T4 플립 (2026-09-13) — G0 파일럿 러너 이관
+  owner: runner
   deploy_type: pages
   name: TCO분석
   pipeline: car
@@ -178,7 +178,7 @@ blogs:
   daily_quota: 1
   domain: rank.informationhot.kr
   id: rank-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 자동차랭킹
   pipeline: car

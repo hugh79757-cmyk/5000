@@ -1,0 +1,80 @@
+name: publish (rank-hugo)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "dry-run (dispatcher 스킵)"
+        type: boolean
+        default: true
+  schedule:
+    - cron: "50 23 * * *"  # 06:50 +07
+
+concurrency:
+  group: publish-lock-car
+  cancel-in-progress: false
+
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+  ZHIPU_API_KEY: ${{ secrets.ZHIPU_API_KEY }}
+  NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  UPSTAGE_API_KEY: ${{ secrets.UPSTAGE_API_KEY }}
+  CLOVA_API_KEY: ${{ secrets.CLOVA_API_KEY }}
+  OPENCODE_ZEN_API_TOKEN: ${{ secrets.OPENCODE_ZEN_API_TOKEN }}
+  COUPANG_ACCESS_KEY: ${{ secrets.COUPANG_ACCESS_KEY }}
+  COUPANG_SECRET_KEY: ${{ secrets.COUPANG_SECRET_KEY }}
+  COUPANG_PARTNER_ID: ${{ secrets.COUPANG_PARTNER_ID }}
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_STATE_BUCKET: 5000-state
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  WRANGLER_TOKEN_AUTH: "1"
+  5000_RUNNER: "1"
+  SITES_ROOT: ${{ github.workspace }}/sites
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: elapsed marker
+        run: date +%s > /tmp/t0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: pip install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Hugo extended setup
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.160.1"
+          extended: true
+      - name: wrangler install
+        run: npm install -g wrangler
+      - name: clone site repo (CAP_PAT)
+        run: |
+          git clone --depth 50 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/rank-hugo.git sites/cap/rank-hugo
+      - name: blowfish theme copy
+        run: |
+          mkdir -p sites/cap/rank-hugo/themes
+          cp -r themes/blowfish sites/cap/rank-hugo/themes/blowfish
+      - name: run slot (R2 round-trip + dispatcher)
+        run: python scripts/run_slot.py 'rank-hugo' ${{ (inputs.dry_run == true || inputs.dry_run == 'true') && '--dry-run' || '' }}
+      - name: elapsed report
+        if: always()
+        run: |
+          T0=$(cat /tmp/t0); T1=$(date +%s)
+          echo "## ⏱ minutes 실측 (스코프 ④)" >> $GITHUB_STEP_SUMMARY
+          echo "total: $((T1 - T0))s" >> $GITHUB_STEP_SUMMARY

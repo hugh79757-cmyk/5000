@@ -11,20 +11,25 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Check workflows enabled
+      # --- 주 목적: 60일 무활동 비활성화 방지를 위한 커밋 활동 유지 ---
+      # 월 1회 실제 상태 요약 커밋으로 GitHub Actions cron 자동 비활성화 방지
+      # (GitHub 정책: 60일간 workflow run 없으면 cron 비활성화)
+      - name: Check workflows enabled (보조 목적: 비활성 워크플로 감지·보고)
+        # 보조 기능: 수동 비활성화(disabled_manually) 또는 비활성 비활성화(disabled_inactivity) 워크플로 감지
+        # 주 목적(커밋 활동)과 독립적 — 감지·보고는 부가 기능, 커밋 유지가 주 목적
         run: |
-          gh api repos/hugh79757-cmyk/5000/actions/workflows --jq '.workflows[] | select(.state=="disabled_manually" or .state=="disabled_inactivity") | .name'
+          DISABLED=$(gh api repos/hugh79757-cmyk/5000/actions/workflows --jq '.workflows[] | select(.state=="disabled_manually" or .state=="disabled_inactivity") | .name')
+          if [ -n "$DISABLED" ]; then
+            echo "## ⚠️ 비활성 워크플로 감지 ($(date -u +%Y-%m-%d))" >> HEALTH_SUMMARY.md
+            echo "$DISABLED" | while read name; do echo "- $name" >> HEALTH_SUMMARY.md; done
+          fi
       - name: Commit health summary
         run: |
           echo "## Keepalive $(date -u +%Y-%m-%d)" >> HEALTH_SUMMARY.md
           gh run list --workflow=publish.yml --limit 10 --json conclusion,createdAt >> HEALTH_SUMMARY.md
-          gh run list --workflow=publish-compare.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
-          gh run list --workflow=publish-deal.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
-          gh run list --workflow=publish-ev.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
-          gh run list --workflow=publish-guide.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
-          gh run list --workflow=publish-hotissue.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
           gh run list --workflow=publish-rank.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
           gh run list --workflow=publish-pick.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          # 비활성(.disabled.yml) 워크플로는 run list에 나타나지 않음 — 별도 감지 스텝에서 처리
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add HEALTH_SUMMARY.md

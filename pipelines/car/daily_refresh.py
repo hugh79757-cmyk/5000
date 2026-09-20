@@ -458,7 +458,7 @@ def replenish_topics(conn, min_pending=50):
     ev_cars = [car["car_id"] for car in popular if car["fuel_type"] in ("전기", "가솔린/하이브리드") and car["car_id"] in market_ok and _fuel_ok(car)]
 
     def _count_eligible_topics(conn, site_id, post_type, days_window=14):
-        """select_topic과 동일한 가드 세트 + 연비 데이터 게이트로 실제 발행 가능 토픽 수 계산.
+        """select_topic과 동일한 가드 세트 + per-post_type 연비 게이트로 실제 발행 가능 토픽 수 계산.
         
         가드:
         1. Market filter: trims.status='시판' 존재
@@ -466,7 +466,9 @@ def replenish_topics(conn, min_pending=50):
         3. Combo block 30-day (any post_type): articles 30일 내 발행 (post_type 무관)
         4. Reuse filter: publish_log 7일 내 동일 topic_id 발행
         5. Recent keys: publish_log 14일 내 car_id:competitor_key 발행 (select_topic과 일치)
-        6. Fuel efficiency gate: lookup_fuel_efficiency 통과 (build_input과 일치)
+        6. Fuel efficiency gate: post_type별 분기
+           - top5_rank: fallback 포함 (build_top5_rank_input:543-556와 일치) — 연비 없으면 연료타입별 기본값 사용
+           - 그 외(tco_analysis, ev_analysis, promo_deal, ranking_compare, beginner_guide, persona_pick, resale_compare): lookup_fuel_efficiency 통과 필수 (build_input:396-401와 일치)
         """
         from shared.db_paths import ARTICLES_DB
         from pipelines.car.data_builder import lookup_fuel_efficiency
@@ -517,22 +519,37 @@ def replenish_topics(conn, min_pending=50):
         params = (cutoff, site_id) + tuple(_combo_params) + (post_type,)
         topics = c.execute(sql, params).fetchall()
         
-        # 4. Apply recent_keys filter + fuel efficiency gate
+        # 4. Apply recent_keys filter + per-post_type fuel efficiency gate
         count = 0
+        # X-2: top5_rank는 fallback 포함 (build_top5_rank_input:543-556와 동일 판정)
+        use_fallback = (post_type == "top5_rank")
         for t in topics:
             key = f"{t['car_id']}:{t['competitor_car_id'] or ''}"
             if key not in recent_keys:
-                # Fuel efficiency check (matches build_input:396-401)
-                try:
-                    fuel_eff = lookup_fuel_efficiency(conn, t['brand'], t['model'], t['displacement'])
-                    if fuel_eff and fuel_eff > 0:
-                        count += 1
-                except Exception:
-                    pass
+                if use_fallback:
+                    # top5_rank: fallback 로직 — 연비 없으면 연료타입별 기본값으로 통과
+                    ft = str(t.get('fuel_type', ''))
+                    if "전기" in ft:
+                        fuel_eff = 4.5
+                    elif "하이브리드" in ft:
+                        fuel_eff = 16.0
+                    elif "디젤" in ft:
+                        fuel_eff = 14.0
+                    else:
+                        fuel_eff = 12.0
+                    count += 1
+                else:
+                    # 그 외: 실측 연비 게이트 (build_input:396-401와 일치)
+                    try:
+                        fuel_eff = lookup_fuel_efficiency(conn, t['brand'], t['model'], t['displacement'])
+                        if fuel_eff and fuel_eff > 0:
+                            count += 1
+                    except Exception:
+                        pass
         return count
 
     def _count_eligible_topics_popular(conn, site_id, post_type, days_window=14):
-        """select_topic 가드 + 연비 게이트 적용 후 인기차(is_popular=1) 토픽 수만 계산.
+        """select_topic 가드 + per-post_type 연비 게이트 적용 후 인기차(is_popular=1) 토픽 수만 계산.
         
         recent_keys 윈도우: 14일 (select_topic과 일치)
         """
@@ -584,18 +601,33 @@ def replenish_topics(conn, min_pending=50):
         params = (cutoff, site_id) + tuple(_combo_params) + (post_type,)
         topics = c.execute(sql, params).fetchall()
         
-        # 3. Apply recent_keys filter + fuel efficiency gate
+        # 3. Apply recent_keys filter + per-post_type fuel efficiency gate
         count = 0
+        # X-2: top5_rank는 fallback 포함 (build_top5_rank_input:543-556와 동일 판정)
+        use_fallback = (post_type == "top5_rank")
         for t in topics:
             key = f"{t['car_id']}:{t['competitor_car_id'] or ''}"
             if key not in recent_keys:
-                # Fuel efficiency check (matches build_input:396-401)
-                try:
-                    fuel_eff = lookup_fuel_efficiency(conn, t['brand'], t['model'], t['displacement'])
-                    if fuel_eff and fuel_eff > 0:
-                        count += 1
-                except Exception:
-                    pass
+                if use_fallback:
+                    # top5_rank: fallback 로직 — 연비 없으면 연료타입별 기본값으로 통과
+                    ft = str(t.get('fuel_type', ''))
+                    if "전기" in ft:
+                        fuel_eff = 4.5
+                    elif "하이브리드" in ft:
+                        fuel_eff = 16.0
+                    elif "디젤" in ft:
+                        fuel_eff = 14.0
+                    else:
+                        fuel_eff = 12.0
+                    count += 1
+                else:
+                    # 그 외: 실측 연비 게이트 (build_input:396-401와 일치)
+                    try:
+                        fuel_eff = lookup_fuel_efficiency(conn, t['brand'], t['model'], t['displacement'])
+                        if fuel_eff and fuel_eff > 0:
+                            count += 1
+                    except Exception:
+                        pass
         return count
 
     total_created = 0
