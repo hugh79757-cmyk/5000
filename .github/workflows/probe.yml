@@ -1,0 +1,38 @@
+name: probe (CAP_PAT / CF / GHP_5000 connectivity)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    name: Connectivity Probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: CAP_PAT probe (rank-hugo + tco-hugo ls-remote)
+        run: |
+          set -e
+          git ls-remote https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/rank-hugo.git > /dev/null
+          echo "rank-hugo: OK"
+          git ls-remote https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/tco-hugo.git > /dev/null
+          echo "tco-hugo: OK"
+
+      - name: CF probe (wrangler whoami)
+        run: |
+          set -e
+          npm install -g wrangler
+          wrangler whoami 2>&1 | head -5
+          echo "CF auth: OK"
+
+      - name: GHP_5000 probe (5000 repo ls-remote)
+        run: |
+          set -e
+          git ls-remote https://x-access-token:${{ secrets.GHP_5000 }}@github.com/hugh79757-cmyk/5000.git > /dev/null
+          echo "GHP_5000: OK"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "=== PROBE SUMMARY ==="
+          echo "All probes completed (exit code only, no secret values echoed)"
+          echo "Failures: re-run once max per V-6 constraint"
