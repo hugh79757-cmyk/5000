@@ -379,6 +379,7 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
             if use_workers:
                 result = subprocess.run(
                     [WRANGLER_PATH, "deploy",
+                     "--profile", "hugh79757",
                      "--config", str(wf)],
                     cwd=str(site), stdout=log_f, stderr=log_f,
                     env=_wrangler_env, timeout=_deploy_timeout
@@ -386,6 +387,7 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
             else:
                 result = subprocess.run(
                     [WRANGLER_PATH, "pages", "deploy", "./public",
+                     "--profile", "hugh79757",
                      "--project-name=" + cf_project,
                      "--branch=main",
                      "--commit-dirty=true",
@@ -436,6 +438,7 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
                     if use_workers:
                         result = subprocess.run(
                             [WRANGLER_PATH, "deploy",
+                             "--profile", "hugh79757",
                              "--config", str(wf)],
                             cwd=str(site), stdout=log_f, stderr=log_f,
                             env=_wrangler_env, timeout=_deploy_timeout
@@ -443,6 +446,7 @@ def _deploy_site_inner(site_path, cf_project, deploy_type=None) -> bool:
                     else:
                         result = subprocess.run(
                             [WRANGLER_PATH, "pages", "deploy", "./public",
+                             "--profile", "hugh79757",
                              "--project-name=" + cf_project,
                              "--branch=main",
                              "--commit-dirty=true",

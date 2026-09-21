@@ -1233,6 +1233,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             if _use_workers:
                 r2 = subprocess.run(
                     [WRANGLER, "deploy",
+                     "--profile", "hugh79757",
                      "--config", str(site_path / "wrangler.toml")],
                     cwd=str(site_path),
                     capture_output=True, text=True,
@@ -1242,6 +1243,7 @@ def _build_and_deploy_central(blog_id: str) -> bool:
             else:
                 r2 = subprocess.run(
                     [WRANGLER, "pages", "deploy", "public",
+                     "--profile", "hugh79757",
                      "--project-name", blog_id,
                      "--commit-dirty=true",
                      "--commit-message=publish"],
