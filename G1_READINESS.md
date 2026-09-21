@@ -220,7 +220,7 @@ SELECT * FROM article_quality WHERE blog_id='pick-hugo';  -- 0건
 [ ] articles 동기화: stap_content.db 최신 반영 확인 완료 (허위경보 해소)
 [ ] content.db publish_ledger 동기화 복구 (ledger_sync 실행)
 [ ] batch 2 4/4 발행 레그 실증 완료
-[ ] 사용자 승인 (② B1 완료 + 배치 2 실증 보고 수신 후)
+[ ] 사용자 승인 (AA-3 probe 초록 + 사용자 진행 신호 + 배치 2 실증 보고 수신 후)
 ```
 
 ---
@@ -236,3 +236,75 @@ SELECT * FROM article_quality WHERE blog_id='pick-hugo';  -- 0건
 ---
 
 *본 문서는 읽기 전용 감사 산출물. Flip/커밋 작업 금지. 배치 3 flip 직전 재실행하여 최신 상태 반영 필요.*
+---
+
+## 9. G4 READINESS — Senior (stock + senior 그룹) 이관 전제 갱신 (2026-09-19)
+
+### 9.1 Senior 파이프라인 신규 데이터 소스 (복지로 전환)
+
+| 항목 | 상세 | file:line |
+|------|------|-----------|
+| **데이터 소스** | gov24 혜택 API (유지) + 복지로 지자체/중앙 API (신규) | pipelines/senior/fetcher.py:15-18, 20-21 |
+| **지자체 API** | `http://apis.data.go.kr/B554287/LocalGovernmentWelfareInformations/LcgvWelfarelist` | fetcher.py:20 |
+| **중앙 API** | `http://apis.data.go.kr/B554287/NationalWelfareInformationsV001/NationalWelfarelistV001` (srchKeyCode=003, callTp=L) | fetcher.py:21 |
+| **인증** | DATA_GO_KR_API_KEY (Header/Query param) | fetcher.py:14 |
+| **데이터 포맷** | XML (ElementTree 파싱) | fetcher.py:142-143, 180-181 |
+| **수집 결과** | 지자체 426건 + 중앙 16건 = **442건** 시니어 전용 서비스 | fetcher.py:227-228 |
+| **노인일자리 API** | `sjfd100` 폐기 → `fetch_senior_jobs()` 빈 리스트 반환 | fetcher.py:230-233 |
+
+### 9.2 필터링 로직 — `is_senior_service()` 5단계 판별 (fetcher.py:26-120)
+
+| 단계 | 판별 기준 | 우선순위 |
+|------|-----------|----------|
+| 1 | 서비스명에 명시적 시니어 키워드 (`노인`, `어르신`, `경로`, `장수수당`, `기초연금`, `장기요양`, `틀니`, `임플란트` 등) | 최우선 |
+| 2 | 대상자(trgterIndvdlNmArray)에 명시적 시니어 조건 (`노인`, `어르신`, `65세`, `70세`, `기초연금수급`, `경로우대`, `만 65세 이상`) | 높음 |
+| 3 | lifeNmArray가 "노년"/"고령" 단독이거나 마지막에 오는 경우 + 서비스명/대상에 시니어 키워드 | 중간 |
+| 4 | intrsThemaArray가 명시적 시니어 테마 (`노인복지`, `노인일자리`, `경로당`, `장기요양`, `치매관리`, `기초연금`, `노인돌봄`, `노인맞춤돌봄`) + 서비스명/대상 키워드 | 중간 |
+| 5 | servDgst에 명시적 시니어 표현 + 서비스명/대상 키워드 보조 | 보조 |
+
+**수집 실적**: 지자체 10페이지(500건씩) 중 426건 + 중앙 1페이지(461건) 중 16건 = **442건** 정밀 필터링
+
+### 9.3 수집 DB & Round-trip 대상
+
+| DB | 경로 | 용도 |
+|----|------|------|
+| **senior.db** | `shared/db.py:get_db_path("senior")` → `data/senior.db` | 서비스 원장 (services 테이블) |
+| **content.db** | `shared/db.py:ARTICLES_DB` → `data/stap_content.db` | 발행 원장 (articles 테이블, source=gov24_api) |
+| **car.db** | 미사용 (시니어 파이프라인 독립) | — |
+
+**Round-trip 경로**: R2 `5000-state` 버킷 → 로컬 `data/` 복원 → fetcher 수집 → senior.db 저장 → 발행 시 senior.db 조회 → content_store.insert_article() → stap_content.db articles 기록
+
+### 9.4 러너 환경 호환성
+
+| 의존성 | 버전/비고 | 비고 |
+|--------|-----------|------|
+| **requests** | 2.31+ | gov24/복지로 API HTTP 호출 |
+| **xml.etree.ElementTree** | 표준 라이브러리 | 복지로 XML 파싱 |
+| **requests/urllib** | 표준/서드파티 | gov24 API 호출 (ODCloud) |
+| **sqlite3** | 표준 라이브러리 | senior.db CRUD |
+| **lxml** | 불필요 | ElementTree 사용 |
+
+**러너 도커/환경**: 별도 시스템 패키지 불필요 (Python 표준 라이브러리 + requests만 필요). 기존 5000 러너 환경과 100% 호환.
+
+### 9.5 키/인증 요구사항
+
+| 키 | 용도 | 필수 여부 |
+|----|------|-----------|
+| **DATA_GO_KR_API_KEY** | gov24(혜택) + 복지로(지자체/중앙) API | **필수** |
+| NAVER_CLIENT_ID/SECRET | 네이버 블로그 보강 (선택) | 선택 |
+
+### 9.6 G4 이관 게이트 반영
+
+> Senior 파이프라인은 G4(stock + senior) 그룹에 속하며, M-2 READINESS에서 "이관이 신규 소스(복지로/혜택)를 정확히 재현하는지"가 게이트 기준.
+
+| 게이트 항목 | 상태 | 비고 |
+|------------|------|------|
+| 신규 엔드포인트 재현 | ✅ 완료 | fetcher.py:20-21, 140-230 |
+| 키/인증 정확히 적용 | ✅ 완료 | DATA_GO_KR_API_KEY 단일 키로 3개 API 커버 |
+| 수집 DB round-trip | ✅ 호환 | senior.db + stap_content.db 경로 공유 |
+| 러너 호환성 | ✅ 확인 | requests + ElementTree만 사용, 추가 의존성 없음 |
+| 신규 키 적용 | ✅ 적용됨 | 1a7bd07dda3f66dcfdc0101f19cebda907cf5a3aecae7f6dc43cd89d4c3912d9 |
+
+---
+
+*G4 READINESS 반영 완료 — M-2 READINESS 문서에서 참조*

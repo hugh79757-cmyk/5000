@@ -1,27 +1,31 @@
-# G1 설계안 — 7블로그 러너 이관 (compare·deal·ev·guide·hotissue·rank·pick) + tco 유지
+# G1 설계안 — rank-hugo 단독 러너 이관 (compare·deal·ev·guide·hotissue·tco·travel·sector 8개 비활성화) + pick-hugo 차기
 
-**작성일**: 2026-09-18  
-**상태**: 조건부 승인 대기 (수정 6건 반영 후 최종 승인 요청)  
-**범위**: car 파이프라인 8개 블로그 중 tco(러너 운영 중) 제외한 7개 블로그 러너 이관 + tco 크론 유지
+**작성일**: 2026-09-19  
+**상태**: 재편 완료 — Batch 1: rank-hugo 단독, Batch 1.5: pick-hugo, Batch 2: 제외 (비활성 블로그 재활성 시 별도)  
+**범위**: car 파이프라인 8개 블로그 중 7개 비활성화(paused) + tco-hugo 러너 유지(스케줄 제거) → rank-hugo만 러너 이관. pick-hugo는 차기 창(Batch 1.5). ev/guide/hotissue/tco/travel/sector 이관 스코프 제외.
 
 ---
 
 ## 0. 사전 조사 — pick-hugo 상태 확정 (수정 1 반영)
 
-### config/blogs.d/cap.yaml 원값 실측
+### config/blogs.d/cap.yaml 원값 실측 (2026-09-19 비활성화 반영)
 
-| 블로그 | pipeline | owner | daily_quota | 비고 |
-|--------|----------|-------|-------------|------|
-| compare-hugo | car | mac | 5 | |
-| deal-hugo | car | mac | 5 | |
-| ev-hugo | car | mac | 5 | |
-| guide-hugo | car | mac | 5 | |
-| hotissue-hugo | car | mac | 5 | |
-| tco-hugo | car | **runner** | 5 | **이미 러너 운영 중** |
-| rank-hugo | car | mac | 1 | |
-| **pick-hugo** | **car** | **mac** | **1** | **car 멤버 확정** |
+| 블로그 | pipeline | owner | daily_quota | 상태 | 비고 |
+|--------|----------|-------|-------------|------|------|
+| compare-hugo | car | mac | 5 | **paused** | 비활성화 (데이터고갈 Class A) |
+| deal-hugo | car | mac | 5 | **paused** | 비활성화 (데이터고갈 Class A) |
+| ev-hugo | car | mac | 5 | **paused** | 비활성화 (데이터고갈 Class A) |
+| guide-hugo | car | mac | 5 | **paused** | 비활성화 (데이터고갈 Class A) |
+| hotissue-hugo | car | mac | 5 | **paused** | 비활성화 (Class A/B: 7일+ no_topics) |
+| tco-hugo | car | **runner** | 5 | **paused** | 비활성화 (데이터고갈 Class A, GH schedule 제거) |
+| rank-hugo | car | mac | 1 | **active** | **Batch 1 대상: runner 이관** |
+| **pick-hugo** | **car** | **mac** | **1** | **active** | **Batch 1.5 대상: 차기 창 (감사 후)** |
 
-**결론**: pick-hugo는 **car 그룹 멤버** (pipeline: car) → G1 생성 대상 7개에 포함 유지. 단, owner=mac이므로 러너 이관 시 owner: mac → runner 변경 필요. flip 순서에 pick 감사(G1_READINESS) 추가 후 배치 3 배치.
+**결론**: 
+- **Batch 1**: rank-hugo 단독 (owner: mac → runner, publish-rank.yml 신규 생성)
+- **Batch 1.5**: pick-hugo (전제: 정정 1 완료 + W5 7개 car_id + ledger_sync + pick 감사) — 불변
+- **Batch 2**: 이관 스코프 제외 — compare/deal/ev/guide/hotissue/tco 7개 비활성화. 재활성 시 별도 미니 절차 문서화.
+- travel-hugo (tap), sector-hugo (stap)도 동일 사유로 비활성화.
 
 ---
 
@@ -31,17 +35,17 @@
 - `schedule` 트리거는 `inputs` 전달 불가
 - 현행 `publish.yml`은 `inputs.blog || 'tco-hugo'` 폴백으로 동작 → 7블로그 추가 시 **전부 tco-hugo로 발행되는 사고 발생**
 - 해결: **블로그별 전용 워크플로 파일 생성** (`publish-<blog>.yml`)
+### 생성 대상 (재편: 1개 + 예비 1개) — config.yaml 파생 확정
 
-### 생성 대상 (7개) — config.yaml 파생 확정
-| 워크플로 파일 | 대상 블로그 | pipeline | owner(현) | daily_quota | 비고 |
-|--------------|-------------|----------|-----------|-------------|------|
-| `publish-compare.yml` | compare-hugo | car | mac | 5 | batch 1 |
-| `publish-deal.yml` | deal-hugo | car | mac | 5 | batch 1 |
-| `publish-ev.yml` | ev-hugo | car | mac | 5 | batch 2 |
-| `publish-guide.yml` | guide-hugo | car | mac | 5 | batch 2 |
-| `publish-hotissue.yml` | hotissue-hugo | car | mac | 5 | batch 2 |
-| `publish-rank.yml` | rank-hugo | car | mac | 1 | batch 3 |
-| `publish-pick.yml` | pick-hugo | car | mac | 1 | batch 3 (+ pick 감사) |
+| 워크플로 파일 | 대상 블로그 | pipeline | owner(현) | daily_quota | 상태 | 비고 |
+|--------------|-------------|----------|-----------|-------------|------|------|
+| `publish-rank.yml` | rank-hugo | car | mac | 1 | **생성 대상 (Batch 1)** | rank 단독 flip |
+| `publish-pick.yml` | pick-hugo | car | mac | 1 | **예비 (Batch 1.5)** | 차기 창, 감사 후 생성 |
+| ~~`publish-compare.yml`~~ | compare-hugo | car | mac | 5 | **비활성화** | .disabled.yml로 보관 |
+| ~~`publish-deal.yml`~~ | deal-hugo | car | mac | 5 | **비활성화** | .disabled.yml로 보관 |
+| ~~`publish-ev.yml`~~ | ev-hugo | car | mac | 5 | **비활성화** | 미생성 (Batch 2 제외) |
+| ~~`publish-guide.yml`~~ | guide-hugo | car | mac | 5 | **비활성화** | 미생성 (Batch 2 제외) |
+| ~~`publish-hotissue.yml`~~ | hotissue-hugo | car | mac | 5 | **비활성화** | .disabled.yml로 보관 |
 
 ### 생성 스크립트 — **config.yaml 읽기 방식 (단일 공급원)**
 
@@ -66,6 +70,19 @@ def load_car_blogs():
             if times:
                 car_blogs.append((blog_id, times))
     return car_blogs
+
+# 비활성 블로그 조회용 (재활성 시 참조)
+def load_paused_car_blogs():
+    with open(CONFIG_PATH) as f:
+        data = yaml.safe_load(f)
+    blogs = data.get("blogs", [])
+    paused = []
+    for blog in blogs:
+        if blog.get("pipeline") == "car" and blog.get("status") == "paused":
+            blog_id = blog["id"]
+            times = blog.get("schedule", {}).get("times", [])
+            paused.append((blog_id, times))
+    return paused
 
 def kst_to_cron(kst_time: str) -> str:
     """+07 로컬 HH:MM → cron 'MM HH * * *' (UTC)"""
@@ -270,22 +287,34 @@ def generate():
 def verify_cross_reference():
     """생성 후 교차 검증: config.yaml 슬롯 ↔ 생성된 cron 일치 확인"""
     car_blogs = load_car_blogs()
-    print("\n=== 교차 검증표 ===")
+    print("\n=== 교차 검증표 (Batch 1: rank-hugo) ===")
     print("| 블로그 | 로컬 슬롯 (+07) | UTC cron | 정확 분 충돌(동일분) | 비고 |")
     print("|--------|----------------|----------|---------------------|------|")
     tco_slots = [(23,30), (3,10), (6,35), (10,30), (13,45)]
     for blog_id, times in car_blogs:
         if blog_id == "tco-hugo":
-            continue
+            continue  # tco는 기존 publish.yml 사용 (schedule 제거됨)
         for t in times:
             h, m = map(int, t.split(":"))
             utc_h = (h - 7) % 24
             cron = f"{m:02d} {utc_h} * * *"
-            # 정확한 분 충돌만 체크 (의도적 5-10분 스태거는 정상)
             exact_collision = any(utc_h == tc and m == tm for tc, tm in tco_slots)
             collision_str = "⚠️ 충돌" if exact_collision else "OK (스태거)"
             note = "tco와 5-10분 스태거" if not exact_collision else "동일 분 중복"
             print(f"| {blog_id} | {t} | {cron} | {collision_str} | {note} |")
+
+    # 비활성 블로그 슬롯도 기록용 출력
+    paused_blogs = load_paused_car_blogs()
+    if paused_blogs:
+        print("\n=== 비활성 블로그 슬롯 (참조용 — 재활성 시 cron 변환 필요) ===")
+        print("| 블로그 | 로컬 슬롯 (+07) | UTC cron | 비고 |")
+        print("|--------|----------------|----------|------|")
+        for blog_id, times in paused_blogs:
+            for t in times:
+                h, m = map(int, t.split(":"))
+                utc_h = (h - 7) % 24
+                cron = f"{m:02d} {utc_h} * * *"
+                print(f"| {blog_id} | {t} | {cron} | status=paused |")
 
 if __name__ == "__main__":
     generate()
@@ -617,60 +646,75 @@ if __name__ == "__main__":
 
 ---
 
-## Diff 요약 (수정 반영 후 최종)
+## Diff 요약 (재편: rank 단독 + 비활성화 8개)
 
-### 신규 파일 (7개) — config.yaml 파생 생성
+### 신규 파일 (1개) — config.yaml 파생 생성 (Batch 1)
 ```
-.github/workflows/publish-compare.yml
-.github/workflows/publish-deal.yml
-.github/workflows/publish-ev.yml
-.github/workflows/publish-guide.yml
-.github/workflows/publish-hotissue.yml
 .github/workflows/publish-rank.yml
+```
+
+### 신규 파일 (예비 1개) — Batch 1.5 생성 대기
+```
 .github/workflows/publish-pick.yml
 ```
 
-### 신규 파일 (2개 — 운영)
+### 비활성화로 보류된 파일 (5개) — .disabled.yml로 보관
 ```
-.github/workflows/keepalive.yml      (timeout-minutes: 20 추가, 실제 내용 변화 커밋)
-.github/workflows/daily_refresh.yml  (cron 0 0 * * *, owner=runner만 보충, timeout-minutes: 20)
+.github/workflows/publish-compare.yml.disabled
+.github/workflows/publish-deal.yml.disabled
+.github/workflows/publish-hotissue.yml.disabled
+.github/workflows/daily_refresh.yml.disabled
+.github/workflows/publish-ev.yml.disabled (미생성, Batch 2 제외)
+.github/workflows/publish-guide.yml.disabled (미생성, Batch 2 제외)
+```
+
+### 기존 운영 파일 (2개 — 유지)
+```
+.github/workflows/keepalive.yml      (timeout-minutes: 20, 실제 내용 변화 커밋)
+.github/workflows/daily_refresh.yml  (cron 제거됨 — tco-hugo 비활성화)
 ```
 
 ### 신규 스크립트 (2개)
 ```
-scripts/generate_publish_workflows.py  (config.yaml 읽기 + 교차 검증 포함)
+scripts/generate_publish_workflows.py  (config.yaml 읽기 + 교차 검증 포함, 비활성 필터링)
 scripts/normalize_timezone.py          (+07/+09→UTC 마이그레이션, src_tz별 분기)
 ```
 
-### 기존 `publish.yml` — **유지** (tco-hugo 전용, 롤백용 킬 스위치 경로)
+### 기존 `publish.yml` — **수정됨** (tco-hugo schedule 제거, 수동 dispatch만 유지)
 - `concurrency.group: publish-lock-car` 공유 유지
-- tco-hugo 크론 5슬롯 그대로 운영
+- tco-hugo 크론 5슬롯 제거 (비활성화)
 
 ---
 
-## 배치별 Flip 계획 (pick 감사 추가 반영)
+## 배치별 Flip 계획 (재편: 데이터고갈 비활성화 반영)
 
 | 배치 | 블로그 | 조건 | Flip 시기 |
 |------|--------|------|-----------|
-| 1 | compare-hugo, deal-hugo | 3조건 충족 시 즉시 | tco 23:30 UTC + 30분 후 (00:00 UTC) |
-| 2 | ev-hugo, guide-hugo, hotissue-hugo | batch 1 4/4 실증 후 | 동일 규칙 |
-| 3 | rank-hugo, pick-hugo | batch 2 4/4 실증 후 + **pick 감사 완료** | 동일 규칙 |
+| 1 | **rank-hugo** 단독 | 3조건 충족 시 즉시 (AA-3 probe 초록 + 사용자 진행 신호 + G-1 + E-2) | tco 23:30 UTC + 30분 후 (00:00 UTC) |
+| 1.5 | **pick-hugo** | batch 1 4/4 실증 후 + **pick 감사 완료** | 동일 규칙 |
+| 2 | **제외** — ev-hugo, guide-hugo, hotissue-hugo 비활성화 | 재활성 시 별도 미니 절차 | — |
+| — | **비활성(8개)**: compare, deal, ev, guide, hotissue, tco, travel, sector | 재활성 조건: 연비 데이터 보강 또는 가드 만기(30일~10/15, 90일~12/15) | — |
 
-> **pick 감사 항목 (G1_READINESS)**: 가드 시뮬, W5 풀, 발행 이력, quota/슬롯 검증 — flip 배치 3 직전 수행
+> **pick 감사 항목 (G1_READINESS)**: 가드 시뮬, W5 풀, 발행 이력, quota/슬롯 검증 — flip 배치 1.5 직전 수행
+> **deal-hugo schedule 변경(17:45/20:50) 보류** — deal 비활성화로 무의미, 재활성 시 재검토
 
 ---
 
-## 승인 후 즉시 실행 가능한 액션 (수정 반영 후) — 번들링 원칙 적용
+## 승인 후 즉시 실행 가능한 액션 (재편: rank 단독) — 번들링 원칙 적용
 
 1. **batch 1 flip 단일 커밋** (번들링 — 단독 커밋 금지):
-   - `config/blogs.d/cap.yaml` deal-hugo schedule: `17:30, 20:45` → `17:45, 20:50`
-   - compare-hugo, deal-hugo `owner: mac → runner`
-   - 생성된 워크플로 2개: `publish-compare.yml`, `publish-deal.yml`
+   - `config/blogs.d/cap.yaml` rank-hugo `owner: mac → runner`
+   - 생성된 워크플로 1개: `publish-rank.yml`
    - `daily_refresh.yml`, `keepalive.yml` (이미 커밋됨 — 변경 없으면 제외)
+   - **비활성화 커밋은 별도** (ops/blogs: 2026-09-19 완료, flip 번들과 분리)
+
 2. `tco 발화(23:30 UTC) 후 30분+ 이격 확인 → flip push`
-3. `daily_refresh` 첫 발화(00:00 UTC = 07:00 +07) 후 tco 토픽 보충 여부 확인 보고
+
+3. `daily_refresh` 첫 발화(00:00 UTC = 07:00 +07) 후 rank 토픽 보충 여부 확인 보고
+
 4. `normalize_timezone.py` 실행은 **별도 승인 + 전체 백업 + dry-run diff 보고 선행** (batch flip과 동시 실행 금지)
-5. pick 감사(G1_READINESS) → batch 3 flip 직전 수행
+
+5. pick 감사(G1_READINESS) → batch 1.5 flip 직전 수행
 
 ---
 

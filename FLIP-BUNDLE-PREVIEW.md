@@ -1,6 +1,6 @@
 # Flip Batch 1 번들 Diff 프리뷰
 
-**목적**: ② B1 완료 수신 즉시 기계적 실행(신규 판정 없음)
+**목적**: AA-3 probe 초록 + 사용자 진행 신호 수신 즉시 기계적 실행(신규 판정 없음)
 **대상**: 단일 커밋에 번들 포함 — cap.yaml + owner flip + 워크플로 3개 + 운영 워크플로 2개
 **생성 시점**: 2026-09-18 (date 원값)
 
@@ -10,7 +10,7 @@
 
 | 게이트 | 상태 | 비고 |
 |--------|------|------|
-| ② B1 완료 | ⏳ 대기 | 사용자 UI 작업 진행 중 |
+| AA-3 probe 초록 + 사용자 진행 신호 | ⏳ 대기 | 사용자 UI 작업 진행 중 |
 | F-1: rank 크론 교차표 | ✅ **통과** | 9워크플로 전수, 이격 ≥10분, 충돌 0건 |
 | **H-1: rank W5 100% (재조정)** | ✅ **통과** | 풀 57/57 verified=1, 65→57 산술 불일치 해소, 6개 car_id 진위·자산 확인 |
 | E-1: 7블로그 eligible 진위 | ✅ **확정** | 측정=라이브 전수 일치 |
@@ -18,7 +18,7 @@
 | E-3: 배치 재편 | ✅ **확정** | Batch 1: compare/deal/rank |
 | E-4: FUEL-UNIVERSE | ✅ **완료** | 8블로그 replenish 가능량 산출 |
 
-**step 0 실행 시 필수 확인**: ② B1 + H-1(100% 재확인) + F-1(확보)
+**step 0 실행 시 필수 확인**: AA-3 probe 초록 + 사용자 진행 신호 + H-1(100% 재확인) + F-1(확보)
 
 ---
 
@@ -150,25 +150,40 @@
 
 ---
 
-## 6. 난합계 (단일 커밋 기준) — **E-3 확정: 9파일 (rank-hugo 추가)**
+## 6. 난합계 (단일 커밋 기준) — **재편: Batch 1 rank 단독**
 
 | 파일 | 변경 유형 | 라인 수 | 추적 상태 |
 |------|-----------|---------|-----------|
-| config/blogs.d/cap.yaml | 수정 | ~16 | tracked (M) |
-| .github/workflows/publish-compare.yml | 신규 | ~70 | untracked (??) |
-| .github/workflows/publish-deal.yml | 신규 | ~70 | untracked (??) |
+| config/blogs.d/cap.yaml | 수정 | ~4라인 (rank owner만) | tracked (M) |
 | .github/workflows/publish-rank.yml | 신규 | ~70 | untracked (??) |
-| .github/workflows/daily_refresh.yml | 신규 | ~50 | untracked (??) |
-| .github/workflows/keepalive.yml | 신규 | ~40 | untracked (??) |
-| scripts/generate_publish_workflows.py | 신규 | ~200 | untracked (??) |
-| scripts/verify_car_state.py | 신규 | ~100 | untracked (??) |
-| pipelines/car/daily_refresh.py | 수정 | ~130 | tracked (M) |
-| **총계** | | **~746라인** | |
+| .github/workflows/daily_refresh.yml | 기존 | ~50 | tracked (M) — schedule 제거됨 |
+| .github/workflows/keepalive.yml | 기존 | ~40 | tracked |
+| scripts/generate_publish_workflows.py | 기존 | ~200 | tracked |
+| scripts/verify_car_state.py | 기존 | ~100 | tracked |
+| pipelines/car/daily_refresh.py | 기존 | ~130 | tracked (M) |
+| **총계** | | **~564라인** | |
 
-**배치 구성 (E-3 확정):**
-- **Batch 1 (이번 flip)**: compare-hugo, deal-hugo, rank-hugo (메커니즘 게이트 + 발행 레그 4/4)
-- **Batch 1.5 (차기 창)**: pick-hugo (전제: 정정 1 완료 + W5 7개 car_id + ledger_sync)
-- **Batch 2**: ev-hugo, guide-hugo, hotissue-hugo (메커니즘 이관)
+**배치 구성 (재편):**
+- **Batch 1 (이번 flip)**: rank-hugo 단독 (메커니즘 게이트 + 발행 레그 4/4)
+- **Batch 1.5 (차기 창)**: pick-hugo (전제: 정정 1 완료 + W5 7개 car_id + ledger_sync) — 불변
+- **Batch 2**: 이관 스코프에서 제외 — ev-hugo, guide-hugo, hotissue-hugo 비활성화. 재활성 절차(활성화 → 리시딩 → flip → 게이트)를 미니 절차로 별도 문서화 예정.
+- **비활성 블로그(8개)**: compare-hugo, deal-hugo, ev-hugo, guide-hugo, hotissue-hugo, tco-hugo, travel-hugo, sector-hugo — config.yaml status=paused, GH 워크플로 .disabled.yml 처리. 재활성 조건: 연비 데이터 보강 또는 가드 만기(30일~10/15, 90일~12/15).
+
+**제외 파일 (배치 1에서 제외 — 비활성화로 인한 보류):**
+| 파일 | 제외 사유 | 비고 |
+|------|-----------|------|
+| .github/workflows/publish-compare.yml | compare-hugo 비활성화 | .disabled.yml로 보관, 재활성 시 복원 |
+| .github/workflows/publish-deal.yml | deal-hugo 비활성화 | .disabled.yml로 보관, 재활성 시 복원 |
+| .github/workflows/publish-ev.yml | ev-hugo 비활성화 | 미생성 (배치 2 제외) |
+| .github/workflows/publish-guide.yml | guide-hugo 비활성화 | 미생성 (배치 2 제외) |
+| .github/workflows/publish-hotissue.yml | hotissue-hugo 비활성화 | 미생성 (배치 2 제외) |
+| scripts/normalize_timezone.py | F-4 시점 커밋, 실행 보류 유지 | 타임존 정규화 스크립트. 배치 1에 generate_publish_workflows.py가 단일 공급원으로 포함. |
+
+**배치 구성 (E-3 확정 → 2026-09-19 데이터고갈 비활성화 반영 재편):**
+- **Batch 1 (이번 flip)**: rank-hugo 단독 (compare-hugo, deal-hugo 비활성화로 제외)
+- **Batch 1.5 (차기 창)**: pick-hugo (전제: 정정 1 완료 + W5 7개 car_id + ledger_sync) — 불변
+- **Batch 2**: 이관 스코프에서 제외 — ev-hugo, guide-hugo, hotissue-hugo 비활성화. 재활성 절차(활성화 → 리시딩 → flip → 게이트)를 미니 절차로 별도 문서화 예정.
+- **비활성 블로그(8개)**: compare-hugo, deal-hugo, ev-hugo, guide-hugo, hotissue-hugo, tco-hugo, travel-hugo, sector-hugo — config.yaml status=paused, GH 워크플로 .disabled.yml 처리. 재활성 조건: 연비 데이터 보강 또는 가드 만기(30일~10/15, 90일~12/15).
 
 ---
 
@@ -180,30 +195,49 @@
 
 ---
 
-## 7. 실행 순서 (② 수신 시 — step 0 추가)
+## 7. 실행 순서 (② 수신 시 — step 0 추가) — **재편: rank 단독**
 
 ```bash
 cd /Users/twinssn/Projects/5000
 
-# 0. 전제조건 확인 + 창 판정 + 사전 리시딩 (E-2) — flip 전 필수
-# [전제조건] ② B1 완료 + G-1(rank W5 100% 재확인) + E-2 리시딩 완료
+# 0. 전제: AA-3 probe 초록 + 사용자 진행 신호 / 창 내: 리시딩 → add → commit → push → 실증 (E-2 리시딩은 창 내 실행, 전제 아님)
+# [전제] AA-3 probe 초록 + 사용자 진행 신호 + X-1(활성 경로) + X-2(계수 패치) + W-2(H-1 56/56) + 창 판정
 #   - rank W5: python3 scripts/verify_car_images.py audi_a6_2026 kona_2027 renault______2027 genesis_____gv70_2027 renault___2027 k8_2027
 #   - 재확인: 57/57 car_ids verified=1 (100%) ✓
-# - tco 발화(23:30 UTC)와 30분+ 이격
-# - Mac car 슬롯 ±30분 회피
+#   - X-1: daily_refresh.yml PHASE 1(관찰 스테이징, --get-only + --dry-run) 배포 확인
+#   - X-2: daily_refresh.py _count_eligible_topics per-type 분기 패치 적용 확인 (top5_rank=fallback 56 재현)
+# - tco 발화(23:30 UTC)와 30분+ 이격 (tco 비활성화로 현 러너 크론 0본 — pick 06:55 ±30분 회피 + daily_refresh 00:00 UTC 이격만)
+# - Mac car 슬롯 ±30분 회피 (pick 06:55 단독)
 # - date 원값 기록 (+07 로컬)
-# - 사전 리시딩(compare/deal/rank 3블로그):
+# - 사전 리시딩(rank-hugo 단독):
 #   R2-fresh pull → 맥 로컬(car.db topics+publish_log 해당 site, 
 #   stap_content.db articles 해당 blog_id, cooldown.json, 
 #   content.db publish_ledger 해당 blog_id) 병합 → 회피창 put →
 #   사전/후 rowcount·md5 대조 기록
 # 창 밖이면: 대기 후 창 진입 (이탈 아님, 대기 사유 명시)
 
+# 0.5. cap.yaml rank-hugo owner mac→runner 에디트 (창 내 실행 — Mac 스케줄러 hot-read 방지)
+python3 -c "
+import sys
+with open('config/blogs.d/cap.yaml', 'r') as f:
+    content = f.read()
+lines = content.split('\n')
+for i, line in enumerate(lines):
+    if 'id: rank-hugo' in line:
+        for j in range(i+1, min(i+4, len(lines))):
+            if 'owner: mac' in lines[j]:
+                lines[j] = lines[j].replace('owner: mac', 'owner: runner')
+                print(f'Fixed line {j+1}: {lines[j].strip()}')
+                break
+        break
+with open('config/blogs.d/cap.yaml', 'w') as f:
+    f.write('\n'.join(lines))
+print('Done')
+"
+git diff config/blogs.d/cap.yaml | head -10  # ±1라인만 변경 확인
 # 1. 변경사항 스테이징 (수정 목록 — 커밋 메시지와 일치 필수)
-# 9파일 (정규화 스크립트 제외 — F-4 커밋·실행 보류)
+# 7파일 (정규화 스크립트 제외 — F-4 커밋·실행 보류)
 git add config/blogs.d/cap.yaml \
-      .github/workflows/publish-compare.yml \
-      .github/workflows/publish-deal.yml \
       .github/workflows/publish-rank.yml \
       .github/workflows/daily_refresh.yml \
       .github/workflows/keepalive.yml \
@@ -211,41 +245,41 @@ git add config/blogs.d/cap.yaml \
       scripts/verify_car_state.py \
       pipelines/car/daily_refresh.py
 
-# 2. 커밋 (단일 번들 — E-3 배치 1: compare/deal/rank)
-git commit -m "G1 batch 1 flip: compare/deal/rank runner 이관 + daily_refresh C-3 fix
+# 2. 커밋 (단일 번들 — Batch 1: rank-hugo 단독, publish.yml fallback 포함)
+git commit -m "G1 batch 1 flip: rank-hugo runner 이관 + daily_refresh C-3 fix + publish.yml fallback rank
 
-- compare-hugo, deal-hugo, rank-hugo owner: mac -> runner
-- deal-hugo schedule: 17:30/20:45 -> 17:45/20:50 (tco 충돌 해소)
-- publish-compare.yml, publish-deal.yml, publish-rank.yml 신규 생성 (config.yaml 파생)
+- rank-hugo owner: mac -> runner
+- publish-rank.yml 신규 생성 (config.yaml 파생)
+- publish.yml fallback: tco-hugo -> rank-hugo (수동 dispatch 폴백 동기화)
 - publish-lock-car 공유 직렬화, timeout-minutes: 20 통일
 - 일일 보충(daily_refresh) + 월 킵얼라이브(keepalive) 운영 워크플로 포함
 - 단일 공급원 스크립트 2종 번들 (generate/verify) — normalize은 F-4 보류
 - C-3 fix: daily_refresh usable_pending 계산에 select_topic 가드 세트 적용 (combo 90/30일, reuse 7일, recent_keys 14일) — replenish 트리거 정합성 확보
-- rank-hugo 발행 레그 4/4 증명 담당 (85 eligible, W5 풀 17 car_id)"
+- rank-hugo 발행 레그 4/4 증명 담당 (85 eligible, W5 56 car_id 전원 verified=1 — H-1 재판정 기준)
+- compare/deal/ev/guide/hotissue/tco/travel/sector 8개 블로그 비활성화 별도 커밋 (ops/blogs)"
 
 # 3. 푸시
 git push origin main
 
 # 4. 실증 (메시지 명세와 파일 목록 일치 확인 — 불일치 시 중단·예외)
 git show origin/main --stat
-gh workflow list | grep -E "publish-compare|publish-deal|publish-rank|daily_refresh|keepalive"
+gh workflow list | grep -E "publish-rank|daily_refresh|keepalive"
 ```
 
 ---
 
-## 8. 검증 체크리스트 (push 후 즉시)
+## 8. 검증 체크리스트 (push 후 즉시) — **재편: rank 단독**
 
 - [ ] `git show origin/main` 해시 일치
-- [ ] `gh workflow list`에서 publish-compare, publish-deal, publish-rank 활성 확인
-- [ ] `gh run list --workflow=publish-compare.yml --limit 1` 정상 발화 대기
-- [ ] `gh run list --workflow=publish-deal.yml --limit 1` 정상 발화 대기
+- [ ] `gh workflow list`에서 publish-rank 활성 확인 (compare/deal은 .disabled.yml로 비활성)
 - [ ] `gh run list --workflow=publish-rank.yml --limit 1` 정상 발화 대기
-- [ ] Mac scheduler.log `[SKIP] compare-hugo owner=runner` 확인
-- [ ] Mac scheduler.log `[SKIP] deal-hugo owner=runner` 확인
 - [ ] Mac scheduler.log `[SKIP] rank-hugo owner=runner` 확인
+- [ ] Mac scheduler.log `[SKIP] compare-hugo owner=runner` → **대신 `[SKIP] compare-hugo inactive` 확인** (status=paused)
+- [ ] Mac scheduler.log `[SKIP] deal-hugo owner=runner` → **대신 `[SKIP] deal-hugo inactive` 확인** (status=paused)
 - [ ] KILL-SWITCH 4신호 0건 유지
-- [ ] **E-2 사전 리시딩 완료 확인**: R2-fresh에 compare/deal/rank 3블로그 행 병합됨 (rowcount·md5 대조)
+- [ ] **E-2 사전 리시딩 완료 확인**: R2-fresh에 rank-hugo 행 병합됨 (rowcount·md5 대조)
 - [ ] **E-5 ops 섹션**: flip 보고에 ops 반영/충돌/거짓경보 여부 포함
+- [ ] **비활성 블로그 8개 스킵 확인**: scheduler.log에서 `Queue skip (inactive): <blog_id>` 8개 모두 확인
 
 ---
 
@@ -472,4 +506,97 @@ pick-hugo:      persona_pick        fuel_gate  eligible= 58
 
 ---
 
-*프리뷰 완료 — ② B1 완료 수신 즉시 위 순서로 기계적 실행*
+## 12. 배치별 Flip 계획 (재편: 데이터고갈 비활성화 반영)
+
+| 배치 | 블로그 | 조건 | Flip 시기 |
+|------|--------|------|-----------|
+| 1 | **rank-hugo** 단독 | 3조건 충족 시 즉시 (AA-3 probe 초록 + 사용자 진행 신호 + G-1 + E-2) | tco 23:30 UTC + 30분 후 (00:00 UTC) |
+| 1.5 | pick-hugo | batch 1 4/4 실증 후 + **pick 감사 완료** | 동일 규칙 |
+| 2 | **제외** — ev-hugo, guide-hugo, hotissue-hugo 비활성화 | 재활성 시 별도 미니 절차 | — |
+| — | **비활성(8개)**: compare, deal, ev, guide, hotissue, tco, travel, sector | 재활성 조건: 연비 데이터 보강 또는 가드 만기(30일~10/15, 90일~12/15) | — |
+
+> **pick 감사 항목 (G1_READINESS)**: 가드 시뮬, W5 풀, 발행 이력, quota/슬롯 검증 — flip 배치 1.5 직전 수행
+
+---
+
+## 13. 승인 후 즉시 실행 가능한 액션 (재편: rank 단독) — 번들링 원칙 적용
+
+1. **batch 1 flip 단일 커밋** (번들링 — 단독 커밋 금지):
+   - `config/blogs.d/cap.yaml` rank-hugo `owner: mac → runner`
+   - 생성된 워크플로 1개: `publish-rank.yml`
+   - `daily_refresh.yml`, `keepalive.yml` (이미 커밋됨 — 변경 없으면 제외)
+   - **비활성화 커밋은 별도** (ops/blogs: 2026-09-19 완료, flip 번들과 분리)
+
+2. `tco 발화(23:30 UTC) 후 30분+ 이격 확인 → flip push`
+
+3. `daily_refresh` 첫 발화(00:00 UTC = 07:00 +07) 후 rank 토픽 보충 여부 확인 보고
+
+4. `normalize_timezone.py` 실행은 **별도 승인 + 전체 백업 + dry-run diff 보고 선행** (batch flip과 동시 실행 금지)
+
+5. pick 감사(G1_READINESS) → batch 1.5 flip 직전 수행
+
+---
+
+## 14. 기록 정리 (X-4) — 워크플로 명명 통일 + 그룹 표기 정합
+
+### 14.1 워크플로 명명 규칙 (단일 규칙로 통일)
+
+| 구분 | 패턴 | 예시 | 비고 |
+|------|------|------|------|
+| **활성** | `publish-<blog>.yml` | `publish-rank.yml`, `publish-pick.yml` | config.yaml blog_id 기준, `-hugo` 접미 없음 |
+| **활성(폴백)** | `publish.yml` | `publish.yml` | 구 tco-hugo용, 수동 dispatch + rank-hugo 폴백 |
+| **활성(운영)** | `daily_refresh.yml`, `keepalive.yml` | 동일 | 고정명 |
+| **보관(비활성)** | `publish-<blog>.disabled.yml` | `publish-compare-hugo.disabled.yml` | 기존 생성분 + `-hugo` 접미 유지, 재활성 시 `.disabled` 제거 후 rename |
+
+**적용 현황 (2026-09-19):**
+- 활성: `publish-rank.yml`, `publish.yml`, `daily_refresh.yml`, `keepalive.yml`
+- 보관: `publish-compare-hugo.disabled.yml`, `publish-deal-hugo.disabled.yml`, `publish-ev-hugo.disabled.yml`, `publish-guide-hugo.disabled.yml`, `publish-hotissue-hugo.disabled.yml`, `publish-rank-hugo.disabled.yml`, `publish-pick-hugo.disabled.yml`, `daily_refresh.disabled.yml`
+
+**재활성 절차:** `.disabled.yml` → `.yml` rename + config.yaml `status: active` → 커밋 → push
+
+### 14.2 그룹 표기 정합 (G4 정의 확정)
+
+| 그룹 표기 | 정의 | 구성 블로그 | 비고 |
+|-----------|------|-------------|------|
+| **G4** | stock + senior | finance-hugo, stock-hugo, dividend-hugo, etf-hugo, ipo-hugo, sector-hugo, senior-hugo, senior-blogger | **M-2 READINESS에서 확정** (ETAP/G-STAP/TAP 표기 폐기) |
+| car | car pipeline | rank-hugo, pick-hugo, compare-hugo, deal-hugo, ev-hugo, guide-hugo, hotissue-hugo, tco-hugo | Batch 1/1.5 대상 |
+| rap | rap pipeline | rap-hugo, rap2-hugo, rap3-hugo, rap4-hugo, rap5-hugo | G2 대상 |
+| curation | curation pipeline | 24개 블로그 | G3 대상 |
+| etap | ETAP pipeline | 32개 블로그 | 별도 운영 |
+| travel (TAP) | travel pipeline | travel1~4-hugo, tap-blogger | travel-hugo paused |
+
+> **비고**: `G4 = ETAP + G-STAP/TAP` 구 표기 전면 폐기. M-2 READINESS 문서에서 그룹 명명·스코프 단일 확정 후 적용.
+
+---
+
+## 16. 배치 1.5 pre-flight — owner 잔해 정합 (O-1-F-3)
+
+**배경**: 2026-09-20 ops 레인 세션에서 cap.yaml pick status 변경 시 owner 잔해 3건(compare/pick/rank)이 섞여 유출됨. cap.yaml 단일 작성자 규칙 위반 사례로 기록.
+
+**owner 잔해 3건 상태 (stash@{0} 보관 중)**:
+| 블로그 | HEAD | Working tree | 의미 |
+|--------|------|-------------|------|
+| compare-hugo (depth_next) | owner: mac | owner: runner | compare는 이관 완료(실제 runner 사용). 잔해 무해. |
+| pick-hugo (depth_next) | owner: mac | owner: runner | 배치 1.5 대상 — 원칙상 mac 유지. 창 내 edit 필요. |
+| rank-hugo (depth_next) | owner: mac | owner: runner | rank는 이미 main에서 owner: runner. 잔해 무해. |
+
+**3-way 대조 오염 방지 규칙**:
+- 이관 창 내 FLIP edit 전 반드시 `git diff`로 owner 변경 범위 확인
+- 의도하지 않은 owner 변경은 스테이시(stash) 보관 후 이관 창 내 판정
+- 판정 결과는 본 항목에 기록 (이력 추적)
+
+**pick owner mac 원칙 재확정**: G1-DESIGN §0 배치 1.5 명세 — pick-hugo owner: mac. 현재 잔해(runner)는 배치 1.5 flip 창 내에서 명시적 edit 또는 mac 원칙 유지 결정 필요.
+
+**rank 확인 무해**: rank-hugo main은 이미 owner: runner (4697b429b). depth_next 내 잔해도 runner — 무해. 기록만.
+
+**규칙 (cap.yaml·blogs.d 단일 작성자 — 신설)**:
+> cap.yaml 및 blogs.d/*.yaml 수정은 이관 세션 창 내에서만 수행. ops 레인의 config 변경은 제안 형태로 제출 → 이관 창 경유 집행. 예외: 긴급 안전 차단(KILL-SWITCH 등) → 즉시 후 사후 보고.
+
+*프리뷰 완료 — AA-3 probe 초글 + 사용자 진행 신호 수신 즉시 위 순서로 기계적 실행*
+
+---
+
+## 15. 인접 확인 (X-5) — rank 06:50 vs pick 06:55 5분 인접
+
+**판정: 무해**  
+rank-hugo(러너, 06:50 +07 = 23:50 UTC) ↔ pick-hugo(맥, 06:55 +07 = 23:55 UTC) — **5분 인접**이나 서로 다른 저장소(R2 라운드트립 vs 맥 로컬)로 I/O 충돌 없음. tco-hugo 파일럿 동거 패턴(러너 tco 23:30~13:45 UTC + 맥 car 슬롯 ±5~15분 스태거)과 동일 — 무해 판정. car 잔여 Mac 슬롯 = pick 06:55 단독 재확인.
