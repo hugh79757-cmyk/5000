@@ -2,7 +2,7 @@ name: daily_refresh (runner state replenish)
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # 00:00 UTC = 07:00 +07 (아침 첫 슬롯 전)
+    - cron: "30 0 * * *"  # 00:30 UTC = 07:30 +07 (rank 23:50 +40분 버퍼, RC-4)
   workflow_dispatch:
 
 concurrency:
@@ -67,7 +67,7 @@ jobs:
 #
 # 3. PHASE 2: 실모드 (전환 후)
 #    - verify_car_state.py --replenish-runner-only (--dry-run 제거)
-#      * 실제 replenish 실행 → R2 put (회피창 준수: daily_refresh 00:00 UTC = rank 23:50 UTC + 10분)
+#      * 실제 replenish 실행 → R2 put (회피창 준수: daily_refresh 00:30 UTC = rank 23:50 UTC + 40분)
 #    - run_slot.py (--dry-run 제거): R2 round-trip 완료, dispatcher 스킵 유지
 #    - rank-hugo 자가급유 완전 자동화 (매일 00:00 UTC 보충 → 06:50 슬롯 발행)
 #
