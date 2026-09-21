@@ -307,4 +307,21 @@ SELECT * FROM article_quality WHERE blog_id='pick-hugo';  -- 0건
 
 ---
 
+### 10. STAP 배포 경로 통합 — 인라인 wrangler 금지 (ST-3, 2026-09-21)
+
+> STAP(shared/publisher.py)는 5000의 dispatcher.py/deploy.py와 별도 경로로 wrangler를 호출했으나,
+> CLOUDFLARE_API_TOKEN 환경변수 충돌(STRUCT-02)로 인해 인증 실패가 반복됨. ST-1 수정으로
+> 동일 패턴(env strip + --profile hugh79757)을 적용했으나, 근본 해결은 **단일 배포 경로** 원칙.
+
+| 게이트 항목 | 상태 | 비고 |
+|------------|------|------|
+| STAP wrangler 인증 수정 | ✅ 완료 | `d1a89aaf` — env strip + --profile + commit-dirty 제거 |
+| CLOUDFLARE_API_TOKEN 무발견 확인 | ✅ 확인 | grep 0건 (ST-2) |
+| **인라인 wrangler 금지 규칙** | ⚠️ 규칙 등재 | STAP의 모든 배포는 5000 dispatcher.py 또는 shared/publishers/deploy.py 경유. 인라인 subprocess wrangler 호출 금지. |
+| **단일 소스 원칙** | ⚠️ 규칙 등재 | wrangler 인증·토큰 strip·profile 관리는 shared/publishers/deploy.py의 build_wrangler_env()가 유일한 소스. |
+
+**규칙:** STAP/ETAP/TAP 등 외부 프로젝트는 자체 wrangler deploy를 수행하지 않는다. 5000의 dispatcher.py 또는 deploy.py를 경유한다. 인라인 wrangler 호출 시 STRUCT-02(CLOUDFLARE_API_TOKEN 충돌) 재발 위험.
+
+---
+
 *G4 READINESS 반영 완료 — M-2 READINESS 문서에서 참조*
