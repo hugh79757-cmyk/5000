@@ -29,7 +29,7 @@ class ProblemSpec:
     hook: str
     alert_template: str
     threshold: str
-    cooldown_minutes: int = 60
+    cooldown_minutes: int = 360  # R-5: 6h per-problem cooldown (was 60min)
     action: str = ""
     detect_fn: str = ""
     playbook_ref: str = ""  # 예: "ERROR_PLAYBOOKS.md#p01"

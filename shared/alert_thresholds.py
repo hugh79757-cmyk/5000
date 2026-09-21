@@ -77,18 +77,27 @@ class ThresholdChecker:
         threshold = config.get("keyword_fail_streak", 5)
         return streak_count >= threshold
 
-    def _in_cooldown(self, blog_id: str) -> bool:
-        """Returns True if blog_id is still within its cooldown period."""
-        if blog_id not in self._last_alerted:
+    def _in_cooldown(self, blog_id: str, problem_id: str = "", cooldown_minutes: int = 0) -> bool:
+        """Returns True if (blog_id, problem_id) is still within its cooldown period.
+
+        R-5: per-problem cooldown. Key is (blog_id, problem_id).
+        cooldown_minutes overrides blog-level config when > 0.
+        """
+        key = (blog_id, problem_id) if problem_id else (blog_id, "")
+        if key not in self._last_alerted:
             return False
-        config = self.get_config(blog_id)
-        cooldown_seconds = config.get("cooldown_minutes", 60) * 60
-        elapsed = time.time() - self._last_alerted[blog_id]
+        if cooldown_minutes > 0:
+            cooldown_seconds = cooldown_minutes * 60
+        else:
+            config = self.get_config(blog_id)
+            cooldown_seconds = config.get("cooldown_minutes", 60) * 60
+        elapsed = time.time() - self._last_alerted[key]
         return elapsed < cooldown_seconds
 
-    def _mark_alerted(self, blog_id: str) -> None:
-        """Records current timestamp for cooldown tracking."""
-        self._last_alerted[blog_id] = time.time()
+    def _mark_alerted(self, blog_id: str, problem_id: str = "") -> None:
+        """Records current timestamp for cooldown tracking. R-5: per-problem key."""
+        key = (blog_id, problem_id) if problem_id else (blog_id, "")
+        self._last_alerted[key] = time.time()
 
     def maybe_alert(
         self,

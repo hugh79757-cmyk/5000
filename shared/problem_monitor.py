@@ -79,22 +79,22 @@ class PublishMonitor:
         context["consecutive"] = consecutive
 
         if spec.threshold == "always":
-            if self.checker._in_cooldown(blog_id):
+            if self.checker._in_cooldown(blog_id, spec.problem_id, spec.cooldown_minutes):
                 logger.info(f"[problem_monitor] 쿨다운 스킵: {blog_id}/{spec.problem_id}")
                 return sent
             rendered = self.send_problem_alert(spec.problem_id, blog_id, context)
             if rendered is not None:
                 sent.append(spec.problem_id)
-            self.checker._mark_alerted(blog_id)
+            self.checker._mark_alerted(blog_id, spec.problem_id)
         elif spec.threshold.startswith("consecutive:"):
             if self.checker.check_consecutive_failures(blog_id, consecutive):
-                if self.checker._in_cooldown(blog_id):
+                if self.checker._in_cooldown(blog_id, spec.problem_id, spec.cooldown_minutes):
                     logger.info(f"[problem_monitor] 쿨다운 스킵: {blog_id}/{spec.problem_id}")
                 else:
                     rendered = self.send_problem_alert(spec.problem_id, blog_id, context)
                     if rendered is not None:
                         sent.append(spec.problem_id)
-                    self.checker._mark_alerted(blog_id)
+                    self.checker._mark_alerted(blog_id, spec.problem_id)
             else:
                 logger.debug(
                     f"[problem_monitor] 연속 {consecutive}회 < 임계값: {blog_id}/{spec.problem_id}"
