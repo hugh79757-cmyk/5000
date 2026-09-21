@@ -1,0 +1,4 @@
+[2026-09-20 16:00:00] CONFIG_CHANGE cap.yaml | 사전카운트=pick-hugo status active→paused + depth_next owner 잔해 3건 | 백업=cap.yaml.bak_disable_20260919_143857 | 사후=pick-hugo status=paused 확정, owner 잔해 stash 보관 | 보존확인=rank-hugo active 유지, pick-hugo 재고 58 확인
+[2026-09-20 16:05:00] KNOWN_ISSUE_REGISTER INFRA-PAUSE-DB-REPAIR-PENDING | 사전카운트=신규 1건 | 백업=N/A | 사후=.planning/known_issues/INFRA-PAUSE-DB-REPAIR-PENDING.md 생성 | 보존확인=증거 로그·커밋·재활성 지도 포함
+[2026-09-21 00:30:00] FORENSIC_O2 fail_checks 455 | 사전카운트=check_results 465건(fail) | 백업=N/A(읽기 전용) | 사후=5대 검사기 226건 타임라인 + 이관 이벤트 대조표 + pick DB open 근인 분석 완료 | 보존확인=이관 유발 결함 0건 확인, 원본 SQL 출력 동봉
+[2026-09-21 01:20:00] CODE_FIX shared/candidate_availability.py | 사전카운트=pick-hugo checker_error (DB 락 경합) | 백업=git stash@{0} 보관 | 사후=timeout 5→30s + retry/backoff(3회) + row_factory=Row 추가 | 보존확인=전 car 블로그 healthy 복귀(pick 11, rank 63, compare 126, deal 176, ev 84, guide 140, hotissue 127, tco 171)
