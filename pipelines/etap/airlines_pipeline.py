@@ -149,11 +149,11 @@ def _add_product_cards(article):
         logger.info(f"[airlines-hugo] 항공권 카드 {len(cards)}개 추가 (hub={origin_code})")
     return article
 
-def _run_impl() -> bool:
+def _run_impl() -> dict:
     topic = pick_topic()
     if not topic:
         logger.info("[airlines-hugo] No topics")
-        return False
+        return {"success": False, "reason": "no_topics"}
     logger.info(f"[airlines-hugo] {topic.get('airline_name','')} generating")
     article = generate_airline_review(topic)
     if not article:
@@ -162,7 +162,7 @@ def _run_impl() -> bool:
         mark_published_by_id(topic["id"], TOPIC_TABLE, BLOG_ID,
                              topic.get("title",""), topic.get("slug",""))
         logger.warning(f"[airlines-hugo] 데이터 부족 토픽 exhausted 처리: {topic.get('airline_name','')}")
-        return False
+        return {"success": False, "reason": "no_data"}
 
     # Quality guard
     article["content"], _qg_issues, _qg_draft = postprocess_content(
@@ -188,7 +188,7 @@ def _run_impl() -> bool:
     if airline_name:
         register_entity("airline", airline_name, BLOG_ID, article["slug"],
                         airline_name + " airline review", 50, 1)
-    return True
+    return {"success": True, "reason": "pipeline_success"}
 
 
 def run():
