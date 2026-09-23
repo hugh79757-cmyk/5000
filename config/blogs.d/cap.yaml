@@ -55,11 +55,11 @@ blogs:
   status: paused
   theme: Blowfish
   managed_by: pipeline
-- cf_project: ev-hugo
+  - cf_project: ev-hugo
   daily_quota: 5
   domain: ev.rotcha.kr
   id: ev-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 전기차분석
   pipeline: car
@@ -82,11 +82,11 @@ blogs:
   status: paused
   theme: Blowfish
   managed_by: pipeline
-- cf_project: guide-hugo
+  - cf_project: guide-hugo
   daily_quota: 5
   domain: guide.rotcha.kr
   id: guide-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 초보가이드
   pipeline: car
@@ -105,11 +105,11 @@ blogs:
   status: paused
   theme: Blowfish
   managed_by: pipeline
-- cf_project: hotissue-hugo
+  - cf_project: hotissue-hugo
   daily_quota: 5
   domain: hotissue.rotcha.kr
   id: hotissue-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 핫이슈
   pipeline: car
@@ -194,11 +194,11 @@ blogs:
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
-- cf_project: pick-hugo
+  - cf_project: pick-hugo
   daily_quota: 1
   domain: pick.informationhot.kr
   id: pick-hugo
-  owner: mac
+  owner: runner
   deploy_type: pages
   name: 내차찾기
   pipeline: car
