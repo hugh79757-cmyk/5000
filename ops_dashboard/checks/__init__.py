@@ -155,3 +155,8 @@ try:
 except ImportError:
     pass
 
+try:
+    from ops_dashboard.checks import check_p36_offtopic  # noqa: F401
+except ImportError:
+    pass
+

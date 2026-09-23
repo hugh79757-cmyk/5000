@@ -603,6 +603,23 @@ codes:
   - "CUAP 라벨덤프 포스트 샘플로 check_c10 단위 테스트 (False 기대)"
   - "POST /api/run-checks?blog_id={cuap_blog} 재검사 트리거"
   needs_human: false
+- code: P36
+  playbook_ref: ERROR_PLAYBOOKS.md#p36
+  name_ko: 오프토픽 차단 (off-topic blocked)
+  severity: CRITICAL
+  family: content_mismatch
+  hook: result_parse
+  automation_level: human_approval
+  one_line_action: curation allowed 토큰/키워드 재점검 — 비주제 상품이 게이트에 걸림 (발행은 차단됨) — 키워드 확인: `python3 -c "import sys; sys.path.insert(0,'.'); from pipelines.curation.keywords import get_keywords; [print(k) for k in get_keywords('{blog_id}')]"` (read-time 필터 작동 중이면 정크는 이미 차단됨)
+  target_files:
+  - path: 'pipelines/curation/pipeline.py'
+    hint: problem_id="P36" 설정 지점 — off-topic 차단 로직
+  - path: 'shared/problem_registry.py'
+    hint: P36 ProblemSpec 정의 (:773-789)
+  verify:
+  - GET /api/attention → P36 항목 비어있는지 확인
+  - POST /api/run-checks?blog_id={blog_id} 재검사 트리거
+  needs_human: true
 - code: unknown_failure
   playbook_ref: ''
   name_ko: 미등록 실패 사유

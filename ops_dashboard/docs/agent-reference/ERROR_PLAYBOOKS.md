@@ -283,3 +283,35 @@ R 규칙은 대체로 구조·템플릿·SEO·운영 표준의 준수 여부를 
 3. `check_c10` 탐지 후 `/api/run-checks?blog_id={blog}` 재검사로 close 확인.
 
 **대시보드 확인**: `/api/attention` 또는 check_results `c10_cuap_format_tone` status=fail 필터.
+
+---
+
+## P36 — 오프토픽 차단 (off-topic blocked) (CRITICAL)
+
+**발생 위치**: `pipelines/curation/pipeline.py` (curation allowed 토큰 차단 시 `problem_id="P36"` 설정)
+
+**신호**: `offtopic_blocked` / `result_parse` / hook=`result_parse`
+
+**설명**: curation 파이프라인이 관련성 게이트에서 비주제 상품을 차단할 때 즉시 노출. 대시보드 + Telegram CRITICAL 알람 발동. 발행 자체는 차단됨.
+
+**원인**:
+- curation allowed 토큰/키워드가 허용 목록에 없어 게이트에 걸림
+- 프롬프트에 명시된 허용 키워드 목록(`allowed_tokens`)과 실제 생성 콘텐츠 불일치
+- 키워드 수집(`get_keywords`) 결과가 허용 목록 범위를 초과
+
+**판별 로직**:
+- curation pipeline `keyword_filter.py` / `allowed_token.py` 에서 `offtopic_blocked` reason으로 분류 → `publish_error_events.py`에서 P36으로 매핑 (`problem_registry.py:631-632` FAMILY_MAP: P36→content_mismatch)
+
+**해결 방법**:
+1. `curation allowed` 토큰/키워드 재점검 — 비주제 상품이 게이트에 걸린 것인지 확인
+2. 허용 키워드 목록(`allowed_tokens`) 프롬프트 내 정의를 확인하고, 실제 대상 카테고리에 맞게 수정
+3. read-time 필터가 작동 중이면 이미 차단된 것이므로 추가 조치 불필요 (발행 차단됨)
+4. 키워드 확인: `python3 -c "import sys; sys.path.insert(0,'.'); from pipelines.curation.keywords import get_keywords; [print(k) for k in get_keywords('{blog_id}')]"`
+
+**검증**:
+- POST /api/run-checks?blog_id={blog_id} 재검사 트리거 → P36 이벤트 미발생 확인
+- `/api/attention` P36 항목 비어있는지 확인
+
+**대시보드 확인**: `/api/attention` 또는 publish_error_events `problem_id=P36` 필터.
+
+**수정 권한**: 코드 제안 가능 (허용 키워드 목록 변경); 발행·배포는 승인 필요 (발행 차단 상태 확인 후)

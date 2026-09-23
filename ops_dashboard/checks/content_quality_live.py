@@ -1,9 +1,9 @@
 """Live content quality gate for dispatcher post-generate.
 
 Checks:
-- P36 hallucination price
-- P37 region mismatch
-- P38 H2 count
+- P50 hallucination price
+- P51 region mismatch
+- P52 H2 count
 
 Minimal implementation for now.
 """
@@ -44,12 +44,12 @@ def check_content_quality(blog_id: str, md_text: str, frontmatter: dict) -> dict
         if region.lower() not in body_lower:
             issues.append({"code": "P37", "detail": f"region {region} not found in body"})
     
-    # P36 hallucination price placeholder
+    # P50 hallucination price placeholder
     # look for price patterns without source
     if re.search(r'₩\s*\d{1,3}(,\d{3})+', md_text):
         # naive: if price appears but no source link
         if "coupang" not in md_text.lower() and "source" not in md_text.lower():
-            issues.append({"code": "P36", "detail": "price without source"})
+            issues.append({"code": "P50", "detail": "price without source"})
     
     return {"blog_id": blog_id, "issues": issues, "suggestions": suggestions, "h2_count": h2_cnt}
 
