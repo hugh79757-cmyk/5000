@@ -835,12 +835,19 @@ def seed_maintenance_status(conn: sqlite3.Connection) -> int:
     count = 0
     for item in MAINTENANCE_SEED_BLOGS:
         try:
+            # INSERT OR IGNORE: 기존 상태 보존 (in_progress/ready 초기화 방지)
+            conn.execute("""
+                INSERT OR IGNORE INTO blog_lifecycle
+                    (blog_id, maintenance_status)
+                VALUES (?, 'awaiting')
+            """, (item["blog_id"],))
+            # 기존이 none인 경우에만 갱신
             conn.execute("""
                 UPDATE blog_lifecycle
-                SET maintenance_status = ?
+                SET maintenance_status = 'awaiting'
                 WHERE blog_id = ? AND maintenance_status = 'none'
-            """, (item["maintenance_status"], item["blog_id"]))
-            count += conn.total_changes
+            """, (item["blog_id"],))
+            count += 1
         except sqlite3.OperationalError:
             pass
     conn.commit()

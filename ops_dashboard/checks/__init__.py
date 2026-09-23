@@ -39,6 +39,18 @@ def run_all_checks(
     if blog_ids:
         blogs = [b for b in blogs if b["blog_id"] in blog_ids]
 
+    # awaiting → in_progress 자동 전이 (정비 시작 표시)
+    try:
+        for b in blogs:
+            if b.get("maintenance_status") == "awaiting":
+                conn.execute(
+                    "UPDATE blog_lifecycle SET maintenance_status='in_progress' WHERE blog_id=?",
+                    (b["blog_id"],),
+                )
+        conn.commit()
+    except Exception as e:
+        logger.error("maintenance awaiting→in_progress transition failed: %s", e)
+
     summary = {"total": 0, "pass": 0, "fail": 0, "unknown": 0, "attention_items": []}
 
     for blog in blogs:
