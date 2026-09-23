@@ -109,8 +109,11 @@ import time
 import random
 
 
-def _connect_car_db_with_retry(db_path: str | Path, max_retries: int = 3, base_timeout: int = 30) -> sqlite3.Connection:
-    """car.db 연결 with retry/backoff for WAL lock contention."""
+def _connect_car_db_with_retry(db_path: str | Path, max_retries: int = 5, base_timeout: int = 60) -> sqlite3.Connection:
+    """car.db 연결 with retry/backoff for WAL lock contention.
+
+    macOS sandbox에서 URI read-only 모드가 차단될 경우 비-URI 모드로 폴백한다.
+    """
     last_error = None
     for attempt in range(max_retries):
         try:
@@ -119,7 +122,17 @@ def _connect_car_db_with_retry(db_path: str | Path, max_retries: int = 3, base_t
             return conn
         except sqlite3.OperationalError as e:
             last_error = e
-            if "unable to open database file" in str(e).lower() or "database is locked" in str(e).lower():
+            error_msg = str(e).lower()
+            if "unable to open database file" in error_msg or "database is locked" in error_msg:
+                # macOS sandbox fallback: non-URI read-only connection
+                if "unable to open database file" in error_msg:
+                    try:
+                        conn = sqlite3.connect(str(db_path), uri=False)
+                        conn.execute("PRAGMA query_only=ON")
+                        conn.row_factory = sqlite3.Row
+                        return conn
+                    except sqlite3.OperationalError:
+                        pass
                 if attempt < max_retries - 1:
                     wait_time = (2 ** attempt) * 0.5 + random.uniform(0, 0.2)
                     time.sleep(wait_time)
