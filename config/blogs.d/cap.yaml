@@ -24,14 +24,14 @@ blogs:
   managed_by: pipeline
   funnel_stage: bridge
   depth_next:
-  - id: pick-hugo
-    owner: mac
-    topic: 비교 결과 내 조건에 맞는 차 찾기
+    - id: pick-hugo
+      owner: mac
+      topic: 비교 결과 내 조건에 맞는 차 찾기
   bridge_to:
-  - id: finance-hugo
-    owner: mac
-    topic: 비교한 차량 가격으로 적금 vs 차량 할부 비교
-    bridge_context: 차량 구매 자금 마련 — 할부 금리와 적금 누적액 비교
+    - id: finance-hugo
+      owner: mac
+      topic: 비교한 차량 가격으로 적금 vs 차량 할부 비교
+      bridge_context: 차량 구매 자금 마련 — 할부 금리와 적금 누적액 비교
 - cf_project: deal-hugo
   daily_quota: 5
   domain: deal.rotcha.kr
@@ -55,7 +55,7 @@ blogs:
   status: paused
   theme: Blowfish
   managed_by: pipeline
-  - cf_project: ev-hugo
+- cf_project: ev-hugo
   daily_quota: 5
   domain: ev.rotcha.kr
   id: ev-hugo
@@ -82,7 +82,7 @@ blogs:
   status: paused
   theme: Blowfish
   managed_by: pipeline
-  - cf_project: guide-hugo
+- cf_project: guide-hugo
   daily_quota: 5
   domain: guide.rotcha.kr
   id: guide-hugo
@@ -105,7 +105,7 @@ blogs:
   status: paused
   theme: Blowfish
   managed_by: pipeline
-  - cf_project: hotissue-hugo
+- cf_project: hotissue-hugo
   daily_quota: 5
   domain: hotissue.rotcha.kr
   id: hotissue-hugo
@@ -194,7 +194,7 @@ blogs:
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
-  - cf_project: pick-hugo
+- cf_project: pick-hugo
   daily_quota: 1
   domain: pick.informationhot.kr
   id: pick-hugo
