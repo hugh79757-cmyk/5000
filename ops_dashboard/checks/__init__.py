@@ -71,6 +71,17 @@ def run_all_checks(
                 summary["total"] += 1
                 summary["unknown"] += 1
 
+    # 일별 롤업 집계 (check_rollups 테이블)
+    try:
+        from ops_dashboard.db import rollup_check_results, cleanup_old_check_results
+        rollup_count = rollup_check_results(conn)
+        cleaned = cleanup_old_check_results(conn)
+        summary["rollup_rows"] = rollup_count
+        summary["cleaned_rows"] = cleaned
+    except Exception as e:
+        logger.error("rollup_check_results failed: %s", e)
+        summary["rollup_error"] = str(e)
+
     return summary
 
 

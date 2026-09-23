@@ -694,6 +694,16 @@ def _register_api_routes(app: Flask) -> None:
         summary = run_all_checks(conn, blog_ids=blog_ids)
         return jsonify(summary)
 
+    @app.route("/api/rollups")
+    @require_auth
+    def api_rollups():
+        conn = _get_db()
+        _ensure_db(conn)
+        blog_id = request.args.get("blog_id")
+        days = request.args.get("days", default=30, type=int)
+        from ops_dashboard.db import get_check_rollups
+        return jsonify(get_check_rollups(conn, blog_id=blog_id or None, days=days))
+
     @app.route("/api/maintenance/status", methods=["POST"])
     @require_auth
     def api_maintenance_status():
