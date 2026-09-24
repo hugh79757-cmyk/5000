@@ -26,7 +26,7 @@ jobs:
         run: |
           python scripts/run_slot.py rank-hugo --get-only
           # R2 -> 로컬 12객체 복원 (manifest md5 검증 포함)
-      - name: Replenish owner=runner blogs only — PHASE 1: 관찰 스테이징 (--dry-run)
+      - name: "Replenish owner=runner blogs only — PHASE 1: 관찰 스테이징 (--dry-run)"
         # 전환 기준: 3일 연속 dry-run 성공 + replenish 시뮬 0건(rank 풀 유지) 또는 >0건(보충 확인)
         # 전환 주체: 사용자 수동 승인 후 commit (FLIP-BUNDLE-PREVIEW step 0에 내장)
         # 실모드 전환 시: 아래 --dry-run 제거 + verify_car_state.py 인자 제거
