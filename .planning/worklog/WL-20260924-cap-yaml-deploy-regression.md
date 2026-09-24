@@ -77,3 +77,20 @@ DEPLOY-REGRESSION (신규) — 자책 배포 회귀. KILL-SWITCH 1/4 대상 아�
 - 감사 결론: 우회 발행 없음. dispatcher.py L1815 `status != active → return None` (exit 0 success).
   실측: pick 최신 09-10, ev 09-13, hotissue/compare 09-16 — 유령 기간 포스트 0건.
 - 조치: 유령 8종 → .yml.disabled + publish-compare.yml disable + keepalive pick 참조 가드.
+
+## Appendix G — M-5.1 tracked record (2026-09-24, dbb874a81 + e6d042ab3)
+- 유령 displacement: 정식 35943986636(01:40:51Z, pending) → 유령 89831(01:40:53Z 진입) →
+  86636 취소(01:40:54Z) → 89831 failure(파손 yaml). path 스왑 확정. UI 취소 가설 폐쇄.
+- paused 가드 검증: dispatcher.py L1815 `status != active → return None`(exit 0).
+  pick 유령 success 35677574281(schedule 확정)도 무발행. 실측 0건(pick 최신 09-10,
+  ev 09-13, hotissue/compare 09-16). 롤백 대상 없음.
+- 감사 A (rank 이중발행): 유령 이력 09-19~24 = 3건(09-22/23 cancelled, 09-24 failure),
+  success 0건. 라이브 1건/일(09-20 최신, 이후 0건). 이중발행 없음, quota 정상.
+- 단, 09-22(35677584872)·09-23(35808015514) 정식 success는 deployed:false
+  (Hugo build failed, FAILED_TRANSIENT) — success 로그와 라이브 불일치의 별도 결함.
+  내일 슬롯 4조건 + deploy.log 원인 조사 필요.
+- 사전 점검 B: failure_count/cooldown에 rank 항목 없음 (로컬 + R2 `5000-state` 직접 확인).
+  89831은 dispatcher 실패 경로에서 put_state 스킵 → 반납 없음. suppress 위험 없음.
+- daily_refresh 유령 폐탄 비고: daily_refresh.disabled.yml 4전패(tco --get-only 부재).
+  live replenish 무dry-run이었으나 env 누락 덕분에 fail-safe (R2 접근 전 argparse 사망).
+- SHAs: dbb874a81 (rename 8종) + e6d042ab3 (keepalive 가드·FLIP 문구·본 WL).
