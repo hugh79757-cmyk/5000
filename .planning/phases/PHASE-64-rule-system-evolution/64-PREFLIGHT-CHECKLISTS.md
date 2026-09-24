@@ -134,6 +134,14 @@
      ·기존 버전 롤백을 포함한 재배포
    - 승인 필요 여부: [불필요/필요 — 사유:]
 
+□ 7. CONFIG-PARSE 게이트 (2026-09-24 신설 — cap.yaml DEPLOY-REGRESSION postmortem)
+   - config/blogs.d/*.yaml 또는 .github/workflows/*.yml에 닿는 모든 커밋은 푸시 전 통과 필수:
+     ·`python3 -c "import yaml,sys; [yaml.safe_load(open(f)) for f in <변경 yaml>]"` → 전 파일 PARSE_OK
+     ·워크플로우 변경 시: cron/concurrency 라인 육안 점검 (스케줄 시각·동시성 그룹)
+   - 배경: M-5 flip(15f299899)이 cap.yaml 파싱 파괴 → CAP 4블로그 연쇄 실패. 3-way 체크는
+     스코프만 보고 내용 유효성을 못 봄. 크론 주석 사건에 이어 두 번째 "검증됐다고 믿은 푸시".
+   - 위반 시: 푸시 금지, 즉시 보고.
+
 
 ※ CLOUDFLARE_API_TOKEN 환경변수가 설정되어 있으면 wrangler가 OAuth profile을 무시하고
   잘못된 계정으로 배포할 수 있다. dispatcher.py는 내부에서 이 env var를 제거하므로
