@@ -546,7 +546,7 @@ pick-hugo:      persona_pick        fuel_gate  eligible= 58
 | **활성** | `publish-<blog>.yml` | `publish-rank.yml`, `publish-pick.yml` | config.yaml blog_id 기준, `-hugo` 접미 없음 |
 | **활성(폴백)** | `publish.yml` | `publish.yml` | 구 tco-hugo용, 수동 dispatch + rank-hugo 폴백 |
 | **활성(운영)** | `daily_refresh.yml`, `keepalive.yml` | 동일 | 고정명 |
-| **보관(비활성)** | `publish-<blog>.disabled.yml` | `publish-compare-hugo.disabled.yml` | 기존 생성분 + `-hugo` 접미 유지, 재활성 시 `.disabled` 제거 후 rename |
+| **보관(비활성)** | `publish-<blog>.yml.disabled` | `publish-compare-hugo.yml.disabled` | `.yml`로 끝나면 GitHub가 live 등록하므로 `.yml.disabled` 사용 (M-5.1, 2026-09-24). 기존 `.disabled.yml` 명명은 무효였음 |
 
 **적용 현황 (2026-09-19):**
 - 활성: `publish-rank.yml`, `publish.yml`, `daily_refresh.yml`, `keepalive.yml`

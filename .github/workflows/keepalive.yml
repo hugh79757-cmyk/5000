@@ -28,7 +28,7 @@ jobs:
           echo "## Keepalive $(date -u +%Y-%m-%d)" >> HEALTH_SUMMARY.md
           gh run list --workflow=publish.yml --limit 10 --json conclusion,createdAt >> HEALTH_SUMMARY.md
           gh run list --workflow=publish-rank.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
-          gh run list --workflow=publish-pick.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md
+          gh run list --workflow=publish-pick.yml --limit 5 --json conclusion,createdAt >> HEALTH_SUMMARY.md 2>/dev/null || echo "pick workflow removed (M-5.1), skipping" >> HEALTH_SUMMARY.md
           # 비활성(.disabled.yml) 워크플로는 run list에 나타나지 않음 — 별도 감지 스텝에서 처리
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"

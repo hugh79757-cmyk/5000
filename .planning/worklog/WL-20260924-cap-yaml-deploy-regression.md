@@ -63,3 +63,17 @@ DEPLOY-REGRESSION (신규) — 자책 배포 회귀. KILL-SWITCH 1/4 대상 아�
 - daily_refresh `--get-only` 결함 still open → 다음 daily_refresh 스케줄도 실패 예정. 수정 시 별도 fix + push 결정 필요.
 - 6e3b173c6 db.py auto-transition 동작변경: 이번 push 포함, 단독 검증 없음.
 - 다음 예약 슬롯(23:50 UTC rank) 자동 회복 예상이나 실측 전까지 미확정.
+
+## Appendix E — daily_refresh 3연쇄 fix (2026-09-24 10:00–10:35 +07)
+- E1 `--get-only` 미구현: scripts/run_slot.py에 인자+early-return 6줄 추가 (c0473c178). 근거: baseline `unrecognized arguments` 재현 + monkeypatch harness `calls=['get'] rc=0`.
+- E2 워크플로우 YAML 무효: daily_refresh.yml L29·keepalive.yml L17의 `name:` 내 unquoted `: ` → ScannerError. push마다 invalid-file 실패 run 발생·schedule/dispatch 불능. 따옴표 2줄 수정 (02fbd3074). 근거: 전 active yml safe_load ALL PARSE OK.
+- E3 R2 secret 미전달: R2_* secret 존재하나 job env 매핑 없음 → manifest 다운로드 exit 2. job-level env 4줄 추가 (427519bd9).
+- 실증: workflow_dispatch 35950085060 success (E1·E2·E3 해소). 이전 dispatch 2건(35949552071·35949781073)은 E3 실패로 기록 유지.
+- 미해소 의문(검증불가): 02:03Z 스케줄 run이 tco-hugo 스텝 실행 — HEAD 파일(rank-hugo)과 불일치. 다음 00:30Z 스케줄 run에서 스텝명 확인 필요.
+
+## Appendix F — M-5.1 유령 워크플로 중립화 (2026-09-24, commit dbb874a81)
+- 0단계 전수: ev 유령 success 09-20~23 (5/일 크론), hotissue 동일, pick 1건(35677574281),
+  rank 유령 0건, daily_refresh 유령 전패, compare 정식 success 09-21~23, deal 정식 ~09-21.
+- 감사 결론: 우회 발행 없음. dispatcher.py L1815 `status != active → return None` (exit 0 success).
+  실측: pick 최신 09-10, ev 09-13, hotissue/compare 09-16 — 유령 기간 포스트 0건.
+- 조치: 유령 8종 → .yml.disabled + publish-compare.yml disable + keepalive pick 참조 가드.
