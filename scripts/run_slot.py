@@ -182,6 +182,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("blog_id")
     ap.add_argument("--dry-run", action="store_true", help="dispatcher 스킵 (probe)")
+    ap.add_argument("--get-only", action="store_true",
+                    help="R2 → 로컬 복원만 (dispatcher·put_state 스킵)")
     ap.add_argument("--skip-opsdb", action="store_true",
                     help="ops.db put 제외 (G-A 안 b — 기본 동작, 명시용 플래그)")
     args = ap.parse_args()
@@ -195,6 +197,10 @@ def main() -> int:
     s3 = _s3()
     if not get_state(s3):
         return 2
+
+    if args.get_only:
+        print("[run_slot] get-only — R2 복원 완료, dispatcher·put_state 스킵")
+        return 0
 
     if args.dry_run:
         print("[run_slot] dry-run — dispatcher 스킵, put_state만 수행")
