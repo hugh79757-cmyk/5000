@@ -1,5 +1,6 @@
 // ===== Cloudflare Worker: rotcha-redirect =====
-// /entry/*, /m/entry/*, /posts/YYYY-MM-DD-* 요청을 올바른 /posts/slug/로 301 리다이렉트
+// /entry/*, /m/entry/* 요청을 올바른 /posts/slug/로 301 리다이렉트
+// (일반 /posts/* 조회는 Worker를 거치지 않고 Pages로 직접 서빙)
 
 const SLUG_MAP = {
   "'내일-봬요'-vs-'뵈요'-헷갈리는-높임-표현-바로잡기": "헷갈리기-쉬운-맞춤법-top-10-총정리",

@@ -1,0 +1,2 @@
+[08:26] CF zone route DELETE rotcha.kr/posts/* (id 27a3171f) | 사전카운트=routes 3개(rotcha-redirect) | 백업=workers/wrangler.toml git diff + API route ID 기록 | 사후=routes 2개(entry,m/entry) + curl /posts/ 200 + /entry/ 301 정상 | 보존확인=SLUG_MAP/리다이렉트 로직 유지, 파일 수정만(배포 불필요)
+[2026-09-27 08:42] wiki-personal 비활성화 | 사전: embed루프 PID1034 + ingest PID1051 + dashboard PID1064 가동, 8 plist 중 3 loaded | 백업: plist 파일 유지(삭제안함, 재활성화 가능) | 사후: 잔여프로세스 0, loaded 0 | 보존확인: launchd 파일 전부 존재
