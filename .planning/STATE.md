@@ -94,6 +94,7 @@ progress:
 
 | Date | Task | Commit |
 |------|------|--------|
+| 2026-10-04 | Quick 261004-gz6 — nomad.techpawz.com 이미지 전수조사(156포스트/851 URL) + ETAP R2 업로드 차단 해제 + Pexels 실사진 백필 851건. **배포 불필유**(라이브 HTML이 이미 절대 R2 URL 참조 → 키 충만으로 해결, Hugo 리빌드·wrangler 미실행). 전수조사 `posts_with_missing` 145→0, 라이브 5포스트 39/39 HTTP 200. 잔여: 크레딧 불일치 331건, 타 ETAP 36사이트 미처리 | `550f87d99`, `29da01508`, `1f88a372e` |
 | 2026-09-13 | Quick 260913-g12 — playwright chromium self-heal guard (generator.py `_ensure_chromium` 2 launch 지점 배선, fcntl 잠금+6h 쿨다운+240s 대기, 단위테스트 6건) | `c87682b88`, `7703a72c3` |
 | 2026-09-07 | ETAP H2-GUARD 영어 바이패스 + affiliate 카드 버튼 마크업 + 라이브 14블로그 H2 4,196 복원/Book Now 2,573 버튼화 + Pages 재배포 2회차 | `미커밋` |
 | 2026-08-26 | 발행 오류 트리아지 — senior W5 R13 Hugo 본문이미지 삽입(_ensure_body_image) + 백필 12건+twitter_card 19건 배포, playwright chromium 재설치(rap3/5 회복), foodtour/adventure 스테일 확인 | `본 커밋` |
