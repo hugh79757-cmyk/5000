@@ -65,7 +65,7 @@ def _upload_to_r2(r2_key, image_url, force=False):
 ## 검증
 
 ### [검증됨] — [VERIFY] 전수조사 재실행, 누락 0건
-근거: `audit-report.post.json` 1,562,045 바이트 결과 `posts: 156`, **`posts_with_missing: 0`**, **`missing_by_prefix: {}`**, `kinds: {r2: 851, external: 23, r2-wrong-slug: 1}`. 백필 전 대비 `posts_with_missing` 가 145 → 0으로 감소했고 875개 URL 중 R2 대상 851건이 키 집합에 전부 존재함. 임의 표본이 아니라 전체 156개 포스트를 스캔한 결과임.
+근거: `audit-report.post.json` 결과 `posts: 156`, **`posts_with_missing: 0`**, **`missing_by_prefix: {}`**, `kinds: {r2: 851, external: 23, r2-wrong-slug: 1}`. 백필 전 대비 `posts_with_missing` 가 145 → 0으로 감소했고 875개 URL 중 R2 대상 851건이 키 집합에 전부 존재함. 임의 표본이 아니라 전체 156개 포스트를 스캔한 결과임.
 
 ### [검증됨] — 라이브 HTML 실측, 39/39 HTTP 200
 근거: `requests`(브라우저 UA)로 `https://nomad.techpawz.com/posts/{slug}/` 5건 페치 후 R2 URL 정규식 추출 → 8 스레드 `HEAD` 병렬 요청.
