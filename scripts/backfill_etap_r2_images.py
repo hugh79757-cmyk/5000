@@ -19,6 +19,8 @@ import json
 import os
 import re
 import sys
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -139,19 +141,55 @@ def featureimage_credit(fm):
 
 
 # --- network work -----------------------------------------------------------
+# Pexels free tier enforces a short-window burst limiter (HTTP 429 "Throttle limit
+# exceeded") that is far tighter than the 25,000 x-ratelimit-remaining header.
+# A process-wide min interval keeps us under it. ponytail: one global lock, no
+# token bucket — if throughput ever matters, swap in a real limiter.
+_PACE_LOCK = threading.Lock()
+_LAST_CALL = [0.0]
+_CACHE = {}
+_CACHE_LOCK = threading.Lock()
+MIN_INTERVAL = 0.35  # ~170 req/min
+
+
+def _pace():
+    with _PACE_LOCK:
+        wait = MIN_INTERVAL - (time.monotonic() - _LAST_CALL[0])
+        if wait > 0:
+            time.sleep(wait)
+        _LAST_CALL[0] = time.monotonic()
+
+
+def search_cached(fn, query, per_page=5, city="", country=""):
+    """Paced + memoized search. Repeat queries are free; 429s stay rare."""
+    key = (fn.__name__, query, per_page, city, country)
+    with _CACHE_LOCK:
+        if key in _CACHE:
+            return _CACHE[key]
+    _pace()
+    hits = fn(query, per_page, city, country)
+    with _CACHE_LOCK:
+        _CACHE[key] = hits
+    return hits
+
+
 def find_photo(credit, city, country, slugq):
     """-> (photo, credit_match). Credit-name search first (keeps attribution)."""
-    import requests
     if credit:
-        hits = _search_with_fallback(credit, per_page=5, city="", country="")
+        hits = search_cached(_search_with_fallback, credit)
         if hits:
             return hits[0], True
-    # Unsplash's key allows only 50 req/h — keep the credit probe as the only
-    # _search_with_fallback() call; geographic fallbacks go to Pexels directly.
-    for q in (f"{city} {country} travel", f"{city} travel", slugq):
-        if not q.strip():
-            continue
-        hits = _search_pexels(q, per_page=5, city="", country="")
+    # Unsplash's key is exhausted (403, remaining=0) — keep the credit probe as
+    # the only _search_with_fallback() call; geographic fallbacks go to Pexels.
+    queries = []
+    if city:
+        queries.append(f"{city} {country} travel" if country else f"{city} travel")
+    if city:
+        queries.append(f"{city} travel")
+    if slugq:
+        queries.append(slugq)
+    for q in queries:
+        hits = search_cached(_search_pexels, q)
         if hits:
             return hits[0], False
     return None, False
@@ -264,6 +302,7 @@ def load_site_posts(site):
 
 
 def main():
+    global MIN_INTERVAL
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--report", default=DEFAULT_REPORT)
     ap.add_argument("--site", default=DEFAULT_SITE)
@@ -272,7 +311,11 @@ def main():
     ap.add_argument("--max-per-run", type=int, default=900)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--self-check", action="store_true")
+    ap.add_argument("--pace", type=float, default=MIN_INTERVAL,
+                    help="min seconds between search calls (Pexels burst guard)")
     args = ap.parse_args()
+
+    MIN_INTERVAL = args.pace
 
     if args.self_check:
         demo()
