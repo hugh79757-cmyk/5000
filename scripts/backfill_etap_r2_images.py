@@ -161,20 +161,22 @@ def _pace():
 
 
 def search_cached(fn, query, per_page=5, city="", country=""):
-    """Paced + memoized search. Repeat queries are free; 429s stay rare."""
+    """Paced + memoized search. Repeat queries are free; empty results are NOT
+    cached — an empty list usually means a 429, and caching it would poison the
+    rest of the run."""
     key = (fn.__name__, query, per_page, city, country)
     with _CACHE_LOCK:
         if key in _CACHE:
             return _CACHE[key]
     _pace()
     hits = fn(query, per_page, city, country)
-    with _CACHE_LOCK:
-        _CACHE[key] = hits
+    if hits:
+        with _CACHE_LOCK:
+            _CACHE[key] = hits
     return hits
 
 
-def find_photo(credit, city, country, slugq):
-    """-> (photo, credit_match). Credit-name search first (keeps attribution)."""
+def _find_photo_once(credit, city, country, slugq):
     if credit:
         hits = search_cached(_search_with_fallback, credit)
         if hits:
@@ -184,7 +186,6 @@ def find_photo(credit, city, country, slugq):
     queries = []
     if city:
         queries.append(f"{city} {country} travel" if country else f"{city} travel")
-    if city:
         queries.append(f"{city} travel")
     if slugq:
         queries.append(slugq)
@@ -192,6 +193,21 @@ def find_photo(credit, city, country, slugq):
         hits = search_cached(_search_pexels, q)
         if hits:
             return hits[0], False
+    return None, False
+
+
+def find_photo(credit, city, country, slugq, attempts=3, backoff=45):
+    """-> (photo, credit_match). Credit-name search first (keeps attribution).
+    Empty searches are usually a burst-throttle, so back off and retry before
+    giving up — a recorded `fail` must mean 'no photo exists', not 'rate limited'."""
+    for attempt in range(attempts):
+        photo, matched = _find_photo_once(credit, city, country, slugq)
+        if photo:
+            return photo, matched
+        if attempt < attempts - 1:
+            print(f"  throttle/backoff on {slugq} ({credit or city or slugq}) "
+                  f"— retry {attempt + 2}/{attempts} in {backoff}s", flush=True)
+            time.sleep(backoff)
     return None, False
 
 
