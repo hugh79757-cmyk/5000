@@ -296,14 +296,14 @@ def fill_trim_efficiency(conn):
 
     c = conn.cursor()
     rows = c.execute("""
-        SELECT t.rowid AS rid, t.car_id, t.trim_name, c.brand, c.model, c.displacement
+        SELECT t.rowid AS rid, t.car_id, t.trim_name, c.brand, c.model, c.displacement, c.fuel_type
         FROM trims t JOIN cars c ON t.car_id = c.car_id
         WHERE (t.fuel_efficiency IS NULL OR t.fuel_efficiency = 0)
     """).fetchall()
 
     filled = 0
     for r in rows:
-        eff = lookup_fuel_efficiency(conn, r["brand"], r["model"], r["displacement"])
+        eff = lookup_fuel_efficiency(conn, r["brand"], r["model"], r["displacement"], r["fuel_type"])
         if eff and eff > 0:
             c.execute("UPDATE trims SET fuel_efficiency=? WHERE rowid=?", (eff, r["rid"]))
             filled += 1
@@ -311,6 +311,109 @@ def fill_trim_efficiency(conn):
     conn.commit()
     if filled > 0:
         logger.info(f"  [연비보충] {filled}/{len(rows)}건 매칭 완료")
+    return filled
+
+
+def refresh_trim_specs(conn):
+    """데스크톱 카이즈유 페이지에서 트림별 연비·배기량 보충 (2026-11-09 deal 부활).
+
+    배경: 모바일 페이지(m.carisyou.com)는 등급명+가격만 있어 신모델(2025~2027)
+    트림의 fuel_efficiency가 NULL → build_input 연비 게이트 차단 → no_data 공백.
+    데스크톱 페이지(www.carisyou.com/car/{id})에는 트림 테이블에 연료·배기량·연비·가격
+    컬럼이 있다. 같은 카이즈유 데이터이므로 (car_id, price) 매칭으로 정확 결합.
+    - 매칭: 가격 기준 (트림명 파싱 회피 — 모바일/데스크톱 명칭 규칙 상이 실증)
+    - overwrite: 항상 갱신 (기존 4.7 오염값 — 코나 가솔린에 전기차 전비가 채워진
+      사례 — 수정 목적). fuel_type 미전달 lookup의 오매칭이 만든 값이므로
+      데스크톱 원본 값이 권위.
+    - cars.displacement=0 차량은 행 중 최대 cc로 보충 (배기량0 게이트 해소).
+    """
+    c = conn.cursor()
+    cars = c.execute("""
+        SELECT car_id, carisyou_id FROM cars
+        WHERE carisyou_id > 0 AND (
+            displacement IS NULL OR displacement = 0
+            OR EXISTS (SELECT 1 FROM trims t WHERE t.car_id = cars.car_id
+                       AND (t.fuel_efficiency IS NULL OR t.fuel_efficiency = 0))
+        )
+    """).fetchall()
+    filled = 0
+    disp_fixed = 0
+    for car in cars:
+        cid = car["carisyou_id"]
+        try:
+            resp = requests.get(f"https://www.carisyou.com/car/{cid}",
+                                headers=HEADERS, timeout=10)
+            if resp.status_code != 200 or len(resp.text) < 50000:
+                continue
+            soup = BeautifulSoup(resp.text, "html.parser")
+            target = None
+            for t in soup.select("table"):
+                thead = t.select_one("thead")
+                if thead and "등급명" in thead.get_text():
+                    target = t
+                    break
+            if not target:
+                continue
+            # 모델 레벨 연비 범위 (미매칭 트림 폴백용 최솟값 — 페이지 게시 실측치)
+            model_min = None
+            for dt in soup.select("dl dt"):
+                if dt.get_text(strip=True) == "연비":
+                    dd = dt.find_next_sibling("dd")
+                    if dd:
+                        m = re.search(r"([\d.]+)\s*~\s*([\d.]+)", dd.get_text(" ", strip=True))
+                        if m:
+                            model_min = float(m.group(1))
+                    break
+            disp_vals = []
+            for row in target.select("tbody tr"):
+                cells = row.select("td")
+                if len(cells) < 5:
+                    continue
+                # 가격: "6,759 만원" / "1억 6,400만원" 모두 처리 (refresh_trims와 동일 규칙)
+                raw_p = cells[-1].get_text(strip=True).replace(",", "")
+                eok_m = re.search(r"(\d+)억\s*(\d*)", raw_p)
+                man_m = re.search(r"(\d+)만", raw_p)
+                if eok_m:
+                    price = int(eok_m.group(1)) * 10000 + (int(eok_m.group(2)) if eok_m.group(2) else 0)
+                elif man_m:
+                    price = int(man_m.group(1))
+                else:
+                    dm2 = re.search(r"\d+", raw_p)
+                    price = int(dm2.group(0)) if dm2 else 0
+                if price < 500:
+                    continue
+                eff = None
+                em = re.search(r"([\d.]+)\s*(?:km/kwh|km/kWh|km/ℓ|km/l|㎞/ℓ)",
+                               cells[-2].get_text(strip=True), re.I)
+                if em:
+                    eff = float(em.group(1))
+                dm = re.search(r"(\d[\d,]*)\s*cc", cells[-3].get_text(strip=True))
+                if dm:
+                    disp_vals.append(int(dm.group(1).replace(",", "")))
+                if eff and eff > 0:
+                    res = c.execute(
+                        "UPDATE trims SET fuel_efficiency=? WHERE car_id=? AND price=?",
+                        (eff, car["car_id"], price))
+                    filled += res.rowcount
+            # 미매칭 트림 폴백: 모델 최소 연비 (실측 범위 하한, 보수적)
+            if model_min:
+                res = c.execute(
+                    "UPDATE trims SET fuel_efficiency=? WHERE car_id=? AND "
+                    "(fuel_efficiency IS NULL OR fuel_efficiency = 0)",
+                    (model_min, car["car_id"]))
+                filled += res.rowcount
+            if disp_vals:
+                mx = max(disp_vals)
+                c.execute(
+                    "UPDATE cars SET displacement=? WHERE car_id=? AND "
+                    "(displacement IS NULL OR displacement=0)",
+                    (mx, car["car_id"]))
+                disp_fixed += 1
+        except Exception as e:
+            logger.warning(f"트림 스펙 보충 실패 [{car['car_id']}]: {e}")
+        time.sleep(0.3)
+    conn.commit()
+    logger.info(f"트림 스펙 보충: 연비 {filled}건, 배기량 {disp_fixed}차량")
     return filled
 
 
@@ -963,6 +1066,11 @@ def run_refresh() -> dict:
         trims_updated = refresh_trims(conn)
     except Exception as e:
         logger.exception(f"refresh_trims 실패: {e}")
+
+    try:
+        refresh_trim_specs(conn)  # 데스크톱 연비·배기량 보충 (2026-11-09 deal 부활)
+    except Exception as e:
+        logger.exception(f"refresh_trim_specs 실패: {e}")
 
     try:
         fill_trim_efficiency(conn)
