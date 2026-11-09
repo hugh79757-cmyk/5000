@@ -20,20 +20,21 @@ blogs:
     - '20:55'
   site_path: /Users/twinssn/Projects/cap/compare-hugo
   status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: bridge
   depth_next:
-    - id: pick-hugo
-      owner: mac
-      topic: 비교 결과 내 조건에 맞는 차 찾기
+  - id: pick-hugo
+    owner: mac
+    topic: 비교 결과 내 조건에 맞는 차 찾기
   bridge_to:
-    - id: finance-hugo
-      owner: mac
-      topic: 비교한 차량 가격으로 적금 vs 차량 할부 비교
-      bridge_context: 차량 구매 자금 마련 — 할부 금리와 적금 누적액 비교
+  - id: finance-hugo
+    owner: mac
+    topic: 비교한 차량 가격으로 적금 vs 차량 할부 비교
+    bridge_context: 차량 구매 자금 마련 — 할부 금리와 적금 누적액 비교
 - cf_project: deal-hugo
-  daily_quota: 5
+  daily_quota: 1
   domain: deal.rotcha.kr
   id: deal-hugo
   owner: runner
@@ -46,13 +47,9 @@ blogs:
   repo: deal-hugo
   schedule:
     times:
-    - 06:35
-    - '10:15'
-    - '13:40'
-    - '17:45'
-    - '20:50'
+    - 08:30
   site_path: /Users/twinssn/Projects/cap/deal-hugo
-  status: paused
+  status: active
   theme: Blowfish
   managed_by: pipeline
 - cf_project: ev-hugo
@@ -80,6 +77,7 @@ blogs:
     - '21:00'
   site_path: /Users/twinssn/Projects/cap/ev-hugo
   status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
 - cf_project: guide-hugo
@@ -103,6 +101,7 @@ blogs:
     - '21:00'
   site_path: /Users/twinssn/Projects/cap/guide-hugo
   status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
 - cf_project: hotissue-hugo
@@ -138,6 +137,7 @@ blogs:
     - '20:35'
   site_path: /Users/twinssn/Projects/cap/hotissue-hugo
   status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -172,6 +172,7 @@ blogs:
     - '20:45'
   site_path: /Users/twinssn/Projects/cap/tco-hugo
   status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
 - cf_project: rank-hugo
@@ -190,7 +191,8 @@ blogs:
     times:
     - 06:50
   site_path: /Users/twinssn/Projects/cap/rank-hugo
-  status: active
+  status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: landing
@@ -211,6 +213,7 @@ blogs:
     - 06:55
   site_path: /Users/twinssn/Projects/cap/pick-hugo
   status: paused
+  inactive: true
   theme: Blowfish
   managed_by: pipeline
   funnel_stage: monetize

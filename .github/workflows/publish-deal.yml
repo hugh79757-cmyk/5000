@@ -8,11 +8,7 @@ on:
         type: boolean
         default: true
   schedule:
-    - cron: "35 22 * * *"  # 06:35 +07
-    - cron: "15 23 * * *"  # 10:15 +07
-    - cron: "40 23 * * *"  # 13:40 +07
-    - cron: "45 0 * * *"   # 17:45 +07
-    - cron: "50 0 * * *"   # 20:50 +07
+    - cron: "30 1 * * *"  # 08:30 +07 = 01:30 UTC — 하루 1회 (daily_refresh 00:30 UTC 이후, 직렬화 그룹 공유)
 
 concurrency:
   group: publish-lock-car
