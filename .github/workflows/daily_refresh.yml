@@ -17,6 +17,9 @@ jobs:
       R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      # 카이즈유 크롤 프록시 (GH IP 403 차단 → CF Pages Function 경유)
+      CARISYOU_M_BASE: https://deal.rotcha.kr/proxy/m
+      CARISYOU_W_BASE: https://deal.rotcha.kr/proxy/w
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

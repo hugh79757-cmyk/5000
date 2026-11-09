@@ -27,6 +27,11 @@ from shared.db_paths import ARTICLES_DB
 DB_PATH = Path(__file__).parent.parent.parent / "data" / "car.db"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
 
+# 카이즈유 베이스 URL (2026-11-09): GH Actions IP가 403 차단되므로
+# CF Pages 프록시(deal.rotcha.kr/proxy/{m,w}/...)로 우회 가능. env 미설정 시 직결(맥).
+CARISYOU_M = os.environ.get("CARISYOU_M_BASE", "https://m.carisyou.com")
+CARISYOU_W = os.environ.get("CARISYOU_W_BASE", "https://www.carisyou.com")
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -61,7 +66,7 @@ def refresh_trims(conn):
     for car in cars:
         cid = car["carisyou_id"]
         try:
-            resp = requests.get(f"https://m.carisyou.com/car/{cid}", headers=HEADERS, timeout=10)
+            resp = requests.get(f"{CARISYOU_M}/car/{cid}", headers=HEADERS, timeout=10)
             if _diag:
                 logger.info(f"[diag] m.carisyou.com 첫 요청: status={resp.status_code} len={len(resp.text)} url={resp.url}")
                 _diag = False
@@ -217,7 +222,7 @@ def scan_new_cars(conn):
 
     for cid in range(scan_start, scan_end + 1):
         try:
-            resp = requests.get(f"https://m.carisyou.com/car/{cid}", headers=HEADERS, timeout=5)
+            resp = requests.get(f"{CARISYOU_M}/car/{cid}", headers=HEADERS, timeout=5)
             if resp.status_code != 200 or len(resp.text) < 50000:
                 continue
             soup = BeautifulSoup(resp.text, "html.parser")
@@ -346,7 +351,7 @@ def refresh_trim_specs(conn):
     for car in cars:
         cid = car["carisyou_id"]
         try:
-            resp = requests.get(f"https://www.carisyou.com/car/{cid}",
+            resp = requests.get(f"{CARISYOU_W}/car/{cid}",
                                 headers=HEADERS, timeout=10)
             if car["car_id"] == cars[0]["car_id"]:
                 logger.info(f"[diag] www.carisyou.com 첫 요청: status={resp.status_code} len={len(resp.text)} url={resp.url}")
@@ -438,7 +443,7 @@ def refresh_images(conn):
             continue
 
         try:
-            resp = requests.get(f"https://m.carisyou.com/car/{car['carisyou_id']}", headers=HEADERS, timeout=10)
+            resp = requests.get(f"{CARISYOU_M}/car/{car['carisyou_id']}", headers=HEADERS, timeout=10)
             soup = BeautifulSoup(resp.text, "html.parser")
             imgs = soup.select("img[src*='file.carisyou.com/upload']")
             added = 0
