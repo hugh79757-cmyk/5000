@@ -84,7 +84,7 @@ def run(blog_cfg):
     conn = sqlite3.connect(str(CAR_DB_PATH))
     conn.row_factory = sqlite3.Row
 
-    MAX_RETRY = 26
+    MAX_RETRY = 80  # 2026-11-09 deal 부활: 26→80 — 랜덤 토픽 풀에서 연비통과 후보 소진 없이 성공 확률 보장 (C(95,26)/C(100,26)≈23% 실패 → 80회 시 0.02% 미만)
     topic = None
     data = None
     skip_ids = []
