@@ -57,10 +57,14 @@ def refresh_trims(conn):
     updated = 0
     price_changed = 0
 
+    _diag = True
     for car in cars:
         cid = car["carisyou_id"]
         try:
             resp = requests.get(f"https://m.carisyou.com/car/{cid}", headers=HEADERS, timeout=10)
+            if _diag:
+                logger.info(f"[diag] m.carisyou.com 첫 요청: status={resp.status_code} len={len(resp.text)} url={resp.url}")
+                _diag = False
             if resp.status_code != 200:
                 continue
             soup = BeautifulSoup(resp.text, "html.parser")
@@ -344,6 +348,8 @@ def refresh_trim_specs(conn):
         try:
             resp = requests.get(f"https://www.carisyou.com/car/{cid}",
                                 headers=HEADERS, timeout=10)
+            if car["car_id"] == cars[0]["car_id"]:
+                logger.info(f"[diag] www.carisyou.com 첫 요청: status={resp.status_code} len={len(resp.text)} url={resp.url}")
             if resp.status_code != 200 or len(resp.text) < 50000:
                 continue
             soup = BeautifulSoup(resp.text, "html.parser")
