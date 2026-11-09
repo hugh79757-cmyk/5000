@@ -34,7 +34,7 @@ jobs:
         run: |
           python -m pipelines.car.daily_refresh
           # 카이즈유 크롤(트림/가격/이미지) + owner=runner 블로그 토픽 보충
-      - name: Put state back to R2 (dispatcher는 스킵 — 발행은 별도 슬롯 워크플로)
+      - name: Put state back to R2 (get 재수행 금지 — 로컬 변경분 보존)
         run: |
-          python scripts/run_slot.py rank-hugo --dry-run
-          # --dry-run = dispatcher 스킵 + put_state 수행 (run_slot.py:205)
+          python scripts/run_slot.py rank-hugo --put-only
+          # --put-only = get_state·dispatcher 스킵 + put_state만 (run_slot.py main)

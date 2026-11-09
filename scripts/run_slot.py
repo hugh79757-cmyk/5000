@@ -184,6 +184,8 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true", help="dispatcher 스킵 (probe)")
     ap.add_argument("--get-only", action="store_true",
                     help="R2 → 로컬 복원만 (dispatcher·put_state 스킵)")
+    ap.add_argument("--put-only", action="store_true",
+                    help="로컬 → R2 반납만 (get_state·dispatcher 스킵 — refresh 후 반납용, 2026-11-09)")
     ap.add_argument("--skip-opsdb", action="store_true",
                     help="ops.db put 제외 (G-A 안 b — 기본 동작, 명시용 플래그)")
     args = ap.parse_args()
@@ -195,6 +197,12 @@ def main() -> int:
         missing = [k for k in missing if k in pre]
 
     s3 = _s3()
+    if args.put_only:
+        # refresh 후 반납 전용: get_state를 건너뛰어야 로컬 변경분이 보존된다.
+        # (기존 --dry-run 경로는 get_state가 먼저 실행되어 R2 상태로 로컬을 덮어씀)
+        if not put_state(s3, skip_opsdb=True):
+            return 3
+        return 0
     if not get_state(s3):
         return 2
 

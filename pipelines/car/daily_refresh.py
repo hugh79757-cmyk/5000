@@ -53,6 +53,7 @@ def refresh_trims(conn):
     """기존 차량의 트림/가격 업데이트 + 가격 변동 기록"""
     c = conn.cursor()
     cars = c.execute("SELECT car_id, carisyou_id, brand, model FROM cars WHERE carisyou_id > 0").fetchall()
+    logger.info(f"refresh_trims 대상: {len(cars)}대")
     updated = 0
     price_changed = 0
 
@@ -631,7 +632,7 @@ def replenish_topics(conn, min_pending=50):
             if key not in recent_keys:
                 if use_fallback:
                     # top5_rank: fallback 로직 — 연비 없으면 연료타입별 기본값으로 통과
-                    ft = str(t.get('fuel_type', ''))
+                    ft = str(t['fuel_type']) if 'fuel_type' in t.keys() else ''
                     if "전기" in ft:
                         fuel_eff = 4.5
                     elif "하이브리드" in ft:
@@ -713,7 +714,7 @@ def replenish_topics(conn, min_pending=50):
             if key not in recent_keys:
                 if use_fallback:
                     # top5_rank: fallback 로직 — 연비 없으면 연료타입별 기본값으로 통과
-                    ft = str(t.get('fuel_type', ''))
+                    ft = str(t['fuel_type']) if 'fuel_type' in t.keys() else ''
                     if "전기" in ft:
                         fuel_eff = 4.5
                     elif "하이브리드" in ft:
