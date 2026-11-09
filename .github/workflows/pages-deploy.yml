@@ -1,0 +1,48 @@
+name: pages-deploy (site only, no publish)
+
+on:
+  workflow_dispatch:
+    inputs:
+      blog:
+        description: "blog_id (예: deal-hugo)"
+        type: string
+        required: true
+        default: "deal-hugo"
+
+concurrency:
+  group: publish-lock-car
+  cancel-in-progress: false
+
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  WRANGLER_TOKEN_AUTH: "1"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hugo extended setup
+        uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: "0.160.1"
+          extended: true
+      - name: wrangler install
+        run: npm install -g wrangler
+      - name: clone site repo (CAP_PAT)
+        run: |
+          git clone --depth 50 https://x-access-token:${{ secrets.CAP_PAT }}@github.com/hugh79757-cmyk/${{ inputs.blog }}.git sites/cap/${{ inputs.blog }}
+      - name: blowfish theme copy
+        run: |
+          mkdir -p sites/cap/${{ inputs.blog }}/themes
+          cp -r themes/blowfish sites/cap/${{ inputs.blog }}/themes/blowfish
+      - name: hugo build
+        run: |
+          cd sites/cap/${{ inputs.blog }}
+          HUGO_THEMESDIR="$GITHUB_WORKSPACE/sites/cap/${{ inputs.blog }}/themes" hugo --gc --minify
+      - name: wrangler pages deploy
+        run: |
+          cd sites/cap/${{ inputs.blog }}
+          wrangler pages deploy public --project-name=${{ inputs.blog }}
