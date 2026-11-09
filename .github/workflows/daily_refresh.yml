@@ -30,7 +30,7 @@ jobs:
         run: |
           python scripts/run_slot.py rank-hugo --get-only
           # R2 -> 로컬 12객체 복원 (manifest md5 검증 포함)
-      - name: Refresh car data — LIVE MODE (2026-11-09 deal 부활: 크롤+토픽보충 전부 러너 수행, 맥 의존 제거)
+      - name: "Refresh car data — LIVE MODE (2026-11-09 deal 부활, 크롤+토픽보충 전부 러너 수행, 맥 의존 제거)"
         run: |
           python -m pipelines.car.daily_refresh
           # 카이즈유 크롤(트림/가격/이미지) + owner=runner 블로그 토픽 보충
